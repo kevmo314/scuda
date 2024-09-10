@@ -67,7 +67,7 @@ async fn main() -> anyhow::Result<()> {
     listener.config_mut().max_frame_length(usize::MAX);
     listener
         .filter_map(|r| future::ready(r.ok()))
-        .map(server::BaseChannel::with_defaults)1
+        .map(server::BaseChannel::with_defaults)
         .max_channels_per_key(1, |t| t.transport().peer_addr().unwrap().ip())
         .map(|channel| {
             let server = ScudaServer(channel.transport().peer_addr().unwrap());
