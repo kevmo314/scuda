@@ -547,32 +547,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f3cb5ba0dc43242ce17de99c180e96db90b235b8a9fdc9543c96d2209116bd9f"
 
 [[package]]
-name = "scuda-api"
-version = "0.1.0"
-dependencies = [
- "tarpc",
-]
-
-[[package]]
-name = "scuda-client"
-version = "0.1.0"
-dependencies = [
- "libc",
- "nvml-wrapper-sys",
- "scuda-api",
- "tarpc",
- "tokio",
-]
-
-[[package]]
-name = "scuda-server"
+name = "scuda"
 version = "0.1.0"
 dependencies = [
  "anyhow",
  "futures",
  "libc",
  "nvml-wrapper-sys",
- "scuda-api",
  "tarpc",
  "tokio",
 ]

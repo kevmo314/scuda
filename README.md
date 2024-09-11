@@ -3,6 +3,21 @@
 SCUDA is a GPU over IP bridge allowing GPUs on remote machines to be attached
 to CPU-only machines.
 
+## Running the server
+
+```sh
+cargo run --features=disable-preload
+```
+
+## Running the client
+
+If the server above is running:
+
+```sh
+cargo build --lib
+LD_PRELOAD=$(pwd)/target/debug/libscuda.so nvidia-smi
+```
+
 ## Installation
 
 To install SCUDA, run the server binary on the GPU host:
