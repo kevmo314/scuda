@@ -1,12 +1,13 @@
 use libc::RTLD_NEXT;
 use libc::{c_char, c_int, c_uint, c_void};
 use nvml_wrapper_sys::bindings::{
-    nvmlReturn_enum_NVML_ERROR_INSUFFICIENT_SIZE, nvmlReturn_enum_NVML_SUCCESS, nvmlReturn_t,
+    nvmlReturn_enum_NVML_ERROR_GPU_IS_LOST, nvmlReturn_enum_NVML_ERROR_INSUFFICIENT_SIZE,
+    nvmlReturn_enum_NVML_SUCCESS, nvmlReturn_t,
 };
 use std::ffi::{CStr, CString};
 use std::net::{IpAddr, Ipv6Addr};
 use std::sync::LazyLock;
-use tarpc::client::NewClient;
+use tarpc::client::{NewClient, RpcError};
 use tarpc::tokio_serde::formats::Json;
 use tarpc::{client, context};
 use tokio::runtime::{self, Runtime};
@@ -31,6 +32,21 @@ static CLIENT: LazyLock<api::ScudaClient> = LazyLock::new(|| {
 
     client
 });
+
+fn handle_response(response: Result<nvmlReturn_t, RpcError>) -> nvmlReturn_t {
+    match response {
+        Ok(response) => response,
+        Err(e) => {
+            eprintln!("Error: {:?}", e);
+            nvmlReturn_enum_NVML_ERROR_GPU_IS_LOST
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn nvmlInitWithFlags(flags: u32) -> nvmlReturn_t {
+    handle_response(RUNTIME.block_on(CLIENT.nvmlInitWithFlags(context::current(), flags)))
+}
 
 #[no_mangle]
 pub extern "C" fn nvmlSystemGetCudaDriverVersion_v2(
@@ -75,6 +91,7 @@ pub extern "C" fn dlsym(handle: *mut c_void, name: *const c_char) -> *mut c_void
         let symbol_name = CStr::from_ptr(name).to_str().unwrap();
 
         match symbol_name {
+            "nvmlInitWithFlags" => nvmlInitWithFlags as *mut c_void,
             "nvmlSystemGetCudaDriverVersion_v2" => nvmlSystemGetCudaDriverVersion_v2 as *mut c_void,
             "nvmlDeviceGetCount_v2" => nvmlDeviceGetCount_v2 as *mut c_void,
             "dlsym" => dlvsym as *mut c_void,
