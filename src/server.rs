@@ -1,4 +1,4 @@
-use std::{future::Future, net::SocketAddr};
+use std::{future::Future, net::SocketAddr, sync::LazyLock};
 
 use crate::api::Scuda;
 use libc::c_char;
@@ -8,7 +8,15 @@ use tarpc::context;
 #[derive(Clone)]
 pub struct ScudaServer(pub SocketAddr);
 
+static NVML_LIB: LazyLock<NvmlLib> = LazyLock::new(|| {
+    unsafe { NvmlLib::new("libnvidia-ml.so").unwrap() }
+});
+
 impl Scuda for ScudaServer {
+    async fn nvmlInitWithFlags(self, _: context::Context, flags: u32) -> u32 {
+        return unsafe { NVML_LIB.nvmlInitWithFlags(flags) };
+    }
+
     async fn nvml_device_get_name(self, _: context::Context, device: u64, length: u32) -> String {
         let mut name = vec![0u8; length as usize];
         let name_ptr = name.as_mut_ptr() as *mut c_char;
