@@ -43,30 +43,111 @@ fn handle_response(response: Result<nvmlReturn_t, RpcError>) -> nvmlReturn_t {
     }
 }
 
+// 4.11 Initialization and Cleanup
 #[no_mangle]
 pub extern "C" fn nvmlInitWithFlags(flags: u32) -> nvmlReturn_t {
     handle_response(RUNTIME.block_on(CLIENT.nvmlInitWithFlags(context::current(), flags)))
 }
 
 #[no_mangle]
+pub extern "C" fn nvmlInit_v2() -> nvmlReturn_t {
+    handle_response(RUNTIME.block_on(CLIENT.nvmlInit_v2(context::current())))
+}
+
+#[no_mangle]
+pub extern "C" fn nvmlShutdown() -> nvmlReturn_t {
+    handle_response(RUNTIME.block_on(CLIENT.nvmlShutdown(context::current())))
+}
+
+// 4.12 Error reporting
+#[no_mangle]
+pub extern "C" fn nvmlErrorString(result: nvmlReturn_t) -> *const c_char {
+    match RUNTIME.block_on(CLIENT.nvmlErrorString(context::current(), result)) {
+        Ok(response) => CString::new(response).unwrap().into_raw(),
+        Err(_) => CString::new("Unknown error").unwrap().into_raw(),
+    }
+}
+
+// 4.14 System Queries
+#[no_mangle]
+pub extern "C" fn nvmlSystemGetCudaDriverVersion(cuda_driver_version: *mut c_int) -> nvmlReturn_t {
+    match RUNTIME.block_on(CLIENT.nvmlSystemGetCudaDriverVersion(context::current())) {
+        Ok((result, version)) => {
+            unsafe {
+                *cuda_driver_version = version;
+            }
+            result
+        }
+        Err(_) => nvmlReturn_enum_NVML_ERROR_GPU_IS_LOST,
+    }
+}
+
+#[no_mangle]
 pub extern "C" fn nvmlSystemGetCudaDriverVersion_v2(
     cuda_driver_version: *mut c_int,
 ) -> nvmlReturn_t {
-    let response =
-        RUNTIME.block_on(CLIENT.nvml_system_get_cuda_driver_version_v2(context::current()));
-    match response {
-        Ok(response) => {
-            println!("CUDA Driver Version: {}", response);
+    match RUNTIME.block_on(CLIENT.nvmlSystemGetCudaDriverVersion_v2(context::current())) {
+        Ok((result, version)) => {
             unsafe {
-                *cuda_driver_version = response;
+                *cuda_driver_version = version;
             }
-            nvmlReturn_enum_NVML_SUCCESS
+            result
         }
-        Err(e) => {
-            eprintln!("Error: {:?}", e);
-            nvmlReturn_enum_NVML_ERROR_INSUFFICIENT_SIZE
+        Err(_) => nvmlReturn_enum_NVML_ERROR_GPU_IS_LOST,
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn nvmlSystemGetDriverVersion(
+    driver_version: *mut c_char,
+    length: c_uint,
+) -> nvmlReturn_t {
+    match RUNTIME.block_on(CLIENT.nvmlSystemGetDriverVersion(context::current(), length)) {
+        Ok((result, version)) => {
+            let version = CString::new(version).unwrap();
+            unsafe {
+                std::ptr::copy_nonoverlapping(version.as_ptr(), driver_version, length as usize);
+            }
+            result
+        }
+        Err(_) => nvmlReturn_enum_NVML_ERROR_INSUFFICIENT_SIZE,
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn nvmlSystemGetNVMLVersion(
+    nvml_version: *mut c_char,
+    length: c_uint,
+) -> nvmlReturn_t {
+    match RUNTIME.block_on(CLIENT.nvmlSystemGetNVMLVersion(context::current(), length)) {
+        Ok((result, version)) => {
+            let version = CString::new(version).unwrap();
+            unsafe {
+                std::ptr::copy_nonoverlapping(version.as_ptr(), nvml_version, length as usize);
+            }
+            result
+        }
+        Err(_) => nvmlReturn_enum_NVML_ERROR_INSUFFICIENT_SIZE,
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn nvmlSystemGetProcessName(
+    pid: c_uint,
+    process_name: *mut c_char,
+    length: c_uint,
+) -> nvmlReturn_t {
+    let length = length as u32;
+    let (result, name) = RUNTIME
+        .block_on(CLIENT.nvmlSystemGetProcessName(context::current(), pid, length))
+        .unwrap();
+    if result == nvmlReturn_enum_NVML_SUCCESS {
+        let name = CString::new(name).unwrap();
+        unsafe {
+            std::ptr::copy_nonoverlapping(name.as_ptr(), process_name, length as usize);
         }
     }
+    result
 }
 
 #[no_mangle]
