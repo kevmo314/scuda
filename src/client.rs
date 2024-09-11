@@ -11,6 +11,8 @@ use tarpc::tokio_serde::formats::Json;
 use tarpc::{client, context};
 use tokio::runtime::{self, Runtime};
 
+use crate::api;
+
 static RUNTIME: LazyLock<Runtime> = LazyLock::new(|| {
     runtime::Builder::new_multi_thread()
         .enable_io()
@@ -19,12 +21,12 @@ static RUNTIME: LazyLock<Runtime> = LazyLock::new(|| {
         .unwrap()
 });
 
-static CLIENT: LazyLock<scuda_api::ScudaClient> = LazyLock::new(|| {
+static CLIENT: LazyLock<api::ScudaClient> = LazyLock::new(|| {
     let server_addr = (IpAddr::V6(Ipv6Addr::LOCALHOST), 31337);
     let mut transport = tarpc::serde_transport::tcp::connect(server_addr, Json::default);
     transport.config_mut().max_frame_length(usize::MAX);
     let tx = RUNTIME.block_on(transport).unwrap();
-    let NewClient { client, dispatch } = scuda_api::ScudaClient::new(client::Config::default(), tx);
+    let NewClient { client, dispatch } = api::ScudaClient::new(client::Config::default(), tx);
     RUNTIME.spawn(dispatch);
 
     client
