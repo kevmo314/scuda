@@ -14,9 +14,11 @@ cargo run --features=disable-preload
 If the server above is running:
 
 ```sh
-cargo build --lib
-LD_PRELOAD=$(pwd)/target/debug/libscuda.so nvidia-smi
+chmod +x local.sh
+./local.sh run
 ```
+
+The above will rebuild the client and run nvidia-smi for you.
 
 ## Installation
 
