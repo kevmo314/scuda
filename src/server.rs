@@ -1,5 +1,5 @@
 use std::{
-    ffi::{CStr, CString},
+    ffi::{CStr},
     future::Future,
     net::SocketAddr,
     sync::LazyLock,
@@ -8,8 +8,9 @@ use std::{
 use crate::api::Scuda;
 use libc::c_char;
 use nvml_wrapper_sys::bindings::{
-    nvmlDevice_t, nvmlReturn_enum_NVML_SUCCESS, nvmlReturn_t, NvmlLib,
+    nvmlDevice_t, nvmlReturn_enum_NVML_SUCCESS, nvmlReturn_t, NvmlLib
 };
+
 use tarpc::context;
 
 #[derive(Clone)]
@@ -19,10 +20,14 @@ static NVML_LIB: LazyLock<NvmlLib> =
     LazyLock::new(|| unsafe { NvmlLib::new("libnvidia-ml.so").unwrap() });
 
 impl Scuda for ScudaServer {
-    // 4.11 Initialization and Cleanup
-    async fn nvmlInitWithFlags(self, _: context::Context, flags: u32) -> nvmlReturn_t {
-        unsafe { NVML_LIB.nvmlInitWithFlags(flags) }
-    }
+    // // 4.11 Initialization and Cleanup
+    // async fn nvmlInitWithFlags(self, _: context::Context, flags: u32) -> nvmlReturn_t {
+    //     let res = unsafe { NVML_LIB.nvmlInitWithFlags(flags) };
+
+    //     println!("{}", res);
+
+    //     res
+    // }
 
     async fn nvmlInit_v2(self, _: ::tarpc::context::Context) -> nvmlReturn_t {
         unsafe { NVML_LIB.nvmlInit_v2() }
@@ -134,6 +139,15 @@ impl Scuda for ScudaServer {
             return 123;
         }
         cuda_driver_version
+    }
+
+    // 4.16 resource requests
+    async fn nvmlDeviceGetFanSpeed(self, _: ::tarpc::context::Context, device: u64, speed: u32) -> nvmlReturn_t {
+        let result = unsafe { NVML_LIB.nvmlDeviceGetFanSpeed(device as nvmlDevice_t, speed as *mut u32) };
+
+        println!("Fan speed response: {}", result);
+
+        result
     }
 }
 

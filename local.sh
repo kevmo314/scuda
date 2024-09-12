@@ -23,7 +23,7 @@ run() {
       exit 1
   fi
 
-  LD_PRELOAD="$libscuda_path" nvidia-smi
+  LD_PRELOAD="$libscuda_path" nvidia-smi --query-gpu=index,name,fan.speed,temperature.gpu --format=csv
 }
 
 # Main script logic using a switch case
