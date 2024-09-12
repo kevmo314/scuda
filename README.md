@@ -3,10 +3,24 @@
 SCUDA is a GPU over IP bridge allowing GPUs on remote machines to be attached
 to CPU-only machines.
 
-## Running the server
+## Local development
+
+Make the local dev script executable
 
 ```sh
-cargo run --features=disable-preload
+chmod +x local.sh
+```
+
+Also helpful to alias this local script in your bash profile.
+
+```sh
+alias s='/home/brodey/scuda-latest/local.sh'
+```
+
+It's required to run scuda server before initiating client commands.
+
+```sh
+s server
 ```
 
 ## Running the client
@@ -14,8 +28,7 @@ cargo run --features=disable-preload
 If the server above is running:
 
 ```sh
-chmod +x local.sh
-./local.sh run
+s run
 ```
 
 The above will rebuild the client and run nvidia-smi for you.
