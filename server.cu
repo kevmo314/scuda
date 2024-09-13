@@ -82,9 +82,9 @@ void *client_handler(void *arg)
                 printf("Number of devices: %u\n", dcount);
             }
 
-            if (write(connfd, &result, sizeof(nvmlReturn_t)) < 0)
-                goto exit;
-            }
+            if (write(connfd, &dcount, sizeof(unsigned int)) <= 0)
+	            goto exit;
+	        }
         }
     }
 

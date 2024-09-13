@@ -145,10 +145,10 @@ nvmlReturn_t nvmlInit_v2()
     return send_rpc_message(RPC_nvmlInit_v2);
 }
 
-nvmlReturn_t nvmlDeviceGetCountHandler_v2()
+nvmlReturn_t nvmlDeviceGetCountHandler_v2(unsigned int* device_count)
 {
     open_rpc_client();
-    return send_rpc_message(RPC_nvmlDeviceGetCount_v2);
+    return send_rpc_message(RPC_nvmlDeviceGetCount_v2, {}, {{device_count, sizeof(unsigned int)}});
 }
 
 nvmlReturn_t nvmlShutdown()
