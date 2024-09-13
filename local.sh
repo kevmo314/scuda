@@ -1,27 +1,37 @@
 #!/bin/bash
 
+libscuda_path="$(pwd)/libscuda.so"
+client_path="$(pwd)/client.cu"
+server_path="$(pwd)/server.c"
+server_out_path="$(pwd)/server"
+
 build() {
-  echo "rebuilding client..."
-  cargo build
+  echo "building client..."
+
+  if [[ "$(uname)" == "Linux" ]]; then
+    nvcc -shared -Xcompiler -fPIC -o $libscuda_path $client_path -lcudart
+  else
+    echo "No compiler options set for os "$(uname)""
+  fi
+
+  if [ ! -f "$libscuda_path" ]; then
+    echo "libscuda.so not found. build may have failed."
+    exit 1
+  fi
 }
 
 server() {
-  echo "starting server..."
-  build
+  echo "building server..."
 
-  cargo run --features=disable-preload
+  gcc -o $server_out_path $server_path -lnvidia-ml -lpthread
+
+  echo "starting server..."
+
+  "$server_out_path"
 }
 
 run() {
   build
-  local libscuda_path="$(pwd)/target/debug/libscuda.so"
-
-  echo "Full path to libscuda.so: $libscuda_path"
-
-  if [ ! -f "$libscuda_path" ]; then
-      echo "libscuda.so not found. build may have failed."
-      exit 1
-  fi
 
   LD_PRELOAD="$libscuda_path" nvidia-smi
 }

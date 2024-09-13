@@ -90,7 +90,7 @@ nvmlReturn_t send_rpc_message(void **response, int *len, const char *op, const v
 
             if (read(sockfd, (void *)len, sizeof(int)) < 0)
                 return NVML_ERROR_GPU_IS_LOST;
-            if (len > 0)
+            if (*len > 0)
             {
                 *response = malloc(*len);
                 if (read(sockfd, *response, *len) < 0)
