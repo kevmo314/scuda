@@ -2,6 +2,8 @@
 
 libscuda_path="$(pwd)/libscuda.so"
 client_path="$(pwd)/client.cu"
+server_path="$(pwd)/server.c"
+server_out_path="$(pwd)/server"
 
 build() {
   echo "building client..."
@@ -13,18 +15,23 @@ build() {
   fi
 
   if [ ! -f "$libscuda_path" ]; then
-      echo "libscuda.so not found. build may have failed."
-      exit 1
+    echo "libscuda.so not found. build may have failed."
+    exit 1
   fi
 }
 
 server() {
+  echo "building server..."
+
+  gcc -o $server_out_path $server_path -lnvidia-ml -lpthread
+
   echo "starting server..."
+
+  "$server_out_path"
 }
 
 run() {
   build
-
 
   LD_PRELOAD="$libscuda_path" nvidia-smi
 }
