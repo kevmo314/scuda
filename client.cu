@@ -145,6 +145,12 @@ nvmlReturn_t nvmlInit_v2()
     return send_rpc_message(RPC_nvmlInit_v2);
 }
 
+nvmlReturn_t nvmlDeviceGetCountHandler_v2()
+{
+    open_rpc_client();
+    return send_rpc_message(RPC_nvmlDeviceGetCount_v2);
+}
+
 nvmlReturn_t nvmlShutdown()
 {
     open_rpc_client();
@@ -163,12 +169,14 @@ void *dlsym(void *handle, const char *name) __THROW
 
     if (!strcmp(name, "nvmlInitWithFlags"))
         return (void *)nvmlInitWithFlags;
-    // if (!strcmp(name, "nvmlInit_v2"))
-    //     return (void *)nvmlInit_v2;
-    // if (!strcmp(name, "nvmlShutdown"))
-    //     return (void *)nvmlShutdown;
-    // if (!strcmp(name, "nvmlDeviceGetName"))
-    //     return (void *)nvmlDeviceGetName;
+    if (!strcmp(name, "nvmlInit_v2"))
+        return (void *)nvmlInit_v2;
+    if (!strcmp(name, "nvmlShutdown"))
+        return (void *)nvmlShutdown;
+    if (!strcmp(name, "nvmlDeviceGetName"))
+        return (void *)nvmlDeviceGetName;
+    if (!strcmp(name, "nvmlDeviceGetCount_v2"))
+        return (void *)nvmlDeviceGetCountHandler_v2;
 
     static void *(*real_dlsym)(void *, const char *) = NULL;
     if (real_dlsym == NULL)

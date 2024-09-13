@@ -3,13 +3,13 @@
 libscuda_path="$(pwd)/libscuda.so"
 client_path="$(pwd)/client.cu"
 server_path="$(pwd)/server.cu"
-server_out_path="$(pwd)/server"
+server_out_path="$(pwd)/server.so"
 
 build() {
   echo "building client..."
 
   if [[ "$(uname)" == "Linux" ]]; then
-    nvcc -shared -Xcompiler -fPIC -o $libscuda_path $client_path -lcudart
+    nvcc -Xcompiler -fPIC -shared -o $libscuda_path $client_path 
   else
     echo "No compiler options set for os "$(uname)""
   fi
@@ -24,12 +24,12 @@ server() {
   echo "building server..." 
 
   if [[ "$(uname)" == "Linux" ]]; then
-    nvcc -shared -Xcompiler -fPIC -o $server_out_path $server_path -lcudart
+    nvcc -o $server_out_path $server_path -lnvidia-ml
   else
     echo "No compiler options set for os "$(uname)""
   fi
 
-  echo "starting server..."
+  echo "starting server... $server_out_path"
 
   "$server_out_path"
 }

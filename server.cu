@@ -69,8 +69,22 @@ void *client_handler(void *arg)
             printf("Sending nvmlInitWithFlags response %d %d\n", request_id, result);
             if (write(connfd, &result, sizeof(nvmlReturn_t)) < 0)
                 goto exit;
-            break;
         }
+        case RPC_nvmlDeviceGetCount_v2:
+        {
+            unsigned int dcount;
+            if (read(connfd, &dcount, sizeof(unsigned int)) < 0)
+                goto exit;
+            printf("Received device count request %d %d\n", request_id, dcount);
+            nvmlReturn_t result = nvmlDeviceGetCount_v2(&dcount);
+    
+            if (result == NVML_SUCCESS) {
+                printf("Number of devices: %u\n", dcount);
+            }
+
+            if (write(connfd, &result, sizeof(nvmlReturn_t)) < 0)
+                goto exit;
+            }
         }
     }
 
