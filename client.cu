@@ -91,7 +91,7 @@ nvmlReturn_t send_rpc_message(void **response, int *len, const char *op, const v
 
             if (read(sockfd, (void *)len, sizeof(int)) < 0)
                 return NVML_ERROR_GPU_IS_LOST;
-            if (len > 0)
+            if (*len > 0)
             {
                 *response = malloc(*len);
                 if (read(sockfd, *response, *len) < 0)
@@ -121,13 +121,6 @@ nvmlReturn_t nvmlDeviceGetName(nvmlDevice_t device, char *name, unsigned int len
 {
     open_rpc_client();
     return send_rpc_message((void **)&name, (int *)&length, "nvmlDeviceGetName", (void *)&device, sizeof(nvmlDevice_t));
-}
-
-nvmlReturn_t nvmlDeviceGetName(nvmlDevice_t device, char *name, unsigned int length)
-{
-    // write "HI MUGIT" to the name buffer
-    strcpy(name, "HI MUGIT");
-    return NVML_SUCCESS;
 }
 
 void *dlsym(void *handle, const char *name)
