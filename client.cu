@@ -40,7 +40,7 @@ int open_rpc_client()
     return sockfd;
 }
 
-int send_rpc_message(void **response, const char *op, const void *args, const int argslen)
+nvmlReturn_t send_rpc_message(void **response, int *len, const char *op, const void *args, const int argslen)
 {
     static int next_request_id = 0, active_response_id = -1;
     static pthread_mutex_t mutex;
@@ -53,16 +53,16 @@ int send_rpc_message(void **response, const char *op, const void *args, const in
 
     uint8_t oplen = (uint8_t)strlen(op);
     if (write(sockfd, (void *)&request_id, sizeof(int)) < 0)
-        return -1;
+        return NVML_ERROR_GPU_IS_LOST;
 
     if (write(sockfd, (void *)&oplen, sizeof(uint8_t)) < 0)
-        return -1;
+        return NVML_ERROR_GPU_IS_LOST;
     if (write(sockfd, op, oplen) < 0)
-        return -1;
+        return NVML_ERROR_GPU_IS_LOST;
     if (write(sockfd, (void *)&argslen, sizeof(int)) < 0)
-        return -1;
+        return NVML_ERROR_GPU_IS_LOST;
     if (write(sockfd, args, argslen) < 0)
-        return -1;
+        return NVML_ERROR_GPU_IS_LOST;
 
     // wait for the response
     while (true)
@@ -74,22 +74,33 @@ int send_rpc_message(void **response, const char *op, const void *args, const in
         if (active_response_id == -1)
         {
             if (read(sockfd, (void *)&active_response_id, sizeof(int)) < 0)
-                return -1;
+                return NVML_ERROR_GPU_IS_LOST;
             continue;
         }
         else
         {
             // it's our turn to read the response.
-            int len;
-            if (read(sockfd, (void *)&len, sizeof(int)) < 0)
-                return -1;
-            *response = malloc(len);
-            if (read(sockfd, *response, len) < 0)
-                return -1;
+            nvmlReturn_t ret;
+            if (read(sockfd, (void *)&ret, sizeof(nvmlReturn_t)) < 0)
+                return NVML_ERROR_GPU_IS_LOST;
+            if (ret != NVML_SUCCESS || response == NULL)
+            {
+                pthread_mutex_unlock(&mutex);
+                return ret;
+            }
+
+            if (read(sockfd, (void *)len, sizeof(int)) < 0)
+                return NVML_ERROR_GPU_IS_LOST;
+            if (len > 0)
+            {
+                *response = malloc(*len);
+                if (read(sockfd, *response, *len) < 0)
+                    return NVML_ERROR_GPU_IS_LOST;
+            }
 
             // we are done, unlock and return.
             pthread_mutex_unlock(&mutex);
-            return len;
+            return ret;
         }
     }
 }
@@ -103,17 +114,13 @@ void close_rpc_client()
 nvmlReturn_t nvmlInitWithFlags(unsigned int flags)
 {
     open_rpc_client();
-    char buffer[1024];
-    sprintf(buffer, "nvmlInitWithFlags %d\n", flags);
-    write(sockfd, buffer, strlen(buffer));
-    return NVML_SUCCESS;
+    return send_rpc_message(NULL, NULL, "nvmlInitWithFlags", (void *)&flags, sizeof(unsigned int));
 }
 
 nvmlReturn_t nvmlDeviceGetName(nvmlDevice_t device, char *name, unsigned int length)
 {
-    // write "HI MUGIT" to the name buffer
-    strcpy(name, "HI MUGIT");
-    return NVML_SUCCESS;
+    open_rpc_client();
+    return send_rpc_message((void **)&name, (int *)&length, "nvmlDeviceGetName", (void *)&device, sizeof(nvmlDevice_t));
 }
 
 nvmlReturn_t nvmlDeviceGetName(nvmlDevice_t device, char *name, unsigned int length)
