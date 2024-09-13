@@ -116,6 +116,18 @@ nvmlReturn_t nvmlInitWithFlags(unsigned int flags)
     return send_rpc_message(NULL, NULL, "nvmlInitWithFlags", (void *)&flags, sizeof(unsigned int));
 }
 
+nvmlReturn_t nvmlInit_v2()
+{
+    open_rpc_client();
+    return send_rpc_message(NULL, NULL, "nvmlInit_v2", NULL, 0);
+}
+
+nvmlReturn_t nvmlShutdown()
+{
+    open_rpc_client();
+    return send_rpc_message(NULL, NULL, "nvmlShutdown", NULL, 0);
+}
+
 nvmlReturn_t nvmlDeviceGetName(nvmlDevice_t device, char *name, unsigned int length)
 {
     open_rpc_client();
@@ -128,6 +140,10 @@ void *dlsym(void *handle, const char *name)
 
     if (!strcmp(name, "nvmlInitWithFlags"))
         return (void *)nvmlInitWithFlags;
+    if (!strcmp(name, "nvmlInit_v2"))
+        return (void *)nvmlInit_v2;
+    if (!strcmp(name, "nvmlShutdown"))
+        return (void *)nvmlShutdown;
     if (!strcmp(name, "nvmlDeviceGetName"))
         return (void *)nvmlDeviceGetName;
 
