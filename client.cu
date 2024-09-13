@@ -7,7 +7,6 @@
 #include <nvml.h>
 #include <unistd.h>
 #include <pthread.h>
-#include <atomic>
 
 int sockfd;
 
@@ -123,17 +122,12 @@ nvmlReturn_t nvmlDeviceGetName(nvmlDevice_t device, char *name, unsigned int len
     return send_rpc_message((void **)&name, (int *)&length, "nvmlDeviceGetName", (void *)&device, sizeof(nvmlDevice_t));
 }
 
-nvmlReturn_t nvmlDeviceGetName(nvmlDevice_t device, char *name, unsigned int length)
-{
-    // write "HI MUGIT" to the name buffer
-    strcpy(name, "HI MUGIT");
-    return NVML_SUCCESS;
-}
-
 void *dlsym(void *handle, const char *name)
 {
     printf("Resolving symbol: %s\n", name);
 
+    if (!strcmp(name, "nvmlInitWithFlags"))
+        return (void *)nvmlInitWithFlags;
     if (!strcmp(name, "nvmlDeviceGetName"))
         return (void *)nvmlDeviceGetName;
 
