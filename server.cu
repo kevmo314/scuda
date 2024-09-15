@@ -77,40 +77,6 @@ void *client_handler(void *arg)
 
     while (read(connfd, &request_id, sizeof(int)) >= 0)
     {
-        if (write(connfd, &request_id, sizeof(int)) < 0)
-            goto exit;
-
-        // Handle different NVML operations
-        switch (op)
-        {
-        case RPC_nvmlInitWithFlags:
-        {
-            unsigned int flags;
-            if (read(connfd, &flags, sizeof(unsigned int)) < 0)
-                goto exit;
-            printf("Received nvmlInitWithFlags request %d %d\n", request_id, flags);
-            nvmlReturn_t result = nvmlInitWithFlags(flags);
-            printf("Sending nvmlInitWithFlags response %d %d\n", request_id, result);
-            if (write(connfd, &result, sizeof(nvmlReturn_t)) < 0)
-                goto exit;
-        }
-        case RPC_nvmlDeviceGetCount_v2:
-        {
-            unsigned int dcount;
-            if (read(connfd, &dcount, sizeof(unsigned int)) < 0)
-                goto exit;
-            printf("Received device count request %d %d\n", request_id, dcount);
-            nvmlReturn_t result = nvmlDeviceGetCount_v2(&dcount);
-    
-            if (result == NVML_SUCCESS) {
-                printf("Number of devices: %u\n", dcount);
-            }
-
-            if (write(connfd, &dcount, sizeof(unsigned int)) <= 0)
-	            goto exit;
-	        }
-        }
-            break;
         int result = request_handler(connfd);
         if (write(connfd, &result, sizeof(int)) < 0)
             break;
