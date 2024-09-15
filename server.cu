@@ -12,31 +12,60 @@
 #define PORT 14833
 #define MAX_CLIENTS 10
 
-int sockfd;
+int request_handler(int connfd) {
+    unsigned int op;
+    if (read(connfd, &op, sizeof(unsigned int)) < 0)
+        return -1;
 
-void nvmlInitWithFlagsHandler(int connfd, unsigned int flags)
-{
-    nvmlReturn_t result = nvmlInitWithFlags(flags);
-    write(connfd, &result, sizeof(result));
-}
-
-void nvmlShutdownHandler(int connfd)
-{
-    nvmlReturn_t result = nvmlShutdown();
-    write(connfd, &result, sizeof(result));
-}
-
-void nvmlDeviceGetNameHandler(int connfd, nvmlDevice_t device)
-{
-    char name[NVML_DEVICE_NAME_BUFFER_SIZE];
-    nvmlReturn_t result = nvmlDeviceGetName(device, name, NVML_DEVICE_NAME_BUFFER_SIZE);
-    write(connfd, &result, sizeof(result));
-    if (result == NVML_SUCCESS)
+    switch (op)
     {
-        int len = strlen(name) + 1; // including null terminator
-        write(connfd, &len, sizeof(len));
-        write(connfd, name, len);
+    case RPC_nvmlInitWithFlags:
+    {
+        unsigned int flags;
+        if (read(connfd, &flags, sizeof(unsigned int)) < 0)
+            return -1;
+        return nvmlInitWithFlags(flags);
     }
+    case RPC_nvmlShutdown:
+        return nvmlShutdown();
+    case RPC_nvmlDeviceGetName:
+    {
+        nvmlDevice_t device;
+        char name[NVML_DEVICE_NAME_BUFFER_SIZE];
+        unsigned int length;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+            return -1;
+        if (read(connfd, &length, sizeof(unsigned int)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetName(device, name, length);
+        if (write(connfd, name, length) < 0)
+            return -1;
+        return result;
+    }
+    case RPC_nvmlDeviceGetCount_v2:
+    {
+        unsigned int deviceCount = 0;
+        nvmlReturn_t result = nvmlDeviceGetCount_v2(&deviceCount);
+        if (write(connfd, &deviceCount, sizeof(unsigned int)) < 0)
+            return -1;
+        return result;
+    }
+    case RPC_nvmlDeviceGetHandleByIndex_v2:
+    {
+        unsigned int index;
+        nvmlDevice_t device;
+        if (read(connfd, &index, sizeof(unsigned int)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetHandleByIndex_v2(index, &device);
+        if (write(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+            return -1;
+        return result;
+    }
+    default:
+        printf("Unknown operation %d\n", op);
+        break;
+    }
+    return -1;
 }
 
 void *client_handler(void *arg)
@@ -44,37 +73,17 @@ void *client_handler(void *arg)
     int connfd = *(int *)arg;
     free(arg);
 
-    unsigned int op;
     int request_id;
-    int argslen;
 
     while (read(connfd, &request_id, sizeof(int)) >= 0)
     {
-        if (read(connfd, &op, sizeof(unsigned int)) < 0)
-            goto exit;
-
         if (write(connfd, &request_id, sizeof(int)) < 0)
-            goto exit;
-
-        // Handle different NVML operations
-        switch (op)
-        {
-        case RPC_nvmlInitWithFlags:
-        {
-            unsigned int flags;
-            if (read(connfd, &flags, sizeof(unsigned int)) < 0)
-                goto exit;
-            printf("Received nvmlInitWithFlags request %d %d\n", request_id, flags);
-            nvmlReturn_t result = nvmlInitWithFlags(flags);
-            printf("Sending nvmlInitWithFlags response %d %d\n", request_id, result);
-            if (write(connfd, &result, sizeof(nvmlReturn_t)) < 0)
-                goto exit;
             break;
-        }
-        }
+        int result = request_handler(connfd);
+        if (write(connfd, &result, sizeof(int)) < 0)
+            break;
     }
 
-exit:
     close(connfd);
     pthread_exit(NULL);
 }
@@ -82,7 +91,7 @@ exit:
 int main()
 {
     struct sockaddr_in servaddr, cli;
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd == -1)
     {
         printf("Socket creation failed.\n");

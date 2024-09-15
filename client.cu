@@ -6,6 +6,9 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <vector>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
 
 #include "api.h"
 
@@ -16,22 +19,33 @@ int open_rpc_client()
     struct sockaddr_in servaddr;
 
     if (sockfd != 0)
-    {
         return sockfd;
+
+    char* server_ip = getenv("SCUDA_SERVER");
+    if (server_ip == NULL)
+    {
+        printf("SCUDA_SERVER environment variable not set\n");
+        exit(0);
     }
 
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    addrinfo hints, *res;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+    if (getaddrinfo(server_ip, "14833", &hints, &res) != 0)
+    {
+        printf("getaddrinfo failed\n");
+        exit(0);
+    }
+
+    sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
     if (sockfd == -1)
     {
         printf("socket creation failed...\n");
         exit(0);
     }
 
-    bzero(&servaddr, sizeof(servaddr));
-    servaddr.sin_family = AF_INET;
-    servaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    servaddr.sin_port = htons(14833);
-    if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) != 0)
+    if (connect(sockfd, res->ai_addr, res->ai_addrlen) != 0)
     {
         printf("connection with the server failed...\n");
         exit(0);
@@ -54,15 +68,12 @@ nvmlReturn_t send_rpc_message(
 
     int request_id = next_request_id++;
 
-    printf("Sending request %d\n", request_id);
     if (write(sockfd, &request_id, sizeof(int)) < 0 ||
         write(sockfd, &op, sizeof(unsigned int)) < 0)
     {
         pthread_mutex_unlock(&mutex);
         return NVML_ERROR_GPU_IS_LOST;
     }
-
-    printf("Sending %lu requests\n", requests.size());
 
     for (auto r : requests)
         if (write(sockfd, r.first, r.second) < 0)
@@ -74,11 +85,8 @@ nvmlReturn_t send_rpc_message(
     // wait for the response
     while (true)
     {
-        printf("Waiting for response %d\n", request_id);
         while (active_response_id != request_id && active_response_id != -1)
             pthread_cond_wait(&cond, &mutex);
-
-        printf("Got response active %d\n", active_response_id);
 
         // we currently own mutex. if active response id is -1, read the response id
         if (active_response_id == -1)
@@ -89,8 +97,6 @@ nvmlReturn_t send_rpc_message(
                 return NVML_ERROR_GPU_IS_LOST;
             }
 
-            printf("Got response id %d\n", active_response_id);
-
             if (active_response_id != request_id)
             {
                 pthread_cond_broadcast(&cond);
@@ -100,18 +106,7 @@ nvmlReturn_t send_rpc_message(
 
         active_response_id = -1;
 
-        printf("Reading response %d\n", request_id);
-
         // it's our turn to read the response.
-        nvmlReturn_t ret;
-        if (read(sockfd, &ret, sizeof(nvmlReturn_t)) < 0 || ret != NVML_SUCCESS)
-        {
-            pthread_mutex_unlock(&mutex);
-            return NVML_ERROR_GPU_IS_LOST;
-        }
-
-        printf("Reading %lu responses\n", responses.size());
-
         for (auto r : responses)
             if (read(sockfd, r.first, r.second) < 0)
             {
@@ -119,7 +114,9 @@ nvmlReturn_t send_rpc_message(
                 return NVML_ERROR_GPU_IS_LOST;
             }
 
-        printf("done!\n");
+        nvmlReturn_t ret;
+        if (read(sockfd, &ret, sizeof(nvmlReturn_t)) < 0)
+            ret = NVML_ERROR_GPU_IS_LOST;
 
         // we are done, unlock and return.
         pthread_mutex_unlock(&mutex);
@@ -151,10 +148,22 @@ nvmlReturn_t nvmlShutdown()
     return send_rpc_message(RPC_nvmlShutdown);
 }
 
+nvmlReturn_t nvmlDeviceGetCount_v2(unsigned int* deviceCount)
+{
+    open_rpc_client();
+    return send_rpc_message(RPC_nvmlDeviceGetCount_v2, {}, {{deviceCount, sizeof(unsigned int)}});
+}
+
 nvmlReturn_t nvmlDeviceGetName(nvmlDevice_t device, char *name, unsigned int length)
 {
     open_rpc_client();
     return send_rpc_message(RPC_nvmlDeviceGetName, {{&device, sizeof(nvmlDevice_t)}, {&length, sizeof(int)}}, {{name, length}});
+}
+
+nvmlReturn_t nvmlDeviceGetHandleByIndex_v2(unsigned int index, nvmlDevice_t *device)
+{
+    open_rpc_client();
+    return send_rpc_message(RPC_nvmlDeviceGetHandleByIndex_v2, {{&index, sizeof(unsigned int)}}, {{device, sizeof(nvmlDevice_t)}});
 }
 
 void *dlsym(void *handle, const char *name) __THROW
@@ -163,12 +172,16 @@ void *dlsym(void *handle, const char *name) __THROW
 
     if (!strcmp(name, "nvmlInitWithFlags"))
         return (void *)nvmlInitWithFlags;
-    // if (!strcmp(name, "nvmlInit_v2"))
-    //     return (void *)nvmlInit_v2;
-    // if (!strcmp(name, "nvmlShutdown"))
-    //     return (void *)nvmlShutdown;
-    // if (!strcmp(name, "nvmlDeviceGetName"))
-    //     return (void *)nvmlDeviceGetName;
+    if (!strcmp(name, "nvmlInit_v2"))
+        return (void *)nvmlInit_v2;
+    if (!strcmp(name, "nvmlShutdown"))
+        return (void *)nvmlShutdown;
+    if (!strcmp(name, "nvmlDeviceGetCount_v2"))
+        return (void *)nvmlDeviceGetCount_v2;
+    if (!strcmp(name, "nvmlDeviceGetName"))
+        return (void *)nvmlDeviceGetName;
+    if (!strcmp(name, "nvmlDeviceGetHandleByIndex_v2"))
+        return (void *)nvmlDeviceGetHandleByIndex_v2;
 
     static void *(*real_dlsym)(void *, const char *) = NULL;
     if (real_dlsym == NULL)
