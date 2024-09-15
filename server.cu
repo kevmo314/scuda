@@ -19,6 +19,7 @@ int request_handler(int connfd) {
 
     switch (op)
     {
+    // 4.11 Initialization and Cleanup
     case RPC_nvmlInitWithFlags:
     {
         unsigned int flags;
@@ -26,6 +27,8 @@ int request_handler(int connfd) {
             return -1;
         return nvmlInitWithFlags(flags);
     }
+    case RPC_nvmlInit_v2:
+        return nvmlInit_v2();
     case RPC_nvmlShutdown:
         return nvmlShutdown();
     case RPC_nvmlDeviceGetName:

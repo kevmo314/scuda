@@ -18,7 +18,7 @@ int open_rpc_client()
 {
     struct sockaddr_in servaddr;
 
-    char* server_ip = getenv("SCUDA_SERVER");
+    char *server_ip = getenv("SCUDA_SERVER");
     if (server_ip == NULL)
     {
         printf("SCUDA_SERVER environment variable not set\n");
@@ -127,6 +127,7 @@ void close_rpc_client()
     sockfd = 0;
 }
 
+// 4.11 Initialization and Cleanup
 nvmlReturn_t nvmlInitWithFlags(unsigned int flags)
 {
     if (open_rpc_client() < 0)
@@ -148,7 +149,84 @@ nvmlReturn_t nvmlShutdown()
     return result;
 }
 
-nvmlReturn_t nvmlDeviceGetCount_v2(unsigned int* deviceCount)
+// 4.14 System Queries
+nvmlReturn_t nvmlSystemGetDriverVersion(char *version, unsigned int length)
+{
+    return send_rpc_message(RPC_nvmlSystemGetDriverVersion, {}, {{version, length}});
+}
+
+nvmlReturn_t nvmlSystemGetDriverVersion_v2(char *version, unsigned int length)
+{
+    return send_rpc_message(RPC_nvmlSystemGetDriverVersion_v2, {}, {{version, length}});
+}
+
+nvmlReturn_t nvmlSystemGetDriverBranch(char *branch, unsigned int length)
+{
+    return send_rpc_message(RPC_nvmlSystemGetDriverBranch, {}, {{branch, length}});
+}
+
+nvmlReturn_t nvmlSystemGetHicVersion(unsigned int *hwbcCount, nvmlHwbcEntry_t *hwbcEntries)
+{
+    return send_rpc_message(RPC_nvmlSystemGetHicVersion, {}, {{hwbcCount, sizeof(unsigned int)}, {hwbcEntries, sizeof(nvmlHwbcEntry_t)}});
+}
+
+nvmlReturn_t nvmlSystemGetNVMLVersion(char *version, unsigned int length)
+{
+    return send_rpc_message(RPC_nvmlSystemGetNVMLVersion, {}, {{version, length}});
+}
+
+nvmlReturn_t nvmlSystemGetProcessName(unsigned int pid, char *name, unsigned int length)
+{
+    return send_rpc_message(RPC_nvmlSystemGetProcessName, {{&pid, sizeof(unsigned int)}}, {{name, length}});
+}
+
+nvmlReturn_t nvmlSystemGetTopologyGpuSet(unsigned int cpuNumber, unsigned int *count, nvmlDevice_t *deviceArray)
+{
+    return send_rpc_message(RPC_nvmlSystemGetTopologyGpuSet, {{&cpuNumber, sizeof(unsigned int)}}, {{count, sizeof(unsigned int)}, {deviceArray, sizeof(nvmlDevice_t)}});
+}
+
+// 4.15 Unit Queries
+nvmlReturn_t nvmlUnitGetCount(unsigned int *unitCount)
+{
+    return send_rpc_message(RPC_nvmlUnitGetCount, {}, {{unitCount, sizeof(unsigned int)}});
+}
+
+nvmlReturn_t nvmlUnitGetDevices(nvmlUnit_t unit, unsigned int *deviceCount, nvmlDevice_t *devices)
+{
+    return send_rpc_message(RPC_nvmlUnitGetDevices, {{&unit, sizeof(nvmlUnit_t)}}, {{deviceCount, sizeof(unsigned int)}, {devices, sizeof(nvmlDevice_t)}});
+}
+
+nvmlReturn_t nvmlUnitGetFanSpeedInfo(nvmlUnit_t unit, nvmlUnitFanSpeeds_t *fanSpeeds)
+{
+    return send_rpc_message(RPC_nvmlUnitGetFanSpeedInfo, {{&unit, sizeof(nvmlUnit_t)}}, {{fanSpeeds, sizeof(nvmlUnitFanSpeeds_t)}});
+}
+
+nvmlReturn_t nvmlUnitGetHandleByIndex(unsigned int index, nvmlUnit_t *unit)
+{
+    return send_rpc_message(RPC_nvmlUnitGetHandleByIndex, {{&index, sizeof(unsigned int)}}, {{unit, sizeof(nvmlUnit_t)}});
+}
+
+nvmlReturn_t nvmlUnitGetLedState(nvmlUnit_t unit, nvmlLedState_t *state)
+{
+    return send_rpc_message(RPC_nvmlUnitGetLedState, {{&unit, sizeof(nvmlUnit_t)}}, {{state, sizeof(nvmlLedState_t)}});
+}
+
+nvmlReturn_t nvmlUnitGetPsuInfo(nvmlUnit_t unit, nvmlPSUInfo_t *psu)
+{
+    return send_rpc_message(RPC_nvmlUnitGetPsuInfo, {{&unit, sizeof(nvmlUnit_t)}}, {{psu, sizeof(nvmlPSUInfo_t)}});
+}
+
+nvmlReturn_t nvmlUnitGetTemperature(nvmlUnit_t unit, unsigned int type, unsigned int *temp)
+{
+    return send_rpc_message(RPC_nvmlUnitGetTemperature, {{&unit, sizeof(nvmlUnit_t)}, {&type, sizeof(unsigned int)}}, {{temp, sizeof(unsigned int)}});
+}
+
+nvmlReturn_t nvmlUnitGetUnitInfo(nvmlUnit_t unit, nvmlUnitInfo_t *info)
+{
+    return send_rpc_message(RPC_nvmlUnitGetUnitInfo, {{&unit, sizeof(nvmlUnit_t)}}, {{info, sizeof(nvmlUnitInfo_t)}});
+}
+
+nvmlReturn_t nvmlDeviceGetCount_v2(unsigned int *deviceCount)
 {
     return send_rpc_message(RPC_nvmlDeviceGetCount_v2, {}, {{deviceCount, sizeof(unsigned int)}});
 }
@@ -167,12 +245,48 @@ void *dlsym(void *handle, const char *name) __THROW
 {
     printf("Resolving symbol: %s\n", name);
 
+    // 4.11 Initialization and Cleanup
     if (!strcmp(name, "nvmlInitWithFlags"))
         return (void *)nvmlInitWithFlags;
     if (!strcmp(name, "nvmlInit_v2"))
         return (void *)nvmlInit_v2;
     if (!strcmp(name, "nvmlShutdown"))
         return (void *)nvmlShutdown;
+
+    // 4.14 System Queries
+    if (!strcmp(name, "nvmlSystemGetDriverVersion"))
+        return (void *)nvmlSystemGetDriverVersion;
+    if (!strcmp(name, "nvmlSystemGetDriverVersion_v2"))
+        return (void *)nvmlSystemGetDriverVersion_v2;
+    if (!strcmp(name, "nvmlSystemGetDriverBranch"))
+        return (void *)nvmlSystemGetDriverBranch;
+    if (!strcmp(name, "nvmlSystemGetHicVersion"))
+        return (void *)nvmlSystemGetHicVersion;
+    if (!strcmp(name, "nvmlSystemGetNVMLVersion"))
+        return (void *)nvmlSystemGetNVMLVersion;
+    if (!strcmp(name, "nvmlSystemGetProcessName"))
+        return (void *)nvmlSystemGetProcessName;
+    if (!strcmp(name, "nvmlSystemGetTopologyGpuSet"))
+        return (void *)nvmlSystemGetTopologyGpuSet;
+
+    // 4.15 Unit Queries
+    if (!strcmp(name, "nvmlUnitGetCount"))
+        return (void *)nvmlUnitGetCount;
+    if (!strcmp(name, "nvmlUnitGetDevices"))
+        return (void *)nvmlUnitGetDevices;
+    if (!strcmp(name, "nvmlUnitGetFanSpeedInfo"))
+        return (void *)nvmlUnitGetFanSpeedInfo;
+    if (!strcmp(name, "nvmlUnitGetHandleByIndex"))
+        return (void *)nvmlUnitGetHandleByIndex;
+    if (!strcmp(name, "nvmlUnitGetLedState"))
+        return (void *)nvmlUnitGetLedState;
+    if (!strcmp(name, "nvmlUnitGetPsuInfo"))
+        return (void *)nvmlUnitGetPsuInfo;
+    if (!strcmp(name, "nvmlUnitGetTemperature"))
+        return (void *)nvmlUnitGetTemperature;
+    if (!strcmp(name, "nvmlUnitGetUnitInfo"))
+        return (void *)nvmlUnitGetUnitInfo;
+
     if (!strcmp(name, "nvmlDeviceGetCount_v2"))
         return (void *)nvmlDeviceGetCount_v2;
     if (!strcmp(name, "nvmlDeviceGetName"))
