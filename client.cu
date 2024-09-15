@@ -18,14 +18,11 @@ int open_rpc_client()
 {
     struct sockaddr_in servaddr;
 
-    if (sockfd != 0)
-        return sockfd;
-
     char* server_ip = getenv("SCUDA_SERVER");
     if (server_ip == NULL)
     {
         printf("SCUDA_SERVER environment variable not set\n");
-        exit(0);
+        return -1;
     }
 
     addrinfo hints, *res;
@@ -35,20 +32,20 @@ int open_rpc_client()
     if (getaddrinfo(server_ip, "14833", &hints, &res) != 0)
     {
         printf("getaddrinfo failed\n");
-        exit(0);
+        return -1;
     }
 
     sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
     if (sockfd == -1)
     {
         printf("socket creation failed...\n");
-        exit(0);
+        return -1;
     }
 
     if (connect(sockfd, res->ai_addr, res->ai_addrlen) != 0)
     {
         printf("connection with the server failed...\n");
-        exit(0);
+        return -1;
     }
     return sockfd;
 }
@@ -132,37 +129,37 @@ void close_rpc_client()
 
 nvmlReturn_t nvmlInitWithFlags(unsigned int flags)
 {
-    open_rpc_client();
+    if (open_rpc_client() < 0)
+        return NVML_ERROR_GPU_IS_LOST;
     return send_rpc_message(RPC_nvmlInitWithFlags, {{&flags, sizeof(unsigned int)}});
 }
 
 nvmlReturn_t nvmlInit_v2()
 {
-    open_rpc_client();
+    if (open_rpc_client() < 0)
+        return NVML_ERROR_GPU_IS_LOST;
     return send_rpc_message(RPC_nvmlInit_v2);
 }
 
 nvmlReturn_t nvmlShutdown()
 {
-    open_rpc_client();
-    return send_rpc_message(RPC_nvmlShutdown);
+    nvmlReturn_t result = send_rpc_message(RPC_nvmlShutdown);
+    close_rpc_client();
+    return result;
 }
 
 nvmlReturn_t nvmlDeviceGetCount_v2(unsigned int* deviceCount)
 {
-    open_rpc_client();
     return send_rpc_message(RPC_nvmlDeviceGetCount_v2, {}, {{deviceCount, sizeof(unsigned int)}});
 }
 
 nvmlReturn_t nvmlDeviceGetName(nvmlDevice_t device, char *name, unsigned int length)
 {
-    open_rpc_client();
     return send_rpc_message(RPC_nvmlDeviceGetName, {{&device, sizeof(nvmlDevice_t)}, {&length, sizeof(int)}}, {{name, length}});
 }
 
 nvmlReturn_t nvmlDeviceGetHandleByIndex_v2(unsigned int index, nvmlDevice_t *device)
 {
-    open_rpc_client();
     return send_rpc_message(RPC_nvmlDeviceGetHandleByIndex_v2, {{&index, sizeof(unsigned int)}}, {{device, sizeof(nvmlDevice_t)}});
 }
 

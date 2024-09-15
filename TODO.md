@@ -1,5 +1,7 @@
 Features:
+- Add moar APIs
 - Multithread the server
+- Make port configurable
 
 Bugs:
 - Server exits when the client disconnects
