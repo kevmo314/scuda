@@ -9,6 +9,4 @@
 #define RPC_nvmlDeviceGetName 3
 #define RPC_nvmlDeviceGetHandleByIndex_v2 5
 
-#define RPC_nvmlDeviceGetCount_v2 4
-
 #endif

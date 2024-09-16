@@ -16,8 +16,6 @@ int sockfd;
 
 int open_rpc_client()
 {
-    struct sockaddr_in servaddr;
-
     char* server_ip = getenv("SCUDA_SERVER");
     if (server_ip == NULL)
     {
