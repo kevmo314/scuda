@@ -12,13 +12,15 @@
 #define PORT 14833
 #define MAX_CLIENTS 10
 
-int request_handler(int connfd) {
+int request_handler(int connfd)
+{
     unsigned int op;
     if (read(connfd, &op, sizeof(unsigned int)) < 0)
         return -1;
 
     switch (op)
     {
+    // 4.11 Initialization and Cleanup
     case RPC_nvmlInitWithFlags:
     {
         unsigned int flags;
@@ -26,16 +28,79 @@ int request_handler(int connfd) {
             return -1;
         return nvmlInitWithFlags(flags);
     }
+    case RPC_nvmlInit_v2:
+        return nvmlInit_v2();
     case RPC_nvmlShutdown:
         return nvmlShutdown();
+    // 4.14 System Queries
+    case RPC_nvmlSystemGetDriverVersion:
+    {
+        unsigned int length;
+        if (read(connfd, &length, sizeof(unsigned int)) < 0)
+            return -1;
+        char version[length];
+        nvmlReturn_t result = nvmlSystemGetDriverVersion(version, length);
+        if (write(connfd, version, length) < 0)
+            return -1;
+        return result;
+    }
+    case RPC_nvmlSystemGetHicVersion:
+    {
+        unsigned int hwbcCount;
+        if (read(connfd, &hwbcCount, sizeof(unsigned int)) < 0)
+            return -1;
+        nvmlHwbcEntry_t *hwbcEntries = (nvmlHwbcEntry_t *)malloc(hwbcCount * sizeof(nvmlHwbcEntry_t));
+        nvmlReturn_t result = nvmlSystemGetHicVersion(&hwbcCount, hwbcEntries);
+        if (write(connfd, &hwbcCount, sizeof(unsigned int)) < 0 ||
+            write(connfd, hwbcEntries, hwbcCount * sizeof(nvmlHwbcEntry_t)) < 0)
+            return -1;
+        return result;
+    }
+    case RPC_nvmlSystemGetNVMLVersion:
+    {
+        unsigned int length;
+        if (read(connfd, &length, sizeof(unsigned int)) < 0)
+            return -1;
+        char version[length];
+        nvmlReturn_t result = nvmlSystemGetNVMLVersion(version, length);
+        if (write(connfd, version, length) < 0)
+            return -1;
+        return result;
+    }
+    case RPC_nvmlSystemGetProcessName:
+    {
+        unsigned int pid;
+        unsigned int length;
+        if (read(connfd, &pid, sizeof(unsigned int)) < 0 ||
+            read(connfd, &length, sizeof(unsigned int)) < 0)
+            return -1;
+        char name[length];
+        nvmlReturn_t result = nvmlSystemGetProcessName(pid, name, length);
+        if (write(connfd, name, length) < 0)
+            return -1;
+        return result;
+    }
+    case RPC_nvmlSystemGetTopologyGpuSet:
+    {
+        unsigned int cpuNumber;
+        unsigned int count;
+        if (read(connfd, &cpuNumber, sizeof(unsigned int)) < 0 ||
+            read(connfd, &count, sizeof(unsigned int)) < 0)
+            return -1;
+        nvmlDevice_t *deviceArray = (nvmlDevice_t *)malloc(count * sizeof(nvmlDevice_t));
+        nvmlReturn_t result = nvmlSystemGetTopologyGpuSet(cpuNumber, &count, deviceArray);
+        if (write(connfd, &count, sizeof(unsigned int)) < 0 ||
+            write(connfd, deviceArray, count * sizeof(nvmlDevice_t)) < 0)
+            return -1;
+        return result;
+    }
     case RPC_nvmlDeviceGetName:
     {
         nvmlDevice_t device;
         char name[NVML_DEVICE_NAME_BUFFER_SIZE];
         unsigned int length;
-        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
-            return -1;
-        if (read(connfd, &length, sizeof(unsigned int)) < 0)
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0 ||
+            read(connfd, &length, sizeof(unsigned int)) < 0)
             return -1;
         nvmlReturn_t result = nvmlDeviceGetName(device, name, length);
         if (write(connfd, name, length) < 0)
