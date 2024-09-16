@@ -2,6 +2,7 @@ Features:
 - Add moar APIs
 - Multithread the server
 - Make port configurable
+- Add TLS for the socket
 
 Bugs:
 - Server exits when the client disconnects [done]
