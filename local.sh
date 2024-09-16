@@ -1,17 +1,20 @@
 #!/bin/bash
 
 libscuda_path="$(pwd)/libscuda.so"
-client_path="$(pwd)/client.cu"
-server_path="$(pwd)/server.cu"
+src_dir="$(pwd)/src"
 server_out_path="$(pwd)/server.so"
+
+# Find all .cu files in src directory dynamically
+client_sources=$(find "$src_dir" -name "*.cu" ! -name "server.cu")
+server_sources=$(find "$src_dir" -name "server.cu")
 
 build() {
   echo "building client..."
 
   if [[ "$(uname)" == "Linux" ]]; then
-    nvcc -Xcompiler -fPIC -shared -o $libscuda_path $client_path 
+    nvcc -Xcompiler -fPIC -shared -o "$libscuda_path" $client_sources 
   else
-    echo "No compiler options set for os "$(uname)""
+    echo "No compiler options set for os $(uname)"
   fi
 
   if [ ! -f "$libscuda_path" ]; then
@@ -24,9 +27,9 @@ server() {
   echo "building server..." 
 
   if [[ "$(uname)" == "Linux" ]]; then
-    nvcc -o $server_out_path $server_path -lnvidia-ml
+    nvcc -o "$server_out_path" $server_sources -lnvidia-ml
   else
-    echo "No compiler options set for os "$(uname)""
+    echo "No compiler options set for os $(uname)"
   fi
 
   echo "starting server... $server_out_path"
