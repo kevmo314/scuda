@@ -103,6 +103,9 @@ int request_handler(int connfd)
             read(connfd, &length, sizeof(unsigned int)) < 0)
             return -1;
         nvmlReturn_t result = nvmlDeviceGetName(device, name, length);
+
+        printf("received device name response: %s\n", name);
+
         if (write(connfd, name, length) < 0)
             return -1;
         return result;
@@ -140,17 +143,35 @@ void *client_handler(void *arg)
 
     int request_id;
 
-    while (read(connfd, &request_id, sizeof(int)) >= 0)
+    while (1)
     {
-        if (write(connfd, &request_id, sizeof(int)) < 0)
+        int n = read(connfd, &request_id, sizeof(int));
+        if (n == 0)
+        {
+            printf("client disconnected, loop continuing. \n");
             break;
-        int result = request_handler(connfd);
-        if (write(connfd, &result, sizeof(int)) < 0)
+        }
+        else if (n < 0)
+        {
+            printf("error reading from client.\n");
             break;
+        }
+
+        if (write(connfd, &request_id, sizeof(int)) < 0) {
+            printf("error writing to client.\n");
+            break;
+        }
+
+        int res = request_handler(connfd);
+        if (write(connfd, &res, sizeof(int)) < 0) {
+            printf("error writing result to client.\n");
+            break;
+        }
     }
 
     close(connfd);
-    pthread_exit(NULL);
+    // dont need pthread_exit, can return when complete instead
+    return NULL;
 }
 
 int main()
@@ -203,6 +224,8 @@ int main()
             free(connfd);
             continue;
         }
+
+        printf("client connected, spawning thread.\n");
 
         pthread_t thread_id;
         pthread_create(&thread_id, NULL, client_handler, connfd);
