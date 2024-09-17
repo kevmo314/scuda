@@ -20,6 +20,7 @@
 #include "api.h"
 
 int sockfd;
+char* port;
 
 int open_rpc_client()
 {
@@ -27,14 +28,24 @@ int open_rpc_client()
     if (server_ip == NULL)
     {
         printf("SCUDA_SERVER environment variable not set\n");
-        return -1;
+        std::exit(1);
+    }
+
+    char *p = getenv("SCUDA_TARGET_PORT");
+
+    if (p == NULL)
+    {
+        std::cout << "SCUDA_TARGET_PORT not defined, defaulting to: " << "14833" << std::endl;
+        port = (char *)"14833";
+    } else {
+        port = p;
     }
 
     addrinfo hints, *res;
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
-    if (getaddrinfo(server_ip, "14833", &hints, &res) != 0)
+    if (getaddrinfo(server_ip, port, &hints, &res) != 0)
     {
         printf("getaddrinfo failed\n");
         return -1;
@@ -388,26 +399,33 @@ nvmlReturn_t nvmlDeviceGetHandleByIndex_v2(unsigned int index, nvmlDevice_t *dev
 std::unordered_map<std::string, void*> functionMap;
 
 void initializeFunctionMap() {
-    // attach all handlers to our function map
-    functionMap["nvmlInitWithFlags"] = (void*)nvmlInitWithFlags;
-    functionMap["nvmlInit_v2"] = (void*)nvmlInit_v2;
-    functionMap["nvmlShutdown"] = (void*)nvmlShutdown;
-    functionMap["nvmlSystemGetDriverVersion"] = (void*)nvmlSystemGetDriverVersion;
-    functionMap["nvmlSystemGetHicVersion"] = (void*)nvmlSystemGetHicVersion;
-    functionMap["nvmlSystemGetNVMLVersion"] = (void*)nvmlSystemGetNVMLVersion;
-    functionMap["nvmlSystemGetProcessName"] = (void*)nvmlSystemGetProcessName;
-    functionMap["nvmlSystemGetTopologyGpuSet"] = (void*)nvmlSystemGetTopologyGpuSet;
-    functionMap["nvmlUnitGetCount"] = (void*)nvmlUnitGetCount;
-    functionMap["nvmlUnitGetDevices"] = (void*)nvmlUnitGetDevices;
-    functionMap["nvmlUnitGetFanSpeedInfo"] = (void*)nvmlUnitGetFanSpeedInfo;
-    functionMap["nvmlUnitGetHandleByIndex"] = (void*)nvmlUnitGetHandleByIndex;
-    functionMap["nvmlUnitGetLedState"] = (void*)nvmlUnitGetLedState;
-    functionMap["nvmlUnitGetPsuInfo"] = (void*)nvmlUnitGetPsuInfo;
-    functionMap["nvmlUnitGetTemperature"] = (void*)nvmlUnitGetTemperature;
-    functionMap["nvmlUnitGetUnitInfo"] = (void*)nvmlUnitGetUnitInfo;
-    functionMap["nvmlDeviceGetCount_v2"] = (void*)nvmlDeviceGetCount_v2;
-    functionMap["nvmlDeviceGetName"] = (void*)nvmlDeviceGetName;
-    functionMap["nvmlDeviceGetHandleByIndex_v2"] = (void*)nvmlDeviceGetHandleByIndex_v2;
+    // simple cache check to make sure we only init handlers on the first run
+    if (functionMap.find("nvmlInit_v2") != functionMap.end()) {
+        std::cout << "handlers already initialized" << std::endl;
+    } else {
+        std::cout << "initializing handlers" << std::endl;
+
+        // attach all handlers to our function map
+        functionMap["nvmlInitWithFlags"] = (void*)nvmlInitWithFlags;
+        functionMap["nvmlInit_v2"] = (void*)nvmlInit_v2;
+        functionMap["nvmlShutdown"] = (void*)nvmlShutdown;
+        functionMap["nvmlSystemGetDriverVersion"] = (void*)nvmlSystemGetDriverVersion;
+        functionMap["nvmlSystemGetHicVersion"] = (void*)nvmlSystemGetHicVersion;
+        functionMap["nvmlSystemGetNVMLVersion"] = (void*)nvmlSystemGetNVMLVersion;
+        functionMap["nvmlSystemGetProcessName"] = (void*)nvmlSystemGetProcessName;
+        functionMap["nvmlSystemGetTopologyGpuSet"] = (void*)nvmlSystemGetTopologyGpuSet;
+        functionMap["nvmlUnitGetCount"] = (void*)nvmlUnitGetCount;
+        functionMap["nvmlUnitGetDevices"] = (void*)nvmlUnitGetDevices;
+        functionMap["nvmlUnitGetFanSpeedInfo"] = (void*)nvmlUnitGetFanSpeedInfo;
+        functionMap["nvmlUnitGetHandleByIndex"] = (void*)nvmlUnitGetHandleByIndex;
+        functionMap["nvmlUnitGetLedState"] = (void*)nvmlUnitGetLedState;
+        functionMap["nvmlUnitGetPsuInfo"] = (void*)nvmlUnitGetPsuInfo;
+        functionMap["nvmlUnitGetTemperature"] = (void*)nvmlUnitGetTemperature;
+        functionMap["nvmlUnitGetUnitInfo"] = (void*)nvmlUnitGetUnitInfo;
+        functionMap["nvmlDeviceGetCount_v2"] = (void*)nvmlDeviceGetCount_v2;
+        functionMap["nvmlDeviceGetName"] = (void*)nvmlDeviceGetName;
+        functionMap["nvmlDeviceGetHandleByIndex_v2"] = (void*)nvmlDeviceGetHandleByIndex_v2;
+    }
 }
 
 // Lookup function similar to dlsym
