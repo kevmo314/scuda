@@ -140,27 +140,6 @@ int rpc_wait_for_response(int request_id)
     }
 }
 
-// define cuda function prototypes here
-nvmlReturn_t nvmlInitWithFlags(unsigned int flags);
-nvmlReturn_t nvmlInit_v2();
-nvmlReturn_t nvmlShutdown();
-nvmlReturn_t nvmlSystemGetDriverVersion(char* version, unsigned int length);
-nvmlReturn_t nvmlSystemGetHicVersion(unsigned int* hwbcCount, nvmlHwbcEntry_t* hwbcEntries);
-nvmlReturn_t nvmlSystemGetNVMLVersion(char* version, unsigned int length);
-nvmlReturn_t nvmlSystemGetProcessName(unsigned int pid, char* name, unsigned int length);
-nvmlReturn_t nvmlSystemGetTopologyGpuSet(unsigned int cpuNumber, unsigned int* count, nvmlDevice_t* deviceArray);
-nvmlReturn_t nvmlUnitGetCount(unsigned int* unitCount);
-nvmlReturn_t nvmlUnitGetDevices(nvmlUnit_t unit, unsigned int* deviceCount, nvmlDevice_t* devices);
-nvmlReturn_t nvmlUnitGetFanSpeedInfo(nvmlUnit_t unit, nvmlUnitFanSpeeds_t* fanSpeeds);
-nvmlReturn_t nvmlUnitGetHandleByIndex(unsigned int index, nvmlUnit_t* unit);
-nvmlReturn_t nvmlUnitGetLedState(nvmlUnit_t unit, nvmlLedState_t* state);
-nvmlReturn_t nvmlUnitGetPsuInfo(nvmlUnit_t unit, nvmlPSUInfo_t* psu);
-nvmlReturn_t nvmlUnitGetTemperature(nvmlUnit_t unit, unsigned int type, unsigned int* temp);
-nvmlReturn_t nvmlUnitGetUnitInfo(nvmlUnit_t unit, nvmlUnitInfo_t* info);
-nvmlReturn_t nvmlDeviceGetCount_v2(unsigned int* deviceCount);
-nvmlReturn_t nvmlDeviceGetName(nvmlDevice_t device, char* name, unsigned int length);
-nvmlReturn_t nvmlDeviceGetHandleByIndex_v2(unsigned int index, nvmlDevice_t* device);
-
 nvmlReturn_t rpc_get_return(int request_id)
 {
     nvmlReturn_t result;
@@ -397,6 +376,18 @@ nvmlReturn_t nvmlDeviceGetHandleByIndex_v2(unsigned int index, nvmlDevice_t *dev
     return rpc_get_return(request_id);
 }
 
+// 4.16 Device Queries
+nvmlReturn_t nvmlDeviceGetMemoryInfo_v2(nvmlDevice_t device, nvmlMemory_v2_t *memoryInfo)
+{
+   int request_id = rpc_start_request(RPC_nvmlDeviceGetMemoryInfo_v2);
+    if (request_id < 0 || rpc_write(&device, sizeof(nvmlDevice_t)) < 0 || rpc_wait_for_response(request_id) < 0 || rpc_read(memoryInfo, sizeof(nvmlMemory_v2_t)) < 0) {
+        std::cerr << "Failed to start RPC request" << std::endl;
+        return NVML_ERROR_GPU_IS_LOST;
+    }
+
+    return rpc_get_return(request_id);
+}
+
 std::unordered_map<std::string, void*> functionMap;
 
 void initializeFunctionMap() {
@@ -426,6 +417,7 @@ void initializeFunctionMap() {
         functionMap["nvmlDeviceGetCount_v2"] = (void*)nvmlDeviceGetCount_v2;
         functionMap["nvmlDeviceGetName"] = (void*)nvmlDeviceGetName;
         functionMap["nvmlDeviceGetHandleByIndex_v2"] = (void*)nvmlDeviceGetHandleByIndex_v2;
+        functionMap["nvmlDeviceGetMemoryInfo_v2"] = (void*)nvmlDeviceGetMemoryInfo_v2;
     }
 }
 
