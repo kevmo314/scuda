@@ -4,12 +4,17 @@
 #include <string.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <iostream>
+#include <unordered_map>
+#include <functional>
+#include <string>
+#include <cstring>
 #include <nvml.h>
 #include <sys/socket.h>
 
 #include "api.h"
 
-#define PORT 14833
+#define DEFAULT_PORT 14833
 #define MAX_CLIENTS 10
 
 int request_handler(int connfd)
@@ -176,6 +181,7 @@ void *client_handler(void *arg)
 
 int main()
 {
+    int port = DEFAULT_PORT;
     struct sockaddr_in servaddr, cli;
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd == -1)
@@ -184,11 +190,22 @@ int main()
         exit(EXIT_FAILURE);
     }
 
+    char *p = getenv("SCUDA_PORT");
+
+    if (p == NULL)
+    {
+        std::cout << "SCUDA_PORT not defined, defaulting to: " << "14833" << std::endl;
+        port = DEFAULT_PORT;
+    } else {
+        port = atoi(p);
+        std::cout << "Using SCUDA_PORT: " << port << std::endl;
+    }
+
     // Bind the socket
     memset(&servaddr, 0, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
     servaddr.sin_addr.s_addr = INADDR_ANY;
-    servaddr.sin_port = htons(PORT);
+    servaddr.sin_port = htons(port);
 
     const int enable = 1;
     if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
@@ -210,7 +227,7 @@ int main()
         exit(EXIT_FAILURE);
     }
 
-    printf("Server listening on port %d...\n", PORT);
+    printf("Server listening on port %d...\n", port);
 
     // Server loop
     while (1)
