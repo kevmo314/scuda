@@ -1,6 +1,11 @@
 #include <arpa/inet.h>
 #include <stdio.h>
 #include <dlfcn.h>
+#include <iostream>
+#include <unordered_map>
+#include <functional>
+#include <string>
+#include <cstring>
 #include <string.h>
 #include <nvml.h>
 #include <unistd.h>
@@ -9,6 +14,8 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
+
+#include <unordered_map>
 
 #include "api.h"
 
@@ -120,6 +127,27 @@ int rpc_wait_for_response(int request_id)
         return 0;
     }
 }
+
+// define cuda function prototypes here
+nvmlReturn_t nvmlInitWithFlags(unsigned int flags);
+nvmlReturn_t nvmlInit_v2();
+nvmlReturn_t nvmlShutdown();
+nvmlReturn_t nvmlSystemGetDriverVersion(char* version, unsigned int length);
+nvmlReturn_t nvmlSystemGetHicVersion(unsigned int* hwbcCount, nvmlHwbcEntry_t* hwbcEntries);
+nvmlReturn_t nvmlSystemGetNVMLVersion(char* version, unsigned int length);
+nvmlReturn_t nvmlSystemGetProcessName(unsigned int pid, char* name, unsigned int length);
+nvmlReturn_t nvmlSystemGetTopologyGpuSet(unsigned int cpuNumber, unsigned int* count, nvmlDevice_t* deviceArray);
+nvmlReturn_t nvmlUnitGetCount(unsigned int* unitCount);
+nvmlReturn_t nvmlUnitGetDevices(nvmlUnit_t unit, unsigned int* deviceCount, nvmlDevice_t* devices);
+nvmlReturn_t nvmlUnitGetFanSpeedInfo(nvmlUnit_t unit, nvmlUnitFanSpeeds_t* fanSpeeds);
+nvmlReturn_t nvmlUnitGetHandleByIndex(unsigned int index, nvmlUnit_t* unit);
+nvmlReturn_t nvmlUnitGetLedState(nvmlUnit_t unit, nvmlLedState_t* state);
+nvmlReturn_t nvmlUnitGetPsuInfo(nvmlUnit_t unit, nvmlPSUInfo_t* psu);
+nvmlReturn_t nvmlUnitGetTemperature(nvmlUnit_t unit, unsigned int type, unsigned int* temp);
+nvmlReturn_t nvmlUnitGetUnitInfo(nvmlUnit_t unit, nvmlUnitInfo_t* info);
+nvmlReturn_t nvmlDeviceGetCount_v2(unsigned int* deviceCount);
+nvmlReturn_t nvmlDeviceGetName(nvmlDevice_t device, char* name, unsigned int length);
+nvmlReturn_t nvmlDeviceGetHandleByIndex_v2(unsigned int index, nvmlDevice_t* device);
 
 nvmlReturn_t rpc_get_return(int request_id)
 {
@@ -357,60 +385,65 @@ nvmlReturn_t nvmlDeviceGetHandleByIndex_v2(unsigned int index, nvmlDevice_t *dev
     return rpc_get_return(request_id);
 }
 
+std::unordered_map<std::string, void*> functionMap;
+
+void initializeFunctionMap() {
+    // attach all handlers to our function map
+    functionMap["nvmlInitWithFlags"] = (void*)nvmlInitWithFlags;
+    functionMap["nvmlInit_v2"] = (void*)nvmlInit_v2;
+    functionMap["nvmlShutdown"] = (void*)nvmlShutdown;
+    functionMap["nvmlSystemGetDriverVersion"] = (void*)nvmlSystemGetDriverVersion;
+    functionMap["nvmlSystemGetHicVersion"] = (void*)nvmlSystemGetHicVersion;
+    functionMap["nvmlSystemGetNVMLVersion"] = (void*)nvmlSystemGetNVMLVersion;
+    functionMap["nvmlSystemGetProcessName"] = (void*)nvmlSystemGetProcessName;
+    functionMap["nvmlSystemGetTopologyGpuSet"] = (void*)nvmlSystemGetTopologyGpuSet;
+    functionMap["nvmlUnitGetCount"] = (void*)nvmlUnitGetCount;
+    functionMap["nvmlUnitGetDevices"] = (void*)nvmlUnitGetDevices;
+    functionMap["nvmlUnitGetFanSpeedInfo"] = (void*)nvmlUnitGetFanSpeedInfo;
+    functionMap["nvmlUnitGetHandleByIndex"] = (void*)nvmlUnitGetHandleByIndex;
+    functionMap["nvmlUnitGetLedState"] = (void*)nvmlUnitGetLedState;
+    functionMap["nvmlUnitGetPsuInfo"] = (void*)nvmlUnitGetPsuInfo;
+    functionMap["nvmlUnitGetTemperature"] = (void*)nvmlUnitGetTemperature;
+    functionMap["nvmlUnitGetUnitInfo"] = (void*)nvmlUnitGetUnitInfo;
+    functionMap["nvmlDeviceGetCount_v2"] = (void*)nvmlDeviceGetCount_v2;
+    functionMap["nvmlDeviceGetName"] = (void*)nvmlDeviceGetName;
+    functionMap["nvmlDeviceGetHandleByIndex_v2"] = (void*)nvmlDeviceGetHandleByIndex_v2;
+}
+
+// Lookup function similar to dlsym
+void* getFunctionByName(const char* name) {
+    auto it = functionMap.find(name);
+
+    if (it != functionMap.end()) {
+        return it->second;
+    } else {
+        std::cout << "handler not found: " << name << std::endl;
+        return nullptr;
+    }
+}
+
 void *dlsym(void *handle, const char *name) __THROW
 {
-    printf("Resolving symbol: %s\n", name);
+    initializeFunctionMap();
 
-    // 4.11 Initialization and Cleanup
-    if (!strcmp(name, "nvmlInitWithFlags"))
-        return (void *)nvmlInitWithFlags;
-    if (!strcmp(name, "nvmlInit_v2"))
-        return (void *)nvmlInit_v2;
-    if (!strcmp(name, "nvmlShutdown"))
-        return (void *)nvmlShutdown;
+    std::cout << "Resolving function symbol: " << name << std::endl;
 
-    // 4.14 System Queries
-    if (!strcmp(name, "nvmlSystemGetDriverVersion"))
-        return (void *)nvmlSystemGetDriverVersion;
-    if (!strcmp(name, "nvmlSystemGetHicVersion"))
-        return (void *)nvmlSystemGetHicVersion;
-    if (!strcmp(name, "nvmlSystemGetNVMLVersion"))
-        return (void *)nvmlSystemGetNVMLVersion;
-    if (!strcmp(name, "nvmlSystemGetProcessName"))
-        return (void *)nvmlSystemGetProcessName;
-    if (!strcmp(name, "nvmlSystemGetTopologyGpuSet"))
-        return (void *)nvmlSystemGetTopologyGpuSet;
+    void* func = getFunctionByName(name);
 
-    // 4.15 Unit Queries
-    if (!strcmp(name, "nvmlUnitGetCount"))
-        return (void *)nvmlUnitGetCount;
-    if (!strcmp(name, "nvmlUnitGetDevices"))
-        return (void *)nvmlUnitGetDevices;
-    if (!strcmp(name, "nvmlUnitGetFanSpeedInfo"))
-        return (void *)nvmlUnitGetFanSpeedInfo;
-    if (!strcmp(name, "nvmlUnitGetHandleByIndex"))
-        return (void *)nvmlUnitGetHandleByIndex;
-    if (!strcmp(name, "nvmlUnitGetLedState"))
-        return (void *)nvmlUnitGetLedState;
-    if (!strcmp(name, "nvmlUnitGetPsuInfo"))
-        return (void *)nvmlUnitGetPsuInfo;
-    if (!strcmp(name, "nvmlUnitGetTemperature"))
-        return (void *)nvmlUnitGetTemperature;
-    if (!strcmp(name, "nvmlUnitGetUnitInfo"))
-        return (void *)nvmlUnitGetUnitInfo;
-
-    if (!strcmp(name, "nvmlDeviceGetCount_v2"))
-        return (void *)nvmlDeviceGetCount_v2;
-    if (!strcmp(name, "nvmlDeviceGetName"))
-        return (void *)nvmlDeviceGetName;
-    if (!strcmp(name, "nvmlDeviceGetHandleByIndex_v2"))
-        return (void *)nvmlDeviceGetHandleByIndex_v2;
+    if (func != nullptr) {
+        return func;
+    }
 
     static void *(*real_dlsym)(void *, const char *) = NULL;
-    if (real_dlsym == NULL)
+    if (real_dlsym == NULL) {
+        // avoid calling dlsym recursively; use dlvsym to resolve dlsym itself
         real_dlsym = (void *(*)(void *, const char *))dlvsym(RTLD_NEXT, "dlsym", "GLIBC_2.2.5");
-    /* my target binary is even asking for dlsym() via dlsym()... */
-    if (!strcmp(name, "dlsym"))
+    }
+
+    if (!strcmp(name, "dlsym")) {
         return (void *)dlsym;
+    }
+
+    // if func symbol is not found in the handler mappings, return the real dlsym resolution
     return real_dlsym(handle, name);
 }
