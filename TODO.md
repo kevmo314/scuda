@@ -1,6 +1,6 @@
 Features:
 - Add moar APIs
-- Multithread the server
+- Multithread the server [done]
 - Make port configurable [done]
 - Add TLS for the socket
 

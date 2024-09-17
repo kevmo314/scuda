@@ -1,9 +1,12 @@
 #include <arpa/inet.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <pthread.h>
+#include <iostream>
+#include <thread>
+#include <cstdlib>
+#include <cstring>
+#include <arpa/inet.h>
 #include <unistd.h>
+#include <memory> 
 #include <iostream>
 #include <unordered_map>
 #include <functional>
@@ -141,11 +144,9 @@ int request_handler(int connfd)
     return -1;
 }
 
-void *client_handler(void *arg)
-{
-    int connfd = *(int *)arg;
-    free(arg);
-
+void client_handler(int connfd) {
+    std::cout << "handling client in thread: " << std::this_thread::get_id() << std::endl;
+    
     int request_id;
 
     while (1)
@@ -175,8 +176,6 @@ void *client_handler(void *arg)
     }
 
     close(connfd);
-    // dont need pthread_exit, can return when complete instead
-    return NULL;
 }
 
 int main()
@@ -220,7 +219,6 @@ int main()
         exit(EXIT_FAILURE);
     }
 
-    // Listen for clients
     if (listen(sockfd, MAX_CLIENTS) != 0)
     {
         printf("Listen failed.\n");
@@ -233,19 +231,20 @@ int main()
     while (1)
     {
         socklen_t len = sizeof(cli);
-        int *connfd = (int *)malloc(sizeof(int));
-        *connfd = accept(sockfd, (struct sockaddr *)&cli, &len);
-        if (*connfd < 0)
+        int connfd = accept(sockfd, (struct sockaddr *)&cli, &len);
+
+        if (connfd < 0)
         {
-            printf("Server accept failed.\n");
-            free(connfd);
+            std::cerr << "Server accept failed." << std::endl;
             continue;
         }
 
-        printf("client connected, spawning thread.\n");
+        std::cout << "Client connected, spawning thread." << std::endl;
 
-        pthread_t thread_id;
-        pthread_create(&thread_id, NULL, client_handler, connfd);
+        std::thread client_thread(client_handler, connfd);
+
+        // detach the thread so it runs independently
+        client_thread.detach();
     }
 
     close(sockfd);
