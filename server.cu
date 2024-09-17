@@ -7,6 +7,8 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <memory> 
+#include <iostream>
+#include <unordered_map>
 #include <functional>
 #include <string>
 #include <cstring>
