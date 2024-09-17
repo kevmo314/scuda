@@ -190,15 +190,15 @@ int main()
         exit(EXIT_FAILURE);
     }
 
-    char *p = getenv("SCUDA_TARGET_PORT");
+    char *p = getenv("SCUDA_PORT");
 
     if (p == NULL)
     {
-        std::cout << "SCUDA_TARGET_PORT not defined, defaulting to: " << "14833" << std::endl;
+        std::cout << "SCUDA_PORT not defined, defaulting to: " << "14833" << std::endl;
         port = DEFAULT_PORT;
     } else {
         port = atoi(p);
-        std::cout << "Using SCUDA_TARGET_PORT: " << port << std::endl;
+        std::cout << "Using SCUDA_PORT: " << port << std::endl;
     }
 
     // Bind the socket

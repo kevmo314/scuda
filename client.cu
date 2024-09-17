@@ -31,14 +31,15 @@ int open_rpc_client()
         std::exit(1);
     }
 
-    char *p = getenv("SCUDA_TARGET_PORT");
+    char *p = getenv("SCUDA_PORT");
 
     if (p == NULL)
     {
-        std::cout << "SCUDA_TARGET_PORT not defined, defaulting to: " << "14833" << std::endl;
+        std::cout << "SCUDA_PORT not defined, defaulting to: " << "14833" << std::endl;
         port = (char *)"14833";
     } else {
         port = p;
+        std::cout << "using SCUDA_PORT: " << port << std::endl;
     }
 
     addrinfo hints, *res;
