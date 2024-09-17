@@ -137,6 +137,37 @@ int request_handler(int connfd)
             return -1;
         return result;
     }
+    case RPC_nvmlDeviceGetMemoryInfo_v2:
+    {
+        nvmlDevice_t device;
+        nvmlMemory_v2_t memoryInfo;
+
+        // Read the device handle from the client
+        std::cout << "Reading device handle from client" << std::endl;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0) {
+            std::cerr << "Failed to read device handle" << std::endl;
+            return -1;
+        }
+
+        memoryInfo.version = nvmlMemory_v2;
+
+        // Get memory info for the provided device
+        std::cout << "Calling nvmlDeviceGetMemoryInfo_v2" << std::endl;
+        nvmlReturn_t res = nvmlDeviceGetMemoryInfo_v2(device, &memoryInfo);
+        if (res != NVML_SUCCESS) {
+            std::cerr << "Failed to get memory info: " << nvmlErrorString(res) << std::endl;
+            return -1;
+        }
+
+        // Send the memory info back to the client
+        std::cout << "Sending memory info to client" << std::endl;
+        if (write(connfd, &memoryInfo, sizeof(nvmlMemory_v2_t)) < 0) {
+            std::cerr << "Failed to send memory info to client" << std::endl;
+            return -1;
+        }
+
+        return NVML_SUCCESS;
+    }
     default:
         printf("Unknown operation %d\n", op);
         break;

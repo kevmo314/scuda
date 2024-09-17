@@ -37,7 +37,7 @@ server() {
 run() {
   build
 
-  LD_PRELOAD="$libscuda_path" nvidia-smi --query-gpu=name --format=csv
+  LD_PRELOAD="$libscuda_path" nvidia-smi --query-gpu=memory.total,memory.used,memory.free --format=csv
 }
 
 # Main script logic using a switch case
