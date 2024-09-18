@@ -102,6 +102,107 @@ int request_handler(int connfd)
             return -1;
         return result;
     }
+
+    // 4.15 Unit Queries
+    case RPC_nvmlUnitGetCount:
+    {
+        unsigned int unitCount;
+        nvmlReturn_t result = nvmlUnitGetCount(&unitCount);
+        if (write(connfd, &unitCount, sizeof(unsigned int)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlUnitGetDevices:
+    {
+        nvmlUnit_t unit;
+        unsigned int deviceCount;
+        if (read(connfd, &unit, sizeof(nvmlUnit_t)) < 0 ||
+            read(connfd, &deviceCount, sizeof(unsigned int)) < 0)
+            return -1;
+        nvmlDevice_t *devices = (nvmlDevice_t *)malloc(deviceCount * sizeof(nvmlDevice_t));
+        nvmlReturn_t result = nvmlUnitGetDevices(unit, &deviceCount, devices);
+        if (write(connfd, &deviceCount, sizeof(unsigned int)) < 0 ||
+            write(connfd, devices, deviceCount * sizeof(nvmlDevice_t)) < 0)
+            return -1;
+        free(devices);
+        return result;
+    }
+
+    case RPC_nvmlUnitGetFanSpeedInfo:
+    {
+        nvmlUnit_t unit;
+        nvmlUnitFanSpeeds_t fanSpeeds;
+        if (read(connfd, &unit, sizeof(nvmlUnit_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlUnitGetFanSpeedInfo(unit, &fanSpeeds);
+        if (write(connfd, &fanSpeeds, sizeof(nvmlUnitFanSpeeds_t)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlUnitGetHandleByIndex:
+    {
+        unsigned int index;
+        nvmlUnit_t unit;
+        if (read(connfd, &index, sizeof(unsigned int)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlUnitGetHandleByIndex(index, &unit);
+        if (write(connfd, &unit, sizeof(nvmlUnit_t)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlUnitGetLedState:
+    {
+        nvmlUnit_t unit;
+        nvmlLedState_t state;
+        if (read(connfd, &unit, sizeof(nvmlUnit_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlUnitGetLedState(unit, &state);
+        if (write(connfd, &state, sizeof(nvmlLedState_t)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlUnitGetPsuInfo:
+    {
+        nvmlUnit_t unit;
+        nvmlPSUInfo_t psu;
+        if (read(connfd, &unit, sizeof(nvmlUnit_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlUnitGetPsuInfo(unit, &psu);
+        if (write(connfd, &psu, sizeof(nvmlPSUInfo_t)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlUnitGetTemperature:
+    {
+        nvmlUnit_t unit;
+        unsigned int type;
+        unsigned int temp;
+        if (read(connfd, &unit, sizeof(nvmlUnit_t)) < 0 ||
+            read(connfd, &type, sizeof(unsigned int)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlUnitGetTemperature(unit, type, &temp);
+        if (write(connfd, &temp, sizeof(unsigned int)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlUnitGetUnitInfo:
+    {
+        nvmlUnit_t unit;
+        nvmlUnitInfo_t info;
+        if (read(connfd, &unit, sizeof(nvmlUnit_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlUnitGetUnitInfo(unit, &info);
+        if (write(connfd, &info, sizeof(nvmlUnitInfo_t)) < 0)
+            return -1;
+        return result;
+    }
+
     // 4.16 Device Queries
     case RPC_nvmlDeviceGetAPIRestriction:
     {
