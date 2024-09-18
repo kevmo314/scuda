@@ -20,7 +20,7 @@
 #include "api.h"
 
 int sockfd = -1;
-char* port;
+char *port;
 
 int open_rpc_client()
 {
@@ -46,7 +46,9 @@ int open_rpc_client()
     {
         std::cout << "SCUDA_PORT not defined, defaulting to: " << "14833" << std::endl;
         port = (char *)"14833";
-    } else {
+    }
+    else
+    {
         port = p;
         std::cout << "using SCUDA_PORT: " << port << std::endl;
     }
@@ -81,7 +83,7 @@ pthread_cond_t cond;
 
 int rpc_start_request(const unsigned int op)
 {
-    static int next_request_id = 0;
+    static int next_request_id = 1;
 
     // write the request atomically
     pthread_mutex_lock(&mutex);
@@ -388,8 +390,9 @@ nvmlReturn_t nvmlDeviceGetHandleByIndex_v2(unsigned int index, nvmlDevice_t *dev
 // 4.16 Device Queries
 nvmlReturn_t nvmlDeviceGetMemoryInfo_v2(nvmlDevice_t device, nvmlMemory_v2_t *memoryInfo)
 {
-   int request_id = rpc_start_request(RPC_nvmlDeviceGetMemoryInfo_v2);
-    if (request_id < 0 || rpc_write(&device, sizeof(nvmlDevice_t)) < 0 || rpc_wait_for_response(request_id) < 0 || rpc_read(memoryInfo, sizeof(nvmlMemory_v2_t)) < 0) {
+    int request_id = rpc_start_request(RPC_nvmlDeviceGetMemoryInfo_v2);
+    if (request_id < 0 || rpc_write(&device, sizeof(nvmlDevice_t)) < 0 || rpc_wait_for_response(request_id) < 0 || rpc_read(memoryInfo, sizeof(nvmlMemory_v2_t)) < 0)
+    {
         std::cerr << "Failed to start RPC request" << std::endl;
         return NVML_ERROR_GPU_IS_LOST;
     }
@@ -397,46 +400,54 @@ nvmlReturn_t nvmlDeviceGetMemoryInfo_v2(nvmlDevice_t device, nvmlMemory_v2_t *me
     return rpc_get_return(request_id);
 }
 
-std::unordered_map<std::string, void*> functionMap;
+std::unordered_map<std::string, void *> functionMap;
 
-void initializeFunctionMap() {
+void initializeFunctionMap()
+{
     // simple cache check to make sure we only init handlers on the first run
-    if (functionMap.find("nvmlInit_v2") != functionMap.end()) {
+    if (functionMap.find("nvmlInit_v2") != functionMap.end())
+    {
         std::cout << "handlers already initialized" << std::endl;
-    } else {
+    }
+    else
+    {
         std::cout << "initializing handlers" << std::endl;
 
         // attach all handlers to our function map
-        functionMap["nvmlInitWithFlags"] = (void*)nvmlInitWithFlags;
-        functionMap["nvmlInit_v2"] = (void*)nvmlInit_v2;
-        functionMap["nvmlShutdown"] = (void*)nvmlShutdown;
-        functionMap["nvmlSystemGetDriverVersion"] = (void*)nvmlSystemGetDriverVersion;
-        functionMap["nvmlSystemGetHicVersion"] = (void*)nvmlSystemGetHicVersion;
-        functionMap["nvmlSystemGetNVMLVersion"] = (void*)nvmlSystemGetNVMLVersion;
-        functionMap["nvmlSystemGetProcessName"] = (void*)nvmlSystemGetProcessName;
-        functionMap["nvmlSystemGetTopologyGpuSet"] = (void*)nvmlSystemGetTopologyGpuSet;
-        functionMap["nvmlUnitGetCount"] = (void*)nvmlUnitGetCount;
-        functionMap["nvmlUnitGetDevices"] = (void*)nvmlUnitGetDevices;
-        functionMap["nvmlUnitGetFanSpeedInfo"] = (void*)nvmlUnitGetFanSpeedInfo;
-        functionMap["nvmlUnitGetHandleByIndex"] = (void*)nvmlUnitGetHandleByIndex;
-        functionMap["nvmlUnitGetLedState"] = (void*)nvmlUnitGetLedState;
-        functionMap["nvmlUnitGetPsuInfo"] = (void*)nvmlUnitGetPsuInfo;
-        functionMap["nvmlUnitGetTemperature"] = (void*)nvmlUnitGetTemperature;
-        functionMap["nvmlUnitGetUnitInfo"] = (void*)nvmlUnitGetUnitInfo;
-        functionMap["nvmlDeviceGetCount_v2"] = (void*)nvmlDeviceGetCount_v2;
-        functionMap["nvmlDeviceGetName"] = (void*)nvmlDeviceGetName;
-        functionMap["nvmlDeviceGetHandleByIndex_v2"] = (void*)nvmlDeviceGetHandleByIndex_v2;
-        functionMap["nvmlDeviceGetMemoryInfo_v2"] = (void*)nvmlDeviceGetMemoryInfo_v2;
+        functionMap["nvmlInitWithFlags"] = (void *)nvmlInitWithFlags;
+        functionMap["nvmlInit_v2"] = (void *)nvmlInit_v2;
+        functionMap["nvmlShutdown"] = (void *)nvmlShutdown;
+        functionMap["nvmlSystemGetDriverVersion"] = (void *)nvmlSystemGetDriverVersion;
+        functionMap["nvmlSystemGetHicVersion"] = (void *)nvmlSystemGetHicVersion;
+        functionMap["nvmlSystemGetNVMLVersion"] = (void *)nvmlSystemGetNVMLVersion;
+        functionMap["nvmlSystemGetProcessName"] = (void *)nvmlSystemGetProcessName;
+        functionMap["nvmlSystemGetTopologyGpuSet"] = (void *)nvmlSystemGetTopologyGpuSet;
+        functionMap["nvmlUnitGetCount"] = (void *)nvmlUnitGetCount;
+        functionMap["nvmlUnitGetDevices"] = (void *)nvmlUnitGetDevices;
+        functionMap["nvmlUnitGetFanSpeedInfo"] = (void *)nvmlUnitGetFanSpeedInfo;
+        functionMap["nvmlUnitGetHandleByIndex"] = (void *)nvmlUnitGetHandleByIndex;
+        functionMap["nvmlUnitGetLedState"] = (void *)nvmlUnitGetLedState;
+        functionMap["nvmlUnitGetPsuInfo"] = (void *)nvmlUnitGetPsuInfo;
+        functionMap["nvmlUnitGetTemperature"] = (void *)nvmlUnitGetTemperature;
+        functionMap["nvmlUnitGetUnitInfo"] = (void *)nvmlUnitGetUnitInfo;
+        functionMap["nvmlDeviceGetCount_v2"] = (void *)nvmlDeviceGetCount_v2;
+        functionMap["nvmlDeviceGetName"] = (void *)nvmlDeviceGetName;
+        functionMap["nvmlDeviceGetHandleByIndex_v2"] = (void *)nvmlDeviceGetHandleByIndex_v2;
+        functionMap["nvmlDeviceGetMemoryInfo_v2"] = (void *)nvmlDeviceGetMemoryInfo_v2;
     }
 }
 
 // Lookup function similar to dlsym
-void* getFunctionByName(const char* name) {
+void *getFunctionByName(const char *name)
+{
     auto it = functionMap.find(name);
 
-    if (it != functionMap.end()) {
+    if (it != functionMap.end())
+    {
         return it->second;
-    } else {
+    }
+    else
+    {
         std::cout << "handler not found: " << name << std::endl;
         return nullptr;
     }
@@ -448,19 +459,22 @@ void *dlsym(void *handle, const char *name) __THROW
 
     std::cout << "Resolving function symbol: " << name << std::endl;
 
-    void* func = getFunctionByName(name);
+    void *func = getFunctionByName(name);
 
-    if (func != nullptr) {
+    if (func != nullptr)
+    {
         return func;
     }
 
     static void *(*real_dlsym)(void *, const char *) = NULL;
-    if (real_dlsym == NULL) {
+    if (real_dlsym == NULL)
+    {
         // avoid calling dlsym recursively; use dlvsym to resolve dlsym itself
         real_dlsym = (void *(*)(void *, const char *))dlvsym(RTLD_NEXT, "dlsym", "GLIBC_2.2.5");
     }
 
-    if (!strcmp(name, "dlsym")) {
+    if (!strcmp(name, "dlsym"))
+    {
         return (void *)dlsym;
     }
 
