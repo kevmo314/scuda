@@ -2,6 +2,7 @@ Features:
 - Add moar APIs
 - Multithread the server [done]
 - Make port configurable [done]
+- Add proper debug logging
 - Add TLS for the socket
 
 Bugs:

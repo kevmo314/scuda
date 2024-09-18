@@ -19,11 +19,20 @@
 
 #include "api.h"
 
-int sockfd;
+int sockfd = -1;
 char *port;
 
 int open_rpc_client()
 {
+    // if socket is already opened, return our socket.
+    if (sockfd != -1) {
+        std::cout << "socket already opened" << std::endl;
+
+        return sockfd;
+    }
+
+    std::cout << "opening tcp socket..." << std::endl;
+
     char *server_ip = getenv("SCUDA_SERVER");
     if (server_ip == NULL)
     {

@@ -13,6 +13,7 @@
 #include <string>
 #include <cstring>
 #include <nvml.h>
+#include <future>
 #include <sys/socket.h>
 
 #include "api.h"
@@ -822,7 +823,15 @@ void client_handler(int connfd)
             break;
         }
 
-        int res = request_handler(connfd);
+        // run our request handler in a separate thread
+        std::future<int> request_future = std::async(std::launch::async, [connfd]() {
+            std::cout << "request handled by thread: " << std::this_thread::get_id() << std::endl;
+
+            return request_handler(connfd);
+        });
+
+        // wait for result
+        int res = request_future.get();
         if (write(connfd, &res, sizeof(int)) < 0)
         {
             printf("error writing result to client.\n");
