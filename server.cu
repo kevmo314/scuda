@@ -18,7 +18,7 @@
 #define DEFAULT_PORT 14833
 #define MAX_CLIENTS 10
 
-using RequestHandler = std::function<int(int)>;
+typedef int (*RequestHandler)(int connfd);
 
 int handle_nvmlInitWithFlags(int connfd) {
     unsigned int flags;
@@ -1624,10 +1624,8 @@ int handle_nvmlDeviceRegisterEvents(int connfd) {
 int handle_nvmlEventSetCreate(int connfd) {
     nvmlEventSet_t set;
     nvmlReturn_t result = nvmlEventSetCreate(&set);
-
     if (write(connfd, &set, sizeof(nvmlEventSet_t)) < 0)
         return -1;
-
     return result;
 }
 
@@ -1656,167 +1654,229 @@ int handle_nvmlEventSetWait_v2(int connfd) {
     return result;
 }
 
-static std::unordered_map<unsigned int, RequestHandler> opHandlers = {
-    // 4.11 Initialization and Cleanup
-    {RPC_nvmlInitWithFlags, handle_nvmlInitWithFlags},
-    {RPC_nvmlInit_v2, handle_nvmlInit_v2},
-    {RPC_nvmlShutdown, handle_nvmlShutdown},
-
-    // 4.14 System Queries
-    {RPC_nvmlSystemGetDriverVersion, handle_nvmlSystemGetDriverVersion},
-    {RPC_nvmlSystemGetHicVersion, handle_nvmlSystemGetHicVersion},
-    {RPC_nvmlSystemGetNVMLVersion, handle_nvmlSystemGetNVMLVersion},
-    {RPC_nvmlSystemGetProcessName, handle_nvmlSystemGetProcessName},
-
-    // 4.15 Unit Queries
-    {RPC_nvmlUnitGetCount, handle_nvmlUnitGetCount},
-    {RPC_nvmlUnitGetDevices, handle_nvmlUnitGetDevices},
-    {RPC_nvmlUnitGetFanSpeedInfo, handle_nvmlUnitGetFanSpeedInfo},
-    {RPC_nvmlUnitGetHandleByIndex, handle_nvmlUnitGetHandleByIndex},
-    {RPC_nvmlUnitGetLedState, handle_nvmlUnitGetLedState},
-    {RPC_nvmlUnitGetPsuInfo, handle_nvmlUnitGetPsuInfo},
-    {RPC_nvmlUnitGetTemperature, handle_nvmlUnitGetTemperature},
-    {RPC_nvmlUnitGetUnitInfo, handle_nvmlUnitGetUnitInfo},
-
-    // 4.16 Device Queries
-    {RPC_nvmlDeviceGetAPIRestriction, handle_nvmlDeviceGetAPIRestriction},
-    {RPC_nvmlDeviceGetAdaptiveClockInfoStatus, handle_nvmlDeviceGetAdaptiveClockInfoStatus},
-    {RPC_nvmlDeviceGetApplicationsClock, handle_nvmlDeviceGetApplicationsClock},
-    {RPC_nvmlDeviceGetArchitecture, handle_nvmlDeviceGetArchitecture},
-    {RPC_nvmlDeviceGetAttributes_v2, handle_nvmlDeviceGetAttributes_v2},
-    {RPC_nvmlDeviceGetAutoBoostedClocksEnabled, handle_nvmlDeviceGetAutoBoostedClocksEnabled},
-    {RPC_nvmlDeviceGetBAR1MemoryInfo, handle_nvmlDeviceGetBAR1MemoryInfo},
-    {RPC_nvmlDeviceGetBoardId, handle_nvmlDeviceGetBoardId},
-    {RPC_nvmlDeviceGetBoardPartNumber, handle_nvmlDeviceGetBoardPartNumber},
-    {RPC_nvmlDeviceGetBrand, handle_nvmlDeviceGetBrand},
-    {RPC_nvmlDeviceGetBridgeChipInfo, handle_nvmlDeviceGetBridgeChipInfo},
-    {RPC_nvmlDeviceGetBusType, handle_nvmlDeviceGetBusType},
-    {RPC_nvmlDeviceGetClkMonStatus, handle_nvmlDeviceGetClkMonStatus},
-    {RPC_nvmlDeviceGetClock, handle_nvmlDeviceGetClock},
-    {RPC_nvmlDeviceGetClockInfo, handle_nvmlDeviceGetClockInfo},
-    {RPC_nvmlDeviceGetComputeMode, handle_nvmlDeviceGetComputeMode},
-    {RPC_nvmlDeviceGetComputeRunningProcesses_v3, handle_nvmlDeviceGetComputeRunningProcesses_v3},
-    {RPC_nvmlDeviceGetCount_v2, handle_nvmlDeviceGetCount_v2},
-    {RPC_nvmlDeviceGetCudaComputeCapability, handle_nvmlDeviceGetCudaComputeCapability},
-    {RPC_nvmlDeviceGetCurrPcieLinkGeneration, handle_nvmlDeviceGetCurrPcieLinkGeneration},
-    {RPC_nvmlDeviceGetCurrPcieLinkWidth, handle_nvmlDeviceGetCurrPcieLinkWidth},
-    {RPC_nvmlDeviceGetCurrentClocksThrottleReasons, handle_nvmlDeviceGetCurrentClocksThrottleReasons},
-    {RPC_nvmlDeviceGetDecoderUtilization, handle_nvmlDeviceGetDecoderUtilization},
-    {RPC_nvmlDeviceGetDefaultApplicationsClock, handle_nvmlDeviceGetDefaultApplicationsClock},
-    {RPC_nvmlDeviceGetDefaultEccMode, handle_nvmlDeviceGetDefaultEccMode},
-    {RPC_nvmlDeviceGetDetailedEccErrors, handle_nvmlDeviceGetDetailedEccErrors},
-    {RPC_nvmlDeviceGetDisplayActive, handle_nvmlDeviceGetDisplayActive},
-    {RPC_nvmlDeviceGetDisplayMode, handle_nvmlDeviceGetDisplayMode},
-    {RPC_nvmlDeviceGetDynamicPstatesInfo, handle_nvmlDeviceGetDynamicPstatesInfo},
-    {RPC_nvmlDeviceGetEccMode, handle_nvmlDeviceGetEccMode},
-    {RPC_nvmlDeviceGetEncoderCapacity, handle_nvmlDeviceGetEncoderCapacity},
-    {RPC_nvmlDeviceGetEncoderSessions, handle_nvmlDeviceGetEncoderSessions},
-    {RPC_nvmlDeviceGetEncoderStats, handle_nvmlDeviceGetEncoderStats},
-    {RPC_nvmlDeviceGetEncoderUtilization, handle_nvmlDeviceGetEncoderUtilization},
-    {RPC_nvmlDeviceGetEnforcedPowerLimit, handle_nvmlDeviceGetEnforcedPowerLimit},
-    {RPC_nvmlDeviceGetFBCSessions, handle_nvmlDeviceGetFBCSessions},
-    {RPC_nvmlDeviceGetFBCStats, handle_nvmlDeviceGetFBCStats},
-    {RPC_nvmlDeviceGetFanControlPolicy_v2, handle_nvmlDeviceGetFanControlPolicy_v2},
-    {RPC_nvmlDeviceGetFanSpeed, handle_nvmlDeviceGetFanSpeed},
-    {RPC_nvmlDeviceGetFanSpeed_v2, handle_nvmlDeviceGetFanSpeed_v2},
-    {RPC_nvmlDeviceGetGpcClkMinMaxVfOffset, handle_nvmlDeviceGetGpcClkMinMaxVfOffset},
-    {RPC_nvmlDeviceGetGpcClkVfOffset, handle_nvmlDeviceGetGpcClkVfOffset},
-    {RPC_nvmlDeviceGetGpuFabricInfo, handle_nvmlDeviceGetGpuFabricInfo},
-    {RPC_nvmlDeviceGetGpuMaxPcieLinkGeneration, handle_nvmlDeviceGetGpuMaxPcieLinkGeneration},
-    {RPC_nvmlDeviceGetGpuOperationMode, handle_nvmlDeviceGetGpuOperationMode},
-    {RPC_nvmlDeviceGetGraphicsRunningProcesses_v3, handle_nvmlDeviceGetGraphicsRunningProcesses_v3},
-    {RPC_nvmlDeviceGetGspFirmwareMode, handle_nvmlDeviceGetGspFirmwareMode},
-    {RPC_nvmlDeviceGetGspFirmwareVersion, handle_nvmlDeviceGetGspFirmwareVersion},
-    {RPC_nvmlDeviceGetHandleByIndex_v2, handle_nvmlDeviceGetHandleByIndex_v2},
-    {RPC_nvmlDeviceGetHandleByPciBusId_v2, handle_nvmlDeviceGetHandleByPciBusId_v2},
-    {RPC_nvmlDeviceGetHandleBySerial, handle_nvmlDeviceGetHandleBySerial},
-    {RPC_nvmlDeviceGetHandleByUUID, handle_nvmlDeviceGetHandleByUUID},
-    {RPC_nvmlDeviceGetIndex, handle_nvmlDeviceGetIndex},
-    {RPC_nvmlDeviceGetInforomConfigurationChecksum, handle_nvmlDeviceGetInforomConfigurationChecksum},
-    {RPC_nvmlDeviceGetInforomImageVersion, handle_nvmlDeviceGetInforomImageVersion},
-    {RPC_nvmlDeviceGetInforomVersion, handle_nvmlDeviceGetInforomVersion},
-    {RPC_nvmlDeviceGetIrqNum, handle_nvmlDeviceGetIrqNum},
-    {RPC_nvmlDeviceGetMPSComputeRunningProcesses_v3, handle_nvmlDeviceGetMPSComputeRunningProcesses_v3},
-    {RPC_nvmlDeviceGetMaxClockInfo, handle_nvmlDeviceGetMaxClockInfo},
-    {RPC_nvmlDeviceGetMaxCustomerBoostClock, handle_nvmlDeviceGetMaxCustomerBoostClock},
-    {RPC_nvmlDeviceGetMaxPcieLinkGeneration, handle_nvmlDeviceGetMaxPcieLinkGeneration},
-    {RPC_nvmlDeviceGetMaxPcieLinkWidth, handle_nvmlDeviceGetMaxPcieLinkWidth},
-    {RPC_nvmlDeviceGetMemoryInfo, handle_nvmlDeviceGetMemoryInfo},
-    {RPC_nvmlDeviceGetMemoryInfo_v2, handle_nvmlDeviceGetMemoryInfo_v2},
-    {RPC_nvmlDeviceGetMinMaxClockOfPState, handle_nvmlDeviceGetMinMaxClockOfPState},
-    {RPC_nvmlDeviceGetMinMaxFanSpeed, handle_nvmlDeviceGetMinMaxFanSpeed},
-    {RPC_nvmlDeviceGetMinorNumber, handle_nvmlDeviceGetMinorNumber},
-    {RPC_nvmlDeviceGetMultiGpuBoard, handle_nvmlDeviceGetMultiGpuBoard},
-    {RPC_nvmlDeviceGetName, handle_nvmlDeviceGetName},
-    {RPC_nvmlDeviceGetNumFans, handle_nvmlDeviceGetNumFans},
-    {RPC_nvmlDeviceGetNumGpuCores, handle_nvmlDeviceGetNumGpuCores},
-    {RPC_nvmlDeviceGetP2PStatus, handle_nvmlDeviceGetP2PStatus},
-    {RPC_nvmlDeviceGetPciInfo_v3, handle_nvmlDeviceGetPciInfo_v3},
-    {RPC_nvmlDeviceGetPcieLinkMaxSpeed, handle_nvmlDeviceGetPcieLinkMaxSpeed},
-    {RPC_nvmlDeviceGetPcieReplayCounter, handle_nvmlDeviceGetPcieReplayCounter},
-    {RPC_nvmlDeviceGetPcieSpeed, handle_nvmlDeviceGetPcieSpeed},
-    {RPC_nvmlDeviceGetPcieThroughput, handle_nvmlDeviceGetPcieThroughput},
-    {RPC_nvmlDeviceGetPerformanceState, handle_nvmlDeviceGetPerformanceState},
-    {RPC_nvmlDeviceGetPersistenceMode, handle_nvmlDeviceGetPersistenceMode},
-    {RPC_nvmlDeviceGetPowerManagementDefaultLimit, handle_nvmlDeviceGetPowerManagementDefaultLimit},
-    {RPC_nvmlDeviceGetPowerManagementLimit, handle_nvmlDeviceGetPowerManagementLimit},
-    {RPC_nvmlDeviceGetPowerManagementLimitConstraints, handle_nvmlDeviceGetPowerManagementLimitConstraints},
-    {RPC_nvmlDeviceGetPowerManagementMode, handle_nvmlDeviceGetPowerManagementMode},
-    {RPC_nvmlDeviceGetPowerSource, handle_nvmlDeviceGetPowerSource},
-    {RPC_nvmlDeviceGetPowerState, handle_nvmlDeviceGetPowerState},
-    {RPC_nvmlDeviceGetPowerUsage, handle_nvmlDeviceGetPowerUsage},
-    {RPC_nvmlDeviceGetProcessUtilization, handle_nvmlDeviceGetProcessUtilization},
-    {RPC_nvmlDeviceGetRemappedRows, handle_nvmlDeviceGetRemappedRows},
-    {RPC_nvmlDeviceGetRetiredPages, handle_nvmlDeviceGetRetiredPages},
-    {RPC_nvmlDeviceGetRetiredPagesPendingStatus, handle_nvmlDeviceGetRetiredPagesPendingStatus},
-    {RPC_nvmlDeviceGetRetiredPages_v2, handle_nvmlDeviceGetRetiredPages_v2},
-    {RPC_nvmlDeviceGetRowRemapperHistogram, handle_nvmlDeviceGetRowRemapperHistogram},
-    {RPC_nvmlDeviceGetSamples, handle_nvmlDeviceGetSamples},
-    {RPC_nvmlDeviceGetSerial, handle_nvmlDeviceGetSerial},
-    {RPC_nvmlDeviceGetSupportedClocksThrottleReasons, handle_nvmlDeviceGetSupportedClocksThrottleReasons},
-    {RPC_nvmlDeviceGetSupportedGraphicsClocks, handle_nvmlDeviceGetSupportedGraphicsClocks},
-    {RPC_nvmlDeviceGetSupportedMemoryClocks, handle_nvmlDeviceGetSupportedMemoryClocks},
-    {RPC_nvmlDeviceGetSupportedPerformanceStates, handle_nvmlDeviceGetSupportedPerformanceStates},
-    {RPC_nvmlDeviceGetTargetFanSpeed, handle_nvmlDeviceGetTargetFanSpeed},
-    {RPC_nvmlDeviceGetTemperature, handle_nvmlDeviceGetTemperature},
-    {RPC_nvmlDeviceGetTemperatureThreshold, handle_nvmlDeviceGetTemperatureThreshold},
-    {RPC_nvmlDeviceGetThermalSettings, handle_nvmlDeviceGetThermalSettings},
-    {RPC_nvmlDeviceGetTopologyCommonAncestor, handle_nvmlDeviceGetTopologyCommonAncestor},
-    {RPC_nvmlDeviceGetTopologyNearestGpus, handle_nvmlDeviceGetTopologyNearestGpus},
-    {RPC_nvmlDeviceGetTotalEccErrors, handle_nvmlDeviceGetTotalEccErrors},
-    {RPC_nvmlDeviceGetTotalEnergyConsumption, handle_nvmlDeviceGetTotalEnergyConsumption},
-    {RPC_nvmlDeviceGetUUID, handle_nvmlDeviceGetUUID},
-    {RPC_nvmlDeviceGetUtilizationRates, handle_nvmlDeviceGetUtilizationRates},
-    {RPC_nvmlDeviceGetVbiosVersion, handle_nvmlDeviceGetVbiosVersion},
-    {RPC_nvmlDeviceGetViolationStatus, handle_nvmlDeviceGetViolationStatus},
-    {RPC_nvmlDeviceOnSameBoard, handle_nvmlDeviceOnSameBoard},
-    {RPC_nvmlDeviceValidateInforom, handle_nvmlDeviceValidateInforom},
-
-    // 4.17 Unit Commands
-    {RPC_nvmlUnitSetLedState, handle_nvmlUnitSetLedState},
-
-    // 4.20 Event Handling Methods
-    {RPC_nvmlDeviceGetSupportedEventTypes, handle_nvmlDeviceGetSupportedEventTypes},
-    {RPC_nvmlDeviceRegisterEvents, handle_nvmlDeviceRegisterEvents},
-    {RPC_nvmlEventSetCreate, handle_nvmlEventSetCreate},
-    {RPC_nvmlEventSetFree, handle_nvmlEventSetFree},
-    {RPC_nvmlEventSetWait_v2, handle_nvmlEventSetWait_v2}
+static RequestHandler opHandlers[] = {
+    /* 0  */ handle_nvmlInitWithFlags,
+    /* 1  */ handle_nvmlInit_v2,
+    /* 2  */ handle_nvmlShutdown,
+    /* 3  */ nullptr,  // No handler for RPC_nvmlErrorString, as an example
+    /* 4  */ handle_nvmlSystemGetDriverVersion,
+    /* 5  */ nullptr,  // RPC_nvmlSystemGetDriverVersion_v2 is commented
+    /* 6  */ nullptr,  // RPC_nvmlSystemGetDriverBranch is commented
+    /* 7  */ handle_nvmlSystemGetHicVersion,
+    /* 8  */ handle_nvmlSystemGetNVMLVersion,
+    /* 9  */ handle_nvmlSystemGetProcessName,
+    /* 10 */ nullptr, // handle_nvmlSystemGetTopologyGpuSet,
+    /* 11 */ handle_nvmlUnitGetCount,
+    /* 12 */ handle_nvmlUnitGetDevices,
+    /* 13 */ handle_nvmlUnitGetFanSpeedInfo,
+    /* 14 */ handle_nvmlUnitGetHandleByIndex,
+    /* 15 */ handle_nvmlUnitGetLedState,
+    /* 16 */ handle_nvmlUnitGetPsuInfo,
+    /* 17 */ handle_nvmlUnitGetTemperature,
+    /* 18 */ handle_nvmlUnitGetUnitInfo,
+    /* 19 */ handle_nvmlDeviceGetAPIRestriction,
+    /* 20 */ handle_nvmlDeviceGetAdaptiveClockInfoStatus,
+    /* 21 */ handle_nvmlDeviceGetApplicationsClock,
+    /* 22 */ handle_nvmlDeviceGetArchitecture,
+    /* 23 */ handle_nvmlDeviceGetAttributes_v2,
+    /* 24 */ handle_nvmlDeviceGetAutoBoostedClocksEnabled,
+    /* 25 */ handle_nvmlDeviceGetBAR1MemoryInfo,
+    /* 26 */ handle_nvmlDeviceGetBoardId,
+    /* 27 */ handle_nvmlDeviceGetBoardPartNumber,
+    /* 28 */ handle_nvmlDeviceGetBrand,
+    /* 29 */ handle_nvmlDeviceGetBridgeChipInfo,
+    /* 30 */ handle_nvmlDeviceGetBusType,
+    /* 31 */ nullptr, // handle_nvmlDeviceGetC2cModeInfoV (missing)
+    /* 32 */ handle_nvmlDeviceGetClkMonStatus,
+    /* 33 */ handle_nvmlDeviceGetClock,
+    /* 34 */ handle_nvmlDeviceGetClockInfo,
+    /* 35 */ nullptr,  // handle_nvmlDeviceGetClockOffsets
+    /* 36 */ handle_nvmlDeviceGetComputeMode,
+    /* 37 */ handle_nvmlDeviceGetComputeRunningProcesses_v3,
+    /* 38 */ nullptr,  // handle_nvmlDeviceGetConfComputeGpuAttestationReport
+    /* 39 */ nullptr,  // handle_nvmlDeviceGetConfComputeGpuCertificate
+    /* 40 */ nullptr,  // handle_nvmlDeviceGetConfComputeMemSizeInfo
+    /* 41 */ nullptr,  // handle_nvmlDeviceGetConfComputeProtectedMemoryUsage
+    /* 42 */ handle_nvmlDeviceGetCount_v2,
+    /* 43 */ handle_nvmlDeviceGetCudaComputeCapability,
+    /* 44 */ handle_nvmlDeviceGetCurrPcieLinkGeneration,
+    /* 45 */ handle_nvmlDeviceGetCurrPcieLinkWidth,
+    /* 46 */ nullptr,  // handle_nvmlDeviceGetCurrentClocksEventReasons
+    /* 47 */ handle_nvmlDeviceGetCurrentClocksThrottleReasons,
+    /* 48 */ handle_nvmlDeviceGetDecoderUtilization,
+    /* 49 */ handle_nvmlDeviceGetDefaultApplicationsClock,
+    /* 50 */ handle_nvmlDeviceGetDefaultEccMode,
+    /* 51 */ handle_nvmlDeviceGetDetailedEccErrors,
+    /* 52 */ handle_nvmlDeviceGetDisplayActive,
+    /* 53 */ handle_nvmlDeviceGetDisplayMode,
+    /* 54 */ nullptr,  // handle_nvmlDeviceGetDriverModel_v2
+    /* 55 */ handle_nvmlDeviceGetDynamicPstatesInfo,
+    /* 56 */ handle_nvmlDeviceGetEccMode,
+    /* 57 */ handle_nvmlDeviceGetEncoderCapacity,
+    /* 58 */ handle_nvmlDeviceGetEncoderSessions,
+    /* 59 */ handle_nvmlDeviceGetEncoderStats,
+    /* 60 */ handle_nvmlDeviceGetEncoderUtilization,
+    /* 61 */ handle_nvmlDeviceGetEnforcedPowerLimit,
+    /* 62 */ handle_nvmlDeviceGetFBCSessions,
+    /* 63 */ handle_nvmlDeviceGetFBCStats,
+    /* 64 */ handle_nvmlDeviceGetFanControlPolicy_v2,
+    /* 65 */ handle_nvmlDeviceGetFanSpeed,
+    /* 66 */ handle_nvmlDeviceGetFanSpeed_v2,
+    /* 67 */ handle_nvmlDeviceGetGpcClkMinMaxVfOffset,
+    /* 68 */ handle_nvmlDeviceGetGpcClkVfOffset,
+    /* 69 */ handle_nvmlDeviceGetGpuFabricInfo,
+    /* 70 */ nullptr,  // handle_nvmlDeviceGetGpuFabricInfoV
+    /* 71 */ handle_nvmlDeviceGetGpuMaxPcieLinkGeneration,
+    /* 72 */ handle_nvmlDeviceGetGpuOperationMode,
+    /* 73 */ handle_nvmlDeviceGetGraphicsRunningProcesses_v3,
+    /* 74 */ handle_nvmlDeviceGetGspFirmwareMode,
+    /* 75 */ handle_nvmlDeviceGetGspFirmwareVersion,
+    /* 76 */ handle_nvmlDeviceGetHandleByIndex_v2,
+    /* 77 */ handle_nvmlDeviceGetHandleByPciBusId_v2,
+    /* 78 */ handle_nvmlDeviceGetHandleBySerial,
+    /* 79 */ handle_nvmlDeviceGetHandleByUUID,
+    /* 80 */ handle_nvmlDeviceGetIndex,
+    /* 81 */ handle_nvmlDeviceGetInforomConfigurationChecksum,
+    /* 82 */ handle_nvmlDeviceGetInforomImageVersion,
+    /* 83 */ handle_nvmlDeviceGetInforomVersion,
+    /* 84 */ handle_nvmlDeviceGetIrqNum,
+    /* 85 */ nullptr,  // handle_nvmlDeviceGetJpgUtilization
+    /* 86 */ nullptr,  // handle_nvmlDeviceGetLastBBXFlushTime
+    /* 87 */ handle_nvmlDeviceGetMPSComputeRunningProcesses_v3,
+    /* 88 */ handle_nvmlDeviceGetMaxClockInfo,
+    /* 89 */ handle_nvmlDeviceGetMaxCustomerBoostClock,
+    /* 90 */ handle_nvmlDeviceGetMaxPcieLinkGeneration,
+    /* 91 */ handle_nvmlDeviceGetMaxPcieLinkWidth,
+    /* 92 */ nullptr,  // handle_nvmlDeviceGetMemClkMinMaxVfOffset,
+    /* 93 */ nullptr,  // handle_nvmlDeviceGetMemClkVfOffset,
+    /* 94 */ nullptr,  // handle_nvmlDeviceGetMemoryBusWidth,
+    /* 95 */ nullptr,  // handle_nvmlDeviceGetMemoryErrorCounter,
+    /* 96 */ handle_nvmlDeviceGetMemoryInfo,
+    /* 97 */ handle_nvmlDeviceGetMemoryInfo_v2,
+    /* 98 */ handle_nvmlDeviceGetMinMaxClockOfPState,
+    /* 99 */ handle_nvmlDeviceGetMinMaxFanSpeed,
+    /* 100 */ handle_nvmlDeviceGetMinorNumber,
+    /* 101 */ nullptr,  // handle_nvmlDeviceGetModuleId,
+    /* 102 */ handle_nvmlDeviceGetMultiGpuBoard,
+    /* 103 */ handle_nvmlDeviceGetName,
+    /* 104 */ handle_nvmlDeviceGetNumFans,
+    /* 105 */ handle_nvmlDeviceGetNumGpuCores,
+    /* 106 */ nullptr,  // handle_nvmlDeviceGetOfaUtilization,
+    /* 107 */ handle_nvmlDeviceGetP2PStatus,
+    /* 108 */ nullptr,  // handle_nvmlDeviceGetPciInfoExt,
+    /* 109 */ handle_nvmlDeviceGetPciInfo_v3,
+    /* 110 */ handle_nvmlDeviceGetPcieLinkMaxSpeed,
+    /* 111 */ handle_nvmlDeviceGetPcieReplayCounter,
+    /* 112 */ handle_nvmlDeviceGetPcieSpeed,
+    /* 113 */ handle_nvmlDeviceGetPcieThroughput,
+    /* 114 */ handle_nvmlDeviceGetPerformanceState,
+    /* 115 */ handle_nvmlDeviceGetPersistenceMode,
+    /* 116 */ handle_nvmlDeviceGetPowerManagementDefaultLimit,
+    /* 117 */ handle_nvmlDeviceGetPowerManagementLimit,
+    /* 118 */ handle_nvmlDeviceGetPowerManagementLimitConstraints,
+    /* 119 */ handle_nvmlDeviceGetPowerManagementMode,
+    /* 120 */ handle_nvmlDeviceGetPowerSource,
+    /* 121 */ handle_nvmlDeviceGetPowerState,
+    /* 122 */ handle_nvmlDeviceGetPowerUsage,
+    /* 123 */ handle_nvmlDeviceGetProcessUtilization,
+    /* 124 */ nullptr,  // handle_nvmlDeviceGetProcessesUtilizationInfo,
+    /* 125 */ handle_nvmlDeviceGetRemappedRows,
+    /* 126 */ handle_nvmlDeviceGetRetiredPages,
+    /* 127 */ handle_nvmlDeviceGetRetiredPagesPendingStatus,
+    /* 128 */ handle_nvmlDeviceGetRetiredPages_v2,
+    /* 129 */ handle_nvmlDeviceGetRowRemapperHistogram,
+    /* 130 */ nullptr,  // handle_nvmlDeviceGetRunningProcessDetailList,
+    /* 131 */ handle_nvmlDeviceGetSamples,
+    /* 132 */ handle_nvmlDeviceGetSerial,
+    /* 133 */ nullptr,  // handle_nvmlDeviceGetSramEccErrorStatus,
+    /* 134 */ nullptr, // handle_nvmlDeviceGetSupportedClocksEventReasons
+    /* 135 */ handle_nvmlDeviceGetSupportedClocksThrottleReasons,
+    /* 136 */ handle_nvmlDeviceGetSupportedGraphicsClocks,
+    /* 137 */ handle_nvmlDeviceGetSupportedMemoryClocks,
+    /* 138 */ handle_nvmlDeviceGetSupportedPerformanceStates,
+    /* 139 */ handle_nvmlDeviceGetTargetFanSpeed,
+    /* 140 */ handle_nvmlDeviceGetTemperature,
+    /* 141 */ handle_nvmlDeviceGetTemperatureThreshold,
+    /* 142 */ handle_nvmlDeviceGetThermalSettings,
+    /* 143 */ handle_nvmlDeviceGetTopologyCommonAncestor,
+    /* 144 */ handle_nvmlDeviceGetTopologyNearestGpus,
+    /* 145 */ handle_nvmlDeviceGetTotalEccErrors,
+    /* 146 */ handle_nvmlDeviceGetTotalEnergyConsumption,
+    /* 147 */ handle_nvmlDeviceGetUUID,
+    /* 148 */ handle_nvmlDeviceGetUtilizationRates,
+    /* 149 */ handle_nvmlDeviceGetVbiosVersion,
+    /* 150 */ handle_nvmlDeviceGetViolationStatus,
+    /* 151 */ handle_nvmlDeviceOnSameBoard,
+    /* 152 */ nullptr,  // handle_nvmlDeviceSetClockOffsets,
+    /* 153 */ nullptr,  // handle_nvmlDeviceSetConfComputeUnprotectedMemSize,
+    /* 154 */ nullptr,  // handle_nvmlDeviceSetPowerManagementLimit_v2,
+    /* 155 */ handle_nvmlDeviceValidateInforom,
+    /* 156 */ nullptr,  // handle_nvmlSystemGetConfComputeCapabilities,
+    /* 157 */ nullptr,  // handle_nvmlSystemGetConfComputeGpusReadyState,
+    /* 158 */ nullptr,  // handle_nvmlSystemGetConfComputeKeyRotationThresholdInfo,
+    /* 159 */ nullptr,  // handle_nvmlSystemGetConfComputeSettings,
+    /* 160 */ nullptr,  // handle_nvmlSystemGetConfComputeState,
+    /* 161 */ nullptr,  // handle_nvmlSystemSetConfComputeGpusReadyState,
+    /* 162 */ handle_nvmlUnitSetLedState,
+    /* 163 */ nullptr,  // handle_nvmlDeviceClearEccErrorCounts,
+    /* 164 */ nullptr,  // handle_nvmlDeviceResetApplicationsClocks,
+    /* 165 */ nullptr,  // handle_nvmlDeviceResetGpuLockedClocks,
+    /* 166 */ nullptr,  // handle_nvmlDeviceResetMemoryLockedClocks,
+    /* 167 */ nullptr,  // handle_nvmlDeviceSetAPIRestriction,
+    /* 168 */ nullptr,  // handle_nvmlDeviceSetApplicationsClocks,
+    /* 169 */ nullptr,  // handle_nvmlDeviceSetAutoBoostedClocksEnabled,
+    /* 170 */ nullptr,  // handle_nvmlDeviceSetComputeMode,
+    /* 171 */ nullptr,  // handle_nvmlDeviceSetDefaultAutoBoostedClocksEnabled,
+    /* 172 */ nullptr,  // handle_nvmlDeviceSetDefaultFanSpeed_v2,
+    /* 173 */ nullptr,  // handle_nvmlDeviceSetDriverModel,
+    /* 174 */ nullptr,  // handle_nvmlDeviceSetEccMode,
+    /* 175 */ nullptr,  // handle_nvmlDeviceSetFanControlPolicy,
+    /* 176 */ nullptr,  // handle_nvmlDeviceSetFanSpeed_v2,
+    /* 177 */ nullptr,  // handle_nvmlDeviceSetGpcClkVfOffset,
+    /* 178 */ nullptr,  // handle_nvmlDeviceSetGpuLockedClocks,
+    /* 179 */ nullptr,  // handle_nvmlDeviceSetGpuOperationMode,
+    /* 180 */ nullptr,  // handle_nvmlDeviceSetMemClkVfOffset,
+    /* 181 */ nullptr,  // handle_nvmlDeviceSetMemoryLockedClocks,
+    /* 182 */ nullptr,  // handle_nvmlDeviceSetPersistenceMode,
+    /* 183 */ nullptr,  // handle_nvmlDeviceSetPowerManagementLimit,
+    /* 184 */ nullptr,  // handle_nvmlDeviceSetTemperatureThreshold,
+    /* 185 */ nullptr,  // handle_nvmlDeviceFreezeNvLinkUtilizationCounter,
+    /* 186 */ nullptr,  // handle_nvmlDeviceGetNvLinkCapability,
+    /* 187 */ nullptr,  // handle_nvmlDeviceGetNvLinkErrorCounter,
+    /* 188 */ nullptr,  // handle_nvmlDeviceGetNvLinkRemoteDeviceType,
+    /* 189 */ nullptr,  // handle_nvmlDeviceGetNvLinkRemotePciInfo_v2,
+    /* 190 */ nullptr,  // handle_nvmlDeviceGetNvLinkState,
+    /* 191 */ nullptr,  // handle_nvmlDeviceGetNvLinkUtilizationControl,
+    /* 192 */ nullptr,  // handle_nvmlDeviceGetNvLinkUtilizationCounter,
+    /* 193 */ nullptr,  // handle_nvmlDeviceGetNvLinkVersion,
+    /* 194 */ nullptr,  // handle_nvmlDeviceResetNvLinkErrorCounters,
+    /* 195 */ nullptr,  // handle_nvmlDeviceResetNvLinkUtilizationCounter,
+    /* 196 */ nullptr,  // handle_nvmlDeviceSetNvLinkDeviceLowPowerThreshold,
+    /* 197 */ nullptr,  // handle_nvmlDeviceSetNvLinkUtilizationControl,
+    /* 198 */ nullptr,  // handle_nvmlSystemGetNvlinkBwMode,
+    /* 199 */ nullptr,  // handle_nvmlSystemSetNvlinkBwMode,
+    handle_nvmlDeviceGetSupportedEventTypes,       // RPC_nvmlDeviceGetSupportedEventTypes (200)
+    handle_nvmlDeviceRegisterEvents,               // RPC_nvmlDeviceRegisterEvents (201)
+    handle_nvmlEventSetCreate,                     // RPC_nvmlEventSetCreate (202)
+    handle_nvmlEventSetFree,                       // RPC_nvmlEventSetFree (203)
+    handle_nvmlEventSetWait_v2,
 };
 
-int request_handler(int connfd)
-{
+int request_handler(int connfd) {
     unsigned int op;
-    if (read(connfd, &op, sizeof(unsigned int)) < 0)
-        return -1;
 
-    auto it = opHandlers.find(op);
-    if (it != opHandlers.end()) {
-        std::cout << "found operation!!!" << op << std::endl;
-        return it->second(connfd);
-    } else {
-        std::cerr << "Unknown operation: " << op << std::endl;
+    // Attempt to read the operation code from the client
+    if (read(connfd, &op, sizeof(unsigned int)) < 0) {
+        std::cerr << "Error reading opcode from client" << std::endl;
         return -1;
     }
+
+    if (opHandlers[op] == NULL) {
+        std::cerr << "Unknown or unsupported operation: " << op << std::endl;
+        return -1;
+    }
+
+    return opHandlers[op](connfd);
 }
 
 void client_handler(int connfd)
@@ -1846,7 +1906,7 @@ void client_handler(int connfd)
         // run our request handler in a separate thread
         std::future<int> request_future = std::async(std::launch::async, [connfd]()
                                                      {
-            // << "request handled by thread: " << std::this_thread::get_id() << std::endl;
+            std::cout << "request handled by thread: " << std::this_thread::get_id() << std::endl;
 
             return request_handler(connfd); });
 

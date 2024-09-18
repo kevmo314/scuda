@@ -916,8 +916,6 @@ void initializeFunctionMap()
     // simple cache check to make sure we only init handlers on the first run
     if (functionMap.find("nvmlInit_v2") == functionMap.end())
     {
-        // << "initializing handlers" << std::endl;
-
         // attach all handlers to our function map
         functionMap["nvmlInitWithFlags"] = (void *)nvmlInitWithFlags;
         functionMap["nvmlInit_v2"] = (void *)nvmlInit_v2;
@@ -1001,7 +999,6 @@ void *getFunctionByName(const char *name)
     auto it = functionMap.find(name);
     if (it != functionMap.end())
         return it->second;
-    // << "handler not found: " << name << std::endl;
     return nullptr;
 }
 
@@ -1010,7 +1007,7 @@ void *dlsym(void *handle, const char *name) __THROW
     initializeFunctionMap();
 
     void *func = getFunctionByName(name);
-
+    
     if (func != nullptr)
         return func;
 
