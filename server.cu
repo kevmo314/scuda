@@ -102,6 +102,531 @@ int request_handler(int connfd)
             return -1;
         return result;
     }
+    // 4.16 Device Queries
+    case RPC_nvmlDeviceGetAPIRestriction:
+    {
+        nvmlDevice_t device;
+        nvmlRestrictedAPI_t apiType;
+        nvmlEnableState_t isRestricted;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0 ||
+            read(connfd, &apiType, sizeof(nvmlRestrictedAPI_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetAPIRestriction(device, apiType, &isRestricted);
+        if (write(connfd, &isRestricted, sizeof(nvmlEnableState_t)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetAdaptiveClockInfoStatus:
+    {
+        nvmlDevice_t device;
+        unsigned int adaptiveClockStatus;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetAdaptiveClockInfoStatus(device, &adaptiveClockStatus);
+        if (write(connfd, &adaptiveClockStatus, sizeof(unsigned int)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetApplicationsClock:
+    {
+        nvmlDevice_t device;
+        nvmlClockType_t clockType;
+        unsigned int clockMHz;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0 ||
+            read(connfd, &clockType, sizeof(nvmlClockType_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetApplicationsClock(device, clockType, &clockMHz);
+        if (write(connfd, &clockMHz, sizeof(unsigned int)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetArchitecture:
+    {
+        nvmlDevice_t device;
+        nvmlDeviceArchitecture_t arch;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetArchitecture(device, &arch);
+        if (write(connfd, &arch, sizeof(nvmlDeviceArchitecture_t)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetAttributes_v2:
+    {
+        nvmlDevice_t device;
+        nvmlDeviceAttributes_t attributes;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetAttributes_v2(device, &attributes);
+        if (write(connfd, &attributes, sizeof(nvmlDeviceAttributes_t)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetAutoBoostedClocksEnabled:
+    {
+        nvmlDevice_t device;
+        nvmlEnableState_t isEnabled, defaultIsEnabled;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetAutoBoostedClocksEnabled(device, &isEnabled, &defaultIsEnabled);
+        if (write(connfd, &isEnabled, sizeof(nvmlEnableState_t)) < 0 ||
+            write(connfd, &defaultIsEnabled, sizeof(nvmlEnableState_t)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetBAR1MemoryInfo:
+    {
+        nvmlDevice_t device;
+        nvmlBAR1Memory_t bar1Memory;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetBAR1MemoryInfo(device, &bar1Memory);
+        if (write(connfd, &bar1Memory, sizeof(nvmlBAR1Memory_t)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetBoardId:
+    {
+        nvmlDevice_t device;
+        unsigned int boardId;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetBoardId(device, &boardId);
+        if (write(connfd, &boardId, sizeof(unsigned int)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetBoardPartNumber:
+    {
+        nvmlDevice_t device;
+        unsigned int length;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0 ||
+            read(connfd, &length, sizeof(unsigned int)) < 0)
+            return -1;
+        char partNumber[length];
+        nvmlReturn_t result = nvmlDeviceGetBoardPartNumber(device, partNumber, length);
+        if (write(connfd, partNumber, length) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetBrand:
+    {
+        nvmlDevice_t device;
+        nvmlBrandType_t type;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetBrand(device, &type);
+        if (write(connfd, &type, sizeof(nvmlBrandType_t)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetBridgeChipInfo:
+    {
+        nvmlDevice_t device;
+        nvmlBridgeChipHierarchy_t bridgeHierarchy;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetBridgeChipInfo(device, &bridgeHierarchy);
+        if (write(connfd, &bridgeHierarchy, sizeof(nvmlBridgeChipHierarchy_t)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetBusType:
+    {
+        nvmlDevice_t device;
+        nvmlBusType_t type;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetBusType(device, &type);
+        if (write(connfd, &type, sizeof(nvmlBusType_t)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetC2cModeInfoV:
+    {
+        nvmlDevice_t device;
+        nvmlC2cModeInfo_v1_t c2cModeInfo;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetC2cModeInfoV(device, &c2cModeInfo);
+        if (write(connfd, &c2cModeInfo, sizeof(nvmlC2cModeInfo_v1_t)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetClkMonStatus:
+    {
+        nvmlDevice_t device;
+        nvmlClkMonStatus_t status;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetClkMonStatus(device, &status);
+        if (write(connfd, &status, sizeof(nvmlClkMonStatus_t)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetClock:
+    {
+        nvmlDevice_t device;
+        nvmlClockType_t clockType;
+        nvmlClockId_t clockId;
+        unsigned int clockMHz;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0 ||
+            read(connfd, &clockType, sizeof(nvmlClockType_t)) < 0 ||
+            read(connfd, &clockId, sizeof(nvmlClockId_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetClock(device, clockType, clockId, &clockMHz);
+        if (write(connfd, &clockMHz, sizeof(unsigned int)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetClockInfo:
+    {
+        nvmlDevice_t device;
+        nvmlClockType_t type;
+        unsigned int clock;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0 ||
+            read(connfd, &type, sizeof(nvmlClockType_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetClockInfo(device, type, &clock);
+        if (write(connfd, &clock, sizeof(unsigned int)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetClockOffsets:
+    {
+        nvmlDevice_t device;
+        nvmlClockOffset_t info;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetClockOffsets(device, &info);
+        if (write(connfd, &info, sizeof(nvmlClockOffset_t)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetComputeMode:
+    {
+        nvmlDevice_t device;
+        nvmlComputeMode_t mode;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetComputeMode(device, &mode);
+        if (write(connfd, &mode, sizeof(nvmlComputeMode_t)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetComputeRunningProcesses_v3:
+    {
+        nvmlDevice_t device;
+        unsigned int infoCount;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0 ||
+            read(connfd, &infoCount, sizeof(unsigned int)) < 0)
+            return -1;
+        nvmlProcessInfo_t *infos = (nvmlProcessInfo_t *)malloc(infoCount * sizeof(nvmlProcessInfo_t));
+        nvmlReturn_t result = nvmlDeviceGetComputeRunningProcesses_v3(device, &infoCount, infos);
+        if (write(connfd, &infoCount, sizeof(unsigned int)) < 0 ||
+            write(connfd, infos, infoCount * sizeof(nvmlProcessInfo_t)) < 0)
+            return -1;
+        free(infos);
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetConfComputeGpuAttestationReport:
+    {
+        nvmlDevice_t device;
+        nvmlConfComputeGpuAttestationReport_t gpuAtstReport;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetConfComputeGpuAttestationReport(device, &gpuAtstReport);
+        if (write(connfd, &gpuAtstReport, sizeof(nvmlConfComputeGpuAttestationReport_t)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetConfComputeGpuCertificate:
+    {
+        nvmlDevice_t device;
+        nvmlConfComputeGpuCertificate_t gpuCert;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetConfComputeGpuCertificate(device, &gpuCert);
+        if (write(connfd, &gpuCert, sizeof(nvmlConfComputeGpuCertificate_t)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetConfComputeMemSizeInfo:
+    {
+        nvmlDevice_t device;
+        nvmlConfComputeMemSizeInfo_t memInfo;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetConfComputeMemSizeInfo(device, &memInfo);
+        if (write(connfd, &memInfo, sizeof(nvmlConfComputeMemSizeInfo_t)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetConfComputeProtectedMemoryUsage:
+    {
+        nvmlDevice_t device;
+        nvmlMemory_t memory;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetConfComputeProtectedMemoryUsage(device, &memory);
+        if (write(connfd, &memory, sizeof(nvmlMemory_t)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetCount_v2:
+    {
+        unsigned int deviceCount;
+        nvmlReturn_t result = nvmlDeviceGetCount_v2(&deviceCount);
+        if (write(connfd, &deviceCount, sizeof(unsigned int)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetCudaComputeCapability:
+    {
+        nvmlDevice_t device;
+        int major, minor;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetCudaComputeCapability(device, &major, &minor);
+        if (write(connfd, &major, sizeof(int)) < 0 ||
+            write(connfd, &minor, sizeof(int)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetCurrPcieLinkGeneration:
+    {
+        nvmlDevice_t device;
+        unsigned int currLinkGen;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetCurrPcieLinkGeneration(device, &currLinkGen);
+        if (write(connfd, &currLinkGen, sizeof(unsigned int)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetCurrPcieLinkWidth:
+    {
+        nvmlDevice_t device;
+        unsigned int currLinkWidth;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetCurrPcieLinkWidth(device, &currLinkWidth);
+        if (write(connfd, &currLinkWidth, sizeof(unsigned int)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetCurrentClocksEventReasons:
+    {
+        nvmlDevice_t device;
+        unsigned long long clocksEventReasons;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetCurrentClocksEventReasons(device, &clocksEventReasons);
+        if (write(connfd, &clocksEventReasons, sizeof(unsigned long long)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetCurrentClocksThrottleReasons:
+    {
+        nvmlDevice_t device;
+        unsigned long long clocksThrottleReasons;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetCurrentClocksThrottleReasons(device, &clocksThrottleReasons);
+        if (write(connfd, &clocksThrottleReasons, sizeof(unsigned long long)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetDecoderUtilization:
+    {
+        nvmlDevice_t device;
+        unsigned int utilization, samplingPeriodUs;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetDecoderUtilization(device, &utilization, &samplingPeriodUs);
+        if (write(connfd, &utilization, sizeof(unsigned int)) < 0 ||
+            write(connfd, &samplingPeriodUs, sizeof(unsigned int)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetDefaultApplicationsClock:
+    {
+        nvmlDevice_t device;
+        nvmlClockType_t clockType;
+        unsigned int clockMHz;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0 ||
+            read(connfd, &clockType, sizeof(nvmlClockType_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetDefaultApplicationsClock(device, clockType, &clockMHz);
+        if (write(connfd, &clockMHz, sizeof(unsigned int)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetDefaultEccMode:
+    {
+        nvmlDevice_t device;
+        nvmlEnableState_t defaultMode;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetDefaultEccMode(device, &defaultMode);
+        if (write(connfd, &defaultMode, sizeof(nvmlEnableState_t)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetDetailedEccErrors:
+    {
+        nvmlDevice_t device;
+        nvmlMemoryErrorType_t errorType;
+        nvmlEccCounterType_t counterType;
+        nvmlEccErrorCounts_t eccCounts;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0 ||
+            read(connfd, &errorType, sizeof(nvmlMemoryErrorType_t)) < 0 ||
+            read(connfd, &counterType, sizeof(nvmlEccCounterType_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetDetailedEccErrors(device, errorType, counterType, &eccCounts);
+        if (write(connfd, &eccCounts, sizeof(nvmlEccErrorCounts_t)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetDisplayActive:
+    {
+        nvmlDevice_t device;
+        nvmlEnableState_t isActive;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetDisplayActive(device, &isActive);
+        if (write(connfd, &isActive, sizeof(nvmlEnableState_t)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetDisplayMode:
+    {
+        nvmlDevice_t device;
+        nvmlEnableState_t display;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetDisplayMode(device, &display);
+        if (write(connfd, &display, sizeof(nvmlEnableState_t)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetDriverModel_v2:
+    {
+        nvmlDevice_t device;
+        nvmlDriverModel_t current, pending;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetDriverModel_v2(device, &current, &pending);
+        if (write(connfd, &current, sizeof(nvmlDriverModel_t)) < 0 ||
+            write(connfd, &pending, sizeof(nvmlDriverModel_t)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetDynamicPstatesInfo:
+    {
+        nvmlDevice_t device;
+        nvmlGpuDynamicPstatesInfo_t pDynamicPstatesInfo;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetDynamicPstatesInfo(device, &pDynamicPstatesInfo);
+        if (write(connfd, &pDynamicPstatesInfo, sizeof(nvmlGpuDynamicPstatesInfo_t)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetEccMode:
+    {
+        nvmlDevice_t device;
+        nvmlEnableState_t current, pending;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetEccMode(device, &current, &pending);
+        if (write(connfd, &current, sizeof(nvmlEnableState_t)) < 0 ||
+            write(connfd, &pending, sizeof(nvmlEnableState_t)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetEncoderCapacity:
+    {
+        nvmlDevice_t device;
+        nvmlEncoderType_t encoderQueryType;
+        unsigned int encoderCapacity;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0 ||
+            read(connfd, &encoderQueryType, sizeof(nvmlEncoderType_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetEncoderCapacity(device, encoderQueryType, &encoderCapacity);
+        if (write(connfd, &encoderCapacity, sizeof(unsigned int)) < 0)
+            return -1;
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetEncoderSessions:
+    {
+        nvmlDevice_t device;
+        unsigned int sessionCount;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0 ||
+            read(connfd, &sessionCount, sizeof(unsigned int)) < 0)
+            return -1;
+        nvmlEncoderSessionInfo_t *sessionInfos = (nvmlEncoderSessionInfo_t *)malloc(sessionCount * sizeof(nvmlEncoderSessionInfo_t));
+        nvmlReturn_t result = nvmlDeviceGetEncoderSessions(device, &sessionCount, sessionInfos);
+        if (write(connfd, &sessionCount, sizeof(unsigned int)) < 0 ||
+            write(connfd, sessionInfos, sessionCount * sizeof(nvmlEncoderSessionInfo_t)) < 0)
+            return -1;
+        free(sessionInfos);
+        return result;
+    }
+
+    case RPC_nvmlDeviceGetEncoderStats:
+    {
+        nvmlDevice_t device;
+        unsigned int sessionCount, averageFps, averageLatency;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceGetEncoderStats(device, &sessionCount, &averageFps, &averageLatency);
+        if (write(connfd, &sessionCount, sizeof(unsigned int)) < 0 ||
+            write(connfd, &averageFps, sizeof(unsigned int)) < 0 ||
+            write(connfd, &averageLatency, sizeof(unsigned int)) < 0)
+            return -1;
+        return result;
+    }
+
     case RPC_nvmlDeviceGetName:
     {
         nvmlDevice_t device;
@@ -115,14 +640,6 @@ int request_handler(int connfd)
         printf("received device name response: %s\n", name);
 
         if (write(connfd, name, length) < 0)
-            return -1;
-        return result;
-    }
-    case RPC_nvmlDeviceGetCount_v2:
-    {
-        unsigned int deviceCount = 0;
-        nvmlReturn_t result = nvmlDeviceGetCount_v2(&deviceCount);
-        if (write(connfd, &deviceCount, sizeof(unsigned int)) < 0)
             return -1;
         return result;
     }
