@@ -344,6 +344,74 @@ nvmlReturn_t nvmlUnitGetUnitInfo(nvmlUnit_t unit, nvmlUnitInfo_t *info)
     return rpc_get_return(request_id);
 }
 
+// 4.17 Unit Commands
+nvmlReturn_t nvmlUnitSetLedState(nvmlUnit_t unit, nvmlLedColor_t color)
+{
+    int request_id = rpc_start_request(RPC_nvmlUnitSetLedState);
+    if (request_id < 0 ||
+        rpc_write(&unit, sizeof(nvmlUnit_t)) < 0 ||
+        rpc_write(&color, sizeof(nvmlLedColor_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0)
+        return NVML_ERROR_GPU_IS_LOST;
+    return rpc_get_return(request_id);
+}
+
+// 4.20 Event Handling Methods
+nvmlReturn_t nvmlDeviceGetSupportedEventTypes(nvmlDevice_t device, unsigned long long *eventTypes)
+{
+    int request_id = rpc_start_request(RPC_nvmlDeviceGetSupportedEventTypes);
+    if (request_id < 0 ||
+        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(eventTypes, sizeof(unsigned long long)) < 0)
+        return NVML_ERROR_GPU_IS_LOST;
+    return rpc_get_return(request_id);
+}
+
+nvmlReturn_t nvmlDeviceRegisterEvents(nvmlDevice_t device, unsigned long long eventTypes, nvmlEventSet_t set)
+{
+    int request_id = rpc_start_request(RPC_nvmlDeviceRegisterEvents);
+    if (request_id < 0 ||
+        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_write(&eventTypes, sizeof(unsigned long long)) < 0 ||
+        rpc_write(&set, sizeof(nvmlEventSet_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0)
+        return NVML_ERROR_GPU_IS_LOST;
+    return rpc_get_return(request_id);
+}
+
+nvmlReturn_t nvmlEventSetCreate(nvmlEventSet_t *set)
+{
+    int request_id = rpc_start_request(RPC_nvmlEventSetCreate);
+    if (request_id < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(set, sizeof(nvmlEventSet_t)) < 0)
+        return NVML_ERROR_GPU_IS_LOST;
+    return rpc_get_return(request_id);
+}
+
+nvmlReturn_t nvmlEventSetFree(nvmlEventSet_t set)
+{
+    int request_id = rpc_start_request(RPC_nvmlEventSetFree);
+    if (request_id < 0 ||
+        rpc_write(&set, sizeof(nvmlEventSet_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0)
+        return NVML_ERROR_GPU_IS_LOST;
+    return rpc_get_return(request_id);
+}
+
+nvmlReturn_t nvmlEventSetWait_v2(nvmlEventSet_t set, nvmlEventData_t *data, unsigned int timeoutms)
+{
+    int request_id = rpc_start_request(RPC_nvmlEventSetWait_v2);
+    if (request_id < 0 ||
+        rpc_write(&set, sizeof(nvmlEventSet_t)) < 0 ||
+        rpc_write(&timeoutms, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(data, sizeof(nvmlEventData_t)) < 0)
+        return NVML_ERROR_GPU_IS_LOST;
+    return rpc_get_return(request_id);
+}
+
 nvmlReturn_t nvmlDeviceGetCount_v2(unsigned int *deviceCount)
 {
     int request_id = rpc_start_request(RPC_nvmlDeviceGetCount_v2);

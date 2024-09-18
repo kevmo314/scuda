@@ -173,4 +173,55 @@
 #define RPC_nvmlSystemGetConfComputeState 160
 #define RPC_nvmlSystemSetConfComputeGpusReadyState 161
 
+// 4.17 Unit Commands
+#define RPC_nvmlUnitSetLedState 162
+
+// 4.18 Device Commands
+#define RPC_nvmlDeviceClearEccErrorCounts 163
+#define RPC_nvmlDeviceResetApplicationsClocks 164
+#define RPC_nvmlDeviceResetGpuLockedClocks 165
+#define RPC_nvmlDeviceResetMemoryLockedClocks 166
+#define RPC_nvmlDeviceSetAPIRestriction 167
+#define RPC_nvmlDeviceSetApplicationsClocks 168
+#define RPC_nvmlDeviceSetAutoBoostedClocksEnabled 169
+#define RPC_nvmlDeviceSetComputeMode 170
+#define RPC_nvmlDeviceSetDefaultAutoBoostedClocksEnabled 171
+#define RPC_nvmlDeviceSetDefaultFanSpeed_v2 172
+#define RPC_nvmlDeviceSetDriverModel 173
+#define RPC_nvmlDeviceSetEccMode 174
+#define RPC_nvmlDeviceSetFanControlPolicy 175
+#define RPC_nvmlDeviceSetFanSpeed_v2 176
+#define RPC_nvmlDeviceSetGpcClkVfOffset 177
+#define RPC_nvmlDeviceSetGpuLockedClocks 178
+#define RPC_nvmlDeviceSetGpuOperationMode 179
+#define RPC_nvmlDeviceSetMemClkVfOffset 180
+#define RPC_nvmlDeviceSetMemoryLockedClocks 181
+#define RPC_nvmlDeviceSetPersistenceMode 182
+#define RPC_nvmlDeviceSetPowerManagementLimit 183
+#define RPC_nvmlDeviceSetTemperatureThreshold 184
+
+// 4.19 NvLink Methods
+#define RPC_nvmlDeviceFreezeNvLinkUtilizationCounter 185
+#define RPC_nvmlDeviceGetNvLinkCapability 186
+#define RPC_nvmlDeviceGetNvLinkErrorCounter 187
+#define RPC_nvmlDeviceGetNvLinkRemoteDeviceType 188
+#define RPC_nvmlDeviceGetNvLinkRemotePciInfo_v2 189
+#define RPC_nvmlDeviceGetNvLinkState 190
+#define RPC_nvmlDeviceGetNvLinkUtilizationControl 191
+#define RPC_nvmlDeviceGetNvLinkUtilizationCounter 192
+#define RPC_nvmlDeviceGetNvLinkVersion 193
+#define RPC_nvmlDeviceResetNvLinkErrorCounters 194
+#define RPC_nvmlDeviceResetNvLinkUtilizationCounter 195
+#define RPC_nvmlDeviceSetNvLinkDeviceLowPowerThreshold 196
+#define RPC_nvmlDeviceSetNvLinkUtilizationControl 197
+#define RPC_nvmlSystemGetNvlinkBwMode 198
+#define RPC_nvmlSystemSetNvlinkBwMode 199
+
+// 4.20 Event Handling Methods
+#define RPC_nvmlDeviceGetSupportedEventTypes 200
+#define RPC_nvmlDeviceRegisterEvents 201
+#define RPC_nvmlEventSetCreate 202
+#define RPC_nvmlEventSetFree 203
+#define RPC_nvmlEventSetWait_v2 204
+
 #endif

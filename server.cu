@@ -362,18 +362,6 @@ int request_handler(int connfd)
         return result;
     }
 
-    case RPC_nvmlDeviceGetC2cModeInfoV:
-    {
-        nvmlDevice_t device;
-        nvmlC2cModeInfo_v1_t c2cModeInfo;
-        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
-            return -1;
-        nvmlReturn_t result = nvmlDeviceGetC2cModeInfoV(device, &c2cModeInfo);
-        if (write(connfd, &c2cModeInfo, sizeof(nvmlC2cModeInfo_v1_t)) < 0)
-            return -1;
-        return result;
-    }
-
     case RPC_nvmlDeviceGetClkMonStatus:
     {
         nvmlDevice_t device;
@@ -417,18 +405,6 @@ int request_handler(int connfd)
         return result;
     }
 
-    case RPC_nvmlDeviceGetClockOffsets:
-    {
-        nvmlDevice_t device;
-        nvmlClockOffset_t info;
-        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
-            return -1;
-        nvmlReturn_t result = nvmlDeviceGetClockOffsets(device, &info);
-        if (write(connfd, &info, sizeof(nvmlClockOffset_t)) < 0)
-            return -1;
-        return result;
-    }
-
     case RPC_nvmlDeviceGetComputeMode:
     {
         nvmlDevice_t device;
@@ -456,58 +432,6 @@ int request_handler(int connfd)
             write(connfd, infos, infoCount * sizeof(nvmlProcessInfo_t)) < 0)
             return -1;
         free(infos);
-        return result;
-    }
-
-    case RPC_nvmlDeviceGetConfComputeGpuAttestationReport:
-    {
-        nvmlDevice_t device;
-        nvmlConfComputeGpuAttestationReport_t gpuAtstReport;
-        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
-            return -1;
-        nvmlReturn_t result =
-            nvmlDeviceGetConfComputeGpuAttestationReport(device, &gpuAtstReport);
-        if (write(connfd, &gpuAtstReport,
-                  sizeof(nvmlConfComputeGpuAttestationReport_t)) < 0)
-            return -1;
-        return result;
-    }
-
-    case RPC_nvmlDeviceGetConfComputeGpuCertificate:
-    {
-        nvmlDevice_t device;
-        nvmlConfComputeGpuCertificate_t gpuCert;
-        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
-            return -1;
-        nvmlReturn_t result =
-            nvmlDeviceGetConfComputeGpuCertificate(device, &gpuCert);
-        if (write(connfd, &gpuCert, sizeof(nvmlConfComputeGpuCertificate_t)) < 0)
-            return -1;
-        return result;
-    }
-
-    case RPC_nvmlDeviceGetConfComputeMemSizeInfo:
-    {
-        nvmlDevice_t device;
-        nvmlConfComputeMemSizeInfo_t memInfo;
-        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
-            return -1;
-        nvmlReturn_t result = nvmlDeviceGetConfComputeMemSizeInfo(device, &memInfo);
-        if (write(connfd, &memInfo, sizeof(nvmlConfComputeMemSizeInfo_t)) < 0)
-            return -1;
-        return result;
-    }
-
-    case RPC_nvmlDeviceGetConfComputeProtectedMemoryUsage:
-    {
-        nvmlDevice_t device;
-        nvmlMemory_t memory;
-        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
-            return -1;
-        nvmlReturn_t result =
-            nvmlDeviceGetConfComputeProtectedMemoryUsage(device, &memory);
-        if (write(connfd, &memory, sizeof(nvmlMemory_t)) < 0)
-            return -1;
         return result;
     }
 
@@ -556,19 +480,6 @@ int request_handler(int connfd)
         nvmlReturn_t result =
             nvmlDeviceGetCurrPcieLinkWidth(device, &currLinkWidth);
         if (write(connfd, &currLinkWidth, sizeof(unsigned int)) < 0)
-            return -1;
-        return result;
-    }
-
-    case RPC_nvmlDeviceGetCurrentClocksEventReasons:
-    {
-        nvmlDevice_t device;
-        unsigned long long clocksEventReasons;
-        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
-            return -1;
-        nvmlReturn_t result =
-            nvmlDeviceGetCurrentClocksEventReasons(device, &clocksEventReasons);
-        if (write(connfd, &clocksEventReasons, sizeof(unsigned long long)) < 0)
             return -1;
         return result;
     }
@@ -664,20 +575,6 @@ int request_handler(int connfd)
             return -1;
         nvmlReturn_t result = nvmlDeviceGetDisplayMode(device, &display);
         if (write(connfd, &display, sizeof(nvmlEnableState_t)) < 0)
-            return -1;
-        return result;
-    }
-
-    case RPC_nvmlDeviceGetDriverModel_v2:
-    {
-        nvmlDevice_t device;
-        nvmlDriverModel_t current, pending;
-        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
-            return -1;
-        nvmlReturn_t result =
-            nvmlDeviceGetDriverModel_v2(device, &current, &pending);
-        if (write(connfd, &current, sizeof(nvmlDriverModel_t)) < 0 ||
-            write(connfd, &pending, sizeof(nvmlDriverModel_t)) < 0)
             return -1;
         return result;
     }
@@ -893,18 +790,6 @@ int request_handler(int connfd)
         return result;
     }
 
-    case RPC_nvmlDeviceGetGpuFabricInfoV:
-    {
-        nvmlDevice_t device;
-        nvmlGpuFabricInfoV_t gpuFabricInfo;
-        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
-            return -1;
-        nvmlReturn_t result = nvmlDeviceGetGpuFabricInfoV(device, &gpuFabricInfo);
-        if (write(connfd, &gpuFabricInfo, sizeof(nvmlGpuFabricInfoV_t)) < 0)
-            return -1;
-        return result;
-    }
-
     case RPC_nvmlDeviceGetGpuMaxPcieLinkGeneration:
     {
         nvmlDevice_t device;
@@ -1104,16 +989,65 @@ int request_handler(int connfd)
         return result;
     }
 
-    case RPC_nvmlDeviceGetJpgUtilization:
+    // 4.17 Unit Commands
+    case RPC_nvmlUnitSetLedState:
+    {
+        nvmlUnit_t unit;
+        nvmlLedColor_t color;
+        if (read(connfd, &unit, sizeof(nvmlUnit_t)) < 0 ||
+            read(connfd, &color, sizeof(nvmlLedColor_t)) < 0)
+            return -1;
+        return nvmlUnitSetLedState(unit, color);
+    }
+    // 4.20 Event Handling Methods
+    case RPC_nvmlDeviceGetSupportedEventTypes:
     {
         nvmlDevice_t device;
-        unsigned int utilization, samplingPeriodUs;
         if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
             return -1;
-        nvmlReturn_t result =
-            nvmlDeviceGetJpgUtilization(device, &utilization, &samplingPeriodUs);
-        if (write(connfd, &utilization, sizeof(unsigned int)) < 0 ||
-            write(connfd, &samplingPeriodUs, sizeof(unsigned int)) < 0)
+        unsigned long long eventTypes;
+        nvmlReturn_t result = nvmlDeviceGetSupportedEventTypes(device, &eventTypes);
+        if (write(connfd, &eventTypes, sizeof(unsigned long long)) < 0)
+            return -1;
+        return result;
+    }
+    case RPC_nvmlDeviceRegisterEvents:
+    {
+        nvmlDevice_t device;
+        unsigned long long eventTypes;
+        nvmlEventSet_t set;
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0 ||
+            read(connfd, &eventTypes, sizeof(unsigned long long)) < 0 ||
+            read(connfd, &set, sizeof(nvmlEventSet_t)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlDeviceRegisterEvents(device, eventTypes, set);
+        return result;
+    }
+    case RPC_nvmlEventSetCreate:
+    {
+        nvmlEventSet_t set;
+        nvmlReturn_t result = nvmlEventSetCreate(&set);
+        if (write(connfd, &set, sizeof(nvmlEventSet_t)) < 0)
+            return -1;
+        return result;
+    }
+    case RPC_nvmlEventSetFree:
+    {
+        nvmlEventSet_t set;
+        if (read(connfd, &set, sizeof(nvmlEventSet_t)) < 0)
+            return -1;
+        return nvmlEventSetFree(set);
+    }
+    case RPC_nvmlEventSetWait_v2:
+    {
+        nvmlEventSet_t set;
+        nvmlEventData_t data;
+        unsigned int timeoutms;
+        if (read(connfd, &set, sizeof(nvmlEventSet_t)) < 0 ||
+            read(connfd, &timeoutms, sizeof(unsigned int)) < 0)
+            return -1;
+        nvmlReturn_t result = nvmlEventSetWait_v2(set, &data, timeoutms);
+        if (write(connfd, &data, sizeof(unsigned long long)) < 0)
             return -1;
         return result;
     }
