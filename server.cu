@@ -6,7 +6,7 @@
 #include <cstring>
 #include <arpa/inet.h>
 #include <unistd.h>
-#include <memory> 
+#include <memory>
 #include <iostream>
 #include <unordered_map>
 #include <functional>
@@ -144,7 +144,8 @@ int request_handler(int connfd)
 
         // Read the device handle from the client
         std::cout << "Reading device handle from client" << std::endl;
-        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0) {
+        if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+        {
             std::cerr << "Failed to read device handle" << std::endl;
             return -1;
         }
@@ -154,14 +155,16 @@ int request_handler(int connfd)
         // Get memory info for the provided device
         std::cout << "Calling nvmlDeviceGetMemoryInfo_v2" << std::endl;
         nvmlReturn_t res = nvmlDeviceGetMemoryInfo_v2(device, &memoryInfo);
-        if (res != NVML_SUCCESS) {
+        if (res != NVML_SUCCESS)
+        {
             std::cerr << "Failed to get memory info: " << nvmlErrorString(res) << std::endl;
             return -1;
         }
 
         // Send the memory info back to the client
         std::cout << "Sending memory info to client" << std::endl;
-        if (write(connfd, &memoryInfo, sizeof(nvmlMemory_v2_t)) < 0) {
+        if (write(connfd, &memoryInfo, sizeof(nvmlMemory_v2_t)) < 0)
+        {
             std::cerr << "Failed to send memory info to client" << std::endl;
             return -1;
         }
@@ -175,9 +178,10 @@ int request_handler(int connfd)
     return -1;
 }
 
-void client_handler(int connfd) {
+void client_handler(int connfd)
+{
     std::cout << "handling client in thread: " << std::this_thread::get_id() << std::endl;
-    
+
     int request_id;
 
     while (1)
@@ -194,13 +198,15 @@ void client_handler(int connfd) {
             break;
         }
 
-        if (write(connfd, &request_id, sizeof(int)) < 0) {
+        if (write(connfd, &request_id, sizeof(int)) < 0)
+        {
             printf("error writing to client.\n");
             break;
         }
 
         int res = request_handler(connfd);
-        if (write(connfd, &res, sizeof(int)) < 0) {
+        if (write(connfd, &res, sizeof(int)) < 0)
+        {
             printf("error writing result to client.\n");
             break;
         }
@@ -226,7 +232,9 @@ int main()
     {
         std::cout << "SCUDA_PORT not defined, defaulting to: " << "14833" << std::endl;
         port = DEFAULT_PORT;
-    } else {
+    }
+    else
+    {
         port = atoi(p);
         std::cout << "Using SCUDA_PORT: " << port << std::endl;
     }
