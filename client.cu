@@ -27,12 +27,12 @@ int open_rpc_client()
     // if socket is already opened, return our socket.
     if (sockfd != -1)
     {
-        std::cout << "socket already opened" << std::endl;
+        // << "socket already opened" << std::endl;
 
         return sockfd;
     }
 
-    std::cout << "opening tcp socket..." << std::endl;
+    // << "opening tcp socket..." << std::endl;
 
     char *server_ip = getenv("SCUDA_SERVER");
     if (server_ip == NULL)
@@ -45,14 +45,12 @@ int open_rpc_client()
 
     if (p == NULL)
     {
-        std::cout << "SCUDA_PORT not defined, defaulting to: " << "14833"
-                  << std::endl;
         port = (char *)"14833";
     }
     else
     {
         port = p;
-        std::cout << "using SCUDA_PORT: " << port << std::endl;
+        // << "using SCUDA_PORT: " << port << std::endl;
     }
 
     addrinfo hints, *res;
@@ -918,8 +916,6 @@ void initializeFunctionMap()
     // simple cache check to make sure we only init handlers on the first run
     if (functionMap.find("nvmlInit_v2") == functionMap.end())
     {
-        std::cout << "initializing handlers" << std::endl;
-
         // attach all handlers to our function map
         functionMap["nvmlInitWithFlags"] = (void *)nvmlInitWithFlags;
         functionMap["nvmlInit_v2"] = (void *)nvmlInit_v2;
@@ -1003,7 +999,6 @@ void *getFunctionByName(const char *name)
     auto it = functionMap.find(name);
     if (it != functionMap.end())
         return it->second;
-    std::cout << "handler not found: " << name << std::endl;
     return nullptr;
 }
 
@@ -1012,7 +1007,7 @@ void *dlsym(void *handle, const char *name) __THROW
     initializeFunctionMap();
 
     void *func = getFunctionByName(name);
-
+    
     if (func != nullptr)
         return func;
 
