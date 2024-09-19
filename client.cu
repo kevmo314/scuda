@@ -1007,7 +1007,9 @@ void *dlsym(void *handle, const char *name) __THROW
     initializeFunctionMap();
 
     void *func = getFunctionByName(name);
-    
+
+    std::cout << "calling: " << name << std::endl;
+
     if (func != nullptr)
         return func;
 

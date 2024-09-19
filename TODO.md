@@ -4,9 +4,88 @@ Features:
 - Make port configurable [done]
 - Add proper debug logging
 - Add TLS for the socket
+- Get cuda.is_available to work
 
 Bugs:
 - Server exits when the client disconnects [done]
 - Client dlsym resolution needs to switch to a hashmap or trie-based lookup table instead of linear strcmp [done]
 - Enable TCP_NODELAY/prevent fragmentation across requests.
   - This one might be a little trickier than it seems as we want to ideally send one packet per request and disabling Nagle's algorithm would fragment within requests.
+
+## Required handlers for cuda is_torch_available
+
+- cuDriverGetVersion
+- cuLinkCreate_v2
+- cuLinkAddData_v2
+- cuLinkComplete
+- cuModuleLoadData
+- cuModuleUnload
+- cuGetErrorString
+- cuLinkDestroy
+- cuModuleGetFunction
+- cuFuncSetAttribute
+- cuLaunchKernel
+- cuGetErrorName
+- cuModuleLoadFatBinary
+- cuModuleLoadDataEx
+- cuLinkAddFile_v2
+- cuInit
+- cuDriverGetVersion
+- cuLinkCreate_v2
+- cuLinkAddData_v2
+- cuLinkComplete
+- cuModuleLoadData
+- cuModuleUnload
+- cuGetErrorString
+- cuLinkDestroy
+- cuModuleGetFunction
+- cuFuncSetAttribute
+- cuFuncGetAttribute
+- cuLaunchKernel
+- cuGetErrorName
+- cuModuleLoadFatBinary
+- cuModuleLoadDataEx
+- cuLinkAddFile_v2
+- cuCtxPushCurrent
+- cuCtxPopCurrent
+- cuCtxGetDevice
+- cuDevicePrimaryCtxRetain
+- cuDevicePrimaryCtxRelease
+- cuDevicePrimaryCtxReset
+- cuDeviceGet
+- cuDeviceGetAttribute
+- cuStreamSynchronize
+- cuOccupancyMaxActiveBlocksPerMultiprocessor
+- cuLaunchKernelEx
+- cuMemcpyDtoH_v2
+- cuModuleGetGlobal_v2
+- cuInit
+- cuDriverGetVersion
+- cuLinkCreate_v2
+- cuLinkAddData_v2
+- cuLinkComplete
+- cuModuleLoadData
+- cuModuleUnload
+- cuGetErrorString
+- cuLinkDestroy
+- cuModuleGetFunction
+- cuFuncSetAttribute
+- cuFuncGetAttribute
+- cuLaunchKernel
+- cuGetErrorName
+- cuModuleLoadFatBinary
+- cuModuleLoadDataEx
+- cuLinkAddFile_v2
+- cuCtxPushCurrent
+- cuCtxPopCurrent
+- cuCtxGetDevice
+- cuDevicePrimaryCtxRetain
+- cuDevicePrimaryCtxRelease
+- cuDevicePrimaryCtxReset
+- cuDeviceGet
+- cuDeviceGetAttribute
+- cuStreamSynchronize
+- cuOccupancyMaxActiveBlocksPerMultiprocessor
+- cuLaunchKernelEx
+- cuMemcpyDtoH_v2
+- cuModuleGetGlobal_v2

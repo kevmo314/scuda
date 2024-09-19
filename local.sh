@@ -37,7 +37,7 @@ server() {
 run() {
   build
 
-  LD_PRELOAD="$libscuda_path" nvidia-smi --query-gpu=memory.total,memory.used,memory.free --format=csv
+  LD_PRELOAD="$libscuda_path" python3 -c "import torch; print(torch.cuda.is_available())"
 }
 
 # Main script logic using a switch case
