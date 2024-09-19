@@ -224,4 +224,7 @@
 #define RPC_nvmlEventSetFree 203
 #define RPC_nvmlEventSetWait_v2 204
 
+// cuda
+#define RPC_cuDriverGetVersion 205
+
 #endif
