@@ -586,7 +586,7 @@ nvmlReturn_t nvmlDeviceGetMemoryInfo_v2(nvmlDevice_t device,
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(memoryInfo, sizeof(nvmlMemory_v2_t)) < 0)
     {
-        std::cerr << "Failed to start RPC request" << std::endl;
+        
         return NVML_ERROR_GPU_IS_LOST;
     }
 
@@ -915,24 +915,428 @@ nvmlReturn_t nvmlEventSetWait_v2(nvmlEventSet_t set, nvmlEventData_t *data, unsi
 
 CUresult cuDriverGetVersion(int *driverVersion)
 {
+    
     int request_id = rpc_start_request(RPC_cuDriverGetVersion);
     if (request_id < 0 ||
-        rpc_wait_for_response(request_id) < 0 || // Wait for the response
-        rpc_read(driverVersion, sizeof(int)) < 0) // Read the driver version
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(driverVersion, sizeof(int)) < 0)
+        return CUDA_ERROR_UNKNOWN;
+    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
+}
+
+CUresult cuLinkCreate_v2(unsigned int numOptions, CUjit_option *options, void **optionValues, CUlinkState *stateOut)
+{
+    
+    int request_id = rpc_start_request(RPC_cuLinkCreate_v2);
+    if (request_id < 0 ||
+        rpc_write(&numOptions, sizeof(unsigned int)) < 0 ||
+        rpc_write(options, numOptions * sizeof(CUjit_option)) < 0 ||
+        rpc_write(optionValues, numOptions * sizeof(void *)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(stateOut, sizeof(CUlinkState)) < 0)
+        return CUDA_ERROR_UNKNOWN;
+    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
+}
+
+CUresult cuLinkAddData_v2(CUlinkState state, CUjitInputType type, void *data, size_t size, const char *name, unsigned int numOptions, CUjit_option *options, void **optionValues)
+{
+    
+    int request_id = rpc_start_request(RPC_cuLinkAddData_v2);
+    if (request_id < 0 ||
+        rpc_write(&state, sizeof(CUlinkState)) < 0 ||
+        rpc_write(&type, sizeof(CUjitInputType)) < 0 ||
+        rpc_write(&size, sizeof(size_t)) < 0 ||
+        rpc_write(name, strlen(name) + 1) < 0 ||
+        rpc_write(data, size) < 0 ||
+        rpc_write(&numOptions, sizeof(unsigned int)) < 0 ||
+        rpc_write(options, numOptions * sizeof(CUjit_option)) < 0 ||
+        rpc_write(optionValues, numOptions * sizeof(void *)) < 0 ||
+        rpc_wait_for_response(request_id) < 0)
+        return CUDA_ERROR_UNKNOWN;
+    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
+}
+
+CUresult cuLinkComplete(CUlinkState state, void **cubinOut, size_t *sizeOut)
+{
+    
+    int request_id = rpc_start_request(RPC_cuLinkComplete);
+    if (request_id < 0 ||
+        rpc_write(&state, sizeof(CUlinkState)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(cubinOut, sizeof(void *)) < 0 ||
+        rpc_read(sizeOut, sizeof(size_t)) < 0)
+        return CUDA_ERROR_UNKNOWN;
+    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
+}
+
+CUresult cuModuleLoadData(CUmodule *module, const void *image)
+{
+    
+    int request_id = rpc_start_request(RPC_cuModuleLoadData);
+    if (request_id < 0 ||
+        rpc_write(image, sizeof(image)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(module, sizeof(CUmodule)) < 0)
+        return CUDA_ERROR_UNKNOWN;
+    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
+}
+
+CUresult cuModuleUnload(CUmodule hmod)
+{
+    
+    int request_id = rpc_start_request(RPC_cuModuleUnload);
+    if (request_id < 0 ||
+        rpc_write(&hmod, sizeof(CUmodule)) < 0 ||
+        rpc_wait_for_response(request_id) < 0)
+        return CUDA_ERROR_UNKNOWN;
+    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
+}
+
+CUresult cuGetErrorString(CUresult error, const char **pStr)
+{
+    
+    int request_id = rpc_start_request(RPC_cuGetErrorString);
+    if (request_id < 0 ||
+        rpc_write(&error, sizeof(CUresult)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pStr, sizeof(const char *)) < 0)
+        return CUDA_ERROR_UNKNOWN;
+    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
+}
+
+CUresult cuLinkDestroy(CUlinkState state)
+{
+    
+    int request_id = rpc_start_request(RPC_cuLinkDestroy);
+    if (request_id < 0 ||
+        rpc_write(&state, sizeof(CUlinkState)) < 0 ||
+        rpc_wait_for_response(request_id) < 0)
+        return CUDA_ERROR_UNKNOWN;
+    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
+}
+
+CUresult cuModuleGetFunction(CUfunction *hfunc, CUmodule hmod, const char *name)
+{
+    
+    int request_id = rpc_start_request(RPC_cuModuleGetFunction);
+    if (request_id < 0 ||
+        rpc_write(&hmod, sizeof(CUmodule)) < 0 ||
+        rpc_write(name, strlen(name) + 1) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(hfunc, sizeof(CUfunction)) < 0)
+        return CUDA_ERROR_UNKNOWN;
+    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
+}
+
+CUresult cuFuncSetAttribute(CUfunction hfunc, CUfunction_attribute attrib, int value)
+{
+    
+    int request_id = rpc_start_request(RPC_cuFuncSetAttribute);
+    if (request_id < 0 ||
+        rpc_write(&hfunc, sizeof(CUfunction)) < 0 ||
+        rpc_write(&attrib, sizeof(CUfunction_attribute)) < 0 ||
+        rpc_write(&value, sizeof(int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0)
+        return CUDA_ERROR_UNKNOWN;
+    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
+}
+
+CUresult cuLaunchKernel(CUfunction f, unsigned int gridDimX, unsigned int gridDimY, unsigned int gridDimZ, unsigned int blockDimX, unsigned int blockDimY, unsigned int blockDimZ, unsigned int sharedMemBytes, CUstream hStream, void **kernelParams, void **extra)
+{
+    
+    int request_id = rpc_start_request(RPC_cuLaunchKernel);
+    if (request_id < 0 ||
+        rpc_write(&f, sizeof(CUfunction)) < 0 ||
+        rpc_write(&gridDimX, sizeof(unsigned int)) < 0 ||
+        rpc_write(&gridDimY, sizeof(unsigned int)) < 0 ||
+        rpc_write(&gridDimZ, sizeof(unsigned int)) < 0 ||
+        rpc_write(&blockDimX, sizeof(unsigned int)) < 0 ||
+        rpc_write(&blockDimY, sizeof(unsigned int)) < 0 ||
+        rpc_write(&blockDimZ, sizeof(unsigned int)) < 0 ||
+        rpc_write(&sharedMemBytes, sizeof(unsigned int)) < 0 ||
+        rpc_write(&hStream, sizeof(CUstream)) < 0 ||
+        rpc_write(kernelParams, sizeof(void *)) < 0 ||
+        rpc_write(extra, sizeof(void *)) < 0 ||
+        rpc_wait_for_response(request_id) < 0)
+        return CUDA_ERROR_UNKNOWN;
+    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
+}
+
+CUresult cuGetErrorName(CUresult error, const char **pStr)
+{
+    
+    int request_id = rpc_start_request(RPC_cuGetErrorName);
+    if (request_id < 0 ||
+        rpc_write(&error, sizeof(CUresult)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pStr, sizeof(const char *)) < 0)
+        return CUDA_ERROR_UNKNOWN;
+    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
+}
+
+CUresult cuModuleLoadFatBinary(CUmodule *module, const void *fatCubin)
+{
+    
+    int request_id = rpc_start_request(RPC_cuModuleLoadFatBinary);
+    if (request_id < 0 ||
+        rpc_write(fatCubin, sizeof(fatCubin)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(module, sizeof(CUmodule)) < 0)
+        return CUDA_ERROR_UNKNOWN;
+    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
+}
+
+CUresult cuModuleLoadDataEx(CUmodule *module, const void *image, unsigned int numOptions, CUjit_option *options, void **optionValues)
+{
+    
+    int request_id = rpc_start_request(RPC_cuModuleLoadDataEx);
+    if (request_id < 0 ||
+        rpc_write(image, sizeof(image)) < 0 ||
+        rpc_write(&numOptions, sizeof(unsigned int)) < 0 ||
+        rpc_write(options, numOptions * sizeof(CUjit_option)) < 0 ||
+        rpc_write(optionValues, numOptions * sizeof(void *)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(module, sizeof(CUmodule)) < 0)
+        return CUDA_ERROR_UNKNOWN;
+    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
+}
+
+CUresult cuLinkAddFile_v2(CUlinkState state, CUjitInputType type, const char *path, unsigned int numOptions, CUjit_option *options, void **optionValues)
+{
+    
+    int request_id = rpc_start_request(RPC_cuLinkAddFile_v2);
+    if (request_id < 0 ||
+        rpc_write(&state, sizeof(CUlinkState)) < 0 ||
+        rpc_write(&type, sizeof(CUjitInputType)) < 0 ||
+        rpc_write(path, strlen(path) + 1) < 0 ||
+        rpc_write(&numOptions, sizeof(unsigned int)) < 0 ||
+        rpc_write(options, numOptions * sizeof(CUjit_option)) < 0 ||
+        rpc_write(optionValues, numOptions * sizeof(void *)) < 0 ||
+        rpc_wait_for_response(request_id) < 0)
+        return CUDA_ERROR_UNKNOWN;
+    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
+}
+
+CUresult cuInit(unsigned int Flags)
+{
+    
+    int request_id = rpc_start_request(RPC_cuInit);
+    if (request_id < 0 ||
+        rpc_write(&Flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0)
+        return CUDA_ERROR_UNKNOWN;
+    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
+}
+
+CUresult cuFuncGetAttribute(int *pi, CUfunction_attribute attrib, CUfunction hfunc)
+{
+    
+    int request_id = rpc_start_request(RPC_cuFuncGetAttribute);
+    if (request_id < 0 ||
+        rpc_write(&attrib, sizeof(CUfunction_attribute)) < 0 ||
+        rpc_write(&hfunc, sizeof(CUfunction)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pi, sizeof(int)) < 0)
+        return CUDA_ERROR_UNKNOWN;
+    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
+}
+
+CUresult cuCtxPushCurrent(CUcontext ctx)
+{
+    
+    int request_id = rpc_start_request(RPC_cuCtxPushCurrent);
+    if (request_id < 0 ||
+        rpc_write(&ctx, sizeof(CUcontext)) < 0 ||
+        rpc_wait_for_response(request_id) < 0)
+        return CUDA_ERROR_UNKNOWN;
+    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
+}
+
+CUresult cuCtxPopCurrent(CUcontext *pctx)
+{
+    
+    int request_id = rpc_start_request(RPC_cuCtxPopCurrent);
+    if (request_id < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pctx, sizeof(CUcontext)) < 0)
+        return CUDA_ERROR_UNKNOWN;
+    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
+}
+
+CUresult cuCtxGetDevice(CUdevice *device)
+{
+    
+    int request_id = rpc_start_request(RPC_cuCtxGetDevice);
+    if (request_id < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(device, sizeof(CUdevice)) < 0)
+        return CUDA_ERROR_UNKNOWN;
+    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
+}
+
+CUresult cuDevicePrimaryCtxRetain(CUcontext *pctx, CUdevice dev)
+{
+    
+    int request_id = rpc_start_request(RPC_cuDevicePrimaryCtxRetain);
+    if (request_id < 0 ||
+        rpc_write(&dev, sizeof(CUdevice)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pctx, sizeof(CUcontext)) < 0)
+        return CUDA_ERROR_UNKNOWN;
+    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
+}
+
+CUresult cuDevicePrimaryCtxRelease(CUdevice dev)
+{
+    
+    int request_id = rpc_start_request(RPC_cuDevicePrimaryCtxRelease);
+    if (request_id < 0 ||
+        rpc_write(&dev, sizeof(CUdevice)) < 0 ||
+        rpc_wait_for_response(request_id) < 0)
+        return CUDA_ERROR_UNKNOWN;
+    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
+}
+
+CUresult cuDevicePrimaryCtxReset(CUdevice dev)
+{
+    
+    int request_id = rpc_start_request(RPC_cuDevicePrimaryCtxReset);
+    if (request_id < 0 ||
+        rpc_write(&dev, sizeof(CUdevice)) < 0 ||
+        rpc_wait_for_response(request_id) < 0)
+        return CUDA_ERROR_UNKNOWN;
+    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
+}
+
+CUresult cuDeviceGet(CUdevice *device, int ordinal)
+{
+    
+    int request_id = rpc_start_request(RPC_cuDeviceGet);
+    if (request_id < 0 ||
+        rpc_write(&ordinal, sizeof(int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(device, sizeof(CUdevice)) < 0)
+        return CUDA_ERROR_UNKNOWN;
+    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
+}
+
+CUresult cuDeviceGetAttribute(int *pi, CUdevice_attribute attrib, CUdevice dev)
+{
+    
+    int request_id = rpc_start_request(RPC_cuDeviceGetAttribute);
+    if (request_id < 0 ||
+        rpc_write(&attrib, sizeof(CUdevice_attribute)) < 0 ||
+        rpc_write(&dev, sizeof(CUdevice)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pi, sizeof(int)) < 0)
+        return CUDA_ERROR_UNKNOWN;
+    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
+}
+
+CUresult cuStreamSynchronize(CUstream hStream)
+{
+    
+    int request_id = rpc_start_request(RPC_cuStreamSynchronize);
+    if (request_id < 0 ||
+        rpc_write(&hStream, sizeof(CUstream)) < 0 ||
+        rpc_wait_for_response(request_id) < 0)
+        return CUDA_ERROR_UNKNOWN;
+    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
+}
+
+CUresult cuOccupancyMaxActiveBlocksPerMultiprocessor(int *numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize)
+{
+    
+    int request_id = rpc_start_request(RPC_cuOccupancyMaxActiveBlocksPerMultiprocessor);
+    if (request_id < 0 ||
+        rpc_write(&func, sizeof(CUfunction)) < 0 ||
+        rpc_write(&blockSize, sizeof(int)) < 0 ||
+        rpc_write(&dynamicSMemSize, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(numBlocks, sizeof(int)) < 0)
+        return CUDA_ERROR_UNKNOWN;
+    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
+}
+
+CUresult cuLaunchKernelEx(const CUlaunchConfig *config, CUfunction f, void **kernelParams, void **extra)
+{
+    
+    // Start the RPC request for cuLaunchKernelEx
+    int request_id = rpc_start_request(RPC_cuLaunchKernelEx);
+
+    // Error handling for request initiation
+    if (request_id < 0)
+        return CUDA_ERROR_UNKNOWN;
+
+    // Write config to the request
+    if (rpc_write(config, sizeof(CUlaunchConfig)) < 0)
+        return CUDA_ERROR_UNKNOWN;
+
+    // Write CUfunction f to the request
+    if (rpc_write(&f, sizeof(CUfunction)) < 0)
+        return CUDA_ERROR_UNKNOWN;
+
+    // Write kernel parameters to the request
+    size_t kernelParamsSize = sizeof(void *) * config->gridDimX; // Adjust to the appropriate size as per your logic
+    if (rpc_write(kernelParams, kernelParamsSize) < 0)
+        return CUDA_ERROR_UNKNOWN;
+
+    // Write extra parameters to the request
+    size_t extraSize = sizeof(void *) * config->gridDimX; // Adjust to the appropriate size as per your logic
+    if (rpc_write(extra, extraSize) < 0)
+        return CUDA_ERROR_UNKNOWN;
+
+    // Wait for the response
+    if (rpc_wait_for_response(request_id) < 0)
+        return CUDA_ERROR_UNKNOWN;
+
+    // Return the result from the response
+    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
+}
+
+CUresult cuMemcpyDtoH_v2(void *dstHost, CUdeviceptr srcDevice, size_t ByteCount)
+{
+    int request_id = rpc_start_request(RPC_cuMemcpyDtoH_v2);
+
+    
+    
+    if (request_id < 0 ||
+        rpc_write(dstHost, sizeof(void*)) < 0 ||
+        rpc_write(&srcDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&ByteCount, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(dstHost, ByteCount) < 0)
     {
-        return CUDA_ERROR_UNKNOWN; // Return an error if any step fails
+        return CUDA_ERROR_UNKNOWN;
     }
 
-    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN); // Get the return value from the response
+    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
+}
+
+CUresult cuModuleGetGlobal_v2(CUdeviceptr *dptr, size_t *bytes, CUmodule hmod, const char *name)
+{
+    int request_id = rpc_start_request(RPC_cuModuleGetGlobal_v2);
+
+    
+    
+    if (request_id < 0 ||
+        rpc_write(&hmod, sizeof(CUmodule)) < 0 ||
+        rpc_write(name, strlen(name) + 1) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(dptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(bytes, sizeof(size_t)) < 0)
+    {
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
 }
 
 std::unordered_map<std::string, void *> functionMap;
 
 void initializeFunctionMap()
 {
-    // cuda
-    functionMap["cuDriverGetVersion"] = (void *)cuDriverGetVersion;
-
+    
     // simple cache check to make sure we only init handlers on the first run
     // attach all handlers to our function map
     functionMap["nvmlInitWithFlags"] = (void *)nvmlInitWithFlags;
@@ -1008,42 +1412,70 @@ void initializeFunctionMap()
     functionMap["nvmlEventSetCreate"] = (void *)nvmlEventSetCreate;
     functionMap["nvmlEventSetFree"] = (void *)nvmlEventSetFree;
     functionMap["nvmlEventSetWait_v2"] = (void *)nvmlEventSetWait_v2;
+
+    // cuda
+    functionMap["cuDriverGetVersion"] = (void *)cuDriverGetVersion;
+    functionMap["cuLinkCreate_v2"] = (void *)cuLinkCreate_v2;
+    functionMap["cuLinkAddData_v2"] = (void *)cuLinkAddData_v2;
+    functionMap["cuLinkComplete"] = (void *)cuLinkComplete;
+    functionMap["cuModuleLoadData"] = (void *)cuModuleLoadData;
+    functionMap["cuModuleUnload"] = (void *)cuModuleUnload;
+    functionMap["cuGetErrorString"] = (void *)cuGetErrorString;
+    functionMap["cuLinkDestroy"] = (void *)cuLinkDestroy;
+    functionMap["cuModuleGetFunction"] = (void *)cuModuleGetFunction;
+    functionMap["cuFuncSetAttribute"] = (void *)cuFuncSetAttribute;
+    functionMap["cuLaunchKernel"] = (void *)cuLaunchKernel;
+    functionMap["cuGetErrorName"] = (void *)cuGetErrorName;
+    functionMap["cuModuleLoadFatBinary"] = (void *)cuModuleLoadFatBinary;
+    functionMap["cuModuleLoadDataEx"] = (void *)cuModuleLoadDataEx;
+    functionMap["cuLinkAddFile_v2"] = (void *)cuLinkAddFile_v2;
+    functionMap["cuInit"] = (void *)cuInit;
+    functionMap["cuFuncGetAttribute"] = (void *)cuFuncGetAttribute;
+    functionMap["cuCtxPushCurrent"] = (void *)cuCtxPushCurrent;
+    functionMap["cuCtxPopCurrent"] = (void *)cuCtxPopCurrent;
+    functionMap["cuCtxGetDevice"] = (void *)cuCtxGetDevice;
+    functionMap["cuDevicePrimaryCtxRetain"] = (void *)cuDevicePrimaryCtxRetain;
+    functionMap["cuDevicePrimaryCtxRelease"] = (void *)cuDevicePrimaryCtxRelease;
+    functionMap["cuDevicePrimaryCtxReset"] = (void *)cuDevicePrimaryCtxReset;
+    functionMap["cuDeviceGet"] = (void *)cuDeviceGet;
+    functionMap["cuDeviceGetAttribute"] = (void *)cuDeviceGetAttribute;
+    functionMap["cuStreamSynchronize"] = (void *)cuStreamSynchronize;
+    functionMap["cuOccupancyMaxActiveBlocksPerMultiprocessor"] = (void *)cuOccupancyMaxActiveBlocksPerMultiprocessor;
+    functionMap["cuLaunchKernelEx"] = (void *)cuLaunchKernelEx;
+    functionMap["cuMemcpyDtoH_v2"] = (void *)cuMemcpyDtoH_v2;
+    functionMap["cuModuleGetGlobal_v2"] = (void *)cuModuleGetGlobal_v2;
+    // functionMap["cuGetProcAddress_v2"] = (void *)cuGetProcAddress_v2;
 }
 
 // Lookup function similar to dlsym
 void *getFunctionByName(const char *name)
 {
     auto it = functionMap.find(name);
-    if (it != functionMap.end())
+    if (it != functionMap.end()) {
+        std::cout << "Function found: " << it->second << std::endl;
         return it->second;
+    }
+        
     return nullptr;
 }
 
 void *dlsym(void *handle, const char *name) __THROW
 {
-    initializeFunctionMap();
+    initializeFunctionMap();  // Initialize the function map
 
-    std::cout << "calling " << name << std::endl;
+    void *func = getFunctionByName(name);  // Lookup function by name
 
-    void *func = getFunctionByName(name);
-
-    std::cout << "func " << std::endl;
-
-    if (func != nullptr)
+    if (func != nullptr) {
+        std::cout << "[dlsym] Function address from functionMap: " << func << std::endl;
         return func;
-
-    static void *(*real_dlsym)(void *, const char *) = NULL;
-    if (real_dlsym == NULL)
-    {
-        // avoid calling dlsym recursively; use dlvsym to resolve dlsym itself
-        real_dlsym = (void *(*)(void *, const char *))dlvsym(RTLD_NEXT, "dlsym",
-                                                             "GLIBC_2.2.5");
     }
 
-    if (!strcmp(name, "dlsym"))
-        return (void *)dlsym;
+    // Real dlsym lookup
+    static void *(*real_dlsym)(void *, const char *) = NULL;
+    if (real_dlsym == NULL) {
+        real_dlsym = (void *(*)(void *, const char *))dlvsym(RTLD_NEXT, "dlsym", "GLIBC_2.2.5");
+    }
 
-    // if func symbol is not found in the handler mappings, return the real dlsym
-    // resolution
+    std::cout << "[dlsym] Falling back to real_dlsym for name: " << name << std::endl;
     return real_dlsym(handle, name);
 }

@@ -9,7 +9,7 @@ build() {
   echo "building client..."
 
   if [[ "$(uname)" == "Linux" ]]; then
-    nvcc -Xcompiler -fPIC -shared -o $libscuda_path $client_path 
+    nvcc -Xcompiler -fPIC -shared -o $libscuda_path $client_path
   else
     echo "No compiler options set for os "$(uname)""
   fi

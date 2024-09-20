@@ -1640,21 +1640,6 @@ int handle_nvmlEventSetFree(int connfd) {
 }
 
 int handle_cuDriverGetVersion(int connfd) {
-    int driverVersion;
-
-    // Read parameters if needed (in this case, there are no parameters to read)
-
-    // Call the cuDriverGetVersion function
-    CUresult result = cuDriverGetVersion(&driverVersion);
-
-    // Write the driver version back to the client
-    if (write(connfd, &driverVersion, sizeof(int)) < 0)
-        return -1;
-
-    return result;
-}
-
-int handle_cuDriverGetVersion(int connfd) {
     nvmlEventSet_t set;
     nvmlEventData_t data;
     unsigned int timeoutms;
@@ -1875,7 +1860,7 @@ static RequestHandler opHandlers[] = {
     handle_nvmlDeviceRegisterEvents,               // RPC_nvmlDeviceRegisterEvents (201)
     handle_nvmlEventSetCreate,                     // RPC_nvmlEventSetCreate (202)
     handle_nvmlEventSetFree,                       // RPC_nvmlEventSetFree (203)
-    handle_nvmlEventSetWait_v2, // 204
+    nullptr, // 204
 
     // cuda
     handle_cuDriverGetVersion, // 205
