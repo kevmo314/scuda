@@ -1699,7 +1699,7 @@ int handle_cuGetProcAddress_v2(int connfd) {
     std::cout << "Server: Symbol - " << symbol << ", CUDA Version - " << cudaVersion << ", Flags - " << flags << std::endl;
 
     // Call the actual cuGetProcAddress_v2 function with the correct parameters
-    CUresult result_code = cuGetProcAddress(symbol, &func, cudaVersion, flags, &result);
+    CUresult result_code = cuGetProcAddress_v2(symbol, &func, cudaVersion, flags, &result);
     if (result_code != CUDA_SUCCESS) {
         const char *errorStr = nullptr;
         cuGetErrorString(result_code, &errorStr);

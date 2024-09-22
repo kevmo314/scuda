@@ -1356,8 +1356,21 @@ CUresult cuModuleGetGlobal_v2(CUdeviceptr *dptr, size_t *bytes, CUmodule hmod, c
     return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
 }
 
+// Map of symbols to their corresponding function pointers
+std::unordered_map<std::string, void (*)()> cuFunctionMap;
+
+void initializeCuFunctionMap() {
+    cuFunctionMap["cuInit"] = reinterpret_cast<void (*)()>(cuInit);
+    // cuFunctionMap["cuGetProcAddress"] = reinterpret_cast<void (*)()>(cuGetProcAddress);
+}
+
+void noOpFunction() {
+    // Do nothing
+}
+
 CUresult cuGetProcAddress_v2_handler(const char *symbol, void **pfn, int cudaVersion, cuuint64_t flags, CUdriverProcAddressQueryResult *symbolStatus)
 {
+    initializeCuFunctionMap();
     // Open RPC client if not already opened
     if (open_rpc_client() < 0)
         return CUDA_ERROR_UNKNOWN;
@@ -1378,6 +1391,8 @@ CUresult cuGetProcAddress_v2_handler(const char *symbol, void **pfn, int cudaVer
         return CUDA_ERROR_UNKNOWN;
     }
 
+    std::cout << "SYMBOL RETURN: " << symbol << std::endl;
+
     // Wait for the server response
     if (rpc_wait_for_response(request_id) < 0)
     {
@@ -1385,14 +1400,63 @@ CUresult cuGetProcAddress_v2_handler(const char *symbol, void **pfn, int cudaVer
     }
 
     // Read the function pointer from the response
-    if (rpc_read(pfn, sizeof(void *)) < 0 || rpc_read(&symbolStatus, sizeof(CUdriverProcAddressQueryResult)) < 0)
+    if (rpc_read(pfn, sizeof(void *)) < 0 || rpc_read(symbolStatus, sizeof(CUdriverProcAddressQueryResult)) < 0)
     {
         return CUDA_ERROR_UNKNOWN;
     }
 
     std::cout << "call complete: " << symbolStatus << std::endl;
 
+    std::string symbolName(symbol);
+    auto it = cuFunctionMap.find(symbolName);
+    if (it != cuFunctionMap.end()) {
+        *pfn = reinterpret_cast<void *>(it->second);
+        std::cout << "Mapped symbol: " << symbolName << " to function: " << *pfn << std::endl;
+    } else {
+        void *fn = nullptr;
+        std::cerr << "Function for symbol: " << symbolName << " not found!" << std::endl;
+        *pfn = reinterpret_cast<void *>(noOpFunction); 
+    }
+
     // Retrieve and return the result from the response
+    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
+}
+
+CUresult cuGetProcAddress(const char *symbol, void **pfn, int cudaVersion, cuuint64_t flags, CUdriverProcAddressQueryResult *symbolStatus) {
+    // Open RPC client if not already opened
+    if (open_rpc_client() < 0)
+        return CUDA_ERROR_UNKNOWN;
+
+    // Start the RPC request for cuGetProcAddress
+    int request_id = rpc_start_request(RPC_cuGetProcAddress_v2);
+    if (request_id < 0)
+        return CUDA_ERROR_UNKNOWN;
+
+    int symbol_length = strlen(symbol) + 1;
+
+    void *placeholder = nullptr;
+    if (rpc_write(&symbol_length, sizeof(int)) < 0 ||
+        rpc_write(symbol, symbol_length) < 0 ||
+        rpc_write(&cudaVersion, sizeof(int)) < 0 ||
+        rpc_write(&placeholder, sizeof(void *)) < 0 ||  // Write a placeholder instead of pfn
+        rpc_write(&flags, sizeof(cuuint64_t)) < 0) {
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    std::cout << "SYMBOL RETURN: " << symbol << std::endl;
+
+    // Wait for the server response
+    if (rpc_wait_for_response(request_id) < 0)
+    {
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    // Read the function pointer from the response
+    if (rpc_read(pfn, sizeof(void *)) < 0 || rpc_read(symbolStatus, sizeof(CUdriverProcAddressQueryResult)) < 0)
+    {
+        return CUDA_ERROR_UNKNOWN;
+    }
+
     return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
 }
 
@@ -1509,6 +1573,7 @@ void initializeFunctionMap()
     functionMap["cuMemcpyDtoH_v2"] = (void *)cuMemcpyDtoH_v2;
     functionMap["cuModuleGetGlobal_v2"] = (void *)cuModuleGetGlobal_v2;
     functionMap["cuGetProcAddress_v2"] = (void *)cuGetProcAddress_v2_handler;
+    // functionMap["cuGetProcAddress"] = (void *)cuGetProcAddress_v2_handler;
 }
 
 // Lookup function similar to dlsym
