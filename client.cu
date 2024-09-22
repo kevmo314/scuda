@@ -129,7 +129,18 @@ int rpc_write(const void *data, size_t size)
 
 int rpc_read(void *data, size_t size)
 {
-    if (read(sockfd, data, size) < 0)
+    if (data == nullptr) {
+        // temp buffer to discard data
+        char tempBuffer[256];
+        while (size > 0) {
+            ssize_t bytesRead = read(sockfd, tempBuffer, std::min(size, sizeof(tempBuffer)));
+            if (bytesRead < 0) {
+                pthread_mutex_unlock(&mutex);
+                return -1; // error if reading fails
+            }
+            size -= bytesRead;
+        }
+    } else if (read(sockfd, data, size) < 0)
     {
         pthread_mutex_unlock(&mutex);
         return -1;
@@ -1373,8 +1384,8 @@ CUresult cuGetProcAddress_v2_handler(const char *symbol, void **pfn, int cudaVer
         return CUDA_ERROR_UNKNOWN;
     }
 
-    //  // Read the function pointer from the response
-    if (rpc_read(pfn, sizeof(void *)) < 0 || rpc_read(symbolStatus, sizeof(CUdriverProcAddressQueryResult)) < 0)
+    // Read the function pointer from the response
+    if (rpc_read(pfn, sizeof(void *)) < 0 || rpc_read(&symbolStatus, sizeof(CUdriverProcAddressQueryResult)) < 0)
     {
         return CUDA_ERROR_UNKNOWN;
     }
