@@ -1639,23 +1639,6 @@ int handle_nvmlEventSetFree(int connfd) {
     return nvmlEventSetFree(set);
 }
 
-int handle_cuDriverGetVersion(int connfd) {
-    nvmlEventSet_t set;
-    nvmlEventData_t data;
-    unsigned int timeoutms;
-
-    if (read(connfd, &set, sizeof(nvmlEventSet_t)) < 0 || read(connfd, &timeoutms, sizeof(unsigned int)) < 0)
-        return -1;
-
-    nvmlReturn_t result = nvmlEventSetWait_v2(set, &data, timeoutms);
-
-    if (write(connfd, &data, sizeof(unsigned long long)) < 0)
-        return -1;
-
-    return result;
-}
-
-
 int handle_cuGetProcAddress_v2(int connfd) {
     int symbol_length;
     char symbol[256];
@@ -1663,8 +1646,6 @@ int handle_cuGetProcAddress_v2(int connfd) {
     int cudaVersion;
     cuuint64_t flags;
     CUdriverProcAddressQueryResult result;
-
-    std::cerr << ">>>> Server: Receiving parameters" << std::endl;
 
     if (read(connfd, &symbol_length, sizeof(int)) < 0) {
         std::cerr << "Failed to read symbol length" << std::endl;
@@ -1696,8 +1677,6 @@ int handle_cuGetProcAddress_v2(int connfd) {
         return -1;
     }
 
-    std::cout << "Server: Symbol - " << symbol << ", CUDA Version - " << cudaVersion << ", Flags - " << flags << std::endl;
-
     // Call the actual cuGetProcAddress_v2 function with the correct parameters
     CUresult result_code = cuGetProcAddress_v2(symbol, &func, cudaVersion, flags, &result);
     if (result_code != CUDA_SUCCESS) {
@@ -1707,8 +1686,6 @@ int handle_cuGetProcAddress_v2(int connfd) {
                 << " (" << (errorStr ? errorStr : "Unknown error") << ")" << std::endl;
         return -1;
     }
-
-    std::cout << "v2 result: " << &result << std::endl;
 
     if (write(connfd, &func, sizeof(void *)) < 0) {
         std::cerr << "Failed to write function pointer to client. Error: " << strerror(errno) << std::endl;
@@ -1720,7 +1697,169 @@ int handle_cuGetProcAddress_v2(int connfd) {
         return -1;
     }
 
-    std::cout << "Server: Sent function pointer and result to client successfully." << std::endl;
+    return result;
+}
+
+int handle_cudaGetDeviceCount(int connfd) {
+    int deviceCount = 0;
+    cudaError_t result;
+
+    // Initialize the CUDA runtime
+    result = cudaFree(0);  // A way to initialize the CUDA runtime
+    if (result != cudaSuccess) {
+        const char *errorStr = cudaGetErrorString(result);
+        std::cerr << "cudaFree (runtime init) failed with error code: " << result
+                  << " (" << (errorStr ? errorStr : "Unknown error") << ")" << std::endl;
+        return -1;
+    }
+
+    // Call the actual cudaGetDeviceCount function
+    result = cudaGetDeviceCount(&deviceCount);
+
+    // Check for errors in the cudaGetDeviceCount call
+    if (result != cudaSuccess) {
+        const char *errorStr = cudaGetErrorString(result);
+        std::cerr << "cudaGetDeviceCount failed with error code: " << result
+                  << " (" << (errorStr ? errorStr : "Unknown error") << ")" << std::endl;
+        return -1;
+    }
+
+    // Write the result code back to the client
+    if (write(connfd, &result, sizeof(cudaError_t)) < 0) {
+        std::cerr << "Failed to write result code to client. Error: " << strerror(errno) << std::endl;
+        return -1;
+    }
+
+    // Write the device count back to the client
+    if (write(connfd, &deviceCount, sizeof(int)) < 0) {
+        std::cerr << "Failed to write device count to client. Error: " << strerror(errno) << std::endl;
+        return -1;
+    }
+
+    std::cout << "Server: Sent device count to client successfully: " << deviceCount << std::endl;
+
+    return result;
+}
+
+int handle_cuDeviceGetCount(int connfd) {
+    int deviceCount = 0;
+    CUresult result;
+
+    std::cout << "brooo wtf" << std::endl;
+
+    // Initialize the CUDA driver
+    result = cuInit(0);
+    if (result != CUDA_SUCCESS) {
+        const char *errorStr = nullptr;
+        cuGetErrorString(result, &errorStr);
+        std::cerr << "cuInit failed with error code: " << result 
+                  << " (" << (errorStr ? errorStr : "Unknown error") << ")" << std::endl;
+        return -1;
+    }
+
+    // Call the actual cuDeviceGetCount function
+    result = cuDeviceGetCount(&deviceCount);
+
+    // Check for errors in the cuDeviceGetCount call
+    if (result != CUDA_SUCCESS) {
+        const char *errorStr = nullptr;
+        cuGetErrorString(result, &errorStr);
+        std::cerr << "cuDeviceGetCount failed with error code: " << result 
+                  << " (" << (errorStr ? errorStr : "Unknown error") << ")" << std::endl;
+        return -1;
+    }
+
+    // Write the result code back to the client
+    if (write(connfd, &result, sizeof(CUresult)) < 0) {
+        std::cerr << "Failed to write result code to client. Error: " << strerror(errno) << std::endl;
+        return -1;
+    }
+
+    // Write the device count back to the client
+    if (write(connfd, &deviceCount, sizeof(int)) < 0) {
+        std::cerr << "Failed to write device count to client. Error: " << strerror(errno) << std::endl;
+        return -1;
+    }
+
+    std::cout << "Server: Sent device count to client successfully: " << deviceCount << std::endl;
+
+    return result;
+}
+
+int handle_cuDriverGetVersion(int connfd) {
+    int driverVersion = 0;
+    CUresult result;
+
+    // Call the actual cuDriverGetVersion function
+    result = cuDriverGetVersion(&driverVersion);
+
+    // Check for errors in the cuDriverGetVersion call
+    if (result != CUDA_SUCCESS) {
+        const char *errorStr = nullptr;
+        cuGetErrorString(result, &errorStr);
+        std::cerr << "cuDriverGetVersion failed with error code: " << result 
+                  << " (" << (errorStr ? errorStr : "Unknown error") << ")" << std::endl;
+
+        // Write the error result code back to the client
+        if (write(connfd, &result, sizeof(CUresult)) < 0) {
+            std::cerr << "Failed to write error code to client. Error: " << strerror(errno) << std::endl;
+        }
+        return -1;
+    }
+
+    // Write the success result code back to the client
+    if (write(connfd, &result, sizeof(CUresult)) < 0) {
+        std::cerr << "Failed to write result code to client. Error: " << strerror(errno) << std::endl;
+        return -1;
+    }
+
+    // Write the driver version back to the client
+    if (write(connfd, &driverVersion, sizeof(int)) < 0) {
+        std::cerr << "Failed to write driver version to client. Error: " << strerror(errno) << std::endl;
+        return -1;
+    }
+
+    std::cout << "Server: Sent driver version to client successfully: " << driverVersion << std::endl;
+
+    return result;
+}
+
+int handle_cuInit(int connfd) {
+    unsigned int flags;
+    CUresult result;
+
+    // Read the flags from the client
+    if (read(connfd, &flags, sizeof(unsigned int)) < 0) {
+        std::cerr << "Failed to read flags from client. Error: " << strerror(errno) << std::endl;
+        return -1;
+    }
+
+    std::cout << "Server: Received flags from client: " << flags << std::endl;
+
+    // Call the actual cuInit function with the received flags
+    result = cuInit(flags);
+
+    // Check for errors in the cuInit call
+    if (result != CUDA_SUCCESS) {
+        const char *errorStr = nullptr;
+        cuGetErrorString(result, &errorStr);
+        std::cerr << "cuInit failed with error code: " << result 
+                  << " (" << (errorStr ? errorStr : "Unknown error") << ")" << std::endl;
+
+        // Write the error result code back to the client
+        if (write(connfd, &result, sizeof(CUresult)) < 0) {
+            std::cerr << "Failed to write error code to client. Error: " << strerror(errno) << std::endl;
+        }
+        return -1;
+    }
+
+    // Write the success result code back to the client
+    if (write(connfd, &result, sizeof(CUresult)) < 0) {
+        std::cerr << "Failed to write result code to client. Error: " << strerror(errno) << std::endl;
+        return -1;
+    }
+
+    std::cout << "Server: Sent cuInit result to client successfully: " << result << std::endl;
 
     return result;
 }
@@ -1947,7 +2086,7 @@ static RequestHandler opHandlers[] = {
     nullptr,              // RPC_cuModuleLoadFatBinary (217)
     nullptr,                 // RPC_cuModuleLoadDataEx (218)
     nullptr,                   // RPC_cuLinkAddFile_v2 (219)
-    nullptr,                             // RPC_cuInit (220)
+    handle_cuInit, // 220
     nullptr,                 // RPC_cuFuncGetAttribute (221)
     nullptr,                   // RPC_cuCtxPushCurrent (222)
     nullptr,                    // RPC_cuCtxPopCurrent (223)
@@ -1963,6 +2102,9 @@ static RequestHandler opHandlers[] = {
     nullptr,                    // RPC_cuMemcpyDtoH_v2 (233)
     nullptr,               // RPC_cuModuleGetGlobal_v2 (234)
     handle_cuGetProcAddress_v2,
+    nullptr, // handle_cuDeviceGetCount, // RPC_cuDeviceGetCount
+    handle_cudaGetDeviceCount, // RPC_cudaGetDeviceCount
+    handle_cuDriverGetVersion, 
 };
 
 int request_handler(int connfd) {

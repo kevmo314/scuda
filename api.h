@@ -225,7 +225,6 @@
 #define RPC_nvmlEventSetWait_v2 204
 
 // cuda
-#define RPC_cuDriverGetVersion 205
 #define RPC_cuLinkCreate_v2 206
 #define RPC_cuLinkAddData_v2 207
 #define RPC_cuLinkComplete 208
@@ -256,5 +255,8 @@
 #define RPC_cuMemcpyDtoH_v2 233
 #define RPC_cuModuleGetGlobal_v2 234
 #define RPC_cuGetProcAddress_v2 235
+#define RPC_cuDeviceGetCount 236
+#define RPC_cudaGetDeviceCount 237
+#define RPC_cuDriverGetVersion 238
 
 #endif

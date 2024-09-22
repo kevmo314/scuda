@@ -1,3 +1,4 @@
+
 #include <arpa/inet.h>
 #include <cstring>
 #include <dlfcn.h>
@@ -941,17 +942,6 @@ nvmlReturn_t nvmlEventSetWait_v2(nvmlEventSet_t set, nvmlEventData_t *data, unsi
     return rpc_get_return<nvmlReturn_t>(request_id, NVML_ERROR_GPU_IS_LOST);
 }
 
-CUresult cuDriverGetVersion(int *driverVersion)
-{
-    
-    int request_id = rpc_start_request(RPC_cuDriverGetVersion);
-    if (request_id < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(driverVersion, sizeof(int)) < 0)
-        return CUDA_ERROR_UNKNOWN;
-    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
-}
-
 CUresult cuLinkCreate_v2(unsigned int numOptions, CUjit_option *options, void **optionValues, CUlinkState *stateOut)
 {
     
@@ -1145,14 +1135,48 @@ CUresult cuLinkAddFile_v2(CUlinkState state, CUjitInputType type, const char *pa
     return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
 }
 
-CUresult cuInit(unsigned int Flags)
-{
-    
-    int request_id = rpc_start_request(RPC_cuInit);
-    if (request_id < 0 ||
-        rpc_write(&Flags, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0)
+CUresult cuInit(unsigned int Flags) {
+    // Open RPC client if not already opened
+    if (open_rpc_client() < 0)
         return CUDA_ERROR_UNKNOWN;
+
+    // Start the RPC request for cuInit
+    int request_id = rpc_start_request(RPC_cuInit);
+    if (request_id < 0) {
+        std::cerr << "Failed to start cuInit request" << std::endl;
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    // Write the flags to the server
+    if (rpc_write(&Flags, sizeof(unsigned int)) < 0) {
+        std::cerr << "Failed to write flags to server" << std::endl;
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    // Wait for the server response
+    if (rpc_wait_for_response(request_id) < 0) {
+        std::cerr << "Failed to wait for response from server" << std::endl;
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    // Read the result code from the server
+    CUresult result;
+    if (rpc_read(&result, sizeof(CUresult)) < 0) {
+        std::cerr << "Failed to read result code from server" << std::endl;
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    // Log the successful initialization
+    if (result == CUDA_SUCCESS) {
+        std::cout << "cuInit successful, Flags: " << Flags << std::endl;
+    } else {
+        const char *errorStr = nullptr;
+        cuGetErrorString(result, &errorStr);
+        std::cerr << "cuInit failed with error code: " << result 
+                  << " (" << (errorStr ? errorStr : "Unknown error") << ")" << std::endl;
+    }
+
+    // Return the result received from the server
     return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
 }
 
@@ -1359,9 +1383,126 @@ CUresult cuModuleGetGlobal_v2(CUdeviceptr *dptr, size_t *bytes, CUmodule hmod, c
 // Map of symbols to their corresponding function pointers
 std::unordered_map<std::string, void (*)()> cuFunctionMap;
 
+CUresult cuDeviceGetCount_handler(int *count) {
+    // Open RPC client if not already opened
+    if (open_rpc_client() < 0)
+        return CUDA_ERROR_UNKNOWN;
+
+    // Start the RPC request for cuDeviceGetCount
+    int request_id = rpc_start_request(RPC_cuDeviceGetCount);
+    if (request_id < 0)
+        return CUDA_ERROR_UNKNOWN;
+
+    // Wait for the server response
+    if (rpc_wait_for_response(request_id) < 0) {
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    // Read the result code from the response
+    CUresult result;
+    if (rpc_read(&result, sizeof(CUresult)) < 0) {
+        std::cerr << "rpc_read for result failed" << std::endl;
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    // Read the device count from the response
+    if (rpc_read(count, sizeof(int)) < 0) {
+        std::cerr << "rpc_read for count failed" << std::endl;
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    // Retrieve and return the result from the response
+    return result;
+}
+
+CUresult cuDriverGetVersion_handler(int *driverVersion) {
+    if (driverVersion == nullptr) {
+        return CUDA_ERROR_INVALID_VALUE;
+    }
+
+    // Start the RPC request for cuDriverGetVersion
+    int request_id = rpc_start_request(RPC_cuDriverGetVersion);
+    if (request_id < 0) {
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    // Wait for the server response
+    if (rpc_wait_for_response(request_id) < 0) {
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    // Read the result code from the server
+    CUresult result;
+    if (rpc_read(&result, sizeof(CUresult)) < 0) {
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    // If the result indicates an error, return it directly
+    if (result != CUDA_SUCCESS) {
+        return result;
+    }
+
+    // Read the driver version from the server
+    if (rpc_read(driverVersion, sizeof(int)) < 0) {
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    std::cout << "Client: Received driver version from server: " << *driverVersion << std::endl;
+
+    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
+}
+
+
+cudaError_t cudaGetDeviceCountShim(int *count) {
+    if (sockfd < 0) {
+        std::cerr << "Socket not connected." << std::endl;
+        return cudaErrorUnknown;
+    }
+
+    // Prepare the request ID for the server
+    int request_id = rpc_start_request(RPC_cudaGetDeviceCount);
+    if (request_id < 0) {
+        std::cerr << "Failed to start request for cuDeviceGetCount" << std::endl;
+        return cudaErrorUnknown;
+    }
+
+    // Wait for the server's response
+    if (rpc_wait_for_response(request_id) < 0) {
+        std::cerr << "Failed to wait for response from server" << std::endl;
+        return cudaErrorUnknown;
+    }
+
+    // Read the result code from the server
+    cudaError_t result;
+    if (rpc_read(&result, sizeof(CUresult)) < 0) {
+        std::cerr << "Failed to read result from server" << std::endl;
+        return cudaErrorUnknown;
+    }
+
+    // Check if the cuDeviceGetCount call was successful
+    if (result != CUDA_SUCCESS) {
+        std::cerr << "cuDeviceGetCount call failed on the server. Error code: " << result << std::endl;
+        return cudaErrorUnknown;
+    }
+
+    // Read the device count from the server
+    if (rpc_read(count, sizeof(int)) < 0) {
+        std::cerr << "Failed to read device count from server" << std::endl;
+        return cudaErrorUnknown;
+    }
+
+    std::cout << "Client: Received device count from server: " << *count << std::endl;
+
+    cudaError_t res = rpc_get_return<cudaError_t>(request_id, cudaErrorUnknown);
+
+    return cudaSuccess;
+}
+
 void initializeCuFunctionMap() {
     cuFunctionMap["cuInit"] = reinterpret_cast<void (*)()>(cuInit);
-    // cuFunctionMap["cuGetProcAddress"] = reinterpret_cast<void (*)()>(cuGetProcAddress);
+    cuFunctionMap["cuGetProcAddress"] = reinterpret_cast<void (*)()>(cuGetProcAddress);
+    cuFunctionMap["cuDriverGetVersion"] = reinterpret_cast<void (*)()>(cuDriverGetVersion_handler);
+    cuFunctionMap["cudaGetDeviceCount"] = reinterpret_cast<void (*)()>(cudaGetDeviceCountShim);
 }
 
 void noOpFunction() {
@@ -1391,8 +1532,6 @@ CUresult cuGetProcAddress_v2_handler(const char *symbol, void **pfn, int cudaVer
         return CUDA_ERROR_UNKNOWN;
     }
 
-    std::cout << "SYMBOL RETURN: " << symbol << std::endl;
-
     // Wait for the server response
     if (rpc_wait_for_response(request_id) < 0)
     {
@@ -1404,8 +1543,6 @@ CUresult cuGetProcAddress_v2_handler(const char *symbol, void **pfn, int cudaVer
     {
         return CUDA_ERROR_UNKNOWN;
     }
-
-    std::cout << "call complete: " << symbolStatus << std::endl;
 
     std::string symbolName(symbol);
     auto it = cuFunctionMap.find(symbolName);
@@ -1443,8 +1580,6 @@ CUresult cuGetProcAddress(const char *symbol, void **pfn, int cudaVersion, cuuin
         return CUDA_ERROR_UNKNOWN;
     }
 
-    std::cout << "SYMBOL RETURN: " << symbol << std::endl;
-
     // Wait for the server response
     if (rpc_wait_for_response(request_id) < 0)
     {
@@ -1455,6 +1590,17 @@ CUresult cuGetProcAddress(const char *symbol, void **pfn, int cudaVersion, cuuin
     if (rpc_read(pfn, sizeof(void *)) < 0 || rpc_read(symbolStatus, sizeof(CUdriverProcAddressQueryResult)) < 0)
     {
         return CUDA_ERROR_UNKNOWN;
+    }
+
+    std::string symbolName(symbol);
+    auto it = cuFunctionMap.find(symbolName);
+    if (it != cuFunctionMap.end()) {
+        *pfn = reinterpret_cast<void *>(it->second);
+        std::cout << "Mapped symbol: " << symbolName << " to function: " << *pfn << std::endl;
+    } else {
+        void *fn = nullptr;
+        std::cerr << "Function for symbol: " << symbolName << " not found!" << std::endl;
+        *pfn = reinterpret_cast<void *>(cudaGetDeviceCountShim); 
     }
 
     return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
@@ -1542,7 +1688,7 @@ void initializeFunctionMap()
     functionMap["nvmlEventSetWait_v2"] = (void *)nvmlEventSetWait_v2;
 
     // cuda
-    functionMap["cuDriverGetVersion"] = (void *)cuDriverGetVersion;
+    // functionMap["cuDriverGetVersion"] = (void *)cuDriverGetVersion;
     functionMap["cuLinkCreate_v2"] = (void *)cuLinkCreate_v2;
     functionMap["cuLinkAddData_v2"] = (void *)cuLinkAddData_v2;
     functionMap["cuLinkComplete"] = (void *)cuLinkComplete;
@@ -1573,7 +1719,8 @@ void initializeFunctionMap()
     functionMap["cuMemcpyDtoH_v2"] = (void *)cuMemcpyDtoH_v2;
     functionMap["cuModuleGetGlobal_v2"] = (void *)cuModuleGetGlobal_v2;
     functionMap["cuGetProcAddress_v2"] = (void *)cuGetProcAddress_v2_handler;
-    // functionMap["cuGetProcAddress"] = (void *)cuGetProcAddress_v2_handler;
+    functionMap["cuDeviceGetCount"] = (void *)cuDeviceGetCount_handler;
+    functionMap["cudaGetDeviceCount"] = (void *)cudaGetDeviceCountShim;
 }
 
 // Lookup function similar to dlsym
@@ -1593,6 +1740,8 @@ void *dlsym(void *handle, const char *name) __THROW
     initializeFunctionMap();  // Initialize the function map
 
     void *func = getFunctionByName(name);  // Lookup function by name
+
+    std::cout << "Functionnnnnn: " << name << std::endl;
 
     if (func != nullptr) {
         std::cout << "[dlsym] Function address from functionMap: " << func << std::endl;
