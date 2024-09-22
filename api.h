@@ -11,8 +11,6 @@
 
 // 4.14 System Queries
 #define RPC_nvmlSystemGetDriverVersion 4
-// #define RPC_nvmlSystemGetDriverVersion_v2 5
-// #define RPC_nvmlSystemGetDriverBranch 6
 #define RPC_nvmlSystemGetHicVersion 7
 #define RPC_nvmlSystemGetNVMLVersion 8
 #define RPC_nvmlSystemGetProcessName 9
@@ -252,11 +250,12 @@
 #define RPC_cuStreamSynchronize 230
 #define RPC_cuOccupancyMaxActiveBlocksPerMultiprocessor 231
 #define RPC_cuLaunchKernelEx 232
-#define RPC_cuMemcpyDtoH_v2 233
-#define RPC_cuModuleGetGlobal_v2 234
-#define RPC_cuGetProcAddress_v2 235
-#define RPC_cuDeviceGetCount 236
-#define RPC_cudaGetDeviceCount 237
-#define RPC_cuDriverGetVersion 238
+#define RPC_cuModuleGetGlobal_v2 233
+#define RPC_cuGetProcAddress_v2 234
+#define RPC_cudaGetDeviceCount 235
+#define RPC_cuDriverGetVersion 236
+#define RPC_cuGetExportTable 237
+#define RPC_cuModuleGetLoadingMode 238
+#define RPC_cuDeviceGetCount 239
 
 #endif

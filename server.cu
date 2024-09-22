@@ -1700,6 +1700,101 @@ int handle_cuGetProcAddress_v2(int connfd) {
     return result;
 }
 
+int handle_cuGetExportTable(int connfd) {
+    CUuuid table_uuid;
+
+    // Read the UUID from the client
+    if (read(connfd, &table_uuid, sizeof(CUuuid)) < 0) {
+        std::cerr << "Failed to read UUID from client" << std::endl;
+        return -1;
+    }
+
+    std::cout << "Server: Received UUID from client: ";
+    for (int i = 0; i < 16; i++) {
+        std::cout << std::hex << (int)table_uuid.bytes[i] << " ";
+    }
+    std::cout << std::endl;
+
+    const void *export_table = nullptr;
+    CUresult result = cuGetExportTable(reinterpret_cast<const void **>(&export_table), &table_uuid);
+
+    if (result != CUDA_SUCCESS) {
+        const char *errorStr = nullptr;
+        cuGetErrorString(result, &errorStr);
+        std::cerr << "cuGetExportTable failed with error code: " << result 
+                  << " (" << (errorStr ? errorStr : "Unknown error") << ")" << std::endl;
+
+        // Write the error code to the client
+        if (write(connfd, &result, sizeof(CUresult)) < 0) {
+            std::cerr << "Failed to write result code to client. Error: " << strerror(errno) << std::endl;
+            return -1;
+        }
+        return -1;
+    }
+
+    // Write the result code back to the client
+    if (write(connfd, &result, sizeof(CUresult)) < 0) {
+        std::cerr << "Failed to write result code to client. Error: " << strerror(errno) << std::endl;
+        return -1;
+    }
+
+    // Write the export table pointer back to the client
+    if (write(connfd, &export_table, sizeof(void *)) < 0) {
+        std::cerr << "Failed to write export table pointer to client. Error: " << strerror(errno) << std::endl;
+        return -1;
+    }
+
+    std::cout << "Server: Sent export table pointer to client successfully: " << export_table << std::endl;
+
+    return 0;
+}
+
+int handle_cuModuleGetLoadingMode(int connfd) {
+    CUmoduleLoadingMode loadingMode;
+    CUresult result;
+
+    // Call cuModuleGetLoadingMode with the correct argument
+    result = cuModuleGetLoadingMode(&loadingMode);
+
+    // Check if the cuModuleGetLoadingMode call was successful
+    if (result != CUDA_SUCCESS) {
+        const char *errorStr = nullptr;
+        cuGetErrorString(result, &errorStr);
+        std::cerr << "cuModuleGetLoadingMode failed with error code: " << result 
+                  << " (" << (errorStr ? errorStr : "Unknown error") << ")" << std::endl;
+
+        // Write the error code back to the client
+        ssize_t bytes_written = write(connfd, &result, sizeof(CUresult));
+        if (bytes_written < 0) {
+            std::cerr << "Failed to write result code to client. Error: " << strerror(errno) << std::endl;
+            return -1;
+        } else if (bytes_written != sizeof(CUresult)) {
+            std::cerr << "Mismatch in bytes written for result code. Expected " 
+                      << sizeof(CUresult) << " but wrote " << bytes_written << std::endl;
+            return -1;
+        }
+        return -1;
+    }
+
+    // Write the result code back to the client
+    ssize_t bytes_written = write(connfd, &result, sizeof(CUresult));
+    if (bytes_written < 0) {
+        std::cerr << "Failed to write result code to client. Error: " << strerror(errno) << std::endl;
+        return -1;
+    }
+
+    // Write the loading mode back to the client
+    bytes_written = write(connfd, &loadingMode, sizeof(CUmoduleLoadingMode));
+    if (bytes_written < 0) {
+        std::cerr << "Failed to write loading mode to client. Error: " << strerror(errno) << std::endl;
+        return -1;
+    }
+
+    std::cout << "Server: Sent loading mode to client successfully." << std::endl;
+
+    return 0;
+}
+
 int handle_cudaGetDeviceCount(int connfd) {
     int deviceCount = 0;
     cudaError_t result;
@@ -1745,19 +1840,10 @@ int handle_cuDeviceGetCount(int connfd) {
     int deviceCount = 0;
     CUresult result;
 
-    std::cout << "brooo wtf" << std::endl;
+    // Log start of request processing
+    std::cout << "Server: Handling cuDeviceGetCount request." << std::endl;
 
-    // Initialize the CUDA driver
-    result = cuInit(0);
-    if (result != CUDA_SUCCESS) {
-        const char *errorStr = nullptr;
-        cuGetErrorString(result, &errorStr);
-        std::cerr << "cuInit failed with error code: " << result 
-                  << " (" << (errorStr ? errorStr : "Unknown error") << ")" << std::endl;
-        return -1;
-    }
-
-    // Call the actual cuDeviceGetCount function
+    // Call cuDeviceGetCount to get the number of devices
     result = cuDeviceGetCount(&deviceCount);
 
     // Check for errors in the cuDeviceGetCount call
@@ -1766,6 +1852,11 @@ int handle_cuDeviceGetCount(int connfd) {
         cuGetErrorString(result, &errorStr);
         std::cerr << "cuDeviceGetCount failed with error code: " << result 
                   << " (" << (errorStr ? errorStr : "Unknown error") << ")" << std::endl;
+
+        // Send error code back to client
+        if (write(connfd, &result, sizeof(CUresult)) < 0) {
+            std::cerr << "Failed to write error result code to client. Error: " << strerror(errno) << std::endl;
+        }
         return -1;
     }
 
@@ -1783,7 +1874,7 @@ int handle_cuDeviceGetCount(int connfd) {
 
     std::cout << "Server: Sent device count to client successfully: " << deviceCount << std::endl;
 
-    return result;
+    return 0;
 }
 
 int handle_cuDriverGetVersion(int connfd) {
@@ -1822,6 +1913,39 @@ int handle_cuDriverGetVersion(int connfd) {
     std::cout << "Server: Sent driver version to client successfully: " << driverVersion << std::endl;
 
     return result;
+}
+
+int handle_cuDeviceGet(int connfd) {
+    int deviceIndex;
+    CUdevice device;
+    CUresult result;
+
+    // Read the device index from the client
+    if (read(connfd, &deviceIndex, sizeof(int)) < 0) {
+        std::cerr << "Failed to read device index from client. Error: " << strerror(errno) << std::endl;
+        return -1;
+    }
+
+    std::cout << "Server: Received device index: " << deviceIndex << std::endl;
+
+    // Call the actual cuDeviceGet function
+    result = cuDeviceGet(&device, deviceIndex);
+
+    // Write the result code back to the client
+    if (write(connfd, &result, sizeof(CUresult)) < 0) {
+        std::cerr << "Failed to write result code to client. Error: " << strerror(errno) << std::endl;
+        return -1;
+    }
+
+    // Write the device handle back to the client
+    if (write(connfd, &device, sizeof(CUdevice)) < 0) {
+        std::cerr << "Failed to write device handle to client. Error: " << strerror(errno) << std::endl;
+        return -1;
+    }
+
+    std::cout << "Server: Sent device handle to client successfully." << std::endl;
+
+    return 0;
 }
 
 int handle_cuInit(int connfd) {
@@ -2094,30 +2218,50 @@ static RequestHandler opHandlers[] = {
     nullptr,           // RPC_cuDevicePrimaryCtxRetain (225)
     nullptr,          // RPC_cuDevicePrimaryCtxRelease (226)
     nullptr,            // RPC_cuDevicePrimaryCtxReset (227)
-    nullptr,                        // RPC_cuDeviceGet (228)
+    handle_cuDeviceGet,
     nullptr,               // RPC_cuDeviceGetAttribute (229)
     nullptr,                // RPC_cuStreamSynchronize (230)
     nullptr, // RPC_cuOccupancyMaxActiveBlocksPerMultiprocessor (231)
     nullptr,                   // RPC_cuLaunchKernelEx (232)
-    nullptr,                    // RPC_cuMemcpyDtoH_v2 (233)
     nullptr,               // RPC_cuModuleGetGlobal_v2 (234)
     handle_cuGetProcAddress_v2,
-    nullptr, // handle_cuDeviceGetCount, // RPC_cuDeviceGetCount
     handle_cudaGetDeviceCount, // RPC_cudaGetDeviceCount
-    handle_cuDriverGetVersion, 
+    handle_cuDriverGetVersion,
+    handle_cuGetExportTable,
+    handle_cuModuleGetLoadingMode,
+    handle_cuDeviceGetCount,
 };
 
 int request_handler(int connfd) {
     unsigned int op;
+    ssize_t bytes_read;
 
-    // Attempt to read the operation code from the client
-    if (read(connfd, &op, sizeof(unsigned int)) < 0) {
-        std::cout << "Error reading opcode from client" << std::endl;
+    // Buffer to hold the raw data for debugging
+    unsigned char raw_data[sizeof(unsigned int)];
+
+    // Read the raw data from the client
+    bytes_read = read(connfd, raw_data, sizeof(unsigned int));
+    if (bytes_read < 0) {
+        std::cerr << "Error reading raw data from client: " << strerror(errno) << std::endl;
+        return -1;
+    } else if (bytes_read != sizeof(unsigned int)) {
+        std::cerr << "Expected " << sizeof(unsigned int) << " bytes, but got " << bytes_read << std::endl;
         return -1;
     }
 
+    // Log the raw bytes received for debugging
+    std::cout << "Raw op bytes received: ";
+    for (size_t i = 0; i < sizeof(unsigned int); ++i) {
+        std::cout << std::hex << static_cast<int>(raw_data[i]) << " ";
+    }
+    std::cout << std::dec << std::endl;
+
+    // Now interpret the raw bytes as the operation code
+    memcpy(&op, raw_data, sizeof(unsigned int));
+    std::cout << "Incoming op: " << op << std::endl;
+
     if (opHandlers[op] == NULL) {
-        std::cout << "Unknown or unsupported operation: " << op << std::endl;
+        std::cerr << "Unknown or unsupported operation: " << op << std::endl;
         return -1;
     }
 
