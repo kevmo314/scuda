@@ -86,20 +86,36 @@ int rpc_start_request(const unsigned int op)
 {
     static int next_request_id = 1;
 
-    // write the request atomically
+    // Ensure socket is open
+    if (sockfd < 0) {
+        std::cerr << "Socket not open" << std::endl;
+        return -1;
+    }
+
+    // Lock the mutex for atomic operation
     pthread_mutex_lock(&mutex);
 
     int request_id = next_request_id++;
 
-    if (write(sockfd, &request_id, sizeof(int)) < 0 ||
-        write(sockfd, &op, sizeof(unsigned int)) < 0)
+    // Write the request ID and operation code
+    if (write(sockfd, &request_id, sizeof(int)) < 0)
     {
+        std::cerr << "Failed to write request_id. Error: " << strerror(errno) << std::endl;
         pthread_mutex_unlock(&mutex);
         return -1;
     }
 
+    if (write(sockfd, &op, sizeof(unsigned int)) < 0)
+    {
+        std::cerr << "Failed to write operation code. Error: " << strerror(errno) << std::endl;
+        pthread_mutex_unlock(&mutex);
+        return -1;
+    }
+
+    // Return the request ID
     return request_id;
 }
+
 
 int rpc_write(const void *data, size_t size)
 {
@@ -160,6 +176,7 @@ T rpc_get_return(int request_id, T error_value)
         result = error_value;
 
     pthread_mutex_unlock(&mutex);
+
     return result;
 }
 
@@ -1298,8 +1315,6 @@ CUresult cuMemcpyDtoH_v2(void *dstHost, CUdeviceptr srcDevice, size_t ByteCount)
 {
     int request_id = rpc_start_request(RPC_cuMemcpyDtoH_v2);
 
-    
-    
     if (request_id < 0 ||
         rpc_write(dstHost, sizeof(void*)) < 0 ||
         rpc_write(&srcDevice, sizeof(CUdeviceptr)) < 0 ||
@@ -1317,8 +1332,6 @@ CUresult cuModuleGetGlobal_v2(CUdeviceptr *dptr, size_t *bytes, CUmodule hmod, c
 {
     int request_id = rpc_start_request(RPC_cuModuleGetGlobal_v2);
 
-    
-    
     if (request_id < 0 ||
         rpc_write(&hmod, sizeof(CUmodule)) < 0 ||
         rpc_write(name, strlen(name) + 1) < 0 ||
@@ -1329,6 +1342,46 @@ CUresult cuModuleGetGlobal_v2(CUdeviceptr *dptr, size_t *bytes, CUmodule hmod, c
         return CUDA_ERROR_UNKNOWN;
     }
 
+    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
+}
+
+CUresult cuGetProcAddress_v2_handler(const char *symbol, void **pfn, int cudaVersion, cuuint64_t flags, CUdriverProcAddressQueryResult *symbolStatus)
+{
+    // Open RPC client if not already opened
+    if (open_rpc_client() < 0)
+        return CUDA_ERROR_UNKNOWN;
+
+    // Start the RPC request for cuGetProcAddress
+    int request_id = rpc_start_request(RPC_cuGetProcAddress_v2);
+    if (request_id < 0)
+        return CUDA_ERROR_UNKNOWN;
+
+    int symbol_length = strlen(symbol) + 1;
+
+    void *placeholder = nullptr;
+    if (rpc_write(&symbol_length, sizeof(int)) < 0 ||
+        rpc_write(symbol, symbol_length) < 0 ||
+        rpc_write(&cudaVersion, sizeof(int)) < 0 ||
+        rpc_write(&placeholder, sizeof(void *)) < 0 ||  // Write a placeholder instead of pfn
+        rpc_write(&flags, sizeof(cuuint64_t)) < 0) {
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    // Wait for the server response
+    if (rpc_wait_for_response(request_id) < 0)
+    {
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    //  // Read the function pointer from the response
+    if (rpc_read(pfn, sizeof(void *)) < 0 || rpc_read(symbolStatus, sizeof(CUdriverProcAddressQueryResult)))
+    {
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    std::cout << "call complete: " << symbolStatus << std::endl;
+
+    // Retrieve and return the result from the response
     return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
 }
 
@@ -1444,7 +1497,7 @@ void initializeFunctionMap()
     functionMap["cuLaunchKernelEx"] = (void *)cuLaunchKernelEx;
     functionMap["cuMemcpyDtoH_v2"] = (void *)cuMemcpyDtoH_v2;
     functionMap["cuModuleGetGlobal_v2"] = (void *)cuModuleGetGlobal_v2;
-    // functionMap["cuGetProcAddress_v2"] = (void *)cuGetProcAddress_v2;
+    functionMap["cuGetProcAddress_v2"] = (void *)cuGetProcAddress_v2_handler;
 }
 
 // Lookup function similar to dlsym

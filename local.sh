@@ -8,6 +8,10 @@ server_out_path="$(pwd)/server.so"
 build() {
   echo "building client..."
 
+  if [ -f "$libscuda_path" ]; then
+    rm "$libscuda_path"
+  fi
+
   if [[ "$(uname)" == "Linux" ]]; then
     nvcc -Xcompiler -fPIC -shared -o $libscuda_path $client_path
   else
@@ -24,7 +28,7 @@ server() {
   echo "building server..." 
 
   if [[ "$(uname)" == "Linux" ]]; then
-    nvcc -o $server_out_path $server_path -lnvidia-ml
+    nvcc -o $server_out_path $server_path -L/usr/lib/x86_64-linux-gnu/libcuda.so -lcuda -lnvidia-ml
   else
     echo "No compiler options set for os "$(uname)""
   fi
@@ -36,6 +40,8 @@ server() {
 
 run() {
   build
+
+  export SCUDA_SERVER=0.0.0.0
 
   LD_PRELOAD="$libscuda_path" python3 -c "import torch; print(torch.cuda.is_available())"
 }

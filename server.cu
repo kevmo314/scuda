@@ -1655,6 +1655,76 @@ int handle_cuDriverGetVersion(int connfd) {
     return result;
 }
 
+
+int handle_cuGetProcAddress_v2(int connfd) {
+    int symbol_length;
+    char symbol[256];
+    void *func = nullptr;  // pointer to be sent back to the client
+    int cudaVersion;
+    cuuint64_t flags;
+    CUdriverProcAddressQueryResult result;
+
+    std::cerr << ">>>> Server: Receiving parameters" << std::endl;
+
+    if (read(connfd, &symbol_length, sizeof(int)) < 0) {
+        std::cerr << "Failed to read symbol length" << std::endl;
+        return -1;
+    }
+
+    if (symbol_length <= 0 || symbol_length > sizeof(symbol)) {
+        std::cerr << "Invalid symbol length" << std::endl;
+        return -1;
+    }
+
+    if (read(connfd, symbol, symbol_length) < 0) {
+        std::cerr << "Failed to read symbol string" << std::endl;
+        return -1;
+    }
+
+    if (read(connfd, &cudaVersion, sizeof(int)) < 0) {
+        std::cerr << "Failed to read CUDA version" << std::endl;
+        return -1;
+    }
+
+    if (read(connfd, &func, sizeof(void *)) < 0) {
+        std::cerr << "Failed to read function pointer" << std::endl;
+        return -1;
+    }
+
+    if (read(connfd, &flags, sizeof(cuuint64_t)) < 0) {
+        std::cerr << "Failed to read flags" << std::endl;
+        return -1;
+    }
+
+    std::cout << "Server: Symbol - " << symbol << ", CUDA Version - " << cudaVersion << ", Flags - " << flags << std::endl;
+
+    // Call the actual cuGetProcAddress_v2 function with the correct parameters
+    CUresult result_code = cuGetProcAddress(symbol, &func, cudaVersion, flags, &result);
+    if (result_code != CUDA_SUCCESS) {
+        const char *errorStr = nullptr;
+        cuGetErrorString(result_code, &errorStr);
+        std::cerr << "cuGetProcAddress_v2 failed with error code: " << result_code 
+                << " (" << (errorStr ? errorStr : "Unknown error") << ")" << std::endl;
+        return -1;
+    }
+
+    std::cout << "v2 result: " << &result << std::endl;
+
+    if (write(connfd, &func, sizeof(void *)) < 0) {
+        std::cerr << "Failed to write function pointer to client. Error: " << strerror(errno) << std::endl;
+        return -1;
+    }
+
+    if (write(connfd, &result, sizeof(CUdriverProcAddressQueryResult)) < 0) {
+        std::cerr << "Failed to write result to client. Error: " << strerror(errno) << std::endl;
+        return -1;
+    }
+
+    std::cout << "Server: Sent function pointer and result to client successfully." << std::endl;
+
+    return result;
+}
+
 static RequestHandler opHandlers[] = {
     /* 0  */ handle_nvmlInitWithFlags,
     /* 1  */ handle_nvmlInit_v2,
@@ -1861,9 +1931,38 @@ static RequestHandler opHandlers[] = {
     handle_nvmlEventSetCreate,                     // RPC_nvmlEventSetCreate (202)
     handle_nvmlEventSetFree,                       // RPC_nvmlEventSetFree (203)
     nullptr, // 204
-
     // cuda
-    handle_cuDriverGetVersion, // 205
+    nullptr,                 // RPC_cuDriverGetVersion (205)
+    nullptr,                    // RPC_cuLinkCreate_v2 (206)
+    nullptr,                   // RPC_cuLinkAddData_v2 (207)
+    nullptr,                     // RPC_cuLinkComplete (208)
+    nullptr,                   // RPC_cuModuleLoadData (209)
+    nullptr,                     // RPC_cuModuleUnload (210)
+    nullptr,                   // RPC_cuGetErrorString (211)
+    nullptr,                      // RPC_cuLinkDestroy (212)
+    nullptr,                // RPC_cuModuleGetFunction (213)
+    nullptr,                 // RPC_cuFuncSetAttribute (214)
+    nullptr,                     // RPC_cuLaunchKernel (215)
+    nullptr,                     // RPC_cuGetErrorName (216)
+    nullptr,              // RPC_cuModuleLoadFatBinary (217)
+    nullptr,                 // RPC_cuModuleLoadDataEx (218)
+    nullptr,                   // RPC_cuLinkAddFile_v2 (219)
+    nullptr,                             // RPC_cuInit (220)
+    nullptr,                 // RPC_cuFuncGetAttribute (221)
+    nullptr,                   // RPC_cuCtxPushCurrent (222)
+    nullptr,                    // RPC_cuCtxPopCurrent (223)
+    nullptr,                     // RPC_cuCtxGetDevice (224)
+    nullptr,           // RPC_cuDevicePrimaryCtxRetain (225)
+    nullptr,          // RPC_cuDevicePrimaryCtxRelease (226)
+    nullptr,            // RPC_cuDevicePrimaryCtxReset (227)
+    nullptr,                        // RPC_cuDeviceGet (228)
+    nullptr,               // RPC_cuDeviceGetAttribute (229)
+    nullptr,                // RPC_cuStreamSynchronize (230)
+    nullptr, // RPC_cuOccupancyMaxActiveBlocksPerMultiprocessor (231)
+    nullptr,                   // RPC_cuLaunchKernelEx (232)
+    nullptr,                    // RPC_cuMemcpyDtoH_v2 (233)
+    nullptr,               // RPC_cuModuleGetGlobal_v2 (234)
+    handle_cuGetProcAddress_v2,
 };
 
 int request_handler(int connfd) {
@@ -1871,12 +1970,12 @@ int request_handler(int connfd) {
 
     // Attempt to read the operation code from the client
     if (read(connfd, &op, sizeof(unsigned int)) < 0) {
-        std::cerr << "Error reading opcode from client" << std::endl;
+        std::cout << "Error reading opcode from client" << std::endl;
         return -1;
     }
 
     if (opHandlers[op] == NULL) {
-        std::cerr << "Unknown or unsupported operation: " << op << std::endl;
+        std::cout << "Unknown or unsupported operation: " << op << std::endl;
         return -1;
     }
 
@@ -1916,6 +2015,7 @@ void client_handler(int connfd)
 
         // wait for result
         int res = request_future.get();
+
         if (write(connfd, &res, sizeof(int)) < 0)
         {
             printf("error writing result to client.\n");
@@ -1988,7 +2088,7 @@ int main()
             continue;
         }
 
-        // << "Client connected, spawning thread." << std::endl;
+        std::cout << "Client connected, spawning thread." << std::endl;
 
         std::thread client_thread(client_handler, connfd);
 
