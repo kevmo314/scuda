@@ -1,5 +1,152 @@
+import io
 import sys
 from pycparser import parse_file, c_ast
+from typing import Optional
+
+def heap_allocation_size(node: c_ast.FuncDecl, p: c_ast.PtrDecl) -> Optional[str]:
+    """
+    Returns the size of heap-allocated parameters. Because there is no convention in
+    Nvidia's API for how these parameters are defined, we need to manually specify
+    which ones are heap allocated and how much memory they require.
+    """
+    if node.name == "nvmlSystemGetDriverVersion":
+        if p.name == "version":
+            return "length * sizeof(char)"
+    if node.name == "nvmlSystemGetNVMLVersion":
+        if p.name == "version":
+            return "length * sizeof(char)"
+    if node.name == "nvmlSystemGetProcessName":
+        if p.name == "name":
+            return "length * sizeof(char)"
+    if node.name == "nvmlSystemGetHicVersion":
+        if p.name == "hwbcEntries":
+            return "hwbcCount * sizeof(nvmlHwbcEntry_t)"
+    if node.name == "nvmlUnitGetDevices":
+        if p.name == "devices":
+            return "deviceCount * sizeof(nvmlDevice_t)"
+    if node.name == "nvmlSystemGetHicVersion":
+        if p.name == "hwbcEntries":
+            return "hwbcCount * sizeof(nvmlHwbcEntry_t)"
+    if node.name == "nvmlDeviceGetName":
+        if p.name == "name":
+            return "length * sizeof(char)"
+    if node.name == "nvmlDeviceGetSerial":
+        if p.name == "serial":
+            return "length * sizeof(char)"
+    if node.name == "nvmlDeviceGetMemoryAffinity":
+        if p.name == "nodeSet":
+            return "nodeSetSize * sizeof(unsigned long)"
+    if node.name == "nvmlDeviceGetCpuAffinityWithinScope":
+        if p.name == "cpuSet":
+            return "cpuSetSize * sizeof(unsigned long)"
+    if node.name == "nvmlDeviceGetCpuAffinity":
+        if p.name == "cpuSet":
+            return "cpuSetSize * sizeof(unsigned long)"
+    if node.name == "nvmlDeviceGetTopologyNearestGpus":
+        if p.name == "deviceArray":
+            return "count * sizeof(nvmlDevice_t)"
+    if node.name == "nvmlDeviceGetUUID":
+        if p.name == "uuid":
+            return "length * sizeof(char)"
+    if node.name == "nvmlVgpuInstanceGetMdevUUID":
+        if p.name == "mdevUuid":
+            return "size * sizeof(char)"
+    if node.name == "nvmlDeviceGetBoardPartNumber":
+        if p.name == "partNumber":
+            return "length * sizeof(char)"
+    if node.name == "nvmlDeviceGetInforomVersion":
+        if p.name == "version":
+            return "length * sizeof(char)"
+    if node.name == "nvmlDeviceGetInforomImageVersion":
+        if p.name == "version":
+            return "length * sizeof(char)"
+    if node.name == "nvmlDeviceGetEncoderSessions":
+        if p.name == "sessionInfos":
+            return "sessionCount * sizeof(nvmlEncoderSessionInfo_t)"
+    if node.name == "nvmlDeviceGetVbiosVersion":
+        if p.name == "version":
+            return "length * sizeof(char)"
+    if node.name == "nvmlDeviceGetComputeRunningProcesses_v3":
+        if p.name == "infos":
+            return "infoCount * sizeof(nvmlProcessInfo_t)"
+    if node.name == "nvmlDeviceGetGraphicsRunningProcesses_v3":
+        if p.name == "infos":
+            return "infoCount * sizeof(nvmlProcessInfo_t)"
+    if node.name == "nvmlDeviceGetMPSComputeRunningProcesses_v3":
+        if p.name == "infos":
+            return "infoCount * sizeof(nvmlProcessInfo_t)"
+    if node.name == "nvmlDeviceGetSamples":
+        if p.name == "samples":
+            return "sampleCount * sizeof(nvmlSample_t)"
+    if node.name == "nvmlDeviceGetAccountingPids":
+        if p.name == "pids":
+            return "count * sizeof(unsigned int)"
+    if node.name == "nvmlDeviceGetRetiredPages":
+        if p.name == "addresses":
+            return "pageCount * sizeof(unsigned long long)"
+    if node.name == "nvmlDeviceGetRetiredPages_v2":
+        if p.name == "addresses":
+            return "pageCount * sizeof(unsigned long long)"
+    if node.name == "nvmlDeviceGetFieldValues":
+        if p.name == "values":
+            return "valuesCount * sizeof(nvmlFieldValue_t)"
+    if node.name == "nvmlDeviceClearFieldValues":
+        if p.name == "values":
+            return "valuesCount * sizeof(nvmlFieldValue_t)"
+    if node.name == "nvmlDeviceGetSupportedVgpus":
+        if p.name == "vgpuTypeIds":
+            return "vgpuCount * sizeof(nvmlVgpuTypeId_t)"
+    if node.name == "nvmlDeviceGetCreatableVgpus":
+        if p.name == "vgpuTypeIds":
+            return "vgpuCount * sizeof(nvmlVgpuTypeId_t)"
+    if node.name == "nvmlVgpuTypeGetName":
+        if p.name == "vgpuTypeName":
+            return "size * sizeof(char)"
+    if node.name == "nvmlVgpuTypeGetLicense":
+        if p.name == "vgpuTypeLicenseString":
+            return "size * sizeof(char)"
+    if node.name == "nvmlVgpuTypeGetMaxInstances":
+        if p.name == "vgpuTypeId":
+            return "vgpuInstanceCount * sizeof(unsigned int)"
+    if node.name == "nvmlDeviceGetActiveVgpus":
+        if p.name == "vgpuInstances":
+            return "vgpuCount * sizeof(nvmlVgpuInstance_t)"
+    if node.name == "nvmlVgpuInstanceGetVmID":
+        if p.name == "vmId":
+            return "size * sizeof(char)"
+    if node.name == "nvmlVgpuInstanceGetUUID":
+        if p.name == "uuid":
+            return "size * sizeof(char)"
+    if node.name == "nvmlVgpuInstanceGetVmDriverVersion":
+        if p.name == "version":
+            return "length * sizeof(char)"
+    if node.name == "nvmlVgpuInstanceGetGpuPciId":
+        if p.name == "vgpuPciId":
+            return "length * sizeof(char)"
+    if node.name == "nvmlDeviceGetPgpuMetadataString":
+        if p.name == "pgpuMetadata":
+            return "bufferSize * sizeof(char)"
+    if node.name == "nvmlDeviceGetVgpuUtilization":
+        if p.name == "utilizationSamples":
+            return "vgpuInstanceSamplesCount * sizeof(nvmlVgpuInstanceUtilizationSample_t)"
+    if node.name == "nvmlDeviceGetVgpuProcessUtilization":
+        if p.name == "utilizationSamples":
+            return "vgpuProcessSamplesCount * sizeof(nvmlVgpuInstanceUtilizationSample_t)"
+    if node.name == "nvmlVgpuInstanceGetAccountingPids":
+        if p.name == "pids":
+            return "count * sizeof(unsigned int)"
+    if node.name == "nvmlDeviceGetGpuInstancePossiblePlacements_v2":
+        if p.name == "placements":
+            return "count * sizeof(nvmlGpuInstancePlacement_t)"
+    if node.name == "nvmlDeviceGetGpuInstances":
+        if p.name == "gpuInstances":
+            return "count * sizeof(nvmlGpuInstance_t)"
+    if node.name == "nvmlGpuInstanceGetComputeInstancePossiblePlacements":
+        if p.name == "gpuInstances":
+            return "count * sizeof(nvmlComputeInstancePlacement_t)"
+    if node.name == "nvmlGpuInstanceGetComputeInstances":
+        if p.name == "computeInstances":
+            return "count * sizeof(nvmlComputeInstance_t)"
 
 def format_param(param):
     if isinstance(param, c_ast.TypeDecl):
@@ -25,7 +172,12 @@ def format_type_name(param):
     print(param)
     raise NotImplementedError('Unsupported param type: %s' % type(param))
 
-class FuncDefVisitor(c_ast.NodeVisitor):
+class ClientCodegenVisitor(c_ast.NodeVisitor):
+    def __init__(self, sink: io.IOBase):
+        self.sink = sink
+        self.sink.write("#include <nvml.h>\n\n")
+        self.sink.write("#include \"gen_api.h\"\n\n")
+        
     def visit_Decl(self, node):
         if not isinstance(node.type, c_ast.FuncDecl):
             return
@@ -35,28 +187,118 @@ class FuncDefVisitor(c_ast.NodeVisitor):
         params = node.type.args.params if node.type.args else []
 
         # construct the function signature
-        print('{return_type} {name}({params})'.format(
+        self.sink.write('{return_type} {name}({params})\n'.format(
             return_type=return_type.names[0],
             name=node.name,
             params=', '.join(format_param(p) for p in params)
         ))
-        print('{')
-        print('    int request_id = rpc_start_request(RPC_%s);' % node.name)
-        print('    if (request_id < 0 ||')
+        self.sink.write('{\n')
+        self.sink.write('    int request_id = rpc_start_request(RPC_%s);\n' % node.name)
+        self.sink.write('    %s return_value;\n' % return_type.names[0])
+        self.sink.write('    if (request_id < 0 ||\n')
         # write the entire parameter list as a block of memory
         for p in params:
+            if p.name is None:
+                continue
             if isinstance(p.type, c_ast.TypeDecl):
-                print('        rpc_write(&%s, sizeof(%s)) < 0 ||' % (p.name, format_type_name(p.type)))
-            if isinstance(p.type, c_ast.PtrDecl):
-                print('        rpc_write(%s, sizeof(%s)) < 0 ||' % (p.name, format_type_name(p.type)))
-        print('        rpc_wait_for_response(request_id) < 0 ||')
+                self.sink.write('        rpc_write(&%s, sizeof(%s)) < 0 ||\n' % (p.name, format_type_name(p.type)))
+            if isinstance(p.type, c_ast.PtrDecl) and not heap_allocation_size(node, p):
+                self.sink.write('        rpc_write(%s, sizeof(%s)) < 0 ||\n' % (p.name, format_type_name(p.type)))
+        ptrs = [p for p in params if isinstance(p.type, c_ast.PtrDecl) and not heap_allocation_size(node, p)]
+        self.sink.write('        rpc_wait_for_response(request_id) < 0 ||\n')
         for p in params:
-            if isinstance(p.type, c_ast.PtrDecl):
-                print('        rpc_read(%s, sizeof(%s)) < 0 ||' % (p.name, format_type_name(p.type)))
-        print('        return NVML_ERROR_GPU_IS_LOST;')
-        print('    return rpc_get_return(request_id);')
-        print('}')
-        print()
+            if p.name is None or not isinstance(p.type, c_ast.PtrDecl):
+                continue
+            self.sink.write('        rpc_read(%s, sizeof(%s)) < 0 ||\n' % (p.name, format_type_name(p.type)))
+        self.sink.write('        rpc_end_request(request_id, &return_value) < 0)\n')
+        self.sink.write('        return NVML_ERROR_GPU_IS_LOST;\n')
+        self.sink.write('    return return_value;\n')
+        self.sink.write('}\n\n')
+
+class ServerCodegenVisitor(c_ast.NodeVisitor):
+    def __init__(self, sink: io.IOBase):
+        self.sink = sink
+        self.sink.write("#include <nvml.h>\n\n")
+        self.sink.write("#include <unistd.h>\n\n")
+        self.sink.write("#include \"gen_api.h\"\n\n")
+        
+    def visit_Decl(self, node):
+        if not isinstance(node.type, c_ast.FuncDecl):
+            return
+        return_type = node.type.type.type
+        if not isinstance(return_type, c_ast.IdentifierType):
+            return
+        params = node.type.args.params if node.type.args else []
+
+        # construct the function signature
+        self.sink.write('int handle_{name}(int connfd)\n'.format(name=node.name))
+        self.sink.write('{\n')
+
+        # read non-heap-allocated variables
+        stack_vars = [p for p in params if p.name is not None and isinstance(p.type, c_ast.TypeDecl) or (isinstance(p.type, c_ast.PtrDecl) and not heap_allocation_size(node, p))]
+        heap_vars = [p for p in params if p.name is not None and isinstance(p.type, c_ast.PtrDecl) and heap_allocation_size(node, p)]
+        if len(stack_vars) > 0:
+            for p in stack_vars:
+                self.sink.write('    %s %s;\n' % (format_type_name(p.type), p.name))
+            self.sink.write('\n')
+            for i, p in enumerate(stack_vars):
+                self.sink.write('%sread(connfd, &%s, sizeof(%s)) < 0%s' % (
+                    '        ' if i > 0 else '    if (', p.name, format_type_name(p.type), ' ||\n' if i < len(stack_vars) - 1 else ')\n'))
+            self.sink.write('        return -1;\n\n')
+
+        # malloc heap-allocated variables
+        if len(heap_vars) > 0:
+            for p in heap_vars:
+                size = heap_allocation_size(node, p)
+                if not size:
+                    continue
+                self.sink.write('    %s *%s = (%s *) malloc(%s);\n' % (format_type_name(p.type), p.name, format_type_name(p.type), size))
+            self.sink.write('\n')
+        return_type = node.type.type.type
+
+        # call the function
+        self.sink.write('    %s result = %s(' % (return_type.names[0], node.name))
+        for i, p in enumerate(params):
+            if p.name is None:
+                continue
+            if isinstance(p.type, c_ast.PtrDecl) and not heap_allocation_size(node, p):
+                self.sink.write('&%s' % p.name)
+            else:
+                self.sink.write('%s' % p.name)
+            if i < len(params) - 1:
+                self.sink.write(', ')
+        self.sink.write(');\n\n')
+
+        # write pointer vars
+        ptr_vars = [p for p in params if p.name is not None and isinstance(p.type, c_ast.PtrDecl)]
+        if len(ptr_vars) > 0:
+            for i, p in enumerate(ptr_vars):
+                size = heap_allocation_size(node, p)
+                if size:
+                    self.sink.write('%swrite(connfd, %s, %s) < 0%s' % (
+                        '        ' if i > 0 else '    if (', p.name, size, ' ||\n' if i < len(ptr_vars) - 1 else ')\n'))
+                else:
+                    self.sink.write('%swrite(connfd, &%s, sizeof(%s)) < 0%s' % (
+                        '        ' if i > 0 else '    if (', p.name, format_type_name(p.type), ' ||\n' if i < len(ptr_vars) - 1 else ')\n'))
+            self.sink.write('        return -1;\n\n')
+        self.sink.write('    return result;\n')
+        self.sink.write('}\n\n')
+
+class HeaderCodegenVisitor(c_ast.NodeVisitor):
+    def __init__(self, sink: io.IOBase):
+        self.sink = sink
+        self.index = 0
+        
+    def visit_Decl(self, node):
+        if not isinstance(node.type, c_ast.FuncDecl):
+            return
+        return_type = node.type.type.type
+        if not isinstance(return_type, c_ast.IdentifierType):
+            return
+
+        # construct the function signature
+        self.sink.write('#define RPC_{name} {index}\n'.format(name=node.name, index=self.index))
+        self.index += 1
 
 
 def show_func_defs(filename):
@@ -64,8 +306,17 @@ def show_func_defs(filename):
     # make sure one exists in PATH.
     ast = parse_file(filename, use_cpp=True)
 
-    v = FuncDefVisitor()
-    v.visit(ast)
+    with open('gen_api.h', 'w') as f:
+        v = HeaderCodegenVisitor(f)
+        v.visit(ast)
+
+    with open('gen_client.cu', 'w') as f:
+        v = ClientCodegenVisitor(f)
+        v.visit(ast)
+
+    with open('gen_server.cu', 'w') as f:
+        v = ServerCodegenVisitor(f)
+        v.visit(ast)
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
