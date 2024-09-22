@@ -1374,7 +1374,7 @@ CUresult cuGetProcAddress_v2_handler(const char *symbol, void **pfn, int cudaVer
     }
 
     //  // Read the function pointer from the response
-    if (rpc_read(pfn, sizeof(void *)) < 0 || rpc_read(symbolStatus, sizeof(CUdriverProcAddressQueryResult)))
+    if (rpc_read(pfn, sizeof(void *)) < 0 || rpc_read(symbolStatus, sizeof(CUdriverProcAddressQueryResult)) < 0)
     {
         return CUDA_ERROR_UNKNOWN;
     }
