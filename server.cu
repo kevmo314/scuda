@@ -23,7 +23,7 @@
 typedef struct
 {
     int connfd;
-    unsigned int request_id;
+    int read_request_id;
     pthread_mutex_t read_mutex, write_mutex;
 } conn_t;
 
@@ -63,7 +63,7 @@ void client_handler(int connfd)
             std::cerr << "Error locking mutex." << std::endl;
             break;
         }
-        int n = read(connfd, &conn.request_id, sizeof(unsigned int));
+        int n = read(connfd, &conn.read_request_id, sizeof(int));
         if (n == 0)
         {
             printf("client disconnected, loop continuing. \n");
@@ -113,12 +113,15 @@ int rpc_write(const void *conn, const void *data, const size_t size)
 // signal from the handler that the request read is complete.
 int rpc_end_request(const void *conn)
 {
-    return pthread_mutex_unlock(&((conn_t *)conn)->read_mutex);
+    int request_id = ((conn_t *)conn)->read_request_id;
+    if (pthread_mutex_unlock(&((conn_t *)conn)->read_mutex) < 0)
+        return -1;
+    return request_id;
 }
 
-int rpc_start_response(const void *conn)
+int rpc_start_response(const void *conn, const int request_id)
 {
-    return pthread_mutex_lock(&((conn_t *)conn)->write_mutex) || write(((conn_t *)conn)->connfd, &((conn_t *)conn)->request_id, sizeof(unsigned int));
+    return pthread_mutex_lock(&((conn_t *)conn)->write_mutex) || write(((conn_t *)conn)->connfd, &request_id, sizeof(unsigned int));
 }
 
 int main()
