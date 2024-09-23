@@ -259,7 +259,7 @@ class ServerCodegenVisitor(c_ast.NodeVisitor):
         self.sink.write("extern int rpc_read(const void *conn, void *data, const size_t size);\n");
         self.sink.write("extern int rpc_write(const void *conn, const void *data, const size_t size);\n");
         self.sink.write("extern int rpc_end_request(const void *conn);\n");
-        self.sink.write("extern int rpc_start_response(const void *conn);\n");
+        self.sink.write("extern int rpc_start_response(const void *conn, const int request_id);\n");
     
         self.functions = []
 
@@ -302,7 +302,8 @@ class ServerCodegenVisitor(c_ast.NodeVisitor):
                     '        ' if i > 0 else '    if (', p.name, format_type_name(p.type), ' ||\n' if i < len(stack_vars) - 1 else ')\n'))
             self.sink.write('        return -1;\n\n')
 
-        self.sink.write('    if (rpc_end_request(conn) < 0)\n')
+        self.sink.write('    int request_id = rpc_end_request(conn);\n')
+        self.sink.write('    if (request_id < 0)\n')
         self.sink.write('        return -1;\n\n')
 
         # malloc heap-allocated variables
@@ -329,7 +330,7 @@ class ServerCodegenVisitor(c_ast.NodeVisitor):
         self.sink.write(');\n\n')
 
 
-        self.sink.write('    if (rpc_start_response(conn) < 0)\n')
+        self.sink.write('    if (rpc_start_response(conn, request_id) < 0)\n')
         self.sink.write('        return -1;\n\n')
 
         # write pointer vars
