@@ -1342,26 +1342,22 @@ CUresult cuDeviceGetShim(CUdevice *device, int ordinal) {
 CUresult cuDeviceGetCountShim(int *deviceCount) {
     std::cout << "Client: calling cuDeviceGetCountShim" << std::endl;
 
-    // Check if the socket is connected
     if (sockfd < 0) {
         std::cerr << "Socket not connected." << std::endl;
         return CUDA_ERROR_UNKNOWN;
     }
 
-    // Start the RPC request with the appropriate opcode for cuDeviceGetCount
     int request_id = rpc_start_request(RPC_cuDeviceGetCount);
     if (request_id < 0) {
         std::cerr << "Failed to start request for cuDeviceGetCount" << std::endl;
         return CUDA_ERROR_UNKNOWN;
     }
 
-    // Wait for the server's response
     if (rpc_wait_for_response(request_id) < 0) {
         std::cerr << "Failed to wait for response from server" << std::endl;
         return CUDA_ERROR_UNKNOWN;
     }
 
-    // Read the result code from the server
     CUresult result;
     ssize_t bytes_read = rpc_read(&result, sizeof(CUresult));
     if (bytes_read < 0) {
@@ -1369,13 +1365,11 @@ CUresult cuDeviceGetCountShim(int *deviceCount) {
         return CUDA_ERROR_UNKNOWN;
     }
 
-    // Check if the cuDeviceGetCount call was successful
     if (result != CUDA_SUCCESS) {
         std::cerr << "cuDeviceGetCount call failed on the server. Error code: " << result << std::endl;
         return result;
     }
 
-    // Read the device count from the server
     bytes_read = rpc_read(deviceCount, sizeof(int));
     if (bytes_read < 0) {
         std::cerr << "Failed to read device count from server. Error: " << strerror(errno) << std::endl;
@@ -1384,9 +1378,14 @@ CUresult cuDeviceGetCountShim(int *deviceCount) {
 
     std::cout << "Client: Received device count from server: " << *deviceCount << std::endl;
 
+    // Ensure the device count is positive to avoid errors
+    if (*deviceCount <= 0) {
+        std::cerr << "Invalid device count received from server: " << *deviceCount << std::endl;
+        return CUDA_ERROR_NO_DEVICE; // Return specific error for no devices found
+    }
+
     return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
 }
-
 
 void cuDeviceGetNameShim() {
     std::cout << "calling cuDeviceGetNameShim" << std::endl;
@@ -2300,6 +2299,8 @@ void cuGraphicsVDPAURegisterOutputSurfaceShim() {
 }
 
 CUresult cuGetExportTableShim(void **ppExportTable, const CUuuid *pTableUuid) {
+    std::cout << "calling cuGetExportTableShim" << std::endl;
+
     if (sockfd < 0) {
         std::cerr << "Socket not connected." << std::endl;
         return CUDA_ERROR_UNKNOWN;
@@ -2799,7 +2800,7 @@ CUresult cuModuleGetGlobal_v2(CUdeviceptr *dptr, size_t *bytes, CUmodule hmod, c
 }
 
 // Map of symbols to their corresponding function pointers
-std::unordered_map<std::string, void (*)()> cuFunctionMap;
+std::unordered_map<std::string, void (*)()> cucudaFunctionMap;
 
 CUresult cuDriverGetVersion_handler(int *driverVersion) {
     if (driverVersion == nullptr) {
@@ -2854,421 +2855,388 @@ void cuGraphicsResourceGetMappedPointerShim() {
     std::cout << "Client: calling cuGraphicsResourceGetMappedPointerShim" << std::endl;
 }
 
-cudaError_t cudaGetDeviceCountShim(int *count) {
-    std::cout << "calling cudaGetDeviceCountShim" << std::endl;
+// cudaError_t cudaGetDeviceCountShim(int *count) {
+//     std::cout << "calling cudaGetDeviceCountShim" << std::endl;
 
-    if (sockfd < 0) {
-        std::cerr << "Socket not connected." << std::endl;
-        return cudaErrorUnknown;
-    }
+//     if (sockfd < 0) {
+//         std::cerr << "Socket not connected." << std::endl;
+//         return cudaErrorUnknown;
+//     }
 
-    // Prepare the request ID for the server
-    int request_id = rpc_start_request(RPC_cudaGetDeviceCount);
-    if (request_id < 0) {
-        std::cerr << "Failed to start request for cudaGetDeviceCount" << std::endl;
-        return cudaErrorUnknown;
-    }
+//     // Prepare the request ID for the server
+//     int request_id = rpc_start_request(RPC_cudaGetDeviceCount);
+//     if (request_id < 0) {
+//         std::cerr << "Failed to start request for cudaGetDeviceCount" << std::endl;
+//         return cudaErrorUnknown;
+//     }
 
-    // Wait for the server's response
-    if (rpc_wait_for_response(request_id) < 0) {
-        std::cerr << "Failed to wait for response from server" << std::endl;
-        return cudaErrorUnknown;
-    }
+//     // Wait for the server's response
+//     if (rpc_wait_for_response(request_id) < 0) {
+//         std::cerr << "Failed to wait for response from server" << std::endl;
+//         return cudaErrorUnknown;
+//     }
 
-    // Read the result code from the server as cudaError_t
-    cudaError_t result;
-    if (rpc_read(&result, sizeof(cudaError_t)) < 0) {
-        std::cerr << "Failed to read result from server" << std::endl;
-        return cudaErrorUnknown;
-    }
+//     // Read the result code from the server as cudaError_t
+//     cudaError_t result;
+//     if (rpc_read(&result, sizeof(cudaError_t)) < 0) {
+//         std::cerr << "Failed to read result from server" << std::endl;
+//         return cudaErrorUnknown;
+//     }
 
-    // Check if the cudaGetDeviceCount call was successful
-    if (result != cudaSuccess) {
-        std::cerr << "cudaGetDeviceCount call failed on the server. Error code: " << result << std::endl;
-        return result;  // Return the actual error code from the server
-    }
+//     // Check if the cudaGetDeviceCount call was successful
+//     if (result != cudaSuccess) {
+//         std::cerr << "cudaGetDeviceCount call failed on the server. Error code: " << result << std::endl;
+//         return result;  // Return the actual error code from the server
+//     }
 
-    // Read the device count from the server
-    if (rpc_read(count, sizeof(int)) < 0) {
-        std::cerr << "Failed to read device count from server" << std::endl;
-        return cudaErrorUnknown;
-    }
+//     // Read the device count from the server
+//     if (rpc_read(count, sizeof(int)) < 0) {
+//         std::cerr << "Failed to read device count from server" << std::endl;
+//         return cudaErrorUnknown;
+//     }
 
-    if (read(sockfd, &result, sizeof(int)) < 0) {
-        return cudaErrorUnknown;
-    }
+//     if (read(sockfd, &result, sizeof(int)) < 0) {
+//         return cudaErrorUnknown;
+//     }
 
-    pthread_mutex_unlock(&mutex);
+//     std::cout << "Client: Received device count from server: " << result << std::endl;
 
-    std::cout << "Client: Received device count from server: " << result << std::endl;
-
-    return cudaSuccess;  // Return success if everything else worked
-}
-
-void initializeCuFunctionMap() {
-    cuFunctionMap["cuInit"] = reinterpret_cast<void (*)()>(cuInit);
-    cuFunctionMap["cuGetProcAddress"] = reinterpret_cast<void (*)()>(cuGetProcAddress);
-    cuFunctionMap["cuDriverGetVersion"] = reinterpret_cast<void (*)()>(cuDriverGetVersion_handler);
-    cuFunctionMap["cudaGetDeviceCount"] = reinterpret_cast<void (*)()>(cudaGetDeviceCountShim);
-    cuFunctionMap["cuDeviceGet"] = reinterpret_cast<void (*)()>(cuDeviceGetShim);
-    cuFunctionMap["cuDeviceGetCount"] = reinterpret_cast<void (*)()>(cuDeviceGetCountShim);
-    cuFunctionMap["cuDeviceGetName"] = reinterpret_cast<void (*)()>(cuDeviceGetNameShim);
-    cuFunctionMap["cuDeviceTotalMem"] = reinterpret_cast<void (*)()>(cuDeviceTotalMemShim);
-    cuFunctionMap["cuDeviceGetAttribute"] = reinterpret_cast<void (*)()>(cuDeviceGetAttributeShim);
-    cuFunctionMap["cuDeviceGetP2PAttribute"] = reinterpret_cast<void (*)()>(cuDeviceGetP2PAttributeShim);
-    cuFunctionMap["cuDeviceGetByPCIBusId"] = reinterpret_cast<void (*)()>(cuDeviceGetByPCIBusIdShim);
-    cuFunctionMap["cuDeviceGetPCIBusId"] = reinterpret_cast<void (*)()>(cuDeviceGetPCIBusIdShim);
-    cuFunctionMap["cuDeviceGetUuid"] = reinterpret_cast<void (*)()>(cuDeviceGetUuidShim);
-    cuFunctionMap["cuDeviceGetTexture1DLinearMaxWidth"] = reinterpret_cast<void (*)()>(cuDeviceGetTexture1DLinearMaxWidthShim);
-    cuFunctionMap["cuDeviceGetDefaultMemPool"] = reinterpret_cast<void (*)()>(cuDeviceGetDefaultMemPoolShim);
-    cuFunctionMap["cuDeviceSetMemPool"] = reinterpret_cast<void (*)()>(cuDeviceSetMemPoolShim);
-    cuFunctionMap["cuDeviceGetMemPool"] = reinterpret_cast<void (*)()>(cuDeviceGetMemPoolShim);
-    cuFunctionMap["cuFlushGPUDirectRDMAWrites"] = reinterpret_cast<void (*)()>(cuFlushGPUDirectRDMAWritesShim);
-    cuFunctionMap["cuDevicePrimaryCtxRetain"] = reinterpret_cast<void (*)()>(cuDevicePrimaryCtxRetainShim);
-    cuFunctionMap["cuDevicePrimaryCtxRelease"] = reinterpret_cast<void (*)()>(cuDevicePrimaryCtxReleaseShim);
-    cuFunctionMap["cuDevicePrimaryCtxSetFlags"] = reinterpret_cast<void (*)()>(cuDevicePrimaryCtxSetFlagsShim);
-    cuFunctionMap["cuDevicePrimaryCtxGetState"] = reinterpret_cast<void (*)()>(cuDevicePrimaryCtxGetStateShim);
-    cuFunctionMap["cuDevicePrimaryCtxReset"] = reinterpret_cast<void (*)()>(cuDevicePrimaryCtxResetShim);
-    cuFunctionMap["cuCtxCreate"] = reinterpret_cast<void (*)()>(cuCtxCreateShim);
-    cuFunctionMap["cuCtxGetFlags"] = reinterpret_cast<void (*)()>(cuCtxGetFlagsShim);
-    cuFunctionMap["cuCtxSetCurrent"] = reinterpret_cast<void (*)()>(cuCtxSetCurrentShim);
-    cuFunctionMap["cuCtxGetCurrent"] = reinterpret_cast<void (*)()>(cuCtxGetCurrentShim);
-    cuFunctionMap["cuCtxDetach"] = reinterpret_cast<void (*)()>(cuCtxDetachShim);
-    cuFunctionMap["cuCtxGetApiVersion"] = reinterpret_cast<void (*)()>(cuCtxGetApiVersionShim);
-    cuFunctionMap["cuCtxGetDevice"] = reinterpret_cast<void (*)()>(cuCtxGetDeviceShim);
-    cuFunctionMap["cuCtxGetLimit"] = reinterpret_cast<void (*)()>(cuCtxGetLimitShim);
-    cuFunctionMap["cuCtxSetLimit"] = reinterpret_cast<void (*)()>(cuCtxSetLimitShim);
-    cuFunctionMap["cuCtxGetCacheConfig"] = reinterpret_cast<void (*)()>(cuCtxGetCacheConfigShim);
-    cuFunctionMap["cuCtxSetCacheConfig"] = reinterpret_cast<void (*)()>(cuCtxSetCacheConfigShim);
-    cuFunctionMap["cuCtxGetSharedMemConfig"] = reinterpret_cast<void (*)()>(cuCtxGetSharedMemConfigShim);
-    cuFunctionMap["cuCtxGetStreamPriorityRange"] = reinterpret_cast<void (*)()>(cuCtxGetStreamPriorityRangeShim);
-    cuFunctionMap["cuCtxSetSharedMemConfig"] = reinterpret_cast<void (*)()>(cuCtxSetSharedMemConfigShim);
-    cuFunctionMap["cuCtxSynchronize"] = reinterpret_cast<void (*)()>(cuCtxSynchronizeShim);
-    cuFunctionMap["cuCtxResetPersistingL2Cache"] = reinterpret_cast<void (*)()>(cuCtxResetPersistingL2CacheShim);
-    cuFunctionMap["cuCtxPopCurrent"] = reinterpret_cast<void (*)()>(cuCtxPopCurrentShim);
-    cuFunctionMap["cuCtxPushCurrent"] = reinterpret_cast<void (*)()>(cuCtxPushCurrentShim);
-    cuFunctionMap["cuModuleLoad"] = reinterpret_cast<void (*)()>(cuModuleLoadShim);
-    cuFunctionMap["cuModuleLoadData"] = reinterpret_cast<void (*)()>(cuModuleLoadDataShim);
-    cuFunctionMap["cuModuleLoadFatBinary"] = reinterpret_cast<void (*)()>(cuModuleLoadFatBinaryShim);
-    cuFunctionMap["cuModuleUnload"] = reinterpret_cast<void (*)()>(cuModuleUnloadShim);
-    cuFunctionMap["cuModuleGetFunction"] = reinterpret_cast<void (*)()>(cuModuleGetFunctionShim);
-    cuFunctionMap["cuModuleGetGlobal"] = reinterpret_cast<void (*)()>(cuModuleGetGlobalShim);
-    cuFunctionMap["cuModuleGetTexRef"] = reinterpret_cast<void (*)()>(cuModuleGetTexRefShim);
-    cuFunctionMap["cuModuleGetSurfRef"] = reinterpret_cast<void (*)()>(cuModuleGetSurfRefShim);
-    cuFunctionMap["cuModuleGetLoadingMode"] = reinterpret_cast<void (*)()>(cuModuleGetLoadingModeShim);
-    cuFunctionMap["cuLibraryLoadData"] = reinterpret_cast<void (*)()>(cuLibraryLoadDataShim);
-    cuFunctionMap["cuLibraryLoadFromFile"] = reinterpret_cast<void (*)()>(cuLibraryLoadFromFileShim);
-    cuFunctionMap["cuLibraryUnload"] = reinterpret_cast<void (*)()>(cuLibraryUnloadShim);
-    cuFunctionMap["cuLibraryGetKernel"] = reinterpret_cast<void (*)()>(cuLibraryGetKernelShim);
-    cuFunctionMap["cuLibraryGetModule"] = reinterpret_cast<void (*)()>(cuLibraryGetModuleShim);
-    cuFunctionMap["cuKernelGetFunction"] = reinterpret_cast<void (*)()>(cuKernelGetFunctionShim);
-    cuFunctionMap["cuLibraryGetGlobal"] = reinterpret_cast<void (*)()>(cuLibraryGetGlobalShim);
-    cuFunctionMap["cuLibraryGetManaged"] = reinterpret_cast<void (*)()>(cuLibraryGetManagedShim);
-    cuFunctionMap["cuKernelGetAttribute"] = reinterpret_cast<void (*)()>(cuKernelGetAttributeShim);
-    cuFunctionMap["cuKernelSetAttribute"] = reinterpret_cast<void (*)()>(cuKernelSetAttributeShim);
-    cuFunctionMap["cuKernelSetCacheConfig"] = reinterpret_cast<void (*)()>(cuKernelSetCacheConfigShim);
-    cuFunctionMap["cuLinkCreate"] = reinterpret_cast<void (*)()>(cuLinkCreateShim);
-    cuFunctionMap["cuLinkAddData"] = reinterpret_cast<void (*)()>(cuLinkAddDataShim);
-    cuFunctionMap["cuLinkAddFile"] = reinterpret_cast<void (*)()>(cuLinkAddFileShim);
-    cuFunctionMap["cuLinkComplete"] = reinterpret_cast<void (*)()>(cuLinkCompleteShim);
-    cuFunctionMap["cuLinkDestroy"] = reinterpret_cast<void (*)()>(cuLinkDestroyShim);
-    cuFunctionMap["cuMemGetInfo"] = reinterpret_cast<void (*)()>(cuMemGetInfoShim);
-    cuFunctionMap["cuMemAllocManaged"] = reinterpret_cast<void (*)()>(cuMemAllocManagedShim);
-    cuFunctionMap["cuMemAlloc"] = reinterpret_cast<void (*)()>(cuMemAllocShim);
-    cuFunctionMap["cuMemAllocPitch"] = reinterpret_cast<void (*)()>(cuMemAllocPitchShim);
-    cuFunctionMap["cuMemFree"] = reinterpret_cast<void (*)()>(cuMemFreeShim);
-    cuFunctionMap["cuMemGetAddressRange"] = reinterpret_cast<void (*)()>(cuMemGetAddressRangeShim);
-    cuFunctionMap["cuMemFreeHost"] = reinterpret_cast<void (*)()>(cuMemFreeHostShim);
-    cuFunctionMap["cuMemHostAlloc"] = reinterpret_cast<void (*)()>(cuMemHostAllocShim);
-    cuFunctionMap["cuMemHostGetDevicePointer"] = reinterpret_cast<void (*)()>(cuMemHostGetDevicePointerShim);
-    cuFunctionMap["cuMemHostGetFlags"] = reinterpret_cast<void (*)()>(cuMemHostGetFlagsShim);
-    cuFunctionMap["cuMemHostRegister"] = reinterpret_cast<void (*)()>(cuMemHostRegisterShim);
-    cuFunctionMap["cuMemHostUnregister"] = reinterpret_cast<void (*)()>(cuMemHostUnregisterShim);
-    cuFunctionMap["cuPointerGetAttribute"] = reinterpret_cast<void (*)()>(cuPointerGetAttributeShim);
-    cuFunctionMap["cuPointerGetAttributes"] = reinterpret_cast<void (*)()>(cuPointerGetAttributesShim);
-    cuFunctionMap["cuMemAllocAsync"] = reinterpret_cast<void (*)()>(cuMemAllocAsyncShim);
-    cuFunctionMap["cuMemAllocFromPoolAsync"] = reinterpret_cast<void (*)()>(cuMemAllocFromPoolAsyncShim);
-    cuFunctionMap["cuMemFreeAsync"] = reinterpret_cast<void (*)()>(cuMemFreeAsyncShim);
-    cuFunctionMap["cuMemPoolTrimTo"] = reinterpret_cast<void (*)()>(cuMemPoolTrimToShim);
-    cuFunctionMap["cuMemPoolSetAttribute"] = reinterpret_cast<void (*)()>(cuMemPoolSetAttributeShim);
-    cuFunctionMap["cuMemPoolGetAttribute"] = reinterpret_cast<void (*)()>(cuMemPoolGetAttributeShim);
-    cuFunctionMap["cuMemPoolSetAccess"] = reinterpret_cast<void (*)()>(cuMemPoolSetAccessShim);
-    cuFunctionMap["cuMemPoolGetAccess"] = reinterpret_cast<void (*)()>(cuMemPoolGetAccessShim);
-    cuFunctionMap["cuMemPoolCreate"] = reinterpret_cast<void (*)()>(cuMemPoolCreateShim);
-    cuFunctionMap["cuMemPoolDestroy"] = reinterpret_cast<void (*)()>(cuMemPoolDestroyShim);
-    cuFunctionMap["cuMemPoolExportToShareableHandle"] = reinterpret_cast<void (*)()>(cuMemPoolExportToShareableHandleShim);
-    cuFunctionMap["cuMemPoolImportFromShareableHandle"] = reinterpret_cast<void (*)()>(cuMemPoolImportFromShareableHandleShim);
-    cuFunctionMap["cuMemPoolExportPointer"] = reinterpret_cast<void (*)()>(cuMemPoolExportPointerShim);
-    cuFunctionMap["cuMemPoolImportPointer"] = reinterpret_cast<void (*)()>(cuMemPoolImportPointerShim);
-    cuFunctionMap["cuMemcpy"] = reinterpret_cast<void (*)()>(cuMemcpyShim);
-    cuFunctionMap["cuMemcpyAsync"] = reinterpret_cast<void (*)()>(cuMemcpyAsyncShim);
-    cuFunctionMap["cuMemcpyPeer"] = reinterpret_cast<void (*)()>(cuMemcpyPeerShim);
-    cuFunctionMap["cuMemcpyPeerAsync"] = reinterpret_cast<void (*)()>(cuMemcpyPeerAsyncShim);
-    cuFunctionMap["cuMemcpyHtoD"] = reinterpret_cast<void (*)()>(cuMemcpyHtoDShim);
-    cuFunctionMap["cuMemcpyHtoDAsync"] = reinterpret_cast<void (*)()>(cuMemcpyHtoDAsyncShim);
-    cuFunctionMap["cuMemcpyDtoH"] = reinterpret_cast<void (*)()>(cuMemcpyDtoHShim);
-    cuFunctionMap["cuMemcpyDtoHAsync"] = reinterpret_cast<void (*)()>(cuMemcpyDtoHAsyncShim);
-    cuFunctionMap["cuMemcpyDtoD"] = reinterpret_cast<void (*)()>(cuMemcpyDtoDShim);
-    cuFunctionMap["cuMemcpyDtoDAsync"] = reinterpret_cast<void (*)()>(cuMemcpyDtoDAsyncShim);
-    cuFunctionMap["cuMemcpy2DUnaligned"] = reinterpret_cast<void (*)()>(cuMemcpy2DUnalignedShim);
-    cuFunctionMap["cuMemcpy2DAsync"] = reinterpret_cast<void (*)()>(cuMemcpy2DAsyncShim);
-    cuFunctionMap["cuMemcpy3D"] = reinterpret_cast<void (*)()>(cuMemcpy3DShim);
-    cuFunctionMap["cuMemcpy3DAsync"] = reinterpret_cast<void (*)()>(cuMemcpy3DAsyncShim);
-    cuFunctionMap["cuMemcpy3DPeer"] = reinterpret_cast<void (*)()>(cuMemcpy3DPeerShim);
-    cuFunctionMap["cuMemcpy3DPeerAsync"] = reinterpret_cast<void (*)()>(cuMemcpy3DPeerAsyncShim);
-    cuFunctionMap["cuMemsetD8"] = reinterpret_cast<void (*)()>(cuMemsetD8Shim);
-    cuFunctionMap["cuMemsetD8Async"] = reinterpret_cast<void (*)()>(cuMemsetD8AsyncShim);
-    cuFunctionMap["cuMemsetD2D8"] = reinterpret_cast<void (*)()>(cuMemsetD2D8Shim);
-    cuFunctionMap["cuMemsetD2D8Async"] = reinterpret_cast<void (*)()>(cuMemsetD2D8AsyncShim);
-    cuFunctionMap["cuFuncSetCacheConfig"] = reinterpret_cast<void (*)()>(cuFuncSetCacheConfigShim);
-    cuFunctionMap["cuFuncSetSharedMemConfig"] = reinterpret_cast<void (*)()>(cuFuncSetSharedMemConfigShim);
-    cuFunctionMap["cuFuncGetAttribute"] = reinterpret_cast<void (*)()>(cuFuncGetAttributeShim);
-    cuFunctionMap["cuFuncSetAttribute"] = reinterpret_cast<void (*)()>(cuFuncSetAttributeShim);
-    cuFunctionMap["cuArrayCreate"] = reinterpret_cast<void (*)()>(cuArrayCreateShim);
-    cuFunctionMap["cuArrayGetDescriptor"] = reinterpret_cast<void (*)()>(cuArrayGetDescriptorShim);
-    cuFunctionMap["cuArrayGetSparseProperties"] = reinterpret_cast<void (*)()>(cuArrayGetSparsePropertiesShim);
-    cuFunctionMap["cuArrayGetPlane"] = reinterpret_cast<void (*)()>(cuArrayGetPlaneShim);
-    cuFunctionMap["cuArray3DCreate"] = reinterpret_cast<void (*)()>(cuArray3DCreateShim);
-    cuFunctionMap["cuArray3DGetDescriptor"] = reinterpret_cast<void (*)()>(cuArray3DGetDescriptorShim);
-    cuFunctionMap["cuArrayDestroy"] = reinterpret_cast<void (*)()>(cuArrayDestroyShim);
-    cuFunctionMap["cuMipmappedArrayCreate"] = reinterpret_cast<void (*)()>(cuMipmappedArrayCreateShim);
-    cuFunctionMap["cuMipmappedArrayGetLevel"] = reinterpret_cast<void (*)()>(cuMipmappedArrayGetLevelShim);
-    cuFunctionMap["cuMipmappedArrayGetSparseProperties"] = reinterpret_cast<void (*)()>(cuMipmappedArrayGetSparsePropertiesShim);
-    cuFunctionMap["cuMipmappedArrayDestroy"] = reinterpret_cast<void (*)()>(cuMipmappedArrayDestroyShim);
-    cuFunctionMap["cuArrayGetMemoryRequirements"] = reinterpret_cast<void (*)()>(cuArrayGetMemoryRequirementsShim);
-    cuFunctionMap["cuMipmappedArrayGetMemoryRequirements"] = reinterpret_cast<void (*)()>(cuMipmappedArrayGetMemoryRequirementsShim);
-    cuFunctionMap["cuTexObjectCreate"] = reinterpret_cast<void (*)()>(cuTexObjectCreateShim);
-    cuFunctionMap["cuTexObjectDestroy"] = reinterpret_cast<void (*)()>(cuTexObjectDestroyShim);
-    cuFunctionMap["cuTexObjectGetResourceDesc"] = reinterpret_cast<void (*)()>(cuTexObjectGetResourceDescShim);
-    cuFunctionMap["cuTexObjectGetTextureDesc"] = reinterpret_cast<void (*)()>(cuTexObjectGetTextureDescShim);
-    cuFunctionMap["cuTexObjectGetResourceViewDesc"] = reinterpret_cast<void (*)()>(cuTexObjectGetResourceViewDescShim);
-    cuFunctionMap["cuSurfObjectCreate"] = reinterpret_cast<void (*)()>(cuSurfObjectCreateShim);
-    cuFunctionMap["cuSurfObjectDestroy"] = reinterpret_cast<void (*)()>(cuSurfObjectDestroyShim);
-    cuFunctionMap["cuSurfObjectGetResourceDesc"] = reinterpret_cast<void (*)()>(cuSurfObjectGetResourceDescShim);
-    cuFunctionMap["cuImportExternalMemory"] = reinterpret_cast<void (*)()>(cuImportExternalMemoryShim);
-    cuFunctionMap["cuExternalMemoryGetMappedBuffer"] = reinterpret_cast<void (*)()>(cuExternalMemoryGetMappedBufferShim);
-    cuFunctionMap["cuExternalMemoryGetMappedMipmappedArray"] = reinterpret_cast<void (*)()>(cuExternalMemoryGetMappedMipmappedArrayShim);
-    cuFunctionMap["cuDestroyExternalMemory"] = reinterpret_cast<void (*)()>(cuDestroyExternalMemoryShim);
-    cuFunctionMap["cuImportExternalSemaphore"] = reinterpret_cast<void (*)()>(cuImportExternalSemaphoreShim);
-    cuFunctionMap["cuSignalExternalSemaphoresAsync"] = reinterpret_cast<void (*)()>(cuSignalExternalSemaphoresAsyncShim);
-    cuFunctionMap["cuWaitExternalSemaphoresAsync"] = reinterpret_cast<void (*)()>(cuWaitExternalSemaphoresAsyncShim);
-    cuFunctionMap["cuDestroyExternalSemaphore"] = reinterpret_cast<void (*)()>(cuDestroyExternalSemaphoreShim);
-    cuFunctionMap["cuDeviceGetNvSciSyncAttributes"] = reinterpret_cast<void (*)()>(cuDeviceGetNvSciSyncAttributesShim);
-    cuFunctionMap["cuLaunchKernel"] = reinterpret_cast<void (*)()>(cuLaunchKernelShim);
-    cuFunctionMap["cuLaunchCooperativeKernel"] = reinterpret_cast<void (*)()>(cuLaunchCooperativeKernelShim);
-    cuFunctionMap["cuLaunchCooperativeKernelMultiDevice"] = reinterpret_cast<void (*)()>(cuLaunchCooperativeKernelMultiDeviceShim);
-    cuFunctionMap["cuLaunchHostFunc"] = reinterpret_cast<void (*)()>(cuLaunchHostFuncShim);
-    cuFunctionMap["cuLaunchKernelEx"] = reinterpret_cast<void (*)()>(cuLaunchKernelExShim);
-    cuFunctionMap["cuEventCreate"] = reinterpret_cast<void (*)()>(cuEventCreateShim);
-    cuFunctionMap["cuEventRecord"] = reinterpret_cast<void (*)()>(cuEventRecordShim);
-    cuFunctionMap["cuEventRecordWithFlags"] = reinterpret_cast<void (*)()>(cuEventRecordWithFlagsShim);
-    cuFunctionMap["cuEventQuery"] = reinterpret_cast<void (*)()>(cuEventQueryShim);
-    cuFunctionMap["cuEventSynchronize"] = reinterpret_cast<void (*)()>(cuEventSynchronizeShim);
-    cuFunctionMap["cuEventDestroy"] = reinterpret_cast<void (*)()>(cuEventDestroyShim);
-    cuFunctionMap["cuEventElapsedTime"] = reinterpret_cast<void (*)()>(cuEventElapsedTimeShim);
-    cuFunctionMap["cuStreamWaitValue32"] = reinterpret_cast<void (*)()>(cuStreamWaitValue32Shim);
-    cuFunctionMap["cuStreamWriteValue32"] = reinterpret_cast<void (*)()>(cuStreamWriteValue32Shim);
-    cuFunctionMap["cuStreamWaitValue64"] = reinterpret_cast<void (*)()>(cuStreamWaitValue64Shim);
-    cuFunctionMap["cuStreamWriteValue64"] = reinterpret_cast<void (*)()>(cuStreamWriteValue64Shim);
-    cuFunctionMap["cuStreamBatchMemOp"] = reinterpret_cast<void (*)()>(cuStreamBatchMemOpShim);
-    cuFunctionMap["cuStreamCreate"] = reinterpret_cast<void (*)()>(cuStreamCreateShim);
-    cuFunctionMap["cuStreamCreateWithPriority"] = reinterpret_cast<void (*)()>(cuStreamCreateWithPriorityShim);
-    cuFunctionMap["cuStreamGetPriority"] = reinterpret_cast<void (*)()>(cuStreamGetPriorityShim);
-    cuFunctionMap["cuStreamGetFlags"] = reinterpret_cast<void (*)()>(cuStreamGetFlagsShim);
-    cuFunctionMap["cuStreamGetCtx"] = reinterpret_cast<void (*)()>(cuStreamGetCtxShim);
-    cuFunctionMap["cuStreamGetId"] = reinterpret_cast<void (*)()>(cuStreamGetIdShim);
-    cuFunctionMap["cuStreamDestroy"] = reinterpret_cast<void (*)()>(cuStreamDestroyShim);
-    cuFunctionMap["cuStreamWaitEvent"] = reinterpret_cast<void (*)()>(cuStreamWaitEventShim);
-    cuFunctionMap["cuStreamAddCallback"] = reinterpret_cast<void (*)()>(cuStreamAddCallbackShim);
-    cuFunctionMap["cuStreamSynchronize"] = reinterpret_cast<void (*)()>(cuStreamSynchronizeShim);
-    cuFunctionMap["cuStreamQuery"] = reinterpret_cast<void (*)()>(cuStreamQueryShim);
-    cuFunctionMap["cuStreamAttachMemAsync"] = reinterpret_cast<void (*)()>(cuStreamAttachMemAsyncShim);
-    cuFunctionMap["cuStreamCopyAttributes"] = reinterpret_cast<void (*)()>(cuStreamCopyAttributesShim);
-    cuFunctionMap["cuStreamGetAttribute"] = reinterpret_cast<void (*)()>(cuStreamGetAttributeShim);
-    cuFunctionMap["cuStreamSetAttribute"] = reinterpret_cast<void (*)()>(cuStreamSetAttributeShim);
-    cuFunctionMap["cuDeviceCanAccessPeer"] = reinterpret_cast<void (*)()>(cuDeviceCanAccessPeerShim);
-    cuFunctionMap["cuCtxEnablePeerAccess"] = reinterpret_cast<void (*)()>(cuCtxEnablePeerAccessShim);
-    cuFunctionMap["cuCtxDisablePeerAccess"] = reinterpret_cast<void (*)()>(cuCtxDisablePeerAccessShim);
-    cuFunctionMap["cuIpcGetEventHandle"] = reinterpret_cast<void (*)()>(cuIpcGetEventHandleShim);
-    cuFunctionMap["cuIpcOpenEventHandle"] = reinterpret_cast<void (*)()>(cuIpcOpenEventHandleShim);
-    cuFunctionMap["cuIpcGetMemHandle"] = reinterpret_cast<void (*)()>(cuIpcGetMemHandleShim);
-    cuFunctionMap["cuIpcOpenMemHandle"] = reinterpret_cast<void (*)()>(cuIpcOpenMemHandleShim);
-    cuFunctionMap["cuIpcCloseMemHandle"] = reinterpret_cast<void (*)()>(cuIpcCloseMemHandleShim);
-    cuFunctionMap["cuGLCtxCreate"] = reinterpret_cast<void (*)()>(cuGLCtxCreateShim);
-    cuFunctionMap["cuGLInit"] = reinterpret_cast<void (*)()>(cuGLInitShim);
-    cuFunctionMap["cuGLGetDevices"] = reinterpret_cast<void (*)()>(cuGLGetDevicesShim);
-    cuFunctionMap["cuGLRegisterBufferObject"] = reinterpret_cast<void (*)()>(cuGLRegisterBufferObjectShim);
-    cuFunctionMap["cuGLMapBufferObject"] = reinterpret_cast<void (*)()>(cuGLMapBufferObjectShim);
-    cuFunctionMap["cuGLMapBufferObjectAsync"] = reinterpret_cast<void (*)()>(cuGLMapBufferObjectAsyncShim);
-    cuFunctionMap["cuGLUnmapBufferObject"] = reinterpret_cast<void (*)()>(cuGLUnmapBufferObjectShim);
-    cuFunctionMap["cuGLUnmapBufferObjectAsync"] = reinterpret_cast<void (*)()>(cuGLUnmapBufferObjectAsyncShim);
-    cuFunctionMap["cuGLUnregisterBufferObject"] = reinterpret_cast<void (*)()>(cuGLUnregisterBufferObjectShim);
-    cuFunctionMap["cuGLSetBufferObjectMapFlags"] = reinterpret_cast<void (*)()>(cuGLSetBufferObjectMapFlagsShim);
-    cuFunctionMap["cuGraphicsGLRegisterImage"] = reinterpret_cast<void (*)()>(cuGraphicsGLRegisterImageShim);
-    cuFunctionMap["cuGraphicsGLRegisterBuffer"] = reinterpret_cast<void (*)()>(cuGraphicsGLRegisterBufferShim);
-    cuFunctionMap["cuGraphicsEGLRegisterImage"] = reinterpret_cast<void (*)()>(cuGraphicsEGLRegisterImageShim);
-    cuFunctionMap["cuEGLStreamConsumerConnect"] = reinterpret_cast<void (*)()>(cuEGLStreamConsumerConnectShim);
-    cuFunctionMap["cuEGLStreamConsumerDisconnect"] = reinterpret_cast<void (*)()>(cuEGLStreamConsumerDisconnectShim);
-    cuFunctionMap["cuEGLStreamConsumerAcquireFrame"] = reinterpret_cast<void (*)()>(cuEGLStreamConsumerAcquireFrameShim);
-    cuFunctionMap["cuEGLStreamConsumerReleaseFrame"] = reinterpret_cast<void (*)()>(cuEGLStreamConsumerReleaseFrameShim);
-    cuFunctionMap["cuEGLStreamProducerConnect"] = reinterpret_cast<void (*)()>(cuEGLStreamProducerConnectShim);
-    cuFunctionMap["cuEGLStreamProducerDisconnect"] = reinterpret_cast<void (*)()>(cuEGLStreamProducerDisconnectShim);
-    cuFunctionMap["cuEGLStreamProducerPresentFrame"] = reinterpret_cast<void (*)()>(cuEGLStreamProducerPresentFrameShim);
-    cuFunctionMap["cuEGLStreamProducerReturnFrame"] = reinterpret_cast<void (*)()>(cuEGLStreamProducerReturnFrameShim);
-    cuFunctionMap["cuGraphicsResourceGetMappedEglFrame"] = reinterpret_cast<void (*)()>(cuGraphicsResourceGetMappedEglFrameShim);
-    cuFunctionMap["cuGraphicsUnregisterResource"] = reinterpret_cast<void (*)()>(cuGraphicsUnregisterResourceShim);
-    cuFunctionMap["cuGraphicsMapResources"] = reinterpret_cast<void (*)()>(cuGraphicsMapResourcesShim);
-    cuFunctionMap["cuGraphicsUnmapResources"] = reinterpret_cast<void (*)()>(cuGraphicsUnmapResourcesShim);
-    cuFunctionMap["cuGraphicsResourceSetMapFlags"] = reinterpret_cast<void (*)()>(cuGraphicsResourceSetMapFlagsShim);
-    cuFunctionMap["cuGraphicsSubResourceGetMappedArray"] = reinterpret_cast<void (*)()>(cuGraphicsSubResourceGetMappedArrayShim);
-    cuFunctionMap["cuGraphicsResourceGetMappedMipmappedArray"] = reinterpret_cast<void (*)()>(cuGraphicsResourceGetMappedMipmappedArrayShim);
-    cuFunctionMap["cuProfilerInitialize"] = reinterpret_cast<void (*)()>(cuProfilerInitializeShim);
-    cuFunctionMap["cuProfilerStart"] = reinterpret_cast<void (*)()>(cuProfilerStartShim);
-    cuFunctionMap["cuProfilerStop"] = reinterpret_cast<void (*)()>(cuProfilerStopShim);
-    cuFunctionMap["cuVDPAUGetDevice"] = reinterpret_cast<void (*)()>(cuVDPAUGetDeviceShim);
-    cuFunctionMap["cuVDPAUCtxCreate"] = reinterpret_cast<void (*)()>(cuVDPAUCtxCreateShim);
-    cuFunctionMap["cuGraphicsVDPAURegisterVideoSurface"] = reinterpret_cast<void (*)()>(cuGraphicsVDPAURegisterVideoSurfaceShim);
-    cuFunctionMap["cuGraphicsVDPAURegisterOutputSurface"] = reinterpret_cast<void (*)()>(cuGraphicsVDPAURegisterOutputSurfaceShim);
-    cuFunctionMap["cuGetExportTable"] = reinterpret_cast<void (*)()>(cuGetExportTableShim);
-    cuFunctionMap["cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags"] = reinterpret_cast<void (*)()>(cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlagsShim);
-    cuFunctionMap["cuOccupancyAvailableDynamicSMemPerBlock"] = reinterpret_cast<void (*)()>(cuOccupancyAvailableDynamicSMemPerBlockShim);
-    cuFunctionMap["cuOccupancyMaxPotentialClusterSize"] = reinterpret_cast<void (*)()>(cuOccupancyMaxPotentialClusterSizeShim);
-    cuFunctionMap["cuOccupancyMaxActiveClusters"] = reinterpret_cast<void (*)()>(cuOccupancyMaxActiveClustersShim);
-    cuFunctionMap["cuMemAdvise"] = reinterpret_cast<void (*)()>(cuMemAdviseShim);
-    cuFunctionMap["cuMemPrefetchAsync"] = reinterpret_cast<void (*)()>(cuMemPrefetchAsyncShim);
-    cuFunctionMap["cuMemRangeGetAttribute"] = reinterpret_cast<void (*)()>(cuMemRangeGetAttributeShim);
-    cuFunctionMap["cuMemRangeGetAttributes"] = reinterpret_cast<void (*)()>(cuMemRangeGetAttributesShim);
-    cuFunctionMap["cuGetErrorString"] = reinterpret_cast<void (*)()>(cuGetErrorStringShim);
-    cuFunctionMap["cuGetErrorName"] = reinterpret_cast<void (*)()>(cuGetErrorNameShim);
-    cuFunctionMap["cuGraphCreate"] = reinterpret_cast<void (*)()>(cuGraphCreateShim);
-    cuFunctionMap["cuGraphAddKernelNode"] = reinterpret_cast<void (*)()>(cuGraphAddKernelNodeShim);
-    cuFunctionMap["cuGraphKernelNodeGetParams"] = reinterpret_cast<void (*)()>(cuGraphKernelNodeGetParamsShim);
-    cuFunctionMap["cuGraphKernelNodeSetParams"] = reinterpret_cast<void (*)()>(cuGraphKernelNodeSetParamsShim);
-    cuFunctionMap["cuGraphAddMemcpyNode"] = reinterpret_cast<void (*)()>(cuGraphAddMemcpyNodeShim);
-    cuFunctionMap["cuGraphMemcpyNodeGetParams"] = reinterpret_cast<void (*)()>(cuGraphMemcpyNodeGetParamsShim);
-    cuFunctionMap["cuGraphMemcpyNodeSetParams"] = reinterpret_cast<void (*)()>(cuGraphMemcpyNodeSetParamsShim);
-    cuFunctionMap["cuGraphAddMemsetNode"] = reinterpret_cast<void (*)()>(cuGraphAddMemsetNodeShim);
-    cuFunctionMap["cuGraphMemsetNodeGetParams"] = reinterpret_cast<void (*)()>(cuGraphMemsetNodeGetParamsShim);
-    cuFunctionMap["cuGraphMemsetNodeSetParams"] = reinterpret_cast<void (*)()>(cuGraphMemsetNodeSetParamsShim);
-    cuFunctionMap["cuGraphAddHostNode"] = reinterpret_cast<void (*)()>(cuGraphAddHostNodeShim);
-    cuFunctionMap["cuGraphHostNodeGetParams"] = reinterpret_cast<void (*)()>(cuGraphHostNodeGetParamsShim);
-    cuFunctionMap["cuGraphHostNodeSetParams"] = reinterpret_cast<void (*)()>(cuGraphHostNodeSetParamsShim);
-    cuFunctionMap["cuGraphAddChildGraphNode"] = reinterpret_cast<void (*)()>(cuGraphAddChildGraphNodeShim);
-    cuFunctionMap["cuGraphChildGraphNodeGetGraph"] = reinterpret_cast<void (*)()>(cuGraphChildGraphNodeGetGraphShim);
-    cuFunctionMap["cuGraphAddEmptyNode"] = reinterpret_cast<void (*)()>(cuGraphAddEmptyNodeShim);
-    cuFunctionMap["cuGraphAddEventRecordNode"] = reinterpret_cast<void (*)()>(cuGraphAddEventRecordNodeShim);
-    cuFunctionMap["cuGraphEventRecordNodeGetEvent"] = reinterpret_cast<void (*)()>(cuGraphEventRecordNodeGetEventShim);
-    cuFunctionMap["cuGraphEventRecordNodeSetEvent"] = reinterpret_cast<void (*)()>(cuGraphEventRecordNodeSetEventShim);
-    cuFunctionMap["cuGraphAddEventWaitNode"] = reinterpret_cast<void (*)()>(cuGraphAddEventWaitNodeShim);
-    cuFunctionMap["cuGraphEventWaitNodeGetEvent"] = reinterpret_cast<void (*)()>(cuGraphEventWaitNodeGetEventShim);
-    cuFunctionMap["cuGraphEventWaitNodeSetEvent"] = reinterpret_cast<void (*)()>(cuGraphEventWaitNodeSetEventShim);
-    cuFunctionMap["cuGraphAddExternalSemaphoresSignalNode"] = reinterpret_cast<void (*)()>(cuGraphAddExternalSemaphoresSignalNodeShim);
-    cuFunctionMap["cuGraphExternalSemaphoresSignalNodeGetParams"] = reinterpret_cast<void (*)()>(cuGraphExternalSemaphoresSignalNodeGetParamsShim);
-    cuFunctionMap["cuGraphExternalSemaphoresSignalNodeSetParams"] = reinterpret_cast<void (*)()>(cuGraphExternalSemaphoresSignalNodeSetParamsShim);
-    cuFunctionMap["cuGraphAddExternalSemaphoresWaitNode"] = reinterpret_cast<void (*)()>(cuGraphAddExternalSemaphoresWaitNodeShim);
-    cuFunctionMap["cuGraphExternalSemaphoresWaitNodeGetParams"] = reinterpret_cast<void (*)()>(cuGraphExternalSemaphoresWaitNodeGetParamsShim);
-    cuFunctionMap["cuGraphExternalSemaphoresWaitNodeSetParams"] = reinterpret_cast<void (*)()>(cuGraphExternalSemaphoresWaitNodeSetParamsShim);
-    cuFunctionMap["cuGraphExecExternalSemaphoresSignalNodeSetParams"] = reinterpret_cast<void (*)()>(cuGraphExecExternalSemaphoresSignalNodeSetParamsShim);
-    cuFunctionMap["cuGraphExecExternalSemaphoresWaitNodeSetParams"] = reinterpret_cast<void (*)()>(cuGraphExecExternalSemaphoresWaitNodeSetParamsShim);
-    cuFunctionMap["cuGraphAddMemAllocNode"] = reinterpret_cast<void (*)()>(cuGraphAddMemAllocNodeShim);
-    cuFunctionMap["cuGraphMemAllocNodeGetParams"] = reinterpret_cast<void (*)()>(cuGraphMemAllocNodeGetParamsShim);
-    cuFunctionMap["cuGraphAddMemFreeNode"] = reinterpret_cast<void (*)()>(cuGraphAddMemFreeNodeShim);
-    cuFunctionMap["cuGraphMemFreeNodeGetParams"] = reinterpret_cast<void (*)()>(cuGraphMemFreeNodeGetParamsShim);
-    cuFunctionMap["cuDeviceGraphMemTrim"] = reinterpret_cast<void (*)()>(cuDeviceGraphMemTrimShim);
-    cuFunctionMap["cuDeviceGetGraphMemAttribute"] = reinterpret_cast<void (*)()>(cuDeviceGetGraphMemAttributeShim);
-    cuFunctionMap["cuDeviceSetGraphMemAttribute"] = reinterpret_cast<void (*)()>(cuDeviceSetGraphMemAttributeShim);
-    cuFunctionMap["cuGraphClone"] = reinterpret_cast<void (*)()>(cuGraphCloneShim);
-    cuFunctionMap["cuGraphNodeFindInClone"] = reinterpret_cast<void (*)()>(cuGraphNodeFindInCloneShim);
-    cuFunctionMap["cuGraphNodeGetType"] = reinterpret_cast<void (*)()>(cuGraphNodeGetTypeShim);
-    cuFunctionMap["cuGraphGetNodes"] = reinterpret_cast<void (*)()>(cuGraphGetNodesShim);
-    cuFunctionMap["cuGraphGetRootNodes"] = reinterpret_cast<void (*)()>(cuGraphGetRootNodesShim);
-    cuFunctionMap["cuGraphGetEdges"] = reinterpret_cast<void (*)()>(cuGraphGetEdgesShim);
-    cuFunctionMap["cuGraphNodeGetDependencies"] = reinterpret_cast<void (*)()>(cuGraphNodeGetDependenciesShim);
-    cuFunctionMap["cuGraphNodeGetDependentNodes"] = reinterpret_cast<void (*)()>(cuGraphNodeGetDependentNodesShim);
-    cuFunctionMap["cuGraphAddDependencies"] = reinterpret_cast<void (*)()>(cuGraphAddDependenciesShim);
-    cuFunctionMap["cuGraphRemoveDependencies"] = reinterpret_cast<void (*)()>(cuGraphRemoveDependenciesShim);
-    cuFunctionMap["cuGraphDestroyNode"] = reinterpret_cast<void (*)()>(cuGraphDestroyNodeShim);
-    cuFunctionMap["cuGraphInstantiate"] = reinterpret_cast<void (*)()>(cuGraphInstantiateShim);
-    cuFunctionMap["cuGraphUpload"] = reinterpret_cast<void (*)()>(cuGraphUploadShim);
-    cuFunctionMap["cuGraphLaunch"] = reinterpret_cast<void (*)()>(cuGraphLaunchShim);
-    cuFunctionMap["cuGraphExecDestroy"] = reinterpret_cast<void (*)()>(cuGraphExecDestroyShim);
-    cuFunctionMap["cuGraphDestroy"] = reinterpret_cast<void (*)()>(cuGraphDestroyShim);
-    cuFunctionMap["cuStreamBeginCapture"] = reinterpret_cast<void (*)()>(cuStreamBeginCaptureShim);
-    cuFunctionMap["cuStreamEndCapture"] = reinterpret_cast<void (*)()>(cuStreamEndCaptureShim);
-    cuFunctionMap["cuStreamIsCapturing"] = reinterpret_cast<void (*)()>(cuStreamIsCapturingShim);
-    cuFunctionMap["cuStreamGetCaptureInfo"] = reinterpret_cast<void (*)()>(cuStreamGetCaptureInfoShim);
-    cuFunctionMap["cuStreamUpdateCaptureDependencies"] = reinterpret_cast<void (*)()>(cuStreamUpdateCaptureDependenciesShim);
-    cuFunctionMap["cuGraphExecKernelNodeSetParams"] = reinterpret_cast<void (*)()>(cuGraphExecKernelNodeSetParamsShim);
-    cuFunctionMap["cuGraphExecMemcpyNodeSetParams"] = reinterpret_cast<void (*)()>(cuGraphExecMemcpyNodeSetParamsShim);
-    cuFunctionMap["cuGraphExecMemsetNodeSetParams"] = reinterpret_cast<void (*)()>(cuGraphExecMemsetNodeSetParamsShim);
-    cuFunctionMap["cuGraphExecHostNodeSetParams"] = reinterpret_cast<void (*)()>(cuGraphExecHostNodeSetParamsShim);
-    cuFunctionMap["cuGraphExecChildGraphNodeSetParams"] = reinterpret_cast<void (*)()>(cuGraphExecChildGraphNodeSetParamsShim);
-    cuFunctionMap["cuGraphExecEventRecordNodeSetEvent"] = reinterpret_cast<void (*)()>(cuGraphExecEventRecordNodeSetEventShim);
-    cuFunctionMap["cuGraphExecEventWaitNodeSetEvent"] = reinterpret_cast<void (*)()>(cuGraphExecEventWaitNodeSetEventShim);
-    cuFunctionMap["cuThreadExchangeStreamCaptureMode"] = reinterpret_cast<void (*)()>(cuThreadExchangeStreamCaptureModeShim);
-    cuFunctionMap["cuGraphExecUpdate"] = reinterpret_cast<void (*)()>(cuGraphExecUpdateShim);
-    cuFunctionMap["cuGraphKernelNodeCopyAttributes"] = reinterpret_cast<void (*)()>(cuGraphKernelNodeCopyAttributesShim);
-    cuFunctionMap["cuGraphKernelNodeGetAttribute"] = reinterpret_cast<void (*)()>(cuGraphKernelNodeGetAttributeShim);
-    cuFunctionMap["cuGraphKernelNodeSetAttribute"] = reinterpret_cast<void (*)()>(cuGraphKernelNodeSetAttributeShim);
-    cuFunctionMap["cuGraphDebugDotPrint"] = reinterpret_cast<void (*)()>(cuGraphDebugDotPrintShim);
-    cuFunctionMap["cuUserObjectCreate"] = reinterpret_cast<void (*)()>(cuUserObjectCreateShim);
-    cuFunctionMap["cuUserObjectRetain"] = reinterpret_cast<void (*)()>(cuUserObjectRetainShim);
-    cuFunctionMap["cuUserObjectRelease"] = reinterpret_cast<void (*)()>(cuUserObjectReleaseShim);
-    cuFunctionMap["cuGraphRetainUserObject"] = reinterpret_cast<void (*)()>(cuGraphRetainUserObjectShim);
-    cuFunctionMap["cuGraphReleaseUserObject"] = reinterpret_cast<void (*)()>(cuGraphReleaseUserObjectShim);
-    cuFunctionMap["cuGraphNodeSetEnabled"] = reinterpret_cast<void (*)()>(cuGraphNodeSetEnabledShim);
-    cuFunctionMap["cuGraphNodeGetEnabled"] = reinterpret_cast<void (*)()>(cuGraphNodeGetEnabledShim);
-    cuFunctionMap["cuGraphInstantiateWithParams"] = reinterpret_cast<void (*)()>(cuGraphInstantiateWithParamsShim);
-    cuFunctionMap["cuGraphExecGetFlags"] = reinterpret_cast<void (*)()>(cuGraphExecGetFlagsShim);
-
-    cuFunctionMap["cuGraphInstantiateWithParams_ptsz"] = reinterpret_cast<void (*)()>(cuGraphInstantiateWithParams_ptszShim);
-    cuFunctionMap["cuGraphInstantiateWithFlags"] = reinterpret_cast<void (*)()>(cuGraphInstantiateWithFlagsShim);
-    cuFunctionMap["cuEGLStreamConsumerConnectWithFlags"] = reinterpret_cast<void (*)()>(cuEGLStreamConsumerConnectWithFlagsShim);
-    cuFunctionMap["cuGraphicsResourceGetMappedPointer"] = reinterpret_cast<void (*)()>(cuGraphicsResourceGetMappedPointerShim);
-}
+//     return cudaSuccess;  // Return success if everything else worked
+// }
 
 void noOpFunction() {
     // Do nothing
 }
+std::unordered_map<std::string, void *> cudaFunctionMap;
+
+void initCudaFunctionMap() {
+    cudaFunctionMap["cuInit"] = (void *)cuInit;
+    cudaFunctionMap["cuGetProcAddress"] = (void *)cuGetProcAddress;
+    cudaFunctionMap["cuDriverGetVersion"] = (void *)cuDriverGetVersion_handler;
+    // cudaFunctionMap["cudaGetDeviceCount"] = (void *)cudaGetDeviceCountShim;
+    cudaFunctionMap["cuDeviceGet"] = (void *)cuDeviceGetShim;
+    cudaFunctionMap["cuDeviceGetCount"] = (void *)cuDeviceGetCountShim;
+    cudaFunctionMap["cuDeviceGetName"] = (void *)cuDeviceGetNameShim;
+    cudaFunctionMap["cuDeviceTotalMem"] = (void *)cuDeviceTotalMemShim;
+    cudaFunctionMap["cuDeviceGetAttribute"] = (void *)cuDeviceGetAttributeShim;
+    cudaFunctionMap["cuDeviceGetP2PAttribute"] = (void *)cuDeviceGetP2PAttributeShim;
+    cudaFunctionMap["cuDeviceGetByPCIBusId"] = (void *)cuDeviceGetByPCIBusIdShim;
+    cudaFunctionMap["cuDeviceGetPCIBusId"] = (void *)cuDeviceGetPCIBusIdShim;
+    cudaFunctionMap["cuDeviceGetUuid"] = (void *)cuDeviceGetUuidShim;
+    cudaFunctionMap["cuDeviceGetTexture1DLinearMaxWidth"] = (void *)cuDeviceGetTexture1DLinearMaxWidthShim;
+    cudaFunctionMap["cuDeviceGetDefaultMemPool"] = (void *)cuDeviceGetDefaultMemPoolShim;
+    cudaFunctionMap["cuDeviceSetMemPool"] = (void *)cuDeviceSetMemPoolShim;
+    cudaFunctionMap["cuDeviceGetMemPool"] = (void *)cuDeviceGetMemPoolShim;
+    cudaFunctionMap["cuFlushGPUDirectRDMAWrites"] = (void *)cuFlushGPUDirectRDMAWritesShim;
+    cudaFunctionMap["cuDevicePrimaryCtxRetain"] = (void *)cuDevicePrimaryCtxRetainShim;
+    cudaFunctionMap["cuDevicePrimaryCtxRelease"] = (void *)cuDevicePrimaryCtxReleaseShim;
+    cudaFunctionMap["cuDevicePrimaryCtxSetFlags"] = (void *)cuDevicePrimaryCtxSetFlagsShim;
+    cudaFunctionMap["cuDevicePrimaryCtxGetState"] = (void *)cuDevicePrimaryCtxGetStateShim;
+    cudaFunctionMap["cuDevicePrimaryCtxReset"] = (void *)cuDevicePrimaryCtxResetShim;
+    cudaFunctionMap["cuCtxCreate"] = (void *)cuCtxCreateShim;
+    cudaFunctionMap["cuCtxGetFlags"] = (void *)cuCtxGetFlagsShim;
+    cudaFunctionMap["cuCtxSetCurrent"] = (void *)cuCtxSetCurrentShim;
+    cudaFunctionMap["cuCtxGetCurrent"] = (void *)cuCtxGetCurrentShim;
+    cudaFunctionMap["cuCtxDetach"] = (void *)cuCtxDetachShim;
+    cudaFunctionMap["cuCtxGetApiVersion"] = (void *)cuCtxGetApiVersionShim;
+    cudaFunctionMap["cuCtxGetDevice"] = (void *)cuCtxGetDeviceShim;
+    cudaFunctionMap["cuCtxGetLimit"] = (void *)cuCtxGetLimitShim;
+    cudaFunctionMap["cuCtxSetLimit"] = (void *)cuCtxSetLimitShim;
+    cudaFunctionMap["cuCtxGetCacheConfig"] = (void *)cuCtxGetCacheConfigShim;
+    cudaFunctionMap["cuCtxSetCacheConfig"] = (void *)cuCtxSetCacheConfigShim;
+    cudaFunctionMap["cuCtxGetSharedMemConfig"] = (void *)cuCtxGetSharedMemConfigShim;
+    cudaFunctionMap["cuCtxGetStreamPriorityRange"] = (void *)cuCtxGetStreamPriorityRangeShim;
+    cudaFunctionMap["cuCtxSetSharedMemConfig"] = (void *)cuCtxSetSharedMemConfigShim;
+    cudaFunctionMap["cuCtxSynchronize"] = (void *)cuCtxSynchronizeShim;
+    cudaFunctionMap["cuCtxResetPersistingL2Cache"] = (void *)cuCtxResetPersistingL2CacheShim;
+    cudaFunctionMap["cuCtxPopCurrent"] = (void *)cuCtxPopCurrentShim;
+    cudaFunctionMap["cuCtxPushCurrent"] = (void *)cuCtxPushCurrentShim;
+    cudaFunctionMap["cuModuleLoad"] = (void *)cuModuleLoadShim;
+    cudaFunctionMap["cuModuleLoadData"] = (void *)cuModuleLoadDataShim;
+    cudaFunctionMap["cuModuleLoadFatBinary"] = (void *)cuModuleLoadFatBinaryShim;
+    cudaFunctionMap["cuModuleUnload"] = (void *)cuModuleUnloadShim;
+    cudaFunctionMap["cuModuleGetFunction"] = (void *)cuModuleGetFunctionShim;
+    cudaFunctionMap["cuModuleGetGlobal"] = (void *)cuModuleGetGlobalShim;
+    cudaFunctionMap["cuModuleGetTexRef"] = (void *)cuModuleGetTexRefShim;
+    cudaFunctionMap["cuModuleGetSurfRef"] = (void *)cuModuleGetSurfRefShim;
+    cudaFunctionMap["cuModuleGetLoadingMode"] = (void *)cuModuleGetLoadingModeShim;
+    cudaFunctionMap["cuLibraryLoadData"] = (void *)cuLibraryLoadDataShim;
+    cudaFunctionMap["cuLibraryLoadFromFile"] = (void *)cuLibraryLoadFromFileShim;
+    cudaFunctionMap["cuLibraryUnload"] = (void *)cuLibraryUnloadShim;
+    cudaFunctionMap["cuLibraryGetKernel"] = (void *)cuLibraryGetKernelShim;
+    cudaFunctionMap["cuLibraryGetModule"] = (void *)cuLibraryGetModuleShim;
+    cudaFunctionMap["cuKernelGetFunction"] = (void *)cuKernelGetFunctionShim;
+    cudaFunctionMap["cuLibraryGetGlobal"] = (void *)cuLibraryGetGlobalShim;
+    cudaFunctionMap["cuLibraryGetManaged"] = (void *)cuLibraryGetManagedShim;
+    cudaFunctionMap["cuKernelGetAttribute"] = (void *)cuKernelGetAttributeShim;
+    cudaFunctionMap["cuKernelSetAttribute"] = (void *)cuKernelSetAttributeShim;
+    cudaFunctionMap["cuKernelSetCacheConfig"] = (void *)cuKernelSetCacheConfigShim;
+    cudaFunctionMap["cuLinkCreate"] = (void *)cuLinkCreateShim;
+    cudaFunctionMap["cuLinkAddData"] = (void *)cuLinkAddDataShim;
+    cudaFunctionMap["cuLinkAddFile"] = (void *)cuLinkAddFileShim;
+    cudaFunctionMap["cuLinkComplete"] = (void *)cuLinkCompleteShim;
+    cudaFunctionMap["cuLinkDestroy"] = (void *)cuLinkDestroyShim;
+    cudaFunctionMap["cuMemGetInfo"] = (void *)cuMemGetInfoShim;
+    cudaFunctionMap["cuMemAllocManaged"] = (void *)cuMemAllocManagedShim;
+    cudaFunctionMap["cuMemAlloc"] = (void *)cuMemAllocShim;
+    cudaFunctionMap["cuMemAllocPitch"] = (void *)cuMemAllocPitchShim;
+    cudaFunctionMap["cuMemFree"] = (void *)cuMemFreeShim;
+    cudaFunctionMap["cuMemGetAddressRange"] = (void *)cuMemGetAddressRangeShim;
+    cudaFunctionMap["cuMemFreeHost"] = (void *)cuMemFreeHostShim;
+    cudaFunctionMap["cuMemHostAlloc"] = (void *)cuMemHostAllocShim;
+    cudaFunctionMap["cuMemHostGetDevicePointer"] = (void *)cuMemHostGetDevicePointerShim;
+    cudaFunctionMap["cuMemHostGetFlags"] = (void *)cuMemHostGetFlagsShim;
+    cudaFunctionMap["cuMemHostRegister"] = (void *)cuMemHostRegisterShim;
+    cudaFunctionMap["cuMemHostUnregister"] = (void *)cuMemHostUnregisterShim;
+    cudaFunctionMap["cuPointerGetAttribute"] = (void *)cuPointerGetAttributeShim;
+    cudaFunctionMap["cuPointerGetAttributes"] = (void *)cuPointerGetAttributesShim;
+    cudaFunctionMap["cuMemAllocAsync"] = (void *)cuMemAllocAsyncShim;
+    cudaFunctionMap["cuMemAllocFromPoolAsync"] = (void *)cuMemAllocFromPoolAsyncShim;
+    cudaFunctionMap["cuMemFreeAsync"] = (void *)cuMemFreeAsyncShim;
+    cudaFunctionMap["cuMemPoolTrimTo"] = (void *)cuMemPoolTrimToShim;
+    cudaFunctionMap["cuMemPoolSetAttribute"] = (void *)cuMemPoolSetAttributeShim;
+    cudaFunctionMap["cuMemPoolGetAttribute"] = (void *)cuMemPoolGetAttributeShim;
+    cudaFunctionMap["cuMemPoolSetAccess"] = (void *)cuMemPoolSetAccessShim;
+    cudaFunctionMap["cuMemPoolGetAccess"] = (void *)cuMemPoolGetAccessShim;
+    cudaFunctionMap["cuMemPoolCreate"] = (void *)cuMemPoolCreateShim;
+    cudaFunctionMap["cuMemPoolDestroy"] = (void *)cuMemPoolDestroyShim;
+    cudaFunctionMap["cuMemPoolExportToShareableHandle"] = (void *)cuMemPoolExportToShareableHandleShim;
+    cudaFunctionMap["cuMemPoolImportFromShareableHandle"] = (void *)cuMemPoolImportFromShareableHandleShim;
+    cudaFunctionMap["cuMemPoolExportPointer"] = (void *)cuMemPoolExportPointerShim;
+    cudaFunctionMap["cuMemPoolImportPointer"] = (void *)cuMemPoolImportPointerShim;
+    cudaFunctionMap["cuMemcpy"] = (void *)cuMemcpyShim;
+    cudaFunctionMap["cuMemcpyAsync"] = (void *)cuMemcpyAsyncShim;
+    cudaFunctionMap["cuMemcpyPeer"] = (void *)cuMemcpyPeerShim;
+    cudaFunctionMap["cuMemcpyPeerAsync"] = (void *)cuMemcpyPeerAsyncShim;
+    cudaFunctionMap["cuMemcpyHtoD"] = (void *)cuMemcpyHtoDShim;
+    cudaFunctionMap["cuMemcpyHtoDAsync"] = (void *)cuMemcpyHtoDAsyncShim;
+    cudaFunctionMap["cuMemcpyDtoH"] = (void *)cuMemcpyDtoHShim;
+    cudaFunctionMap["cuMemcpyDtoHAsync"] = (void *)cuMemcpyDtoHAsyncShim;
+    cudaFunctionMap["cuMemcpyDtoD"] = (void *)cuMemcpyDtoDShim;
+    cudaFunctionMap["cuMemcpyDtoDAsync"] = (void *)cuMemcpyDtoDAsyncShim;
+    cudaFunctionMap["cuMemcpy2DUnaligned"] = (void *)cuMemcpy2DUnalignedShim;
+    cudaFunctionMap["cuMemcpy2DAsync"] = (void *)cuMemcpy2DAsyncShim;
+    cudaFunctionMap["cuMemcpy3D"] = (void *)cuMemcpy3DShim;
+    cudaFunctionMap["cuMemcpy3DAsync"] = (void *)cuMemcpy3DAsyncShim;
+    cudaFunctionMap["cuMemcpy3DPeer"] = (void *)cuMemcpy3DPeerShim;
+    cudaFunctionMap["cuMemcpy3DPeerAsync"] = (void *)cuMemcpy3DPeerAsyncShim;
+    cudaFunctionMap["cuMemsetD8"] = (void *)cuMemsetD8Shim;
+    cudaFunctionMap["cuMemsetD8Async"] = (void *)cuMemsetD8AsyncShim;
+    cudaFunctionMap["cuMemsetD2D8"] = (void *)cuMemsetD2D8Shim;
+    cudaFunctionMap["cuMemsetD2D8Async"] = (void *)cuMemsetD2D8AsyncShim;
+    cudaFunctionMap["cuFuncSetCacheConfig"] = (void *)cuFuncSetCacheConfigShim;
+    cudaFunctionMap["cuFuncSetSharedMemConfig"] = (void *)cuFuncSetSharedMemConfigShim;
+    cudaFunctionMap["cuFuncGetAttribute"] = (void *)cuFuncGetAttributeShim;
+    cudaFunctionMap["cuFuncSetAttribute"] = (void *)cuFuncSetAttributeShim;
+    cudaFunctionMap["cuArrayCreate"] = (void *)cuArrayCreateShim;
+    cudaFunctionMap["cuArrayGetDescriptor"] = (void *)cuArrayGetDescriptorShim;
+    cudaFunctionMap["cuArrayGetSparseProperties"] = (void *)cuArrayGetSparsePropertiesShim;
+    cudaFunctionMap["cuArrayGetPlane"] = (void *)cuArrayGetPlaneShim;
+    cudaFunctionMap["cuArray3DCreate"] = (void *)cuArray3DCreateShim;
+    cudaFunctionMap["cuArray3DGetDescriptor"] = (void *)cuArray3DGetDescriptorShim;
+    cudaFunctionMap["cuArrayDestroy"] = (void *)cuArrayDestroyShim;
+    cudaFunctionMap["cuMipmappedArrayCreate"] = (void *)cuMipmappedArrayCreateShim;
+    cudaFunctionMap["cuMipmappedArrayGetLevel"] = (void *)cuMipmappedArrayGetLevelShim;
+    cudaFunctionMap["cuMipmappedArrayGetSparseProperties"] = (void *)cuMipmappedArrayGetSparsePropertiesShim;
+    cudaFunctionMap["cuMipmappedArrayDestroy"] = (void *)cuMipmappedArrayDestroyShim;
+    cudaFunctionMap["cuArrayGetMemoryRequirements"] = (void *)cuArrayGetMemoryRequirementsShim;
+    cudaFunctionMap["cuMipmappedArrayGetMemoryRequirements"] = (void *)cuMipmappedArrayGetMemoryRequirementsShim;
+    cudaFunctionMap["cuTexObjectCreate"] = (void *)cuTexObjectCreateShim;
+    cudaFunctionMap["cuTexObjectDestroy"] = (void *)cuTexObjectDestroyShim;
+    cudaFunctionMap["cuTexObjectGetResourceDesc"] = (void *)cuTexObjectGetResourceDescShim;
+    cudaFunctionMap["cuTexObjectGetTextureDesc"] = (void *)cuTexObjectGetTextureDescShim;
+    cudaFunctionMap["cuTexObjectGetResourceViewDesc"] = (void *)cuTexObjectGetResourceViewDescShim;
+    cudaFunctionMap["cuSurfObjectCreate"] = (void *)cuSurfObjectCreateShim;
+    cudaFunctionMap["cuSurfObjectDestroy"] = (void *)cuSurfObjectDestroyShim;
+    cudaFunctionMap["cuSurfObjectGetResourceDesc"] = (void *)cuSurfObjectGetResourceDescShim;
+    cudaFunctionMap["cuImportExternalMemory"] = (void *)cuImportExternalMemoryShim;
+    cudaFunctionMap["cuExternalMemoryGetMappedBuffer"] = (void *)cuExternalMemoryGetMappedBufferShim;
+    cudaFunctionMap["cuExternalMemoryGetMappedMipmappedArray"] = (void *)cuExternalMemoryGetMappedMipmappedArrayShim;
+    cudaFunctionMap["cuDestroyExternalMemory"] = (void *)cuDestroyExternalMemoryShim;
+    cudaFunctionMap["cuImportExternalSemaphore"] = (void *)cuImportExternalSemaphoreShim;
+    cudaFunctionMap["cuSignalExternalSemaphoresAsync"] = (void *)cuSignalExternalSemaphoresAsyncShim;
+    cudaFunctionMap["cuWaitExternalSemaphoresAsync"] = (void *)cuWaitExternalSemaphoresAsyncShim;
+    cudaFunctionMap["cuDestroyExternalSemaphore"] = (void *)cuDestroyExternalSemaphoreShim;
+    cudaFunctionMap["cuDeviceGetNvSciSyncAttributes"] = (void *)cuDeviceGetNvSciSyncAttributesShim;
+    cudaFunctionMap["cuLaunchKernel"] = (void *)cuLaunchKernelShim;
+    cudaFunctionMap["cuLaunchCooperativeKernel"] = (void *)cuLaunchCooperativeKernelShim;
+    cudaFunctionMap["cuLaunchCooperativeKernelMultiDevice"] = (void *)cuLaunchCooperativeKernelMultiDeviceShim;
+    cudaFunctionMap["cuLaunchHostFunc"] = (void *)cuLaunchHostFuncShim;
+    cudaFunctionMap["cuLaunchKernelEx"] = (void *)cuLaunchKernelExShim;
+    cudaFunctionMap["cuEventCreate"] = (void *)cuEventCreateShim;
+    cudaFunctionMap["cuEventRecord"] = (void *)cuEventRecordShim;
+    cudaFunctionMap["cuEventRecordWithFlags"] = (void *)cuEventRecordWithFlagsShim;
+    cudaFunctionMap["cuEventQuery"] = (void *)cuEventQueryShim;
+    cudaFunctionMap["cuEventSynchronize"] = (void *)cuEventSynchronizeShim;
+    cudaFunctionMap["cuEventDestroy"] = (void *)cuEventDestroyShim;
+    cudaFunctionMap["cuEventElapsedTime"] = (void *)cuEventElapsedTimeShim;
+    cudaFunctionMap["cuStreamWaitValue32"] = (void *)cuStreamWaitValue32Shim;
+    cudaFunctionMap["cuStreamWriteValue32"] = (void *)cuStreamWriteValue32Shim;
+    cudaFunctionMap["cuStreamWaitValue64"] = (void *)cuStreamWaitValue64Shim;
+    cudaFunctionMap["cuStreamWriteValue64"] = (void *)cuStreamWriteValue64Shim;
+    cudaFunctionMap["cuStreamBatchMemOp"] = (void *)cuStreamBatchMemOpShim;
+    cudaFunctionMap["cuStreamCreate"] = (void *)cuStreamCreateShim;
+    cudaFunctionMap["cuStreamCreateWithPriority"] = (void *)cuStreamCreateWithPriorityShim;
+    cudaFunctionMap["cuStreamGetPriority"] = (void *)cuStreamGetPriorityShim;
+    cudaFunctionMap["cuStreamGetFlags"] = (void *)cuStreamGetFlagsShim;
+    cudaFunctionMap["cuStreamGetCtx"] = (void *)cuStreamGetCtxShim;
+    cudaFunctionMap["cuStreamGetId"] = (void *)cuStreamGetIdShim;
+    cudaFunctionMap["cuStreamDestroy"] = (void *)cuStreamDestroyShim;
+    cudaFunctionMap["cuStreamWaitEvent"] = (void *)cuStreamWaitEventShim;
+    cudaFunctionMap["cuStreamAddCallback"] = (void *)cuStreamAddCallbackShim;
+    cudaFunctionMap["cuStreamSynchronize"] = (void *)cuStreamSynchronizeShim;
+    cudaFunctionMap["cuStreamQuery"] = (void *)cuStreamQueryShim;
+    cudaFunctionMap["cuStreamAttachMemAsync"] = (void *)cuStreamAttachMemAsyncShim;
+    cudaFunctionMap["cuStreamCopyAttributes"] = (void *)cuStreamCopyAttributesShim;
+    cudaFunctionMap["cuStreamGetAttribute"] = (void *)cuStreamGetAttributeShim;
+    cudaFunctionMap["cuStreamSetAttribute"] = (void *)cuStreamSetAttributeShim;
+    cudaFunctionMap["cuDeviceCanAccessPeer"] = (void *)cuDeviceCanAccessPeerShim;
+    cudaFunctionMap["cuCtxEnablePeerAccess"] = (void *)cuCtxEnablePeerAccessShim;
+    cudaFunctionMap["cuCtxDisablePeerAccess"] = (void *)cuCtxDisablePeerAccessShim;
+    cudaFunctionMap["cuIpcGetEventHandle"] = (void *)cuIpcGetEventHandleShim;
+    cudaFunctionMap["cuIpcOpenEventHandle"] = (void *)cuIpcOpenEventHandleShim;
+    cudaFunctionMap["cuIpcGetMemHandle"] = (void *)cuIpcGetMemHandleShim;
+    cudaFunctionMap["cuIpcOpenMemHandle"] = (void *)cuIpcOpenMemHandleShim;
+    cudaFunctionMap["cuIpcCloseMemHandle"] = (void *)cuIpcCloseMemHandleShim;
+    cudaFunctionMap["cuGLCtxCreate"] = (void *)cuGLCtxCreateShim;
+    cudaFunctionMap["cuGLInit"] = (void *)cuGLInitShim;
+    cudaFunctionMap["cuGLGetDevices"] = (void *)cuGLGetDevicesShim;
+    cudaFunctionMap["cuGLRegisterBufferObject"] = (void *)cuGLRegisterBufferObjectShim;
+    cudaFunctionMap["cuGLMapBufferObject"] = (void *)cuGLMapBufferObjectShim;
+    cudaFunctionMap["cuGLMapBufferObjectAsync"] = (void *)cuGLMapBufferObjectAsyncShim;
+    cudaFunctionMap["cuGLUnmapBufferObject"] = (void *)cuGLUnmapBufferObjectShim;
+    cudaFunctionMap["cuGLUnmapBufferObjectAsync"] = (void *)cuGLUnmapBufferObjectAsyncShim;
+    cudaFunctionMap["cuGLUnregisterBufferObject"] = (void *)cuGLUnregisterBufferObjectShim;
+    cudaFunctionMap["cuGLSetBufferObjectMapFlags"] = (void *)cuGLSetBufferObjectMapFlagsShim;
+    cudaFunctionMap["cuGraphicsGLRegisterImage"] = (void *)cuGraphicsGLRegisterImageShim;
+    cudaFunctionMap["cuGraphicsGLRegisterBuffer"] = (void *)cuGraphicsGLRegisterBufferShim;
+    cudaFunctionMap["cuGraphicsEGLRegisterImage"] = (void *)cuGraphicsEGLRegisterImageShim;
+    cudaFunctionMap["cuEGLStreamConsumerConnect"] = (void *)cuEGLStreamConsumerConnectShim;
+    cudaFunctionMap["cuEGLStreamConsumerDisconnect"] = (void *)cuEGLStreamConsumerDisconnectShim;
+    cudaFunctionMap["cuEGLStreamConsumerAcquireFrame"] = (void *)cuEGLStreamConsumerAcquireFrameShim;
+    cudaFunctionMap["cuEGLStreamConsumerReleaseFrame"] = (void *)cuEGLStreamConsumerReleaseFrameShim;
+    cudaFunctionMap["cuEGLStreamProducerConnect"] = (void *)cuEGLStreamProducerConnectShim;
+    cudaFunctionMap["cuEGLStreamProducerDisconnect"] = (void *)cuEGLStreamProducerDisconnectShim;
+    cudaFunctionMap["cuEGLStreamProducerPresentFrame"] = (void *)cuEGLStreamProducerPresentFrameShim;
+    cudaFunctionMap["cuEGLStreamProducerReturnFrame"] = (void *)cuEGLStreamProducerReturnFrameShim;
+    cudaFunctionMap["cuGraphicsResourceGetMappedEglFrame"] = (void *)cuGraphicsResourceGetMappedEglFrameShim;
+    cudaFunctionMap["cuGraphicsUnregisterResource"] = (void *)cuGraphicsUnregisterResourceShim;
+    cudaFunctionMap["cuGraphicsMapResources"] = (void *)cuGraphicsMapResourcesShim;
+    cudaFunctionMap["cuGraphicsUnmapResources"] = (void *)cuGraphicsUnmapResourcesShim;
+    cudaFunctionMap["cuGraphicsResourceSetMapFlags"] = (void *)cuGraphicsResourceSetMapFlagsShim;
+    cudaFunctionMap["cuGraphicsSubResourceGetMappedArray"] = (void *)cuGraphicsSubResourceGetMappedArrayShim;
+    cudaFunctionMap["cuGraphicsResourceGetMappedMipmappedArray"] = (void *)cuGraphicsResourceGetMappedMipmappedArrayShim;
+    cudaFunctionMap["cuProfilerInitialize"] = (void *)cuProfilerInitializeShim;
+    cudaFunctionMap["cuProfilerStart"] = (void *)cuProfilerStartShim;
+    cudaFunctionMap["cuProfilerStop"] = (void *)cuProfilerStopShim;
+    cudaFunctionMap["cuVDPAUGetDevice"] = (void *)cuVDPAUGetDeviceShim;
+    cudaFunctionMap["cuVDPAUCtxCreate"] = (void *)cuVDPAUCtxCreateShim;
+    cudaFunctionMap["cuGraphicsVDPAURegisterVideoSurface"] = (void *)cuGraphicsVDPAURegisterVideoSurfaceShim;
+    cudaFunctionMap["cuGraphicsVDPAURegisterOutputSurface"] = (void *)cuGraphicsVDPAURegisterOutputSurfaceShim;
+    cudaFunctionMap["cuGetExportTable"] = (void *)cuGetExportTableShim;
+    cudaFunctionMap["cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags"] = (void *)cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlagsShim;
+    cudaFunctionMap["cuOccupancyAvailableDynamicSMemPerBlock"] = (void *)cuOccupancyAvailableDynamicSMemPerBlockShim;
+    cudaFunctionMap["cuOccupancyMaxPotentialClusterSize"] = (void *)cuOccupancyMaxPotentialClusterSizeShim;
+    cudaFunctionMap["cuOccupancyMaxActiveClusters"] = (void *)cuOccupancyMaxActiveClustersShim;
+    cudaFunctionMap["cuMemAdvise"] = (void *)cuMemAdviseShim;
+    cudaFunctionMap["cuMemPrefetchAsync"] = (void *)cuMemPrefetchAsyncShim;
+    cudaFunctionMap["cuMemRangeGetAttribute"] = (void *)cuMemRangeGetAttributeShim;
+    cudaFunctionMap["cuMemRangeGetAttributes"] = (void *)cuMemRangeGetAttributesShim;
+    cudaFunctionMap["cuGetErrorString"] = (void *)cuGetErrorStringShim;
+    cudaFunctionMap["cuGetErrorName"] = (void *)cuGetErrorNameShim;
+    cudaFunctionMap["cuGraphCreate"] = (void *)cuGraphCreateShim;
+    cudaFunctionMap["cuGraphAddKernelNode"] = (void *)cuGraphAddKernelNodeShim;
+    cudaFunctionMap["cuGraphKernelNodeGetParams"] = (void *)cuGraphKernelNodeGetParamsShim;
+    cudaFunctionMap["cuGraphKernelNodeSetParams"] = (void *)cuGraphKernelNodeSetParamsShim;
+    cudaFunctionMap["cuGraphAddMemcpyNode"] = (void *)cuGraphAddMemcpyNodeShim;
+    cudaFunctionMap["cuGraphMemcpyNodeGetParams"] = (void *)cuGraphMemcpyNodeGetParamsShim;
+    cudaFunctionMap["cuGraphMemcpyNodeSetParams"] = (void *)cuGraphMemcpyNodeSetParamsShim;
+    cudaFunctionMap["cuGraphAddMemsetNode"] = (void *)cuGraphAddMemsetNodeShim;
+    cudaFunctionMap["cuGraphMemsetNodeGetParams"] = (void *)cuGraphMemsetNodeGetParamsShim;
+    cudaFunctionMap["cuGraphMemsetNodeSetParams"] = (void *)cuGraphMemsetNodeSetParamsShim;
+    cudaFunctionMap["cuGraphAddHostNode"] = (void *)cuGraphAddHostNodeShim;
+    cudaFunctionMap["cuGraphHostNodeGetParams"] = (void *)cuGraphHostNodeGetParamsShim;
+    cudaFunctionMap["cuGraphHostNodeSetParams"] = (void *)cuGraphHostNodeSetParamsShim;
+    cudaFunctionMap["cuGraphAddChildGraphNode"] = (void *)cuGraphAddChildGraphNodeShim;
+    cudaFunctionMap["cuGraphChildGraphNodeGetGraph"] = (void *)cuGraphChildGraphNodeGetGraphShim;
+    cudaFunctionMap["cuGraphAddEmptyNode"] = (void *)cuGraphAddEmptyNodeShim;
+    cudaFunctionMap["cuGraphAddEventRecordNode"] = (void *)cuGraphAddEventRecordNodeShim;
+    cudaFunctionMap["cuGraphEventRecordNodeGetEvent"] = (void *)cuGraphEventRecordNodeGetEventShim;
+    cudaFunctionMap["cuGraphEventRecordNodeSetEvent"] = (void *)cuGraphEventRecordNodeSetEventShim;
+    cudaFunctionMap["cuGraphAddEventWaitNode"] = (void *)cuGraphAddEventWaitNodeShim;
+    cudaFunctionMap["cuGraphEventWaitNodeGetEvent"] = (void *)cuGraphEventWaitNodeGetEventShim;
+    cudaFunctionMap["cuGraphEventWaitNodeSetEvent"] = (void *)cuGraphEventWaitNodeSetEventShim;
+    cudaFunctionMap["cuGraphAddExternalSemaphoresSignalNode"] = (void *)cuGraphAddExternalSemaphoresSignalNodeShim;
+    cudaFunctionMap["cuGraphExternalSemaphoresSignalNodeGetParams"] = (void *)cuGraphExternalSemaphoresSignalNodeGetParamsShim;
+    cudaFunctionMap["cuGraphExternalSemaphoresSignalNodeSetParams"] = (void *)cuGraphExternalSemaphoresSignalNodeSetParamsShim;
+    cudaFunctionMap["cuGraphAddExternalSemaphoresWaitNode"] = (void *)cuGraphAddExternalSemaphoresWaitNodeShim;
+    cudaFunctionMap["cuGraphExternalSemaphoresWaitNodeGetParams"] = (void *)cuGraphExternalSemaphoresWaitNodeGetParamsShim;
+    cudaFunctionMap["cuGraphExternalSemaphoresWaitNodeSetParams"] = (void *)cuGraphExternalSemaphoresWaitNodeSetParamsShim;
+    cudaFunctionMap["cuGraphExecExternalSemaphoresSignalNodeSetParams"] = (void *)cuGraphExecExternalSemaphoresSignalNodeSetParamsShim;
+    cudaFunctionMap["cuGraphExecExternalSemaphoresWaitNodeSetParams"] = (void *)cuGraphExecExternalSemaphoresWaitNodeSetParamsShim;
+    cudaFunctionMap["cuGraphAddMemAllocNode"] = (void *)cuGraphAddMemAllocNodeShim;
+    cudaFunctionMap["cuGraphMemAllocNodeGetParams"] = (void *)cuGraphMemAllocNodeGetParamsShim;
+    cudaFunctionMap["cuGraphAddMemFreeNode"] = (void *)cuGraphAddMemFreeNodeShim;
+    cudaFunctionMap["cuGraphMemFreeNodeGetParams"] = (void *)cuGraphMemFreeNodeGetParamsShim;
+    cudaFunctionMap["cuDeviceGraphMemTrim"] = (void *)cuDeviceGraphMemTrimShim;
+    cudaFunctionMap["cuDeviceGetGraphMemAttribute"] = (void *)cuDeviceGetGraphMemAttributeShim;
+    cudaFunctionMap["cuDeviceSetGraphMemAttribute"] = (void *)cuDeviceSetGraphMemAttributeShim;
+    cudaFunctionMap["cuGraphClone"] = (void *)cuGraphCloneShim;
+    cudaFunctionMap["cuGraphNodeFindInClone"] = (void *)cuGraphNodeFindInCloneShim;
+    cudaFunctionMap["cuGraphNodeGetType"] = (void *)cuGraphNodeGetTypeShim;
+    cudaFunctionMap["cuGraphGetNodes"] = (void *)cuGraphGetNodesShim;
+    cudaFunctionMap["cuGraphGetRootNodes"] = (void *)cuGraphGetRootNodesShim;
+    cudaFunctionMap["cuGraphGetEdges"] = (void *)cuGraphGetEdgesShim;
+    cudaFunctionMap["cuGraphNodeGetDependencies"] = (void *)cuGraphNodeGetDependenciesShim;
+    cudaFunctionMap["cuGraphNodeGetDependentNodes"] = (void *)cuGraphNodeGetDependentNodesShim;
+    cudaFunctionMap["cuGraphAddDependencies"] = (void *)cuGraphAddDependenciesShim;
+    cudaFunctionMap["cuGraphRemoveDependencies"] = (void *)cuGraphRemoveDependenciesShim;
+    cudaFunctionMap["cuGraphDestroyNode"] = (void *)cuGraphDestroyNodeShim;
+    cudaFunctionMap["cuGraphInstantiate"] = (void *)cuGraphInstantiateShim;
+    cudaFunctionMap["cuGraphUpload"] = (void *)cuGraphUploadShim;
+    cudaFunctionMap["cuGraphLaunch"] = (void *)cuGraphLaunchShim;
+    cudaFunctionMap["cuGraphExecDestroy"] = (void *)cuGraphExecDestroyShim;
+    cudaFunctionMap["cuGraphDestroy"] = (void *)cuGraphDestroyShim;
+    cudaFunctionMap["cuStreamBeginCapture"] = (void *)cuStreamBeginCaptureShim;
+    cudaFunctionMap["cuStreamEndCapture"] = (void *)cuStreamEndCaptureShim;
+    cudaFunctionMap["cuStreamIsCapturing"] = (void *)cuStreamIsCapturingShim;
+    cudaFunctionMap["cuStreamGetCaptureInfo"] = (void *)cuStreamGetCaptureInfoShim;
+    cudaFunctionMap["cuStreamUpdateCaptureDependencies"] = (void *)cuStreamUpdateCaptureDependenciesShim;
+    cudaFunctionMap["cuGraphExecKernelNodeSetParams"] = (void *)cuGraphExecKernelNodeSetParamsShim;
+    cudaFunctionMap["cuGraphExecMemcpyNodeSetParams"] = (void *)cuGraphExecMemcpyNodeSetParamsShim;
+    cudaFunctionMap["cuGraphExecMemsetNodeSetParams"] = (void *)cuGraphExecMemsetNodeSetParamsShim;
+    cudaFunctionMap["cuGraphExecHostNodeSetParams"] = (void *)cuGraphExecHostNodeSetParamsShim;
+    cudaFunctionMap["cuGraphExecChildGraphNodeSetParams"] = (void *)cuGraphExecChildGraphNodeSetParamsShim;
+    cudaFunctionMap["cuGraphExecEventRecordNodeSetEvent"] = (void *)cuGraphExecEventRecordNodeSetEventShim;
+    cudaFunctionMap["cuGraphExecEventWaitNodeSetEvent"] = (void *)cuGraphExecEventWaitNodeSetEventShim;
+    cudaFunctionMap["cuThreadExchangeStreamCaptureMode"] = (void *)cuThreadExchangeStreamCaptureModeShim;
+    cudaFunctionMap["cuGraphExecUpdate"] = (void *)cuGraphExecUpdateShim;
+    cudaFunctionMap["cuGraphKernelNodeCopyAttributes"] = (void *)cuGraphKernelNodeCopyAttributesShim;
+    cudaFunctionMap["cuGraphKernelNodeGetAttribute"] = (void *)cuGraphKernelNodeGetAttributeShim;
+    cudaFunctionMap["cuGraphKernelNodeSetAttribute"] = (void *)cuGraphKernelNodeSetAttributeShim;
+    cudaFunctionMap["cuGraphDebugDotPrint"] = (void *)cuGraphDebugDotPrintShim;
+    cudaFunctionMap["cuUserObjectCreate"] = (void *)cuUserObjectCreateShim;
+    cudaFunctionMap["cuUserObjectRetain"] = (void *)cuUserObjectRetainShim;
+    cudaFunctionMap["cuUserObjectRelease"] = (void *)cuUserObjectReleaseShim;
+    cudaFunctionMap["cuGraphRetainUserObject"] = (void *)cuGraphRetainUserObjectShim;
+    cudaFunctionMap["cuGraphReleaseUserObject"] = (void *)cuGraphReleaseUserObjectShim;
+    cudaFunctionMap["cuGraphNodeSetEnabled"] = (void *)cuGraphNodeSetEnabledShim;
+    cudaFunctionMap["cuGraphNodeGetEnabled"] = (void *)cuGraphNodeGetEnabledShim;
+    cudaFunctionMap["cuGraphInstantiateWithParams"] = (void *)cuGraphInstantiateWithParamsShim;
+    cudaFunctionMap["cuGraphExecGetFlags"] = (void *)cuGraphExecGetFlagsShim;
+    cudaFunctionMap["cuGraphInstantiateWithParams_ptsz"] = (void *)cuGraphInstantiateWithParams_ptszShim;
+    cudaFunctionMap["cuGraphInstantiateWithFlags"] = (void *)cuGraphInstantiateWithFlagsShim;
+    cudaFunctionMap["cuEGLStreamConsumerConnectWithFlags"] = (void *)cuEGLStreamConsumerConnectWithFlagsShim;
+    cudaFunctionMap["cuGraphicsResourceGetMappedPointer"] = (void *)cuGraphicsResourceGetMappedPointerShim;
+}
 
 CUresult cuGetProcAddress_v2_handler(const char *symbol, void **pfn, int cudaVersion, cuuint64_t flags, CUdriverProcAddressQueryResult *symbolStatus)
 {
-    initializeCuFunctionMap();
-    // Open RPC client if not already opened
-    if (open_rpc_client() < 0)
-        return CUDA_ERROR_UNKNOWN;
-
-    // Start the RPC request for cuGetProcAddress
-    int request_id = rpc_start_request(RPC_cuGetProcAddress_v2);
-    if (request_id < 0)
-        return CUDA_ERROR_UNKNOWN;
-
-    int symbol_length = strlen(symbol) + 1;
-
-    void *placeholder = nullptr;
-    if (rpc_write(&symbol_length, sizeof(int)) < 0 ||
-        rpc_write(symbol, symbol_length) < 0 ||
-        rpc_write(&cudaVersion, sizeof(int)) < 0 ||
-        rpc_write(&placeholder, sizeof(void *)) < 0 ||  // Write a placeholder instead of pfn
-        rpc_write(&flags, sizeof(cuuint64_t)) < 0) {
-        return CUDA_ERROR_UNKNOWN;
-    }
-
-    // Wait for the server response
-    if (rpc_wait_for_response(request_id) < 0)
-    {
-        return CUDA_ERROR_UNKNOWN;
-    }
-
-    // Read the function pointer from the response
-    if (rpc_read(pfn, sizeof(void *)) < 0 || rpc_read(symbolStatus, sizeof(CUdriverProcAddressQueryResult)) < 0)
-    {
-        return CUDA_ERROR_UNKNOWN;
-    }
+    initCudaFunctionMap();
 
     std::string symbolName(symbol);
-    auto it = cuFunctionMap.find(symbolName);
-    if (it != cuFunctionMap.end()) {
+    auto it = cudaFunctionMap.find(symbolName);
+    if (it != cudaFunctionMap.end()) {
         *pfn = reinterpret_cast<void *>(it->second);
         std::cout << "Mapped symbol: " << symbolName << " to function: " << *pfn << std::endl;
     } else {
@@ -3277,62 +3245,27 @@ CUresult cuGetProcAddress_v2_handler(const char *symbol, void **pfn, int cudaVer
         *pfn = reinterpret_cast<void *>(noOpFunction); 
     }
 
-    // Retrieve and return the result from the response
-    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
+    return CUDA_SUCCESS;
 }
 
 CUresult cuGetProcAddress(const char *symbol, void **pfn, int cudaVersion, cuuint64_t flags, CUdriverProcAddressQueryResult *symbolStatus) {
-    // Open RPC client if not already opened
-    if (open_rpc_client() < 0)
-        return CUDA_ERROR_UNKNOWN;
-
-    // Start the RPC request for cuGetProcAddress
-    int request_id = rpc_start_request(RPC_cuGetProcAddress_v2);
-    if (request_id < 0)
-        return CUDA_ERROR_UNKNOWN;
-
-    int symbol_length = strlen(symbol) + 1;
-
-    void *placeholder = nullptr;
-    if (rpc_write(&symbol_length, sizeof(int)) < 0 ||
-        rpc_write(symbol, symbol_length) < 0 ||
-        rpc_write(&cudaVersion, sizeof(int)) < 0 ||
-        rpc_write(&placeholder, sizeof(void *)) < 0 ||  // Write a placeholder instead of pfn
-        rpc_write(&flags, sizeof(cuuint64_t)) < 0) {
-        return CUDA_ERROR_UNKNOWN;
-    }
-
-    // Wait for the server response
-    if (rpc_wait_for_response(request_id) < 0)
-    {
-        return CUDA_ERROR_UNKNOWN;
-    }
-
-    // Read the function pointer from the response
-    if (rpc_read(pfn, sizeof(void *)) < 0 || rpc_read(symbolStatus, sizeof(CUdriverProcAddressQueryResult)) < 0)
-    {
-        return CUDA_ERROR_UNKNOWN;
-    }
+    open_rpc_client();
 
     std::string symbolName(symbol);
-    auto it = cuFunctionMap.find(symbolName);
-    if (it != cuFunctionMap.end()) {
+    auto it = cudaFunctionMap.find(symbolName);
+    if (it != cudaFunctionMap.end()) {
         *pfn = reinterpret_cast<void *>(it->second);
         std::cout << "Mapped symbol: " << symbolName << " to function: " << *pfn << std::endl;
     } else {
-        void *fn = nullptr;
         std::cerr << "Function for symbol: " << symbolName << " not found!" << std::endl;
         *pfn = reinterpret_cast<void *>(noOpFunction); 
     }
-
-    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
 }
 
-std::unordered_map<std::string, void *> functionMap;
+std::unordered_map<std::string, void*> functionMap;
 
 void initializeFunctionMap()
 {
-    
     // simple cache check to make sure we only init handlers on the first run
     // attach all handlers to our function map
     functionMap["nvmlInitWithFlags"] = (void *)nvmlInitWithFlags;
@@ -3411,6 +3344,68 @@ void initializeFunctionMap()
 
     // cuda
     functionMap["cuGetProcAddress_v2"] = (void *)cuGetProcAddress_v2_handler;
+
+    functionMap["cuInit"] = (void *)cuInit;
+    functionMap["cuGetProcAddress"] = (void *)cuGetProcAddress;
+    functionMap["cuDriverGetVersion"] = (void *)cuDriverGetVersion_handler;
+    // functionMap["cudaGetDeviceCount"] = (void *)cudaGetDeviceCountShim;
+    functionMap["cuDeviceGet"] = (void *)cuDeviceGetShim;
+    functionMap["cuDeviceGetCount"] = (void *)cuDeviceGetCountShim;
+    functionMap["cuDeviceGetName"] = (void *)cuDeviceGetNameShim;
+    functionMap["cuDeviceTotalMem"] = (void *)cuDeviceTotalMemShim;
+    functionMap["cuDeviceGetAttribute"] = (void *)cuDeviceGetAttributeShim;
+    functionMap["cuDeviceGetP2PAttribute"] = (void *)cuDeviceGetP2PAttributeShim;
+    functionMap["cuDeviceGetByPCIBusId"] = (void *)cuDeviceGetByPCIBusIdShim;
+    functionMap["cuDeviceGetPCIBusId"] = (void *)cuDeviceGetPCIBusIdShim;
+    functionMap["cuDeviceGetUuid"] = (void *)cuDeviceGetUuidShim;
+    functionMap["cuDeviceGetTexture1DLinearMaxWidth"] = (void *)cuDeviceGetTexture1DLinearMaxWidthShim;
+    functionMap["cuDeviceGetDefaultMemPool"] = (void *)cuDeviceGetDefaultMemPoolShim;
+    functionMap["cuDeviceSetMemPool"] = (void *)cuDeviceSetMemPoolShim;
+    functionMap["cuDeviceGetMemPool"] = (void *)cuDeviceGetMemPoolShim;
+    functionMap["cuFlushGPUDirectRDMAWrites"] = (void *)cuFlushGPUDirectRDMAWritesShim;
+    functionMap["cuDevicePrimaryCtxRetain"] = (void *)cuDevicePrimaryCtxRetainShim;
+    functionMap["cuDevicePrimaryCtxRelease"] = (void *)cuDevicePrimaryCtxReleaseShim;
+    functionMap["cuDevicePrimaryCtxSetFlags"] = (void *)cuDevicePrimaryCtxSetFlagsShim;
+    functionMap["cuDevicePrimaryCtxGetState"] = (void *)cuDevicePrimaryCtxGetStateShim;
+    functionMap["cuDevicePrimaryCtxReset"] = (void *)cuDevicePrimaryCtxResetShim;
+    functionMap["cuCtxCreate"] = (void *)cuCtxCreateShim;
+    functionMap["cuCtxGetFlags"] = (void *)cuCtxGetFlagsShim;
+    functionMap["cuCtxSetCurrent"] = (void *)cuCtxSetCurrentShim;
+    functionMap["cuCtxGetCurrent"] = (void *)cuCtxGetCurrentShim;
+    functionMap["cuCtxDetach"] = (void *)cuCtxDetachShim;
+    functionMap["cuCtxGetApiVersion"] = (void *)cuCtxGetApiVersionShim;
+    functionMap["cuCtxGetDevice"] = (void *)cuCtxGetDeviceShim;
+    functionMap["cuCtxGetLimit"] = (void *)cuCtxGetLimitShim;
+    functionMap["cuCtxSetLimit"] = (void *)cuCtxSetLimitShim;
+    functionMap["cuCtxGetCacheConfig"] = (void *)cuCtxGetCacheConfigShim;
+    functionMap["cuCtxSetCacheConfig"] = (void *)cuCtxSetCacheConfigShim;
+    functionMap["cuCtxGetSharedMemConfig"] = (void *)cuCtxGetSharedMemConfigShim;
+    functionMap["cuCtxGetStreamPriorityRange"] = (void *)cuCtxGetStreamPriorityRangeShim;
+    functionMap["cuCtxSetSharedMemConfig"] = (void *)cuCtxSetSharedMemConfigShim;
+    functionMap["cuCtxSynchronize"] = (void *)cuCtxSynchronizeShim;
+    functionMap["cuCtxResetPersistingL2Cache"] = (void *)cuCtxResetPersistingL2CacheShim;
+    functionMap["cuCtxPopCurrent"] = (void *)cuCtxPopCurrentShim;
+    functionMap["cuCtxPushCurrent"] = (void *)cuCtxPushCurrentShim;
+    functionMap["cuModuleLoad"] = (void *)cuModuleLoadShim;
+    functionMap["cuModuleLoadData"] = (void *)cuModuleLoadDataShim;
+    functionMap["cuModuleLoadFatBinary"] = (void *)cuModuleLoadFatBinaryShim;
+    functionMap["cuModuleUnload"] = (void *)cuModuleUnloadShim;
+    functionMap["cuModuleGetFunction"] = (void *)cuModuleGetFunctionShim;
+    functionMap["cuModuleGetGlobal"] = (void *)cuModuleGetGlobalShim;
+    functionMap["cuModuleGetTexRef"] = (void *)cuModuleGetTexRefShim;
+    functionMap["cuModuleGetSurfRef"] = (void *)cuModuleGetSurfRefShim;
+    functionMap["cuModuleGetLoadingMode"] = (void *)cuModuleGetLoadingModeShim;
+    functionMap["cuLibraryLoadData"] = (void *)cuLibraryLoadDataShim;
+    functionMap["cuLibraryLoadFromFile"] = (void *)cuLibraryLoadFromFileShim;
+    functionMap["cuLibraryUnload"] = (void *)cuLibraryUnloadShim;
+    functionMap["cuLibraryGetKernel"] = (void *)cuLibraryGetKernelShim;
+    functionMap["cuLibraryGetModule"] = (void *)cuLibraryGetModuleShim;
+    functionMap["cuKernelGetFunction"] = (void *)cuKernelGetFunctionShim;
+    functionMap["cuLibraryGetGlobal"] = (void *)cuLibraryGetGlobalShim;
+    functionMap["cuLibraryGetManaged"] = (void *)cuLibraryGetManagedShim;
+    functionMap["cuKernelGetAttribute"] = (void *)cuKernelGetAttributeShim;
+    functionMap["cuKernelSetAttribute"] = (void *)cuKernelSetAttributeShim;
+    functionMap["cuKernelSetCacheConfig"] = (void *)cuKernelSetCacheConfigShim;
 }
 
 // Lookup function similar to dlsym
@@ -3418,7 +3413,7 @@ void *getFunctionByName(const char *name)
 {
     auto it = functionMap.find(name);
     if (it != functionMap.end()) {
-        std::cout << "Function found: " << it->second << std::endl;
+        std::cout << "Function found: " << name << it->second << std::endl;
         return it->second;
     }
         
@@ -3431,10 +3426,8 @@ void *dlsym(void *handle, const char *name) __THROW
 
     void *func = getFunctionByName(name);  // Lookup function by name
 
-    std::cout << "Functionnnnnn: " << name << std::endl;
-
     if (func != nullptr) {
-        std::cout << "[dlsym] Function address from functionMap: " << func << std::endl;
+        std::cout << "[dlsym] Function address from cudaFunctionMap: " << func << std::endl;
         return func;
     }
 

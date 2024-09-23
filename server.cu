@@ -1874,7 +1874,7 @@ int handle_cuDeviceGetCount(int connfd) {
 
     std::cout << "Server: Sent device count to client successfully: " << deviceCount << std::endl;
 
-    return 0;
+    return result;
 }
 
 int handle_cuDriverGetVersion(int connfd) {
@@ -1945,7 +1945,7 @@ int handle_cuDeviceGet(int connfd) {
 
     std::cout << "Server: Sent device handle to client successfully." << std::endl;
 
-    return 0;
+    return result;
 }
 
 int handle_cuInit(int connfd) {
