@@ -1,6 +1,24 @@
 #include <nvml.h>
+#include <cuda.h>
 #include <string>
 #include <unordered_map>
+
+#include <arpa/inet.h>
+#include <cstring>
+#include <dlfcn.h>
+#include <functional>
+#include <iostream>
+#include <netdb.h>
+#include <nvml.h>
+#include <pthread.h>
+#include <stdio.h>
+#include <string.h>
+#include <string>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <unordered_map>
+#include <vector>
 
 #include "gen_api.h"
 
@@ -4108,6 +4126,2021 @@ nvmlReturn_t nvmlDeviceSetNvLinkDeviceLowPowerThreshold(nvmlDevice_t device, nvm
     return return_value;
 }
 
+CUresult cuLinkCreate_v2(unsigned int numOptions, CUjit_option *options, void **optionValues, CUlinkState *stateOut)
+{
+    std::cout << "calling cuLinkCreate_v2 " << std::endl;
+}
+
+CUresult cuLinkAddData_v2(CUlinkState state, CUjitInputType type, void *data, size_t size, const char *name, unsigned int numOptions, CUjit_option *options, void **optionValues)
+{
+    std::cout << "calling cuLinkAddData_v2 " << std::endl;
+}
+
+CUresult cuLinkComplete(CUlinkState state, void **cubinOut, size_t *sizeOut)
+{
+}
+
+CUresult cuModuleLoadData(CUmodule *module, const void *image)
+{
+    
+}
+
+CUresult cuModuleUnload(CUmodule hmod)
+{
+}
+
+CUresult cuGetErrorString(CUresult error, const char **pStr)
+{
+    
+}
+
+CUresult cuLinkDestroy(CUlinkState state)
+{
+
+}
+
+CUresult cuModuleGetFunction(CUfunction *hfunc, CUmodule hmod, const char *name)
+{
+    
+}
+
+CUresult cuFuncSetAttribute(CUfunction hfunc, CUfunction_attribute attrib, int value)
+{
+    
+}
+
+CUresult cuLaunchKernel(CUfunction f, unsigned int gridDimX, unsigned int gridDimY, unsigned int gridDimZ, unsigned int blockDimX, unsigned int blockDimY, unsigned int blockDimZ, unsigned int sharedMemBytes, CUstream hStream, void **kernelParams, void **extra)
+{
+    
+}
+
+CUresult cuGetErrorName(CUresult error, const char **pStr)
+{
+   
+}
+
+CUresult cuModuleLoadFatBinary(CUmodule *module, const void *fatCubin)
+{
+    
+}
+
+CUresult cuModuleLoadDataEx(CUmodule *module, const void *image, unsigned int numOptions, CUjit_option *options, void **optionValues)
+{
+    
+}
+
+CUresult cuLinkAddFile_v2(CUlinkState state, CUjitInputType type, const char *path, unsigned int numOptions, CUjit_option *options, void **optionValues)
+{
+    
+}
+
+CUresult cuInit(unsigned int flags) {
+    std::cerr << "calling cuinit1!!!" << std::endl; 
+
+    // Start the RPC request for cuInit
+    int request_id = rpc_start_request(RPC_cuInit);
+    if (request_id < 0) {
+        std::cerr << "Failed to start cuInit request" << std::endl;
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    // Write the flags to the server
+    if (rpc_write(&flags, sizeof(unsigned int)) < 0) {
+        std::cerr << "Failed to write flags to server" << std::endl;
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    // Wait for the server response
+    if (rpc_wait_for_response(request_id) < 0) {
+        std::cerr << "Failed to wait for response from server" << std::endl;
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    // Read the result code from the server
+    CUresult result;
+    if (rpc_read(&result, sizeof(CUresult)) < 0) {
+        std::cerr << "Failed to read result code from server" << std::endl;
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    // Log the successful initialization
+    if (result == CUDA_SUCCESS) {
+        std::cout << "cuInit successful, Flags: " << flags << std::endl;
+    }
+
+    rpc_end_request(&result, request_id);
+
+    return result;
+}
+
+CUresult cuCtxPushCurrent(CUcontext ctx)
+{
+  
+}
+
+CUresult cuCtxPopCurrent(CUcontext *pctx)
+{
+    
+}
+
+CUresult cuCtxGetDevice(CUdevice *device)
+{
+}
+
+CUresult cuDevicePrimaryCtxRetain(CUcontext *pctx, CUdevice dev)
+{
+    
+   
+}
+
+CUresult cuDevicePrimaryCtxRelease(CUdevice dev)
+{
+
+}
+
+CUresult cuDevicePrimaryCtxReset(CUdevice dev)
+{
+    
+}
+
+CUresult cuDeviceGetAttribute(int *pi, CUdevice_attribute attrib, CUdevice dev)
+{
+    
+}
+
+CUresult cuStreamSynchronize(CUstream hStream)
+{
+    
+}
+
+CUresult cuDeviceGetShim(CUdevice *device, int ordinal) {
+    std::cout << "Client: calling cuDeviceGetShim" << std::endl;
+
+    // Check if the device pointer is valid
+    if (device == nullptr) {
+        std::cerr << "Invalid device pointer provided." << std::endl;
+        return CUDA_ERROR_INVALID_VALUE;
+    }
+
+    // Start the request with the specific RPC operation code for cuDeviceGet
+    int request_id = rpc_start_request(RPC_cuDeviceGet);
+    if (request_id < 0) {
+        std::cerr << "Failed to start request for cuDeviceGet" << std::endl;
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    // Write the ordinal value to the server
+    if (rpc_write(&ordinal, sizeof(int)) < 0) {
+        std::cerr << "Failed to write ordinal to server. Error: " << strerror(errno) << std::endl;
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    // Wait for the server's response
+    if (rpc_wait_for_response(request_id) < 0) {
+        std::cerr << "Failed to wait for response from server" << std::endl;
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    // Read the result code from the server
+    CUresult result;
+    if (rpc_read(&result, sizeof(CUresult)) < 0) {
+        std::cerr << "Failed to read result code from server. Error: " << strerror(errno) << std::endl;
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    // Check if the cuDeviceGet call was successful
+    if (result != CUDA_SUCCESS) {
+        std::cerr << "cuDeviceGet call failed on the server. Error code: " << result << std::endl;
+        return result;
+    }
+
+    // Read the device handle from the server
+    if (rpc_read(device, sizeof(CUdevice)) < 0) {
+        std::cerr << "Failed to read device handle from server. Error: " << strerror(errno) << std::endl;
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    std::cout << "Client: Received device handle from server: " << *device << std::endl;
+
+    rpc_end_request(&result, request_id);
+
+    return result;
+}
+
+CUresult cuDeviceGetCountShim(int *deviceCount) {
+    std::cout << "Client: calling cuDeviceGetCountShim" << std::endl;
+
+    int request_id = rpc_start_request(RPC_cuDeviceGetCount);
+    if (request_id < 0) {
+        std::cerr << "Failed to start request for cuDeviceGetCount" << std::endl;
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    if (rpc_wait_for_response(request_id) < 0) {
+        std::cerr << "Failed to wait for response from server" << std::endl;
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    CUresult result;
+    ssize_t bytes_read = rpc_read(&result, sizeof(CUresult));
+    if (bytes_read < 0) {
+        std::cerr << "Failed to read result from server. Error: " << strerror(errno) << std::endl;
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    if (result != CUDA_SUCCESS) {
+        std::cerr << "cuDeviceGetCount call failed on the server. Error code: " << result << std::endl;
+        return result;
+    }
+
+    bytes_read = rpc_read(deviceCount, sizeof(int));
+    if (bytes_read < 0) {
+        std::cerr << "Failed to read device count from server. Error: " << strerror(errno) << std::endl;
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    std::cout << "Client: Received device count from server: " << *deviceCount << std::endl;
+
+    rpc_end_request(&result, request_id);
+
+    return result;
+}
+
+void cuDeviceGetNameShim() {
+    std::cout << "calling cuDeviceGetNameShim" << std::endl;
+}
+
+void cuDeviceTotalMemShim() {
+    std::cout << "calling cuDeviceTotalMemShim" << std::endl;
+}
+
+void cuDeviceGetAttributeShim() {
+    std::cout << "calling cuDeviceGetAttributeShim" << std::endl;
+}
+
+void cuDeviceGetP2PAttributeShim() {
+    std::cout << "calling cuDeviceGetP2PAttributeShim" << std::endl;
+}
+
+void cuDeviceGetByPCIBusIdShim() {
+    std::cout << "calling cuDeviceGetByPCIBusIdShim" << std::endl;
+}
+
+void cuDeviceGetPCIBusIdShim() {
+    std::cout << "calling cuDeviceGetPCIBusIdShim" << std::endl;
+}
+
+void cuDeviceGetUuidShim() {
+    std::cout << "calling cuDeviceGetUuidShim" << std::endl;
+}
+
+void cuDeviceGetTexture1DLinearMaxWidthShim() {
+    std::cout << "calling cuDeviceGetTexture1DLinearMaxWidthShim" << std::endl;
+}
+
+void cuDeviceGetDefaultMemPoolShim() {
+    std::cout << "calling cuDeviceGetDefaultMemPoolShim" << std::endl;
+}
+
+void cuDeviceSetMemPoolShim() {
+    std::cout << "calling cuDeviceSetMemPoolShim" << std::endl;
+}
+
+void cuDeviceGetMemPoolShim() {
+    std::cout << "calling cuDeviceGetMemPoolShim" << std::endl;
+}
+
+void cuFlushGPUDirectRDMAWritesShim() {
+    std::cout << "calling cuFlushGPUDirectRDMAWritesShim" << std::endl;
+}
+
+void cuDevicePrimaryCtxRetainShim() {
+    std::cout << "calling cuDevicePrimaryCtxRetainShim" << std::endl;
+}
+
+void cuDevicePrimaryCtxReleaseShim() {
+    std::cout << "calling cuDevicePrimaryCtxReleaseShim" << std::endl;
+}
+
+void cuDevicePrimaryCtxSetFlagsShim() {
+    std::cout << "calling cuDevicePrimaryCtxSetFlagsShim" << std::endl;
+}
+
+void cuDevicePrimaryCtxGetStateShim() {
+    std::cout << "calling cuDevicePrimaryCtxGetStateShim" << std::endl;
+}
+
+void cuDevicePrimaryCtxResetShim() {
+    std::cout << "calling cuDevicePrimaryCtxResetShim" << std::endl;
+}
+
+void cuCtxCreateShim() {
+    std::cout << "calling cuCtxCreateShim" << std::endl;
+}
+
+void cuCtxGetFlagsShim() {
+    std::cout << "calling cuCtxGetFlagsShim" << std::endl;
+}
+
+void cuCtxSetCurrentShim() {
+    std::cout << "calling cuCtxSetCurrentShim" << std::endl;
+}
+
+void cuCtxGetCurrentShim() {
+    std::cout << "calling cuCtxGetCurrentShim" << std::endl;
+}
+
+void cuCtxDetachShim() {
+    std::cout << "calling cuCtxDetachShim" << std::endl;
+}
+
+void cuCtxGetApiVersionShim() {
+    std::cout << "calling cuCtxGetApiVersionShim" << std::endl;
+}
+
+void cuCtxGetDeviceShim() {
+    std::cout << "calling cuCtxGetDeviceShim" << std::endl;
+}
+
+void cuCtxGetLimitShim() {
+    std::cout << "calling cuCtxGetLimitShim" << std::endl;
+}
+
+void cuCtxSetLimitShim() {
+    std::cout << "calling cuCtxSetLimitShim" << std::endl;
+}
+
+void cuCtxGetCacheConfigShim() {
+    std::cout << "calling cuCtxGetCacheConfigShim" << std::endl;
+}
+
+void cuCtxSetCacheConfigShim() {
+    std::cout << "calling cuCtxSetCacheConfigShim" << std::endl;
+}
+
+void cuCtxGetSharedMemConfigShim() {
+    std::cout << "calling cuCtxGetSharedMemConfigShim" << std::endl;
+}
+
+void cuCtxGetStreamPriorityRangeShim() {
+    std::cout << "calling cuCtxGetStreamPriorityRangeShim" << std::endl;
+}
+
+void cuCtxSetSharedMemConfigShim() {
+    std::cout << "calling cuCtxSetSharedMemConfigShim" << std::endl;
+}
+
+void cuCtxSynchronizeShim() {
+    std::cout << "calling cuCtxSynchronizeShim" << std::endl;
+}
+
+void cuCtxResetPersistingL2CacheShim() {
+    std::cout << "calling cuCtxResetPersistingL2CacheShim" << std::endl;
+}
+
+void cuCtxPopCurrentShim() {
+    std::cout << "calling cuCtxPopCurrentShim" << std::endl;
+}
+
+void cuCtxPushCurrentShim() {
+    std::cout << "calling cuCtxPushCurrentShim" << std::endl;
+}
+
+void cuModuleLoadShim() {
+    std::cout << "calling cuModuleLoadShim" << std::endl;
+}
+
+void cuModuleLoadDataShim() {
+    std::cout << "calling cuModuleLoadDataShim" << std::endl;
+}
+
+void cuModuleLoadFatBinaryShim() {
+    std::cout << "calling cuModuleLoadFatBinaryShim" << std::endl;
+}
+
+void cuModuleUnloadShim() {
+    std::cout << "calling cuModuleUnloadShim" << std::endl;
+}
+
+void cuModuleGetFunctionShim() {
+    std::cout << "calling cuModuleGetFunctionShim" << std::endl;
+}
+
+void cuModuleGetGlobalShim() {
+    std::cout << "calling cuModuleGetGlobalShim" << std::endl;
+}
+
+void cuModuleGetTexRefShim() {
+    std::cout << "calling cuModuleGetTexRefShim" << std::endl;
+}
+
+void cuModuleGetSurfRefShim() {
+    std::cout << "calling cuModuleGetSurfRefShim" << std::endl;
+}
+
+CUresult cuModuleGetLoadingModeShim(CUmoduleLoadingMode *mode) {
+    std::cout << "Client: calling cuModuleGetLoadingModeShim" << std::endl;
+
+    // Prepare the request ID for the server
+    int request_id = rpc_start_request(RPC_cuModuleGetLoadingMode);
+    if (request_id < 0) {
+        std::cerr << "Failed to start request for cuModuleGetLoadingMode" << std::endl;
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    // Wait for the server's response
+    if (rpc_wait_for_response(request_id) < 0) {
+        std::cerr << "Failed to wait for response from server" << std::endl;
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    // Read the result code from the server
+    CUresult result;
+    ssize_t bytes_read = rpc_read(&result, sizeof(CUresult));
+    if (bytes_read < 0) {
+        std::cerr << "Failed to read result from server. Error: " << strerror(errno) << std::endl;
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    // Check if the cuModuleGetLoadingMode call was successful
+    if (result != CUDA_SUCCESS) {
+        std::cerr << "cuModuleGetLoadingMode call failed on the server. Error code: " << result << std::endl;
+        return result;
+    }
+
+    // Read the loading mode from the server
+    bytes_read = rpc_read(mode, sizeof(CUmoduleLoadingMode));
+    if (bytes_read < 0) {
+        std::cerr << "Failed to read loading mode from server. Error: " << strerror(errno) << std::endl;
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    std::cout << "Client: Received loading mode from server: " << *mode << std::endl;
+
+    rpc_end_request(&result, request_id);
+
+    return result;
+}
+
+void cuLibraryLoadDataShim() {
+    std::cout << "calling cuLibraryLoadDataShim" << std::endl;
+}
+
+void cuLibraryLoadFromFileShim() {
+    std::cout << "calling cuLibraryLoadFromFileShim" << std::endl;
+}
+
+void cuLibraryUnloadShim() {
+    std::cout << "calling cuLibraryUnloadShim" << std::endl;
+}
+
+void cuLibraryGetKernelShim() {
+    std::cout << "calling cuLibraryGetKernelShim" << std::endl;
+}
+
+void cuLibraryGetModuleShim() {
+    std::cout << "calling cuLibraryGetModuleShim" << std::endl;
+}
+
+void cuKernelGetFunctionShim() {
+    std::cout << "calling cuKernelGetFunctionShim" << std::endl;
+}
+
+void cuLibraryGetGlobalShim() {
+    std::cout << "calling cuLibraryGetGlobalShim" << std::endl;
+}
+
+void cuLibraryGetManagedShim() {
+    std::cout << "calling cuLibraryGetManagedShim" << std::endl;
+}
+
+void cuKernelGetAttributeShim() {
+    std::cout << "calling cuKernelGetAttributeShim" << std::endl;
+}
+
+void cuKernelSetAttributeShim() {
+    std::cout << "calling cuKernelSetAttributeShim" << std::endl;
+}
+
+void cuKernelSetCacheConfigShim() {
+    std::cout << "calling cuKernelSetCacheConfigShim" << std::endl;
+}
+
+void cuLinkCreateShim() {
+    std::cout << "calling cuLinkCreateShim" << std::endl;
+}
+
+void cuLinkAddDataShim() {
+    std::cout << "calling cuLinkAddDataShim" << std::endl;
+}
+
+void cuLinkAddFileShim() {
+    std::cout << "calling cuLinkAddFileShim" << std::endl;
+}
+
+void cuLinkCompleteShim() {
+    std::cout << "calling cuLinkCompleteShim" << std::endl;
+}
+
+void cuLinkDestroyShim() {
+    std::cout << "calling cuLinkDestroyShim" << std::endl;
+}
+
+void cuMemGetInfoShim() {
+    std::cout << "calling cuMemGetInfoShim" << std::endl;
+}
+
+void cuMemAllocManagedShim() {
+    std::cout << "calling cuMemAllocManagedShim" << std::endl;
+}
+
+void cuMemAllocShim() {
+    std::cout << "calling cuMemAllocShim" << std::endl;
+}
+
+void cuMemAllocPitchShim() {
+    std::cout << "calling cuMemAllocPitchShim" << std::endl;
+}
+
+void cuMemFreeShim() {
+    std::cout << "calling cuMemFreeShim" << std::endl;
+}
+
+void cuMemGetAddressRangeShim() {
+    std::cout << "calling cuMemGetAddressRangeShim" << std::endl;
+}
+
+void cuMemFreeHostShim() {
+    std::cout << "calling cuMemFreeHostShim" << std::endl;
+}
+
+void cuMemHostAllocShim() {
+    std::cout << "calling cuMemHostAllocShim" << std::endl;
+}
+
+void cuMemHostGetDevicePointerShim() {
+    std::cout << "calling cuMemHostGetDevicePointerShim" << std::endl;
+}
+
+void cuMemHostGetFlagsShim() {
+    std::cout << "calling cuMemHostGetFlagsShim" << std::endl;
+}
+
+void cuMemHostRegisterShim() {
+    std::cout << "calling cuMemHostRegisterShim" << std::endl;
+}
+
+void cuMemHostUnregisterShim() {
+    std::cout << "calling cuMemHostUnregisterShim" << std::endl;
+}
+
+void cuPointerGetAttributeShim() {
+    std::cout << "calling cuPointerGetAttributeShim" << std::endl;
+}
+
+void cuPointerGetAttributesShim() {
+    std::cout << "calling cuPointerGetAttributesShim" << std::endl;
+}
+
+void cuMemAllocAsyncShim() {
+    std::cout << "calling cuMemAllocAsyncShim" << std::endl;
+}
+
+void cuMemAllocFromPoolAsyncShim() {
+    std::cout << "calling cuMemAllocFromPoolAsyncShim" << std::endl;
+}
+
+void cuMemFreeAsyncShim() {
+    std::cout << "calling cuMemFreeAsyncShim" << std::endl;
+}
+
+void cuMemPoolTrimToShim() {
+    std::cout << "calling cuMemPoolTrimToShim" << std::endl;
+}
+
+void cuMemPoolSetAttributeShim() {
+    std::cout << "calling cuMemPoolSetAttributeShim" << std::endl;
+}
+
+void cuMemPoolGetAttributeShim() {
+    std::cout << "calling cuMemPoolGetAttributeShim" << std::endl;
+}
+
+void cuMemPoolSetAccessShim() {
+    std::cout << "calling cuMemPoolSetAccessShim" << std::endl;
+}
+
+void cuMemPoolGetAccessShim() {
+    std::cout << "calling cuMemPoolGetAccessShim" << std::endl;
+}
+
+void cuMemPoolCreateShim() {
+    std::cout << "calling cuMemPoolCreateShim" << std::endl;
+}
+
+void cuMemPoolDestroyShim() {
+    std::cout << "calling cuMemPoolDestroyShim" << std::endl;
+}
+
+void cuMemPoolExportToShareableHandleShim() {
+    std::cout << "calling cuMemPoolExportToShareableHandleShim" << std::endl;
+}
+
+void cuMemPoolImportFromShareableHandleShim() {
+    std::cout << "calling cuMemPoolImportFromShareableHandleShim" << std::endl;
+}
+
+void cuMemPoolExportPointerShim() {
+    std::cout << "calling cuMemPoolExportPointerShim" << std::endl;
+}
+
+void cuMemPoolImportPointerShim() {
+    std::cout << "calling cuMemPoolImportPointerShim" << std::endl;
+}
+
+void cuMemcpyShim() {
+    std::cout << "calling cuMemcpyShim" << std::endl;
+}
+
+void cuMemcpyAsyncShim() {
+    std::cout << "calling cuMemcpyAsyncShim" << std::endl;
+}
+
+void cuMemcpyPeerShim() {
+    std::cout << "calling cuMemcpyPeerShim" << std::endl;
+}
+
+void cuMemcpyPeerAsyncShim() {
+    std::cout << "calling cuMemcpyPeerAsyncShim" << std::endl;
+}
+
+void cuMemcpyHtoDShim() {
+    std::cout << "calling cuMemcpyHtoDShim" << std::endl;
+}
+
+void cuMemcpyHtoDAsyncShim() {
+    std::cout << "calling cuMemcpyHtoDAsyncShim" << std::endl;
+}
+
+void cuMemcpyDtoHShim() {
+    std::cout << "calling cuMemcpyDtoHShim" << std::endl;
+}
+
+void cuMemcpyDtoHAsyncShim() {
+    std::cout << "calling cuMemcpyDtoHAsyncShim" << std::endl;
+}
+
+void cuMemcpyDtoDShim() {
+    std::cout << "calling cuMemcpyDtoDShim" << std::endl;
+}
+
+void cuMemcpyDtoDAsyncShim() {
+    std::cout << "calling cuMemcpyDtoDAsyncShim" << std::endl;
+}
+
+void cuMemcpy2DUnalignedShim() {
+    std::cout << "calling cuMemcpy2DUnalignedShim" << std::endl;
+}
+
+void cuMemcpy2DAsyncShim() {
+    std::cout << "calling cuMemcpy2DAsyncShim" << std::endl;
+}
+
+void cuMemcpy3DShim() {
+    std::cout << "calling cuMemcpy3DShim" << std::endl;
+}
+
+void cuMemcpy3DAsyncShim() {
+    std::cout << "calling cuMemcpy3DAsyncShim" << std::endl;
+}
+
+void cuMemcpy3DPeerShim() {
+    std::cout << "calling cuMemcpy3DPeerShim" << std::endl;
+}
+
+void cuMemcpy3DPeerAsyncShim() {
+    std::cout << "calling cuMemcpy3DPeerAsyncShim" << std::endl;
+}
+
+void cuMemsetD8Shim() {
+    std::cout << "calling cuMemsetD8Shim" << std::endl;
+}
+
+void cuMemsetD8AsyncShim() {
+    std::cout << "calling cuMemsetD8AsyncShim" << std::endl;
+}
+
+void cuMemsetD2D8Shim() {
+    std::cout << "calling cuMemsetD2D8Shim" << std::endl;
+}
+
+void cuMemsetD2D8AsyncShim() {
+    std::cout << "calling cuMemsetD2D8AsyncShim" << std::endl;
+}
+
+void cuFuncSetCacheConfigShim() {
+    std::cout << "calling cuFuncSetCacheConfigShim" << std::endl;
+}
+
+void cuFuncSetSharedMemConfigShim() {
+    std::cout << "calling cuFuncSetSharedMemConfigShim" << std::endl;
+}
+
+void cuFuncGetAttributeShim() {
+    std::cout << "calling cuFuncGetAttributeShim" << std::endl;
+}
+
+void cuFuncSetAttributeShim() {
+    std::cout << "calling cuFuncSetAttributeShim" << std::endl;
+}
+
+void cuArrayCreateShim() {
+    std::cout << "calling cuArrayCreateShim" << std::endl;
+}
+
+void cuArrayGetDescriptorShim() {
+    std::cout << "calling cuArrayGetDescriptorShim" << std::endl;
+}
+
+void cuArrayGetSparsePropertiesShim() {
+    std::cout << "calling cuArrayGetSparsePropertiesShim" << std::endl;
+}
+
+void cuArrayGetPlaneShim() {
+    std::cout << "calling cuArrayGetPlaneShim" << std::endl;
+}
+
+void cuArray3DCreateShim() {
+    std::cout << "calling cuArray3DCreateShim" << std::endl;
+}
+
+void cuArray3DGetDescriptorShim() {
+    std::cout << "calling cuArray3DGetDescriptorShim" << std::endl;
+}
+
+void cuArrayDestroyShim() {
+    std::cout << "calling cuArrayDestroyShim" << std::endl;
+}
+
+void cuMipmappedArrayCreateShim() {
+    std::cout << "calling cuMipmappedArrayCreateShim" << std::endl;
+}
+
+void cuMipmappedArrayGetLevelShim() {
+    std::cout << "calling cuMipmappedArrayGetLevelShim" << std::endl;
+}
+
+void cuMipmappedArrayGetSparsePropertiesShim() {
+    std::cout << "calling cuMipmappedArrayGetSparsePropertiesShim" << std::endl;
+}
+
+void cuMipmappedArrayDestroyShim() {
+    std::cout << "calling cuMipmappedArrayDestroyShim" << std::endl;
+}
+
+void cuArrayGetMemoryRequirementsShim() {
+    std::cout << "calling cuArrayGetMemoryRequirementsShim" << std::endl;
+}
+
+void cuMipmappedArrayGetMemoryRequirementsShim() {
+    std::cout << "calling cuMipmappedArrayGetMemoryRequirementsShim" << std::endl;
+}
+
+void cuTexObjectCreateShim() {
+    std::cout << "calling cuTexObjectCreateShim" << std::endl;
+}
+
+void cuTexObjectDestroyShim() {
+    std::cout << "calling cuTexObjectDestroyShim" << std::endl;
+}
+
+void cuTexObjectGetResourceDescShim() {
+    std::cout << "calling cuTexObjectGetResourceDescShim" << std::endl;
+}
+
+void cuTexObjectGetTextureDescShim() {
+    std::cout << "calling cuTexObjectGetTextureDescShim" << std::endl;
+}
+
+void cuTexObjectGetResourceViewDescShim() {
+    std::cout << "calling cuTexObjectGetResourceViewDescShim" << std::endl;
+}
+
+void cuSurfObjectCreateShim() {
+    std::cout << "calling cuSurfObjectCreateShim" << std::endl;
+}
+
+void cuSurfObjectDestroyShim() {
+    std::cout << "calling cuSurfObjectDestroyShim" << std::endl;
+}
+
+void cuSurfObjectGetResourceDescShim() {
+    std::cout << "calling cuSurfObjectGetResourceDescShim" << std::endl;
+}
+
+void cuImportExternalMemoryShim() {
+    std::cout << "calling cuImportExternalMemoryShim" << std::endl;
+}
+
+void cuExternalMemoryGetMappedBufferShim() {
+    std::cout << "calling cuExternalMemoryGetMappedBufferShim" << std::endl;
+}
+
+void cuExternalMemoryGetMappedMipmappedArrayShim() {
+    std::cout << "calling cuExternalMemoryGetMappedMipmappedArrayShim" << std::endl;
+}
+
+void cuDestroyExternalMemoryShim() {
+    std::cout << "calling cuDestroyExternalMemoryShim" << std::endl;
+}
+
+void cuImportExternalSemaphoreShim() {
+    std::cout << "calling cuImportExternalSemaphoreShim" << std::endl;
+}
+
+void cuSignalExternalSemaphoresAsyncShim() {
+    std::cout << "calling cuSignalExternalSemaphoresAsyncShim" << std::endl;
+}
+
+void cuWaitExternalSemaphoresAsyncShim() {
+    std::cout << "calling cuWaitExternalSemaphoresAsyncShim" << std::endl;
+}
+
+void cuDestroyExternalSemaphoreShim() {
+    std::cout << "calling cuDestroyExternalSemaphoreShim" << std::endl;
+}
+
+void cuDeviceGetNvSciSyncAttributesShim() {
+    std::cout << "calling cuDeviceGetNvSciSyncAttributesShim" << std::endl;
+}
+
+void cuLaunchKernelShim() {
+    std::cout << "calling cuLaunchKernelShim" << std::endl;
+}
+
+void cuLaunchCooperativeKernelShim() {
+    std::cout << "calling cuLaunchCooperativeKernelShim" << std::endl;
+}
+
+void cuLaunchCooperativeKernelMultiDeviceShim() {
+    std::cout << "calling cuLaunchCooperativeKernelMultiDeviceShim" << std::endl;
+}
+
+void cuLaunchHostFuncShim() {
+    std::cout << "calling cuLaunchHostFuncShim" << std::endl;
+}
+
+void cuLaunchKernelExShim() {
+    std::cout << "calling cuLaunchKernelExShim" << std::endl;
+}
+
+void cuEventCreateShim() {
+    std::cout << "calling cuEventCreateShim" << std::endl;
+}
+
+void cuEventRecordShim() {
+    std::cout << "calling cuEventRecordShim" << std::endl;
+}
+
+void cuEventRecordWithFlagsShim() {
+    std::cout << "calling cuEventRecordWithFlagsShim" << std::endl;
+}
+
+void cuEventQueryShim() {
+    std::cout << "calling cuEventQueryShim" << std::endl;
+}
+
+void cuEventSynchronizeShim() {
+    std::cout << "calling cuEventSynchronizeShim" << std::endl;
+}
+
+void cuEventDestroyShim() {
+    std::cout << "calling cuEventDestroyShim" << std::endl;
+}
+
+void cuEventElapsedTimeShim() {
+    std::cout << "calling cuEventElapsedTimeShim" << std::endl;
+}
+
+void cuStreamWaitValue32Shim() {
+    std::cout << "calling cuStreamWaitValue32Shim" << std::endl;
+}
+
+void cuStreamWriteValue32Shim() {
+    std::cout << "calling cuStreamWriteValue32Shim" << std::endl;
+}
+
+void cuStreamWaitValue64Shim() {
+    std::cout << "calling cuStreamWaitValue64Shim" << std::endl;
+}
+
+void cuStreamWriteValue64Shim() {
+    std::cout << "calling cuStreamWriteValue64Shim" << std::endl;
+}
+
+void cuStreamBatchMemOpShim() {
+    std::cout << "calling cuStreamBatchMemOpShim" << std::endl;
+}
+
+void cuStreamCreateShim() {
+    std::cout << "calling cuStreamCreateShim" << std::endl;
+}
+
+void cuStreamCreateWithPriorityShim() {
+    std::cout << "calling cuStreamCreateWithPriorityShim" << std::endl;
+}
+
+void cuStreamGetPriorityShim() {
+    std::cout << "calling cuStreamGetPriorityShim" << std::endl;
+}
+
+void cuStreamGetFlagsShim() {
+    std::cout << "calling cuStreamGetFlagsShim" << std::endl;
+}
+
+void cuStreamGetCtxShim() {
+    std::cout << "calling cuStreamGetCtxShim" << std::endl;
+}
+
+void cuStreamGetIdShim() {
+    std::cout << "calling cuStreamGetIdShim" << std::endl;
+}
+
+void cuStreamDestroyShim() {
+    std::cout << "calling cuStreamDestroyShim" << std::endl;
+}
+
+void cuStreamWaitEventShim() {
+    std::cout << "calling cuStreamWaitEventShim" << std::endl;
+}
+
+void cuStreamAddCallbackShim() {
+    std::cout << "calling cuStreamAddCallbackShim" << std::endl;
+}
+
+void cuStreamSynchronizeShim() {
+    std::cout << "calling cuStreamSynchronizeShim" << std::endl;
+}
+
+void cuStreamQueryShim() {
+    std::cout << "calling cuStreamQueryShim" << std::endl;
+}
+
+void cuStreamAttachMemAsyncShim() {
+    std::cout << "calling cuStreamAttachMemAsyncShim" << std::endl;
+}
+
+void cuStreamCopyAttributesShim() {
+    std::cout << "calling cuStreamCopyAttributesShim" << std::endl;
+}
+
+void cuStreamGetAttributeShim() {
+    std::cout << "calling cuStreamGetAttributeShim" << std::endl;
+}
+
+void cuStreamSetAttributeShim() {
+    std::cout << "calling cuStreamSetAttributeShim" << std::endl;
+}
+
+void cuDeviceCanAccessPeerShim() {
+    std::cout << "calling cuDeviceCanAccessPeerShim" << std::endl;
+}
+
+void cuCtxEnablePeerAccessShim() {
+    std::cout << "calling cuCtxEnablePeerAccessShim" << std::endl;
+}
+
+void cuCtxDisablePeerAccessShim() {
+    std::cout << "calling cuCtxDisablePeerAccessShim" << std::endl;
+}
+
+void cuIpcGetEventHandleShim() {
+    std::cout << "calling cuIpcGetEventHandleShim" << std::endl;
+}
+
+void cuIpcOpenEventHandleShim() {
+    std::cout << "calling cuIpcOpenEventHandleShim" << std::endl;
+}
+
+void cuIpcGetMemHandleShim() {
+    std::cout << "calling cuIpcGetMemHandleShim" << std::endl;
+}
+
+void cuIpcOpenMemHandleShim() {
+    std::cout << "calling cuIpcOpenMemHandleShim" << std::endl;
+}
+
+void cuIpcCloseMemHandleShim() {
+    std::cout << "calling cuIpcCloseMemHandleShim" << std::endl;
+}
+
+void cuGLCtxCreateShim() {
+    std::cout << "calling cuGLCtxCreateShim" << std::endl;
+}
+
+void cuGLInitShim() {
+    std::cout << "calling cuGLInitShim" << std::endl;
+}
+
+void cuGLGetDevicesShim() {
+    std::cout << "calling cuGLGetDevicesShim" << std::endl;
+}
+
+void cuGLRegisterBufferObjectShim() {
+    std::cout << "calling cuGLRegisterBufferObjectShim" << std::endl;
+}
+
+void cuGLMapBufferObjectShim() {
+    std::cout << "calling cuGLMapBufferObjectShim" << std::endl;
+}
+
+void cuGLMapBufferObjectAsyncShim() {
+    std::cout << "calling cuGLMapBufferObjectAsyncShim" << std::endl;
+}
+
+void cuGLUnmapBufferObjectShim() {
+    std::cout << "calling cuGLUnmapBufferObjectShim" << std::endl;
+}
+
+void cuGLUnmapBufferObjectAsyncShim() {
+    std::cout << "calling cuGLUnmapBufferObjectAsyncShim" << std::endl;
+}
+
+void cuGLUnregisterBufferObjectShim() {
+    std::cout << "calling cuGLUnregisterBufferObjectShim" << std::endl;
+}
+
+void cuGLSetBufferObjectMapFlagsShim() {
+    std::cout << "calling cuGLSetBufferObjectMapFlagsShim" << std::endl;
+}
+
+void cuGraphicsGLRegisterImageShim() {
+    std::cout << "calling cuGraphicsGLRegisterImageShim" << std::endl;
+}
+
+void cuGraphicsGLRegisterBufferShim() {
+    std::cout << "calling cuGraphicsGLRegisterBufferShim" << std::endl;
+}
+
+void cuGraphicsEGLRegisterImageShim() {
+    std::cout << "calling cuGraphicsEGLRegisterImageShim" << std::endl;
+}
+
+void cuEGLStreamConsumerConnectShim() {
+    std::cout << "calling cuEGLStreamConsumerConnectShim" << std::endl;
+}
+
+void cuEGLStreamConsumerDisconnectShim() {
+    std::cout << "calling cuEGLStreamConsumerDisconnectShim" << std::endl;
+}
+
+void cuEGLStreamConsumerAcquireFrameShim() {
+    std::cout << "calling cuEGLStreamConsumerAcquireFrameShim" << std::endl;
+}
+
+void cuEGLStreamConsumerReleaseFrameShim() {
+    std::cout << "calling cuEGLStreamConsumerReleaseFrameShim" << std::endl;
+}
+
+void cuEGLStreamProducerConnectShim() {
+    std::cout << "calling cuEGLStreamProducerConnectShim" << std::endl;
+}
+
+void cuEGLStreamProducerDisconnectShim() {
+    std::cout << "calling cuEGLStreamProducerDisconnectShim" << std::endl;
+}
+
+void cuEGLStreamProducerPresentFrameShim() {
+    std::cout << "calling cuEGLStreamProducerPresentFrameShim" << std::endl;
+}
+
+void cuEGLStreamProducerReturnFrameShim() {
+    std::cout << "calling cuEGLStreamProducerReturnFrameShim" << std::endl;
+}
+
+void cuGraphicsResourceGetMappedEglFrameShim() {
+    std::cout << "calling cuGraphicsResourceGetMappedEglFrameShim" << std::endl;
+}
+
+void cuGraphicsUnregisterResourceShim() {
+    std::cout << "calling cuGraphicsUnregisterResourceShim" << std::endl;
+}
+
+void cuGraphicsMapResourcesShim() {
+    std::cout << "calling cuGraphicsMapResourcesShim" << std::endl;
+}
+
+void cuGraphicsUnmapResourcesShim() {
+    std::cout << "calling cuGraphicsUnmapResourcesShim" << std::endl;
+}
+
+void cuGraphicsResourceSetMapFlagsShim() {
+    std::cout << "calling cuGraphicsResourceSetMapFlagsShim" << std::endl;
+}
+
+void cuGraphicsSubResourceGetMappedArrayShim() {
+    std::cout << "calling cuGraphicsSubResourceGetMappedArrayShim" << std::endl;
+}
+
+void cuGraphicsResourceGetMappedMipmappedArrayShim() {
+    std::cout << "calling cuGraphicsResourceGetMappedMipmappedArrayShim" << std::endl;
+}
+
+void cuProfilerInitializeShim() {
+    std::cout << "calling cuProfilerInitializeShim" << std::endl;
+}
+
+void cuProfilerStartShim() {
+    std::cout << "calling cuProfilerStartShim" << std::endl;
+}
+
+void cuProfilerStopShim() {
+    std::cout << "calling cuProfilerStopShim" << std::endl;
+}
+
+void cuVDPAUGetDeviceShim() {
+    std::cout << "calling cuVDPAUGetDeviceShim" << std::endl;
+}
+
+void cuVDPAUCtxCreateShim() {
+    std::cout << "calling cuVDPAUCtxCreateShim" << std::endl;
+}
+
+void cuGraphicsVDPAURegisterVideoSurfaceShim() {
+    std::cout << "calling cuGraphicsVDPAURegisterVideoSurfaceShim" << std::endl;
+}
+
+void cuGraphicsVDPAURegisterOutputSurfaceShim() {
+    std::cout << "calling cuGraphicsVDPAURegisterOutputSurfaceShim" << std::endl;
+}
+
+CUresult cuGetExportTableShim(void **ppExportTable, const CUuuid *pTableUuid) {
+    std::cout << "calling cuGetExportTableShim" << std::endl;
+
+    // Start the request to the server
+    int request_id = rpc_start_request(RPC_cuGetExportTable);
+    if (request_id < 0) {
+        std::cerr << "Failed to start request for cuGetExportTable" << std::endl;
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    // Check if pTableUuid is valid
+    if (pTableUuid == nullptr) {
+        std::cerr << "Invalid UUID pointer provided to cuGetExportTableShim" << std::endl;
+        return CUDA_ERROR_INVALID_VALUE;
+    }
+
+    // Send the UUID to the server
+    if (rpc_write(pTableUuid, sizeof(CUuuid)) < 0) {
+        std::cerr << "Failed to write UUID to server" << std::endl;
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    // Wait for the server response
+    if (rpc_wait_for_response(request_id) < 0) {
+        std::cerr << "Failed to wait for response from server" << std::endl;
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    // Read the result code from the server
+    CUresult result;
+    if (rpc_read(&result, sizeof(CUresult)) < 0) {
+        std::cerr << "Failed to read result from server" << std::endl;
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    // Check if the cuGetExportTable call was successful
+    if (result != CUDA_SUCCESS) {
+        std::cerr << "cuGetExportTable call failed on the server. Error code: " << result << std::endl;
+        return result;
+    }
+
+    // Read the export table pointer from the server
+    if (rpc_read(ppExportTable, sizeof(void *)) < 0) {
+        std::cerr << "Failed to read export table pointer from server" << std::endl;
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    std::cout << "Client: Received export table pointer from server: " << *ppExportTable << std::endl;
+
+    rpc_end_request(&result, request_id);
+
+    return result;
+}
+
+void cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlagsShim() {
+    std::cout << "calling cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlagsShim" << std::endl;
+}
+
+void cuOccupancyAvailableDynamicSMemPerBlockShim() {
+    std::cout << "calling cuOccupancyAvailableDynamicSMemPerBlockShim" << std::endl;
+}
+
+void cuOccupancyMaxPotentialClusterSizeShim() {
+    std::cout << "calling cuOccupancyMaxPotentialClusterSizeShim" << std::endl;
+}
+
+void cuOccupancyMaxActiveClustersShim() {
+    std::cout << "calling cuOccupancyMaxActiveClustersShim" << std::endl;
+}
+
+void cuMemAdviseShim() {
+    std::cout << "calling cuMemAdviseShim" << std::endl;
+}
+
+void cuMemPrefetchAsyncShim() {
+    std::cout << "calling cuMemPrefetchAsyncShim" << std::endl;
+}
+
+void cuMemRangeGetAttributeShim() {
+    std::cout << "calling cuMemRangeGetAttributeShim" << std::endl;
+}
+
+void cuMemRangeGetAttributesShim() {
+    std::cout << "calling cuMemRangeGetAttributesShim" << std::endl;
+}
+
+void cuGetErrorNameShim() {
+    std::cout << "calling cuGetErrorNameShim" << std::endl;
+}
+
+void cuGraphCreateShim() {
+    std::cout << "calling cuGraphCreateShim" << std::endl;
+}
+
+void cuGraphAddKernelNodeShim() {
+    std::cout << "calling cuGraphAddKernelNodeShim" << std::endl;
+}
+
+void cuGraphKernelNodeGetParamsShim() {
+    std::cout << "calling cuGraphKernelNodeGetParamsShim" << std::endl;
+}
+
+void cuGraphKernelNodeSetParamsShim() {
+    std::cout << "calling cuGraphKernelNodeSetParamsShim" << std::endl;
+}
+
+void cuGraphAddMemcpyNodeShim() {
+    std::cout << "calling cuGraphAddMemcpyNodeShim" << std::endl;
+}
+
+void cuGraphMemcpyNodeGetParamsShim() {
+    std::cout << "calling cuGraphMemcpyNodeGetParamsShim" << std::endl;
+}
+
+void cuGraphMemcpyNodeSetParamsShim() {
+    std::cout << "calling cuGraphMemcpyNodeSetParamsShim" << std::endl;
+}
+
+void cuGraphAddMemsetNodeShim() {
+    std::cout << "calling cuGraphAddMemsetNodeShim" << std::endl;
+}
+
+void cuGraphMemsetNodeGetParamsShim() {
+    std::cout << "calling cuGraphMemsetNodeGetParamsShim" << std::endl;
+}
+
+void cuGraphMemsetNodeSetParamsShim() {
+    std::cout << "calling cuGraphMemsetNodeSetParamsShim" << std::endl;
+}
+
+void cuGraphAddHostNodeShim() {
+    std::cout << "calling cuGraphAddHostNodeShim" << std::endl;
+}
+
+void cuGraphHostNodeGetParamsShim() {
+    std::cout << "calling cuGraphHostNodeGetParamsShim" << std::endl;
+}
+
+void cuGraphHostNodeSetParamsShim() {
+    std::cout << "calling cuGraphHostNodeSetParamsShim" << std::endl;
+}
+
+void cuGraphAddChildGraphNodeShim() {
+    std::cout << "calling cuGraphAddChildGraphNodeShim" << std::endl;
+}
+
+void cuGraphChildGraphNodeGetGraphShim() {
+    std::cout << "calling cuGraphChildGraphNodeGetGraphShim" << std::endl;
+}
+
+void cuGraphAddEmptyNodeShim() {
+    std::cout << "calling cuGraphAddEmptyNodeShim" << std::endl;
+}
+
+void cuGraphAddEventRecordNodeShim() {
+    std::cout << "calling cuGraphAddEventRecordNodeShim" << std::endl;
+}
+
+void cuGraphEventRecordNodeGetEventShim() {
+    std::cout << "calling cuGraphEventRecordNodeGetEventShim" << std::endl;
+}
+
+void cuGraphEventRecordNodeSetEventShim() {
+    std::cout << "calling cuGraphEventRecordNodeSetEventShim" << std::endl;
+}
+
+void cuGraphAddEventWaitNodeShim() {
+    std::cout << "calling cuGraphAddEventWaitNodeShim" << std::endl;
+}
+
+void cuGraphEventWaitNodeGetEventShim() {
+    std::cout << "calling cuGraphEventWaitNodeGetEventShim" << std::endl;
+}
+
+void cuGraphEventWaitNodeSetEventShim() {
+    std::cout << "calling cuGraphEventWaitNodeSetEventShim" << std::endl;
+}
+
+void cuGraphAddExternalSemaphoresSignalNodeShim() {
+    std::cout << "calling cuGraphAddExternalSemaphoresSignalNodeShim" << std::endl;
+}
+
+void cuGraphExternalSemaphoresSignalNodeGetParamsShim() {
+    std::cout << "calling cuGraphExternalSemaphoresSignalNodeGetParamsShim" << std::endl;
+}
+
+void cuGraphExternalSemaphoresSignalNodeSetParamsShim() {
+    std::cout << "calling cuGraphExternalSemaphoresSignalNodeSetParamsShim" << std::endl;
+}
+
+void cuGraphAddExternalSemaphoresWaitNodeShim() {
+    std::cout << "calling cuGraphAddExternalSemaphoresWaitNodeShim" << std::endl;
+}
+
+void cuGraphExternalSemaphoresWaitNodeGetParamsShim() {
+    std::cout << "calling cuGraphExternalSemaphoresWaitNodeGetParamsShim" << std::endl;
+}
+
+void cuGraphExternalSemaphoresWaitNodeSetParamsShim() {
+    std::cout << "calling cuGraphExternalSemaphoresWaitNodeSetParamsShim" << std::endl;
+}
+
+void cuGraphExecExternalSemaphoresSignalNodeSetParamsShim() {
+    std::cout << "calling cuGraphExecExternalSemaphoresSignalNodeSetParamsShim" << std::endl;
+}
+
+void cuGraphExecExternalSemaphoresWaitNodeSetParamsShim() {
+    std::cout << "calling cuGraphExecExternalSemaphoresWaitNodeSetParamsShim" << std::endl;
+}
+
+void cuGraphAddMemAllocNodeShim() {
+    std::cout << "calling cuGraphAddMemAllocNodeShim" << std::endl;
+}
+
+void cuGraphMemAllocNodeGetParamsShim() {
+    std::cout << "calling cuGraphMemAllocNodeGetParamsShim" << std::endl;
+}
+
+void cuGraphAddMemFreeNodeShim() {
+    std::cout << "calling cuGraphAddMemFreeNodeShim" << std::endl;
+}
+
+void cuGraphMemFreeNodeGetParamsShim() {
+    std::cout << "calling cuGraphMemFreeNodeGetParamsShim" << std::endl;
+}
+
+void cuDeviceGraphMemTrimShim() {
+    std::cout << "calling cuDeviceGraphMemTrimShim" << std::endl;
+}
+
+void cuDeviceGetGraphMemAttributeShim() {
+    std::cout << "calling cuDeviceGetGraphMemAttributeShim" << std::endl;
+}
+
+void cuDeviceSetGraphMemAttributeShim() {
+    std::cout << "calling cuDeviceSetGraphMemAttributeShim" << std::endl;
+}
+
+void cuGraphCloneShim() {
+    std::cout << "calling cuGraphCloneShim" << std::endl;
+}
+
+void cuGraphNodeFindInCloneShim() {
+    std::cout << "calling cuGraphNodeFindInCloneShim" << std::endl;
+}
+
+void cuGraphNodeGetTypeShim() {
+    std::cout << "calling cuGraphNodeGetTypeShim" << std::endl;
+}
+
+void cuGraphGetNodesShim() {
+    std::cout << "calling cuGraphGetNodesShim" << std::endl;
+}
+
+void cuGraphGetRootNodesShim() {
+    std::cout << "calling cuGraphGetRootNodesShim" << std::endl;
+}
+
+void cuGraphGetEdgesShim() {
+    std::cout << "calling cuGraphGetEdgesShim" << std::endl;
+}
+
+void cuGraphNodeGetDependenciesShim() {
+    std::cout << "calling cuGraphNodeGetDependenciesShim" << std::endl;
+}
+
+void cuGraphNodeGetDependentNodesShim() {
+    std::cout << "calling cuGraphNodeGetDependentNodesShim" << std::endl;
+}
+
+void cuGraphAddDependenciesShim() {
+    std::cout << "calling cuGraphAddDependenciesShim" << std::endl;
+}
+
+void cuGraphRemoveDependenciesShim() {
+    std::cout << "calling cuGraphRemoveDependenciesShim" << std::endl;
+}
+
+void cuGraphDestroyNodeShim() {
+    std::cout << "calling cuGraphDestroyNodeShim" << std::endl;
+}
+
+void cuGraphInstantiateShim() {
+    std::cout << "calling cuGraphInstantiateShim" << std::endl;
+}
+
+void cuGraphUploadShim() {
+    std::cout << "calling cuGraphUploadShim" << std::endl;
+}
+
+void cuGraphLaunchShim() {
+    std::cout << "calling cuGraphLaunchShim" << std::endl;
+}
+
+void cuGraphExecDestroyShim() {
+    std::cout << "calling cuGraphExecDestroyShim" << std::endl;
+}
+
+void cuGraphDestroyShim() {
+    std::cout << "calling cuGraphDestroyShim" << std::endl;
+}
+
+void cuStreamBeginCaptureShim() {
+    std::cout << "calling cuStreamBeginCaptureShim" << std::endl;
+}
+
+void cuStreamEndCaptureShim() {
+    std::cout << "calling cuStreamEndCaptureShim" << std::endl;
+}
+
+void cuStreamIsCapturingShim() {
+    std::cout << "calling cuStreamIsCapturingShim" << std::endl;
+}
+
+void cuStreamGetCaptureInfoShim() {
+    std::cout << "calling cuStreamGetCaptureInfoShim" << std::endl;
+}
+
+void cuStreamUpdateCaptureDependenciesShim() {
+    std::cout << "calling cuStreamUpdateCaptureDependenciesShim" << std::endl;
+}
+
+void cuGraphExecKernelNodeSetParamsShim() {
+    std::cout << "calling cuGraphExecKernelNodeSetParamsShim" << std::endl;
+}
+
+void cuGraphExecMemcpyNodeSetParamsShim() {
+    std::cout << "calling cuGraphExecMemcpyNodeSetParamsShim" << std::endl;
+}
+
+void cuGraphExecMemsetNodeSetParamsShim() {
+    std::cout << "calling cuGraphExecMemsetNodeSetParamsShim" << std::endl;
+}
+
+void cuGraphExecHostNodeSetParamsShim() {
+    std::cout << "calling cuGraphExecHostNodeSetParamsShim" << std::endl;
+}
+
+void cuGraphExecChildGraphNodeSetParamsShim() {
+    std::cout << "calling cuGraphExecChildGraphNodeSetParamsShim" << std::endl;
+}
+
+void cuGraphExecEventRecordNodeSetEventShim() {
+    std::cout << "calling cuGraphExecEventRecordNodeSetEventShim" << std::endl;
+}
+
+void cuGraphExecEventWaitNodeSetEventShim() {
+    std::cout << "calling cuGraphExecEventWaitNodeSetEventShim" << std::endl;
+}
+
+void cuThreadExchangeStreamCaptureModeShim() {
+    std::cout << "calling cuThreadExchangeStreamCaptureModeShim" << std::endl;
+}
+
+void cuGraphExecUpdateShim() {
+    std::cout << "calling cuGraphExecUpdateShim" << std::endl;
+}
+
+void cuGraphKernelNodeCopyAttributesShim() {
+    std::cout << "calling cuGraphKernelNodeCopyAttributesShim" << std::endl;
+}
+
+void cuGraphKernelNodeGetAttributeShim() {
+    std::cout << "calling cuGraphKernelNodeGetAttributeShim" << std::endl;
+}
+
+void cuGraphKernelNodeSetAttributeShim() {
+    std::cout << "calling cuGraphKernelNodeSetAttributeShim" << std::endl;
+}
+
+void cuGraphDebugDotPrintShim() {
+    std::cout << "calling cuGraphDebugDotPrintShim" << std::endl;
+}
+
+void cuUserObjectCreateShim() {
+    std::cout << "calling cuUserObjectCreateShim" << std::endl;
+}
+
+void cuUserObjectRetainShim() {
+    std::cout << "calling cuUserObjectRetainShim" << std::endl;
+}
+
+void cuUserObjectReleaseShim() {
+    std::cout << "calling cuUserObjectReleaseShim" << std::endl;
+}
+
+void cuGraphRetainUserObjectShim() {
+    std::cout << "calling cuGraphRetainUserObjectShim" << std::endl;
+}
+
+void cuGraphReleaseUserObjectShim() {
+    std::cout << "calling cuGraphReleaseUserObjectShim" << std::endl;
+}
+
+void cuGraphNodeSetEnabledShim() {
+    std::cout << "calling cuGraphNodeSetEnabledShim" << std::endl;
+}
+
+void cuGraphNodeGetEnabledShim() {
+    std::cout << "calling cuGraphNodeGetEnabledShim" << std::endl;
+}
+
+void cuGraphInstantiateWithParamsShim() {
+    std::cout << "calling cuGraphInstantiateWithParamsShim" << std::endl;
+}
+
+void cuGraphExecGetFlagsShim() {
+    std::cout << "calling cuGraphExecGetFlagsShim" << std::endl;
+}
+
+CUresult cuOccupancyMaxActiveBlocksPerMultiprocessor(int *numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize)
+{
+    
+}
+
+CUresult cuLaunchKernelEx(const CUlaunchConfig *config, CUfunction f, void **kernelParams, void **extra)
+{
+
+}
+
+CUresult cuModuleGetGlobal_v2(CUdeviceptr *dptr, size_t *bytes, CUmodule hmod, const char *name)
+{
+   
+}
+
+// Map of symbols to their corresponding function pointers
+std::unordered_map<std::string, void (*)()> cucudaFunctionMap;
+
+CUresult cuDriverGetVersion_handler(int *driverVersion) {
+    if (driverVersion == nullptr) {
+        return CUDA_ERROR_INVALID_VALUE;
+    }
+
+    // Start the RPC request for cuDriverGetVersion
+    int request_id = rpc_start_request(RPC_cuDriverGetVersion);
+    if (request_id < 0) {
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    // Wait for the server response
+    if (rpc_wait_for_response(request_id) < 0) {
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    // Read the result code from the server
+    CUresult result;
+    if (rpc_read(&result, sizeof(CUresult)) < 0) {
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    // If the result indicates an error, return it directly
+    if (result != CUDA_SUCCESS) {
+        return result;
+    }
+
+    // Read the driver version from the server
+    if (rpc_read(driverVersion, sizeof(int)) < 0) {
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    std::cout << "Client: Received driver version from server: " << *driverVersion << std::endl;
+
+    rpc_end_request(&result, request_id);
+
+    return result;
+}
+
+void cuGraphInstantiateWithParams_ptszShim() {
+    std::cout << "Client: calling cuGraphInstantiateWithParams_ptsz" << std::endl;
+}
+
+void cuGraphInstantiateWithFlagsShim() {
+    std::cout << "Client: calling cuGraphInstantiateWithFlags" << std::endl;
+}
+
+void cuEGLStreamConsumerConnectWithFlagsShim() {
+    std::cout << "Client: calling cuEGLStreamConsumerConnectWithFlags" << std::endl;
+}
+
+extern "C" void cuGraphicsResourceGetMappedPointerShim() {
+    std::cout << "Client: calling cuGraphicsResourceGetMappedPointerShim" << std::endl;
+}
+
+extern "C" void cuGetErrorStringShim() {
+    std::cout << "Client: calling cuGetErrorStringShim" << std::endl;
+}
+
+extern "C" void cuLinkAddData_v2Shim() {
+    std::cout << "Client: calling cuLinkAddData_v2Shim" << std::endl;
+}
+
+extern "C" void cuModuleLoadDataExShim() {
+    std::cout << "Client: calling cuModuleLoadDataExShim" << std::endl;
+}
+
+extern "C" void cuLinkAddFile_v2Shim() {
+    std::cout << "Client: calling cuLinkAddFile_v2Shim" << std::endl;
+}
+
+extern "C" void cuMemcpyDtoH_v2Shim() {
+    std::cout << "Client: calling cuMemcpyDtoH_v2Shim" << std::endl;
+}
+
+extern "C" void cuOccupancyMaxActiveBlocksPerMultiprocessorShim() {
+    std::cout << "Client: calling cuOccupancyMaxActiveBlocksPerMultiprocessorShim" << std::endl;
+}
+
+extern "C" void cuModuleGetGlobal_v2Shim() {
+    std::cout << "Client: calling cuModuleGetGlobal_v2Shim" << std::endl;
+}
+
+std::unordered_map<std::string, void *> cudaFunctionMap;
+
+void initCudaFunctionMap() {
+    cudaFunctionMap["cuInit"] = (void *)cuInit;
+    cudaFunctionMap["cuGetProcAddress"] = (void *)cuGetProcAddress;
+    cudaFunctionMap["cuDriverGetVersion"] = (void *)cuDriverGetVersion_handler;
+    cudaFunctionMap["cudaGetDeviceCount"] = (void *)cudaGetDeviceCount;
+    cudaFunctionMap["cuDeviceGet"] = (void *)cuDeviceGetShim;
+    cudaFunctionMap["cuDeviceGetCount"] = (void *)cuDeviceGetCountShim;
+    cudaFunctionMap["cuDeviceGetName"] = (void *)cuDeviceGetNameShim;
+    cudaFunctionMap["cuDeviceTotalMem"] = (void *)cuDeviceTotalMemShim;
+    cudaFunctionMap["cuDeviceGetAttribute"] = (void *)cuDeviceGetAttributeShim;
+    cudaFunctionMap["cuDeviceGetP2PAttribute"] = (void *)cuDeviceGetP2PAttributeShim;
+    cudaFunctionMap["cuDeviceGetByPCIBusId"] = (void *)cuDeviceGetByPCIBusIdShim;
+    cudaFunctionMap["cuDeviceGetPCIBusId"] = (void *)cuDeviceGetPCIBusIdShim;
+    cudaFunctionMap["cuDeviceGetUuid"] = (void *)cuDeviceGetUuidShim;
+    cudaFunctionMap["cuDeviceGetTexture1DLinearMaxWidth"] = (void *)cuDeviceGetTexture1DLinearMaxWidthShim;
+    cudaFunctionMap["cuDeviceGetDefaultMemPool"] = (void *)cuDeviceGetDefaultMemPoolShim;
+    cudaFunctionMap["cuDeviceSetMemPool"] = (void *)cuDeviceSetMemPoolShim;
+    cudaFunctionMap["cuDeviceGetMemPool"] = (void *)cuDeviceGetMemPoolShim;
+    cudaFunctionMap["cuFlushGPUDirectRDMAWrites"] = (void *)cuFlushGPUDirectRDMAWritesShim;
+    cudaFunctionMap["cuDevicePrimaryCtxRetain"] = (void *)cuDevicePrimaryCtxRetainShim;
+    cudaFunctionMap["cuDevicePrimaryCtxRelease"] = (void *)cuDevicePrimaryCtxReleaseShim;
+    cudaFunctionMap["cuDevicePrimaryCtxSetFlags"] = (void *)cuDevicePrimaryCtxSetFlagsShim;
+    cudaFunctionMap["cuDevicePrimaryCtxGetState"] = (void *)cuDevicePrimaryCtxGetStateShim;
+    cudaFunctionMap["cuDevicePrimaryCtxReset"] = (void *)cuDevicePrimaryCtxResetShim;
+    cudaFunctionMap["cuCtxCreate"] = (void *)cuCtxCreateShim;
+    cudaFunctionMap["cuCtxGetFlags"] = (void *)cuCtxGetFlagsShim;
+    cudaFunctionMap["cuCtxSetCurrent"] = (void *)cuCtxSetCurrentShim;
+    cudaFunctionMap["cuCtxGetCurrent"] = (void *)cuCtxGetCurrentShim;
+    cudaFunctionMap["cuCtxDetach"] = (void *)cuCtxDetachShim;
+    cudaFunctionMap["cuCtxGetApiVersion"] = (void *)cuCtxGetApiVersionShim;
+    cudaFunctionMap["cuCtxGetDevice"] = (void *)cuCtxGetDeviceShim;
+    cudaFunctionMap["cuCtxGetLimit"] = (void *)cuCtxGetLimitShim;
+    cudaFunctionMap["cuCtxSetLimit"] = (void *)cuCtxSetLimitShim;
+    cudaFunctionMap["cuCtxGetCacheConfig"] = (void *)cuCtxGetCacheConfigShim;
+    cudaFunctionMap["cuCtxSetCacheConfig"] = (void *)cuCtxSetCacheConfigShim;
+    cudaFunctionMap["cuCtxGetSharedMemConfig"] = (void *)cuCtxGetSharedMemConfigShim;
+    cudaFunctionMap["cuCtxGetStreamPriorityRange"] = (void *)cuCtxGetStreamPriorityRangeShim;
+    cudaFunctionMap["cuCtxSetSharedMemConfig"] = (void *)cuCtxSetSharedMemConfigShim;
+    cudaFunctionMap["cuCtxSynchronize"] = (void *)cuCtxSynchronizeShim;
+    cudaFunctionMap["cuCtxResetPersistingL2Cache"] = (void *)cuCtxResetPersistingL2CacheShim;
+    cudaFunctionMap["cuCtxPopCurrent"] = (void *)cuCtxPopCurrentShim;
+    cudaFunctionMap["cuCtxPushCurrent"] = (void *)cuCtxPushCurrentShim;
+    cudaFunctionMap["cuModuleLoad"] = (void *)cuModuleLoadShim;
+    cudaFunctionMap["cuModuleLoadData"] = (void *)cuModuleLoadDataShim;
+    cudaFunctionMap["cuModuleLoadFatBinary"] = (void *)cuModuleLoadFatBinaryShim;
+    cudaFunctionMap["cuModuleUnload"] = (void *)cuModuleUnloadShim;
+    cudaFunctionMap["cuModuleGetFunction"] = (void *)cuModuleGetFunctionShim;
+    cudaFunctionMap["cuModuleGetGlobal"] = (void *)cuModuleGetGlobalShim;
+    cudaFunctionMap["cuModuleGetTexRef"] = (void *)cuModuleGetTexRefShim;
+    cudaFunctionMap["cuModuleGetSurfRef"] = (void *)cuModuleGetSurfRefShim;
+    cudaFunctionMap["cuModuleGetLoadingMode"] = (void *)cuModuleGetLoadingModeShim;
+    cudaFunctionMap["cuLibraryLoadData"] = (void *)cuLibraryLoadDataShim;
+    cudaFunctionMap["cuLibraryLoadFromFile"] = (void *)cuLibraryLoadFromFileShim;
+    cudaFunctionMap["cuLibraryUnload"] = (void *)cuLibraryUnloadShim;
+    cudaFunctionMap["cuLibraryGetKernel"] = (void *)cuLibraryGetKernelShim;
+    cudaFunctionMap["cuLibraryGetModule"] = (void *)cuLibraryGetModuleShim;
+    cudaFunctionMap["cuKernelGetFunction"] = (void *)cuKernelGetFunctionShim;
+    cudaFunctionMap["cuLibraryGetGlobal"] = (void *)cuLibraryGetGlobalShim;
+    cudaFunctionMap["cuLibraryGetManaged"] = (void *)cuLibraryGetManagedShim;
+    cudaFunctionMap["cuKernelGetAttribute"] = (void *)cuKernelGetAttributeShim;
+    cudaFunctionMap["cuKernelSetAttribute"] = (void *)cuKernelSetAttributeShim;
+    cudaFunctionMap["cuKernelSetCacheConfig"] = (void *)cuKernelSetCacheConfigShim;
+    cudaFunctionMap["cuLinkCreate"] = (void *)cuLinkCreateShim;
+    cudaFunctionMap["cuLinkAddData"] = (void *)cuLinkAddDataShim;
+    cudaFunctionMap["cuLinkAddFile"] = (void *)cuLinkAddFileShim;
+    cudaFunctionMap["cuLinkComplete"] = (void *)cuLinkCompleteShim;
+    cudaFunctionMap["cuLinkDestroy"] = (void *)cuLinkDestroyShim;
+    cudaFunctionMap["cuMemGetInfo"] = (void *)cuMemGetInfoShim;
+    cudaFunctionMap["cuMemAllocManaged"] = (void *)cuMemAllocManagedShim;
+    cudaFunctionMap["cuMemAlloc"] = (void *)cuMemAllocShim;
+    cudaFunctionMap["cuMemAllocPitch"] = (void *)cuMemAllocPitchShim;
+    cudaFunctionMap["cuMemFree"] = (void *)cuMemFreeShim;
+    cudaFunctionMap["cuMemGetAddressRange"] = (void *)cuMemGetAddressRangeShim;
+    cudaFunctionMap["cuMemFreeHost"] = (void *)cuMemFreeHostShim;
+    cudaFunctionMap["cuMemHostAlloc"] = (void *)cuMemHostAllocShim;
+    cudaFunctionMap["cuMemHostGetDevicePointer"] = (void *)cuMemHostGetDevicePointerShim;
+    cudaFunctionMap["cuMemHostGetFlags"] = (void *)cuMemHostGetFlagsShim;
+    cudaFunctionMap["cuMemHostRegister"] = (void *)cuMemHostRegisterShim;
+    cudaFunctionMap["cuMemHostUnregister"] = (void *)cuMemHostUnregisterShim;
+    cudaFunctionMap["cuPointerGetAttribute"] = (void *)cuPointerGetAttributeShim;
+    cudaFunctionMap["cuPointerGetAttributes"] = (void *)cuPointerGetAttributesShim;
+    cudaFunctionMap["cuMemAllocAsync"] = (void *)cuMemAllocAsyncShim;
+    cudaFunctionMap["cuMemAllocFromPoolAsync"] = (void *)cuMemAllocFromPoolAsyncShim;
+    cudaFunctionMap["cuMemFreeAsync"] = (void *)cuMemFreeAsyncShim;
+    cudaFunctionMap["cuMemPoolTrimTo"] = (void *)cuMemPoolTrimToShim;
+    cudaFunctionMap["cuMemPoolSetAttribute"] = (void *)cuMemPoolSetAttributeShim;
+    cudaFunctionMap["cuMemPoolGetAttribute"] = (void *)cuMemPoolGetAttributeShim;
+    cudaFunctionMap["cuMemPoolSetAccess"] = (void *)cuMemPoolSetAccessShim;
+    cudaFunctionMap["cuMemPoolGetAccess"] = (void *)cuMemPoolGetAccessShim;
+    cudaFunctionMap["cuMemPoolCreate"] = (void *)cuMemPoolCreateShim;
+    cudaFunctionMap["cuMemPoolDestroy"] = (void *)cuMemPoolDestroyShim;
+    cudaFunctionMap["cuMemPoolExportToShareableHandle"] = (void *)cuMemPoolExportToShareableHandleShim;
+    cudaFunctionMap["cuMemPoolImportFromShareableHandle"] = (void *)cuMemPoolImportFromShareableHandleShim;
+    cudaFunctionMap["cuMemPoolExportPointer"] = (void *)cuMemPoolExportPointerShim;
+    cudaFunctionMap["cuMemPoolImportPointer"] = (void *)cuMemPoolImportPointerShim;
+    cudaFunctionMap["cuMemcpy"] = (void *)cuMemcpyShim;
+    cudaFunctionMap["cuMemcpyAsync"] = (void *)cuMemcpyAsyncShim;
+    cudaFunctionMap["cuMemcpyPeer"] = (void *)cuMemcpyPeerShim;
+    cudaFunctionMap["cuMemcpyPeerAsync"] = (void *)cuMemcpyPeerAsyncShim;
+    cudaFunctionMap["cuMemcpyHtoD"] = (void *)cuMemcpyHtoDShim;
+    cudaFunctionMap["cuMemcpyHtoDAsync"] = (void *)cuMemcpyHtoDAsyncShim;
+    cudaFunctionMap["cuMemcpyDtoH"] = (void *)cuMemcpyDtoHShim;
+    cudaFunctionMap["cuMemcpyDtoHAsync"] = (void *)cuMemcpyDtoHAsyncShim;
+    cudaFunctionMap["cuMemcpyDtoD"] = (void *)cuMemcpyDtoDShim;
+    cudaFunctionMap["cuMemcpyDtoDAsync"] = (void *)cuMemcpyDtoDAsyncShim;
+    cudaFunctionMap["cuMemcpy2DUnaligned"] = (void *)cuMemcpy2DUnalignedShim;
+    cudaFunctionMap["cuMemcpy2DAsync"] = (void *)cuMemcpy2DAsyncShim;
+    cudaFunctionMap["cuMemcpy3D"] = (void *)cuMemcpy3DShim;
+    cudaFunctionMap["cuMemcpy3DAsync"] = (void *)cuMemcpy3DAsyncShim;
+    cudaFunctionMap["cuMemcpy3DPeer"] = (void *)cuMemcpy3DPeerShim;
+    cudaFunctionMap["cuMemcpy3DPeerAsync"] = (void *)cuMemcpy3DPeerAsyncShim;
+    cudaFunctionMap["cuMemsetD8"] = (void *)cuMemsetD8Shim;
+    cudaFunctionMap["cuMemsetD8Async"] = (void *)cuMemsetD8AsyncShim;
+    cudaFunctionMap["cuMemsetD2D8"] = (void *)cuMemsetD2D8Shim;
+    cudaFunctionMap["cuMemsetD2D8Async"] = (void *)cuMemsetD2D8AsyncShim;
+    cudaFunctionMap["cuFuncSetCacheConfig"] = (void *)cuFuncSetCacheConfigShim;
+    cudaFunctionMap["cuFuncSetSharedMemConfig"] = (void *)cuFuncSetSharedMemConfigShim;
+    cudaFunctionMap["cuFuncGetAttribute"] = (void *)cuFuncGetAttributeShim;
+    cudaFunctionMap["cuFuncSetAttribute"] = (void *)cuFuncSetAttributeShim;
+    cudaFunctionMap["cuArrayCreate"] = (void *)cuArrayCreateShim;
+    cudaFunctionMap["cuArrayGetDescriptor"] = (void *)cuArrayGetDescriptorShim;
+    cudaFunctionMap["cuArrayGetSparseProperties"] = (void *)cuArrayGetSparsePropertiesShim;
+    cudaFunctionMap["cuArrayGetPlane"] = (void *)cuArrayGetPlaneShim;
+    cudaFunctionMap["cuArray3DCreate"] = (void *)cuArray3DCreateShim;
+    cudaFunctionMap["cuArray3DGetDescriptor"] = (void *)cuArray3DGetDescriptorShim;
+    cudaFunctionMap["cuArrayDestroy"] = (void *)cuArrayDestroyShim;
+    cudaFunctionMap["cuMipmappedArrayCreate"] = (void *)cuMipmappedArrayCreateShim;
+    cudaFunctionMap["cuMipmappedArrayGetLevel"] = (void *)cuMipmappedArrayGetLevelShim;
+    cudaFunctionMap["cuMipmappedArrayGetSparseProperties"] = (void *)cuMipmappedArrayGetSparsePropertiesShim;
+    cudaFunctionMap["cuMipmappedArrayDestroy"] = (void *)cuMipmappedArrayDestroyShim;
+    cudaFunctionMap["cuArrayGetMemoryRequirements"] = (void *)cuArrayGetMemoryRequirementsShim;
+    cudaFunctionMap["cuMipmappedArrayGetMemoryRequirements"] = (void *)cuMipmappedArrayGetMemoryRequirementsShim;
+    cudaFunctionMap["cuTexObjectCreate"] = (void *)cuTexObjectCreateShim;
+    cudaFunctionMap["cuTexObjectDestroy"] = (void *)cuTexObjectDestroyShim;
+    cudaFunctionMap["cuTexObjectGetResourceDesc"] = (void *)cuTexObjectGetResourceDescShim;
+    cudaFunctionMap["cuTexObjectGetTextureDesc"] = (void *)cuTexObjectGetTextureDescShim;
+    cudaFunctionMap["cuTexObjectGetResourceViewDesc"] = (void *)cuTexObjectGetResourceViewDescShim;
+    cudaFunctionMap["cuSurfObjectCreate"] = (void *)cuSurfObjectCreateShim;
+    cudaFunctionMap["cuSurfObjectDestroy"] = (void *)cuSurfObjectDestroyShim;
+    cudaFunctionMap["cuSurfObjectGetResourceDesc"] = (void *)cuSurfObjectGetResourceDescShim;
+    cudaFunctionMap["cuImportExternalMemory"] = (void *)cuImportExternalMemoryShim;
+    cudaFunctionMap["cuExternalMemoryGetMappedBuffer"] = (void *)cuExternalMemoryGetMappedBufferShim;
+    cudaFunctionMap["cuExternalMemoryGetMappedMipmappedArray"] = (void *)cuExternalMemoryGetMappedMipmappedArrayShim;
+    cudaFunctionMap["cuDestroyExternalMemory"] = (void *)cuDestroyExternalMemoryShim;
+    cudaFunctionMap["cuImportExternalSemaphore"] = (void *)cuImportExternalSemaphoreShim;
+    cudaFunctionMap["cuSignalExternalSemaphoresAsync"] = (void *)cuSignalExternalSemaphoresAsyncShim;
+    cudaFunctionMap["cuWaitExternalSemaphoresAsync"] = (void *)cuWaitExternalSemaphoresAsyncShim;
+    cudaFunctionMap["cuDestroyExternalSemaphore"] = (void *)cuDestroyExternalSemaphoreShim;
+    cudaFunctionMap["cuDeviceGetNvSciSyncAttributes"] = (void *)cuDeviceGetNvSciSyncAttributesShim;
+    cudaFunctionMap["cuLaunchKernel"] = (void *)cuLaunchKernelShim;
+    cudaFunctionMap["cuLaunchCooperativeKernel"] = (void *)cuLaunchCooperativeKernelShim;
+    cudaFunctionMap["cuLaunchCooperativeKernelMultiDevice"] = (void *)cuLaunchCooperativeKernelMultiDeviceShim;
+    cudaFunctionMap["cuLaunchHostFunc"] = (void *)cuLaunchHostFuncShim;
+    cudaFunctionMap["cuLaunchKernelEx"] = (void *)cuLaunchKernelExShim;
+    cudaFunctionMap["cuEventCreate"] = (void *)cuEventCreateShim;
+    cudaFunctionMap["cuEventRecord"] = (void *)cuEventRecordShim;
+    cudaFunctionMap["cuEventRecordWithFlags"] = (void *)cuEventRecordWithFlagsShim;
+    cudaFunctionMap["cuEventQuery"] = (void *)cuEventQueryShim;
+    cudaFunctionMap["cuEventSynchronize"] = (void *)cuEventSynchronizeShim;
+    cudaFunctionMap["cuEventDestroy"] = (void *)cuEventDestroyShim;
+    cudaFunctionMap["cuEventElapsedTime"] = (void *)cuEventElapsedTimeShim;
+    cudaFunctionMap["cuStreamWaitValue32"] = (void *)cuStreamWaitValue32Shim;
+    cudaFunctionMap["cuStreamWriteValue32"] = (void *)cuStreamWriteValue32Shim;
+    cudaFunctionMap["cuStreamWaitValue64"] = (void *)cuStreamWaitValue64Shim;
+    cudaFunctionMap["cuStreamWriteValue64"] = (void *)cuStreamWriteValue64Shim;
+    cudaFunctionMap["cuStreamBatchMemOp"] = (void *)cuStreamBatchMemOpShim;
+    cudaFunctionMap["cuStreamCreate"] = (void *)cuStreamCreateShim;
+    cudaFunctionMap["cuStreamCreateWithPriority"] = (void *)cuStreamCreateWithPriorityShim;
+    cudaFunctionMap["cuStreamGetPriority"] = (void *)cuStreamGetPriorityShim;
+    cudaFunctionMap["cuStreamGetFlags"] = (void *)cuStreamGetFlagsShim;
+    cudaFunctionMap["cuStreamGetCtx"] = (void *)cuStreamGetCtxShim;
+    cudaFunctionMap["cuStreamGetId"] = (void *)cuStreamGetIdShim;
+    cudaFunctionMap["cuStreamDestroy"] = (void *)cuStreamDestroyShim;
+    cudaFunctionMap["cuStreamWaitEvent"] = (void *)cuStreamWaitEventShim;
+    cudaFunctionMap["cuStreamAddCallback"] = (void *)cuStreamAddCallbackShim;
+    cudaFunctionMap["cuStreamSynchronize"] = (void *)cuStreamSynchronizeShim;
+    cudaFunctionMap["cuStreamQuery"] = (void *)cuStreamQueryShim;
+    cudaFunctionMap["cuStreamAttachMemAsync"] = (void *)cuStreamAttachMemAsyncShim;
+    cudaFunctionMap["cuStreamCopyAttributes"] = (void *)cuStreamCopyAttributesShim;
+    cudaFunctionMap["cuStreamGetAttribute"] = (void *)cuStreamGetAttributeShim;
+    cudaFunctionMap["cuStreamSetAttribute"] = (void *)cuStreamSetAttributeShim;
+    cudaFunctionMap["cuDeviceCanAccessPeer"] = (void *)cuDeviceCanAccessPeerShim;
+    cudaFunctionMap["cuCtxEnablePeerAccess"] = (void *)cuCtxEnablePeerAccessShim;
+    cudaFunctionMap["cuCtxDisablePeerAccess"] = (void *)cuCtxDisablePeerAccessShim;
+    cudaFunctionMap["cuIpcGetEventHandle"] = (void *)cuIpcGetEventHandleShim;
+    cudaFunctionMap["cuIpcOpenEventHandle"] = (void *)cuIpcOpenEventHandleShim;
+    cudaFunctionMap["cuIpcGetMemHandle"] = (void *)cuIpcGetMemHandleShim;
+    cudaFunctionMap["cuIpcOpenMemHandle"] = (void *)cuIpcOpenMemHandleShim;
+    cudaFunctionMap["cuIpcCloseMemHandle"] = (void *)cuIpcCloseMemHandleShim;
+    cudaFunctionMap["cuGLCtxCreate"] = (void *)cuGLCtxCreateShim;
+    cudaFunctionMap["cuGLInit"] = (void *)cuGLInitShim;
+    cudaFunctionMap["cuGLGetDevices"] = (void *)cuGLGetDevicesShim;
+    cudaFunctionMap["cuGLRegisterBufferObject"] = (void *)cuGLRegisterBufferObjectShim;
+    cudaFunctionMap["cuGLMapBufferObject"] = (void *)cuGLMapBufferObjectShim;
+    cudaFunctionMap["cuGLMapBufferObjectAsync"] = (void *)cuGLMapBufferObjectAsyncShim;
+    cudaFunctionMap["cuGLUnmapBufferObject"] = (void *)cuGLUnmapBufferObjectShim;
+    cudaFunctionMap["cuGLUnmapBufferObjectAsync"] = (void *)cuGLUnmapBufferObjectAsyncShim;
+    cudaFunctionMap["cuGLUnregisterBufferObject"] = (void *)cuGLUnregisterBufferObjectShim;
+    cudaFunctionMap["cuGLSetBufferObjectMapFlags"] = (void *)cuGLSetBufferObjectMapFlagsShim;
+    cudaFunctionMap["cuGraphicsGLRegisterImage"] = (void *)cuGraphicsGLRegisterImageShim;
+    cudaFunctionMap["cuGraphicsGLRegisterBuffer"] = (void *)cuGraphicsGLRegisterBufferShim;
+    cudaFunctionMap["cuGraphicsEGLRegisterImage"] = (void *)cuGraphicsEGLRegisterImageShim;
+    cudaFunctionMap["cuEGLStreamConsumerConnect"] = (void *)cuEGLStreamConsumerConnectShim;
+    cudaFunctionMap["cuEGLStreamConsumerDisconnect"] = (void *)cuEGLStreamConsumerDisconnectShim;
+    cudaFunctionMap["cuEGLStreamConsumerAcquireFrame"] = (void *)cuEGLStreamConsumerAcquireFrameShim;
+    cudaFunctionMap["cuEGLStreamConsumerReleaseFrame"] = (void *)cuEGLStreamConsumerReleaseFrameShim;
+    cudaFunctionMap["cuEGLStreamProducerConnect"] = (void *)cuEGLStreamProducerConnectShim;
+    cudaFunctionMap["cuEGLStreamProducerDisconnect"] = (void *)cuEGLStreamProducerDisconnectShim;
+    cudaFunctionMap["cuEGLStreamProducerPresentFrame"] = (void *)cuEGLStreamProducerPresentFrameShim;
+    cudaFunctionMap["cuEGLStreamProducerReturnFrame"] = (void *)cuEGLStreamProducerReturnFrameShim;
+    cudaFunctionMap["cuGraphicsResourceGetMappedEglFrame"] = (void *)cuGraphicsResourceGetMappedEglFrameShim;
+    cudaFunctionMap["cuGraphicsUnregisterResource"] = (void *)cuGraphicsUnregisterResourceShim;
+    cudaFunctionMap["cuGraphicsMapResources"] = (void *)cuGraphicsMapResourcesShim;
+    cudaFunctionMap["cuGraphicsUnmapResources"] = (void *)cuGraphicsUnmapResourcesShim;
+    cudaFunctionMap["cuGraphicsResourceSetMapFlags"] = (void *)cuGraphicsResourceSetMapFlagsShim;
+    cudaFunctionMap["cuGraphicsSubResourceGetMappedArray"] = (void *)cuGraphicsSubResourceGetMappedArrayShim;
+    cudaFunctionMap["cuGraphicsResourceGetMappedMipmappedArray"] = (void *)cuGraphicsResourceGetMappedMipmappedArrayShim;
+    cudaFunctionMap["cuProfilerInitialize"] = (void *)cuProfilerInitializeShim;
+    cudaFunctionMap["cuProfilerStart"] = (void *)cuProfilerStartShim;
+    cudaFunctionMap["cuProfilerStop"] = (void *)cuProfilerStopShim;
+    cudaFunctionMap["cuVDPAUGetDevice"] = (void *)cuVDPAUGetDeviceShim;
+    cudaFunctionMap["cuVDPAUCtxCreate"] = (void *)cuVDPAUCtxCreateShim;
+    cudaFunctionMap["cuGraphicsVDPAURegisterVideoSurface"] = (void *)cuGraphicsVDPAURegisterVideoSurfaceShim;
+    cudaFunctionMap["cuGraphicsVDPAURegisterOutputSurface"] = (void *)cuGraphicsVDPAURegisterOutputSurfaceShim;
+    cudaFunctionMap["cuGetExportTable"] = (void *)cuGetExportTableShim;
+    cudaFunctionMap["cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags"] = (void *)cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlagsShim;
+    cudaFunctionMap["cuOccupancyAvailableDynamicSMemPerBlock"] = (void *)cuOccupancyAvailableDynamicSMemPerBlockShim;
+    cudaFunctionMap["cuOccupancyMaxPotentialClusterSize"] = (void *)cuOccupancyMaxPotentialClusterSizeShim;
+    cudaFunctionMap["cuOccupancyMaxActiveClusters"] = (void *)cuOccupancyMaxActiveClustersShim;
+    cudaFunctionMap["cuMemAdvise"] = (void *)cuMemAdviseShim;
+    cudaFunctionMap["cuMemPrefetchAsync"] = (void *)cuMemPrefetchAsyncShim;
+    cudaFunctionMap["cuMemRangeGetAttribute"] = (void *)cuMemRangeGetAttributeShim;
+    cudaFunctionMap["cuMemRangeGetAttributes"] = (void *)cuMemRangeGetAttributesShim;
+    cudaFunctionMap["cuGetErrorString"] = (void *)cuGetErrorStringShim;
+    cudaFunctionMap["cuGetErrorName"] = (void *)cuGetErrorNameShim;
+    cudaFunctionMap["cuGraphCreate"] = (void *)cuGraphCreateShim;
+    cudaFunctionMap["cuGraphAddKernelNode"] = (void *)cuGraphAddKernelNodeShim;
+    cudaFunctionMap["cuGraphKernelNodeGetParams"] = (void *)cuGraphKernelNodeGetParamsShim;
+    cudaFunctionMap["cuGraphKernelNodeSetParams"] = (void *)cuGraphKernelNodeSetParamsShim;
+    cudaFunctionMap["cuGraphAddMemcpyNode"] = (void *)cuGraphAddMemcpyNodeShim;
+    cudaFunctionMap["cuGraphMemcpyNodeGetParams"] = (void *)cuGraphMemcpyNodeGetParamsShim;
+    cudaFunctionMap["cuGraphMemcpyNodeSetParams"] = (void *)cuGraphMemcpyNodeSetParamsShim;
+    cudaFunctionMap["cuGraphAddMemsetNode"] = (void *)cuGraphAddMemsetNodeShim;
+    cudaFunctionMap["cuGraphMemsetNodeGetParams"] = (void *)cuGraphMemsetNodeGetParamsShim;
+    cudaFunctionMap["cuGraphMemsetNodeSetParams"] = (void *)cuGraphMemsetNodeSetParamsShim;
+    cudaFunctionMap["cuGraphAddHostNode"] = (void *)cuGraphAddHostNodeShim;
+    cudaFunctionMap["cuGraphHostNodeGetParams"] = (void *)cuGraphHostNodeGetParamsShim;
+    cudaFunctionMap["cuGraphHostNodeSetParams"] = (void *)cuGraphHostNodeSetParamsShim;
+    cudaFunctionMap["cuGraphAddChildGraphNode"] = (void *)cuGraphAddChildGraphNodeShim;
+    cudaFunctionMap["cuGraphChildGraphNodeGetGraph"] = (void *)cuGraphChildGraphNodeGetGraphShim;
+    cudaFunctionMap["cuGraphAddEmptyNode"] = (void *)cuGraphAddEmptyNodeShim;
+    cudaFunctionMap["cuGraphAddEventRecordNode"] = (void *)cuGraphAddEventRecordNodeShim;
+    cudaFunctionMap["cuGraphEventRecordNodeGetEvent"] = (void *)cuGraphEventRecordNodeGetEventShim;
+    cudaFunctionMap["cuGraphEventRecordNodeSetEvent"] = (void *)cuGraphEventRecordNodeSetEventShim;
+    cudaFunctionMap["cuGraphAddEventWaitNode"] = (void *)cuGraphAddEventWaitNodeShim;
+    cudaFunctionMap["cuGraphEventWaitNodeGetEvent"] = (void *)cuGraphEventWaitNodeGetEventShim;
+    cudaFunctionMap["cuGraphEventWaitNodeSetEvent"] = (void *)cuGraphEventWaitNodeSetEventShim;
+    cudaFunctionMap["cuGraphAddExternalSemaphoresSignalNode"] = (void *)cuGraphAddExternalSemaphoresSignalNodeShim;
+    cudaFunctionMap["cuGraphExternalSemaphoresSignalNodeGetParams"] = (void *)cuGraphExternalSemaphoresSignalNodeGetParamsShim;
+    cudaFunctionMap["cuGraphExternalSemaphoresSignalNodeSetParams"] = (void *)cuGraphExternalSemaphoresSignalNodeSetParamsShim;
+    cudaFunctionMap["cuGraphAddExternalSemaphoresWaitNode"] = (void *)cuGraphAddExternalSemaphoresWaitNodeShim;
+    cudaFunctionMap["cuGraphExternalSemaphoresWaitNodeGetParams"] = (void *)cuGraphExternalSemaphoresWaitNodeGetParamsShim;
+    cudaFunctionMap["cuGraphExternalSemaphoresWaitNodeSetParams"] = (void *)cuGraphExternalSemaphoresWaitNodeSetParamsShim;
+    cudaFunctionMap["cuGraphExecExternalSemaphoresSignalNodeSetParams"] = (void *)cuGraphExecExternalSemaphoresSignalNodeSetParamsShim;
+    cudaFunctionMap["cuGraphExecExternalSemaphoresWaitNodeSetParams"] = (void *)cuGraphExecExternalSemaphoresWaitNodeSetParamsShim;
+    cudaFunctionMap["cuGraphAddMemAllocNode"] = (void *)cuGraphAddMemAllocNodeShim;
+    cudaFunctionMap["cuGraphMemAllocNodeGetParams"] = (void *)cuGraphMemAllocNodeGetParamsShim;
+    cudaFunctionMap["cuGraphAddMemFreeNode"] = (void *)cuGraphAddMemFreeNodeShim;
+    cudaFunctionMap["cuGraphMemFreeNodeGetParams"] = (void *)cuGraphMemFreeNodeGetParamsShim;
+    cudaFunctionMap["cuDeviceGraphMemTrim"] = (void *)cuDeviceGraphMemTrimShim;
+    cudaFunctionMap["cuDeviceGetGraphMemAttribute"] = (void *)cuDeviceGetGraphMemAttributeShim;
+    cudaFunctionMap["cuDeviceSetGraphMemAttribute"] = (void *)cuDeviceSetGraphMemAttributeShim;
+    cudaFunctionMap["cuGraphClone"] = (void *)cuGraphCloneShim;
+    cudaFunctionMap["cuGraphNodeFindInClone"] = (void *)cuGraphNodeFindInCloneShim;
+    cudaFunctionMap["cuGraphNodeGetType"] = (void *)cuGraphNodeGetTypeShim;
+    cudaFunctionMap["cuGraphGetNodes"] = (void *)cuGraphGetNodesShim;
+    cudaFunctionMap["cuGraphGetRootNodes"] = (void *)cuGraphGetRootNodesShim;
+    cudaFunctionMap["cuGraphGetEdges"] = (void *)cuGraphGetEdgesShim;
+    cudaFunctionMap["cuGraphNodeGetDependencies"] = (void *)cuGraphNodeGetDependenciesShim;
+    cudaFunctionMap["cuGraphNodeGetDependentNodes"] = (void *)cuGraphNodeGetDependentNodesShim;
+    cudaFunctionMap["cuGraphAddDependencies"] = (void *)cuGraphAddDependenciesShim;
+    cudaFunctionMap["cuGraphRemoveDependencies"] = (void *)cuGraphRemoveDependenciesShim;
+    cudaFunctionMap["cuGraphDestroyNode"] = (void *)cuGraphDestroyNodeShim;
+    cudaFunctionMap["cuGraphInstantiate"] = (void *)cuGraphInstantiateShim;
+    cudaFunctionMap["cuGraphUpload"] = (void *)cuGraphUploadShim;
+    cudaFunctionMap["cuGraphLaunch"] = (void *)cuGraphLaunchShim;
+    cudaFunctionMap["cuGraphExecDestroy"] = (void *)cuGraphExecDestroyShim;
+    cudaFunctionMap["cuGraphDestroy"] = (void *)cuGraphDestroyShim;
+    cudaFunctionMap["cuStreamBeginCapture"] = (void *)cuStreamBeginCaptureShim;
+    cudaFunctionMap["cuStreamEndCapture"] = (void *)cuStreamEndCaptureShim;
+    cudaFunctionMap["cuStreamIsCapturing"] = (void *)cuStreamIsCapturingShim;
+    cudaFunctionMap["cuStreamGetCaptureInfo"] = (void *)cuStreamGetCaptureInfoShim;
+    cudaFunctionMap["cuStreamUpdateCaptureDependencies"] = (void *)cuStreamUpdateCaptureDependenciesShim;
+    cudaFunctionMap["cuGraphExecKernelNodeSetParams"] = (void *)cuGraphExecKernelNodeSetParamsShim;
+    cudaFunctionMap["cuGraphExecMemcpyNodeSetParams"] = (void *)cuGraphExecMemcpyNodeSetParamsShim;
+    cudaFunctionMap["cuGraphExecMemsetNodeSetParams"] = (void *)cuGraphExecMemsetNodeSetParamsShim;
+    cudaFunctionMap["cuGraphExecHostNodeSetParams"] = (void *)cuGraphExecHostNodeSetParamsShim;
+    cudaFunctionMap["cuGraphExecChildGraphNodeSetParams"] = (void *)cuGraphExecChildGraphNodeSetParamsShim;
+    cudaFunctionMap["cuGraphExecEventRecordNodeSetEvent"] = (void *)cuGraphExecEventRecordNodeSetEventShim;
+    cudaFunctionMap["cuGraphExecEventWaitNodeSetEvent"] = (void *)cuGraphExecEventWaitNodeSetEventShim;
+    cudaFunctionMap["cuThreadExchangeStreamCaptureMode"] = (void *)cuThreadExchangeStreamCaptureModeShim;
+    cudaFunctionMap["cuGraphExecUpdate"] = (void *)cuGraphExecUpdateShim;
+    cudaFunctionMap["cuGraphKernelNodeCopyAttributes"] = (void *)cuGraphKernelNodeCopyAttributesShim;
+    cudaFunctionMap["cuGraphKernelNodeGetAttribute"] = (void *)cuGraphKernelNodeGetAttributeShim;
+    cudaFunctionMap["cuGraphKernelNodeSetAttribute"] = (void *)cuGraphKernelNodeSetAttributeShim;
+    cudaFunctionMap["cuGraphDebugDotPrint"] = (void *)cuGraphDebugDotPrintShim;
+    cudaFunctionMap["cuUserObjectCreate"] = (void *)cuUserObjectCreateShim;
+    cudaFunctionMap["cuUserObjectRetain"] = (void *)cuUserObjectRetainShim;
+    cudaFunctionMap["cuUserObjectRelease"] = (void *)cuUserObjectReleaseShim;
+    cudaFunctionMap["cuGraphRetainUserObject"] = (void *)cuGraphRetainUserObjectShim;
+    cudaFunctionMap["cuGraphReleaseUserObject"] = (void *)cuGraphReleaseUserObjectShim;
+    cudaFunctionMap["cuGraphNodeSetEnabled"] = (void *)cuGraphNodeSetEnabledShim;
+    cudaFunctionMap["cuGraphNodeGetEnabled"] = (void *)cuGraphNodeGetEnabledShim;
+    cudaFunctionMap["cuGraphInstantiateWithParams"] = (void *)cuGraphInstantiateWithParamsShim;
+    cudaFunctionMap["cuGraphExecGetFlags"] = (void *)cuGraphExecGetFlagsShim;
+    cudaFunctionMap["cuGraphInstantiateWithParams_ptsz"] = (void *)cuGraphInstantiateWithParams_ptszShim;
+    cudaFunctionMap["cuGraphInstantiateWithFlags"] = (void *)cuGraphInstantiateWithFlagsShim;
+    cudaFunctionMap["cuEGLStreamConsumerConnectWithFlags"] = (void *)cuEGLStreamConsumerConnectWithFlagsShim;
+    cudaFunctionMap["cuGraphicsResourceGetMappedPointer"] = (void *)cuGraphicsResourceGetMappedPointerShim;
+}
+
+void noOpFunction() {
+    // Do nothing
+}
+
+CUresult cuGetProcAddress_v2_handler(const char *symbol, void **pfn, int cudaVersion, cuuint64_t flags, CUdriverProcAddressQueryResult *symbolStatus)
+{
+    initCudaFunctionMap();
+
+    std::string symbolName(symbol);
+    auto it = cudaFunctionMap.find(symbolName);
+    if (it != cudaFunctionMap.end()) {
+        *pfn = reinterpret_cast<void *>(it->second);
+        std::cout << "Mapped symbol: " << symbolName << " to function: " << *pfn << std::endl;
+    } else {
+        std::cerr << "Function for symbol: " << symbolName << " not found!" << std::endl;
+        *pfn = reinterpret_cast<void *>(noOpFunction); 
+    }
+
+    return CUDA_SUCCESS;
+}
+
+CUresult cuGetProcAddress(const char *symbol, void **pfn, int cudaVersion, cuuint64_t flags, CUdriverProcAddressQueryResult *symbolStatus) {
+    std::string symbolName(symbol);
+    auto it = cudaFunctionMap.find(symbolName);
+    if (it != cudaFunctionMap.end()) {
+        *pfn = reinterpret_cast<void *>(it->second);
+        std::cout << "Mapped symbol: " << symbolName << " to function: " << *pfn << std::endl;
+    } else {
+        std::cerr << "Function for symbol: " << symbolName << " not found!" << std::endl;
+        *pfn = reinterpret_cast<void *>(noOpFunction); 
+    }
+}
+
 std::unordered_map<std::string, void *> functionMap = {
     {"nvmlInit_v2", (void *)nvmlInit_v2},
     {"nvmlInitWithFlags", (void *)nvmlInitWithFlags},
@@ -4392,6 +6425,7 @@ std::unordered_map<std::string, void *> functionMap = {
     {"nvmlGpmMigSampleGet", (void *)nvmlGpmMigSampleGet},
     {"nvmlGpmQueryDeviceSupport", (void *)nvmlGpmQueryDeviceSupport},
     {"nvmlDeviceSetNvLinkDeviceLowPowerThreshold", (void *)nvmlDeviceSetNvLinkDeviceLowPowerThreshold},
+    {"cuGetProcAddress_v2", (void *)cuGetProcAddress_v2_handler},
 };
 
 void *get_function_pointer(const char *name)

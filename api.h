@@ -11,8 +11,6 @@
 
 // 4.14 System Queries
 #define RPC_nvmlSystemGetDriverVersion 4
-// #define RPC_nvmlSystemGetDriverVersion_v2 5
-// #define RPC_nvmlSystemGetDriverBranch 6
 #define RPC_nvmlSystemGetHicVersion 7
 #define RPC_nvmlSystemGetNVMLVersion 8
 #define RPC_nvmlSystemGetProcessName 9

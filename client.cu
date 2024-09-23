@@ -1,3 +1,4 @@
+
 #include <arpa/inet.h>
 #include <cstring>
 #include <dlfcn.h>
@@ -19,6 +20,7 @@
 
 #include "api.h"
 #include "codegen/gen_client.h"
+
 
 int sockfd = -1;
 char *port;
@@ -82,28 +84,39 @@ int open_rpc_client()
 pthread_mutex_t mutex;
 pthread_cond_t cond;
 
-int rpc_start_request(const unsigned int op)
-{
-    static int next_request_id = 1;
+int rpc_start_request(const unsigned int op) {
+    static int next_request_id = 1; // Initialized once and retains value across function calls
 
-    open_rpc_client();
+    // Ensure socket is open
+    if (sockfd < 0) {
+        std::cerr << "Socket not open" << std::endl;
+        return -1;
+    }
 
-    // write the request atomically
+    // Lock the mutex for atomic operation
     pthread_mutex_lock(&mutex);
 
-    int request_id = next_request_id++;
+    int request_id = next_request_id++; // Assign and then increment
 
-    if (write(sockfd, &request_id, sizeof(int)) < 0 ||
-        write(sockfd, &op, sizeof(unsigned int)) < 0)
-    {
+    // Write the request ID and operation code
+    if (write(sockfd, &request_id, sizeof(int)) < 0) {
+        std::cerr << "Failed to write request_id. Error: " << strerror(errno) << std::endl;
         pthread_mutex_unlock(&mutex);
         return -1;
     }
 
+    if (write(sockfd, &op, sizeof(unsigned int)) < 0) {
+        std::cerr << "Failed to write operation code. Error: " << strerror(errno) << std::endl;
+        pthread_mutex_unlock(&mutex);
+        return -1;
+    }
+
+    pthread_mutex_unlock(&mutex);
+
     return request_id;
 }
 
-int rpc_write(const void *data, const size_t size)
+int rpc_write(const void *data, size_t size)
 {
     if (write(sockfd, data, size) < 0)
     {
@@ -113,9 +126,20 @@ int rpc_write(const void *data, const size_t size)
     return 0;
 }
 
-int rpc_read(void *data, const size_t size)
+int rpc_read(void *data, size_t size)
 {
-    if (read(sockfd, data, size) < 0)
+    if (data == nullptr) {
+        // temp buffer to discard data
+        char tempBuffer[256];
+        while (size > 0) {
+            ssize_t bytesRead = read(sockfd, tempBuffer, std::min(size, sizeof(tempBuffer)));
+            if (bytesRead < 0) {
+                pthread_mutex_unlock(&mutex);
+                return -1; // error if reading fails
+            }
+            size -= bytesRead;
+        }
+    } else if (read(sockfd, data, size) < 0)
     {
         pthread_mutex_unlock(&mutex);
         return -1;
@@ -123,7 +147,7 @@ int rpc_read(void *data, const size_t size)
     return 0;
 }
 
-int rpc_wait_for_response(const unsigned int request_id)
+int rpc_wait_for_response(int request_id)
 {
     static int active_response_id = -1;
 
@@ -154,13 +178,16 @@ int rpc_wait_for_response(const unsigned int request_id)
     }
 }
 
-int rpc_end_request(void *result, const unsigned int request_id)
+template <typename T>
+T rpc_get_return(int request_id, T error_value)
 {
-    if (read(sockfd, result, sizeof(nvmlReturn_t)) < 0)
-        return -1;
+    T result;
+    if (read(sockfd, &result, sizeof(T)) < 0)
+        result = error_value;
 
     pthread_mutex_unlock(&mutex);
-    return 0;
+
+    return result;
 }
 
 void close_rpc_client()
@@ -171,23 +198,20 @@ void close_rpc_client()
 
 void *dlsym(void *handle, const char *name) __THROW
 {
+    open_rpc_client();
     void *func = get_function_pointer(name);
 
-    if (func != nullptr)
+    if (func != nullptr) {
+        std::cout << "[dlsym] Function address from cudaFunctionMap: " << func << std::endl;
         return func;
-
-    static void *(*real_dlsym)(void *, const char *) = NULL;
-    if (real_dlsym == NULL)
-    {
-        // avoid calling dlsym recursively; use dlvsym to resolve dlsym itself
-        real_dlsym = (void *(*)(void *, const char *))dlvsym(RTLD_NEXT, "dlsym",
-                                                             "GLIBC_2.2.5");
     }
 
-    if (!strcmp(name, "dlsym"))
-        return (void *)dlsym;
+    // Real dlsym lookup
+    static void *(*real_dlsym)(void *, const char *) = NULL;
+    if (real_dlsym == NULL) {
+        real_dlsym = (void *(*)(void *, const char *))dlvsym(RTLD_NEXT, "dlsym", "GLIBC_2.2.5");
+    }
 
-    // if func symbol is not found in the handler mappings, return the real dlsym
-    // resolution
+    std::cout << "[dlsym] Falling back to real_dlsym for name: " << name << std::endl;
     return real_dlsym(handle, name);
 }

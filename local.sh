@@ -24,7 +24,7 @@ server() {
   echo "building server..." 
 
   if [[ "$(uname)" == "Linux" ]]; then
-    nvcc -o $server_out_path $server_path -lnvidia-ml
+    nvcc -o $server_out_path $server_path -lnvidia-ml -lcuda
   else
     echo "No compiler options set for os "$(uname)""
   fi

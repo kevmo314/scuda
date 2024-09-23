@@ -281,3 +281,12 @@
 #define RPC_nvmlGpmMigSampleGet 280
 #define RPC_nvmlGpmQueryDeviceSupport 281
 #define RPC_nvmlDeviceSetNvLinkDeviceLowPowerThreshold 282
+
+#define RPC_cuGetProcAddress_v2 284
+#define RPC_cudaGetDeviceCount 285
+#define RPC_cuDriverGetVersion 286
+#define RPC_cuGetExportTable 287
+#define RPC_cuModuleGetLoadingMode 288
+#define RPC_cuDeviceGetCount 289
+#define RPC_cuDeviceGet 290
+#define RPC_cuInit 291
