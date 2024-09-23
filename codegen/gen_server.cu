@@ -3,6 +3,7 @@
 #include <unistd.h>
 
 #include "gen_api.h"
+#include "gen_server.h"
 
 int handle_nvmlInit_v2(int connfd)
 {
@@ -37,7 +38,7 @@ int handle_nvmlSystemGetDriverVersion(int connfd)
     if (read(connfd, &length, sizeof(unsigned int)) < 0)
         return -1;
 
-    char *version = (char *) malloc(length * sizeof(char));
+    char *version = (char *)malloc(length * sizeof(char));
 
     nvmlReturn_t result = nvmlSystemGetDriverVersion(version, length);
 
@@ -54,7 +55,7 @@ int handle_nvmlSystemGetNVMLVersion(int connfd)
     if (read(connfd, &length, sizeof(unsigned int)) < 0)
         return -1;
 
-    char *version = (char *) malloc(length * sizeof(char));
+    char *version = (char *)malloc(length * sizeof(char));
 
     nvmlReturn_t result = nvmlSystemGetNVMLVersion(version, length);
 
@@ -103,7 +104,7 @@ int handle_nvmlSystemGetProcessName(int connfd)
         read(connfd, &length, sizeof(unsigned int)) < 0)
         return -1;
 
-    char *name = (char *) malloc(length * sizeof(char));
+    char *name = (char *)malloc(length * sizeof(char));
 
     nvmlReturn_t result = nvmlSystemGetProcessName(pid, name, length);
 
@@ -241,7 +242,7 @@ int handle_nvmlUnitGetDevices(int connfd)
         read(connfd, &deviceCount, sizeof(unsigned int)) < 0)
         return -1;
 
-    nvmlDevice_t *devices = (nvmlDevice_t *) malloc(deviceCount * sizeof(nvmlDevice_t));
+    nvmlDevice_t *devices = (nvmlDevice_t *)malloc(deviceCount * sizeof(nvmlDevice_t));
 
     nvmlReturn_t result = nvmlUnitGetDevices(unit, &deviceCount, devices);
 
@@ -259,7 +260,7 @@ int handle_nvmlSystemGetHicVersion(int connfd)
     if (read(connfd, &hwbcCount, sizeof(unsigned int)) < 0)
         return -1;
 
-    nvmlHwbcEntry_t *hwbcEntries = (nvmlHwbcEntry_t *) malloc(hwbcCount * sizeof(nvmlHwbcEntry_t));
+    nvmlHwbcEntry_t *hwbcEntries = (nvmlHwbcEntry_t *)malloc(hwbcCount * sizeof(nvmlHwbcEntry_t));
 
     nvmlReturn_t result = nvmlSystemGetHicVersion(&hwbcCount, hwbcEntries);
 
@@ -379,7 +380,7 @@ int handle_nvmlDeviceGetName(int connfd)
         read(connfd, &length, sizeof(unsigned int)) < 0)
         return -1;
 
-    char *name = (char *) malloc(length * sizeof(char));
+    char *name = (char *)malloc(length * sizeof(char));
 
     nvmlReturn_t result = nvmlDeviceGetName(device, name, length);
 
@@ -432,7 +433,7 @@ int handle_nvmlDeviceGetSerial(int connfd)
         read(connfd, &length, sizeof(unsigned int)) < 0)
         return -1;
 
-    char *serial = (char *) malloc(length * sizeof(char));
+    char *serial = (char *)malloc(length * sizeof(char));
 
     nvmlReturn_t result = nvmlDeviceGetSerial(device, serial, length);
 
@@ -453,7 +454,7 @@ int handle_nvmlDeviceGetMemoryAffinity(int connfd)
         read(connfd, &scope, sizeof(nvmlAffinityScope_t)) < 0)
         return -1;
 
-    unsigned long *nodeSet = (unsigned long *) malloc(nodeSetSize * sizeof(unsigned long));
+    unsigned long *nodeSet = (unsigned long *)malloc(nodeSetSize * sizeof(unsigned long));
 
     nvmlReturn_t result = nvmlDeviceGetMemoryAffinity(device, nodeSetSize, nodeSet, scope);
 
@@ -474,7 +475,7 @@ int handle_nvmlDeviceGetCpuAffinityWithinScope(int connfd)
         read(connfd, &scope, sizeof(nvmlAffinityScope_t)) < 0)
         return -1;
 
-    unsigned long *cpuSet = (unsigned long *) malloc(cpuSetSize * sizeof(unsigned long));
+    unsigned long *cpuSet = (unsigned long *)malloc(cpuSetSize * sizeof(unsigned long));
 
     nvmlReturn_t result = nvmlDeviceGetCpuAffinityWithinScope(device, cpuSetSize, cpuSet, scope);
 
@@ -493,7 +494,7 @@ int handle_nvmlDeviceGetCpuAffinity(int connfd)
         read(connfd, &cpuSetSize, sizeof(unsigned int)) < 0)
         return -1;
 
-    unsigned long *cpuSet = (unsigned long *) malloc(cpuSetSize * sizeof(unsigned long));
+    unsigned long *cpuSet = (unsigned long *)malloc(cpuSetSize * sizeof(unsigned long));
 
     nvmlReturn_t result = nvmlDeviceGetCpuAffinity(device, cpuSetSize, cpuSet);
 
@@ -557,7 +558,7 @@ int handle_nvmlDeviceGetTopologyNearestGpus(int connfd)
         read(connfd, &count, sizeof(unsigned int)) < 0)
         return -1;
 
-    nvmlDevice_t *deviceArray = (nvmlDevice_t *) malloc(count * sizeof(nvmlDevice_t));
+    nvmlDevice_t *deviceArray = (nvmlDevice_t *)malloc(count * sizeof(nvmlDevice_t));
 
     nvmlReturn_t result = nvmlDeviceGetTopologyNearestGpus(device, level, &count, deviceArray);
 
@@ -618,7 +619,7 @@ int handle_nvmlDeviceGetUUID(int connfd)
         read(connfd, &length, sizeof(unsigned int)) < 0)
         return -1;
 
-    char *uuid = (char *) malloc(length * sizeof(char));
+    char *uuid = (char *)malloc(length * sizeof(char));
 
     nvmlReturn_t result = nvmlDeviceGetUUID(device, uuid, length);
 
@@ -637,7 +638,7 @@ int handle_nvmlVgpuInstanceGetMdevUUID(int connfd)
         read(connfd, &size, sizeof(unsigned int)) < 0)
         return -1;
 
-    char *mdevUuid = (char *) malloc(size * sizeof(char));
+    char *mdevUuid = (char *)malloc(size * sizeof(char));
 
     nvmlReturn_t result = nvmlVgpuInstanceGetMdevUUID(vgpuInstance, mdevUuid, size);
 
@@ -673,7 +674,7 @@ int handle_nvmlDeviceGetBoardPartNumber(int connfd)
         read(connfd, &length, sizeof(unsigned int)) < 0)
         return -1;
 
-    char *partNumber = (char *) malloc(length * sizeof(char));
+    char *partNumber = (char *)malloc(length * sizeof(char));
 
     nvmlReturn_t result = nvmlDeviceGetBoardPartNumber(device, partNumber, length);
 
@@ -694,7 +695,7 @@ int handle_nvmlDeviceGetInforomVersion(int connfd)
         read(connfd, &length, sizeof(unsigned int)) < 0)
         return -1;
 
-    char *version = (char *) malloc(length * sizeof(char));
+    char *version = (char *)malloc(length * sizeof(char));
 
     nvmlReturn_t result = nvmlDeviceGetInforomVersion(device, object, version, length);
 
@@ -713,7 +714,7 @@ int handle_nvmlDeviceGetInforomImageVersion(int connfd)
         read(connfd, &length, sizeof(unsigned int)) < 0)
         return -1;
 
-    char *version = (char *) malloc(length * sizeof(char));
+    char *version = (char *)malloc(length * sizeof(char));
 
     nvmlReturn_t result = nvmlDeviceGetInforomImageVersion(device, version, length);
 
@@ -1883,7 +1884,7 @@ int handle_nvmlDeviceGetEncoderSessions(int connfd)
         read(connfd, &sessionCount, sizeof(unsigned int)) < 0)
         return -1;
 
-    nvmlEncoderSessionInfo_t *sessionInfos = (nvmlEncoderSessionInfo_t *) malloc(sessionCount * sizeof(nvmlEncoderSessionInfo_t));
+    nvmlEncoderSessionInfo_t *sessionInfos = (nvmlEncoderSessionInfo_t *)malloc(sessionCount * sizeof(nvmlEncoderSessionInfo_t));
 
     nvmlReturn_t result = nvmlDeviceGetEncoderSessions(device, &sessionCount, sessionInfos);
 
@@ -1980,7 +1981,7 @@ int handle_nvmlDeviceGetVbiosVersion(int connfd)
         read(connfd, &length, sizeof(unsigned int)) < 0)
         return -1;
 
-    char *version = (char *) malloc(length * sizeof(char));
+    char *version = (char *)malloc(length * sizeof(char));
 
     nvmlReturn_t result = nvmlDeviceGetVbiosVersion(device, version, length);
 
@@ -2016,7 +2017,7 @@ int handle_nvmlDeviceGetComputeRunningProcesses_v3(int connfd)
         read(connfd, &infoCount, sizeof(unsigned int)) < 0)
         return -1;
 
-    nvmlProcessInfo_t *infos = (nvmlProcessInfo_t *) malloc(infoCount * sizeof(nvmlProcessInfo_t));
+    nvmlProcessInfo_t *infos = (nvmlProcessInfo_t *)malloc(infoCount * sizeof(nvmlProcessInfo_t));
 
     nvmlReturn_t result = nvmlDeviceGetComputeRunningProcesses_v3(device, &infoCount, infos);
 
@@ -2036,7 +2037,7 @@ int handle_nvmlDeviceGetGraphicsRunningProcesses_v3(int connfd)
         read(connfd, &infoCount, sizeof(unsigned int)) < 0)
         return -1;
 
-    nvmlProcessInfo_t *infos = (nvmlProcessInfo_t *) malloc(infoCount * sizeof(nvmlProcessInfo_t));
+    nvmlProcessInfo_t *infos = (nvmlProcessInfo_t *)malloc(infoCount * sizeof(nvmlProcessInfo_t));
 
     nvmlReturn_t result = nvmlDeviceGetGraphicsRunningProcesses_v3(device, &infoCount, infos);
 
@@ -2056,7 +2057,7 @@ int handle_nvmlDeviceGetMPSComputeRunningProcesses_v3(int connfd)
         read(connfd, &infoCount, sizeof(unsigned int)) < 0)
         return -1;
 
-    nvmlProcessInfo_t *infos = (nvmlProcessInfo_t *) malloc(infoCount * sizeof(nvmlProcessInfo_t));
+    nvmlProcessInfo_t *infos = (nvmlProcessInfo_t *)malloc(infoCount * sizeof(nvmlProcessInfo_t));
 
     nvmlReturn_t result = nvmlDeviceGetMPSComputeRunningProcesses_v3(device, &infoCount, infos);
 
@@ -2120,7 +2121,7 @@ int handle_nvmlDeviceGetSamples(int connfd)
         read(connfd, &sampleCount, sizeof(unsigned int)) < 0)
         return -1;
 
-    nvmlSample_t *samples = (nvmlSample_t *) malloc(sampleCount * sizeof(nvmlSample_t));
+    nvmlSample_t *samples = (nvmlSample_t *)malloc(sampleCount * sizeof(nvmlSample_t));
 
     nvmlReturn_t result = nvmlDeviceGetSamples(device, type, lastSeenTimeStamp, &sampleValType, &sampleCount, samples);
 
@@ -2332,7 +2333,7 @@ int handle_nvmlDeviceGetAccountingPids(int connfd)
         read(connfd, &count, sizeof(unsigned int)) < 0)
         return -1;
 
-    unsigned int *pids = (unsigned int *) malloc(count * sizeof(unsigned int));
+    unsigned int *pids = (unsigned int *)malloc(count * sizeof(unsigned int));
 
     nvmlReturn_t result = nvmlDeviceGetAccountingPids(device, &count, pids);
 
@@ -2371,7 +2372,7 @@ int handle_nvmlDeviceGetRetiredPages(int connfd)
         read(connfd, &pageCount, sizeof(unsigned int)) < 0)
         return -1;
 
-    unsigned long long *addresses = (unsigned long long *) malloc(pageCount * sizeof(unsigned long long));
+    unsigned long long *addresses = (unsigned long long *)malloc(pageCount * sizeof(unsigned long long));
 
     nvmlReturn_t result = nvmlDeviceGetRetiredPages(device, cause, &pageCount, addresses);
 
@@ -2395,7 +2396,7 @@ int handle_nvmlDeviceGetRetiredPages_v2(int connfd)
         read(connfd, &timestamps, sizeof(unsigned long long)) < 0)
         return -1;
 
-    unsigned long long *addresses = (unsigned long long *) malloc(pageCount * sizeof(unsigned long long));
+    unsigned long long *addresses = (unsigned long long *)malloc(pageCount * sizeof(unsigned long long));
 
     nvmlReturn_t result = nvmlDeviceGetRetiredPages_v2(device, cause, &pageCount, addresses, &timestamps);
 
@@ -3120,7 +3121,7 @@ int handle_nvmlDeviceGetFieldValues(int connfd)
         read(connfd, &valuesCount, sizeof(int)) < 0)
         return -1;
 
-    nvmlFieldValue_t *values = (nvmlFieldValue_t *) malloc(valuesCount * sizeof(nvmlFieldValue_t));
+    nvmlFieldValue_t *values = (nvmlFieldValue_t *)malloc(valuesCount * sizeof(nvmlFieldValue_t));
 
     nvmlReturn_t result = nvmlDeviceGetFieldValues(device, valuesCount, values);
 
@@ -3139,7 +3140,7 @@ int handle_nvmlDeviceClearFieldValues(int connfd)
         read(connfd, &valuesCount, sizeof(int)) < 0)
         return -1;
 
-    nvmlFieldValue_t *values = (nvmlFieldValue_t *) malloc(valuesCount * sizeof(nvmlFieldValue_t));
+    nvmlFieldValue_t *values = (nvmlFieldValue_t *)malloc(valuesCount * sizeof(nvmlFieldValue_t));
 
     nvmlReturn_t result = nvmlDeviceClearFieldValues(device, valuesCount, values);
 
@@ -3318,7 +3319,7 @@ int handle_nvmlDeviceGetSupportedVgpus(int connfd)
         read(connfd, &vgpuCount, sizeof(unsigned int)) < 0)
         return -1;
 
-    nvmlVgpuTypeId_t *vgpuTypeIds = (nvmlVgpuTypeId_t *) malloc(vgpuCount * sizeof(nvmlVgpuTypeId_t));
+    nvmlVgpuTypeId_t *vgpuTypeIds = (nvmlVgpuTypeId_t *)malloc(vgpuCount * sizeof(nvmlVgpuTypeId_t));
 
     nvmlReturn_t result = nvmlDeviceGetSupportedVgpus(device, &vgpuCount, vgpuTypeIds);
 
@@ -3338,7 +3339,7 @@ int handle_nvmlDeviceGetCreatableVgpus(int connfd)
         read(connfd, &vgpuCount, sizeof(unsigned int)) < 0)
         return -1;
 
-    nvmlVgpuTypeId_t *vgpuTypeIds = (nvmlVgpuTypeId_t *) malloc(vgpuCount * sizeof(nvmlVgpuTypeId_t));
+    nvmlVgpuTypeId_t *vgpuTypeIds = (nvmlVgpuTypeId_t *)malloc(vgpuCount * sizeof(nvmlVgpuTypeId_t));
 
     nvmlReturn_t result = nvmlDeviceGetCreatableVgpus(device, &vgpuCount, vgpuTypeIds);
 
@@ -3378,7 +3379,7 @@ int handle_nvmlVgpuTypeGetName(int connfd)
         read(connfd, &size, sizeof(unsigned int)) < 0)
         return -1;
 
-    char *vgpuTypeName = (char *) malloc(size * sizeof(char));
+    char *vgpuTypeName = (char *)malloc(size * sizeof(char));
 
     nvmlReturn_t result = nvmlVgpuTypeGetName(vgpuTypeId, vgpuTypeName, &size);
 
@@ -3491,7 +3492,7 @@ int handle_nvmlVgpuTypeGetLicense(int connfd)
         read(connfd, &size, sizeof(unsigned int)) < 0)
         return -1;
 
-    char *vgpuTypeLicenseString = (char *) malloc(size * sizeof(char));
+    char *vgpuTypeLicenseString = (char *)malloc(size * sizeof(char));
 
     nvmlReturn_t result = nvmlVgpuTypeGetLicense(vgpuTypeId, vgpuTypeLicenseString, size);
 
@@ -3563,7 +3564,7 @@ int handle_nvmlDeviceGetActiveVgpus(int connfd)
         read(connfd, &vgpuCount, sizeof(unsigned int)) < 0)
         return -1;
 
-    nvmlVgpuInstance_t *vgpuInstances = (nvmlVgpuInstance_t *) malloc(vgpuCount * sizeof(nvmlVgpuInstance_t));
+    nvmlVgpuInstance_t *vgpuInstances = (nvmlVgpuInstance_t *)malloc(vgpuCount * sizeof(nvmlVgpuInstance_t));
 
     nvmlReturn_t result = nvmlDeviceGetActiveVgpus(device, &vgpuCount, vgpuInstances);
 
@@ -3585,7 +3586,7 @@ int handle_nvmlVgpuInstanceGetVmID(int connfd)
         read(connfd, &vmIdType, sizeof(nvmlVgpuVmIdType_t)) < 0)
         return -1;
 
-    char *vmId = (char *) malloc(size * sizeof(char));
+    char *vmId = (char *)malloc(size * sizeof(char));
 
     nvmlReturn_t result = nvmlVgpuInstanceGetVmID(vgpuInstance, vmId, size, &vmIdType);
 
@@ -3605,7 +3606,7 @@ int handle_nvmlVgpuInstanceGetUUID(int connfd)
         read(connfd, &size, sizeof(unsigned int)) < 0)
         return -1;
 
-    char *uuid = (char *) malloc(size * sizeof(char));
+    char *uuid = (char *)malloc(size * sizeof(char));
 
     nvmlReturn_t result = nvmlVgpuInstanceGetUUID(vgpuInstance, uuid, size);
 
@@ -3624,7 +3625,7 @@ int handle_nvmlVgpuInstanceGetVmDriverVersion(int connfd)
         read(connfd, &length, sizeof(unsigned int)) < 0)
         return -1;
 
-    char *version = (char *) malloc(length * sizeof(char));
+    char *version = (char *)malloc(length * sizeof(char));
 
     nvmlReturn_t result = nvmlVgpuInstanceGetVmDriverVersion(vgpuInstance, version, length);
 
@@ -3856,7 +3857,7 @@ int handle_nvmlVgpuInstanceGetGpuPciId(int connfd)
         read(connfd, &length, sizeof(unsigned int)) < 0)
         return -1;
 
-    char *vgpuPciId = (char *) malloc(length * sizeof(char));
+    char *vgpuPciId = (char *)malloc(length * sizeof(char));
 
     nvmlReturn_t result = nvmlVgpuInstanceGetGpuPciId(vgpuInstance, vgpuPciId, &length);
 
@@ -3956,7 +3957,7 @@ int handle_nvmlDeviceGetPgpuMetadataString(int connfd)
         read(connfd, &bufferSize, sizeof(unsigned int)) < 0)
         return -1;
 
-    char *pgpuMetadata = (char *) malloc(bufferSize * sizeof(char));
+    char *pgpuMetadata = (char *)malloc(bufferSize * sizeof(char));
 
     nvmlReturn_t result = nvmlDeviceGetPgpuMetadataString(device, pgpuMetadata, &bufferSize);
 
@@ -4064,7 +4065,7 @@ int handle_nvmlDeviceGetVgpuUtilization(int connfd)
         read(connfd, &vgpuInstanceSamplesCount, sizeof(unsigned int)) < 0)
         return -1;
 
-    nvmlVgpuInstanceUtilizationSample_t *utilizationSamples = (nvmlVgpuInstanceUtilizationSample_t *) malloc(vgpuInstanceSamplesCount * sizeof(nvmlVgpuInstanceUtilizationSample_t));
+    nvmlVgpuInstanceUtilizationSample_t *utilizationSamples = (nvmlVgpuInstanceUtilizationSample_t *)malloc(vgpuInstanceSamplesCount * sizeof(nvmlVgpuInstanceUtilizationSample_t));
 
     nvmlReturn_t result = nvmlDeviceGetVgpuUtilization(device, lastSeenTimeStamp, &sampleValType, &vgpuInstanceSamplesCount, utilizationSamples);
 
@@ -4087,7 +4088,7 @@ int handle_nvmlDeviceGetVgpuProcessUtilization(int connfd)
         read(connfd, &vgpuProcessSamplesCount, sizeof(unsigned int)) < 0)
         return -1;
 
-    nvmlVgpuProcessUtilizationSample_t *utilizationSamples = (nvmlVgpuProcessUtilizationSample_t *) malloc(vgpuProcessSamplesCount * sizeof(nvmlVgpuInstanceUtilizationSample_t));
+    nvmlVgpuProcessUtilizationSample_t *utilizationSamples = (nvmlVgpuProcessUtilizationSample_t *)malloc(vgpuProcessSamplesCount * sizeof(nvmlVgpuInstanceUtilizationSample_t));
 
     nvmlReturn_t result = nvmlDeviceGetVgpuProcessUtilization(device, lastSeenTimeStamp, &vgpuProcessSamplesCount, utilizationSamples);
 
@@ -4124,7 +4125,7 @@ int handle_nvmlVgpuInstanceGetAccountingPids(int connfd)
         read(connfd, &count, sizeof(unsigned int)) < 0)
         return -1;
 
-    unsigned int *pids = (unsigned int *) malloc(count * sizeof(unsigned int));
+    unsigned int *pids = (unsigned int *)malloc(count * sizeof(unsigned int));
 
     nvmlReturn_t result = nvmlVgpuInstanceGetAccountingPids(vgpuInstance, &count, pids);
 
@@ -4303,7 +4304,7 @@ int handle_nvmlDeviceGetGpuInstancePossiblePlacements_v2(int connfd)
         read(connfd, &count, sizeof(unsigned int)) < 0)
         return -1;
 
-    nvmlGpuInstancePlacement_t *placements = (nvmlGpuInstancePlacement_t *) malloc(count * sizeof(nvmlGpuInstancePlacement_t));
+    nvmlGpuInstancePlacement_t *placements = (nvmlGpuInstancePlacement_t *)malloc(count * sizeof(nvmlGpuInstancePlacement_t));
 
     nvmlReturn_t result = nvmlDeviceGetGpuInstancePossiblePlacements_v2(device, profileId, placements, &count);
 
@@ -4396,7 +4397,7 @@ int handle_nvmlDeviceGetGpuInstances(int connfd)
         read(connfd, &count, sizeof(unsigned int)) < 0)
         return -1;
 
-    nvmlGpuInstance_t *gpuInstances = (nvmlGpuInstance_t *) malloc(count * sizeof(nvmlGpuInstance_t));
+    nvmlGpuInstance_t *gpuInstances = (nvmlGpuInstance_t *)malloc(count * sizeof(nvmlGpuInstance_t));
 
     nvmlReturn_t result = nvmlDeviceGetGpuInstances(device, profileId, gpuInstances, &count);
 
@@ -4589,7 +4590,7 @@ int handle_nvmlGpuInstanceGetComputeInstances(int connfd)
         read(connfd, &count, sizeof(unsigned int)) < 0)
         return -1;
 
-    nvmlComputeInstance_t *computeInstances = (nvmlComputeInstance_t *) malloc(count * sizeof(nvmlComputeInstance_t));
+    nvmlComputeInstance_t *computeInstances = (nvmlComputeInstance_t *)malloc(count * sizeof(nvmlComputeInstance_t));
 
     nvmlReturn_t result = nvmlGpuInstanceGetComputeInstances(gpuInstance, profileId, computeInstances, &count);
 
@@ -5041,37 +5042,6 @@ int handle_nvmlGpmQueryDeviceSupport(int connfd)
     return result;
 }
 
-int handle_nvmlDeviceCcuGetStreamState(int connfd)
-{
-    nvmlDevice_t device;
-    unsigned int state;
-
-    if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0 ||
-        read(connfd, &state, sizeof(unsigned int)) < 0)
-        return -1;
-
-    nvmlReturn_t result = nvmlDeviceCcuGetStreamState(device, &state);
-
-    if (write(connfd, &state, sizeof(unsigned int)) < 0)
-        return -1;
-
-    return result;
-}
-
-int handle_nvmlDeviceCcuSetStreamState(int connfd)
-{
-    nvmlDevice_t device;
-    unsigned int state;
-
-    if (read(connfd, &device, sizeof(nvmlDevice_t)) < 0 ||
-        read(connfd, &state, sizeof(unsigned int)) < 0)
-        return -1;
-
-    nvmlReturn_t result = nvmlDeviceCcuSetStreamState(device, state);
-
-    return result;
-}
-
 int handle_nvmlDeviceSetNvLinkDeviceLowPowerThreshold(int connfd)
 {
     nvmlDevice_t device;
@@ -5089,3 +5059,293 @@ int handle_nvmlDeviceSetNvLinkDeviceLowPowerThreshold(int connfd)
     return result;
 }
 
+static RequestHandler opHandlers[] = {
+    handle_nvmlInit_v2,
+    handle_nvmlInitWithFlags,
+    handle_nvmlShutdown,
+    handle_nvmlSystemGetDriverVersion,
+    handle_nvmlSystemGetNVMLVersion,
+    handle_nvmlSystemGetCudaDriverVersion,
+    handle_nvmlSystemGetCudaDriverVersion_v2,
+    handle_nvmlSystemGetProcessName,
+    handle_nvmlUnitGetCount,
+    handle_nvmlUnitGetHandleByIndex,
+    handle_nvmlUnitGetUnitInfo,
+    handle_nvmlUnitGetLedState,
+    handle_nvmlUnitGetPsuInfo,
+    handle_nvmlUnitGetTemperature,
+    handle_nvmlUnitGetFanSpeedInfo,
+    handle_nvmlUnitGetDevices,
+    handle_nvmlSystemGetHicVersion,
+    handle_nvmlDeviceGetCount_v2,
+    handle_nvmlDeviceGetAttributes_v2,
+    handle_nvmlDeviceGetHandleByIndex_v2,
+    handle_nvmlDeviceGetHandleBySerial,
+    handle_nvmlDeviceGetHandleByUUID,
+    handle_nvmlDeviceGetHandleByPciBusId_v2,
+    handle_nvmlDeviceGetName,
+    handle_nvmlDeviceGetBrand,
+    handle_nvmlDeviceGetIndex,
+    handle_nvmlDeviceGetSerial,
+    handle_nvmlDeviceGetMemoryAffinity,
+    handle_nvmlDeviceGetCpuAffinityWithinScope,
+    handle_nvmlDeviceGetCpuAffinity,
+    handle_nvmlDeviceSetCpuAffinity,
+    handle_nvmlDeviceClearCpuAffinity,
+    handle_nvmlDeviceGetTopologyCommonAncestor,
+    handle_nvmlDeviceGetTopologyNearestGpus,
+    handle_nvmlSystemGetTopologyGpuSet,
+    handle_nvmlDeviceGetP2PStatus,
+    handle_nvmlDeviceGetUUID,
+    handle_nvmlVgpuInstanceGetMdevUUID,
+    handle_nvmlDeviceGetMinorNumber,
+    handle_nvmlDeviceGetBoardPartNumber,
+    handle_nvmlDeviceGetInforomVersion,
+    handle_nvmlDeviceGetInforomImageVersion,
+    handle_nvmlDeviceGetInforomConfigurationChecksum,
+    handle_nvmlDeviceValidateInforom,
+    handle_nvmlDeviceGetDisplayMode,
+    handle_nvmlDeviceGetDisplayActive,
+    handle_nvmlDeviceGetPersistenceMode,
+    handle_nvmlDeviceGetPciInfo_v3,
+    handle_nvmlDeviceGetMaxPcieLinkGeneration,
+    handle_nvmlDeviceGetGpuMaxPcieLinkGeneration,
+    handle_nvmlDeviceGetMaxPcieLinkWidth,
+    handle_nvmlDeviceGetCurrPcieLinkGeneration,
+    handle_nvmlDeviceGetCurrPcieLinkWidth,
+    handle_nvmlDeviceGetPcieThroughput,
+    handle_nvmlDeviceGetPcieReplayCounter,
+    handle_nvmlDeviceGetClockInfo,
+    handle_nvmlDeviceGetMaxClockInfo,
+    handle_nvmlDeviceGetApplicationsClock,
+    handle_nvmlDeviceGetDefaultApplicationsClock,
+    handle_nvmlDeviceResetApplicationsClocks,
+    handle_nvmlDeviceGetClock,
+    handle_nvmlDeviceGetMaxCustomerBoostClock,
+    handle_nvmlDeviceGetSupportedMemoryClocks,
+    handle_nvmlDeviceGetSupportedGraphicsClocks,
+    handle_nvmlDeviceGetAutoBoostedClocksEnabled,
+    handle_nvmlDeviceSetAutoBoostedClocksEnabled,
+    handle_nvmlDeviceSetDefaultAutoBoostedClocksEnabled,
+    handle_nvmlDeviceGetFanSpeed,
+    handle_nvmlDeviceGetFanSpeed_v2,
+    handle_nvmlDeviceGetTargetFanSpeed,
+    handle_nvmlDeviceSetDefaultFanSpeed_v2,
+    handle_nvmlDeviceGetMinMaxFanSpeed,
+    handle_nvmlDeviceGetFanControlPolicy_v2,
+    handle_nvmlDeviceSetFanControlPolicy,
+    handle_nvmlDeviceGetNumFans,
+    handle_nvmlDeviceGetTemperature,
+    handle_nvmlDeviceGetTemperatureThreshold,
+    handle_nvmlDeviceSetTemperatureThreshold,
+    handle_nvmlDeviceGetThermalSettings,
+    handle_nvmlDeviceGetPerformanceState,
+    handle_nvmlDeviceGetCurrentClocksThrottleReasons,
+    handle_nvmlDeviceGetSupportedClocksThrottleReasons,
+    handle_nvmlDeviceGetPowerState,
+    handle_nvmlDeviceGetPowerManagementMode,
+    handle_nvmlDeviceGetPowerManagementLimit,
+    handle_nvmlDeviceGetPowerManagementLimitConstraints,
+    handle_nvmlDeviceGetPowerManagementDefaultLimit,
+    handle_nvmlDeviceGetPowerUsage,
+    handle_nvmlDeviceGetTotalEnergyConsumption,
+    handle_nvmlDeviceGetEnforcedPowerLimit,
+    handle_nvmlDeviceGetGpuOperationMode,
+    handle_nvmlDeviceGetMemoryInfo,
+    handle_nvmlDeviceGetMemoryInfo_v2,
+    handle_nvmlDeviceGetComputeMode,
+    handle_nvmlDeviceGetCudaComputeCapability,
+    handle_nvmlDeviceGetEccMode,
+    handle_nvmlDeviceGetDefaultEccMode,
+    handle_nvmlDeviceGetBoardId,
+    handle_nvmlDeviceGetMultiGpuBoard,
+    handle_nvmlDeviceGetTotalEccErrors,
+    handle_nvmlDeviceGetDetailedEccErrors,
+    handle_nvmlDeviceGetMemoryErrorCounter,
+    handle_nvmlDeviceGetUtilizationRates,
+    handle_nvmlDeviceGetEncoderUtilization,
+    handle_nvmlDeviceGetEncoderCapacity,
+    handle_nvmlDeviceGetEncoderStats,
+    handle_nvmlDeviceGetEncoderSessions,
+    handle_nvmlDeviceGetDecoderUtilization,
+    handle_nvmlDeviceGetFBCStats,
+    handle_nvmlDeviceGetFBCSessions,
+    handle_nvmlDeviceGetDriverModel,
+    handle_nvmlDeviceGetVbiosVersion,
+    handle_nvmlDeviceGetBridgeChipInfo,
+    handle_nvmlDeviceGetComputeRunningProcesses_v3,
+    handle_nvmlDeviceGetGraphicsRunningProcesses_v3,
+    handle_nvmlDeviceGetMPSComputeRunningProcesses_v3,
+    handle_nvmlDeviceOnSameBoard,
+    handle_nvmlDeviceGetAPIRestriction,
+    handle_nvmlDeviceGetSamples,
+    handle_nvmlDeviceGetBAR1MemoryInfo,
+    handle_nvmlDeviceGetViolationStatus,
+    handle_nvmlDeviceGetIrqNum,
+    handle_nvmlDeviceGetNumGpuCores,
+    handle_nvmlDeviceGetPowerSource,
+    handle_nvmlDeviceGetMemoryBusWidth,
+    handle_nvmlDeviceGetPcieLinkMaxSpeed,
+    handle_nvmlDeviceGetPcieSpeed,
+    handle_nvmlDeviceGetAdaptiveClockInfoStatus,
+    handle_nvmlDeviceGetAccountingMode,
+    handle_nvmlDeviceGetAccountingStats,
+    handle_nvmlDeviceGetAccountingPids,
+    handle_nvmlDeviceGetAccountingBufferSize,
+    handle_nvmlDeviceGetRetiredPages,
+    handle_nvmlDeviceGetRetiredPages_v2,
+    handle_nvmlDeviceGetRetiredPagesPendingStatus,
+    handle_nvmlDeviceGetRemappedRows,
+    handle_nvmlDeviceGetRowRemapperHistogram,
+    handle_nvmlDeviceGetArchitecture,
+    handle_nvmlUnitSetLedState,
+    handle_nvmlDeviceSetPersistenceMode,
+    handle_nvmlDeviceSetComputeMode,
+    handle_nvmlDeviceSetEccMode,
+    handle_nvmlDeviceClearEccErrorCounts,
+    handle_nvmlDeviceSetDriverModel,
+    handle_nvmlDeviceSetGpuLockedClocks,
+    handle_nvmlDeviceResetGpuLockedClocks,
+    handle_nvmlDeviceSetMemoryLockedClocks,
+    handle_nvmlDeviceResetMemoryLockedClocks,
+    handle_nvmlDeviceSetApplicationsClocks,
+    handle_nvmlDeviceGetClkMonStatus,
+    handle_nvmlDeviceSetPowerManagementLimit,
+    handle_nvmlDeviceSetGpuOperationMode,
+    handle_nvmlDeviceSetAPIRestriction,
+    handle_nvmlDeviceSetAccountingMode,
+    handle_nvmlDeviceClearAccountingPids,
+    handle_nvmlDeviceGetNvLinkState,
+    handle_nvmlDeviceGetNvLinkVersion,
+    handle_nvmlDeviceGetNvLinkCapability,
+    handle_nvmlDeviceGetNvLinkRemotePciInfo_v2,
+    handle_nvmlDeviceGetNvLinkErrorCounter,
+    handle_nvmlDeviceResetNvLinkErrorCounters,
+    handle_nvmlDeviceSetNvLinkUtilizationControl,
+    handle_nvmlDeviceGetNvLinkUtilizationControl,
+    handle_nvmlDeviceGetNvLinkUtilizationCounter,
+    handle_nvmlDeviceFreezeNvLinkUtilizationCounter,
+    handle_nvmlDeviceResetNvLinkUtilizationCounter,
+    handle_nvmlDeviceGetNvLinkRemoteDeviceType,
+    handle_nvmlEventSetCreate,
+    handle_nvmlDeviceRegisterEvents,
+    handle_nvmlDeviceGetSupportedEventTypes,
+    handle_nvmlEventSetWait_v2,
+    handle_nvmlEventSetFree,
+    handle_nvmlDeviceModifyDrainState,
+    handle_nvmlDeviceQueryDrainState,
+    handle_nvmlDeviceRemoveGpu_v2,
+    handle_nvmlDeviceDiscoverGpus,
+    handle_nvmlDeviceGetFieldValues,
+    handle_nvmlDeviceClearFieldValues,
+    handle_nvmlDeviceGetVirtualizationMode,
+    handle_nvmlDeviceGetHostVgpuMode,
+    handle_nvmlDeviceSetVirtualizationMode,
+    handle_nvmlDeviceGetGridLicensableFeatures_v4,
+    handle_nvmlDeviceGetProcessUtilization,
+    handle_nvmlDeviceGetGspFirmwareVersion,
+    handle_nvmlDeviceGetGspFirmwareMode,
+    handle_nvmlGetVgpuDriverCapabilities,
+    handle_nvmlDeviceGetVgpuCapabilities,
+    handle_nvmlDeviceGetSupportedVgpus,
+    handle_nvmlDeviceGetCreatableVgpus,
+    handle_nvmlVgpuTypeGetClass,
+    handle_nvmlVgpuTypeGetName,
+    handle_nvmlVgpuTypeGetGpuInstanceProfileId,
+    handle_nvmlVgpuTypeGetDeviceID,
+    handle_nvmlVgpuTypeGetFramebufferSize,
+    handle_nvmlVgpuTypeGetNumDisplayHeads,
+    handle_nvmlVgpuTypeGetResolution,
+    handle_nvmlVgpuTypeGetLicense,
+    handle_nvmlVgpuTypeGetFrameRateLimit,
+    handle_nvmlVgpuTypeGetMaxInstances,
+    handle_nvmlVgpuTypeGetMaxInstancesPerVm,
+    handle_nvmlDeviceGetActiveVgpus,
+    handle_nvmlVgpuInstanceGetVmID,
+    handle_nvmlVgpuInstanceGetUUID,
+    handle_nvmlVgpuInstanceGetVmDriverVersion,
+    handle_nvmlVgpuInstanceGetFbUsage,
+    handle_nvmlVgpuInstanceGetLicenseStatus,
+    handle_nvmlVgpuInstanceGetType,
+    handle_nvmlVgpuInstanceGetFrameRateLimit,
+    handle_nvmlVgpuInstanceGetEccMode,
+    handle_nvmlVgpuInstanceGetEncoderCapacity,
+    handle_nvmlVgpuInstanceSetEncoderCapacity,
+    handle_nvmlVgpuInstanceGetEncoderStats,
+    handle_nvmlVgpuInstanceGetEncoderSessions,
+    handle_nvmlVgpuInstanceGetFBCStats,
+    handle_nvmlVgpuInstanceGetFBCSessions,
+    handle_nvmlVgpuInstanceGetGpuInstanceId,
+    handle_nvmlVgpuInstanceGetGpuPciId,
+    handle_nvmlVgpuTypeGetCapabilities,
+    handle_nvmlVgpuInstanceGetMetadata,
+    handle_nvmlDeviceGetVgpuMetadata,
+    handle_nvmlGetVgpuCompatibility,
+    handle_nvmlDeviceGetPgpuMetadataString,
+    handle_nvmlDeviceGetVgpuSchedulerLog,
+    handle_nvmlDeviceGetVgpuSchedulerState,
+    handle_nvmlDeviceGetVgpuSchedulerCapabilities,
+    handle_nvmlGetVgpuVersion,
+    handle_nvmlSetVgpuVersion,
+    handle_nvmlDeviceGetVgpuUtilization,
+    handle_nvmlDeviceGetVgpuProcessUtilization,
+    handle_nvmlVgpuInstanceGetAccountingMode,
+    handle_nvmlVgpuInstanceGetAccountingPids,
+    handle_nvmlVgpuInstanceGetAccountingStats,
+    handle_nvmlVgpuInstanceClearAccountingPids,
+    handle_nvmlVgpuInstanceGetLicenseInfo_v2,
+    handle_nvmlGetExcludedDeviceCount,
+    handle_nvmlGetExcludedDeviceInfoByIndex,
+    handle_nvmlDeviceSetMigMode,
+    handle_nvmlDeviceGetMigMode,
+    handle_nvmlDeviceGetGpuInstanceProfileInfo,
+    handle_nvmlDeviceGetGpuInstanceProfileInfoV,
+    handle_nvmlDeviceGetGpuInstancePossiblePlacements_v2,
+    handle_nvmlDeviceGetGpuInstanceRemainingCapacity,
+    handle_nvmlDeviceCreateGpuInstance,
+    handle_nvmlDeviceCreateGpuInstanceWithPlacement,
+    handle_nvmlGpuInstanceDestroy,
+    handle_nvmlDeviceGetGpuInstances,
+    handle_nvmlDeviceGetGpuInstanceById,
+    handle_nvmlGpuInstanceGetInfo,
+    handle_nvmlGpuInstanceGetComputeInstanceProfileInfo,
+    handle_nvmlGpuInstanceGetComputeInstanceProfileInfoV,
+    handle_nvmlGpuInstanceGetComputeInstanceRemainingCapacity,
+    handle_nvmlGpuInstanceGetComputeInstancePossiblePlacements,
+    handle_nvmlGpuInstanceCreateComputeInstance,
+    handle_nvmlGpuInstanceCreateComputeInstanceWithPlacement,
+    handle_nvmlComputeInstanceDestroy,
+    handle_nvmlGpuInstanceGetComputeInstances,
+    handle_nvmlGpuInstanceGetComputeInstanceById,
+    handle_nvmlComputeInstanceGetInfo_v2,
+    handle_nvmlDeviceIsMigDeviceHandle,
+    handle_nvmlDeviceGetGpuInstanceId,
+    handle_nvmlDeviceGetComputeInstanceId,
+    handle_nvmlDeviceGetMaxMigDeviceCount,
+    handle_nvmlDeviceGetMigDeviceHandleByIndex,
+    handle_nvmlDeviceGetDeviceHandleFromMigDeviceHandle,
+    handle_nvmlDeviceGetBusType,
+    handle_nvmlDeviceGetDynamicPstatesInfo,
+    handle_nvmlDeviceSetFanSpeed_v2,
+    handle_nvmlDeviceGetGpcClkVfOffset,
+    handle_nvmlDeviceSetGpcClkVfOffset,
+    handle_nvmlDeviceGetMemClkVfOffset,
+    handle_nvmlDeviceSetMemClkVfOffset,
+    handle_nvmlDeviceGetMinMaxClockOfPState,
+    handle_nvmlDeviceGetSupportedPerformanceStates,
+    handle_nvmlDeviceGetGpcClkMinMaxVfOffset,
+    handle_nvmlDeviceGetMemClkMinMaxVfOffset,
+    handle_nvmlDeviceGetGpuFabricInfo,
+    handle_nvmlGpmMetricsGet,
+    handle_nvmlGpmSampleFree,
+    handle_nvmlGpmSampleAlloc,
+    handle_nvmlGpmSampleGet,
+    handle_nvmlGpmMigSampleGet,
+    handle_nvmlGpmQueryDeviceSupport,
+    handle_nvmlDeviceSetNvLinkDeviceLowPowerThreshold,
+};
+
+RequestHandler get_handler(const int op)
+{
+    return opHandlers[op];
+}
