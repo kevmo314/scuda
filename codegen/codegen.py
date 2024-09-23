@@ -253,9 +253,13 @@ class ServerCodegenVisitor(c_ast.NodeVisitor):
     def __init__(self, sink: io.IOBase):
         self.sink = sink
         self.sink.write("#include <nvml.h>\n\n")
-        self.sink.write("#include <unistd.h>\n\n")
         self.sink.write("#include \"gen_api.h\"\n")
         self.sink.write("#include \"gen_server.h\"\n\n")
+
+        self.sink.write("extern int rpc_read(const void *conn, void *data, const size_t size);\n");
+        self.sink.write("extern int rpc_write(const void *conn, const void *data, const size_t size);\n");
+        self.sink.write("extern int rpc_end_request(const void *conn);\n");
+        self.sink.write("extern int rpc_start_response(const void *conn);\n");
     
         self.functions = []
 
@@ -282,7 +286,7 @@ class ServerCodegenVisitor(c_ast.NodeVisitor):
             return
 
         # construct the function signature
-        self.sink.write('int handle_{name}(int connfd)\n'.format(name=node.name))
+        self.sink.write('int handle_{name}(void *conn)\n'.format(name=node.name))
         self.sink.write('{\n')
         self.functions.append(node.name)
 
@@ -294,9 +298,12 @@ class ServerCodegenVisitor(c_ast.NodeVisitor):
                 self.sink.write('    %s %s;\n' % (format_type_name(p.type), p.name))
             self.sink.write('\n')
             for i, p in enumerate(stack_vars):
-                self.sink.write('%sread(connfd, &%s, sizeof(%s)) < 0%s' % (
+                self.sink.write('%srpc_read(conn, &%s, sizeof(%s)) < 0%s' % (
                     '        ' if i > 0 else '    if (', p.name, format_type_name(p.type), ' ||\n' if i < len(stack_vars) - 1 else ')\n'))
             self.sink.write('        return -1;\n\n')
+
+        self.sink.write('    if (rpc_end_request(conn) < 0)\n')
+        self.sink.write('        return -1;\n\n')
 
         # malloc heap-allocated variables
         if len(heap_vars) > 0:
@@ -321,16 +328,20 @@ class ServerCodegenVisitor(c_ast.NodeVisitor):
                 self.sink.write(', ')
         self.sink.write(');\n\n')
 
+
+        self.sink.write('    if (rpc_start_response(conn) < 0)\n')
+        self.sink.write('        return -1;\n\n')
+
         # write pointer vars
         ptr_vars = [p for p in params if p.name is not None and isinstance(p.type, c_ast.PtrDecl) and 'const' not in p.type.type.quals]
         if len(ptr_vars) > 0:
             for i, p in enumerate(ptr_vars):
                 size = heap_allocation_size(node, p)
                 if size:
-                    self.sink.write('%swrite(connfd, %s, %s) < 0%s' % (
+                    self.sink.write('%srpc_write(conn, %s, %s) < 0%s' % (
                         '        ' if i > 0 else '    if (', p.name, size[1], ' ||\n' if i < len(ptr_vars) - 1 else ')\n'))
                 else:
-                    self.sink.write('%swrite(connfd, &%s, sizeof(%s)) < 0%s' % (
+                    self.sink.write('%srpc_write(conn, &%s, sizeof(%s)) < 0%s' % (
                         '        ' if i > 0 else '    if (', p.name, format_type_name(p.type), ' ||\n' if i < len(ptr_vars) - 1 else ')\n'))
             self.sink.write('        return -1;\n\n')
         self.sink.write('    return result;\n')
