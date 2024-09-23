@@ -941,16 +941,7 @@ nvmlReturn_t nvmlEventSetWait_v2(nvmlEventSet_t set, nvmlEventData_t *data, unsi
 
 CUresult cuLinkCreate_v2(unsigned int numOptions, CUjit_option *options, void **optionValues, CUlinkState *stateOut)
 {
-    
-    int request_id = rpc_start_request(RPC_cuLinkCreate_v2);
-    if (request_id < 0 ||
-        rpc_write(&numOptions, sizeof(unsigned int)) < 0 ||
-        rpc_write(options, numOptions * sizeof(CUjit_option)) < 0 ||
-        rpc_write(optionValues, numOptions * sizeof(void *)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(stateOut, sizeof(CUlinkState)) < 0)
-        return CUDA_ERROR_UNKNOWN;
-    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
+    std::cout << "calling cuLinkCreate_v2 " << std::endl;
 }
 
 CUresult cuLinkAddData_v2(CUlinkState state, CUjitInputType type, void *data, size_t size, const char *name, unsigned int numOptions, CUjit_option *options, void **optionValues)
@@ -1132,7 +1123,9 @@ CUresult cuLinkAddFile_v2(CUlinkState state, CUjitInputType type, const char *pa
     return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
 }
 
-CUresult cuInit(unsigned int Flags) {
+CUresult cuInit(unsigned int flags) {
+    std::cerr << "calling cuinit1!!!" << std::endl; 
+
     // Open RPC client if not already opened
     if (open_rpc_client() < 0)
         return CUDA_ERROR_UNKNOWN;
@@ -1145,7 +1138,7 @@ CUresult cuInit(unsigned int Flags) {
     }
 
     // Write the flags to the server
-    if (rpc_write(&Flags, sizeof(unsigned int)) < 0) {
+    if (rpc_write(&flags, sizeof(unsigned int)) < 0) {
         std::cerr << "Failed to write flags to server" << std::endl;
         return CUDA_ERROR_UNKNOWN;
     }
@@ -1165,28 +1158,10 @@ CUresult cuInit(unsigned int Flags) {
 
     // Log the successful initialization
     if (result == CUDA_SUCCESS) {
-        std::cout << "cuInit successful, Flags: " << Flags << std::endl;
-    } else {
-        const char *errorStr = nullptr;
-        cuGetErrorString(result, &errorStr);
-        std::cerr << "cuInit failed with error code: " << result 
-                  << " (" << (errorStr ? errorStr : "Unknown error") << ")" << std::endl;
+        std::cout << "cuInit successful, Flags: " << flags << std::endl;
     }
 
     // Return the result received from the server
-    return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
-}
-
-CUresult cuFuncGetAttribute(int *pi, CUfunction_attribute attrib, CUfunction hfunc)
-{
-    
-    int request_id = rpc_start_request(RPC_cuFuncGetAttribute);
-    if (request_id < 0 ||
-        rpc_write(&attrib, sizeof(CUfunction_attribute)) < 0 ||
-        rpc_write(&hfunc, sizeof(CUfunction)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(pi, sizeof(int)) < 0)
-        return CUDA_ERROR_UNKNOWN;
     return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
 }
 
@@ -1377,12 +1352,6 @@ CUresult cuDeviceGetCountShim(int *deviceCount) {
     }
 
     std::cout << "Client: Received device count from server: " << *deviceCount << std::endl;
-
-    // Ensure the device count is positive to avoid errors
-    if (*deviceCount <= 0) {
-        std::cerr << "Invalid device count received from server: " << *deviceCount << std::endl;
-        return CUDA_ERROR_NO_DEVICE; // Return specific error for no devices found
-    }
 
     return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
 }
@@ -2387,10 +2356,6 @@ void cuMemRangeGetAttributesShim() {
     std::cout << "calling cuMemRangeGetAttributesShim" << std::endl;
 }
 
-void cuGetErrorStringShim() {
-    std::cout << "calling cuGetErrorStringShim" << std::endl;
-}
-
 void cuGetErrorNameShim() {
     std::cout << "calling cuGetErrorNameShim" << std::endl;
 }
@@ -2715,6 +2680,16 @@ void cuGraphExecGetFlagsShim() {
     std::cout << "calling cuGraphExecGetFlagsShim" << std::endl;
 }
 
+// cudaError_t cudaGetDeviceCount(int* count) {
+//     std::cout << "calling cudaGetDeviceCount" << std::endl;
+    
+//     // Return a dummy value for testing
+//     *count = 0;  // Set to 0 or any desired value for testing
+
+//     // Return success
+//     return cudaSuccess;
+// }
+
 CUresult cuOccupancyMaxActiveBlocksPerMultiprocessor(int *numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize)
 {
     
@@ -2851,69 +2826,49 @@ void cuEGLStreamConsumerConnectWithFlagsShim() {
     std::cout << "Client: calling cuEGLStreamConsumerConnectWithFlags" << std::endl;
 }
 
-void cuGraphicsResourceGetMappedPointerShim() {
+extern "C" void cuGraphicsResourceGetMappedPointerShim() {
     std::cout << "Client: calling cuGraphicsResourceGetMappedPointerShim" << std::endl;
 }
 
-// cudaError_t cudaGetDeviceCountShim(int *count) {
-//     std::cout << "calling cudaGetDeviceCountShim" << std::endl;
+extern "C" void cuGetErrorStringShim() {
+    std::cout << "Client: calling cuGetErrorStringShim" << std::endl;
+}
 
-//     if (sockfd < 0) {
-//         std::cerr << "Socket not connected." << std::endl;
-//         return cudaErrorUnknown;
-//     }
+extern "C" void cuLinkAddData_v2Shim() {
+    std::cout << "Client: calling cuLinkAddData_v2Shim" << std::endl;
+}
 
-//     // Prepare the request ID for the server
-//     int request_id = rpc_start_request(RPC_cudaGetDeviceCount);
-//     if (request_id < 0) {
-//         std::cerr << "Failed to start request for cudaGetDeviceCount" << std::endl;
-//         return cudaErrorUnknown;
-//     }
+extern "C" void cuModuleLoadDataExShim() {
+    std::cout << "Client: calling cuModuleLoadDataExShim" << std::endl;
+}
 
-//     // Wait for the server's response
-//     if (rpc_wait_for_response(request_id) < 0) {
-//         std::cerr << "Failed to wait for response from server" << std::endl;
-//         return cudaErrorUnknown;
-//     }
+extern "C" void cuLinkAddFile_v2Shim() {
+    std::cout << "Client: calling cuLinkAddFile_v2Shim" << std::endl;
+}
 
-//     // Read the result code from the server as cudaError_t
-//     cudaError_t result;
-//     if (rpc_read(&result, sizeof(cudaError_t)) < 0) {
-//         std::cerr << "Failed to read result from server" << std::endl;
-//         return cudaErrorUnknown;
-//     }
+extern "C" void cuMemcpyDtoH_v2Shim() {
+    std::cout << "Client: calling cuMemcpyDtoH_v2Shim" << std::endl;
+}
 
-//     // Check if the cudaGetDeviceCount call was successful
-//     if (result != cudaSuccess) {
-//         std::cerr << "cudaGetDeviceCount call failed on the server. Error code: " << result << std::endl;
-//         return result;  // Return the actual error code from the server
-//     }
+extern "C" void cuOccupancyMaxActiveBlocksPerMultiprocessorShim() {
+    std::cout << "Client: calling cuOccupancyMaxActiveBlocksPerMultiprocessorShim" << std::endl;
+}
 
-//     // Read the device count from the server
-//     if (rpc_read(count, sizeof(int)) < 0) {
-//         std::cerr << "Failed to read device count from server" << std::endl;
-//         return cudaErrorUnknown;
-//     }
-
-//     if (read(sockfd, &result, sizeof(int)) < 0) {
-//         return cudaErrorUnknown;
-//     }
-
-//     std::cout << "Client: Received device count from server: " << result << std::endl;
-
-//     return cudaSuccess;  // Return success if everything else worked
-// }
+extern "C" void cuModuleGetGlobal_v2Shim() {
+    std::cout << "Client: calling cuModuleGetGlobal_v2Shim" << std::endl;
+}
 
 void noOpFunction() {
     // Do nothing
 }
+
 std::unordered_map<std::string, void *> cudaFunctionMap;
 
 void initCudaFunctionMap() {
     cudaFunctionMap["cuInit"] = (void *)cuInit;
     cudaFunctionMap["cuGetProcAddress"] = (void *)cuGetProcAddress;
     cudaFunctionMap["cuDriverGetVersion"] = (void *)cuDriverGetVersion_handler;
-    // cudaFunctionMap["cudaGetDeviceCount"] = (void *)cudaGetDeviceCountShim;
+    cudaFunctionMap["cudaGetDeviceCount"] = (void *)cudaGetDeviceCount;
     cudaFunctionMap["cuDeviceGet"] = (void *)cuDeviceGetShim;
     cudaFunctionMap["cuDeviceGetCount"] = (void *)cuDeviceGetCountShim;
     cudaFunctionMap["cuDeviceGetName"] = (void *)cuDeviceGetNameShim;
@@ -3240,7 +3195,6 @@ CUresult cuGetProcAddress_v2_handler(const char *symbol, void **pfn, int cudaVer
         *pfn = reinterpret_cast<void *>(it->second);
         std::cout << "Mapped symbol: " << symbolName << " to function: " << *pfn << std::endl;
     } else {
-        void *fn = nullptr;
         std::cerr << "Function for symbol: " << symbolName << " not found!" << std::endl;
         *pfn = reinterpret_cast<void *>(noOpFunction); 
     }
@@ -3348,7 +3302,7 @@ void initializeFunctionMap()
     functionMap["cuInit"] = (void *)cuInit;
     functionMap["cuGetProcAddress"] = (void *)cuGetProcAddress;
     functionMap["cuDriverGetVersion"] = (void *)cuDriverGetVersion_handler;
-    // functionMap["cudaGetDeviceCount"] = (void *)cudaGetDeviceCountShim;
+    functionMap["cudaGetDeviceCount"] = (void *)cudaGetDeviceCount;
     functionMap["cuDeviceGet"] = (void *)cuDeviceGetShim;
     functionMap["cuDeviceGetCount"] = (void *)cuDeviceGetCountShim;
     functionMap["cuDeviceGetName"] = (void *)cuDeviceGetNameShim;
@@ -3406,6 +3360,23 @@ void initializeFunctionMap()
     functionMap["cuKernelGetAttribute"] = (void *)cuKernelGetAttributeShim;
     functionMap["cuKernelSetAttribute"] = (void *)cuKernelSetAttributeShim;
     functionMap["cuKernelSetCacheConfig"] = (void *)cuKernelSetCacheConfigShim;
+    functionMap["cuLinkCreate_v2"] = (void*)cuLinkCreate_v2;
+    functionMap["cuGraphicsResourceGetMappedPointer"] = (void*)cuGraphicsResourceGetMappedPointerShim;
+    functionMap["cuGetErrorString"] = (void*)cuGetErrorStringShim;
+    functionMap["cuGetErrorName"] = (void*)cuGetErrorNameShim;
+    functionMap["cuLinkAddData_v2"] = (void*)cuLinkAddData_v2Shim;
+    functionMap["cuLinkComplete"] = (void*)cuLinkCompleteShim;
+    functionMap["cuLinkDestroy"] = (void*)cuLinkDestroyShim;
+    functionMap["cuModuleLoadDataEx"] = (void*)cuModuleLoadDataExShim;
+    functionMap["cuLinkAddFile_v2"] = (void*)cuLinkAddFile_v2Shim;
+    functionMap["cuFuncSetAttribute"] = (void*)cuFuncSetAttributeShim;
+    functionMap["cuLaunchKernel"] = (void*)cuLaunchKernelShim;
+    functionMap["cuMemcpyDtoH_v2"] = (void*)cuMemcpyDtoH_v2Shim;
+    functionMap["cuStreamSynchronize"] = (void*)cuStreamSynchronizeShim;
+    functionMap["cuOccupancyMaxActiveBlocksPerMultiprocessor"] = (void*)cuOccupancyMaxActiveBlocksPerMultiprocessorShim;
+    functionMap["cuLaunchKernelEx"] = (void*)cuLaunchKernelExShim;
+    functionMap["cuModuleGetGlobal_v2"] = (void*)cuModuleGetGlobal_v2Shim;
+    functionMap["cuFuncGetAttribute"] = (void*)cuFuncGetAttributeShim;
 }
 
 // Lookup function similar to dlsym
