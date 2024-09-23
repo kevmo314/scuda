@@ -191,8 +191,16 @@ class ClientCodegenVisitor(c_ast.NodeVisitor):
     def close(self):
         self.sink.write('std::unordered_map<std::string, void *> functionMap = {\n')
         for f in self.functions:
-            self.sink.write('    {\"%s\", (void *) %s},\n' % (f, f))
+            self.sink.write('    {\"%s\", (void *)%s},\n' % (f, f))
         self.sink.write('};\n\n')
+        
+        self.sink.write('void *get_function_pointer(const char *name)\n')
+        self.sink.write('{\n')
+        self.sink.write('    auto it = functionMap.find(name);\n')
+        self.sink.write('    if (it != functionMap.end())\n')
+        self.sink.write('        return it->second;\n')
+        self.sink.write('    return nullptr;\n')
+        self.sink.write('}\n')
         
     def visit_Decl(self, node):
         if not isinstance(node.type, c_ast.FuncDecl):
@@ -224,7 +232,7 @@ class ClientCodegenVisitor(c_ast.NodeVisitor):
         ptrs = [p for p in params if isinstance(p.type, c_ast.PtrDecl) and not heap_allocation_size(node, p)]
         self.sink.write('        rpc_wait_for_response(request_id) < 0 ||\n')
         for p in params:
-            if p.name is None or not isinstance(p.type, c_ast.PtrDecl):
+            if p.name is None or not isinstance(p.type, c_ast.PtrDecl) or 'const' in p.type.type.quals:
                 continue
             self.sink.write('        rpc_read(%s, sizeof(%s)) < 0 ||\n' % (p.name, format_type_name(p.type)))
         self.sink.write('        rpc_end_request(request_id, &return_value) < 0)\n')
@@ -287,7 +295,7 @@ class ServerCodegenVisitor(c_ast.NodeVisitor):
         self.sink.write(');\n\n')
 
         # write pointer vars
-        ptr_vars = [p for p in params if p.name is not None and isinstance(p.type, c_ast.PtrDecl)]
+        ptr_vars = [p for p in params if p.name is not None and isinstance(p.type, c_ast.PtrDecl) and 'const' not in p.type.type.quals]
         if len(ptr_vars) > 0:
             for i, p in enumerate(ptr_vars):
                 size = heap_allocation_size(node, p)

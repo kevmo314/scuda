@@ -330,8 +330,7 @@ int handle_nvmlDeviceGetHandleBySerial(int connfd)
 
     nvmlReturn_t result = nvmlDeviceGetHandleBySerial(&serial, &device);
 
-    if (write(connfd, &serial, sizeof(char)) < 0 ||
-        write(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+    if (write(connfd, &device, sizeof(nvmlDevice_t)) < 0)
         return -1;
 
     return result;
@@ -348,8 +347,7 @@ int handle_nvmlDeviceGetHandleByUUID(int connfd)
 
     nvmlReturn_t result = nvmlDeviceGetHandleByUUID(&uuid, &device);
 
-    if (write(connfd, &uuid, sizeof(char)) < 0 ||
-        write(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+    if (write(connfd, &device, sizeof(nvmlDevice_t)) < 0)
         return -1;
 
     return result;
@@ -366,8 +364,7 @@ int handle_nvmlDeviceGetHandleByPciBusId_v2(int connfd)
 
     nvmlReturn_t result = nvmlDeviceGetHandleByPciBusId_v2(&pciBusId, &device);
 
-    if (write(connfd, &pciBusId, sizeof(char)) < 0 ||
-        write(connfd, &device, sizeof(nvmlDevice_t)) < 0)
+    if (write(connfd, &device, sizeof(nvmlDevice_t)) < 0)
         return -1;
 
     return result;
@@ -4370,8 +4367,7 @@ int handle_nvmlDeviceCreateGpuInstanceWithPlacement(int connfd)
 
     nvmlReturn_t result = nvmlDeviceCreateGpuInstanceWithPlacement(device, profileId, &placement, &gpuInstance);
 
-    if (write(connfd, &placement, sizeof(nvmlGpuInstancePlacement_t)) < 0 ||
-        write(connfd, &gpuInstance, sizeof(nvmlGpuInstance_t)) < 0)
+    if (write(connfd, &gpuInstance, sizeof(nvmlGpuInstance_t)) < 0)
         return -1;
 
     return result;
@@ -4564,8 +4560,7 @@ int handle_nvmlGpuInstanceCreateComputeInstanceWithPlacement(int connfd)
 
     nvmlReturn_t result = nvmlGpuInstanceCreateComputeInstanceWithPlacement(gpuInstance, profileId, &placement, &computeInstance);
 
-    if (write(connfd, &placement, sizeof(nvmlComputeInstancePlacement_t)) < 0 ||
-        write(connfd, &computeInstance, sizeof(nvmlComputeInstance_t)) < 0)
+    if (write(connfd, &computeInstance, sizeof(nvmlComputeInstance_t)) < 0)
         return -1;
 
     return result;
