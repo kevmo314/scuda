@@ -86,6 +86,8 @@ int rpc_start_request(const unsigned int op)
 {
     static int next_request_id = 1;
 
+    open_rpc_client();
+
     // write the request atomically
     pthread_mutex_lock(&mutex);
 
@@ -101,7 +103,7 @@ int rpc_start_request(const unsigned int op)
     return request_id;
 }
 
-int rpc_write(const void *data, size_t size)
+int rpc_write(const void *data, const size_t size)
 {
     if (write(sockfd, data, size) < 0)
     {
@@ -111,7 +113,7 @@ int rpc_write(const void *data, size_t size)
     return 0;
 }
 
-int rpc_read(void *data, size_t size)
+int rpc_read(void *data, const size_t size)
 {
     if (read(sockfd, data, size) < 0)
     {
@@ -121,7 +123,7 @@ int rpc_read(void *data, size_t size)
     return 0;
 }
 
-int rpc_wait_for_response(int request_id)
+int rpc_wait_for_response(const unsigned int request_id)
 {
     static int active_response_id = -1;
 
@@ -152,14 +154,13 @@ int rpc_wait_for_response(int request_id)
     }
 }
 
-nvmlReturn_t rpc_get_return(int request_id)
+int rpc_end_request(void *result, const unsigned int request_id)
 {
-    nvmlReturn_t result;
-    if (read(sockfd, &result, sizeof(nvmlReturn_t)) < 0)
-        result = NVML_ERROR_GPU_IS_LOST;
+    if (read(sockfd, result, sizeof(nvmlReturn_t)) < 0)
+        return -1;
 
     pthread_mutex_unlock(&mutex);
-    return result;
+    return 0;
 }
 
 void close_rpc_client()

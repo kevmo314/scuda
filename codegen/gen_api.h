@@ -280,6 +280,4 @@
 #define RPC_nvmlGpmSampleGet 279
 #define RPC_nvmlGpmMigSampleGet 280
 #define RPC_nvmlGpmQueryDeviceSupport 281
-#define RPC_nvmlDeviceCcuGetStreamState 282
-#define RPC_nvmlDeviceCcuSetStreamState 283
-#define RPC_nvmlDeviceSetNvLinkDeviceLowPowerThreshold 284
+#define RPC_nvmlDeviceSetNvLinkDeviceLowPowerThreshold 282
