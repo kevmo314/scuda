@@ -2838,6 +2838,21 @@ CUresult cuDriverGetVersion_handler(int *driverVersion) {
     return rpc_get_return<CUresult>(request_id, CUDA_ERROR_UNKNOWN);
 }
 
+void cuGraphInstantiateWithParams_ptszShim() {
+    std::cout << "Client: calling cuGraphInstantiateWithParams_ptsz" << std::endl;
+}
+
+void cuGraphInstantiateWithFlagsShim() {
+    std::cout << "Client: calling cuGraphInstantiateWithFlags" << std::endl;
+}
+
+void cuEGLStreamConsumerConnectWithFlagsShim() {
+    std::cout << "Client: calling cuEGLStreamConsumerConnectWithFlags" << std::endl;
+}
+
+void cuGraphicsResourceGetMappedPointerShim() {
+    std::cout << "Client: calling cuGraphicsResourceGetMappedPointerShim" << std::endl;
+}
 
 cudaError_t cudaGetDeviceCountShim(int *count) {
     std::cout << "calling cudaGetDeviceCountShim" << std::endl;
@@ -3205,6 +3220,11 @@ void initializeCuFunctionMap() {
     cuFunctionMap["cuGraphNodeGetEnabled"] = reinterpret_cast<void (*)()>(cuGraphNodeGetEnabledShim);
     cuFunctionMap["cuGraphInstantiateWithParams"] = reinterpret_cast<void (*)()>(cuGraphInstantiateWithParamsShim);
     cuFunctionMap["cuGraphExecGetFlags"] = reinterpret_cast<void (*)()>(cuGraphExecGetFlagsShim);
+
+    cuFunctionMap["cuGraphInstantiateWithParams_ptsz"] = reinterpret_cast<void (*)()>(cuGraphInstantiateWithParams_ptszShim);
+    cuFunctionMap["cuGraphInstantiateWithFlags"] = reinterpret_cast<void (*)()>(cuGraphInstantiateWithFlagsShim);
+    cuFunctionMap["cuEGLStreamConsumerConnectWithFlags"] = reinterpret_cast<void (*)()>(cuEGLStreamConsumerConnectWithFlagsShim);
+    cuFunctionMap["cuGraphicsResourceGetMappedPointer"] = reinterpret_cast<void (*)()>(cuGraphicsResourceGetMappedPointerShim);
 }
 
 void noOpFunction() {
