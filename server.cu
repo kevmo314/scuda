@@ -12,6 +12,7 @@
 #include <thread>
 #include <unistd.h>
 #include <unordered_map>
+#include <pthread.h>
 
 #include "api.h"
 #include "codegen/gen_server.h"
@@ -19,16 +20,20 @@
 #define DEFAULT_PORT 14833
 #define MAX_CLIENTS 10
 
-int request_handler(int connfd)
+typedef struct
+{
+    int connfd;
+    unsigned int request_id;
+    pthread_mutex_t read_mutex, write_mutex;
+} conn_t;
+
+int request_handler(const conn_t *conn)
 {
     unsigned int op;
 
     // Attempt to read the operation code from the client
-    if (read(connfd, &op, sizeof(unsigned int)) < 0)
-    {
-        std::cerr << "Error reading opcode from client" << std::endl;
+    if (read(conn->connfd, &op, sizeof(unsigned int)) < 0)
         return -1;
-    }
 
     auto opHandler = get_handler(op);
 
@@ -38,16 +43,27 @@ int request_handler(int connfd)
         return -1;
     }
 
-    return opHandler(connfd);
+    return opHandler((void *)conn);
 }
 
 void client_handler(int connfd)
 {
-    int request_id;
-
+    std::vector<std::future<void>> futures;
+    conn_t conn = {connfd};
+    if (pthread_mutex_init(&conn.read_mutex, NULL) < 0 ||
+        pthread_mutex_init(&conn.write_mutex, NULL) < 0)
+    {
+        std::cerr << "Error initializing mutex." << std::endl;
+        return;
+    }
     while (1)
     {
-        int n = read(connfd, &request_id, sizeof(int));
+        if (pthread_mutex_lock(&conn.read_mutex) < 0)
+        {
+            std::cerr << "Error locking mutex." << std::endl;
+            break;
+        }
+        int n = read(connfd, &conn.request_id, sizeof(unsigned int));
         if (n == 0)
         {
             printf("client disconnected, loop continuing. \n");
@@ -59,29 +75,50 @@ void client_handler(int connfd)
             break;
         }
 
-        if (write(connfd, &request_id, sizeof(int)) < 0)
-        {
-            printf("error writing to client.\n");
-            break;
-        }
-
         // run our request handler in a separate thread
-        std::future<int> request_future = std::async(std::launch::async, [connfd]()
-                                                     {
-            std::cout << "request handled by thread: " << std::this_thread::get_id() << std::endl;
+        auto future = std::async(
+            std::launch::async,
+            [&conn]()
+            {
+                int result = request_handler(&conn);
+                if (write(conn.connfd, &result, sizeof(int)) < 0)
+                    std::cerr << "error writing to client." << std::endl;
 
-            return request_handler(connfd); });
+                if (pthread_mutex_unlock(&conn.write_mutex) < 0)
+                    std::cerr << "Error unlocking mutex." << std::endl;
+            });
 
-        // wait for result
-        int res = request_future.get();
-        if (write(connfd, &res, sizeof(int)) < 0)
-        {
-            printf("error writing result to client.\n");
-            break;
-        }
+        futures.push_back(std::move(future));
     }
 
+    for (auto &future : futures)
+        future.wait();
+
+    if (pthread_mutex_destroy(&conn.read_mutex) < 0 ||
+        pthread_mutex_destroy(&conn.write_mutex) < 0)
+        std::cerr << "Error destroying mutex." << std::endl;
     close(connfd);
+}
+
+int rpc_read(const void *conn, void *data, const size_t size)
+{
+    return read(((conn_t *)conn)->connfd, data, size);
+}
+
+int rpc_write(const void *conn, const void *data, const size_t size)
+{
+    return write(((conn_t *)conn)->connfd, data, size);
+}
+
+// signal from the handler that the request read is complete.
+int rpc_end_request(const void *conn)
+{
+    return pthread_mutex_unlock(&((conn_t *)conn)->read_mutex);
+}
+
+int rpc_start_response(const void *conn)
+{
+    return pthread_mutex_lock(&((conn_t *)conn)->write_mutex) || write(((conn_t *)conn)->connfd, &((conn_t *)conn)->request_id, sizeof(unsigned int));
 }
 
 int main()
