@@ -24,7 +24,7 @@
 
 extern int rpc_start_request(const unsigned int request);
 extern int rpc_write(const void *data, const size_t size);
-extern int rpc_read(void *data, const size_t size);
+extern int rpc_read(void *data, size_t size);
 extern int rpc_wait_for_response(const unsigned int request_id);
 extern int rpc_end_request(void *return_value, const unsigned int request_id);
 
@@ -4195,40 +4195,19 @@ CUresult cuLinkAddFile_v2(CUlinkState state, CUjitInputType type, const char *pa
 }
 
 CUresult cuInit(unsigned int flags) {
-    std::cerr << "calling cuinit1!!!" << std::endl; 
+    std::cout << "calling cuInit"  << std::endl;
 
-    // Start the RPC request for cuInit
     int request_id = rpc_start_request(RPC_cuInit);
-    if (request_id < 0) {
-        std::cerr << "Failed to start cuInit request" << std::endl;
-        return CUDA_ERROR_UNKNOWN;
-    }
-
-    // Write the flags to the server
-    if (rpc_write(&flags, sizeof(unsigned int)) < 0) {
-        std::cerr << "Failed to write flags to server" << std::endl;
-        return CUDA_ERROR_UNKNOWN;
-    }
-
-    // Wait for the server response
-    if (rpc_wait_for_response(request_id) < 0) {
-        std::cerr << "Failed to wait for response from server" << std::endl;
-        return CUDA_ERROR_UNKNOWN;
-    }
-
-    // Read the result code from the server
     CUresult result;
-    if (rpc_read(&result, sizeof(CUresult)) < 0) {
-        std::cerr << "Failed to read result code from server" << std::endl;
+    if (request_id < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(&result, sizeof(CUresult)) < 0 ||
+        rpc_end_request(&result, request_id) < 0)
         return CUDA_ERROR_UNKNOWN;
-    }
 
-    // Log the successful initialization
-    if (result == CUDA_SUCCESS) {
+    if (result == CUDA_SUCCESS)
         std::cout << "cuInit successful, Flags: " << flags << std::endl;
-    }
-
-    rpc_end_request(&result, request_id);
 
     return result;
 }
@@ -4274,95 +4253,39 @@ CUresult cuStreamSynchronize(CUstream hStream)
 }
 
 CUresult cuDeviceGetShim(CUdevice *device, int ordinal) {
-    std::cout << "Client: calling cuDeviceGetShim" << std::endl;
+    std::cout << "calling cuDeviceGetShim"  << std::endl;
+    if (!device) return CUDA_ERROR_INVALID_VALUE;
 
-    // Check if the device pointer is valid
-    if (device == nullptr) {
-        std::cerr << "Invalid device pointer provided." << std::endl;
-        return CUDA_ERROR_INVALID_VALUE;
-    }
-
-    // Start the request with the specific RPC operation code for cuDeviceGet
     int request_id = rpc_start_request(RPC_cuDeviceGet);
-    if (request_id < 0) {
-        std::cerr << "Failed to start request for cuDeviceGet" << std::endl;
-        return CUDA_ERROR_UNKNOWN;
-    }
-
-    // Write the ordinal value to the server
-    if (rpc_write(&ordinal, sizeof(int)) < 0) {
-        std::cerr << "Failed to write ordinal to server. Error: " << strerror(errno) << std::endl;
-        return CUDA_ERROR_UNKNOWN;
-    }
-
-    // Wait for the server's response
-    if (rpc_wait_for_response(request_id) < 0) {
-        std::cerr << "Failed to wait for response from server" << std::endl;
-        return CUDA_ERROR_UNKNOWN;
-    }
-
-    // Read the result code from the server
     CUresult result;
-    if (rpc_read(&result, sizeof(CUresult)) < 0) {
-        std::cerr << "Failed to read result code from server. Error: " << strerror(errno) << std::endl;
+    if (request_id < 0 ||
+        rpc_write(&ordinal, sizeof(int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(&result, sizeof(CUresult)) < 0 ||
+        result != CUDA_SUCCESS ||
+        rpc_read(device, sizeof(CUdevice)) < 0 ||
+        rpc_end_request(&result, request_id) < 0)
         return CUDA_ERROR_UNKNOWN;
-    }
-
-    // Check if the cuDeviceGet call was successful
-    if (result != CUDA_SUCCESS) {
-        std::cerr << "cuDeviceGet call failed on the server. Error code: " << result << std::endl;
-        return result;
-    }
-
-    // Read the device handle from the server
-    if (rpc_read(device, sizeof(CUdevice)) < 0) {
-        std::cerr << "Failed to read device handle from server. Error: " << strerror(errno) << std::endl;
-        return CUDA_ERROR_UNKNOWN;
-    }
 
     std::cout << "Client: Received device handle from server: " << *device << std::endl;
-
-    rpc_end_request(&result, request_id);
-
     return result;
 }
 
 CUresult cuDeviceGetCountShim(int *deviceCount) {
-    std::cout << "Client: calling cuDeviceGetCountShim" << std::endl;
+    std::cout << "calling cuDeviceGetCountShim"  << std::endl;
+    if (!deviceCount) return CUDA_ERROR_INVALID_VALUE;
 
     int request_id = rpc_start_request(RPC_cuDeviceGetCount);
-    if (request_id < 0) {
-        std::cerr << "Failed to start request for cuDeviceGetCount" << std::endl;
-        return CUDA_ERROR_UNKNOWN;
-    }
-
-    if (rpc_wait_for_response(request_id) < 0) {
-        std::cerr << "Failed to wait for response from server" << std::endl;
-        return CUDA_ERROR_UNKNOWN;
-    }
-
     CUresult result;
-    ssize_t bytes_read = rpc_read(&result, sizeof(CUresult));
-    if (bytes_read < 0) {
-        std::cerr << "Failed to read result from server. Error: " << strerror(errno) << std::endl;
+    if (request_id < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(&result, sizeof(CUresult)) < 0 ||
+        result != CUDA_SUCCESS ||
+        rpc_read(deviceCount, sizeof(int)) < 0 ||
+        rpc_end_request(&result, request_id) < 0)
         return CUDA_ERROR_UNKNOWN;
-    }
-
-    if (result != CUDA_SUCCESS) {
-        std::cerr << "cuDeviceGetCount call failed on the server. Error code: " << result << std::endl;
-        return result;
-    }
-
-    bytes_read = rpc_read(deviceCount, sizeof(int));
-    if (bytes_read < 0) {
-        std::cerr << "Failed to read device count from server. Error: " << strerror(errno) << std::endl;
-        return CUDA_ERROR_UNKNOWN;
-    }
 
     std::cout << "Client: Received device count from server: " << *deviceCount << std::endl;
-
-    rpc_end_request(&result, request_id);
-
     return result;
 }
 
@@ -4539,46 +4462,20 @@ void cuModuleGetSurfRefShim() {
 }
 
 CUresult cuModuleGetLoadingModeShim(CUmoduleLoadingMode *mode) {
-    std::cout << "Client: calling cuModuleGetLoadingModeShim" << std::endl;
+    std::cout << "calling cuModuleGetLoadingModeShim"  << std::endl;
+    if (!mode) return CUDA_ERROR_INVALID_VALUE;
 
-    // Prepare the request ID for the server
     int request_id = rpc_start_request(RPC_cuModuleGetLoadingMode);
-    if (request_id < 0) {
-        std::cerr << "Failed to start request for cuModuleGetLoadingMode" << std::endl;
-        return CUDA_ERROR_UNKNOWN;
-    }
-
-    // Wait for the server's response
-    if (rpc_wait_for_response(request_id) < 0) {
-        std::cerr << "Failed to wait for response from server" << std::endl;
-        return CUDA_ERROR_UNKNOWN;
-    }
-
-    // Read the result code from the server
     CUresult result;
-    ssize_t bytes_read = rpc_read(&result, sizeof(CUresult));
-    if (bytes_read < 0) {
-        std::cerr << "Failed to read result from server. Error: " << strerror(errno) << std::endl;
+    if (request_id < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(&result, sizeof(CUresult)) < 0 ||
+        result != CUDA_SUCCESS ||
+        rpc_read(mode, sizeof(CUmoduleLoadingMode)) < 0 ||
+        rpc_end_request(&result, request_id) < 0)
         return CUDA_ERROR_UNKNOWN;
-    }
-
-    // Check if the cuModuleGetLoadingMode call was successful
-    if (result != CUDA_SUCCESS) {
-        std::cerr << "cuModuleGetLoadingMode call failed on the server. Error code: " << result << std::endl;
-        return result;
-    }
-
-    // Read the loading mode from the server
-    bytes_read = rpc_read(mode, sizeof(CUmoduleLoadingMode));
-    if (bytes_read < 0) {
-        std::cerr << "Failed to read loading mode from server. Error: " << strerror(errno) << std::endl;
-        return CUDA_ERROR_UNKNOWN;
-    }
 
     std::cout << "Client: Received loading mode from server: " << *mode << std::endl;
-
-    rpc_end_request(&result, request_id);
-
     return result;
 }
 
@@ -5275,56 +5172,21 @@ void cuGraphicsVDPAURegisterOutputSurfaceShim() {
 }
 
 CUresult cuGetExportTableShim(void **ppExportTable, const CUuuid *pTableUuid) {
-    std::cout << "calling cuGetExportTableShim" << std::endl;
+    std::cout << "calling cuGetExportTableShim"  << std::endl;
+    if (!pTableUuid || !ppExportTable) return CUDA_ERROR_INVALID_VALUE;
 
-    // Start the request to the server
     int request_id = rpc_start_request(RPC_cuGetExportTable);
-    if (request_id < 0) {
-        std::cerr << "Failed to start request for cuGetExportTable" << std::endl;
-        return CUDA_ERROR_UNKNOWN;
-    }
-
-    // Check if pTableUuid is valid
-    if (pTableUuid == nullptr) {
-        std::cerr << "Invalid UUID pointer provided to cuGetExportTableShim" << std::endl;
-        return CUDA_ERROR_INVALID_VALUE;
-    }
-
-    // Send the UUID to the server
-    if (rpc_write(pTableUuid, sizeof(CUuuid)) < 0) {
-        std::cerr << "Failed to write UUID to server" << std::endl;
-        return CUDA_ERROR_UNKNOWN;
-    }
-
-    // Wait for the server response
-    if (rpc_wait_for_response(request_id) < 0) {
-        std::cerr << "Failed to wait for response from server" << std::endl;
-        return CUDA_ERROR_UNKNOWN;
-    }
-
-    // Read the result code from the server
     CUresult result;
-    if (rpc_read(&result, sizeof(CUresult)) < 0) {
-        std::cerr << "Failed to read result from server" << std::endl;
+    if (request_id < 0 ||
+        rpc_write(pTableUuid, sizeof(CUuuid)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(&result, sizeof(CUresult)) < 0 ||
+        result != CUDA_SUCCESS ||
+        rpc_read(ppExportTable, sizeof(void *)) < 0 ||
+        rpc_end_request(&result, request_id) < 0)
         return CUDA_ERROR_UNKNOWN;
-    }
-
-    // Check if the cuGetExportTable call was successful
-    if (result != CUDA_SUCCESS) {
-        std::cerr << "cuGetExportTable call failed on the server. Error code: " << result << std::endl;
-        return result;
-    }
-
-    // Read the export table pointer from the server
-    if (rpc_read(ppExportTable, sizeof(void *)) < 0) {
-        std::cerr << "Failed to read export table pointer from server" << std::endl;
-        return CUDA_ERROR_UNKNOWN;
-    }
 
     std::cout << "Client: Received export table pointer from server: " << *ppExportTable << std::endl;
-
-    rpc_end_request(&result, request_id);
-
     return result;
 }
 
@@ -5703,41 +5565,19 @@ CUresult cuModuleGetGlobal_v2(CUdeviceptr *dptr, size_t *bytes, CUmodule hmod, c
 std::unordered_map<std::string, void (*)()> cucudaFunctionMap;
 
 CUresult cuDriverGetVersion_handler(int *driverVersion) {
-    if (driverVersion == nullptr) {
-        return CUDA_ERROR_INVALID_VALUE;
-    }
+    std::cout << "calling cuDriverGetVersion_handler"  << std::endl;
 
-    // Start the RPC request for cuDriverGetVersion
     int request_id = rpc_start_request(RPC_cuDriverGetVersion);
-    if (request_id < 0) {
-        return CUDA_ERROR_UNKNOWN;
-    }
-
-    // Wait for the server response
-    if (rpc_wait_for_response(request_id) < 0) {
-        return CUDA_ERROR_UNKNOWN;
-    }
-
-    // Read the result code from the server
     CUresult result;
-    if (rpc_read(&result, sizeof(CUresult)) < 0) {
+    if (request_id < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(&result, sizeof(CUresult)) < 0 ||
+        result != CUDA_SUCCESS ||
+        rpc_read(driverVersion, sizeof(int)) < 0 ||
+        rpc_end_request(&result, request_id) < 0)
         return CUDA_ERROR_UNKNOWN;
-    }
-
-    // If the result indicates an error, return it directly
-    if (result != CUDA_SUCCESS) {
-        return result;
-    }
-
-    // Read the driver version from the server
-    if (rpc_read(driverVersion, sizeof(int)) < 0) {
-        return CUDA_ERROR_UNKNOWN;
-    }
 
     std::cout << "Client: Received driver version from server: " << *driverVersion << std::endl;
-
-    rpc_end_request(&result, request_id);
-
     return result;
 }
 
@@ -6120,7 +5960,7 @@ CUresult cuGetProcAddress_v2_handler(const char *symbol, void **pfn, int cudaVer
     auto it = cudaFunctionMap.find(symbolName);
     if (it != cudaFunctionMap.end()) {
         *pfn = reinterpret_cast<void *>(it->second);
-        std::cout << "Mapped symbol: " << symbolName << " to function: " << *pfn << std::endl;
+        std::cout << "cuGetProcAddress_v2_handler Mapped symbol: " << symbolName << " to function: " << *pfn << std::endl;
     } else {
         std::cerr << "Function for symbol: " << symbolName << " not found!" << std::endl;
         *pfn = reinterpret_cast<void *>(noOpFunction); 
@@ -6130,11 +5970,12 @@ CUresult cuGetProcAddress_v2_handler(const char *symbol, void **pfn, int cudaVer
 }
 
 CUresult cuGetProcAddress(const char *symbol, void **pfn, int cudaVersion, cuuint64_t flags, CUdriverProcAddressQueryResult *symbolStatus) {
+    
     std::string symbolName(symbol);
     auto it = cudaFunctionMap.find(symbolName);
     if (it != cudaFunctionMap.end()) {
         *pfn = reinterpret_cast<void *>(it->second);
-        std::cout << "Mapped symbol: " << symbolName << " to function: " << *pfn << std::endl;
+        std::cout << "cuGetProcAddress Mapped symbol: " << symbolName << " to function: " << *pfn << std::endl;
     } else {
         std::cerr << "Function for symbol: " << symbolName << " not found!" << std::endl;
         *pfn = reinterpret_cast<void *>(noOpFunction); 

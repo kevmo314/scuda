@@ -7067,224 +7067,89 @@ int handle_cuGetProcAddress_v2(void *conn) {
     cuuint64_t flags;
     CUdriverProcAddressQueryResult result;
 
-    if (rpc_read(conn, &symbol_length, sizeof(int)) < 0) {
-        std::cerr << "Failed to read symbol length" << std::endl;
+    if (rpc_read(conn, &symbol_length, sizeof(int)) < 0 ||
+        rpc_read(conn, symbol, symbol_length) < 0 ||
+        rpc_read(conn, &cudaVersion, sizeof(int)) < 0 ||
+        rpc_read(conn, &flags, sizeof(cuuint64_t)) < 0)
         return -1;
-    }
 
-    if (symbol_length <= 0 || symbol_length > sizeof(symbol)) {
-        std::cerr << "Invalid symbol length" << std::endl;
-        return -1;
-    }
+    int request_id = rpc_end_request(conn);
+    if (request_id < 0) return -1;
 
-    if (rpc_read(conn, symbol, symbol_length) < 0) {
-        std::cerr << "Failed to read symbol string" << std::endl;
-        return -1;
-    }
-
-    if (rpc_read(conn, &cudaVersion, sizeof(int)) < 0) {
-        std::cerr << "Failed to read CUDA version" << std::endl;
-        return -1;
-    }
-
-    if (rpc_read(conn, &func, sizeof(void *)) < 0) {
-        std::cerr << "Failed to read function pointer" << std::endl;
-        return -1;
-    }
-
-    if (rpc_read(conn, &flags, sizeof(cuuint64_t)) < 0) {
-        std::cerr << "Failed to read flags" << std::endl;
-        return -1;
-    }
-
-    // Call the actual cuGetProcAddress_v2 function with the correct parameters
     CUresult result_code = cuGetProcAddress_v2(symbol, &func, cudaVersion, flags, &result);
-    if (result_code != CUDA_SUCCESS) {
-        const char *errorStr = nullptr;
-        cuGetErrorString(result_code, &errorStr);
-        std::cerr << "cuGetProcAddress_v2 failed with error code: " << result_code 
-                << " (" << (errorStr ? errorStr : "Unknown error") << ")" << std::endl;
-        return -1;
-    }
 
-    if (rpc_write(conn, &func, sizeof(void *)) < 0) {
-        std::cerr << "Failed to write function pointer to client. Error: " << strerror(errno) << std::endl;
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &func, sizeof(void *)) < 0 ||
+        rpc_write(conn, &result, sizeof(CUdriverProcAddressQueryResult)) < 0)
         return -1;
-    }
 
-    if (rpc_write(conn, &result, sizeof(CUdriverProcAddressQueryResult)) < 0) {
-        std::cerr << "Failed to write result to client. Error: " << strerror(errno) << std::endl;
-        return -1;
-    }
-
-    return result;
+    return result_code;
 }
 
 int handle_cuGetExportTable(void *conn) {
     CUuuid table_uuid;
-
-    // Read the UUID from the client
-    if (rpc_read(conn, &table_uuid, sizeof(CUuuid)) < 0) {
-        std::cerr << "Failed to read UUID from client" << std::endl;
-        return -1;
-    }
-
-    std::cout << "Server: Received UUID from client: ";
-    for (int i = 0; i < 16; i++) {
-        std::cout << std::hex << (int)table_uuid.bytes[i] << " ";
-    }
-    std::cout << std::endl;
-
     const void *export_table = nullptr;
-    CUresult result = cuGetExportTable(reinterpret_cast<const void **>(&export_table), &table_uuid);
 
-    if (result != CUDA_SUCCESS) {
-        const char *errorStr = nullptr;
-        cuGetErrorString(result, &errorStr);
-        std::cerr << "cuGetExportTable failed with error code: " << result 
-                  << " (" << (errorStr ? errorStr : "Unknown error") << ")" << std::endl;
-
-        // Write the error code to the client
-        if (rpc_write(conn, &result, sizeof(CUresult)) < 0) {
-            std::cerr << "Failed to write result code to client. Error: " << strerror(errno) << std::endl;
-            return -1;
-        }
+    if (rpc_read(conn, &table_uuid, sizeof(CUuuid)) < 0)
         return -1;
-    }
 
-    // Write the result code back to the client
-    if (rpc_write(conn, &result, sizeof(CUresult)) < 0) {
-        std::cerr << "Failed to write result code to client. Error: " << strerror(errno) << std::endl;
+    int request_id = rpc_end_request(conn);
+    if (request_id < 0) return -1;
+
+    CUresult result = cuGetExportTable(&export_table, &table_uuid);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &result, sizeof(CUresult)) < 0 ||
+        rpc_write(conn, &export_table, sizeof(void *)) < 0)
         return -1;
-    }
 
-    // Write the export table pointer back to the client
-    if (rpc_write(conn, &export_table, sizeof(void *)) < 0) {
-        std::cerr << "Failed to write export table pointer to client. Error: " << strerror(errno) << std::endl;
-        return -1;
-    }
-
-    std::cout << "Server: Sent export table pointer to client successfully: " << export_table << std::endl;
-
-    return 0;
+    return result;
 }
 
 int handle_cudaGetDeviceCount(void *conn) {
     int deviceCount = 0;
-    cudaError_t result;
 
-    // Initialize the CUDA runtime
-    result = cudaFree(0);  // A way to initialize the CUDA runtime
-    if (result != cudaSuccess) {
-        const char *errorStr = cudaGetErrorString(result);
-        std::cerr << "cudaFree (runtime init) failed with error code: " << result
-                  << " (" << (errorStr ? errorStr : "Unknown error") << ")" << std::endl;
+    cudaError_t result = cudaGetDeviceCount(&deviceCount);
+
+    int request_id = rpc_end_request(conn);
+    if (request_id < 0) return -1;
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &result, sizeof(cudaError_t)) < 0 ||
+        rpc_write(conn, &deviceCount, sizeof(int)) < 0)
         return -1;
-    }
-
-    // Call the actual cudaGetDeviceCount function
-    result = cudaGetDeviceCount(&deviceCount);
-
-    // Check for errors in the cudaGetDeviceCount call
-    if (result != cudaSuccess) {
-        const char *errorStr = cudaGetErrorString(result);
-        std::cerr << "cudaGetDeviceCount failed with error code: " << result
-                  << " (" << (errorStr ? errorStr : "Unknown error") << ")" << std::endl;
-        return -1;
-    }
-
-    // Write the result code back to the client
-    if (rpc_write(conn, &result, sizeof(cudaError_t)) < 0) {
-        std::cerr << "Failed to write result code to client. Error: " << strerror(errno) << std::endl;
-        return -1;
-    }
-
-    // Write the device count back to the client
-    if (rpc_write(conn, &deviceCount, sizeof(int)) < 0) {
-        std::cerr << "Failed to write device count to client. Error: " << strerror(errno) << std::endl;
-        return -1;
-    }
-
-    std::cout << "Server: Sent device count to client successfully: " << deviceCount << std::endl;
 
     return result;
 }
 
 int handle_cuDeviceGetCount(void *conn) {
     int deviceCount = 0;
-    CUresult result;
 
-    // Log start of request processing
-    std::cout << "Server: Handling cuDeviceGetCount request." << std::endl;
+    CUresult result = cuDeviceGetCount(&deviceCount);
 
-    // Call cuDeviceGetCount to get the number of devices
-    result = cuDeviceGetCount(&deviceCount);
+    int request_id = rpc_end_request(conn);
+    if (request_id < 0) return -1;
 
-    // Check for errors in the cuDeviceGetCount call
-    if (result != CUDA_SUCCESS) {
-        const char *errorStr = nullptr;
-        cuGetErrorString(result, &errorStr);
-        std::cerr << "cuDeviceGetCount failed with error code: " << result 
-                  << " (" << (errorStr ? errorStr : "Unknown error") << ")" << std::endl;
-
-        // Send error code back to client
-        if (rpc_write(conn, &result, sizeof(CUresult)) < 0) {
-            std::cerr << "Failed to write error result code to client. Error: " << strerror(errno) << std::endl;
-        }
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &result, sizeof(CUresult)) < 0 ||
+        rpc_write(conn, &deviceCount, sizeof(int)) < 0)
         return -1;
-    }
-
-    // Write the result code back to the client
-    if (rpc_write(conn, &result, sizeof(CUresult)) < 0) {
-        std::cerr << "Failed to write result code to client. Error: " << strerror(errno) << std::endl;
-        return -1;
-    }
-
-    // Write the device count back to the client
-    if (rpc_write(conn, &deviceCount, sizeof(int)) < 0) {
-        std::cerr << "Failed to write device count to client. Error: " << strerror(errno) << std::endl;
-        return -1;
-    }
-
-    std::cout << "Server: Sent device count to client successfully: " << deviceCount << std::endl;
 
     return result;
 }
 
 int handle_cuDriverGetVersion(void *conn) {
     int driverVersion = 0;
-    CUresult result;
 
-    // Call the actual cuDriverGetVersion function
-    result = cuDriverGetVersion(&driverVersion);
+    CUresult result = cuDriverGetVersion(&driverVersion);
 
-    // Check for errors in the cuDriverGetVersion call
-    if (result != CUDA_SUCCESS) {
-        const char *errorStr = nullptr;
-        cuGetErrorString(result, &errorStr);
-        std::cerr << "cuDriverGetVersion failed with error code: " << result 
-                  << " (" << (errorStr ? errorStr : "Unknown error") << ")" << std::endl;
+    int request_id = rpc_end_request(conn);
+    if (request_id < 0) return -1;
 
-        // Write the error result code back to the client
-        if (rpc_write(conn, &result, sizeof(CUresult)) < 0) {
-            std::cerr << "Failed to write error code to client. Error: " << strerror(errno) << std::endl;
-        }
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &result, sizeof(CUresult)) < 0 ||
+        rpc_write(conn, &driverVersion, sizeof(int)) < 0)
         return -1;
-    }
-
-    // Write the success result code back to the client
-    if (rpc_write(conn, &result, sizeof(CUresult)) < 0) {
-        std::cerr << "Failed to write result code to client. Error: " << strerror(errno) << std::endl;
-        return -1;
-    }
-
-    // Write the driver version back to the client
-    if (rpc_write(conn, &driverVersion, sizeof(int)) < 0) {
-        std::cerr << "Failed to write driver version to client. Error: " << strerror(errno) << std::endl;
-        return -1;
-    }
-
-    std::cout << "Server: Sent driver version to client successfully: " << driverVersion << std::endl;
 
     return result;
 }
@@ -7292,118 +7157,55 @@ int handle_cuDriverGetVersion(void *conn) {
 int handle_cuDeviceGet(void *conn) {
     int deviceIndex;
     CUdevice device;
-    CUresult result;
 
-    // Read the device index from the client
-    if (rpc_read(conn, &deviceIndex, sizeof(int)) < 0) {
-        std::cerr << "Failed to read device index from client. Error: " << strerror(errno) << std::endl;
+    if (rpc_read(conn, &deviceIndex, sizeof(int)) < 0)
         return -1;
-    }
 
-    std::cout << "Server: Received device index: " << deviceIndex << std::endl;
+    CUresult result = cuDeviceGet(&device, deviceIndex);
 
-    // Call the actual cuDeviceGet function
-    result = cuDeviceGet(&device, deviceIndex);
+    int request_id = rpc_end_request(conn);
+    if (request_id < 0) return -1;
 
-    // Write the result code back to the client
-    if (rpc_write(conn, &result, sizeof(CUresult)) < 0) {
-        std::cerr << "Failed to write result code to client. Error: " << strerror(errno) << std::endl;
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &result, sizeof(CUresult)) < 0 ||
+        rpc_write(conn, &device, sizeof(CUdevice)) < 0)
         return -1;
-    }
-
-    // Write the device handle back to the client
-    if (rpc_write(conn, &device, sizeof(CUdevice)) < 0) {
-        std::cerr << "Failed to write device handle to client. Error: " << strerror(errno) << std::endl;
-        return -1;
-    }
-
-    std::cout << "Server: Sent device handle to client successfully." << std::endl;
 
     return result;
 }
 
+
 int handle_cuModuleGetLoadingMode(void *conn) {
     CUmoduleLoadingMode loadingMode;
-    CUresult result;
 
-    // Call cuModuleGetLoadingMode with the correct argument
-    result = cuModuleGetLoadingMode(&loadingMode);
+    CUresult result = cuModuleGetLoadingMode(&loadingMode);
 
-    // Check if the cuModuleGetLoadingMode call was successful
-    if (result != CUDA_SUCCESS) {
-        const char *errorStr = nullptr;
-        cuGetErrorString(result, &errorStr);
-        std::cerr << "cuModuleGetLoadingMode failed with error code: " << result 
-                  << " (" << (errorStr ? errorStr : "Unknown error") << ")" << std::endl;
+    int request_id = rpc_end_request(conn);
+    if (request_id < 0) return -1;
 
-        // Write the error code back to the client
-        ssize_t bytes_written = rpc_write(conn, &result, sizeof(CUresult));
-        if (bytes_written < 0) {
-            std::cerr << "Failed to write result code to client. Error: " << strerror(errno) << std::endl;
-            return -1;
-        } else if (bytes_written != sizeof(CUresult)) {
-            std::cerr << "Mismatch in bytes written for result code. Expected " 
-                      << sizeof(CUresult) << " but wrote " << bytes_written << std::endl;
-            return -1;
-        }
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &result, sizeof(CUresult)) < 0 ||
+        rpc_write(conn, &loadingMode, sizeof(CUmoduleLoadingMode)) < 0)
         return -1;
-    }
 
-    // Write the result code back to the client
-    ssize_t bytes_written = rpc_write(conn, &result, sizeof(CUresult));
-    if (bytes_written < 0) {
-        std::cerr << "Failed to write result code to client. Error: " << strerror(errno) << std::endl;
-        return -1;
-    }
-
-    // Write the loading mode back to the client
-    bytes_written = rpc_write(conn, &loadingMode, sizeof(CUmoduleLoadingMode));
-    if (bytes_written < 0) {
-        std::cerr << "Failed to write loading mode to client. Error: " << strerror(errno) << std::endl;
-        return -1;
-    }
-
-    std::cout << "Server: Sent loading mode to client successfully." << std::endl;
-
-    return 0;
+    return result;
 }
+
 
 int handle_cuInit(void *conn) {
     unsigned int flags;
-    CUresult result;
 
-    // Read the flags from the client
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0) {
-        std::cerr << "Failed to read flags from client. Error: " << strerror(errno) << std::endl;
+    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
         return -1;
-    }
 
-    std::cout << "Server: Received flags from client: " << flags << std::endl;
+    CUresult result = cuInit(flags);
 
-    // Call the actual cuInit function with the received flags
-    result = cuInit(flags);
+    int request_id = rpc_end_request(conn);
+    if (request_id < 0) return -1;
 
-    // Check for errors in the cuInit call
-    if (result != CUDA_SUCCESS) {
-        const char *errorStr = nullptr;
-        cuGetErrorString(result, &errorStr);
-        std::cerr << "cuInit failed with error code: " << result 
-                  << " (" << (errorStr ? errorStr : "Unknown error") << ")" << std::endl;
-
-        // Write the error result code back to the client
-        if (rpc_write(conn, &result, sizeof(CUresult)) < 0) {
-            std::cerr << "Failed to write error code to client. Error: " << strerror(errno) << std::endl;
-        }
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &result, sizeof(CUresult)) < 0)
         return -1;
-    }
-
-    // Write the success result code back to the client
-    if (rpc_write(conn, &result, sizeof(CUresult)) < 0) {
-        std::cerr << "Failed to write result code to client. Error: " << strerror(errno) << std::endl;
-        return -1;
-    }
-
-    std::cout << "Server: Sent cuInit result to client successfully: " << result << std::endl;
 
     return result;
 }
@@ -7692,6 +7494,7 @@ static RequestHandler opHandlers[] = {
     handle_nvmlGpmMigSampleGet,
     handle_nvmlGpmQueryDeviceSupport,
     handle_nvmlDeviceSetNvLinkDeviceLowPowerThreshold,
+
     handle_cuGetProcAddress_v2,
     handle_cudaGetDeviceCount,
     handle_cuDriverGetVersion,
