@@ -152,7 +152,7 @@ def format_param(param):
     if isinstance(param, c_ast.TypeDecl):
         return '%s %s' % (' '.join(param.type.names), param.declname)
     if isinstance(param, c_ast.PtrDecl):
-        return '%s *%s' % (' '.join(param.type.type.names), param.type.declname)
+        return '%s *%s' % (' '.join(param.type.quals + param.type.type.names), param.type.declname)
     if isinstance(param, c_ast.Typename):
         return '%s' % (' '.join(param.type.type.names))
     if isinstance(param, c_ast.Decl):
@@ -175,8 +175,24 @@ def format_type_name(param):
 class ClientCodegenVisitor(c_ast.NodeVisitor):
     def __init__(self, sink: io.IOBase):
         self.sink = sink
-        self.sink.write("#include <nvml.h>\n\n")
+        self.sink.write("#include <nvml.h>\n")
+        self.sink.write("#include <string>\n");
+        self.sink.write("#include <unordered_map>\n\n")
         self.sink.write("#include \"gen_api.h\"\n\n")
+
+        self.sink.write("extern int rpc_start_request(int request);\n");
+        self.sink.write("extern int rpc_write(const void *buf, size_t count);\n");
+        self.sink.write("extern int rpc_read(void *buf, size_t count);\n");
+        self.sink.write("extern int rpc_wait_for_response(int request_id);\n");
+        self.sink.write("extern int rpc_end_request(int request_id, void *return_value);\n\n");
+    
+        self.functions = []
+
+    def close(self):
+        self.sink.write('std::unordered_map<std::string, void *> functionMap = {\n')
+        for f in self.functions:
+            self.sink.write('    {\"%s\", (void *) %s},\n' % (f, f))
+        self.sink.write('};\n\n')
         
     def visit_Decl(self, node):
         if not isinstance(node.type, c_ast.FuncDecl):
@@ -192,6 +208,7 @@ class ClientCodegenVisitor(c_ast.NodeVisitor):
             name=node.name,
             params=', '.join(format_param(p) for p in params)
         ))
+        self.functions.append(node.name)
         self.sink.write('{\n')
         self.sink.write('    int request_id = rpc_start_request(RPC_%s);\n' % node.name)
         self.sink.write('    %s return_value;\n' % return_type.names[0])
@@ -313,6 +330,7 @@ def show_func_defs(filename):
     with open('gen_client.cu', 'w') as f:
         v = ClientCodegenVisitor(f)
         v.visit(ast)
+        v.close()
 
     with open('gen_server.cu', 'w') as f:
         v = ServerCodegenVisitor(f)
