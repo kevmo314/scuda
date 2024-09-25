@@ -7127,109 +7127,6 @@ int handle_cudaGetDeviceCount(void *conn) {
     return result;
 }
 
-int handle_cuDeviceGetCount(void *conn) {
-    int deviceCount = 0;
-    CUresult result;
-
-    // Call the actual cuDeviceGetCount function to get the number of devices
-    result = cuDeviceGetCount(&deviceCount);
-    if (result != CUDA_SUCCESS) {
-        std::cerr << "cuDeviceGetCount failed with error code: " << result << std::endl;
-        // If the function fails, we still need to respond with the result code and zero count.
-        deviceCount = 0;
-    }
-
-    // Now, send the response back to the client
-    int request_id = rpc_end_request(conn); // Use rpc_end_request to finalize the request.
-    if (request_id < 0) {
-        std::cerr << "Failed to end request with error: " << request_id << std::endl;
-        return -1;
-    }
-
-    // Start the response and write the result and device count
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &result, sizeof(CUresult)) < 0 ||
-        rpc_write(conn, &deviceCount, sizeof(int)) < 0) {
-        std::cerr << "Failed to write response to the client." << std::endl;
-        return -1;
-    }
-
-    return result; // Return the CUresult to indicate the function execution status
-}
-
-
-int handle_cuDriverGetVersion(void *conn) {
-    int driverVersion = 0;
-
-    CUresult result = cuDriverGetVersion(&driverVersion);
-
-    int request_id = rpc_end_request(conn);
-    if (request_id < 0) return -1;
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &result, sizeof(CUresult)) < 0 ||
-        rpc_write(conn, &driverVersion, sizeof(int)) < 0)
-        return -1;
-
-    return result;
-}
-
-int handle_cuDeviceGet(void *conn) {
-    int deviceIndex;
-    CUdevice device;
-
-    if (rpc_read(conn, &deviceIndex, sizeof(int)) < 0)
-        return -1;
-
-    CUresult result = cuDeviceGet(&device, deviceIndex);
-
-    int request_id = rpc_end_request(conn);
-    if (request_id < 0) return -1;
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &result, sizeof(CUresult)) < 0 ||
-        rpc_write(conn, &device, sizeof(CUdevice)) < 0)
-        return -1;
-
-    return result;
-}
-
-
-int handle_cuModuleGetLoadingMode(void *conn) {
-    CUmoduleLoadingMode loadingMode;
-
-    CUresult result = cuModuleGetLoadingMode(&loadingMode);
-
-    int request_id = rpc_end_request(conn);
-    if (request_id < 0) return -1;
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &result, sizeof(CUresult)) < 0 ||
-        rpc_write(conn, &loadingMode, sizeof(CUmoduleLoadingMode)) < 0)
-        return -1;
-
-    return result;
-}
-
-
-int handle_cuInit(void *conn) {
-    unsigned int flags;
-
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
-        return -1;
-
-    CUresult result = cuInit(flags);
-
-    int request_id = rpc_end_request(conn);
-    if (request_id < 0) return -1;
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &result, sizeof(CUresult)) < 0)
-        return -1;
-
-    return result;
-}
-
 static RequestHandler opHandlers[] = {
     handle_nvmlInit_v2,
     handle_nvmlInitWithFlags,
@@ -7514,15 +7411,8 @@ static RequestHandler opHandlers[] = {
     handle_nvmlGpmMigSampleGet,
     handle_nvmlGpmQueryDeviceSupport,
     handle_nvmlDeviceSetNvLinkDeviceLowPowerThreshold,
-
     handle_cuGetProcAddress,
     handle_cudaGetDeviceCount,
-    handle_cuDriverGetVersion,
-    handle_cuGetExportTable,
-    handle_cuModuleGetLoadingMode,
-    handle_cuDeviceGetCount,
-    handle_cuDeviceGet,
-    handle_cuInit,
 };
 
 RequestHandler get_handler(const int op)

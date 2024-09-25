@@ -1,5 +1,7 @@
 #include <nvml.h>
 #include <cuda.h>
+#include <cuda_runtime.h>
+
 #include <string>
 #include <unordered_map>
 
@@ -4127,8 +4129,6 @@ nvmlReturn_t nvmlDeviceSetNvLinkDeviceLowPowerThreshold(nvmlDevice_t device, nvm
 
 CUresult cuInitShim(unsigned int flags)
 {
-    std::cout << "calling cuInit" << std::endl;
-
     int request_id = rpc_start_request(RPC_cuInit);
     CUresult result;
     if (request_id < 0 ||
@@ -4145,8 +4145,6 @@ CUresult cuInitShim(unsigned int flags)
 
 CUresult cuDeviceGetShim(CUdevice *device, int ordinal)
 {
-    std::cout << "calling cuDeviceGetShim" << std::endl;
-
     int request_id = rpc_start_request(RPC_cuDeviceGet);
     CUresult result;
     if (request_id < 0 ||
@@ -4166,8 +4164,6 @@ CUresult cuDeviceGetShim(CUdevice *device, int ordinal)
 
 CUresult cuDeviceGetCountShim(int *deviceCount)
 {
-    std::cout << "calling cuDeviceGetCountShim" << std::endl;
-
     int request_id = rpc_start_request(RPC_cuDeviceGetCount);
     CUresult result;
     if (request_id < 0 ||
@@ -4187,7 +4183,6 @@ CUresult cuDeviceGetCountShim(int *deviceCount)
 
 CUresult cuModuleGetLoadingModeShim(CUmoduleLoadingMode *mode)
 {
-    std::cout << "calling cuModuleGetLoadingModeShim" << std::endl;
     if (!mode)
         return CUDA_ERROR_INVALID_VALUE;
 
@@ -4207,7 +4202,6 @@ CUresult cuModuleGetLoadingModeShim(CUmoduleLoadingMode *mode)
 
 CUresult cuGetExportTableShim(void **ppExportTable, const CUuuid *pTableUuid)
 {
-    std::cout << "calling cuGetExportTableShim" << std::endl;
     if (!pTableUuid || !ppExportTable)
         return CUDA_ERROR_INVALID_VALUE;
 
@@ -4231,8 +4225,6 @@ std::unordered_map<std::string, void (*)()> cucudaFunctionMap;
 
 CUresult cuDriverGetVersion_handler(int *driverVersion)
 {
-    std::cout << "calling cuDriverGetVersion_handler" << std::endl;
-
     int request_id = rpc_start_request(RPC_cuDriverGetVersion);
     CUresult result;
     if (request_id < 0 ||
@@ -4252,103 +4244,23 @@ using cuInitPtr = CUresult (*)(unsigned int);
 void *libCudaHandle = dlopen("libcuda.so.1", RTLD_NOW);
 
 cudaError_t cudaGetDeviceCount(int *deviceCount) {
-    std::cout << "Client: Calling cudaGetDeviceCountShim" << std::endl;
+    std::cout << "Client: Calling cudaGetDeviceCount shim" << std::endl;
 
-    // if (!deviceCount) {
-    //     std::cerr << "Client: deviceCount pointer is null!" << std::endl;
-    //     return cudaErrorInvalidValue;
-    // }
+    if (!deviceCount) return cudaErrorInvalidValue;
 
-    // // Start the request to the server for cudaGetDeviceCount
-    // int request_id = rpc_start_request(RPC_cudaGetDeviceCount);  // RPC identifier for cudaGetDeviceCount
-    // if (request_id < 0) {
-    //     std::cerr << "Client: Failed to start request for cudaGetDeviceCount" << std::endl;
-    //     return cudaErrorUnknown;
-    // }
+    int request_id = rpc_start_request(RPC_cudaGetDeviceCount);
+    cudaError_t result;
 
-    // // Wait for the server response
-    // if (rpc_wait_for_response(request_id) < 0) {
-    //     std::cerr << "Client: Failed to wait for response from server" << std::endl;
-    //     return cudaErrorUnknown;
-    // }
+    if (request_id < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(&result, sizeof(cudaError_t)) < 0 ||
+        result != cudaSuccess ||
+        rpc_read(deviceCount, sizeof(int)) < 0 ||
+        rpc_end_request(&result, request_id) < 0)
+        return cudaErrorUnknown;
 
-    // // Read the result code from the server
-    // cudaError_t result;
-    // if (rpc_read(&result, sizeof(cudaError_t)) < 0) {
-    //     std::cerr << "Client: Failed to read result code from server" << std::endl;
-    //     return cudaErrorUnknown;
-    // }
-
-    // // If the result is not cudaSuccess, return the error
-    // if (result != cudaSuccess) {
-    //     std::cerr << "Client: cudaGetDeviceCount call failed on the server with error code: " << result << std::endl;
-    //     return result;
-    // }
-
-    // // Read the device count from the server
-    // if (rpc_read(deviceCount, sizeof(int)) < 0) {
-    //     std::cerr << "Client: Failed to read device count from server" << std::endl;
-    //     return cudaErrorUnknown;
-    // }
-
-    // // End the request, ensuring the request/response cycle is complete
-    // if (rpc_end_request(&result, request_id) < 0) {
-    //     std::cerr << "Client: Failed to end request properly" << std::endl;
-    //     return cudaErrorUnknown;
-    // }
-}
-
-CUresult cuGetProcAddress(const char *symbol, void **pfn, int cudaVersion, cuuint64_t flags, CUdriverProcAddressQueryResult *symbolStatus)
-{
-    std::cout << "cuGetProcAddress getting symbol: " << symbol << std::endl;
-
-    if (strcmp(symbol, "cuGetProcAddress") == 0) {
-        *pfn = reinterpret_cast<void *>(&cuGetProcAddress);
-
-        return CUDA_SUCCESS;
-    } else if (strcmp(symbol, "cuInit") == 0) {
-        *pfn = reinterpret_cast<void *>(&cuInitShim);
-
-        return CUDA_SUCCESS;
-    } else if (strcmp(symbol, "cuDriverGetVersion") == 0) {
-        *pfn = reinterpret_cast<void *>(&cuDriverGetVersion_handler);
-
-        return CUDA_SUCCESS;
-    } else if (strcmp(symbol, "cudaGetDeviceCount") == 0) {
-        *pfn = reinterpret_cast<void *>(&cudaGetDeviceCount);
-
-        return CUDA_SUCCESS;
-    } else if (strcmp(symbol, "cuDeviceGet") == 0) {
-        *pfn = reinterpret_cast<void *>(&cuDeviceGetShim);
-
-        return CUDA_SUCCESS;
-    }
-    else if (strcmp(symbol, "cuDeviceGetCount") == 0) {
-        *pfn = reinterpret_cast<void *>(&cuDeviceGetCountShim);
-
-        return CUDA_SUCCESS;
-    } else if (strcmp(symbol, "cuModuleGetLoadingMode") == 0) {
-        *pfn = reinterpret_cast<void *>(&cuModuleGetLoadingModeShim);
-
-        return CUDA_SUCCESS;
-    } else if (strcmp(symbol, "cuGetExportTable") == 0) {
-        *pfn = reinterpret_cast<void *>(&cuGetExportTableShim);
-
-        return CUDA_SUCCESS;
-    } else {
-        static void *(*real_dlsym)(void *, const char *) = NULL;
-        if (real_dlsym == NULL)
-        {
-            real_dlsym = (void *(*)(void *, const char *))dlvsym(RTLD_NEXT, "dlsym", "GLIBC_2.2.5");
-        }
-
-        std::cout << "[cuGetProcAddress dlsym] Falling back to real_dlsym for name: " << symbol << std::endl;
-        *pfn = real_dlsym(libCudaHandle, symbol);
-
-        return CUDA_SUCCESS;
-    }
-
-    return CUDA_ERROR_UNKNOWN;
+    std::cout << "Client: Received device count from server: " << *deviceCount << std::endl;
+    return cudaSuccess;
 }
 
 std::unordered_map<std::string, void *> functionMap = {
