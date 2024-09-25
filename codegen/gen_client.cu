@@ -4138,14 +4138,7 @@ CUresult cuInitShim(unsigned int flags)
         rpc_end_request(&result, request_id) < 0)
         return CUDA_ERROR_UNKNOWN;
 
-    if (result == CUDA_SUCCESS)
-    {
-        std::cout << "cuInit successful, Flags: " << flags << std::endl;
-    }
-    else
-    {
-        std::cout << "nooo" << std::endl;
-    }
+    std::cout << "RESULTS:: " << &flags << std::endl;
 
     return result;
 }
@@ -4256,40 +4249,106 @@ CUresult cuDriverGetVersion_handler(int *driverVersion)
 
 using cuInitPtr = CUresult (*)(unsigned int);
 
-std::unordered_map<std::string, void *> cudaFunctionMap;
-
-void initCudaFunctionMap()
-{
-    cudaFunctionMap["cuInit"] = reinterpret_cast<void *>(static_cast<cuInitPtr>(cuInitShim));
-    cudaFunctionMap["cuDriverGetVersion"] = reinterpret_cast<void *>(static_cast<CUresult (*)(int *)>(cuDriverGetVersion_handler));
-    cudaFunctionMap["cudaGetDeviceCount"] = reinterpret_cast<void *>(static_cast<cudaError_t (*)(int *)>(cudaGetDeviceCount));
-    cudaFunctionMap["cuDeviceGet"] = reinterpret_cast<void *>(static_cast<CUresult (*)(CUdevice *, int)>(cuDeviceGetShim));
-    cudaFunctionMap["cuDeviceGetCount"] = reinterpret_cast<void *>(static_cast<CUresult (*)(int *)>(cuDeviceGetCountShim));
-    cudaFunctionMap["cuModuleGetLoadingMode"] = reinterpret_cast<void *>(static_cast<CUresult (*)(CUmoduleLoadingMode *)>(cuModuleGetLoadingModeShim));
-    cudaFunctionMap["cuGetExportTable"] = reinterpret_cast<void *>(static_cast<CUresult (*)(void **, const CUuuid *)>(cuGetExportTableShim));
-}
-
 void *libCudaHandle = dlopen("libcuda.so.1", RTLD_NOW);
 
-CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion, cuuint64_t flags, CUdriverProcAddressQueryResult *symbolStatus)
-{
-    // if (strcmp(symbol, "cuInit") == 0)
-    // {
-    //     *pfn = (void *)&cuInitShim;
+cudaError_t cudaGetDeviceCount(int *deviceCount) {
+    std::cout << "Client: Calling cudaGetDeviceCountShim" << std::endl;
+
+    // if (!deviceCount) {
+    //     std::cerr << "Client: deviceCount pointer is null!" << std::endl;
+    //     return cudaErrorInvalidValue;
     // }
-    // else
-    // {
-    static void *(*real_dlsym)(void *, const char *) = NULL;
-    if (real_dlsym == NULL)
-    {
-        real_dlsym = (void *(*)(void *, const char *))dlvsym(RTLD_NEXT, "dlsym", "GLIBC_2.2.5");
+
+    // // Start the request to the server for cudaGetDeviceCount
+    // int request_id = rpc_start_request(RPC_cudaGetDeviceCount);  // RPC identifier for cudaGetDeviceCount
+    // if (request_id < 0) {
+    //     std::cerr << "Client: Failed to start request for cudaGetDeviceCount" << std::endl;
+    //     return cudaErrorUnknown;
+    // }
+
+    // // Wait for the server response
+    // if (rpc_wait_for_response(request_id) < 0) {
+    //     std::cerr << "Client: Failed to wait for response from server" << std::endl;
+    //     return cudaErrorUnknown;
+    // }
+
+    // // Read the result code from the server
+    // cudaError_t result;
+    // if (rpc_read(&result, sizeof(cudaError_t)) < 0) {
+    //     std::cerr << "Client: Failed to read result code from server" << std::endl;
+    //     return cudaErrorUnknown;
+    // }
+
+    // // If the result is not cudaSuccess, return the error
+    // if (result != cudaSuccess) {
+    //     std::cerr << "Client: cudaGetDeviceCount call failed on the server with error code: " << result << std::endl;
+    //     return result;
+    // }
+
+    // // Read the device count from the server
+    // if (rpc_read(deviceCount, sizeof(int)) < 0) {
+    //     std::cerr << "Client: Failed to read device count from server" << std::endl;
+    //     return cudaErrorUnknown;
+    // }
+
+    // // End the request, ensuring the request/response cycle is complete
+    // if (rpc_end_request(&result, request_id) < 0) {
+    //     std::cerr << "Client: Failed to end request properly" << std::endl;
+    //     return cudaErrorUnknown;
+    // }
+}
+
+CUresult cuGetProcAddress(const char *symbol, void **pfn, int cudaVersion, cuuint64_t flags, CUdriverProcAddressQueryResult *symbolStatus)
+{
+    std::cout << "cuGetProcAddress getting symbol: " << symbol << std::endl;
+
+    if (strcmp(symbol, "cuGetProcAddress") == 0) {
+        *pfn = reinterpret_cast<void *>(&cuGetProcAddress);
+
+        return CUDA_SUCCESS;
+    } else if (strcmp(symbol, "cuInit") == 0) {
+        *pfn = reinterpret_cast<void *>(&cuInitShim);
+
+        return CUDA_SUCCESS;
+    } else if (strcmp(symbol, "cuDriverGetVersion") == 0) {
+        *pfn = reinterpret_cast<void *>(&cuDriverGetVersion_handler);
+
+        return CUDA_SUCCESS;
+    } else if (strcmp(symbol, "cudaGetDeviceCount") == 0) {
+        *pfn = reinterpret_cast<void *>(&cudaGetDeviceCount);
+
+        return CUDA_SUCCESS;
+    } else if (strcmp(symbol, "cuDeviceGet") == 0) {
+        *pfn = reinterpret_cast<void *>(&cuDeviceGetShim);
+
+        return CUDA_SUCCESS;
+    }
+    else if (strcmp(symbol, "cuDeviceGetCount") == 0) {
+        *pfn = reinterpret_cast<void *>(&cuDeviceGetCountShim);
+
+        return CUDA_SUCCESS;
+    } else if (strcmp(symbol, "cuModuleGetLoadingMode") == 0) {
+        *pfn = reinterpret_cast<void *>(&cuModuleGetLoadingModeShim);
+
+        return CUDA_SUCCESS;
+    } else if (strcmp(symbol, "cuGetExportTable") == 0) {
+        *pfn = reinterpret_cast<void *>(&cuGetExportTableShim);
+
+        return CUDA_SUCCESS;
+    } else {
+        static void *(*real_dlsym)(void *, const char *) = NULL;
+        if (real_dlsym == NULL)
+        {
+            real_dlsym = (void *(*)(void *, const char *))dlvsym(RTLD_NEXT, "dlsym", "GLIBC_2.2.5");
+        }
+
+        std::cout << "[cuGetProcAddress dlsym] Falling back to real_dlsym for name: " << symbol << std::endl;
+        *pfn = real_dlsym(libCudaHandle, symbol);
+
+        return CUDA_SUCCESS;
     }
 
-    std::cout << "[dlsym] Falling back to real_dlsym for name: " << symbol << std::endl;
-    *pfn = real_dlsym(libCudaHandle, symbol);
-    // }
-
-    return CUDA_SUCCESS;
+    return CUDA_ERROR_UNKNOWN;
 }
 
 std::unordered_map<std::string, void *> functionMap = {
@@ -4580,7 +4639,6 @@ std::unordered_map<std::string, void *> functionMap = {
 
 void *get_function_pointer(const char *name)
 {
-    initCudaFunctionMap();
     auto it = functionMap.find(name);
     if (it != functionMap.end())
         return it->second;
