@@ -194,10 +194,19 @@ void close_rpc_client()
     sockfd = 0;
 }
 
+
+
 void *dlsym(void *handle, const char *name) __THROW
 {
     open_rpc_client();
+    
     void *func = get_function_pointer(name);
+
+    if (strcmp(name, "cuGetProcAddress") == 0) {  // Ensure the correct string comparison with "== 0"
+        std::cout << "[dlsym] Using custom cuGetProcAddress" << std::endl;
+
+        return reinterpret_cast<void*>(cuGetProcAddressHandler);
+    }
 
     if (func != nullptr) {
         std::cout << "[dlsym] Function address from cudaFunctionMap: " << func << " " << name << std::endl;

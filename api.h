@@ -222,4 +222,35 @@
 #define RPC_nvmlEventSetFree 203
 #define RPC_nvmlEventSetWait_v2 204
 
+// cuda
+#define RPC_cuLinkCreate_v2 206
+#define RPC_cuLinkAddData_v2 207
+#define RPC_cuLinkComplete 208
+#define RPC_cuModuleLoadData 209
+#define RPC_cuModuleUnload 210
+#define RPC_cuGetErrorString 211
+#define RPC_cuLinkDestroy 212
+#define RPC_cuModuleGetFunction 213
+#define RPC_cuFuncSetAttribute 214
+#define RPC_cuLaunchKernel 215
+#define RPC_cuGetErrorName 216
+#define RPC_cuModuleLoadFatBinary 217
+#define RPC_cuModuleLoadDataEx 218
+#define RPC_cuLinkAddFile_v2 219
+#define RPC_cuInit 220
+#define RPC_cuFuncGetAttribute 221
+#define RPC_cuCtxPushCurrent 222
+#define RPC_cuCtxPopCurrent 223
+#define RPC_cuCtxGetDevice 224
+#define RPC_cuDevicePrimaryCtxRetain 225
+#define RPC_cuDevicePrimaryCtxRelease 226
+#define RPC_cuDevicePrimaryCtxReset 227
+#define RPC_cuDeviceGet 228
+#define RPC_cuDeviceGetAttribute 229
+#define RPC_cuStreamSynchronize 230
+#define RPC_cuOccupancyMaxActiveBlocksPerMultiprocessor 231
+#define RPC_cuLaunchKernelEx 232
+#define RPC_cuModuleGetGlobal_v2 233
+
+
 #endif
