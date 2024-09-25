@@ -21,7 +21,6 @@
 #include "api.h"
 #include "codegen/gen_client.h"
 
-
 int sockfd = -1;
 char *port;
 
@@ -126,18 +125,22 @@ int rpc_end_request(void *result, const unsigned int request_id)
 
 int rpc_read(void *data, size_t size)
 {
-    if (data == nullptr) {
+    if (data == nullptr)
+    {
         // temp buffer to discard data
         char tempBuffer[256];
-        while (size > 0) {
+        while (size > 0)
+        {
             ssize_t bytesRead = read(sockfd, tempBuffer, std::min(size, sizeof(tempBuffer)));
-            if (bytesRead < 0) {
+            if (bytesRead < 0)
+            {
                 pthread_mutex_unlock(&mutex);
                 return -1; // error if reading fails
             }
             size -= bytesRead;
         }
-    } else if (read(sockfd, data, size) < 0)
+    }
+    else if (read(sockfd, data, size) < 0)
     {
         pthread_mutex_unlock(&mutex);
         return -1;
@@ -200,23 +203,28 @@ void *dlsym(void *handle, const char *name) __THROW
 
     void *func = get_function_pointer(name);
 
-    if (strcmp(name, "cuGetProcAddress") == 0) {  // Ensure the correct string comparison with "== 0"
+    if (strcmp(name, "cuGetProcAddress") == 0)
+    { // Ensure the correct string comparison with "== 0"
         std::cout << "[dlsym] Using custom cuGetProcAddress" << std::endl;
 
-        return (void *)&cuGetProcAddressHandler;
-    } else if (strcmp(name, "cuGetProcAddress_v2") == 0) {
+        return (void *)&cuGetProcAddress_v2;
+    }
+    else if (strcmp(name, "cuGetProcAddress_v2") == 0)
+    {
         std::cout << "bingo" << std::endl;
-        return (void *)&cuGetProcAddress_v2_handler;
+        return (void *)&cuGetProcAddress_v2;
     }
 
-    if (func != nullptr) {
+    if (func != nullptr)
+    {
         std::cout << "[dlsym] Function address from cudaFunctionMap: " << func << " " << name << std::endl;
         return func;
     }
 
     // Real dlsym lookup
     static void *(*real_dlsym)(void *, const char *) = NULL;
-    if (real_dlsym == NULL) {
+    if (real_dlsym == NULL)
+    {
         real_dlsym = (void *(*)(void *, const char *))dlvsym(RTLD_NEXT, "dlsym", "GLIBC_2.2.5");
     }
 
