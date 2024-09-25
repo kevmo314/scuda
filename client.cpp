@@ -179,18 +179,6 @@ int rpc_wait_for_response(const unsigned int request_id)
     }
 }
 
-template <typename T>
-T rpc_get_return(int request_id, T error_value)
-{
-    T result;
-    if (read(sockfd, &result, sizeof(T)) < 0)
-        result = error_value;
-
-    pthread_mutex_unlock(&mutex);
-
-    return result;
-}
-
 void close_rpc_client()
 {
     close(sockfd);
