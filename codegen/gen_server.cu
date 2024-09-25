@@ -1,5 +1,8 @@
 #include <nvml.h>
 
+#include <nvml.h>
+#include <cuda.h>
+
 #include "gen_api.h"
 #include "gen_server.h"
 
@@ -7042,6 +7045,74 @@ int handle_nvmlDeviceSetNvLinkDeviceLowPowerThreshold(void *conn)
     return result;
 }
 
+int handle_cuGetProcAddress(void *conn) {
+    int symbol_length;
+    char symbol[256];
+    void *func = nullptr;
+    int cudaVersion;
+    cuuint64_t flags;
+    CUdriverProcAddressQueryResult result;
+
+    // Read inputs from the client
+    if (rpc_read(conn, &symbol_length, sizeof(int)) < 0 ||
+        rpc_read(conn, symbol, symbol_length) < 0 ||
+        rpc_read(conn, &cudaVersion, sizeof(int)) < 0 ||
+        rpc_read(conn, &flags, sizeof(cuuint64_t)) < 0)
+        return -1;
+
+    // End request to process the function
+    int request_id = rpc_end_request(conn);
+    if (request_id < 0) return -1;
+
+    // Call cuGetProcAddress to get the function pointer and status
+    CUresult result_code = cuGetProcAddress(symbol, &func, cudaVersion, flags, &result);
+
+    // Start response and send the result code, function pointer, and status back to the client
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &result_code, sizeof(CUresult)) < 0 || // Send result_code first
+        rpc_write(conn, &func, sizeof(void *)) < 0 || // Send the function pointer
+        rpc_write(conn, &result, sizeof(CUdriverProcAddressQueryResult)) < 0) // Send the query result status
+        return -1;
+
+    return result_code;
+}
+
+int handle_cuGetExportTable(void *conn) {
+    CUuuid table_uuid;
+    const void *export_table = nullptr;
+
+    if (rpc_read(conn, &table_uuid, sizeof(CUuuid)) < 0)
+        return -1;
+
+    int request_id = rpc_end_request(conn);
+    if (request_id < 0) return -1;
+
+    CUresult result = cuGetExportTable(&export_table, &table_uuid);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &result, sizeof(CUresult)) < 0 ||
+        rpc_write(conn, &export_table, sizeof(void *)) < 0)
+        return -1;
+
+    return result;
+}
+
+int handle_cudaGetDeviceCount(void *conn) {
+    int deviceCount = 0;
+
+    cudaError_t result = cudaGetDeviceCount(&deviceCount);
+
+    int request_id = rpc_end_request(conn);
+    if (request_id < 0) return -1;
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &result, sizeof(cudaError_t)) < 0 ||
+        rpc_write(conn, &deviceCount, sizeof(int)) < 0)
+        return -1;
+
+    return result;
+}
+
 static RequestHandler opHandlers[] = {
     handle_nvmlInit_v2,
     handle_nvmlInitWithFlags,
@@ -7326,6 +7397,8 @@ static RequestHandler opHandlers[] = {
     handle_nvmlGpmMigSampleGet,
     handle_nvmlGpmQueryDeviceSupport,
     handle_nvmlDeviceSetNvLinkDeviceLowPowerThreshold,
+    handle_cuGetProcAddress,
+    handle_cudaGetDeviceCount,
 };
 
 RequestHandler get_handler(const int op)

@@ -377,7 +377,7 @@ def show_func_defs(filename):
         v = HeaderCodegenVisitor(f)
         v.visit(ast)
 
-    with open('gen_client.cu', 'w') as f:
+    with open('gen_client.cpp', 'w') as f:
         v = ClientCodegenVisitor(f)
         v.visit(ast)
         v.close()

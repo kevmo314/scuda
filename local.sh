@@ -1,7 +1,7 @@
 #!/bin/bash
 
 libscuda_path="$(pwd)/libscuda.so"
-client_path="$(pwd)/client.cu $(pwd)/codegen/gen_client.cu"
+client_path="$(pwd)/client.cpp $(pwd)/codegen/gen_client.cpp"
 server_path="$(pwd)/server.cu $(pwd)/codegen/gen_server.cu"
 server_out_path="$(pwd)/server.so"
 
@@ -9,7 +9,13 @@ build() {
   echo "building client..."
 
   if [[ "$(uname)" == "Linux" ]]; then
-    nvcc -Xcompiler -fPIC -shared -o $libscuda_path $client_path 
+    gcc -c -fPIC "$(pwd)/client.cpp" -o "$(pwd)/client.o" -I/usr/local/cuda/include
+    gcc -c -fPIC "$(pwd)/codegen/gen_client.cpp" -o "$(pwd)/codegen/gen_client.o" -I/usr/local/cuda/include
+
+    echo "linking client files..."
+
+    gcc -shared -o libscuda.so "$(pwd)/client.o" "$(pwd)/codegen/gen_client.o" -L/usr/local/cuda/lib64 -lcudart -lstdc++
+
   else
     echo "No compiler options set for os "$(uname)""
   fi
@@ -24,7 +30,7 @@ server() {
   echo "building server..." 
 
   if [[ "$(uname)" == "Linux" ]]; then
-    nvcc -o $server_out_path $server_path -lnvidia-ml
+    nvcc -o $server_out_path $server_path -lnvidia-ml -lcuda
   else
     echo "No compiler options set for os "$(uname)""
   fi
@@ -37,7 +43,7 @@ server() {
 run() {
   build
 
-  LD_PRELOAD="$libscuda_path" nvidia-smi --query-gpu=memory.total,memory.used,memory.free --format=csv
+  LD_PRELOAD="$libscuda_path" python3 -c "import torch; print(torch.cuda.is_available())"
 }
 
 # Main script logic using a switch case

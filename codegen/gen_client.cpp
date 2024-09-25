@@ -1,12 +1,31 @@
 #include <nvml.h>
+#include <cuda.h>
+#include <cuda_runtime.h>
+
 #include <string>
 #include <unordered_map>
+
+#include <arpa/inet.h>
+#include <cstring>
+#include <dlfcn.h>
+#include <functional>
+#include <iostream>
+#include <netdb.h>
+#include <pthread.h>
+#include <stdio.h>
+#include <string.h>
+#include <string>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <unordered_map>
+#include <vector>
 
 #include "gen_api.h"
 
 extern int rpc_start_request(const unsigned int request);
 extern int rpc_write(const void *data, const size_t size);
-extern int rpc_read(void *data, const size_t size);
+extern int rpc_read(void *data, size_t size);
 extern int rpc_wait_for_response(const unsigned int request_id);
 extern int rpc_end_request(void *return_value, const unsigned int request_id);
 
@@ -4106,6 +4125,30 @@ nvmlReturn_t nvmlDeviceSetNvLinkDeviceLowPowerThreshold(nvmlDevice_t device, nvm
         rpc_end_request(&return_value, request_id) < 0)
         return NVML_ERROR_GPU_IS_LOST;
     return return_value;
+}
+
+using cuInitPtr = CUresult (*)(unsigned int);
+
+void *libCudaHandle = dlopen("libcuda.so.1", RTLD_NOW);
+
+cudaError_t cudaGetDeviceCount(int *deviceCount) {
+    std::cout << "Client: Calling cudaGetDeviceCount shim" << std::endl;
+
+    if (!deviceCount) return cudaErrorInvalidValue;
+
+    int request_id = rpc_start_request(RPC_cudaGetDeviceCount);
+    cudaError_t result;
+
+    if (request_id < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(&result, sizeof(cudaError_t)) < 0 ||
+        result != cudaSuccess ||
+        rpc_read(deviceCount, sizeof(int)) < 0 ||
+        rpc_end_request(&result, request_id) < 0)
+        return cudaErrorUnknown;
+
+    std::cout << "Client: Received device count from server: " << *deviceCount << std::endl;
+    return cudaSuccess;
 }
 
 std::unordered_map<std::string, void *> functionMap = {
