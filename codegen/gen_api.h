@@ -284,9 +284,3 @@
 
 #define RPC_cuGetProcAddress 283
 #define RPC_cudaGetDeviceCount 284
-#define RPC_cuDriverGetVersion 285
-#define RPC_cuGetExportTable 286
-#define RPC_cuModuleGetLoadingMode 287
-#define RPC_cuDeviceGetCount 288
-#define RPC_cuDeviceGet 289
-#define RPC_cuInit 290

@@ -1,18 +1,4 @@
-#include <arpa/inet.h>
-#include <cstdlib>
-#include <cstring>
-#include <functional>
-#include <iostream>
-#include <memory>
 #include <nvml.h>
-#include <future>
-#include <stdio.h>
-#include <string>
-#include <sys/socket.h>
-#include <thread>
-#include <unistd.h>
-#include <unordered_map>
-#include <pthread.h>
 
 #include <nvml.h>
 #include <cuda.h>

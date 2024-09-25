@@ -15,10 +15,10 @@
 #include <unistd.h>
 #include <unordered_map>
 #include <vector>
+#include <cuda.h>
 
 #include <unordered_map>
 
-#include "api.h"
 #include "codegen/gen_client.h"
 
 int sockfd = -1;

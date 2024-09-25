@@ -14,7 +14,6 @@
 #include <unordered_map>
 #include <pthread.h>
 
-#include "api.h"
 #include "codegen/gen_server.h"
 
 #define DEFAULT_PORT 14833
