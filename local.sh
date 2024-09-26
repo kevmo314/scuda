@@ -67,8 +67,24 @@ test_cuda_available() {
   if [[ "$output" == "True" ]]; then
     ansi_format "pass" "$pass_message"
   else
-    ansi_format "fail" "$fail_message"
-    exit 1
+    ansi_format "fail" "CUDA is not available. Expected True but got [$output]."
+  fi
+}
+
+test_tensor_to_cuda() {
+  output=$(LD_PRELOAD="$libscuda_path" python3 -c "
+import torch
+print('Creating a tensor...')
+tensor = torch.zeros(10, 10)
+print('Moving tensor to CUDA...')
+tensor = tensor.to('cuda:0')
+print('Tensor successfully moved to CUDA')
+" | tail -n 1)
+
+  if [[ "$output" == "Tensor successfully moved to CUDA" ]]; then
+    ansi_format "pass" "$pass_message"
+  else
+    ansi_format "fail" "Tensor failed. Got [$output]."
   fi
 }
 
@@ -76,32 +92,33 @@ test_cuda_available() {
 declare -A test_cuda_avail=(
   ["function"]="test_cuda_available"
   ["pass"]="CUDA is available."
-  ["fail"]="CUDA is not available. Expected True but got \$output."
 )
 
-#---- assign them to our associative arr ----#
-tests=("test_cuda_avail")
+declare -A test_tensor_to_cuda=(
+  ["function"]="test_tensor_to_cuda"
+  ["pass"]="Tensor moved to CUDA successfully."
+)
+
+#---- assign them to our associative array ----#
+tests=("test_cuda_avail" "test_tensor_to_cuda")
 
 test() {
   build
 
   echo -e "\n\033[1mRunning test(s)...\033[0m"
 
-  for test_name in "${tests[@]}"; do
-    function_name="${test_name}[function]"
-    pass_message="${test_name}[pass]"
-    fail_message="${test_name}[fail]"
+  for test in "${tests[@]}"; do
+    func_name=$(eval "echo \${${test}[function]}")
+    pass_message=$(eval "echo \${${test}[pass]}")
 
-    echo "$(ansi_format 'bold' "Running ${!function_name}...")"
-
-    "${!function_name}" "${!pass_message}" "${!fail_message}"
-  done
+    eval "$func_name \"$pass_message\""
+done
 }
 
 run() {
   build
 
-  LD_PRELOAD="$libscuda_path" python3 -c "import torch; "
+  LD_PRELOAD="$libscuda_path" python3 -c "import torch; print('Creating a tensor...'); tensor = torch.zeros(10, 10); print('Moving tensor to CUDA...'); tensor = tensor.to('cuda:0'); print('Tensor successfully moved to CUDA')"
 }
 
 # Main script logic using a switch case

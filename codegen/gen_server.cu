@@ -7113,6 +7113,36 @@ int handle_cudaGetDeviceCount(void *conn) {
     return result;
 }
 
+int handle_cuDevicePrimaryCtxGetState(void *conn) {
+    CUdevice dev;
+    unsigned int flags = 0;
+    int active = 0;
+
+    // Read the device identifier from the client
+    if (rpc_read(conn, &dev, sizeof(CUdevice)) < 0) {
+        return -1;
+    }
+
+    // Call the actual cuDevicePrimaryCtxGetState function
+    CUresult result = cuDevicePrimaryCtxGetState(dev, &flags, &active);
+
+    // Get the request ID to respond to the client
+    int request_id = rpc_end_request(conn);
+    if (request_id < 0) return -1;
+
+    // Send the response to the client
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &result, sizeof(CUresult)) < 0 ||
+        rpc_write(conn, &flags, sizeof(unsigned int)) < 0 ||
+        rpc_write(conn, &active, sizeof(int)) < 0)
+    {
+        return -1;
+    }
+
+    return result;
+}
+
+
 static RequestHandler opHandlers[] = {
     handle_nvmlInit_v2,
     handle_nvmlInitWithFlags,
@@ -7399,6 +7429,7 @@ static RequestHandler opHandlers[] = {
     handle_nvmlDeviceSetNvLinkDeviceLowPowerThreshold,
     handle_cuGetProcAddress,
     handle_cudaGetDeviceCount,
+    handle_cuDevicePrimaryCtxGetState,
 };
 
 RequestHandler get_handler(const int op)

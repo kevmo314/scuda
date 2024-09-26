@@ -281,6 +281,6 @@
 #define RPC_nvmlGpmMigSampleGet 280
 #define RPC_nvmlGpmQueryDeviceSupport 281
 #define RPC_nvmlDeviceSetNvLinkDeviceLowPowerThreshold 282
-
 #define RPC_cuGetProcAddress 283
 #define RPC_cudaGetDeviceCount 284
+#define RPC_cuDevicePrimaryCtxGetState 285
