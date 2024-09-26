@@ -9,9 +9,8 @@ from cxxheaderparser.types import (
 from typing import Optional
 
 IGNORE_FUNCTIONS = {
-    "nvmlDeviceCcuSetStreamState",
-    "nvmlDeviceCcuGetStreamState",
-    "cudaCreateChannelDesc",
+    "cuOccupancyMaxPotentialBlockSize",
+    "cuOccupancyMaxPotentialBlockSizeWithFlags",
 }
 
 
@@ -264,6 +263,7 @@ def main():
         for f in functions
         if f.return_type.format() in ["nvmlReturn_t", "CUresult", "cudaError_t"]
     ]
+    functions = [f for f in functions if f.name.format() not in IGNORE_FUNCTIONS]
 
     with open("gen_api.h", "w") as f:
         for i, function in enumerate(functions):
@@ -326,10 +326,19 @@ extern int rpc_end_request(void *return_value, const unsigned int request_id);
                     function, param
                 ):
                     # only write pointers if they don't have a heap allocation size (and thus are not server return params)
-                    f.write(
-                        "        rpc_write(%s, sizeof(%s)) < 0 ||\n"
-                        % (param.name, param.type.format())
-                    )
+                    const = param.type.ptr_to.const
+                    param.type.ptr_to.const = False
+                    if param.type.ptr_to.format() == "void":
+                        f.write(
+                            "        rpc_write(%s, sizeof(%s)) < 0 ||\n"
+                            % (param.name, param.type.format())
+                        )
+                    else:
+                        f.write(
+                            "        rpc_write(%s, sizeof(%s)) < 0 ||\n"
+                            % (param.name, param.type.ptr_to.format())
+                        )
+                    param.type.ptr_to.const = const
             # wait for response
             f.write("        rpc_wait_for_response(request_id) < 0 ||\n")
             # read responses back
@@ -345,10 +354,16 @@ extern int rpc_end_request(void *return_value, const unsigned int request_id);
                 if size:
                     f.write("        rpc_read(%s, %s) < 0 ||\n" % (param.name, size[0]))
                 else:
-                    f.write(
-                        "        rpc_read(%s, sizeof(%s)) < 0 ||\n"
-                        % (param.name.format(), param.type.format())
-                    )
+                    if param.type.ptr_to.format() == "void":
+                        f.write(
+                            "        rpc_read(%s, sizeof(%s)) < 0 ||\n"
+                            % (param.name.format(), param.type.format())
+                        )
+                    else:
+                        f.write(
+                            "        rpc_read(%s, sizeof(%s)) < 0 ||\n"
+                            % (param.name.format(), param.type.ptr_to.format())
+                        )
             f.write(
                 """        rpc_end_request(&return_value, request_id) < 0)
         return {error_const};
