@@ -269,7 +269,7 @@ def main():
         for i, function in enumerate(functions):
             f.write(
                 "#define RPC_{name} {index}\n".format(
-                    name=function.name.format(), index=i + 1
+                    name=function.name.format(), index=i
                 )
             )
 
