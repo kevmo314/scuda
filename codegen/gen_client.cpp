@@ -9941,67 +9941,6 @@ nvmlReturn_t nvmlGpmQueryDeviceSupport(nvmlDevice_t device, nvmlGpmSupport_t* gp
 }
 
 /**
-* Get counter collection unit stream state.
-*
-* %HOPPER_OR_NEWER%
-* Supported on Linux, Windows TCC.
-*
-* @param device                               The identifier of the target device
-* @param state                                Returns counter collection unit stream state
-*                                             NVML_COUNTER_COLLECTION_UNIT_STREAM_STATE_DISABLE or
-*                                             NVML_COUNTER_COLLECTION_UNIT_STREAM_STATE_ENABLE
-*
-* @return
-*         - \ref NVML_SUCCESS                 if \a current counter collection unit stream state were successfully queried
-*         - \ref NVML_ERROR_UNINITIALIZED     if the library has not been successfully initialized
-*         - \ref NVML_ERROR_INVALID_ARGUMENT  if \a  device is invalid or \a state is NULL
-*         - \ref NVML_ERROR_NOT_SUPPORTED     if this query is not supported by the device
-*/
-nvmlReturn_t nvmlDeviceCcuGetStreamState(nvmlDevice_t device, unsigned int* state) {
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceCcuGetStreamState);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(state, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(state, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-/**
-* Set counter collection unit stream state.
-*
-* %HOPPER_OR_NEWER%
-* Supported on Linux, Windows TCC.
-*
-* @param device                               The identifier of the target device
-* @param state                                Counter collection unit stream state,
-*                                             NVML_COUNTER_COLLECTION_UNIT_STREAM_STATE_DISABLE or
-*                                             NVML_COUNTER_COLLECTION_UNIT_STREAM_STATE_ENABLE
-*
-* @return
-*         - \ref NVML_SUCCESS                 if \a current counter collection unit stream state is successfully set
-*         - \ref NVML_ERROR_UNINITIALIZED     if the library has not been successfully initialized
-*         - \ref NVML_ERROR_INVALID_ARGUMENT  if \a device is invalid
-*         - \ref NVML_ERROR_NOT_SUPPORTED     if this query is not supported by the device
-*/
-nvmlReturn_t nvmlDeviceCcuSetStreamState(nvmlDevice_t device, unsigned int state) {
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceCcuSetStreamState);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&state, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-/**
 * Set NvLink Low Power Threshold for device.
 *
 * %HOPPER_OR_NEWER%
@@ -31021,85 +30960,6 @@ CUresult cuGraphicsUnmapResources(unsigned int count, CUgraphicsResource* resour
     return return_value;
 }
 
-/**
-* \brief Returns the requested driver API function pointer
-*
-* Returns in \p **pfn the address of the CUDA driver function for the requested
-* CUDA version and flags.
-*
-* The CUDA version is specified as (1000 * major + 10 * minor), so CUDA 11.2
-* should be specified as 11020. For a requested driver symbol, if the specified
-* CUDA version is greater than or equal to the CUDA version in which the driver symbol
-* was introduced, this API will return the function pointer to the corresponding
-* versioned function.
-*
-* The pointer returned by the API should be cast to a function pointer matching the
-* requested driver function's definition in the API header file. The function pointer
-* typedef can be picked up from the corresponding typedefs header file. For example,
-* cudaTypedefs.h consists of function pointer typedefs for driver APIs defined in cuda.h.
-*
-* The API will return ::CUDA_SUCCESS and set the returned \p pfn to NULL if the 
-* requested driver function is not supported on the platform, no ABI 
-* compatible driver function exists for the specified \p cudaVersion or if the 
-* driver symbol is invalid.
-*
-* It will also set the optional \p symbolStatus to one of the values in
-* ::CUdriverProcAddressQueryResult with the following meanings:
-* - ::CU_GET_PROC_ADDRESS_SUCCESS - The requested symbol was succesfully found based
-*   on input arguments and \p pfn is valid
-* - ::CU_GET_PROC_ADDRESS_SYMBOL_NOT_FOUND - The requested symbol was not found
-* - ::CU_GET_PROC_ADDRESS_VERSION_NOT_SUFFICIENT - The requested symbol was found but is
-*   not supported by cudaVersion specified
-*
-* The requested flags can be:
-* - ::CU_GET_PROC_ADDRESS_DEFAULT: This is the default mode. This is equivalent to
-*   ::CU_GET_PROC_ADDRESS_PER_THREAD_DEFAULT_STREAM if the code is compiled with
-*   --default-stream per-thread compilation flag or the macro CUDA_API_PER_THREAD_DEFAULT_STREAM
-*   is defined; ::CU_GET_PROC_ADDRESS_LEGACY_STREAM otherwise.
-* - ::CU_GET_PROC_ADDRESS_LEGACY_STREAM: This will enable the search for all driver symbols
-*   that match the requested driver symbol name except the corresponding per-thread versions.
-* - ::CU_GET_PROC_ADDRESS_PER_THREAD_DEFAULT_STREAM: This will enable the search for all
-*   driver symbols that match the requested driver symbol name including the per-thread
-*   versions. If a per-thread version is not found, the API will return the legacy version
-*   of the driver function.
-*
-* \param symbol - The base name of the driver API function to look for. As an example,
-*                 for the driver API ::cuMemAlloc_v2, \p symbol would be cuMemAlloc and
-*                 \p cudaVersion would be the ABI compatible CUDA version for the _v2 variant. 
-* \param pfn - Location to return the function pointer to the requested driver function
-* \param cudaVersion - The CUDA version to look for the requested driver symbol 
-* \param flags -  Flags to specify search options.
-* \param symbolStatus - Optional location to store the status of the search for
-*                       \p symbol based on \p cudaVersion. See ::CUdriverProcAddressQueryResult
-*                       for possible values.
-*
-* \return
-* ::CUDA_SUCCESS,
-* ::CUDA_ERROR_INVALID_VALUE,
-* ::CUDA_ERROR_NOT_SUPPORTED
-* \note_version_mixing
-*
-* \sa
-* ::cudaGetDriverEntryPoint
-*/
-CUresult cuGetProcAddress_v2(const char* symbol, void** pfn, int cudaVersion, cuuint64_t flags, CUdriverProcAddressQueryResult* symbolStatus) {
-    CUresult return_value;
-
-    int request_id = rpc_start_request(RPC_cuGetProcAddress_v2);
-    if (request_id < 0 ||
-        rpc_write(symbol, sizeof(char)) < 0 ||
-        rpc_write(pfn, sizeof(void*)) < 0 ||
-        rpc_write(&cudaVersion, sizeof(int)) < 0 ||
-        rpc_write(&flags, sizeof(cuuint64_t)) < 0 ||
-        rpc_write(symbolStatus, sizeof(CUdriverProcAddressQueryResult)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(pfn, sizeof(void*)) < 0 ||
-        rpc_read(symbolStatus, sizeof(CUdriverProcAddressQueryResult)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    return return_value;
-}
-
 CUresult cuGetExportTable(const void** ppExportTable, const CUuuid* pExportTableId) {
     CUresult return_value;
 
@@ -44720,8 +44580,6 @@ std::unordered_map<std::string, void *> functionMap = {
     {"nvmlGpmSampleGet", (void *)nvmlGpmSampleGet},
     {"nvmlGpmMigSampleGet", (void *)nvmlGpmMigSampleGet},
     {"nvmlGpmQueryDeviceSupport", (void *)nvmlGpmQueryDeviceSupport},
-    {"nvmlDeviceCcuGetStreamState", (void *)nvmlDeviceCcuGetStreamState},
-    {"nvmlDeviceCcuSetStreamState", (void *)nvmlDeviceCcuSetStreamState},
     {"nvmlDeviceSetNvLinkDeviceLowPowerThreshold", (void *)nvmlDeviceSetNvLinkDeviceLowPowerThreshold},
     {"cuGetErrorString", (void *)cuGetErrorString},
     {"cuGetErrorName", (void *)cuGetErrorName},
@@ -45099,7 +44957,6 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cuGraphicsResourceSetMapFlags_v2", (void *)cuGraphicsResourceSetMapFlags_v2},
     {"cuGraphicsMapResources", (void *)cuGraphicsMapResources},
     {"cuGraphicsUnmapResources", (void *)cuGraphicsUnmapResources},
-    {"cuGetProcAddress_v2", (void *)cuGetProcAddress_v2},
     {"cuGetExportTable", (void *)cuGetExportTable},
     {"cudaDeviceReset", (void *)cudaDeviceReset},
     {"cudaDeviceSynchronize", (void *)cudaDeviceSynchronize},

@@ -9,8 +9,12 @@ from cxxheaderparser.types import (
 from typing import Optional
 
 IGNORE_FUNCTIONS = {
+    "nvmlDeviceCcuGetStreamState",
+    "nvmlDeviceCcuSetStreamState",
     "cuOccupancyMaxPotentialBlockSize",
     "cuOccupancyMaxPotentialBlockSizeWithFlags",
+    "cuGetProcAddress",
+    "cuGetProcAddress_v2",
 }
 
 

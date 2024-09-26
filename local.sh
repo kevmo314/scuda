@@ -2,7 +2,7 @@
 
 libscuda_path="$(pwd)/libscuda.so"
 client_path="$(pwd)/client.cpp $(pwd)/codegen/gen_client.cpp"
-server_path="$(pwd)/server.cu $(pwd)/codegen/gen_server.cu"
+server_path="$(pwd)/server.cu $(pwd)/codegen/gen_server.cpp"
 server_out_path="$(pwd)/server.so"
 
 build() {
