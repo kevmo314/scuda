@@ -4151,8 +4151,31 @@ cudaError_t cudaGetDeviceCount(int *deviceCount) {
     return cudaSuccess;
 }
 
+CUresult cuDevicePrimaryCtxGetStateShim(CUdevice dev, unsigned int *flags, int *active) {
+    std::cout << "Client: Calling cuDevicePrimaryCtxGetStateShim" << std::endl;
+
+    if (!flags || !active) return CUDA_ERROR_INVALID_VALUE;
+
+    int request_id = rpc_start_request(RPC_cuDevicePrimaryCtxGetState);
+    CUresult result;
+
+    if (request_id < 0 ||
+        rpc_write(&dev, sizeof(CUdevice)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(&result, sizeof(CUresult)) < 0 ||
+        result != CUDA_SUCCESS ||
+        rpc_read(flags, sizeof(unsigned int)) < 0 ||
+        rpc_read(active, sizeof(int)) < 0 ||
+        rpc_end_request(&result, request_id) < 0)
+        return CUDA_ERROR_UNKNOWN;
+
+    std::cout << "Client: Received primary context state from server. Flags: " << *flags << ", Active: " << *active << std::endl;
+    return CUDA_SUCCESS;
+}
+
 std::unordered_map<std::string, void *> functionMap = {
     {"nvmlInit_v2", (void *)nvmlInit_v2},
+    {"nvmlInit", (void *)nvmlInit_v2},
     {"nvmlInitWithFlags", (void *)nvmlInitWithFlags},
     {"nvmlShutdown", (void *)nvmlShutdown},
     {"nvmlSystemGetDriverVersion", (void *)nvmlSystemGetDriverVersion},
@@ -4435,6 +4458,7 @@ std::unordered_map<std::string, void *> functionMap = {
     {"nvmlGpmMigSampleGet", (void *)nvmlGpmMigSampleGet},
     {"nvmlGpmQueryDeviceSupport", (void *)nvmlGpmQueryDeviceSupport},
     {"nvmlDeviceSetNvLinkDeviceLowPowerThreshold", (void *)nvmlDeviceSetNvLinkDeviceLowPowerThreshold},
+    {"cuDevicePrimaryCtxGetState", (void *)cuDevicePrimaryCtxGetStateShim}
 };
 
 void *get_function_pointer(const char *name)
