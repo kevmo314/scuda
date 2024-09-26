@@ -1,394 +1,565 @@
-import io
-import sys
-from pycparser import parse_file, c_ast
+from cxxheaderparser.simple import parse_file, ParsedData, ParserOptions
+from cxxheaderparser.preprocessor import make_gcc_preprocessor
+from cxxheaderparser.types import (
+    Function,
+    Parameter,
+    Pointer,
+    Type,
+)
 from typing import Optional
 
 IGNORE_FUNCTIONS = {
     "nvmlDeviceCcuSetStreamState",
     "nvmlDeviceCcuGetStreamState",
+    "cudaCreateChannelDesc",
 }
 
-def heap_allocation_size(node: c_ast.FuncDecl, p: c_ast.PtrDecl) -> Optional[str]:
+
+def heap_allocation_size(function: Function, param: Parameter) -> Optional[str]:
     """
     Returns the size of heap-allocated parameters. Because there is no convention in
     Nvidia's API for how these parameters are defined, we need to manually specify
     which ones are heap allocated and how much memory they require.
     """
-    if node.name == "nvmlSystemGetDriverVersion":
-        if p.name == "version":
+    function_name = function.name.format()
+    parameter_name = param.name.format()
+    if function_name == "nvmlSystemGetDriverVersion":
+        if parameter_name == "version":
             return ("length * sizeof(char)", "length * sizeof(char)")
-    if node.name == "nvmlSystemGetNVMLVersion":
-        if p.name == "version":
+    if function_name == "nvmlSystemGetNVMLVersion":
+        if parameter_name == "version":
             return ("length * sizeof(char)", "length * sizeof(char)")
-    if node.name == "nvmlSystemGetProcessName":
-        if p.name == "name":
+    if function_name == "nvmlSystemGetProcessName":
+        if parameter_name == "name":
             return ("length * sizeof(char)", "length * sizeof(char)")
-    if node.name == "nvmlSystemGetHicVersion":
-        if p.name == "hwbcEntries":
-            return ("*hwbcCount * sizeof(nvmlHwbcEntry_t)", "hwbcCount * sizeof(nvmlHwbcEntry_t)")
-    if node.name == "nvmlUnitGetDevices":
-        if p.name == "devices":
-            return ("*deviceCount * sizeof(nvmlDevice_t)", "deviceCount * sizeof(nvmlDevice_t)")
-    if node.name == "nvmlDeviceGetName":
-        if p.name == "name":
+    if function_name == "nvmlSystemGetHicVersion":
+        if parameter_name == "hwbcEntries":
+            return (
+                "*hwbcCount * sizeof(nvmlHwbcEntry_t)",
+                "hwbcCount * sizeof(nvmlHwbcEntry_t)",
+            )
+    if function_name == "nvmlUnitGetDevices":
+        if parameter_name == "devices":
+            return (
+                "*deviceCount * sizeof(nvmlDevice_t)",
+                "deviceCount * sizeof(nvmlDevice_t)",
+            )
+    if function_name == "nvmlDeviceGetName":
+        if parameter_name == "name":
             return ("length * sizeof(char)", "length * sizeof(char)")
-    if node.name == "nvmlDeviceGetSerial":
-        if p.name == "serial":
+    if function_name == "nvmlDeviceGetSerial":
+        if parameter_name == "serial":
             return ("length * sizeof(char)", "length * sizeof(char)")
-    if node.name == "nvmlDeviceGetMemoryAffinity":
-        if p.name == "nodeSet":
-            return ("nodeSetSize * sizeof(unsigned long)", "nodeSetSize * sizeof(unsigned long)")
-    if node.name == "nvmlDeviceGetCpuAffinityWithinScope":
-        if p.name == "cpuSet":
-            return ("cpuSetSize * sizeof(unsigned long)", "cpuSetSize * sizeof(unsigned long)")
-    if node.name == "nvmlDeviceGetCpuAffinity":
-        if p.name == "cpuSet":
-            return ("cpuSetSize * sizeof(unsigned long)", "cpuSetSize * sizeof(unsigned long)")
-    if node.name == "nvmlDeviceGetTopologyNearestGpus":
-        if p.name == "deviceArray":
+    if function_name == "nvmlDeviceGetMemoryAffinity":
+        if parameter_name == "nodeSet":
+            return (
+                "nodeSetSize * sizeof(unsigned long)",
+                "nodeSetSize * sizeof(unsigned long)",
+            )
+    if function_name == "nvmlDeviceGetCpuAffinityWithinScope":
+        if parameter_name == "cpuSet":
+            return (
+                "cpuSetSize * sizeof(unsigned long)",
+                "cpuSetSize * sizeof(unsigned long)",
+            )
+    if function_name == "nvmlDeviceGetCpuAffinity":
+        if parameter_name == "cpuSet":
+            return (
+                "cpuSetSize * sizeof(unsigned long)",
+                "cpuSetSize * sizeof(unsigned long)",
+            )
+    if function_name == "nvmlDeviceGetTopologyNearestGpus":
+        if parameter_name == "deviceArray":
             return ("*count * sizeof(nvmlDevice_t)", "count * sizeof(nvmlDevice_t)")
-    if node.name == "nvmlDeviceGetUUID":
-        if p.name == "uuid":
+    if function_name == "nvmlDeviceGetUUID":
+        if parameter_name == "uuid":
             return ("length * sizeof(char)", "length * sizeof(char)")
-    if node.name == "nvmlVgpuInstanceGetMdevUUID":
-        if p.name == "mdevUuid":
+    if function_name == "nvmlVgpuInstanceGetMdevUUID":
+        if parameter_name == "mdevUuid":
             return ("size * sizeof(char)", "size * sizeof(char)")
-    if node.name == "nvmlDeviceGetBoardPartNumber":
-        if p.name == "partNumber":
+    if function_name == "nvmlDeviceGetBoardPartNumber":
+        if parameter_name == "partNumber":
             return ("length * sizeof(char)", "length * sizeof(char)")
-    if node.name == "nvmlDeviceGetInforomVersion":
-        if p.name == "version":
+    if function_name == "nvmlDeviceGetInforomVersion":
+        if parameter_name == "version":
             return ("length * sizeof(char)", "length * sizeof(char)")
-    if node.name == "nvmlDeviceGetInforomImageVersion":
-        if p.name == "version":
+    if function_name == "nvmlDeviceGetInforomImageVersion":
+        if parameter_name == "version":
             return ("length * sizeof(char)", "length * sizeof(char)")
-    if node.name == "nvmlDeviceGetEncoderSessions":
-        if p.name == "sessionInfos":
-            return ("*sessionCount * sizeof(nvmlEncoderSessionInfo_t)", "sessionCount * sizeof(nvmlEncoderSessionInfo_t)")
-    if node.name == "nvmlDeviceGetVbiosVersion":
-        if p.name == "version":
+    if function_name == "nvmlDeviceGetEncoderSessions":
+        if parameter_name == "sessionInfos":
+            return (
+                "*sessionCount * sizeof(nvmlEncoderSessionInfo_t)",
+                "sessionCount * sizeof(nvmlEncoderSessionInfo_t)",
+            )
+    if function_name == "nvmlDeviceGetVbiosVersion":
+        if parameter_name == "version":
             return ("length * sizeof(char)", "length * sizeof(char)")
-    if node.name == "nvmlDeviceGetComputeRunningProcesses_v3":
-        if p.name == "infos":
-            return ("*infoCount * sizeof(nvmlProcessInfo_t)", "infoCount * sizeof(nvmlProcessInfo_t)")
-    if node.name == "nvmlDeviceGetGraphicsRunningProcesses_v3":
-        if p.name == "infos":
-            return ("*infoCount * sizeof(nvmlProcessInfo_t)", "infoCount * sizeof(nvmlProcessInfo_t)")
-    if node.name == "nvmlDeviceGetMPSComputeRunningProcesses_v3":
-        if p.name == "infos":
-            return ("*infoCount * sizeof(nvmlProcessInfo_t)", "infoCount * sizeof(nvmlProcessInfo_t)")
-    if node.name == "nvmlDeviceGetSamples":
-        if p.name == "samples":
-            return ("*sampleCount * sizeof(nvmlSample_t)", "sampleCount * sizeof(nvmlSample_t)")
-    if node.name == "nvmlDeviceGetAccountingPids":
-        if p.name == "pids":
+    if function_name == "nvmlDeviceGetComputeRunningProcesses_v3":
+        if parameter_name == "infos":
+            return (
+                "*infoCount * sizeof(nvmlProcessInfo_t)",
+                "infoCount * sizeof(nvmlProcessInfo_t)",
+            )
+    if function_name == "nvmlDeviceGetGraphicsRunningProcesses_v3":
+        if parameter_name == "infos":
+            return (
+                "*infoCount * sizeof(nvmlProcessInfo_t)",
+                "infoCount * sizeof(nvmlProcessInfo_t)",
+            )
+    if function_name == "nvmlDeviceGetMPSComputeRunningProcesses_v3":
+        if parameter_name == "infos":
+            return (
+                "*infoCount * sizeof(nvmlProcessInfo_t)",
+                "infoCount * sizeof(nvmlProcessInfo_t)",
+            )
+    if function_name == "nvmlDeviceGetSamples":
+        if parameter_name == "samples":
+            return (
+                "*sampleCount * sizeof(nvmlSample_t)",
+                "sampleCount * sizeof(nvmlSample_t)",
+            )
+    if function_name == "nvmlDeviceGetAccountingPids":
+        if parameter_name == "pids":
             return ("*count * sizeof(unsigned int)", "count * sizeof(unsigned int)")
-    if node.name == "nvmlDeviceGetRetiredPages":
-        if p.name == "addresses":
-            return ("*pageCount * sizeof(unsigned long long)", "pageCount * sizeof(unsigned long long)")
-    if node.name == "nvmlDeviceGetRetiredPages_v2":
-        if p.name == "addresses":
-            return ("*pageCount * sizeof(unsigned long long)", "pageCount * sizeof(unsigned long long)")
-    if node.name == "nvmlDeviceGetFieldValues":
-        if p.name == "values":
-            return ("valuesCount * sizeof(nvmlFieldValue_t)", "valuesCount * sizeof(nvmlFieldValue_t)")
-    if node.name == "nvmlDeviceClearFieldValues":
-        if p.name == "values":
-            return ("valuesCount * sizeof(nvmlFieldValue_t)", "valuesCount * sizeof(nvmlFieldValue_t)")
-    if node.name == "nvmlDeviceGetSupportedVgpus":
-        if p.name == "vgpuTypeIds":
-            return ("*vgpuCount * sizeof(nvmlVgpuTypeId_t)", "vgpuCount * sizeof(nvmlVgpuTypeId_t)")
-    if node.name == "nvmlDeviceGetCreatableVgpus":
-        if p.name == "vgpuTypeIds":
-            return ("*vgpuCount * sizeof(nvmlVgpuTypeId_t)", "vgpuCount * sizeof(nvmlVgpuTypeId_t)")
-    if node.name == "nvmlVgpuTypeGetName":
-        if p.name == "vgpuTypeName":
+    if function_name == "nvmlDeviceGetRetiredPages":
+        if parameter_name == "addresses":
+            return (
+                "*pageCount * sizeof(unsigned long long)",
+                "pageCount * sizeof(unsigned long long)",
+            )
+    if function_name == "nvmlDeviceGetRetiredPages_v2":
+        if parameter_name == "addresses":
+            return (
+                "*pageCount * sizeof(unsigned long long)",
+                "pageCount * sizeof(unsigned long long)",
+            )
+    if function_name == "nvmlDeviceGetFieldValues":
+        if parameter_name == "values":
+            return (
+                "valuesCount * sizeof(nvmlFieldValue_t)",
+                "valuesCount * sizeof(nvmlFieldValue_t)",
+            )
+    if function_name == "nvmlDeviceClearFieldValues":
+        if parameter_name == "values":
+            return (
+                "valuesCount * sizeof(nvmlFieldValue_t)",
+                "valuesCount * sizeof(nvmlFieldValue_t)",
+            )
+    if function_name == "nvmlDeviceGetSupportedVgpus":
+        if parameter_name == "vgpuTypeIds":
+            return (
+                "*vgpuCount * sizeof(nvmlVgpuTypeId_t)",
+                "vgpuCount * sizeof(nvmlVgpuTypeId_t)",
+            )
+    if function_name == "nvmlDeviceGetCreatableVgpus":
+        if parameter_name == "vgpuTypeIds":
+            return (
+                "*vgpuCount * sizeof(nvmlVgpuTypeId_t)",
+                "vgpuCount * sizeof(nvmlVgpuTypeId_t)",
+            )
+    if function_name == "nvmlVgpuTypeGetName":
+        if parameter_name == "vgpuTypeName":
             return ("*size * sizeof(char)", "size * sizeof(char)")
-    if node.name == "nvmlVgpuTypeGetLicense":
-        if p.name == "vgpuTypeLicenseString":
+    if function_name == "nvmlVgpuTypeGetLicense":
+        if parameter_name == "vgpuTypeLicenseString":
             return ("size * sizeof(char)", "size * sizeof(char)")
-    if node.name == "nvmlVgpuTypeGetMaxInstances":
-        if p.name == "vgpuTypeId":
-            return ("*vgpuInstanceCount * sizeof(unsigned int)", "vgpuInstanceCount * sizeof(unsigned int)")
-    if node.name == "nvmlDeviceGetActiveVgpus":
-        if p.name == "vgpuInstances":
-            return ("*vgpuCount * sizeof(nvmlVgpuInstance_t)", "vgpuCount * sizeof(nvmlVgpuInstance_t)")
-    if node.name == "nvmlVgpuInstanceGetVmID":
-        if p.name == "vmId":
+    if function_name == "nvmlVgpuTypeGetMaxInstances":
+        if parameter_name == "vgpuTypeId":
+            return (
+                "*vgpuInstanceCount * sizeof(unsigned int)",
+                "vgpuInstanceCount * sizeof(unsigned int)",
+            )
+    if function_name == "nvmlDeviceGetActiveVgpus":
+        if parameter_name == "vgpuInstances":
+            return (
+                "*vgpuCount * sizeof(nvmlVgpuInstance_t)",
+                "vgpuCount * sizeof(nvmlVgpuInstance_t)",
+            )
+    if function_name == "nvmlVgpuInstanceGetVmID":
+        if parameter_name == "vmId":
             return ("size * sizeof(char)", "size * sizeof(char)")
-    if node.name == "nvmlVgpuInstanceGetUUID":
-        if p.name == "uuid":
+    if function_name == "nvmlVgpuInstanceGetUUID":
+        if parameter_name == "uuid":
             return ("size * sizeof(char)", "size * sizeof(char)")
-    if node.name == "nvmlVgpuInstanceGetVmDriverVersion":
-        if p.name == "version":
+    if function_name == "nvmlVgpuInstanceGetVmDriverVersion":
+        if parameter_name == "version":
             return ("length * sizeof(char)", "length * sizeof(char)")
-    if node.name == "nvmlVgpuInstanceGetGpuPciId":
-        if p.name == "vgpuPciId":
+    if function_name == "nvmlVgpuInstanceGetGpuPciId":
+        if parameter_name == "vgpuPciId":
             return ("*length * sizeof(char)", "length * sizeof(char)")
-    if node.name == "nvmlDeviceGetPgpuMetadataString":
-        if p.name == "pgpuMetadata":
+    if function_name == "nvmlDeviceGetPgpuMetadataString":
+        if parameter_name == "pgpuMetadata":
             return ("*bufferSize * sizeof(char)", "bufferSize * sizeof(char)")
-    if node.name == "nvmlDeviceGetVgpuUtilization":
-        if p.name == "utilizationSamples":
-            return ("*vgpuInstanceSamplesCount * sizeof(nvmlVgpuInstanceUtilizationSample_t)", "vgpuInstanceSamplesCount * sizeof(nvmlVgpuInstanceUtilizationSample_t)")
-    if node.name == "nvmlDeviceGetVgpuProcessUtilization":
-        if p.name == "utilizationSamples":
-            return ("*vgpuProcessSamplesCount * sizeof(nvmlVgpuInstanceUtilizationSample_t)", "vgpuProcessSamplesCount * sizeof(nvmlVgpuInstanceUtilizationSample_t)")
-    if node.name == "nvmlVgpuInstanceGetAccountingPids":
-        if p.name == "pids":
+    if function_name == "nvmlDeviceGetVgpuUtilization":
+        if parameter_name == "utilizationSamples":
+            return (
+                "*vgpuInstanceSamplesCount * sizeof(nvmlVgpuInstanceUtilizationSample_t)",
+                "vgpuInstanceSamplesCount * sizeof(nvmlVgpuInstanceUtilizationSample_t)",
+            )
+    if function_name == "nvmlDeviceGetVgpuProcessUtilization":
+        if parameter_name == "utilizationSamples":
+            return (
+                "*vgpuProcessSamplesCount * sizeof(nvmlVgpuInstanceUtilizationSample_t)",
+                "vgpuProcessSamplesCount * sizeof(nvmlVgpuInstanceUtilizationSample_t)",
+            )
+    if function_name == "nvmlVgpuInstanceGetAccountingPids":
+        if parameter_name == "pids":
             return ("*count * sizeof(unsigned int)", "count * sizeof(unsigned int)")
-    if node.name == "nvmlDeviceGetGpuInstancePossiblePlacements_v2":
-        if p.name == "placements":
-            return ("*count * sizeof(nvmlGpuInstancePlacement_t)", "count * sizeof(nvmlGpuInstancePlacement_t)")
-    if node.name == "nvmlDeviceGetGpuInstances":
-        if p.name == "gpuInstances":
-            return ("*count * sizeof(nvmlGpuInstance_t)", "count * sizeof(nvmlGpuInstance_t)")
-    if node.name == "nvmlGpuInstanceGetComputeInstancePossiblePlacements":
-        if p.name == "gpuInstances":
-            return ("*count * sizeof(nvmlComputeInstancePlacement_t)", "count * sizeof(nvmlComputeInstancePlacement_t)")
-    if node.name == "nvmlGpuInstanceGetComputeInstances":
-        if p.name == "computeInstances":
-            return ("*count * sizeof(nvmlComputeInstance_t)", "count * sizeof(nvmlComputeInstance_t)")
+    if function_name == "nvmlDeviceGetGpuInstancePossiblePlacements_v2":
+        if parameter_name == "placements":
+            return (
+                "*count * sizeof(nvmlGpuInstancePlacement_t)",
+                "count * sizeof(nvmlGpuInstancePlacement_t)",
+            )
+    if function_name == "nvmlDeviceGetGpuInstances":
+        if parameter_name == "gpuInstances":
+            return (
+                "*count * sizeof(nvmlGpuInstance_t)",
+                "count * sizeof(nvmlGpuInstance_t)",
+            )
+    if function_name == "nvmlGpuInstanceGetComputeInstancePossiblePlacements":
+        if parameter_name == "gpuInstances":
+            return (
+                "*count * sizeof(nvmlComputeInstancePlacement_t)",
+                "count * sizeof(nvmlComputeInstancePlacement_t)",
+            )
+    if function_name == "nvmlGpuInstanceGetComputeInstances":
+        if parameter_name == "computeInstances":
+            return (
+                "*count * sizeof(nvmlComputeInstance_t)",
+                "count * sizeof(nvmlComputeInstance_t)",
+            )
 
-def format_param(param):
-    if isinstance(param, c_ast.TypeDecl):
-        return '%s %s' % (' '.join(param.type.names), param.declname)
-    if isinstance(param, c_ast.PtrDecl):
-        return '%s *%s' % (' '.join(param.type.quals + param.type.type.names), param.type.declname)
-    if isinstance(param, c_ast.Typename):
-        return '%s' % (' '.join(param.type.type.names))
-    if isinstance(param, c_ast.Decl):
-        return format_param(param.type)
-    print(param)
-    raise NotImplementedError('Unsupported param type: %s' % type(param))
 
-def format_type_name(param):
-    if isinstance(param, c_ast.TypeDecl):
-        return ' '.join(param.type.names)
-    if isinstance(param, c_ast.PtrDecl):
-        return ' '.join(param.type.type.names)
-    if isinstance(param, c_ast.Typename):
-        return ' '.join(param.type.type.names)
-    if isinstance(param, c_ast.Decl):
-        return format_type_name(param.type)
-    print(param)
-    raise NotImplementedError('Unsupported param type: %s' % type(param))
+def error_const(return_type: str) -> str:
+    if return_type == "nvmlReturn_t":
+        return "NVML_ERROR_GPU_IS_LOST"
+    if return_type == "CUresult":
+        return "CUDA_ERROR_DEVICE_UNAVAILABLE"
+    if return_type == "cudaError_t":
+        return "cudaErrorDevicesUnavailable"
+    raise NotImplementedError("Unknown return type: %s" % return_type)
 
-class ClientCodegenVisitor(c_ast.NodeVisitor):
-    def __init__(self, sink: io.IOBase):
-        self.sink = sink
-        self.sink.write("#include <nvml.h>\n")
-        self.sink.write("#include <string>\n");
-        self.sink.write("#include <unordered_map>\n\n")
-        self.sink.write("#include \"gen_api.h\"\n\n")
 
-        self.sink.write("extern int rpc_start_request(const unsigned int request);\n");
-        self.sink.write("extern int rpc_write(const void *data, const size_t size);\n");
-        self.sink.write("extern int rpc_read(void *data, const size_t size);\n");
-        self.sink.write("extern int rpc_wait_for_response(const unsigned int request_id);\n");
-        self.sink.write("extern int rpc_end_request(void *return_value, const unsigned int request_id);\n\n");
-    
-        self.functions = []
+def main():
+    options = ParserOptions(preprocessor=make_gcc_preprocessor())
 
-    def close(self):
-        self.sink.write('std::unordered_map<std::string, void *> functionMap = {\n')
-        for f in self.functions:
-            self.sink.write('    {\"%s\", (void *)%s},\n' % (f, f))
-        self.sink.write('};\n\n')
-        
-        self.sink.write('void *get_function_pointer(const char *name)\n')
-        self.sink.write('{\n')
-        self.sink.write('    auto it = functionMap.find(name);\n')
-        self.sink.write('    if (it != functionMap.end())\n')
-        self.sink.write('        return it->second;\n')
-        self.sink.write('    return nullptr;\n')
-        self.sink.write('}\n')
-        
-    def visit_Decl(self, node):
-        if not isinstance(node.type, c_ast.FuncDecl):
-            return
-        return_type = node.type.type.type
-        if not isinstance(return_type, c_ast.IdentifierType):
-            return
-        params = node.type.args.params if node.type.args else []
+    nvml_ast: ParsedData = parse_file("/usr/include/nvml.h", options=options)
+    cuda_ast: ParsedData = parse_file("/usr/include/cuda.h", options=options)
+    cudart_ast: ParsedData = parse_file(
+        "/usr/include/cuda_runtime_api.h", options=options
+    )
 
-        if node.name in IGNORE_FUNCTIONS:
-            return
+    functions = (
+        nvml_ast.namespace.functions
+        + cuda_ast.namespace.functions
+        + cudart_ast.namespace.functions
+    )
+    for f in functions:
+        if f.return_type.format() not in ["nvmlReturn_t", "CUresult", "cudaError_t"]:
+            print("Skipping function: %s" % f.name.format())
+    functions = [
+        f
+        for f in functions
+        if f.return_type.format() in ["nvmlReturn_t", "CUresult", "cudaError_t"]
+    ]
 
-        # construct the function signature
-        self.sink.write('{return_type} {name}({params})\n'.format(
-            return_type=return_type.names[0],
-            name=node.name,
-            params=', '.join(format_param(p) for p in params)
-        ))
-        self.functions.append(node.name)
-        self.sink.write('{\n')
-        self.sink.write('    int request_id = rpc_start_request(RPC_%s);\n' % node.name)
-        self.sink.write('    %s return_value;\n' % return_type.names[0])
-        self.sink.write('    if (request_id < 0 ||\n')
-        # write the entire parameter list as a block of memory
-        for p in params:
-            if p.name is None:
-                continue
-            if isinstance(p.type, c_ast.TypeDecl):
-                self.sink.write('        rpc_write(&%s, sizeof(%s)) < 0 ||\n' % (p.name, format_type_name(p.type)))
-            if isinstance(p.type, c_ast.PtrDecl) and not heap_allocation_size(node, p):
-                self.sink.write('        rpc_write(%s, sizeof(%s)) < 0 ||\n' % (p.name, format_type_name(p.type)))
-        ptrs = [p for p in params if isinstance(p.type, c_ast.PtrDecl) and not heap_allocation_size(node, p)]
-        self.sink.write('        rpc_wait_for_response(request_id) < 0 ||\n')
-        for p in params:
-            if p.name is None or not isinstance(p.type, c_ast.PtrDecl) or 'const' in p.type.type.quals:
-                continue
-            size = heap_allocation_size(node, p)
-            if size:
-                self.sink.write('        rpc_read(%s, %s) < 0 ||\n' % (p.name, size[0]))
-            else:
-                self.sink.write('        rpc_read(%s, sizeof(%s)) < 0 ||\n' % (p.name, format_type_name(p.type)))
-        self.sink.write('        rpc_end_request(&return_value, request_id) < 0)\n')
-        self.sink.write('        return NVML_ERROR_GPU_IS_LOST;\n')
-        self.sink.write('    return return_value;\n')
-        self.sink.write('}\n\n')
+    with open("gen_api.h", "w") as f:
+        for i, function in enumerate(functions):
+            f.write(
+                "#define RPC_{name} {index}\n".format(
+                    name=function.name.format(), index=i + 1
+                )
+            )
 
-class ServerCodegenVisitor(c_ast.NodeVisitor):
-    def __init__(self, sink: io.IOBase):
-        self.sink = sink
-        self.sink.write("#include <nvml.h>\n\n")
-        self.sink.write("#include \"gen_api.h\"\n")
-        self.sink.write("#include \"gen_server.h\"\n\n")
+    with open("gen_client.cpp", "w") as f:
+        f.write(
+            """
+// Generated code.
 
-        self.sink.write("extern int rpc_read(const void *conn, void *data, const size_t size);\n");
-        self.sink.write("extern int rpc_write(const void *conn, const void *data, const size_t size);\n");
-        self.sink.write("extern int rpc_end_request(const void *conn);\n");
-        self.sink.write("extern int rpc_start_response(const void *conn, const int request_id);\n");
-    
-        self.functions = []
+#include <cuda.h>
+#include <cuda_runtime_api.h>
+#include <nvml.h>
+                
+#include <string>
+#include <unordered_map>
 
-    def close(self):
-        self.sink.write('static RequestHandler opHandlers[] = {\n')
-        for f in self.functions:
-            self.sink.write('    handle_%s,\n' % (f))
-        self.sink.write('};\n\n')
-        
-        self.sink.write('RequestHandler get_handler(const int op)\n')
-        self.sink.write('{\n')
-        self.sink.write('    return opHandlers[op];\n')
-        self.sink.write('}\n')
-        
-    def visit_Decl(self, node):
-        if not isinstance(node.type, c_ast.FuncDecl):
-            return
-        return_type = node.type.type.type
-        if not isinstance(return_type, c_ast.IdentifierType):
-            return
-        params = node.type.args.params if node.type.args else []
+#include "gen_api.h"
 
-        if node.name in IGNORE_FUNCTIONS:
-            return
+extern int rpc_start_request(const unsigned int request);
+extern int rpc_write(const void *data, const size_t size);
+extern int rpc_read(void *data, const size_t size);
+extern int rpc_wait_for_response(const unsigned int request_id);
+extern int rpc_end_request(void *return_value, const unsigned int request_id);
 
-        # construct the function signature
-        self.sink.write('int handle_{name}(void *conn)\n'.format(name=node.name))
-        self.sink.write('{\n')
-        self.functions.append(node.name)
+""".lstrip()
+        )
 
-        # read non-heap-allocated variables
-        stack_vars = [p for p in params if p.name is not None and isinstance(p.type, c_ast.TypeDecl) or (isinstance(p.type, c_ast.PtrDecl) and not heap_allocation_size(node, p))]
-        heap_vars = [p for p in params if p.name is not None and isinstance(p.type, c_ast.PtrDecl) and heap_allocation_size(node, p)]
-        if len(stack_vars) > 0:
-            for p in stack_vars:
-                self.sink.write('    %s %s;\n' % (format_type_name(p.type), p.name))
-            self.sink.write('\n')
-            for i, p in enumerate(stack_vars):
-                self.sink.write('%srpc_read(conn, &%s, sizeof(%s)) < 0%s' % (
-                    '        ' if i > 0 else '    if (', p.name, format_type_name(p.type), ' ||\n' if i < len(stack_vars) - 1 else ')\n'))
-            self.sink.write('        return -1;\n\n')
+        for i, function in enumerate(functions):
+            # construct the function signature
+            f.write(
+                """
+{doxygen}{return_type} {name}({params}) {{
+    {return_type} return_value;
 
-        self.sink.write('    int request_id = rpc_end_request(conn);\n')
-        self.sink.write('    if (request_id < 0)\n')
-        self.sink.write('        return -1;\n\n')
-
-        # malloc heap-allocated variables
-        if len(heap_vars) > 0:
-            for p in heap_vars:
-                size = heap_allocation_size(node, p)
-                if not size:
+    int request_id = rpc_start_request(RPC_{name});
+    if (request_id < 0 ||\n""".format(
+                    doxygen=function.doxygen + "\n" if function.doxygen else "",
+                    return_type=function.return_type.format(),
+                    name=function.name.format(),
+                    params=", ".join(
+                        p.type.format_decl(p.name) for p in function.parameters
+                    ),
+                ).lstrip()
+            )
+            # write the entire parameter list as a block of memory
+            for param in function.parameters:
+                if not param.name:
                     continue
-                self.sink.write('    %s *%s = (%s *)malloc(%s);\n' % (format_type_name(p.type), p.name, format_type_name(p.type), size[1]))
-            self.sink.write('\n')
-        return_type = node.type.type.type
-
-        # call the function
-        self.sink.write('    %s result = %s(' % (return_type.names[0], node.name))
-        for i, p in enumerate(params):
-            if p.name is None:
-                continue
-            if isinstance(p.type, c_ast.PtrDecl) and not heap_allocation_size(node, p):
-                self.sink.write('&%s' % p.name)
-            else:
-                self.sink.write('%s' % p.name)
-            if i < len(params) - 1:
-                self.sink.write(', ')
-        self.sink.write(');\n\n')
-
-
-        self.sink.write('    if (rpc_start_response(conn, request_id) < 0)\n')
-        self.sink.write('        return -1;\n\n')
-
-        # write pointer vars
-        ptr_vars = [p for p in params if p.name is not None and isinstance(p.type, c_ast.PtrDecl) and 'const' not in p.type.type.quals]
-        if len(ptr_vars) > 0:
-            for i, p in enumerate(ptr_vars):
-                size = heap_allocation_size(node, p)
+                if isinstance(param.type, Type):
+                    f.write(
+                        "        rpc_write(&%s, sizeof(%s)) < 0 ||\n"
+                        % (param.name, param.type.format())
+                    )
+                if isinstance(param.type, Pointer) and not heap_allocation_size(
+                    function, param
+                ):
+                    # only write pointers if they don't have a heap allocation size (and thus are not server return params)
+                    f.write(
+                        "        rpc_write(%s, sizeof(%s)) < 0 ||\n"
+                        % (param.name, param.type.format())
+                    )
+            # wait for response
+            f.write("        rpc_wait_for_response(request_id) < 0 ||\n")
+            # read responses back
+            for param in function.parameters:
+                if (
+                    param.name is None
+                    or not isinstance(param.type, Pointer)
+                    or param.type.ptr_to.const
+                ):
+                    # only consider non-const pointers for return values
+                    continue
+                size = heap_allocation_size(function, param)
                 if size:
-                    self.sink.write('%srpc_write(conn, %s, %s) < 0%s' % (
-                        '        ' if i > 0 else '    if (', p.name, size[1], ' ||\n' if i < len(ptr_vars) - 1 else ')\n'))
+                    f.write("        rpc_read(%s, %s) < 0 ||\n" % (param.name, size[0]))
                 else:
-                    self.sink.write('%srpc_write(conn, &%s, sizeof(%s)) < 0%s' % (
-                        '        ' if i > 0 else '    if (', p.name, format_type_name(p.type), ' ||\n' if i < len(ptr_vars) - 1 else ')\n'))
-            self.sink.write('        return -1;\n\n')
-        self.sink.write('    return result;\n')
-        self.sink.write('}\n\n')
+                    f.write(
+                        "        rpc_read(%s, sizeof(%s)) < 0 ||\n"
+                        % (param.name.format(), param.type.format())
+                    )
+            f.write(
+                """        rpc_end_request(&return_value, request_id) < 0)
+        return {error_const};
+    return return_value;
+}}
 
-class HeaderCodegenVisitor(c_ast.NodeVisitor):
-    def __init__(self, sink: io.IOBase):
-        self.sink = sink
-        self.index = 0
-        
-    def visit_Decl(self, node):
-        if not isinstance(node.type, c_ast.FuncDecl):
-            return
-        return_type = node.type.type.type
-        if not isinstance(return_type, c_ast.IdentifierType):
-            return
+""".format(
+                    error_const=error_const(function.return_type.format())
+                )
+            )
+        # write the trailer
+        f.write(
+            """
+std::unordered_map<std::string, void *> functionMap = {
+"""
+        )
+        for function in functions:
+            f.write(
+                '    {"%s", (void *)%s},\n'
+                % (function.name.format(), function.name.format())
+            )
+        f.write(
+            """
+};
 
-        if node.name in IGNORE_FUNCTIONS:
-            return
+void *get_function_pointer(const char *name)
+{
+    auto it = functionMap.find(name);
+    if (it != functionMap.end())
+        return it->second;
+    return nullptr;
+}
+"""
+        )
 
-        # construct the function signature
-        self.sink.write('#define RPC_{name} {index}\n'.format(name=node.name, index=self.index))
-        self.index += 1
+    with open("gen_server.cpp", "w") as f:
+        f.write(
+            """
+// Generated code.
 
+#include <cuda.h>
+#include <cuda_runtime_api.h>
+#include <nvml.h>
+                
+#include <string>
+#include <unordered_map>
 
-def show_func_defs(filename):
-    # Note that cpp is used. Provide a path to your own cpp or
-    # make sure one exists in PATH.
-    ast = parse_file(filename, use_cpp=True)
+#include "gen_api.h"
+#include "gen_server.h"
 
-    with open('gen_api.h', 'w') as f:
-        v = HeaderCodegenVisitor(f)
-        v.visit(ast)
+extern int rpc_read(const void *conn, void *data, const size_t size);
+extern int rpc_write(const void *conn, const void *data, const size_t size);
+extern int rpc_end_request(const void *conn);
+extern int rpc_start_response(const void *conn, const int request_id);
 
-    with open('gen_client.cu', 'w') as f:
-        v = ClientCodegenVisitor(f)
-        v.visit(ast)
-        v.close()
+""".lstrip()
+        )
+        for i, function in enumerate(functions):
+            # construct the function signature
+            f.write(
+                "{doxygen}int handle_{name}(void *conn) {{\n".format(
+                    doxygen=function.doxygen + "\n" if function.doxygen else "",
+                    name=function.name.format(),
+                )
+            )
 
-    with open('gen_server.cu', 'w') as f:
-        v = ServerCodegenVisitor(f)
-        v.visit(ast)
-        v.close()
+            # read non-heap-allocated variables
+            stack_vars: list[Parameter] = []
+            heap_vars: list[Parameter] = []
+            for param in function.parameters:
+                if param.name is None:
+                    continue
+                if isinstance(param.type, Pointer) and heap_allocation_size(
+                    function, param
+                ):
+                    heap_vars.append(param)
+                else:
+                    stack_vars.append(param)
+            if len(stack_vars) > 0:
+                for param in stack_vars:
+                    if isinstance(param.type, Pointer):
+                        const = param.type.ptr_to.const
+                        param.type.ptr_to.const = False
+                        if param.type.ptr_to.format() == "void":
+                            f.write("    %s %s;\n" % (param.type.format(), param.name))
+                        else:
+                            f.write(
+                                "    %s %s;\n"
+                                % (param.type.ptr_to.format(), param.name)
+                            )
+                        param.type.ptr_to.const = const
+                    else:
+                        f.write("    %s;\n" % param.format())
+                f.write("\n")
+                for i, param in enumerate(stack_vars):
+                    leading = "        " if i > 0 else "    if ("
+                    trailing = " ||\n" if i < len(stack_vars) - 1 else ")\n"
+                    if (
+                        isinstance(param.type, Pointer)
+                        and param.type.ptr_to.format() != "void"
+                    ):
+                        const = param.type.ptr_to.const
+                        param.type.ptr_to.const = False
+                        if param.type.ptr_to.format() == "void":
+                            f.write(
+                                "%srpc_read(conn, &%s, sizeof(%s)) < 0%s"
+                                % (leading, param.name, param.type.format(), trailing)
+                            )
+                        else:
+                            f.write(
+                                "%srpc_read(conn, &%s, sizeof(%s)) < 0%s"
+                                % (
+                                    leading,
+                                    param.name,
+                                    param.type.ptr_to.format(),
+                                    trailing,
+                                )
+                            )
+                        param.type.ptr_to.const = const
+                    else:
+                        f.write(
+                            "%srpc_read(conn, &%s, sizeof(%s)) < 0%s"
+                            % (leading, param.name, param.type.format(), trailing)
+                        )
+                f.write("        return -1;\n\n")
+
+            f.write("    int request_id = rpc_end_request(conn);\n")
+            f.write("    if (request_id < 0)\n")
+            f.write("        return -1;\n\n")
+
+            # malloc heap-allocated variables
+            if len(heap_vars) > 0:
+                for param in heap_vars:
+                    size = heap_allocation_size(function, param)
+                    if not size:
+                        continue
+                    f.write(
+                        "    %s = (%s)malloc(%s);\n"
+                        % (param.format(), param.type.format(), size[1])
+                    )
+                f.write("\n")
+
+            # call the function
+            f.write(
+                "    %s = %s("
+                % (
+                    function.return_type.format_decl(name="result"),
+                    function.name.format(),
+                )
+            )
+            for i, param in enumerate(function.parameters):
+                if param.name is None:
+                    f.write("nullptr")
+                elif isinstance(param.type, Pointer) and not heap_allocation_size(
+                    function, param
+                ):
+                    f.write("&%s" % param.name)
+                else:
+                    f.write("%s" % param.name)
+                if i < len(function.parameters) - 1:
+                    f.write(", ")
+            f.write(");\n\n")
+
+            f.write("    if (rpc_start_response(conn, request_id) < 0)\n")
+            f.write("        return -1;\n\n")
+
+            # write pointer vars
+            ptr_vars = [
+                p
+                for p in function.parameters
+                if p.name is not None
+                and isinstance(p.type, Pointer)
+                and not p.type.ptr_to.const
+            ]
+            if len(ptr_vars) > 0:
+                for i, param in enumerate(ptr_vars):
+                    size = heap_allocation_size(function, param)
+                    if size:
+                        f.write(
+                            "%srpc_write(conn, %s, %s) < 0%s"
+                            % (
+                                "        " if i > 0 else "    if (",
+                                param.name,
+                                size[1],
+                                " ||\n" if i < len(ptr_vars) - 1 else ")\n",
+                            )
+                        )
+                    else:
+                        f.write(
+                            "%srpc_write(conn, &%s, sizeof(%s)) < 0%s"
+                            % (
+                                "        " if i > 0 else "    if (",
+                                param.name,
+                                param.type.format(),
+                                " ||\n" if i < len(ptr_vars) - 1 else ")\n",
+                            )
+                        )
+                f.write("        return -1;\n\n")
+            f.write("    return result;\n")
+            f.write("}\n\n")
+
+        f.write("static RequestHandler opHandlers[] = {\n")
+        for function in functions:
+            f.write("    handle_%s,\n" % (function.name.format()))
+        f.write("};\n\n")
+
+        f.write("RequestHandler get_handler(const int op)\n")
+        f.write("{\n")
+        f.write("    return opHandlers[op];\n")
+        f.write("}\n")
+
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        show_func_defs(sys.argv[1])
-    else:
-        print("Please provide a filename as argument")
+    main()
