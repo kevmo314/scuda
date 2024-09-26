@@ -1,3 +1,4 @@
+
 #include <arpa/inet.h>
 #include <cstring>
 #include <dlfcn.h>
@@ -14,10 +15,10 @@
 #include <unistd.h>
 #include <unordered_map>
 #include <vector>
+#include <cuda.h>
 
 #include <unordered_map>
 
-#include "api.h"
 #include "codegen/gen_client.h"
 
 int sockfd = -1;
@@ -113,9 +114,33 @@ int rpc_write(const void *data, const size_t size)
     return 0;
 }
 
-int rpc_read(void *data, const size_t size)
+int rpc_end_request(void *result, const unsigned int request_id)
 {
-    if (read(sockfd, data, size) < 0)
+    if (read(sockfd, result, sizeof(nvmlReturn_t)) < 0)
+        return -1;
+
+    pthread_mutex_unlock(&mutex);
+    return 0;
+}
+
+int rpc_read(void *data, size_t size)
+{
+    if (data == nullptr)
+    {
+        // temp buffer to discard data
+        char tempBuffer[256];
+        while (size > 0)
+        {
+            ssize_t bytesRead = read(sockfd, tempBuffer, std::min(size, sizeof(tempBuffer)));
+            if (bytesRead < 0)
+            {
+                pthread_mutex_unlock(&mutex);
+                return -1; // error if reading fails
+            }
+            size -= bytesRead;
+        }
+    }
+    else if (read(sockfd, data, size) < 0)
     {
         pthread_mutex_unlock(&mutex);
         return -1;
@@ -154,40 +179,68 @@ int rpc_wait_for_response(const unsigned int request_id)
     }
 }
 
-int rpc_end_request(void *result, const unsigned int request_id)
-{
-    if (read(sockfd, result, sizeof(nvmlReturn_t)) < 0)
-        return -1;
-
-    pthread_mutex_unlock(&mutex);
-    return 0;
-}
-
 void close_rpc_client()
 {
     close(sockfd);
     sockfd = 0;
 }
 
+CUresult cuGetProcAddress(const char *symbol, void **pfn, int cudaVersion, cuuint64_t flags, CUdriverProcAddressQueryResult *symbolStatus) {
+    std::cout << "cuGetProcAddress getting symbol: " << symbol << std::endl;
+
+    auto it = get_function_pointer(symbol);
+    if (it != nullptr) {
+        *pfn = (void *)(&it);
+        std::cout << "cuGetProcAddress: Mapped symbol '" << symbol << "' to function: " << *pfn << std::endl;
+        return CUDA_SUCCESS;
+    }
+
+    // fall back to dlsym
+    static void *(*real_dlsym)(void *, const char *) = NULL;
+    if (real_dlsym == NULL) {
+        real_dlsym = (void *(*)(void *, const char *))dlvsym(RTLD_NEXT, "dlsym", "GLIBC_2.2.5");
+    }
+
+    void *libCudaHandle = dlopen("libcuda.so", RTLD_NOW | RTLD_GLOBAL);
+    if (!libCudaHandle) {
+        std::cerr << "Error: Failed to open libcuda.so" << std::endl;
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    *pfn = real_dlsym(libCudaHandle, symbol);
+    if (!(*pfn)) {
+        std::cerr << "Error: Could not resolve symbol '" << symbol << "' using dlsym." << std::endl;
+        return CUDA_ERROR_UNKNOWN;
+    }
+
+    return CUDA_SUCCESS;
+}
+
 void *dlsym(void *handle, const char *name) __THROW
 {
+    open_rpc_client();
+
     void *func = get_function_pointer(name);
 
-    if (func != nullptr)
-        return func;
+    /** proc address function calls are basically dlsym; we should handle this differently at the top level. */
+    if (strcmp(name, "cuGetProcAddress_v2") == 0 || strcmp(name, "cuGetProcAddress") == 0)
+    {
+        return (void *)&cuGetProcAddress;
+    }
 
+    if (func != nullptr)
+    {
+        std::cout << "[dlsym] Function address from cudaFunctionMap: " << func << " " << name << std::endl;
+        return func;
+    }
+
+    // Real dlsym lookup
     static void *(*real_dlsym)(void *, const char *) = NULL;
     if (real_dlsym == NULL)
     {
-        // avoid calling dlsym recursively; use dlvsym to resolve dlsym itself
-        real_dlsym = (void *(*)(void *, const char *))dlvsym(RTLD_NEXT, "dlsym",
-                                                             "GLIBC_2.2.5");
+        real_dlsym = (void *(*)(void *, const char *))dlvsym(RTLD_NEXT, "dlsym", "GLIBC_2.2.5");
     }
 
-    if (!strcmp(name, "dlsym"))
-        return (void *)dlsym;
-
-    // if func symbol is not found in the handler mappings, return the real dlsym
-    // resolution
+    std::cout << "[dlsym] Falling back to real_dlsym for name: " << name << std::endl;
     return real_dlsym(handle, name);
 }
