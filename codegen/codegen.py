@@ -545,26 +545,32 @@ extern int rpc_start_response(const void *conn, const int request_id);
             if len(ptr_vars) > 0:
                 for i, param in enumerate(ptr_vars):
                     size = heap_allocation_size(function, param)
+                    leading = "        " if i > 0 else "    if ("
+                    trailing = " ||\n" if i < len(ptr_vars) - 1 else ")\n"
                     if size:
                         f.write(
                             "%srpc_write(conn, %s, %s) < 0%s"
                             % (
-                                "        " if i > 0 else "    if (",
+                               leading,
                                 param.name,
                                 size[1],
-                                " ||\n" if i < len(ptr_vars) - 1 else ")\n",
+                                trailing,
                             )
                         )
                     else:
-                        f.write(
-                            "%srpc_write(conn, &%s, sizeof(%s)) < 0%s"
-                            % (
-                                "        " if i > 0 else "    if (",
-                                param.name,
-                                param.type.format(),
-                                " ||\n" if i < len(ptr_vars) - 1 else ")\n",
+                        const = param.type.ptr_to.const
+                        param.type.ptr_to.const = False
+                        if param.type.ptr_to.format() == "void":
+                            f.write(
+                                "%srpc_write(conn, &%s, sizeof(%s)) < 0%s"
+                                % (leading, param.name, param.type.format(), trailing)
                             )
-                        )
+                        else:
+                            f.write(
+                                "%srpc_write(conn, &%s, sizeof(%s)) < 0%s"
+                                % (leading, param.name, param.type.ptr_to.format(), trailing)
+                            )
+                        param.type.ptr_to.const = const
                 f.write("        return -1;\n\n")
             f.write("    return result;\n")
             f.write("}\n\n")
