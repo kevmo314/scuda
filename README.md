@@ -73,3 +73,44 @@ This project is inspired by some existing proprietary solutions:
 
 - https://www.thundercompute.com/
 - https://www.juicelabs.co/
+
+## Benchmarks
+
+### Without multiplexing
+
+```bash
+strace -T -c -e trace=read,write,open,close python3 -c "import torch; print(torch.cuda.is_available())"
+```
+
+```
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 69.12    0.004175           1      2141           read
+ 26.66    0.001610           1      1157           close
+  4.22    0.000255           2        93           write
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.006040           1      3391           total
+```
+
+
+
+```bash
+strace -T -c -e trace=read,write,open,close python3 -c "
+import torch
+print('Creating a tensor...')
+tensor = torch.zeros(10, 10)
+print('Moving tensor to CUDA...')
+tensor = tensor.to('cuda:0')
+print('Tensor successfully moved to CUDA')
+"
+```
+
+```
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 71.63    0.005715           2      2253           read
+ 22.00    0.001755           1      1159           close
+  6.37    0.000508           2       231           write
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.007978           2      3643           total
+```
