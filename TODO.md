@@ -4,6 +4,7 @@ Features:
 - Make port configurable [done]
 - Add proper debug logging
 - Add TLS for the socket
+- Explore how hard it would be to expose this as a kernel module in addition to a shared object.
 
 Bugs:
 - Server exits when the client disconnects [done]
