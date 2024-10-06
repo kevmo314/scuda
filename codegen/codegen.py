@@ -80,6 +80,18 @@ def main():
         + cudart_ast.namespace.functions
     )
 
+    functions_with_annotations = []
+    for function in functions:
+        try:
+            annotation = next(
+                f for f in annotations.namespace.functions if f.name == function.name
+            )
+        except StopIteration:
+            print(f"Annotation for {function.name} not found")
+            continue
+        operations = parse_annotation(annotation.doxygen)
+        functions_with_annotations.append((function, annotation, operations))
+
     with open("gen_api.h", "w") as f:
         visited = set()
         for function in functions:
@@ -107,18 +119,7 @@ def main():
             "extern int rpc_wait_for_response(const unsigned int request_id);\n"
             "extern int rpc_end_request(void *return_value, const unsigned int request_id);\n"
         )
-        for function in functions:
-            try:
-                annotation = next(
-                    f for f in annotations.namespace.functions if f.name == function.name
-                )
-            except StopIteration:
-                print(f"Annotation for {function.name} not found")
-                continue
-
-            # parse the annotation doxygen
-            operations = parse_annotation(annotation.doxygen)
-
+        for function, annotation, operations in functions_with_annotations:
             f.write(
                 "{return_type} {name}({params}) {{\n".format(
                     return_type=function.return_type.format(),
@@ -196,6 +197,21 @@ def main():
             
             f.write("}\n\n")
 
+        f.write("std::unordered_map<std::string, void *> functionMap = {\n")
+        for function, _, _ in functions_with_annotations:
+            f.write("    {{\"{name}\", (void *){name}}},\n".format(
+                name=function.name.format()
+            ))
+        f.write("};\n\n")
+
+        f.write("void *get_function_pointer(const char *name)\n")
+        f.write("{\n")
+        f.write("    auto it = functionMap.find(name);\n")
+        f.write("    if (it == functionMap.end())\n")
+        f.write("        return nullptr;\n")
+        f.write("    return it->second;\n")
+        f.write("}\n")
+
     with open("gen_server2.cpp", "w") as f:
         f.write(
             "#include <nvml.h>\n"
@@ -211,25 +227,18 @@ def main():
             "extern int rpc_end_request(const void *conn);\n"
             "extern int rpc_start_response(const void *conn, const int request_id);\n\n"
         )
-        for function in functions:
-            try:
-                annotation = next(
-                    f for f in annotations.namespace.functions if f.name == function.name
-                )
-            except StopIteration:
-                print(f"Annotation for {function.name} not found")
-                continue
-
+        for function, annotation, operations in functions_with_annotations:
             # parse the annotation doxygen
             operations = [(operation, next(
                     p for p in function.parameters if p.name == operation.param_name
-                )) for operation in parse_annotation(annotation.doxygen)]
+                )) for operation in operations]
 
             f.write(
-                "int handle_{name}(void *conn) {{\n".format(
+                "int handle_{name}(void *conn)\n".format(
                     name=function.name.format(),
                 )
             )
+            f.write("{\n")
 
             for operation, param in operations:
                 if operation.null_terminated:
@@ -240,6 +249,8 @@ def main():
                     param_type=param.type.format(),
                     param_name=operation.param_name,
                 ))
+
+            f.write("\n")
 
             for operation, param in operations:
                 if operation.send:
@@ -258,6 +269,7 @@ def main():
                         ))
                         f.write("        return -1;\n")
 
+            f.write("\n")
             f.write("    int request_id = rpc_end_request(conn);\n".format(
                 name=function.name.format()
             ))
@@ -303,6 +315,19 @@ def main():
                         f.write("        return -1;\n")
             
             f.write("}\n\n")
+
+            
+        f.write("static RequestHandler opHandlers[] = {\n")
+        for function, _, _ in functions_with_annotations:
+            f.write("    handle_{name},\n".format(
+                name=function.name.format()
+            ))
+        f.write("};\n\n")
+
+        f.write("RequestHandler get_handler(const int op)\n")
+        f.write("{\n")
+        f.write("    return opHandlers[op];\n")
+        f.write("}\n")
 
 
 if __name__ == "__main__":
