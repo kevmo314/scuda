@@ -14,7 +14,7 @@ build() {
 
     echo "linking client files..."
 
-    gcc -shared -o libscuda.so "$(pwd)/client.o" "$(pwd)/codegen/gen_client.o" -L/usr/local/cuda/lib64 -lcudart -lstdc++
+    gcc -shared -o libscuda.so "$(pwd)/client.o" "$(pwd)/codegen/gen_client.o" -L/usr/local/cuda/lib64 -lcudart -lstdc++ -lspdlog -lfmt
 
   else
     echo "No compiler options set for os "$(uname)""
@@ -105,6 +105,8 @@ tests=("test_cuda_avail" "test_tensor_to_cuda")
 test() {
   build
 
+  export SCUDA_SERVER=0.0.0.0
+
   echo -e "\n\033[1mRunning test(s)...\033[0m"
 
   for test in "${tests[@]}"; do
@@ -118,7 +120,16 @@ done
 run() {
   build
 
-  LD_PRELOAD="$libscuda_path" python3 -c "import torch; print('Creating a tensor...'); tensor = torch.zeros(10, 10); print('Moving tensor to CUDA...'); tensor = tensor.to('cuda:0'); print('Tensor successfully moved to CUDA')"
+  export SCUDA_SERVER=0.0.0.0
+
+  LD_PRELOAD="$libscuda_path" python3 -c "
+import torch
+print('Creating a tensor...')
+tensor = torch.zeros(10, 10)
+print('Moving tensor to CUDA...')
+tensor = tensor.to('cuda:0')
+print('Tensor successfully moved to CUDA')
+"
 }
 
 # Main script logic using a switch case
