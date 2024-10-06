@@ -13,13 +13,13 @@ nvmlReturn_t nvmlShutdown();
  */
 const char *nvmlErrorString(nvmlReturn_t result);
 /**
- * @param version RECV_ONLY LENGTH:length
  * @param length SEND_ONLY
+ * @param version RECV_ONLY LENGTH:length
  */
 nvmlReturn_t nvmlSystemGetDriverVersion(char *version, unsigned int length);
 /**
- * @param version RECV_ONLY LENGTH:length
  * @param length SEND_ONLY
+ * @param version RECV_ONLY LENGTH:length
  */
 nvmlReturn_t nvmlSystemGetNVMLVersion(char *version, unsigned int length);
 /**
@@ -32,8 +32,8 @@ nvmlReturn_t nvmlSystemGetCudaDriverVersion(int *cudaDriverVersion);
 nvmlReturn_t nvmlSystemGetCudaDriverVersion_v2(int *cudaDriverVersion);
 /**
  * @param pid SEND_ONLY
- * @param name RECV_ONLY LENGTH:length
  * @param length SEND_ONLY
+ * @param name RECV_ONLY LENGTH:length
  */
 nvmlReturn_t nvmlSystemGetProcessName(unsigned int pid, char *name, unsigned int length);
 /**
@@ -79,7 +79,7 @@ nvmlReturn_t nvmlUnitGetFanSpeedInfo(nvmlUnit_t unit, nvmlUnitFanSpeeds_t *fanSp
 nvmlReturn_t nvmlUnitGetDevices(nvmlUnit_t unit, unsigned int *deviceCount, nvmlDevice_t *devices);
 /**
  * @param hwbcCount SEND_RECV
- * @param hwbcEntries RECV_ONLY
+ * @param hwbcEntries RECV_ONLY LENGTH:*hwbcCount
  */
 nvmlReturn_t nvmlSystemGetHicVersion(unsigned int *hwbcCount, nvmlHwbcEntry_t *hwbcEntries);
 /**
@@ -171,13 +171,13 @@ nvmlReturn_t nvmlDeviceGetTopologyCommonAncestor(nvmlDevice_t device1, nvmlDevic
  * @param device SEND_ONLY
  * @param level SEND_ONLY
  * @param count SEND_RECV
- * @param deviceArray RECV_ONLY LENGTH:count
+ * @param deviceArray RECV_ONLY LENGTH:*count
  */
 nvmlReturn_t nvmlDeviceGetTopologyNearestGpus(nvmlDevice_t device, nvmlGpuTopologyLevel_t level, unsigned int *count, nvmlDevice_t *deviceArray);
 /**
  * @param cpuNumber SEND_ONLY
  * @param count SEND_RECV
- * @param deviceArray RECV_ONLY LENGTH:count
+ * @param deviceArray RECV_ONLY LENGTH:*count
  */
 nvmlReturn_t nvmlSystemGetTopologyGpuSet(unsigned int cpuNumber, unsigned int *count, nvmlDevice_t *deviceArray);
 /**
@@ -206,21 +206,21 @@ nvmlReturn_t nvmlVgpuInstanceGetMdevUUID(nvmlVgpuInstance_t vgpuInstance, char *
 nvmlReturn_t nvmlDeviceGetMinorNumber(nvmlDevice_t device, unsigned int *minorNumber);
 /**
  * @param device SEND_ONLY
- * @param partNumber RECV_ONLY LENGTH:length
  * @param length SEND_ONLY
+ * @param partNumber RECV_ONLY LENGTH:length
  */
 nvmlReturn_t nvmlDeviceGetBoardPartNumber(nvmlDevice_t device, char *partNumber, unsigned int length);
 /**
  * @param device SEND_ONLY
  * @param object SEND_ONLY
- * @param version RECV_ONLY LENGTH:length
  * @param length SEND_ONLY
+ * @param version RECV_ONLY LENGTH:length
  */
 nvmlReturn_t nvmlDeviceGetInforomVersion(nvmlDevice_t device, nvmlInforomObject_t object, char *version, unsigned int length);
 /**
  * @param device SEND_ONLY
- * @param version RECV_ONLY LENGTH:length
  * @param length SEND_ONLY
+ * @param version RECV_ONLY LENGTH:length
  */
 nvmlReturn_t nvmlDeviceGetInforomImageVersion(nvmlDevice_t device, char *version, unsigned int length);
 /**
@@ -332,14 +332,14 @@ nvmlReturn_t nvmlDeviceGetMaxCustomerBoostClock(nvmlDevice_t device, nvmlClockTy
 /**
  * @param device SEND_ONLY
  * @param count SEND_RECV
- * @param clocksMHz RECV_ONLY LENGTH:count
+ * @param clocksMHz RECV_ONLY LENGTH:*count
  */
 nvmlReturn_t nvmlDeviceGetSupportedMemoryClocks(nvmlDevice_t device, unsigned int *count, unsigned int *clocksMHz);
 /**
  * @param device SEND_ONLY
  * @param memoryClockMHz SEND_ONLY
  * @param count SEND_RECV
- * @param clocksMHz RECV_ONLY LENGTH:count
+ * @param clocksMHz RECV_ONLY LENGTH:*count
  */
 nvmlReturn_t nvmlDeviceGetSupportedGraphicsClocks(nvmlDevice_t device, unsigned int memoryClockMHz, unsigned int *count, unsigned int *clocksMHz);
 /**
@@ -581,7 +581,7 @@ nvmlReturn_t nvmlDeviceGetEncoderStats(nvmlDevice_t device, unsigned int *sessio
 /**
  * @param device SEND_ONLY
  * @param sessionCount SEND_RECV
- * @param sessionInfos RECV_ONLY LENGTH:sessionCount
+ * @param sessionInfos RECV_ONLY LENGTH:*sessionCount
  */
 nvmlReturn_t nvmlDeviceGetEncoderSessions(nvmlDevice_t device, unsigned int *sessionCount, nvmlEncoderSessionInfo_t *sessionInfos);
 /**
@@ -598,7 +598,7 @@ nvmlReturn_t nvmlDeviceGetFBCStats(nvmlDevice_t device, nvmlFBCStats_t *fbcStats
 /**
  * @param device SEND_ONLY
  * @param sessionCount SEND_RECV
- * @param sessionInfo RECV_ONLY LENGTH:sessionCount
+ * @param sessionInfo RECV_ONLY LENGTH:*sessionCount
  */
 nvmlReturn_t nvmlDeviceGetFBCSessions(nvmlDevice_t device, unsigned int *sessionCount, nvmlFBCSessionInfo_t *sessionInfo);
 /**
@@ -621,19 +621,19 @@ nvmlReturn_t nvmlDeviceGetBridgeChipInfo(nvmlDevice_t device, nvmlBridgeChipHier
 /**
  * @param device SEND_ONLY
  * @param infoCount SEND_RECV
- * @param infos RECV_ONLY LENGTH:infoCount
+ * @param infos RECV_ONLY LENGTH:*infoCount
  */
 nvmlReturn_t nvmlDeviceGetComputeRunningProcesses_v3(nvmlDevice_t device, unsigned int *infoCount, nvmlProcessInfo_t *infos);
 /**
  * @param device SEND_ONLY
  * @param infoCount SEND_RECV
- * @param infos RECV_ONLY LENGTH:infoCount
+ * @param infos RECV_ONLY LENGTH:*infoCount
  */
 nvmlReturn_t nvmlDeviceGetGraphicsRunningProcesses_v3(nvmlDevice_t device, unsigned int *infoCount, nvmlProcessInfo_t *infos);
 /**
  * @param device SEND_ONLY
  * @param infoCount SEND_RECV
- * @param infos RECV_ONLY LENGTH:infoCount
+ * @param infos RECV_ONLY LENGTH:*infoCount
  */
 nvmlReturn_t nvmlDeviceGetMPSComputeRunningProcesses_v3(nvmlDevice_t device, unsigned int *infoCount, nvmlProcessInfo_t *infos);
 /**
@@ -654,7 +654,7 @@ nvmlReturn_t nvmlDeviceGetAPIRestriction(nvmlDevice_t device, nvmlRestrictedAPI_
  * @param lastSeenTimeStamp SEND_ONLY
  * @param sampleValType RECV_ONLY
  * @param sampleCount SEND_RECV
- * @param samples RECV_ONLY LENGTH:sampleCount
+ * @param samples RECV_ONLY LENGTH:*sampleCount
  */
 nvmlReturn_t nvmlDeviceGetSamples(nvmlDevice_t device, nvmlSamplingType_t type, unsigned long long lastSeenTimeStamp, nvmlValueType_t *sampleValType, unsigned int *sampleCount, nvmlSample_t *samples);
 /**
@@ -717,7 +717,7 @@ nvmlReturn_t nvmlDeviceGetAccountingStats(nvmlDevice_t device, unsigned int pid,
 /**
  * @param device SEND_ONLY
  * @param count SEND_RECV
- * @param pids RECV_ONLY LENGTH:count
+ * @param pids RECV_ONLY LENGTH:*count
  */
 nvmlReturn_t nvmlDeviceGetAccountingPids(nvmlDevice_t device, unsigned int *count, unsigned int *pids);
 /**
@@ -729,15 +729,15 @@ nvmlReturn_t nvmlDeviceGetAccountingBufferSize(nvmlDevice_t device, unsigned int
  * @param device SEND_ONLY
  * @param cause SEND_ONLY
  * @param pageCount SEND_RECV
- * @param addresses RECV_ONLY LENGTH:pageCount
+ * @param addresses RECV_ONLY LENGTH:*pageCount
  */
 nvmlReturn_t nvmlDeviceGetRetiredPages(nvmlDevice_t device, nvmlPageRetirementCause_t cause, unsigned int *pageCount, unsigned long long *addresses);
 /**
  * @param device SEND_ONLY
  * @param cause SEND_ONLY
  * @param pageCount SEND_RECV
- * @param addresses RECV_ONLY LENGTH:pageCount
- * @param timestamps RECV_ONLY LENGTH:pageCount
+ * @param addresses RECV_ONLY LENGTH:*pageCount
+ * @param timestamps RECV_ONLY LENGTH:*pageCount
  */
 nvmlReturn_t nvmlDeviceGetRetiredPages_v2(nvmlDevice_t device, nvmlPageRetirementCause_t cause, unsigned int *pageCount, unsigned long long *addresses, unsigned long long *timestamps);
 /**
@@ -1008,8 +1008,8 @@ nvmlReturn_t nvmlDeviceSetVirtualizationMode(nvmlDevice_t device, nvmlGpuVirtual
 nvmlReturn_t nvmlDeviceGetGridLicensableFeatures_v4(nvmlDevice_t device, nvmlGridLicensableFeatures_t *pGridLicensableFeatures);
 /**
  * @param device SEND_ONLY
- * @param utilization RECV_ONLY LENGTH:processSamplesCount
  * @param processSamplesCount SEND_RECV
+ * @param utilization RECV_ONLY LENGTH:*processSamplesCount
  * @param lastSeenTimeStamp SEND_ONLY
  */
 nvmlReturn_t nvmlDeviceGetProcessUtilization(nvmlDevice_t device, nvmlProcessUtilizationSample_t *utilization, unsigned int *processSamplesCount, unsigned long long lastSeenTimeStamp);
@@ -1038,25 +1038,25 @@ nvmlReturn_t nvmlDeviceGetVgpuCapabilities(nvmlDevice_t device, nvmlDeviceVgpuCa
 /**
  * @param device SEND_ONLY
  * @param vgpuCount SEND_RECV
- * @param vgpuTypeIds RECV_ONLY LENGTH:vgpuCount
+ * @param vgpuTypeIds RECV_ONLY LENGTH:*vgpuCount
  */
 nvmlReturn_t nvmlDeviceGetSupportedVgpus(nvmlDevice_t device, unsigned int *vgpuCount, nvmlVgpuTypeId_t *vgpuTypeIds);
 /**
  * @param device SEND_ONLY
  * @param vgpuCount SEND_RECV
- * @param vgpuTypeIds RECV_ONLY LENGTH:vgpuCount
+ * @param vgpuTypeIds RECV_ONLY LENGTH:*vgpuCount
  */
 nvmlReturn_t nvmlDeviceGetCreatableVgpus(nvmlDevice_t device, unsigned int *vgpuCount, nvmlVgpuTypeId_t *vgpuTypeIds);
 /**
  * @param vgpuTypeId SEND_ONLY
- * @param vgpuTypeClass RECV_ONLY LENGTH:size
  * @param size RECV_ONLY
+ * @param vgpuTypeClass RECV_ONLY LENGTH:*size
  */
 nvmlReturn_t nvmlVgpuTypeGetClass(nvmlVgpuTypeId_t vgpuTypeId, char *vgpuTypeClass, unsigned int *size);
 /**
  * @param vgpuTypeId SEND_ONLY
- * @param vgpuTypeName RECV_ONLY LENGTH:size
  * @param size SEND_RECV
+ * @param vgpuTypeName RECV_ONLY LENGTH:*size
  */
 nvmlReturn_t nvmlVgpuTypeGetName(nvmlVgpuTypeId_t vgpuTypeId, char *vgpuTypeName, unsigned int *size);
 /**
@@ -1089,8 +1089,8 @@ nvmlReturn_t nvmlVgpuTypeGetNumDisplayHeads(nvmlVgpuTypeId_t vgpuTypeId, unsigne
 nvmlReturn_t nvmlVgpuTypeGetResolution(nvmlVgpuTypeId_t vgpuTypeId, unsigned int displayIndex, unsigned int *xdim, unsigned int *ydim);
 /**
  * @param vgpuTypeId SEND_ONLY
- * @param vgpuTypeLicenseString RECV_ONLY LENGTH:size
  * @param size SEND_ONLY
+ * @param vgpuTypeLicenseString RECV_ONLY LENGTH:size
  */
 nvmlReturn_t nvmlVgpuTypeGetLicense(nvmlVgpuTypeId_t vgpuTypeId, char *vgpuTypeLicenseString, unsigned int size);
 /**
@@ -1112,26 +1112,26 @@ nvmlReturn_t nvmlVgpuTypeGetMaxInstancesPerVm(nvmlVgpuTypeId_t vgpuTypeId, unsig
 /**
  * @param device SEND_ONLY
  * @param vgpuCount SEND_RECV
- * @param vgpuInstances RECV_ONLY LENGTH:vgpuCount
+ * @param vgpuInstances RECV_ONLY LENGTH:*vgpuCount
  */
 nvmlReturn_t nvmlDeviceGetActiveVgpus(nvmlDevice_t device, unsigned int *vgpuCount, nvmlVgpuInstance_t *vgpuInstances);
 /**
  * @param vgpuInstance SEND_ONLY
- * @param vmId RECV_ONLY LENGTH:size
  * @param size SEND_ONLY
+ * @param vmId RECV_ONLY LENGTH:size
  * @param vmIdType RECV_ONLY
  */
 nvmlReturn_t nvmlVgpuInstanceGetVmID(nvmlVgpuInstance_t vgpuInstance, char *vmId, unsigned int size, nvmlVgpuVmIdType_t *vmIdType);
 /**
  * @param vgpuInstance SEND_ONLY
- * @param uuid RECV_ONLY LENGTH:size
  * @param size SEND_ONLY
+ * @param uuid RECV_ONLY LENGTH:size
  */
 nvmlReturn_t nvmlVgpuInstanceGetUUID(nvmlVgpuInstance_t vgpuInstance, char *uuid, unsigned int size);
 /**
  * @param vgpuInstance SEND_ONLY
- * @param version RECV_ONLY LENGTH:length
  * @param length SEND_ONLY
+ * @param version RECV_ONLY LENGTH:length
  */
 nvmlReturn_t nvmlVgpuInstanceGetVmDriverVersion(nvmlVgpuInstance_t vgpuInstance, char *version, unsigned int length);
 /**
@@ -1179,7 +1179,7 @@ nvmlReturn_t nvmlVgpuInstanceGetEncoderStats(nvmlVgpuInstance_t vgpuInstance, un
 /**
  * @param vgpuInstance SEND_ONLY
  * @param sessionCount SEND_RECV
- * @param sessionInfo RECV_ONLY LENGTH:sessionCount
+ * @param sessionInfo RECV_ONLY LENGTH:*sessionCount
  */
 nvmlReturn_t nvmlVgpuInstanceGetEncoderSessions(nvmlVgpuInstance_t vgpuInstance, unsigned int *sessionCount, nvmlEncoderSessionInfo_t *sessionInfo);
 /**
@@ -1190,7 +1190,7 @@ nvmlReturn_t nvmlVgpuInstanceGetFBCStats(nvmlVgpuInstance_t vgpuInstance, nvmlFB
 /**
  * @param vgpuInstance SEND_ONLY
  * @param sessionCount SEND_RECV
- * @param sessionInfo RECV_ONLY LENGTH:sessionCount
+ * @param sessionInfo RECV_ONLY LENGTH:*sessionCount
  */
 nvmlReturn_t nvmlVgpuInstanceGetFBCSessions(nvmlVgpuInstance_t vgpuInstance, unsigned int *sessionCount, nvmlFBCSessionInfo_t *sessionInfo);
 /**
@@ -1200,8 +1200,8 @@ nvmlReturn_t nvmlVgpuInstanceGetFBCSessions(nvmlVgpuInstance_t vgpuInstance, uns
 nvmlReturn_t nvmlVgpuInstanceGetGpuInstanceId(nvmlVgpuInstance_t vgpuInstance, unsigned int *gpuInstanceId);
 /**
  * @param vgpuInstance SEND_ONLY
- * @param vgpuPciId RECV_ONLY LENGTH:length
  * @param length SEND_RECV
+ * @param vgpuPciId RECV_ONLY LENGTH:*length
  */
 nvmlReturn_t nvmlVgpuInstanceGetGpuPciId(nvmlVgpuInstance_t vgpuInstance, char *vgpuPciId, unsigned int *length);
 /**
@@ -1212,14 +1212,14 @@ nvmlReturn_t nvmlVgpuInstanceGetGpuPciId(nvmlVgpuInstance_t vgpuInstance, char *
 nvmlReturn_t nvmlVgpuTypeGetCapabilities(nvmlVgpuTypeId_t vgpuTypeId, nvmlVgpuCapability_t capability, unsigned int *capResult);
 /**
  * @param vgpuInstance SEND_ONLY
- * @param vgpuMetadata RECV_ONLY LENGTH:bufferSize
  * @param bufferSize SEND_RECV
+ * @param vgpuMetadata RECV_ONLY LENGTH:*bufferSize
  */
 nvmlReturn_t nvmlVgpuInstanceGetMetadata(nvmlVgpuInstance_t vgpuInstance, nvmlVgpuMetadata_t *vgpuMetadata, unsigned int *bufferSize);
 /**
  * @param device SEND_ONLY
- * @param pgpuMetadata RECV_ONLY LENGTH:bufferSize
  * @param bufferSize SEND_RECV
+ * @param pgpuMetadata RECV_ONLY LENGTH:*bufferSize
  */
 nvmlReturn_t nvmlDeviceGetVgpuMetadata(nvmlDevice_t device, nvmlVgpuPgpuMetadata_t *pgpuMetadata, unsigned int *bufferSize);
 /**
@@ -1230,8 +1230,8 @@ nvmlReturn_t nvmlDeviceGetVgpuMetadata(nvmlDevice_t device, nvmlVgpuPgpuMetadata
 nvmlReturn_t nvmlGetVgpuCompatibility(nvmlVgpuMetadata_t *vgpuMetadata, nvmlVgpuPgpuMetadata_t *pgpuMetadata, nvmlVgpuPgpuCompatibility_t *compatibilityInfo);
 /**
  * @param device SEND_ONLY
- * @param pgpuMetadata RECV_ONLY LENGTH:bufferSize
  * @param bufferSize SEND_RECV
+ * @param pgpuMetadata RECV_ONLY LENGTH:*bufferSize
  */
 nvmlReturn_t nvmlDeviceGetPgpuMetadataString(nvmlDevice_t device, char *pgpuMetadata, unsigned int *bufferSize);
 /**
@@ -1263,14 +1263,14 @@ nvmlReturn_t nvmlSetVgpuVersion(nvmlVgpuVersion_t *vgpuVersion);
  * @param lastSeenTimeStamp SEND_ONLY
  * @param sampleValType SEND_RECV
  * @param vgpuInstanceSamplesCount SEND_RECV
- * @param utilizationSamples RECV_ONLY LENGTH:vgpuInstanceSamplesCount
+ * @param utilizationSamples RECV_ONLY LENGTH:*vgpuInstanceSamplesCount
  */
 nvmlReturn_t nvmlDeviceGetVgpuUtilization(nvmlDevice_t device, unsigned long long lastSeenTimeStamp, nvmlValueType_t *sampleValType, unsigned int *vgpuInstanceSamplesCount, nvmlVgpuInstanceUtilizationSample_t *utilizationSamples);
 /**
  * @param device SEND_ONLY
  * @param lastSeenTimeStamp SEND_ONLY
  * @param vgpuProcessSamplesCount SEND_RECV
- * @param utilizationSamples RECV_ONLY LENGTH:vgpuProcessSamplesCount
+ * @param utilizationSamples RECV_ONLY LENGTH:*vgpuProcessSamplesCount
  */
 nvmlReturn_t nvmlDeviceGetVgpuProcessUtilization(nvmlDevice_t device, unsigned long long lastSeenTimeStamp, unsigned int *vgpuProcessSamplesCount, nvmlVgpuProcessUtilizationSample_t *utilizationSamples);
 /**
@@ -1281,7 +1281,7 @@ nvmlReturn_t nvmlVgpuInstanceGetAccountingMode(nvmlVgpuInstance_t vgpuInstance, 
 /**
  * @param vgpuInstance SEND_ONLY
  * @param count SEND_RECV
- * @param pids RECV_ONLY LENGTH:count
+ * @param pids RECV_ONLY LENGTH:*count
  */
 nvmlReturn_t nvmlVgpuInstanceGetAccountingPids(nvmlVgpuInstance_t vgpuInstance, unsigned int *count, unsigned int *pids);
 /**
@@ -1335,8 +1335,8 @@ nvmlReturn_t nvmlDeviceGetGpuInstanceProfileInfoV(nvmlDevice_t device, unsigned 
 /**
  * @param device SEND_ONLY
  * @param profileId SEND_ONLY
- * @param placements RECV_ONLY LENGTH:count
  * @param count SEND_RECV
+ * @param placements RECV_ONLY LENGTH:*count
  */
 nvmlReturn_t nvmlDeviceGetGpuInstancePossiblePlacements_v2(nvmlDevice_t device, unsigned int profileId, nvmlGpuInstancePlacement_t *placements, unsigned int *count);
 /**
@@ -1365,8 +1365,8 @@ nvmlReturn_t nvmlGpuInstanceDestroy(nvmlGpuInstance_t gpuInstance);
 /**
  * @param device SEND_ONLY
  * @param profileId SEND_ONLY
- * @param gpuInstances RECV_ONLY LENGTH:count
  * @param count SEND_RECV
+ * @param gpuInstances RECV_ONLY LENGTH:*count
  */
 nvmlReturn_t nvmlDeviceGetGpuInstances(nvmlDevice_t device, unsigned int profileId, nvmlGpuInstance_t *gpuInstances, unsigned int *count);
 /**
@@ -1403,8 +1403,8 @@ nvmlReturn_t nvmlGpuInstanceGetComputeInstanceRemainingCapacity(nvmlGpuInstance_
 /**
  * @param gpuInstance SEND_ONLY
  * @param profileId SEND_ONLY
- * @param placements RECV_ONLY LENGTH:count
  * @param count SEND_RECV
+ * @param placements RECV_ONLY LENGTH:*count
  */
 nvmlReturn_t nvmlGpuInstanceGetComputeInstancePossiblePlacements(nvmlGpuInstance_t gpuInstance, unsigned int profileId, nvmlComputeInstancePlacement_t *placements, unsigned int *count);
 /**
@@ -1427,8 +1427,8 @@ nvmlReturn_t nvmlComputeInstanceDestroy(nvmlComputeInstance_t computeInstance);
 /**
  * @param gpuInstance SEND_ONLY
  * @param profileId SEND_ONLY
- * @param computeInstances RECV_ONLY LENGTH:count
  * @param count SEND_RECV
+ * @param computeInstances RECV_ONLY LENGTH:*count
  */
 nvmlReturn_t nvmlGpuInstanceGetComputeInstances(nvmlGpuInstance_t gpuInstance, unsigned int profileId, nvmlComputeInstance_t *computeInstances, unsigned int *count);
 /**
@@ -1519,8 +1519,8 @@ nvmlReturn_t nvmlDeviceSetMemClkVfOffset(nvmlDevice_t device, int offset);
 nvmlReturn_t nvmlDeviceGetMinMaxClockOfPState(nvmlDevice_t device, nvmlClockType_t type, nvmlPstates_t pstate, unsigned int *minClockMHz, unsigned int *maxClockMHz);
 /**
  * @param device SEND_ONLY
- * @param pstates RECV_ONLY LENGTH:size
  * @param size SEND_ONLY
+ * @param pstates RECV_ONLY LENGTH:size
  */
 nvmlReturn_t nvmlDeviceGetSupportedPerformanceStates(nvmlDevice_t device, nvmlPstates_t *pstates, unsigned int size);
 /**
@@ -1554,13 +1554,13 @@ nvmlReturn_t nvmlGpmSampleFree(nvmlGpmSample_t gpmSample);
 nvmlReturn_t nvmlGpmSampleAlloc(nvmlGpmSample_t *gpmSample);
 /**
  * @param device SEND_ONLY
- * @param gpmSample RECV_ONLY SIZE:sizeof(nvmlGpmSample_st)
+ * @param gpmSample RECV_ONLY SIZE:sizeof(nvmlGpmSample_t)
  */
 nvmlReturn_t nvmlGpmSampleGet(nvmlDevice_t device, nvmlGpmSample_t gpmSample);
 /**
  * @param device SEND_ONLY
  * @param gpuInstanceId SEND_ONLY
- * @param gpmSample RECV_ONLY SIZE:sizeof(nvmlGpmSample_st)
+ * @param gpmSample RECV_ONLY SIZE:sizeof(nvmlGpmSample_t)
  */
 nvmlReturn_t nvmlGpmMigSampleGet(nvmlDevice_t device, unsigned int gpuInstanceId, nvmlGpmSample_t gpmSample);
 /**
@@ -1611,8 +1611,8 @@ CUresult cuDeviceGet(CUdevice *device, int ordinal);
  */
 CUresult cuDeviceGetCount(int *count);
 /**
- * @param name RECV_ONLY LENGTH:len
  * @param len SEND_ONLY
+ * @param name RECV_ONLY LENGTH:len
  * @param dev SEND_ONLY
  */
 CUresult cuDeviceGetName(char *name, int len, CUdevice dev);
@@ -1725,8 +1725,8 @@ CUresult cuDevicePrimaryCtxReset_v2(CUdevice dev);
 CUresult cuCtxCreate_v2(CUcontext *pctx, unsigned int flags, CUdevice dev);
 /**
  * @param pctx RECV_ONLY
- * @param paramsArray RECV_ONLY LENGTH:numParams
  * @param numParams SEND_ONLY
+ * @param paramsArray RECV_ONLY LENGTH:numParams
  * @param flags SEND_ONLY
  * @param dev SEND_ONLY
  */
@@ -3489,7 +3489,7 @@ CUresult cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(int *numBlocks, CU
  * @param dynamicSMemSize SEND_ONLY
  * @param blockSizeLimit SEND_ONLY
  */
-CUresult cuOccupancyMaxPotentialBlockSize(int *minGridSize, int *blockSize, CUfunction func, CUoccupancyB2DSize blockSizeToDynamicSMemSize, size_t dynamicSMemSize, int blockSizeLimit);
+// CUresult cuOccupancyMaxPotentialBlockSize(int *minGridSize, int *blockSize, CUfunction func, CUoccupancyB2DSize blockSizeToDynamicSMemSize, size_t dynamicSMemSize, int blockSizeLimit);
 /**
  * @param minGridSize SEND_RECV
  * @param blockSize SEND_RECV
@@ -3499,7 +3499,7 @@ CUresult cuOccupancyMaxPotentialBlockSize(int *minGridSize, int *blockSize, CUfu
  * @param blockSizeLimit SEND_ONLY
  * @param flags SEND_ONLY
  */
-CUresult cuOccupancyMaxPotentialBlockSizeWithFlags(int *minGridSize, int *blockSize, CUfunction func, CUoccupancyB2DSize blockSizeToDynamicSMemSize, size_t dynamicSMemSize, int blockSizeLimit, unsigned int flags);
+// CUresult cuOccupancyMaxPotentialBlockSizeWithFlags(int *minGridSize, int *blockSize, CUfunction func, CUoccupancyB2DSize blockSizeToDynamicSMemSize, size_t dynamicSMemSize, int blockSizeLimit, unsigned int flags);
 /**
  * @param dynamicSmemSize SEND_RECV
  * @param func SEND_ONLY
