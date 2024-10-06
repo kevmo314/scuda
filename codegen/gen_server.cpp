@@ -60,23 +60,6 @@ int handle_nvmlShutdown(void *conn)
         return -1;
 }
 
-int handle_nvmlErrorString(void *conn)
-{
-    nvmlReturn_t result;
-
-    if (rpc_read(conn, &result, sizeof(result)) < 0)
-        return -1;
-
-    int request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        return -1;
-
-    const char* return_value = nvmlErrorString(result);
-
-    if (rpc_start_response(conn, request_id) < 0)
-        return -1;
-}
-
 int handle_nvmlSystemGetDriverVersion(void *conn)
 {
     unsigned int length;
@@ -15927,40 +15910,6 @@ int handle_cudaPeekAtLastError(void *conn)
         return -1;
 }
 
-int handle_cudaGetErrorName(void *conn)
-{
-    cudaError_t error;
-
-    if (rpc_read(conn, &error, sizeof(error)) < 0)
-        return -1;
-
-    int request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        return -1;
-
-    const char* return_value = cudaGetErrorName(error);
-
-    if (rpc_start_response(conn, request_id) < 0)
-        return -1;
-}
-
-int handle_cudaGetErrorString(void *conn)
-{
-    cudaError_t error;
-
-    if (rpc_read(conn, &error, sizeof(error)) < 0)
-        return -1;
-
-    int request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        return -1;
-
-    const char* return_value = cudaGetErrorString(error);
-
-    if (rpc_start_response(conn, request_id) < 0)
-        return -1;
-}
-
 int handle_cudaGetDeviceCount(void *conn)
 {
     int* count;
@@ -19965,35 +19914,6 @@ int handle_cudaGetChannelDesc(void *conn)
         return -1;
 }
 
-int handle_cudaCreateChannelDesc(void *conn)
-{
-    int x;
-    int y;
-    int z;
-    int w;
-    enum cudaChannelFormatKind f;
-
-    if (rpc_read(conn, &x, sizeof(x)) < 0)
-        return -1;
-    if (rpc_read(conn, &y, sizeof(y)) < 0)
-        return -1;
-    if (rpc_read(conn, &z, sizeof(z)) < 0)
-        return -1;
-    if (rpc_read(conn, &w, sizeof(w)) < 0)
-        return -1;
-    if (rpc_read(conn, &f, sizeof(f)) < 0)
-        return -1;
-
-    int request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        return -1;
-
-    struct cudaChannelFormatDesc return_value = cudaCreateChannelDesc(x, y, z, w, f);
-
-    if (rpc_start_response(conn, request_id) < 0)
-        return -1;
-}
-
 int handle_cudaCreateTextureObject(void *conn)
 {
     cudaTextureObject_t* pTexObject;
@@ -22539,7 +22459,6 @@ static RequestHandler opHandlers[] = {
     handle_nvmlInit_v2,
     handle_nvmlInitWithFlags,
     handle_nvmlShutdown,
-    handle_nvmlErrorString,
     handle_nvmlSystemGetDriverVersion,
     handle_nvmlSystemGetNVMLVersion,
     handle_nvmlSystemGetCudaDriverVersion,
@@ -23221,8 +23140,6 @@ static RequestHandler opHandlers[] = {
     handle_cudaThreadSetCacheConfig,
     handle_cudaGetLastError,
     handle_cudaPeekAtLastError,
-    handle_cudaGetErrorName,
-    handle_cudaGetErrorString,
     handle_cudaGetDeviceCount,
     handle_cudaGetDeviceProperties_v2,
     handle_cudaDeviceGetAttribute,
@@ -23379,7 +23296,6 @@ static RequestHandler opHandlers[] = {
     handle_cudaGraphicsSubResourceGetMappedArray,
     handle_cudaGraphicsResourceGetMappedMipmappedArray,
     handle_cudaGetChannelDesc,
-    handle_cudaCreateChannelDesc,
     handle_cudaCreateTextureObject,
     handle_cudaDestroyTextureObject,
     handle_cudaGetTextureObjectResourceDesc,

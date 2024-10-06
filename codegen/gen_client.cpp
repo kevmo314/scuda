@@ -47,18 +47,6 @@ nvmlReturn_t nvmlShutdown() {
     return return_value;
 }
 
-const char* nvmlErrorString(nvmlReturn_t result) {
-    const char* return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlErrorString);
-    if (request_id < 0 ||
-        rpc_write(&result, sizeof(result)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
 nvmlReturn_t nvmlSystemGetDriverVersion(char* version, unsigned int length) {
     nvmlReturn_t return_value;
 
@@ -3946,7 +3934,7 @@ CUresult cuInit(unsigned int Flags) {
         rpc_write(&Flags, sizeof(Flags)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -3958,7 +3946,7 @@ CUresult cuDriverGetVersion(int* driverVersion) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&driverVersion, sizeof(driverVersion)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -3971,7 +3959,7 @@ CUresult cuDeviceGet(CUdevice* device, int ordinal) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&device, sizeof(device)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -3983,7 +3971,7 @@ CUresult cuDeviceGetCount(int* count) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&count, sizeof(count)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -3997,7 +3985,7 @@ CUresult cuDeviceGetName(char* name, int len, CUdevice dev) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(name, len * sizeof(name)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4010,7 +3998,7 @@ CUresult cuDeviceGetUuid(CUuuid* uuid, CUdevice dev) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(uuid, 16) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4023,7 +4011,7 @@ CUresult cuDeviceGetUuid_v2(CUuuid* uuid, CUdevice dev) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(uuid, 16) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4039,7 +4027,7 @@ CUresult cuDeviceGetLuid(char* luid, unsigned int* deviceNodeMask, CUdevice dev)
         rpc_read(luid, luid_len) < 0 ||
         rpc_read(&deviceNodeMask, sizeof(deviceNodeMask)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4052,7 +4040,7 @@ CUresult cuDeviceTotalMem_v2(size_t* bytes, CUdevice dev) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&bytes, sizeof(bytes)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4067,7 +4055,7 @@ CUresult cuDeviceGetTexture1DLinearMaxWidth(size_t* maxWidthInElements, CUarray_
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&maxWidthInElements, sizeof(maxWidthInElements)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4081,7 +4069,7 @@ CUresult cuDeviceGetAttribute(int* pi, CUdevice_attribute attrib, CUdevice dev) 
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pi, sizeof(pi)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4094,7 +4082,7 @@ CUresult cuDeviceSetMemPool(CUdevice dev, CUmemoryPool pool) {
         rpc_write(&pool, sizeof(pool)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4107,7 +4095,7 @@ CUresult cuDeviceGetMemPool(CUmemoryPool* pool, CUdevice dev) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pool, sizeof(pool)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4120,7 +4108,7 @@ CUresult cuDeviceGetDefaultMemPool(CUmemoryPool* pool_out, CUdevice dev) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pool_out, sizeof(pool_out)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4134,7 +4122,7 @@ CUresult cuDeviceGetExecAffinitySupport(int* pi, CUexecAffinityType type, CUdevi
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pi, sizeof(pi)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4147,7 +4135,7 @@ CUresult cuFlushGPUDirectRDMAWrites(CUflushGPUDirectRDMAWritesTarget target, CUf
         rpc_write(&scope, sizeof(scope)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4160,7 +4148,7 @@ CUresult cuDeviceGetProperties(CUdevprop* prop, CUdevice dev) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&prop, sizeof(prop)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4174,7 +4162,7 @@ CUresult cuDeviceComputeCapability(int* major, int* minor, CUdevice dev) {
         rpc_read(&major, sizeof(major)) < 0 ||
         rpc_read(&minor, sizeof(minor)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4187,7 +4175,7 @@ CUresult cuDevicePrimaryCtxRetain(CUcontext* pctx, CUdevice dev) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pctx, sizeof(pctx)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4199,7 +4187,7 @@ CUresult cuDevicePrimaryCtxRelease_v2(CUdevice dev) {
         rpc_write(&dev, sizeof(dev)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4212,7 +4200,7 @@ CUresult cuDevicePrimaryCtxSetFlags_v2(CUdevice dev, unsigned int flags) {
         rpc_write(&flags, sizeof(flags)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4226,7 +4214,7 @@ CUresult cuDevicePrimaryCtxGetState(CUdevice dev, unsigned int* flags, int* acti
         rpc_read(&flags, sizeof(flags)) < 0 ||
         rpc_read(&active, sizeof(active)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4238,7 +4226,7 @@ CUresult cuDevicePrimaryCtxReset_v2(CUdevice dev) {
         rpc_write(&dev, sizeof(dev)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4252,7 +4240,7 @@ CUresult cuCtxCreate_v2(CUcontext* pctx, unsigned int flags, CUdevice dev) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pctx, sizeof(pctx)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4268,7 +4256,7 @@ CUresult cuCtxCreate_v3(CUcontext* pctx, CUexecAffinityParam* paramsArray, int n
         rpc_read(&pctx, sizeof(pctx)) < 0 ||
         rpc_read(paramsArray, numParams * sizeof(paramsArray)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4280,7 +4268,7 @@ CUresult cuCtxDestroy_v2(CUcontext ctx) {
         rpc_write(&ctx, sizeof(ctx)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4292,7 +4280,7 @@ CUresult cuCtxPushCurrent_v2(CUcontext ctx) {
         rpc_write(&ctx, sizeof(ctx)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4304,7 +4292,7 @@ CUresult cuCtxPopCurrent_v2(CUcontext* pctx) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pctx, sizeof(pctx)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4316,7 +4304,7 @@ CUresult cuCtxSetCurrent(CUcontext ctx) {
         rpc_write(&ctx, sizeof(ctx)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4328,7 +4316,7 @@ CUresult cuCtxGetCurrent(CUcontext* pctx) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pctx, sizeof(pctx)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4340,7 +4328,7 @@ CUresult cuCtxGetDevice(CUdevice* device) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&device, sizeof(device)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4352,7 +4340,7 @@ CUresult cuCtxGetFlags(unsigned int* flags) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&flags, sizeof(flags)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4365,7 +4353,7 @@ CUresult cuCtxGetId(CUcontext ctx, unsigned long long* ctxId) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&ctxId, sizeof(ctxId)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4376,7 +4364,7 @@ CUresult cuCtxSynchronize() {
     if (request_id < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4389,7 +4377,7 @@ CUresult cuCtxSetLimit(CUlimit limit, size_t value) {
         rpc_write(&value, sizeof(value)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4402,7 +4390,7 @@ CUresult cuCtxGetLimit(size_t* pvalue, CUlimit limit) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pvalue, sizeof(pvalue)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4414,7 +4402,7 @@ CUresult cuCtxGetCacheConfig(CUfunc_cache* pconfig) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pconfig, sizeof(pconfig)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4426,7 +4414,7 @@ CUresult cuCtxSetCacheConfig(CUfunc_cache config) {
         rpc_write(&config, sizeof(config)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4438,7 +4426,7 @@ CUresult cuCtxGetSharedMemConfig(CUsharedconfig* pConfig) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pConfig, sizeof(pConfig)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4450,7 +4438,7 @@ CUresult cuCtxSetSharedMemConfig(CUsharedconfig config) {
         rpc_write(&config, sizeof(config)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4463,7 +4451,7 @@ CUresult cuCtxGetApiVersion(CUcontext ctx, unsigned int* version) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&version, sizeof(version)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4476,7 +4464,7 @@ CUresult cuCtxGetStreamPriorityRange(int* leastPriority, int* greatestPriority) 
         rpc_read(&leastPriority, sizeof(leastPriority)) < 0 ||
         rpc_read(&greatestPriority, sizeof(greatestPriority)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4487,7 +4475,7 @@ CUresult cuCtxResetPersistingL2Cache() {
     if (request_id < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4500,7 +4488,7 @@ CUresult cuCtxGetExecAffinity(CUexecAffinityParam* pExecAffinity, CUexecAffinity
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pExecAffinity, sizeof(pExecAffinity)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4513,7 +4501,7 @@ CUresult cuCtxAttach(CUcontext* pctx, unsigned int flags) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pctx, sizeof(pctx)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4525,7 +4513,7 @@ CUresult cuCtxDetach(CUcontext ctx) {
         rpc_write(&ctx, sizeof(ctx)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4540,7 +4528,7 @@ CUresult cuModuleLoad(CUmodule* module, const char* fname) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&module, sizeof(module)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4559,7 +4547,7 @@ CUresult cuModuleLoadDataEx(CUmodule* module, const void* image, unsigned int nu
         rpc_read(&module, sizeof(module)) < 0 ||
         rpc_read(&optionValues, sizeof(optionValues)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4571,7 +4559,7 @@ CUresult cuModuleUnload(CUmodule hmod) {
         rpc_write(&hmod, sizeof(hmod)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4584,7 +4572,7 @@ CUresult cuModuleGetLoadingMode(CUmoduleLoadingMode* mode) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&mode, sizeof(mode)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4600,7 +4588,7 @@ CUresult cuModuleGetFunction(CUfunction* hfunc, CUmodule hmod, const char* name)
         rpc_read(&hfunc, sizeof(hfunc)) < 0 ||
         rpc_read(&name, sizeof(name)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4618,7 +4606,7 @@ CUresult cuModuleGetGlobal_v2(CUdeviceptr* dptr, size_t* bytes, CUmodule hmod, c
         rpc_read(&bytes, sizeof(bytes)) < 0 ||
         rpc_read(&name, sizeof(name)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4636,7 +4624,7 @@ CUresult cuLinkCreate_v2(unsigned int numOptions, CUjit_option* options, void** 
         rpc_read(&optionValues, sizeof(optionValues)) < 0 ||
         rpc_read(&stateOut, sizeof(stateOut)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4659,7 +4647,7 @@ CUresult cuLinkAddData_v2(CUlinkState state, CUjitInputType type, void* data, si
         rpc_read(&options, sizeof(options)) < 0 ||
         rpc_read(&optionValues, sizeof(optionValues)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4679,7 +4667,7 @@ CUresult cuLinkAddFile_v2(CUlinkState state, CUjitInputType type, const char* pa
         rpc_read(&options, sizeof(options)) < 0 ||
         rpc_read(&optionValues, sizeof(optionValues)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4695,7 +4683,7 @@ CUresult cuLinkComplete(CUlinkState state, void** cubinOut, size_t* sizeOut) {
         rpc_read(&cubinOut, sizeof(cubinOut)) < 0 ||
         rpc_read(&sizeOut, sizeof(sizeOut)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4707,7 +4695,7 @@ CUresult cuLinkDestroy(CUlinkState state) {
         rpc_write(&state, sizeof(state)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4723,7 +4711,7 @@ CUresult cuModuleGetTexRef(CUtexref* pTexRef, CUmodule hmod, const char* name) {
         rpc_read(&pTexRef, sizeof(pTexRef)) < 0 ||
         rpc_read(&name, sizeof(name)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4739,7 +4727,7 @@ CUresult cuModuleGetSurfRef(CUsurfref* pSurfRef, CUmodule hmod, const char* name
         rpc_read(&pSurfRef, sizeof(pSurfRef)) < 0 ||
         rpc_read(&name, sizeof(name)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4764,7 +4752,7 @@ CUresult cuLibraryLoadData(CUlibrary* library, const void* code, CUjit_option* j
         rpc_read(&libraryOptions, sizeof(libraryOptions)) < 0 ||
         rpc_read(&libraryOptionValues, sizeof(libraryOptionValues)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4789,7 +4777,7 @@ CUresult cuLibraryLoadFromFile(CUlibrary* library, const char* fileName, CUjit_o
         rpc_read(&libraryOptions, sizeof(libraryOptions)) < 0 ||
         rpc_read(&libraryOptionValues, sizeof(libraryOptionValues)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4801,7 +4789,7 @@ CUresult cuLibraryUnload(CUlibrary library) {
         rpc_write(&library, sizeof(library)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4817,7 +4805,7 @@ CUresult cuLibraryGetKernel(CUkernel* pKernel, CUlibrary library, const char* na
         rpc_read(&pKernel, sizeof(pKernel)) < 0 ||
         rpc_read(&name, sizeof(name)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4831,7 +4819,7 @@ CUresult cuLibraryGetModule(CUmodule* pMod, CUlibrary library) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pMod, sizeof(pMod)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4845,7 +4833,7 @@ CUresult cuKernelGetFunction(CUfunction* pFunc, CUkernel kernel) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pFunc, sizeof(pFunc)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4863,7 +4851,7 @@ CUresult cuLibraryGetGlobal(CUdeviceptr* dptr, size_t* bytes, CUlibrary library,
         rpc_read(&bytes, sizeof(bytes)) < 0 ||
         rpc_read(&name, sizeof(name)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4881,7 +4869,7 @@ CUresult cuLibraryGetManaged(CUdeviceptr* dptr, size_t* bytes, CUlibrary library
         rpc_read(&bytes, sizeof(bytes)) < 0 ||
         rpc_read(&name, sizeof(name)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4897,7 +4885,7 @@ CUresult cuLibraryGetUnifiedFunction(void** fptr, CUlibrary library, const char*
         rpc_read(&fptr, sizeof(fptr)) < 0 ||
         rpc_read(&symbol, sizeof(symbol)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4913,7 +4901,7 @@ CUresult cuKernelGetAttribute(int* pi, CUfunction_attribute attrib, CUkernel ker
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pi, sizeof(pi)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4928,7 +4916,7 @@ CUresult cuKernelSetAttribute(CUfunction_attribute attrib, int val, CUkernel ker
         rpc_write(&dev, sizeof(dev)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4942,7 +4930,7 @@ CUresult cuKernelSetCacheConfig(CUkernel kernel, CUfunc_cache config, CUdevice d
         rpc_write(&dev, sizeof(dev)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4957,7 +4945,7 @@ CUresult cuMemGetInfo_v2(size_t* free, size_t* total) {
         rpc_read(&free, sizeof(free)) < 0 ||
         rpc_read(&total, sizeof(total)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4971,7 +4959,7 @@ CUresult cuMemAlloc_v2(CUdeviceptr* dptr, size_t bytesize) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&dptr, sizeof(dptr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -4989,7 +4977,7 @@ CUresult cuMemAllocPitch_v2(CUdeviceptr* dptr, size_t* pPitch, size_t WidthInByt
         rpc_read(&dptr, sizeof(dptr)) < 0 ||
         rpc_read(&pPitch, sizeof(pPitch)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5001,7 +4989,7 @@ CUresult cuMemFree_v2(CUdeviceptr dptr) {
         rpc_write(&dptr, sizeof(dptr)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5017,7 +5005,7 @@ CUresult cuMemGetAddressRange_v2(CUdeviceptr* pbase, size_t* psize, CUdeviceptr 
         rpc_read(&pbase, sizeof(pbase)) < 0 ||
         rpc_read(&psize, sizeof(psize)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5031,7 +5019,7 @@ CUresult cuMemAllocHost_v2(void** pp, size_t bytesize) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pp, sizeof(pp)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5044,7 +5032,7 @@ CUresult cuMemFreeHost(void* p) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&p, sizeof(p)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5059,7 +5047,7 @@ CUresult cuMemHostAlloc(void** pp, size_t bytesize, unsigned int Flags) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pp, sizeof(pp)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5075,7 +5063,7 @@ CUresult cuMemHostGetDevicePointer_v2(CUdeviceptr* pdptr, void* p, unsigned int 
         rpc_read(&pdptr, sizeof(pdptr)) < 0 ||
         rpc_read(&p, sizeof(p)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5090,7 +5078,7 @@ CUresult cuMemHostGetFlags(unsigned int* pFlags, void* p) {
         rpc_read(&pFlags, sizeof(pFlags)) < 0 ||
         rpc_read(&p, sizeof(p)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5105,7 +5093,7 @@ CUresult cuMemAllocManaged(CUdeviceptr* dptr, size_t bytesize, unsigned int flag
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&dptr, sizeof(dptr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5120,7 +5108,7 @@ CUresult cuDeviceGetByPCIBusId(CUdevice* dev, const char* pciBusId) {
         rpc_read(&dev, sizeof(dev)) < 0 ||
         rpc_read(&pciBusId, sizeof(pciBusId)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5135,7 +5123,7 @@ CUresult cuDeviceGetPCIBusId(char* pciBusId, int len, CUdevice dev) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pciBusId, sizeof(pciBusId)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5149,7 +5137,7 @@ CUresult cuIpcGetEventHandle(CUipcEventHandle* pHandle, CUevent event) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pHandle, sizeof(pHandle)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5163,7 +5151,7 @@ CUresult cuIpcOpenEventHandle(CUevent* phEvent, CUipcEventHandle handle) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&phEvent, sizeof(phEvent)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5177,7 +5165,7 @@ CUresult cuIpcGetMemHandle(CUipcMemHandle* pHandle, CUdeviceptr dptr) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pHandle, sizeof(pHandle)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5192,7 +5180,7 @@ CUresult cuIpcOpenMemHandle_v2(CUdeviceptr* pdptr, CUipcMemHandle handle, unsign
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pdptr, sizeof(pdptr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5204,7 +5192,7 @@ CUresult cuIpcCloseMemHandle(CUdeviceptr dptr) {
         rpc_write(&dptr, sizeof(dptr)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5219,7 +5207,7 @@ CUresult cuMemHostRegister_v2(void* p, size_t bytesize, unsigned int Flags) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&p, sizeof(p)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5232,7 +5220,7 @@ CUresult cuMemHostUnregister(void* p) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&p, sizeof(p)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5246,7 +5234,7 @@ CUresult cuMemcpy(CUdeviceptr dst, CUdeviceptr src, size_t ByteCount) {
         rpc_write(&ByteCount, sizeof(ByteCount)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5262,7 +5250,7 @@ CUresult cuMemcpyPeer(CUdeviceptr dstDevice, CUcontext dstContext, CUdeviceptr s
         rpc_write(&ByteCount, sizeof(ByteCount)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5277,7 +5265,7 @@ CUresult cuMemcpyHtoD_v2(CUdeviceptr dstDevice, const void* srcHost, size_t Byte
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&srcHost, sizeof(srcHost)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5292,7 +5280,7 @@ CUresult cuMemcpyDtoH_v2(void* dstHost, CUdeviceptr srcDevice, size_t ByteCount)
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&dstHost, sizeof(dstHost)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5306,7 +5294,7 @@ CUresult cuMemcpyDtoD_v2(CUdeviceptr dstDevice, CUdeviceptr srcDevice, size_t By
         rpc_write(&ByteCount, sizeof(ByteCount)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5321,7 +5309,7 @@ CUresult cuMemcpyDtoA_v2(CUarray dstArray, size_t dstOffset, CUdeviceptr srcDevi
         rpc_write(&ByteCount, sizeof(ByteCount)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5336,7 +5324,7 @@ CUresult cuMemcpyAtoD_v2(CUdeviceptr dstDevice, CUarray srcArray, size_t srcOffs
         rpc_write(&ByteCount, sizeof(ByteCount)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5352,7 +5340,7 @@ CUresult cuMemcpyHtoA_v2(CUarray dstArray, size_t dstOffset, const void* srcHost
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&srcHost, sizeof(srcHost)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5368,7 +5356,7 @@ CUresult cuMemcpyAtoH_v2(void* dstHost, CUarray srcArray, size_t srcOffset, size
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&dstHost, sizeof(dstHost)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5384,7 +5372,7 @@ CUresult cuMemcpyAtoA_v2(CUarray dstArray, size_t dstOffset, CUarray srcArray, s
         rpc_write(&ByteCount, sizeof(ByteCount)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5397,7 +5385,7 @@ CUresult cuMemcpy2D_v2(const CUDA_MEMCPY2D* pCopy) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pCopy, sizeof(pCopy)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5410,7 +5398,7 @@ CUresult cuMemcpy2DUnaligned_v2(const CUDA_MEMCPY2D* pCopy) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pCopy, sizeof(pCopy)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5423,7 +5411,7 @@ CUresult cuMemcpy3D_v2(const CUDA_MEMCPY3D* pCopy) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pCopy, sizeof(pCopy)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5436,7 +5424,7 @@ CUresult cuMemcpy3DPeer(const CUDA_MEMCPY3D_PEER* pCopy) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pCopy, sizeof(pCopy)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5451,7 +5439,7 @@ CUresult cuMemcpyAsync(CUdeviceptr dst, CUdeviceptr src, size_t ByteCount, CUstr
         rpc_write(&hStream, sizeof(hStream)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5468,7 +5456,7 @@ CUresult cuMemcpyPeerAsync(CUdeviceptr dstDevice, CUcontext dstContext, CUdevice
         rpc_write(&hStream, sizeof(hStream)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5484,7 +5472,7 @@ CUresult cuMemcpyHtoDAsync_v2(CUdeviceptr dstDevice, const void* srcHost, size_t
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&srcHost, sizeof(srcHost)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5500,7 +5488,7 @@ CUresult cuMemcpyDtoHAsync_v2(void* dstHost, CUdeviceptr srcDevice, size_t ByteC
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&dstHost, sizeof(dstHost)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5515,7 +5503,7 @@ CUresult cuMemcpyDtoDAsync_v2(CUdeviceptr dstDevice, CUdeviceptr srcDevice, size
         rpc_write(&hStream, sizeof(hStream)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5532,7 +5520,7 @@ CUresult cuMemcpyHtoAAsync_v2(CUarray dstArray, size_t dstOffset, const void* sr
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&srcHost, sizeof(srcHost)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5549,7 +5537,7 @@ CUresult cuMemcpyAtoHAsync_v2(void* dstHost, CUarray srcArray, size_t srcOffset,
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&dstHost, sizeof(dstHost)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5563,7 +5551,7 @@ CUresult cuMemcpy2DAsync_v2(const CUDA_MEMCPY2D* pCopy, CUstream hStream) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pCopy, sizeof(pCopy)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5577,7 +5565,7 @@ CUresult cuMemcpy3DAsync_v2(const CUDA_MEMCPY3D* pCopy, CUstream hStream) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pCopy, sizeof(pCopy)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5591,7 +5579,7 @@ CUresult cuMemcpy3DPeerAsync(const CUDA_MEMCPY3D_PEER* pCopy, CUstream hStream) 
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pCopy, sizeof(pCopy)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5605,7 +5593,7 @@ CUresult cuMemsetD8_v2(CUdeviceptr dstDevice, unsigned char uc, size_t N) {
         rpc_write(&N, sizeof(N)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5619,7 +5607,7 @@ CUresult cuMemsetD16_v2(CUdeviceptr dstDevice, unsigned short us, size_t N) {
         rpc_write(&N, sizeof(N)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5633,7 +5621,7 @@ CUresult cuMemsetD32_v2(CUdeviceptr dstDevice, unsigned int ui, size_t N) {
         rpc_write(&N, sizeof(N)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5649,7 +5637,7 @@ CUresult cuMemsetD2D8_v2(CUdeviceptr dstDevice, size_t dstPitch, unsigned char u
         rpc_write(&Height, sizeof(Height)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5665,7 +5653,7 @@ CUresult cuMemsetD2D16_v2(CUdeviceptr dstDevice, size_t dstPitch, unsigned short
         rpc_write(&Height, sizeof(Height)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5681,7 +5669,7 @@ CUresult cuMemsetD2D32_v2(CUdeviceptr dstDevice, size_t dstPitch, unsigned int u
         rpc_write(&Height, sizeof(Height)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5696,7 +5684,7 @@ CUresult cuMemsetD8Async(CUdeviceptr dstDevice, unsigned char uc, size_t N, CUst
         rpc_write(&hStream, sizeof(hStream)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5711,7 +5699,7 @@ CUresult cuMemsetD16Async(CUdeviceptr dstDevice, unsigned short us, size_t N, CU
         rpc_write(&hStream, sizeof(hStream)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5726,7 +5714,7 @@ CUresult cuMemsetD32Async(CUdeviceptr dstDevice, unsigned int ui, size_t N, CUst
         rpc_write(&hStream, sizeof(hStream)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5743,7 +5731,7 @@ CUresult cuMemsetD2D8Async(CUdeviceptr dstDevice, size_t dstPitch, unsigned char
         rpc_write(&hStream, sizeof(hStream)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5760,7 +5748,7 @@ CUresult cuMemsetD2D16Async(CUdeviceptr dstDevice, size_t dstPitch, unsigned sho
         rpc_write(&hStream, sizeof(hStream)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5777,7 +5765,7 @@ CUresult cuMemsetD2D32Async(CUdeviceptr dstDevice, size_t dstPitch, unsigned int
         rpc_write(&hStream, sizeof(hStream)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5792,7 +5780,7 @@ CUresult cuArrayCreate_v2(CUarray* pHandle, const CUDA_ARRAY_DESCRIPTOR* pAlloca
         rpc_read(&pHandle, sizeof(pHandle)) < 0 ||
         rpc_read(&pAllocateArray, sizeof(pAllocateArray)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5806,7 +5794,7 @@ CUresult cuArrayGetDescriptor_v2(CUDA_ARRAY_DESCRIPTOR* pArrayDescriptor, CUarra
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pArrayDescriptor, sizeof(pArrayDescriptor)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5820,7 +5808,7 @@ CUresult cuArrayGetSparseProperties(CUDA_ARRAY_SPARSE_PROPERTIES* sparseProperti
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&sparseProperties, sizeof(sparseProperties)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5834,7 +5822,7 @@ CUresult cuMipmappedArrayGetSparseProperties(CUDA_ARRAY_SPARSE_PROPERTIES* spars
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&sparseProperties, sizeof(sparseProperties)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5849,7 +5837,7 @@ CUresult cuArrayGetMemoryRequirements(CUDA_ARRAY_MEMORY_REQUIREMENTS* memoryRequ
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&memoryRequirements, sizeof(memoryRequirements)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5864,7 +5852,7 @@ CUresult cuMipmappedArrayGetMemoryRequirements(CUDA_ARRAY_MEMORY_REQUIREMENTS* m
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&memoryRequirements, sizeof(memoryRequirements)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5879,7 +5867,7 @@ CUresult cuArrayGetPlane(CUarray* pPlaneArray, CUarray hArray, unsigned int plan
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pPlaneArray, sizeof(pPlaneArray)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5891,7 +5879,7 @@ CUresult cuArrayDestroy(CUarray hArray) {
         rpc_write(&hArray, sizeof(hArray)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5906,7 +5894,7 @@ CUresult cuArray3DCreate_v2(CUarray* pHandle, const CUDA_ARRAY3D_DESCRIPTOR* pAl
         rpc_read(&pHandle, sizeof(pHandle)) < 0 ||
         rpc_read(&pAllocateArray, sizeof(pAllocateArray)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5920,7 +5908,7 @@ CUresult cuArray3DGetDescriptor_v2(CUDA_ARRAY3D_DESCRIPTOR* pArrayDescriptor, CU
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pArrayDescriptor, sizeof(pArrayDescriptor)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5936,7 +5924,7 @@ CUresult cuMipmappedArrayCreate(CUmipmappedArray* pHandle, const CUDA_ARRAY3D_DE
         rpc_read(&pHandle, sizeof(pHandle)) < 0 ||
         rpc_read(&pMipmappedArrayDesc, sizeof(pMipmappedArrayDesc)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5951,7 +5939,7 @@ CUresult cuMipmappedArrayGetLevel(CUarray* pLevelArray, CUmipmappedArray hMipmap
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pLevelArray, sizeof(pLevelArray)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5963,7 +5951,7 @@ CUresult cuMipmappedArrayDestroy(CUmipmappedArray hMipmappedArray) {
         rpc_write(&hMipmappedArray, sizeof(hMipmappedArray)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5980,7 +5968,7 @@ CUresult cuMemGetHandleForAddressRange(void* handle, CUdeviceptr dptr, size_t si
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&handle, sizeof(handle)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -5997,7 +5985,7 @@ CUresult cuMemAddressReserve(CUdeviceptr* ptr, size_t size, size_t alignment, CU
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&ptr, sizeof(ptr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6010,7 +5998,7 @@ CUresult cuMemAddressFree(CUdeviceptr ptr, size_t size) {
         rpc_write(&size, sizeof(size)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6027,7 +6015,7 @@ CUresult cuMemCreate(CUmemGenericAllocationHandle* handle, size_t size, const CU
         rpc_read(&handle, sizeof(handle)) < 0 ||
         rpc_read(&prop, sizeof(prop)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6039,7 +6027,7 @@ CUresult cuMemRelease(CUmemGenericAllocationHandle handle) {
         rpc_write(&handle, sizeof(handle)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6055,7 +6043,7 @@ CUresult cuMemMap(CUdeviceptr ptr, size_t size, size_t offset, CUmemGenericAlloc
         rpc_write(&flags, sizeof(flags)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6070,7 +6058,7 @@ CUresult cuMemMapArrayAsync(CUarrayMapInfo* mapInfoList, unsigned int count, CUs
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&mapInfoList, sizeof(mapInfoList)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6083,7 +6071,7 @@ CUresult cuMemUnmap(CUdeviceptr ptr, size_t size) {
         rpc_write(&size, sizeof(size)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6099,7 +6087,7 @@ CUresult cuMemSetAccess(CUdeviceptr ptr, size_t size, const CUmemAccessDesc* des
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&desc, sizeof(desc)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6115,7 +6103,7 @@ CUresult cuMemGetAccess(unsigned long long* flags, const CUmemLocation* location
         rpc_read(&flags, sizeof(flags)) < 0 ||
         rpc_read(&location, sizeof(location)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6131,7 +6119,7 @@ CUresult cuMemExportToShareableHandle(void* shareableHandle, CUmemGenericAllocat
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&shareableHandle, sizeof(shareableHandle)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6147,7 +6135,7 @@ CUresult cuMemImportFromShareableHandle(CUmemGenericAllocationHandle* handle, vo
         rpc_read(&handle, sizeof(handle)) < 0 ||
         rpc_read(&osHandle, sizeof(osHandle)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6163,7 +6151,7 @@ CUresult cuMemGetAllocationGranularity(size_t* granularity, const CUmemAllocatio
         rpc_read(&granularity, sizeof(granularity)) < 0 ||
         rpc_read(&prop, sizeof(prop)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6177,7 +6165,7 @@ CUresult cuMemGetAllocationPropertiesFromHandle(CUmemAllocationProp* prop, CUmem
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&prop, sizeof(prop)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6192,7 +6180,7 @@ CUresult cuMemRetainAllocationHandle(CUmemGenericAllocationHandle* handle, void*
         rpc_read(&handle, sizeof(handle)) < 0 ||
         rpc_read(&addr, sizeof(addr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6205,7 +6193,7 @@ CUresult cuMemFreeAsync(CUdeviceptr dptr, CUstream hStream) {
         rpc_write(&hStream, sizeof(hStream)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6220,7 +6208,7 @@ CUresult cuMemAllocAsync(CUdeviceptr* dptr, size_t bytesize, CUstream hStream) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&dptr, sizeof(dptr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6233,7 +6221,7 @@ CUresult cuMemPoolTrimTo(CUmemoryPool pool, size_t minBytesToKeep) {
         rpc_write(&minBytesToKeep, sizeof(minBytesToKeep)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6248,7 +6236,7 @@ CUresult cuMemPoolSetAttribute(CUmemoryPool pool, CUmemPool_attribute attr, void
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&value, sizeof(value)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6263,7 +6251,7 @@ CUresult cuMemPoolGetAttribute(CUmemoryPool pool, CUmemPool_attribute attr, void
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&value, sizeof(value)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6278,7 +6266,7 @@ CUresult cuMemPoolSetAccess(CUmemoryPool pool, const CUmemAccessDesc* map, size_
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&map, sizeof(map)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6294,7 +6282,7 @@ CUresult cuMemPoolGetAccess(CUmemAccess_flags* flags, CUmemoryPool memPool, CUme
         rpc_read(&flags, sizeof(flags)) < 0 ||
         rpc_read(&location, sizeof(location)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6309,7 +6297,7 @@ CUresult cuMemPoolCreate(CUmemoryPool* pool, const CUmemPoolProps* poolProps) {
         rpc_read(&pool, sizeof(pool)) < 0 ||
         rpc_read(&poolProps, sizeof(poolProps)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6321,7 +6309,7 @@ CUresult cuMemPoolDestroy(CUmemoryPool pool) {
         rpc_write(&pool, sizeof(pool)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6337,7 +6325,7 @@ CUresult cuMemAllocFromPoolAsync(CUdeviceptr* dptr, size_t bytesize, CUmemoryPoo
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&dptr, sizeof(dptr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6353,7 +6341,7 @@ CUresult cuMemPoolExportToShareableHandle(void* handle_out, CUmemoryPool pool, C
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&handle_out, sizeof(handle_out)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6370,7 +6358,7 @@ CUresult cuMemPoolImportFromShareableHandle(CUmemoryPool* pool_out, void* handle
         rpc_read(&pool_out, sizeof(pool_out)) < 0 ||
         rpc_read(&handle, sizeof(handle)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6384,7 +6372,7 @@ CUresult cuMemPoolExportPointer(CUmemPoolPtrExportData* shareData_out, CUdevicep
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&shareData_out, sizeof(shareData_out)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6400,7 +6388,7 @@ CUresult cuMemPoolImportPointer(CUdeviceptr* ptr_out, CUmemoryPool pool, CUmemPo
         rpc_read(&ptr_out, sizeof(ptr_out)) < 0 ||
         rpc_read(&shareData, sizeof(shareData)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6415,7 +6403,7 @@ CUresult cuPointerGetAttribute(void* data, CUpointer_attribute attribute, CUdevi
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&data, sizeof(data)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6430,7 +6418,7 @@ CUresult cuMemPrefetchAsync(CUdeviceptr devPtr, size_t count, CUdevice dstDevice
         rpc_write(&hStream, sizeof(hStream)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6445,7 +6433,7 @@ CUresult cuMemAdvise(CUdeviceptr devPtr, size_t count, CUmem_advise advice, CUde
         rpc_write(&device, sizeof(device)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6462,7 +6450,7 @@ CUresult cuMemRangeGetAttribute(void* data, size_t dataSize, CUmem_range_attribu
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&data, sizeof(data)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6482,7 +6470,7 @@ CUresult cuMemRangeGetAttributes(void** data, size_t* dataSizes, CUmem_range_att
         rpc_read(&dataSizes, sizeof(dataSizes)) < 0 ||
         rpc_read(&attributes, sizeof(attributes)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6497,7 +6485,7 @@ CUresult cuPointerSetAttribute(const void* value, CUpointer_attribute attribute,
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&value, sizeof(value)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6514,7 +6502,7 @@ CUresult cuPointerGetAttributes(unsigned int numAttributes, CUpointer_attribute*
         rpc_read(&attributes, sizeof(attributes)) < 0 ||
         rpc_read(&data, sizeof(data)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6528,7 +6516,7 @@ CUresult cuStreamCreate(CUstream* phStream, unsigned int Flags) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&phStream, sizeof(phStream)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6543,7 +6531,7 @@ CUresult cuStreamCreateWithPriority(CUstream* phStream, unsigned int flags, int 
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&phStream, sizeof(phStream)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6557,7 +6545,7 @@ CUresult cuStreamGetPriority(CUstream hStream, int* priority) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&priority, sizeof(priority)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6571,7 +6559,7 @@ CUresult cuStreamGetFlags(CUstream hStream, unsigned int* flags) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&flags, sizeof(flags)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6585,7 +6573,7 @@ CUresult cuStreamGetId(CUstream hStream, unsigned long long* streamId) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&streamId, sizeof(streamId)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6599,7 +6587,7 @@ CUresult cuStreamGetCtx(CUstream hStream, CUcontext* pctx) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pctx, sizeof(pctx)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6613,7 +6601,7 @@ CUresult cuStreamWaitEvent(CUstream hStream, CUevent hEvent, unsigned int Flags)
         rpc_write(&Flags, sizeof(Flags)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6629,7 +6617,7 @@ CUresult cuStreamAddCallback(CUstream hStream, CUstreamCallback callback, void* 
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&userData, sizeof(userData)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6642,7 +6630,7 @@ CUresult cuStreamBeginCapture_v2(CUstream hStream, CUstreamCaptureMode mode) {
         rpc_write(&mode, sizeof(mode)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6655,7 +6643,7 @@ CUresult cuThreadExchangeStreamCaptureMode(CUstreamCaptureMode* mode) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&mode, sizeof(mode)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6669,7 +6657,7 @@ CUresult cuStreamEndCapture(CUstream hStream, CUgraph* phGraph) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&phGraph, sizeof(phGraph)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6683,7 +6671,7 @@ CUresult cuStreamIsCapturing(CUstream hStream, CUstreamCaptureStatus* captureSta
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&captureStatus, sizeof(captureStatus)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6705,7 +6693,7 @@ CUresult cuStreamGetCaptureInfo_v2(CUstream hStream, CUstreamCaptureStatus* capt
         rpc_read(&dependencies_out, sizeof(dependencies_out)) < 0 ||
         rpc_read(&numDependencies_out, sizeof(numDependencies_out)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6721,7 +6709,7 @@ CUresult cuStreamUpdateCaptureDependencies(CUstream hStream, CUgraphNode* depend
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&dependencies, sizeof(dependencies)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6736,7 +6724,7 @@ CUresult cuStreamAttachMemAsync(CUstream hStream, CUdeviceptr dptr, size_t lengt
         rpc_write(&flags, sizeof(flags)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6748,7 +6736,7 @@ CUresult cuStreamQuery(CUstream hStream) {
         rpc_write(&hStream, sizeof(hStream)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6760,7 +6748,7 @@ CUresult cuStreamSynchronize(CUstream hStream) {
         rpc_write(&hStream, sizeof(hStream)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6772,7 +6760,7 @@ CUresult cuStreamDestroy_v2(CUstream hStream) {
         rpc_write(&hStream, sizeof(hStream)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6785,7 +6773,7 @@ CUresult cuStreamCopyAttributes(CUstream dst, CUstream src) {
         rpc_write(&src, sizeof(src)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6800,7 +6788,7 @@ CUresult cuStreamGetAttribute(CUstream hStream, CUstreamAttrID attr, CUstreamAtt
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&value_out, sizeof(value_out)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6815,7 +6803,7 @@ CUresult cuStreamSetAttribute(CUstream hStream, CUstreamAttrID attr, const CUstr
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&value, sizeof(value)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6829,7 +6817,7 @@ CUresult cuEventCreate(CUevent* phEvent, unsigned int Flags) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&phEvent, sizeof(phEvent)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6842,7 +6830,7 @@ CUresult cuEventRecord(CUevent hEvent, CUstream hStream) {
         rpc_write(&hStream, sizeof(hStream)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6856,7 +6844,7 @@ CUresult cuEventRecordWithFlags(CUevent hEvent, CUstream hStream, unsigned int f
         rpc_write(&flags, sizeof(flags)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6868,7 +6856,7 @@ CUresult cuEventQuery(CUevent hEvent) {
         rpc_write(&hEvent, sizeof(hEvent)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6880,7 +6868,7 @@ CUresult cuEventSynchronize(CUevent hEvent) {
         rpc_write(&hEvent, sizeof(hEvent)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6892,7 +6880,7 @@ CUresult cuEventDestroy_v2(CUevent hEvent) {
         rpc_write(&hEvent, sizeof(hEvent)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6907,7 +6895,7 @@ CUresult cuEventElapsedTime(float* pMilliseconds, CUevent hStart, CUevent hEnd) 
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pMilliseconds, sizeof(pMilliseconds)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6922,7 +6910,7 @@ CUresult cuImportExternalMemory(CUexternalMemory* extMem_out, const CUDA_EXTERNA
         rpc_read(&extMem_out, sizeof(extMem_out)) < 0 ||
         rpc_read(&memHandleDesc, sizeof(memHandleDesc)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6938,7 +6926,7 @@ CUresult cuExternalMemoryGetMappedBuffer(CUdeviceptr* devPtr, CUexternalMemory e
         rpc_read(&devPtr, sizeof(devPtr)) < 0 ||
         rpc_read(&bufferDesc, sizeof(bufferDesc)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6954,7 +6942,7 @@ CUresult cuExternalMemoryGetMappedMipmappedArray(CUmipmappedArray* mipmap, CUext
         rpc_read(&mipmap, sizeof(mipmap)) < 0 ||
         rpc_read(&mipmapDesc, sizeof(mipmapDesc)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6966,7 +6954,7 @@ CUresult cuDestroyExternalMemory(CUexternalMemory extMem) {
         rpc_write(&extMem, sizeof(extMem)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6981,7 +6969,7 @@ CUresult cuImportExternalSemaphore(CUexternalSemaphore* extSem_out, const CUDA_E
         rpc_read(&extSem_out, sizeof(extSem_out)) < 0 ||
         rpc_read(&semHandleDesc, sizeof(semHandleDesc)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -6998,7 +6986,7 @@ CUresult cuSignalExternalSemaphoresAsync(const CUexternalSemaphore* extSemArray,
         rpc_read(&extSemArray, sizeof(extSemArray)) < 0 ||
         rpc_read(&paramsArray, sizeof(paramsArray)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7015,7 +7003,7 @@ CUresult cuWaitExternalSemaphoresAsync(const CUexternalSemaphore* extSemArray, c
         rpc_read(&extSemArray, sizeof(extSemArray)) < 0 ||
         rpc_read(&paramsArray, sizeof(paramsArray)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7027,7 +7015,7 @@ CUresult cuDestroyExternalSemaphore(CUexternalSemaphore extSem) {
         rpc_write(&extSem, sizeof(extSem)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7042,7 +7030,7 @@ CUresult cuStreamWaitValue32_v2(CUstream stream, CUdeviceptr addr, cuuint32_t va
         rpc_write(&flags, sizeof(flags)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7057,7 +7045,7 @@ CUresult cuStreamWaitValue64_v2(CUstream stream, CUdeviceptr addr, cuuint64_t va
         rpc_write(&flags, sizeof(flags)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7072,7 +7060,7 @@ CUresult cuStreamWriteValue32_v2(CUstream stream, CUdeviceptr addr, cuuint32_t v
         rpc_write(&flags, sizeof(flags)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7087,7 +7075,7 @@ CUresult cuStreamWriteValue64_v2(CUstream stream, CUdeviceptr addr, cuuint64_t v
         rpc_write(&flags, sizeof(flags)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7103,7 +7091,7 @@ CUresult cuStreamBatchMemOp_v2(CUstream stream, unsigned int count, CUstreamBatc
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&paramArray, sizeof(paramArray)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7118,7 +7106,7 @@ CUresult cuFuncGetAttribute(int* pi, CUfunction_attribute attrib, CUfunction hfu
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pi, sizeof(pi)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7132,7 +7120,7 @@ CUresult cuFuncSetAttribute(CUfunction hfunc, CUfunction_attribute attrib, int v
         rpc_write(&value, sizeof(value)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7145,7 +7133,7 @@ CUresult cuFuncSetCacheConfig(CUfunction hfunc, CUfunc_cache config) {
         rpc_write(&config, sizeof(config)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7158,7 +7146,7 @@ CUresult cuFuncSetSharedMemConfig(CUfunction hfunc, CUsharedconfig config) {
         rpc_write(&config, sizeof(config)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7172,7 +7160,7 @@ CUresult cuFuncGetModule(CUmodule* hmod, CUfunction hfunc) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&hmod, sizeof(hmod)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7194,7 +7182,7 @@ CUresult cuLaunchKernel(CUfunction f, unsigned int gridDimX, unsigned int gridDi
         rpc_write(&extra, sizeof(extra)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7209,7 +7197,7 @@ CUresult cuLaunchKernelEx(const CUlaunchConfig* config, CUfunction f, void** ker
         rpc_write(&extra, sizeof(extra)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7231,7 +7219,7 @@ CUresult cuLaunchCooperativeKernel(CUfunction f, unsigned int gridDimX, unsigned
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&kernelParams, sizeof(kernelParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7246,7 +7234,7 @@ CUresult cuLaunchCooperativeKernelMultiDevice(CUDA_LAUNCH_PARAMS* launchParamsLi
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&launchParamsList, sizeof(launchParamsList)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7261,7 +7249,7 @@ CUresult cuLaunchHostFunc(CUstream hStream, CUhostFn fn, void* userData) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&userData, sizeof(userData)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7276,7 +7264,7 @@ CUresult cuFuncSetBlockShape(CUfunction hfunc, int x, int y, int z) {
         rpc_write(&z, sizeof(z)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7289,7 +7277,7 @@ CUresult cuFuncSetSharedSize(CUfunction hfunc, unsigned int bytes) {
         rpc_write(&bytes, sizeof(bytes)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7302,7 +7290,7 @@ CUresult cuParamSetSize(CUfunction hfunc, unsigned int numbytes) {
         rpc_write(&numbytes, sizeof(numbytes)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7316,7 +7304,7 @@ CUresult cuParamSeti(CUfunction hfunc, int offset, unsigned int value) {
         rpc_write(&value, sizeof(value)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7330,7 +7318,7 @@ CUresult cuParamSetf(CUfunction hfunc, int offset, float value) {
         rpc_write(&value, sizeof(value)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7346,7 +7334,7 @@ CUresult cuParamSetv(CUfunction hfunc, int offset, void* ptr, unsigned int numby
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&ptr, sizeof(ptr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7358,7 +7346,7 @@ CUresult cuLaunch(CUfunction f) {
         rpc_write(&f, sizeof(f)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7372,7 +7360,7 @@ CUresult cuLaunchGrid(CUfunction f, int grid_width, int grid_height) {
         rpc_write(&grid_height, sizeof(grid_height)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7387,7 +7375,7 @@ CUresult cuLaunchGridAsync(CUfunction f, int grid_width, int grid_height, CUstre
         rpc_write(&hStream, sizeof(hStream)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7401,7 +7389,7 @@ CUresult cuParamSetTexRef(CUfunction hfunc, int texunit, CUtexref hTexRef) {
         rpc_write(&hTexRef, sizeof(hTexRef)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7415,7 +7403,7 @@ CUresult cuGraphCreate(CUgraph* phGraph, unsigned int flags) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&phGraph, sizeof(phGraph)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7434,7 +7422,7 @@ CUresult cuGraphAddKernelNode_v2(CUgraphNode* phGraphNode, CUgraph hGraph, const
         rpc_read(&dependencies, sizeof(dependencies)) < 0 ||
         rpc_read(&nodeParams, sizeof(nodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7448,7 +7436,7 @@ CUresult cuGraphKernelNodeGetParams_v2(CUgraphNode hNode, CUDA_KERNEL_NODE_PARAM
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&nodeParams, sizeof(nodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7462,7 +7450,7 @@ CUresult cuGraphKernelNodeSetParams_v2(CUgraphNode hNode, const CUDA_KERNEL_NODE
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&nodeParams, sizeof(nodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7482,7 +7470,7 @@ CUresult cuGraphAddMemcpyNode(CUgraphNode* phGraphNode, CUgraph hGraph, const CU
         rpc_read(&dependencies, sizeof(dependencies)) < 0 ||
         rpc_read(&copyParams, sizeof(copyParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7496,7 +7484,7 @@ CUresult cuGraphMemcpyNodeGetParams(CUgraphNode hNode, CUDA_MEMCPY3D* nodeParams
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&nodeParams, sizeof(nodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7510,7 +7498,7 @@ CUresult cuGraphMemcpyNodeSetParams(CUgraphNode hNode, const CUDA_MEMCPY3D* node
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&nodeParams, sizeof(nodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7530,7 +7518,7 @@ CUresult cuGraphAddMemsetNode(CUgraphNode* phGraphNode, CUgraph hGraph, const CU
         rpc_read(&dependencies, sizeof(dependencies)) < 0 ||
         rpc_read(&memsetParams, sizeof(memsetParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7544,7 +7532,7 @@ CUresult cuGraphMemsetNodeGetParams(CUgraphNode hNode, CUDA_MEMSET_NODE_PARAMS* 
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&nodeParams, sizeof(nodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7558,7 +7546,7 @@ CUresult cuGraphMemsetNodeSetParams(CUgraphNode hNode, const CUDA_MEMSET_NODE_PA
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&nodeParams, sizeof(nodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7577,7 +7565,7 @@ CUresult cuGraphAddHostNode(CUgraphNode* phGraphNode, CUgraph hGraph, const CUgr
         rpc_read(&dependencies, sizeof(dependencies)) < 0 ||
         rpc_read(&nodeParams, sizeof(nodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7591,7 +7579,7 @@ CUresult cuGraphHostNodeGetParams(CUgraphNode hNode, CUDA_HOST_NODE_PARAMS* node
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&nodeParams, sizeof(nodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7605,7 +7593,7 @@ CUresult cuGraphHostNodeSetParams(CUgraphNode hNode, const CUDA_HOST_NODE_PARAMS
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&nodeParams, sizeof(nodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7623,7 +7611,7 @@ CUresult cuGraphAddChildGraphNode(CUgraphNode* phGraphNode, CUgraph hGraph, cons
         rpc_read(&phGraphNode, sizeof(phGraphNode)) < 0 ||
         rpc_read(&dependencies, sizeof(dependencies)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7637,7 +7625,7 @@ CUresult cuGraphChildGraphNodeGetGraph(CUgraphNode hNode, CUgraph* phGraph) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&phGraph, sizeof(phGraph)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7654,7 +7642,7 @@ CUresult cuGraphAddEmptyNode(CUgraphNode* phGraphNode, CUgraph hGraph, const CUg
         rpc_read(&phGraphNode, sizeof(phGraphNode)) < 0 ||
         rpc_read(&dependencies, sizeof(dependencies)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7672,7 +7660,7 @@ CUresult cuGraphAddEventRecordNode(CUgraphNode* phGraphNode, CUgraph hGraph, con
         rpc_read(&phGraphNode, sizeof(phGraphNode)) < 0 ||
         rpc_read(&dependencies, sizeof(dependencies)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7686,7 +7674,7 @@ CUresult cuGraphEventRecordNodeGetEvent(CUgraphNode hNode, CUevent* event_out) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&event_out, sizeof(event_out)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7699,7 +7687,7 @@ CUresult cuGraphEventRecordNodeSetEvent(CUgraphNode hNode, CUevent event) {
         rpc_write(&event, sizeof(event)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7717,7 +7705,7 @@ CUresult cuGraphAddEventWaitNode(CUgraphNode* phGraphNode, CUgraph hGraph, const
         rpc_read(&phGraphNode, sizeof(phGraphNode)) < 0 ||
         rpc_read(&dependencies, sizeof(dependencies)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7731,7 +7719,7 @@ CUresult cuGraphEventWaitNodeGetEvent(CUgraphNode hNode, CUevent* event_out) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&event_out, sizeof(event_out)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7744,7 +7732,7 @@ CUresult cuGraphEventWaitNodeSetEvent(CUgraphNode hNode, CUevent event) {
         rpc_write(&event, sizeof(event)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7763,7 +7751,7 @@ CUresult cuGraphAddExternalSemaphoresSignalNode(CUgraphNode* phGraphNode, CUgrap
         rpc_read(&dependencies, sizeof(dependencies)) < 0 ||
         rpc_read(&nodeParams, sizeof(nodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7777,7 +7765,7 @@ CUresult cuGraphExternalSemaphoresSignalNodeGetParams(CUgraphNode hNode, CUDA_EX
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&params_out, sizeof(params_out)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7791,7 +7779,7 @@ CUresult cuGraphExternalSemaphoresSignalNodeSetParams(CUgraphNode hNode, const C
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&nodeParams, sizeof(nodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7810,7 +7798,7 @@ CUresult cuGraphAddExternalSemaphoresWaitNode(CUgraphNode* phGraphNode, CUgraph 
         rpc_read(&dependencies, sizeof(dependencies)) < 0 ||
         rpc_read(&nodeParams, sizeof(nodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7824,7 +7812,7 @@ CUresult cuGraphExternalSemaphoresWaitNodeGetParams(CUgraphNode hNode, CUDA_EXT_
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&params_out, sizeof(params_out)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7838,7 +7826,7 @@ CUresult cuGraphExternalSemaphoresWaitNodeSetParams(CUgraphNode hNode, const CUD
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&nodeParams, sizeof(nodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7857,7 +7845,7 @@ CUresult cuGraphAddBatchMemOpNode(CUgraphNode* phGraphNode, CUgraph hGraph, cons
         rpc_read(&dependencies, sizeof(dependencies)) < 0 ||
         rpc_read(&nodeParams, sizeof(nodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7871,7 +7859,7 @@ CUresult cuGraphBatchMemOpNodeGetParams(CUgraphNode hNode, CUDA_BATCH_MEM_OP_NOD
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&nodeParams_out, sizeof(nodeParams_out)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7885,7 +7873,7 @@ CUresult cuGraphBatchMemOpNodeSetParams(CUgraphNode hNode, const CUDA_BATCH_MEM_
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&nodeParams, sizeof(nodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7900,7 +7888,7 @@ CUresult cuGraphExecBatchMemOpNodeSetParams(CUgraphExec hGraphExec, CUgraphNode 
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&nodeParams, sizeof(nodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7919,7 +7907,7 @@ CUresult cuGraphAddMemAllocNode(CUgraphNode* phGraphNode, CUgraph hGraph, const 
         rpc_read(&dependencies, sizeof(dependencies)) < 0 ||
         rpc_read(&nodeParams, sizeof(nodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7933,7 +7921,7 @@ CUresult cuGraphMemAllocNodeGetParams(CUgraphNode hNode, CUDA_MEM_ALLOC_NODE_PAR
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&params_out, sizeof(params_out)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7951,7 +7939,7 @@ CUresult cuGraphAddMemFreeNode(CUgraphNode* phGraphNode, CUgraph hGraph, const C
         rpc_read(&phGraphNode, sizeof(phGraphNode)) < 0 ||
         rpc_read(&dependencies, sizeof(dependencies)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7965,7 +7953,7 @@ CUresult cuGraphMemFreeNodeGetParams(CUgraphNode hNode, CUdeviceptr* dptr_out) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&dptr_out, sizeof(dptr_out)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7977,7 +7965,7 @@ CUresult cuDeviceGraphMemTrim(CUdevice device) {
         rpc_write(&device, sizeof(device)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -7992,7 +7980,7 @@ CUresult cuDeviceGetGraphMemAttribute(CUdevice device, CUgraphMem_attribute attr
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&value, sizeof(value)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8007,7 +7995,7 @@ CUresult cuDeviceSetGraphMemAttribute(CUdevice device, CUgraphMem_attribute attr
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&value, sizeof(value)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8021,7 +8009,7 @@ CUresult cuGraphClone(CUgraph* phGraphClone, CUgraph originalGraph) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&phGraphClone, sizeof(phGraphClone)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8036,7 +8024,7 @@ CUresult cuGraphNodeFindInClone(CUgraphNode* phNode, CUgraphNode hOriginalNode, 
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&phNode, sizeof(phNode)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8050,7 +8038,7 @@ CUresult cuGraphNodeGetType(CUgraphNode hNode, CUgraphNodeType* type) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&type, sizeof(type)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8066,7 +8054,7 @@ CUresult cuGraphGetNodes(CUgraph hGraph, CUgraphNode* nodes, size_t* numNodes) {
         rpc_read(&nodes, sizeof(nodes)) < 0 ||
         rpc_read(&numNodes, sizeof(numNodes)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8082,7 +8070,7 @@ CUresult cuGraphGetRootNodes(CUgraph hGraph, CUgraphNode* rootNodes, size_t* num
         rpc_read(&rootNodes, sizeof(rootNodes)) < 0 ||
         rpc_read(&numRootNodes, sizeof(numRootNodes)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8100,7 +8088,7 @@ CUresult cuGraphGetEdges(CUgraph hGraph, CUgraphNode* from, CUgraphNode* to, siz
         rpc_read(&to, sizeof(to)) < 0 ||
         rpc_read(&numEdges, sizeof(numEdges)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8116,7 +8104,7 @@ CUresult cuGraphNodeGetDependencies(CUgraphNode hNode, CUgraphNode* dependencies
         rpc_read(&dependencies, sizeof(dependencies)) < 0 ||
         rpc_read(&numDependencies, sizeof(numDependencies)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8132,7 +8120,7 @@ CUresult cuGraphNodeGetDependentNodes(CUgraphNode hNode, CUgraphNode* dependentN
         rpc_read(&dependentNodes, sizeof(dependentNodes)) < 0 ||
         rpc_read(&numDependentNodes, sizeof(numDependentNodes)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8149,7 +8137,7 @@ CUresult cuGraphAddDependencies(CUgraph hGraph, const CUgraphNode* from, const C
         rpc_read(&from, sizeof(from)) < 0 ||
         rpc_read(&to, sizeof(to)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8166,7 +8154,7 @@ CUresult cuGraphRemoveDependencies(CUgraph hGraph, const CUgraphNode* from, cons
         rpc_read(&from, sizeof(from)) < 0 ||
         rpc_read(&to, sizeof(to)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8178,7 +8166,7 @@ CUresult cuGraphDestroyNode(CUgraphNode hNode) {
         rpc_write(&hNode, sizeof(hNode)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8193,7 +8181,7 @@ CUresult cuGraphInstantiateWithFlags(CUgraphExec* phGraphExec, CUgraph hGraph, u
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&phGraphExec, sizeof(phGraphExec)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8209,7 +8197,7 @@ CUresult cuGraphInstantiateWithParams(CUgraphExec* phGraphExec, CUgraph hGraph, 
         rpc_read(&phGraphExec, sizeof(phGraphExec)) < 0 ||
         rpc_read(&instantiateParams, sizeof(instantiateParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8223,7 +8211,7 @@ CUresult cuGraphExecGetFlags(CUgraphExec hGraphExec, cuuint64_t* flags) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&flags, sizeof(flags)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8238,7 +8226,7 @@ CUresult cuGraphExecKernelNodeSetParams_v2(CUgraphExec hGraphExec, CUgraphNode h
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&nodeParams, sizeof(nodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8254,7 +8242,7 @@ CUresult cuGraphExecMemcpyNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNod
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&copyParams, sizeof(copyParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8270,7 +8258,7 @@ CUresult cuGraphExecMemsetNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNod
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&memsetParams, sizeof(memsetParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8285,7 +8273,7 @@ CUresult cuGraphExecHostNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNode,
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&nodeParams, sizeof(nodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8299,7 +8287,7 @@ CUresult cuGraphExecChildGraphNodeSetParams(CUgraphExec hGraphExec, CUgraphNode 
         rpc_write(&childGraph, sizeof(childGraph)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8313,7 +8301,7 @@ CUresult cuGraphExecEventRecordNodeSetEvent(CUgraphExec hGraphExec, CUgraphNode 
         rpc_write(&event, sizeof(event)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8327,7 +8315,7 @@ CUresult cuGraphExecEventWaitNodeSetEvent(CUgraphExec hGraphExec, CUgraphNode hN
         rpc_write(&event, sizeof(event)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8342,7 +8330,7 @@ CUresult cuGraphExecExternalSemaphoresSignalNodeSetParams(CUgraphExec hGraphExec
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&nodeParams, sizeof(nodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8357,7 +8345,7 @@ CUresult cuGraphExecExternalSemaphoresWaitNodeSetParams(CUgraphExec hGraphExec, 
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&nodeParams, sizeof(nodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8371,7 +8359,7 @@ CUresult cuGraphNodeSetEnabled(CUgraphExec hGraphExec, CUgraphNode hNode, unsign
         rpc_write(&isEnabled, sizeof(isEnabled)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8386,7 +8374,7 @@ CUresult cuGraphNodeGetEnabled(CUgraphExec hGraphExec, CUgraphNode hNode, unsign
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&isEnabled, sizeof(isEnabled)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8399,7 +8387,7 @@ CUresult cuGraphUpload(CUgraphExec hGraphExec, CUstream hStream) {
         rpc_write(&hStream, sizeof(hStream)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8412,7 +8400,7 @@ CUresult cuGraphLaunch(CUgraphExec hGraphExec, CUstream hStream) {
         rpc_write(&hStream, sizeof(hStream)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8424,7 +8412,7 @@ CUresult cuGraphExecDestroy(CUgraphExec hGraphExec) {
         rpc_write(&hGraphExec, sizeof(hGraphExec)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8436,7 +8424,7 @@ CUresult cuGraphDestroy(CUgraph hGraph) {
         rpc_write(&hGraph, sizeof(hGraph)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8451,7 +8439,7 @@ CUresult cuGraphExecUpdate_v2(CUgraphExec hGraphExec, CUgraph hGraph, CUgraphExe
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&resultInfo, sizeof(resultInfo)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8464,7 +8452,7 @@ CUresult cuGraphKernelNodeCopyAttributes(CUgraphNode dst, CUgraphNode src) {
         rpc_write(&src, sizeof(src)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8479,7 +8467,7 @@ CUresult cuGraphKernelNodeGetAttribute(CUgraphNode hNode, CUkernelNodeAttrID att
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&value_out, sizeof(value_out)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8494,7 +8482,7 @@ CUresult cuGraphKernelNodeSetAttribute(CUgraphNode hNode, CUkernelNodeAttrID att
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&value, sizeof(value)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8509,7 +8497,7 @@ CUresult cuGraphDebugDotPrint(CUgraph hGraph, const char* path, unsigned int fla
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&path, sizeof(path)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8527,7 +8515,7 @@ CUresult cuUserObjectCreate(CUuserObject* object_out, void* ptr, CUhostFn destro
         rpc_read(&object_out, sizeof(object_out)) < 0 ||
         rpc_read(&ptr, sizeof(ptr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8540,7 +8528,7 @@ CUresult cuUserObjectRetain(CUuserObject object, unsigned int count) {
         rpc_write(&count, sizeof(count)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8553,7 +8541,7 @@ CUresult cuUserObjectRelease(CUuserObject object, unsigned int count) {
         rpc_write(&count, sizeof(count)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8568,7 +8556,7 @@ CUresult cuGraphRetainUserObject(CUgraph graph, CUuserObject object, unsigned in
         rpc_write(&flags, sizeof(flags)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8582,7 +8570,7 @@ CUresult cuGraphReleaseUserObject(CUgraph graph, CUuserObject object, unsigned i
         rpc_write(&count, sizeof(count)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8598,7 +8586,7 @@ CUresult cuOccupancyMaxActiveBlocksPerMultiprocessor(int* numBlocks, CUfunction 
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&numBlocks, sizeof(numBlocks)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8615,7 +8603,7 @@ CUresult cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(int* numBlocks, CU
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&numBlocks, sizeof(numBlocks)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8631,7 +8619,7 @@ CUresult cuOccupancyAvailableDynamicSMemPerBlock(size_t* dynamicSmemSize, CUfunc
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&dynamicSmemSize, sizeof(dynamicSmemSize)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8647,7 +8635,7 @@ CUresult cuOccupancyMaxPotentialClusterSize(int* clusterSize, CUfunction func, c
         rpc_read(&clusterSize, sizeof(clusterSize)) < 0 ||
         rpc_read(&config, sizeof(config)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8663,7 +8651,7 @@ CUresult cuOccupancyMaxActiveClusters(int* numClusters, CUfunction func, const C
         rpc_read(&numClusters, sizeof(numClusters)) < 0 ||
         rpc_read(&config, sizeof(config)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8677,7 +8665,7 @@ CUresult cuTexRefSetArray(CUtexref hTexRef, CUarray hArray, unsigned int Flags) 
         rpc_write(&Flags, sizeof(Flags)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8691,7 +8679,7 @@ CUresult cuTexRefSetMipmappedArray(CUtexref hTexRef, CUmipmappedArray hMipmapped
         rpc_write(&Flags, sizeof(Flags)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8707,7 +8695,7 @@ CUresult cuTexRefSetAddress_v2(size_t* ByteOffset, CUtexref hTexRef, CUdeviceptr
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&ByteOffset, sizeof(ByteOffset)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8723,7 +8711,7 @@ CUresult cuTexRefSetAddress2D_v3(CUtexref hTexRef, const CUDA_ARRAY_DESCRIPTOR* 
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&desc, sizeof(desc)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8737,7 +8725,7 @@ CUresult cuTexRefSetFormat(CUtexref hTexRef, CUarray_format fmt, int NumPackedCo
         rpc_write(&NumPackedComponents, sizeof(NumPackedComponents)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8751,7 +8739,7 @@ CUresult cuTexRefSetAddressMode(CUtexref hTexRef, int dim, CUaddress_mode am) {
         rpc_write(&am, sizeof(am)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8764,7 +8752,7 @@ CUresult cuTexRefSetFilterMode(CUtexref hTexRef, CUfilter_mode fm) {
         rpc_write(&fm, sizeof(fm)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8777,7 +8765,7 @@ CUresult cuTexRefSetMipmapFilterMode(CUtexref hTexRef, CUfilter_mode fm) {
         rpc_write(&fm, sizeof(fm)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8790,7 +8778,7 @@ CUresult cuTexRefSetMipmapLevelBias(CUtexref hTexRef, float bias) {
         rpc_write(&bias, sizeof(bias)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8804,7 +8792,7 @@ CUresult cuTexRefSetMipmapLevelClamp(CUtexref hTexRef, float minMipmapLevelClamp
         rpc_write(&maxMipmapLevelClamp, sizeof(maxMipmapLevelClamp)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8817,7 +8805,7 @@ CUresult cuTexRefSetMaxAnisotropy(CUtexref hTexRef, unsigned int maxAniso) {
         rpc_write(&maxAniso, sizeof(maxAniso)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8831,7 +8819,7 @@ CUresult cuTexRefSetBorderColor(CUtexref hTexRef, float* pBorderColor) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pBorderColor, sizeof(pBorderColor)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8844,7 +8832,7 @@ CUresult cuTexRefSetFlags(CUtexref hTexRef, unsigned int Flags) {
         rpc_write(&Flags, sizeof(Flags)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8858,7 +8846,7 @@ CUresult cuTexRefGetAddress_v2(CUdeviceptr* pdptr, CUtexref hTexRef) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pdptr, sizeof(pdptr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8872,7 +8860,7 @@ CUresult cuTexRefGetArray(CUarray* phArray, CUtexref hTexRef) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&phArray, sizeof(phArray)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8886,7 +8874,7 @@ CUresult cuTexRefGetMipmappedArray(CUmipmappedArray* phMipmappedArray, CUtexref 
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&phMipmappedArray, sizeof(phMipmappedArray)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8901,7 +8889,7 @@ CUresult cuTexRefGetAddressMode(CUaddress_mode* pam, CUtexref hTexRef, int dim) 
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pam, sizeof(pam)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8915,7 +8903,7 @@ CUresult cuTexRefGetFilterMode(CUfilter_mode* pfm, CUtexref hTexRef) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pfm, sizeof(pfm)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8931,7 +8919,7 @@ CUresult cuTexRefGetFormat(CUarray_format* pFormat, int* pNumChannels, CUtexref 
         rpc_read(&pFormat, sizeof(pFormat)) < 0 ||
         rpc_read(&pNumChannels, sizeof(pNumChannels)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8945,7 +8933,7 @@ CUresult cuTexRefGetMipmapFilterMode(CUfilter_mode* pfm, CUtexref hTexRef) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pfm, sizeof(pfm)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8959,7 +8947,7 @@ CUresult cuTexRefGetMipmapLevelBias(float* pbias, CUtexref hTexRef) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pbias, sizeof(pbias)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8975,7 +8963,7 @@ CUresult cuTexRefGetMipmapLevelClamp(float* pminMipmapLevelClamp, float* pmaxMip
         rpc_read(&pminMipmapLevelClamp, sizeof(pminMipmapLevelClamp)) < 0 ||
         rpc_read(&pmaxMipmapLevelClamp, sizeof(pmaxMipmapLevelClamp)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -8989,7 +8977,7 @@ CUresult cuTexRefGetMaxAnisotropy(int* pmaxAniso, CUtexref hTexRef) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pmaxAniso, sizeof(pmaxAniso)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -9003,7 +8991,7 @@ CUresult cuTexRefGetBorderColor(float* pBorderColor, CUtexref hTexRef) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pBorderColor, sizeof(pBorderColor)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -9017,7 +9005,7 @@ CUresult cuTexRefGetFlags(unsigned int* pFlags, CUtexref hTexRef) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pFlags, sizeof(pFlags)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -9030,7 +9018,7 @@ CUresult cuTexRefCreate(CUtexref* pTexRef) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pTexRef, sizeof(pTexRef)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -9042,7 +9030,7 @@ CUresult cuTexRefDestroy(CUtexref hTexRef) {
         rpc_write(&hTexRef, sizeof(hTexRef)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -9056,7 +9044,7 @@ CUresult cuSurfRefSetArray(CUsurfref hSurfRef, CUarray hArray, unsigned int Flag
         rpc_write(&Flags, sizeof(Flags)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -9070,7 +9058,7 @@ CUresult cuSurfRefGetArray(CUarray* phArray, CUsurfref hSurfRef) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&phArray, sizeof(phArray)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -9089,7 +9077,7 @@ CUresult cuTexObjectCreate(CUtexObject* pTexObject, const CUDA_RESOURCE_DESC* pR
         rpc_read(&pTexDesc, sizeof(pTexDesc)) < 0 ||
         rpc_read(&pResViewDesc, sizeof(pResViewDesc)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -9101,7 +9089,7 @@ CUresult cuTexObjectDestroy(CUtexObject texObject) {
         rpc_write(&texObject, sizeof(texObject)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -9115,7 +9103,7 @@ CUresult cuTexObjectGetResourceDesc(CUDA_RESOURCE_DESC* pResDesc, CUtexObject te
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pResDesc, sizeof(pResDesc)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -9129,7 +9117,7 @@ CUresult cuTexObjectGetTextureDesc(CUDA_TEXTURE_DESC* pTexDesc, CUtexObject texO
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pTexDesc, sizeof(pTexDesc)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -9143,7 +9131,7 @@ CUresult cuTexObjectGetResourceViewDesc(CUDA_RESOURCE_VIEW_DESC* pResViewDesc, C
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pResViewDesc, sizeof(pResViewDesc)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -9158,7 +9146,7 @@ CUresult cuSurfObjectCreate(CUsurfObject* pSurfObject, const CUDA_RESOURCE_DESC*
         rpc_read(&pSurfObject, sizeof(pSurfObject)) < 0 ||
         rpc_read(&pResDesc, sizeof(pResDesc)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -9170,7 +9158,7 @@ CUresult cuSurfObjectDestroy(CUsurfObject surfObject) {
         rpc_write(&surfObject, sizeof(surfObject)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -9184,7 +9172,7 @@ CUresult cuSurfObjectGetResourceDesc(CUDA_RESOURCE_DESC* pResDesc, CUsurfObject 
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pResDesc, sizeof(pResDesc)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -9213,7 +9201,7 @@ CUresult cuTensorMapEncodeTiled(CUtensorMap* tensorMap, CUtensorMapDataType tens
         rpc_read(&boxDim, sizeof(boxDim)) < 0 ||
         rpc_read(&elementStrides, sizeof(elementStrides)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -9246,7 +9234,7 @@ CUresult cuTensorMapEncodeIm2col(CUtensorMap* tensorMap, CUtensorMapDataType ten
         rpc_read(&pixelBoxUpperCorner, sizeof(pixelBoxUpperCorner)) < 0 ||
         rpc_read(&elementStrides, sizeof(elementStrides)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -9261,7 +9249,7 @@ CUresult cuTensorMapReplaceAddress(CUtensorMap* tensorMap, void* globalAddress) 
         rpc_read(&tensorMap, sizeof(tensorMap)) < 0 ||
         rpc_read(&globalAddress, sizeof(globalAddress)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -9276,7 +9264,7 @@ CUresult cuDeviceCanAccessPeer(int* canAccessPeer, CUdevice dev, CUdevice peerDe
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&canAccessPeer, sizeof(canAccessPeer)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -9289,7 +9277,7 @@ CUresult cuCtxEnablePeerAccess(CUcontext peerContext, unsigned int Flags) {
         rpc_write(&Flags, sizeof(Flags)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -9301,7 +9289,7 @@ CUresult cuCtxDisablePeerAccess(CUcontext peerContext) {
         rpc_write(&peerContext, sizeof(peerContext)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -9317,7 +9305,7 @@ CUresult cuDeviceGetP2PAttribute(int* value, CUdevice_P2PAttribute attrib, CUdev
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&value, sizeof(value)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -9329,7 +9317,7 @@ CUresult cuGraphicsUnregisterResource(CUgraphicsResource resource) {
         rpc_write(&resource, sizeof(resource)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -9345,7 +9333,7 @@ CUresult cuGraphicsSubResourceGetMappedArray(CUarray* pArray, CUgraphicsResource
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pArray, sizeof(pArray)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -9359,7 +9347,7 @@ CUresult cuGraphicsResourceGetMappedMipmappedArray(CUmipmappedArray* pMipmappedA
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pMipmappedArray, sizeof(pMipmappedArray)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -9375,7 +9363,7 @@ CUresult cuGraphicsResourceGetMappedPointer_v2(CUdeviceptr* pDevPtr, size_t* pSi
         rpc_read(&pDevPtr, sizeof(pDevPtr)) < 0 ||
         rpc_read(&pSize, sizeof(pSize)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -9388,7 +9376,7 @@ CUresult cuGraphicsResourceSetMapFlags_v2(CUgraphicsResource resource, unsigned 
         rpc_write(&flags, sizeof(flags)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -9403,7 +9391,7 @@ CUresult cuGraphicsMapResources(unsigned int count, CUgraphicsResource* resource
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&resources, sizeof(resources)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -9418,7 +9406,7 @@ CUresult cuGraphicsUnmapResources(unsigned int count, CUgraphicsResource* resour
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&resources, sizeof(resources)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -9437,7 +9425,7 @@ CUresult cuGetProcAddress_v2(const char* symbol, void** pfn, int cudaVersion, cu
         rpc_read(&pfn, sizeof(pfn)) < 0 ||
         rpc_read(&symbolStatus, sizeof(symbolStatus)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -9452,7 +9440,7 @@ CUresult cuGetExportTable(const void** ppExportTable, const CUuuid* pExportTable
         rpc_read(&ppExportTable, sizeof(ppExportTable)) < 0 ||
         rpc_read(&pExportTableId, sizeof(pExportTableId)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
@@ -9463,7 +9451,7 @@ cudaError_t cudaDeviceReset() {
     if (request_id < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9474,7 +9462,7 @@ cudaError_t cudaDeviceSynchronize() {
     if (request_id < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9487,7 +9475,7 @@ cudaError_t cudaDeviceSetLimit(enum cudaLimit limit, size_t value) {
         rpc_write(&value, sizeof(value)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9501,7 +9489,7 @@ cudaError_t cudaDeviceGetLimit(size_t* pValue, enum cudaLimit limit) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pValue, sizeof(pValue)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9517,7 +9505,7 @@ cudaError_t cudaDeviceGetTexture1DLinearMaxWidth(size_t* maxWidthInElements, con
         rpc_read(&maxWidthInElements, sizeof(maxWidthInElements)) < 0 ||
         rpc_read(&fmtDesc, sizeof(fmtDesc)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9530,7 +9518,7 @@ cudaError_t cudaDeviceGetCacheConfig(enum cudaFuncCache* pCacheConfig) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pCacheConfig, sizeof(pCacheConfig)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9545,7 +9533,7 @@ cudaError_t cudaDeviceGetStreamPriorityRange(int* leastPriority, int* greatestPr
         rpc_read(&leastPriority, sizeof(leastPriority)) < 0 ||
         rpc_read(&greatestPriority, sizeof(greatestPriority)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9557,7 +9545,7 @@ cudaError_t cudaDeviceSetCacheConfig(enum cudaFuncCache cacheConfig) {
         rpc_write(&cacheConfig, sizeof(cacheConfig)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9570,7 +9558,7 @@ cudaError_t cudaDeviceGetSharedMemConfig(enum cudaSharedMemConfig* pConfig) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pConfig, sizeof(pConfig)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9582,7 +9570,7 @@ cudaError_t cudaDeviceSetSharedMemConfig(enum cudaSharedMemConfig config) {
         rpc_write(&config, sizeof(config)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9597,7 +9585,7 @@ cudaError_t cudaDeviceGetByPCIBusId(int* device, const char* pciBusId) {
         rpc_read(&device, sizeof(device)) < 0 ||
         rpc_read(&pciBusId, sizeof(pciBusId)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9612,7 +9600,7 @@ cudaError_t cudaDeviceGetPCIBusId(char* pciBusId, int len, int device) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pciBusId, sizeof(pciBusId)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9626,7 +9614,7 @@ cudaError_t cudaIpcGetEventHandle(cudaIpcEventHandle_t* handle, cudaEvent_t even
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&handle, sizeof(handle)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9640,7 +9628,7 @@ cudaError_t cudaIpcOpenEventHandle(cudaEvent_t* event, cudaIpcEventHandle_t hand
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&event, sizeof(event)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9655,7 +9643,7 @@ cudaError_t cudaIpcGetMemHandle(cudaIpcMemHandle_t* handle, void* devPtr) {
         rpc_read(&handle, sizeof(handle)) < 0 ||
         rpc_read(&devPtr, sizeof(devPtr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9670,7 +9658,7 @@ cudaError_t cudaIpcOpenMemHandle(void** devPtr, cudaIpcMemHandle_t handle, unsig
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&devPtr, sizeof(devPtr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9683,7 +9671,7 @@ cudaError_t cudaIpcCloseMemHandle(void* devPtr) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&devPtr, sizeof(devPtr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9696,7 +9684,7 @@ cudaError_t cudaDeviceFlushGPUDirectRDMAWrites(enum cudaFlushGPUDirectRDMAWrites
         rpc_write(&scope, sizeof(scope)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9707,7 +9695,7 @@ cudaError_t cudaThreadExit() {
     if (request_id < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9718,7 +9706,7 @@ cudaError_t cudaThreadSynchronize() {
     if (request_id < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9731,7 +9719,7 @@ cudaError_t cudaThreadSetLimit(enum cudaLimit limit, size_t value) {
         rpc_write(&value, sizeof(value)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9745,7 +9733,7 @@ cudaError_t cudaThreadGetLimit(size_t* pValue, enum cudaLimit limit) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pValue, sizeof(pValue)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9758,7 +9746,7 @@ cudaError_t cudaThreadGetCacheConfig(enum cudaFuncCache* pCacheConfig) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pCacheConfig, sizeof(pCacheConfig)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9770,7 +9758,7 @@ cudaError_t cudaThreadSetCacheConfig(enum cudaFuncCache cacheConfig) {
         rpc_write(&cacheConfig, sizeof(cacheConfig)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9781,7 +9769,7 @@ cudaError_t cudaGetLastError() {
     if (request_id < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9792,31 +9780,7 @@ cudaError_t cudaPeekAtLastError() {
     if (request_id < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-const char* cudaGetErrorName(cudaError_t error) {
-    const char* return_value;
-
-    int request_id = rpc_start_request(RPC_cudaGetErrorName);
-    if (request_id < 0 ||
-        rpc_write(&error, sizeof(error)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-const char* cudaGetErrorString(cudaError_t error) {
-    const char* return_value;
-
-    int request_id = rpc_start_request(RPC_cudaGetErrorString);
-    if (request_id < 0 ||
-        rpc_write(&error, sizeof(error)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9829,7 +9793,7 @@ cudaError_t cudaGetDeviceCount(int* count) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&count, sizeof(count)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9843,7 +9807,7 @@ cudaError_t cudaGetDeviceProperties_v2(struct cudaDeviceProp* prop, int device) 
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&prop, sizeof(prop)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9858,7 +9822,7 @@ cudaError_t cudaDeviceGetAttribute(int* value, enum cudaDeviceAttr attr, int dev
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&value, sizeof(value)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9872,7 +9836,7 @@ cudaError_t cudaDeviceGetDefaultMemPool(cudaMemPool_t* memPool, int device) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&memPool, sizeof(memPool)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9885,7 +9849,7 @@ cudaError_t cudaDeviceSetMemPool(int device, cudaMemPool_t memPool) {
         rpc_write(&memPool, sizeof(memPool)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9899,7 +9863,7 @@ cudaError_t cudaDeviceGetMemPool(cudaMemPool_t* memPool, int device) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&memPool, sizeof(memPool)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9914,7 +9878,7 @@ cudaError_t cudaDeviceGetNvSciSyncAttributes(void* nvSciSyncAttrList, int device
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&nvSciSyncAttrList, sizeof(nvSciSyncAttrList)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9930,7 +9894,7 @@ cudaError_t cudaDeviceGetP2PAttribute(int* value, enum cudaDeviceP2PAttr attr, i
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&value, sizeof(value)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9945,7 +9909,7 @@ cudaError_t cudaChooseDevice(int* device, const struct cudaDeviceProp* prop) {
         rpc_read(&device, sizeof(device)) < 0 ||
         rpc_read(&prop, sizeof(prop)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9959,7 +9923,7 @@ cudaError_t cudaInitDevice(int device, unsigned int deviceFlags, unsigned int fl
         rpc_write(&flags, sizeof(flags)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9971,7 +9935,7 @@ cudaError_t cudaSetDevice(int device) {
         rpc_write(&device, sizeof(device)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9984,7 +9948,7 @@ cudaError_t cudaGetDevice(int* device) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&device, sizeof(device)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -9998,7 +9962,7 @@ cudaError_t cudaSetValidDevices(int* device_arr, int len) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&device_arr, sizeof(device_arr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10010,7 +9974,7 @@ cudaError_t cudaSetDeviceFlags(unsigned int flags) {
         rpc_write(&flags, sizeof(flags)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10023,7 +9987,7 @@ cudaError_t cudaGetDeviceFlags(unsigned int* flags) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&flags, sizeof(flags)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10036,7 +10000,7 @@ cudaError_t cudaStreamCreate(cudaStream_t* pStream) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pStream, sizeof(pStream)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10050,7 +10014,7 @@ cudaError_t cudaStreamCreateWithFlags(cudaStream_t* pStream, unsigned int flags)
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pStream, sizeof(pStream)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10065,7 +10029,7 @@ cudaError_t cudaStreamCreateWithPriority(cudaStream_t* pStream, unsigned int fla
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pStream, sizeof(pStream)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10079,7 +10043,7 @@ cudaError_t cudaStreamGetPriority(cudaStream_t hStream, int* priority) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&priority, sizeof(priority)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10093,7 +10057,7 @@ cudaError_t cudaStreamGetFlags(cudaStream_t hStream, unsigned int* flags) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&flags, sizeof(flags)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10107,7 +10071,7 @@ cudaError_t cudaStreamGetId(cudaStream_t hStream, unsigned long long* streamId) 
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&streamId, sizeof(streamId)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10118,7 +10082,7 @@ cudaError_t cudaCtxResetPersistingL2Cache() {
     if (request_id < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10131,7 +10095,7 @@ cudaError_t cudaStreamCopyAttributes(cudaStream_t dst, cudaStream_t src) {
         rpc_write(&src, sizeof(src)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10146,7 +10110,7 @@ cudaError_t cudaStreamGetAttribute(cudaStream_t hStream, cudaLaunchAttributeID a
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&value_out, sizeof(value_out)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10161,7 +10125,7 @@ cudaError_t cudaStreamSetAttribute(cudaStream_t hStream, cudaLaunchAttributeID a
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&value, sizeof(value)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10173,7 +10137,7 @@ cudaError_t cudaStreamDestroy(cudaStream_t stream) {
         rpc_write(&stream, sizeof(stream)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10187,7 +10151,7 @@ cudaError_t cudaStreamWaitEvent(cudaStream_t stream, cudaEvent_t event, unsigned
         rpc_write(&flags, sizeof(flags)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10203,7 +10167,7 @@ cudaError_t cudaStreamAddCallback(cudaStream_t stream, cudaStreamCallback_t call
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&userData, sizeof(userData)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10215,7 +10179,7 @@ cudaError_t cudaStreamSynchronize(cudaStream_t stream) {
         rpc_write(&stream, sizeof(stream)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10227,7 +10191,7 @@ cudaError_t cudaStreamQuery(cudaStream_t stream) {
         rpc_write(&stream, sizeof(stream)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10243,7 +10207,7 @@ cudaError_t cudaStreamAttachMemAsync(cudaStream_t stream, void* devPtr, size_t l
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&devPtr, sizeof(devPtr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10256,7 +10220,7 @@ cudaError_t cudaStreamBeginCapture(cudaStream_t stream, enum cudaStreamCaptureMo
         rpc_write(&mode, sizeof(mode)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10269,7 +10233,7 @@ cudaError_t cudaThreadExchangeStreamCaptureMode(enum cudaStreamCaptureMode* mode
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&mode, sizeof(mode)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10283,7 +10247,7 @@ cudaError_t cudaStreamEndCapture(cudaStream_t stream, cudaGraph_t* pGraph) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pGraph, sizeof(pGraph)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10297,7 +10261,7 @@ cudaError_t cudaStreamIsCapturing(cudaStream_t stream, enum cudaStreamCaptureSta
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pCaptureStatus, sizeof(pCaptureStatus)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10319,7 +10283,7 @@ cudaError_t cudaStreamGetCaptureInfo_v2(cudaStream_t stream, enum cudaStreamCapt
         rpc_read(&dependencies_out, sizeof(dependencies_out)) < 0 ||
         rpc_read(&numDependencies_out, sizeof(numDependencies_out)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10335,7 +10299,7 @@ cudaError_t cudaStreamUpdateCaptureDependencies(cudaStream_t stream, cudaGraphNo
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&dependencies, sizeof(dependencies)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10348,7 +10312,7 @@ cudaError_t cudaEventCreate(cudaEvent_t* event) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&event, sizeof(event)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10362,7 +10326,7 @@ cudaError_t cudaEventCreateWithFlags(cudaEvent_t* event, unsigned int flags) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&event, sizeof(event)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10375,7 +10339,7 @@ cudaError_t cudaEventRecord(cudaEvent_t event, cudaStream_t stream) {
         rpc_write(&stream, sizeof(stream)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10389,7 +10353,7 @@ cudaError_t cudaEventRecordWithFlags(cudaEvent_t event, cudaStream_t stream, uns
         rpc_write(&flags, sizeof(flags)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10401,7 +10365,7 @@ cudaError_t cudaEventQuery(cudaEvent_t event) {
         rpc_write(&event, sizeof(event)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10413,7 +10377,7 @@ cudaError_t cudaEventSynchronize(cudaEvent_t event) {
         rpc_write(&event, sizeof(event)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10425,7 +10389,7 @@ cudaError_t cudaEventDestroy(cudaEvent_t event) {
         rpc_write(&event, sizeof(event)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10440,7 +10404,7 @@ cudaError_t cudaEventElapsedTime(float* ms, cudaEvent_t start, cudaEvent_t end) 
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&ms, sizeof(ms)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10455,7 +10419,7 @@ cudaError_t cudaImportExternalMemory(cudaExternalMemory_t* extMem_out, const str
         rpc_read(&extMem_out, sizeof(extMem_out)) < 0 ||
         rpc_read(&memHandleDesc, sizeof(memHandleDesc)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10471,7 +10435,7 @@ cudaError_t cudaExternalMemoryGetMappedBuffer(void** devPtr, cudaExternalMemory_
         rpc_read(&devPtr, sizeof(devPtr)) < 0 ||
         rpc_read(&bufferDesc, sizeof(bufferDesc)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10487,7 +10451,7 @@ cudaError_t cudaExternalMemoryGetMappedMipmappedArray(cudaMipmappedArray_t* mipm
         rpc_read(&mipmap, sizeof(mipmap)) < 0 ||
         rpc_read(&mipmapDesc, sizeof(mipmapDesc)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10499,7 +10463,7 @@ cudaError_t cudaDestroyExternalMemory(cudaExternalMemory_t extMem) {
         rpc_write(&extMem, sizeof(extMem)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10514,7 +10478,7 @@ cudaError_t cudaImportExternalSemaphore(cudaExternalSemaphore_t* extSem_out, con
         rpc_read(&extSem_out, sizeof(extSem_out)) < 0 ||
         rpc_read(&semHandleDesc, sizeof(semHandleDesc)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10531,7 +10495,7 @@ cudaError_t cudaSignalExternalSemaphoresAsync_v2(const cudaExternalSemaphore_t* 
         rpc_read(&extSemArray, sizeof(extSemArray)) < 0 ||
         rpc_read(&paramsArray, sizeof(paramsArray)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10548,7 +10512,7 @@ cudaError_t cudaWaitExternalSemaphoresAsync_v2(const cudaExternalSemaphore_t* ex
         rpc_read(&extSemArray, sizeof(extSemArray)) < 0 ||
         rpc_read(&paramsArray, sizeof(paramsArray)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10560,7 +10524,7 @@ cudaError_t cudaDestroyExternalSemaphore(cudaExternalSemaphore_t extSem) {
         rpc_write(&extSem, sizeof(extSem)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10579,7 +10543,7 @@ cudaError_t cudaLaunchKernel(const void* func, dim3 gridDim, dim3 blockDim, void
         rpc_read(&func, sizeof(func)) < 0 ||
         rpc_read(&args, sizeof(args)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10596,7 +10560,7 @@ cudaError_t cudaLaunchKernelExC(const cudaLaunchConfig_t* config, const void* fu
         rpc_read(&func, sizeof(func)) < 0 ||
         rpc_read(&args, sizeof(args)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10615,7 +10579,7 @@ cudaError_t cudaLaunchCooperativeKernel(const void* func, dim3 gridDim, dim3 blo
         rpc_read(&func, sizeof(func)) < 0 ||
         rpc_read(&args, sizeof(args)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10630,7 +10594,7 @@ cudaError_t cudaLaunchCooperativeKernelMultiDevice(struct cudaLaunchParams* laun
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&launchParamsList, sizeof(launchParamsList)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10644,7 +10608,7 @@ cudaError_t cudaFuncSetCacheConfig(const void* func, enum cudaFuncCache cacheCon
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&func, sizeof(func)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10658,7 +10622,7 @@ cudaError_t cudaFuncSetSharedMemConfig(const void* func, enum cudaSharedMemConfi
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&func, sizeof(func)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10673,7 +10637,7 @@ cudaError_t cudaFuncGetAttributes(struct cudaFuncAttributes* attr, const void* f
         rpc_read(&attr, sizeof(attr)) < 0 ||
         rpc_read(&func, sizeof(func)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10688,7 +10652,7 @@ cudaError_t cudaFuncSetAttribute(const void* func, enum cudaFuncAttribute attr, 
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&func, sizeof(func)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10701,7 +10665,7 @@ cudaError_t cudaSetDoubleForDevice(double* d) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&d, sizeof(d)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10714,7 +10678,7 @@ cudaError_t cudaSetDoubleForHost(double* d) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&d, sizeof(d)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10729,7 +10693,7 @@ cudaError_t cudaLaunchHostFunc(cudaStream_t stream, cudaHostFn_t fn, void* userD
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&userData, sizeof(userData)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10746,7 +10710,7 @@ cudaError_t cudaOccupancyMaxActiveBlocksPerMultiprocessor(int* numBlocks, const 
         rpc_read(&numBlocks, sizeof(numBlocks)) < 0 ||
         rpc_read(&func, sizeof(func)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10763,7 +10727,7 @@ cudaError_t cudaOccupancyAvailableDynamicSMemPerBlock(size_t* dynamicSmemSize, c
         rpc_read(&dynamicSmemSize, sizeof(dynamicSmemSize)) < 0 ||
         rpc_read(&func, sizeof(func)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10781,7 +10745,7 @@ cudaError_t cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(int* numBlock
         rpc_read(&numBlocks, sizeof(numBlocks)) < 0 ||
         rpc_read(&func, sizeof(func)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10798,7 +10762,7 @@ cudaError_t cudaOccupancyMaxPotentialClusterSize(int* clusterSize, const void* f
         rpc_read(&func, sizeof(func)) < 0 ||
         rpc_read(&launchConfig, sizeof(launchConfig)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10815,7 +10779,7 @@ cudaError_t cudaOccupancyMaxActiveClusters(int* numClusters, const void* func, c
         rpc_read(&func, sizeof(func)) < 0 ||
         rpc_read(&launchConfig, sizeof(launchConfig)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10830,7 +10794,7 @@ cudaError_t cudaMallocManaged(void** devPtr, size_t size, unsigned int flags) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&devPtr, sizeof(devPtr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10844,7 +10808,7 @@ cudaError_t cudaMalloc(void** devPtr, size_t size) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&devPtr, sizeof(devPtr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10858,7 +10822,7 @@ cudaError_t cudaMallocHost(void** ptr, size_t size) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&ptr, sizeof(ptr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10875,7 +10839,7 @@ cudaError_t cudaMallocPitch(void** devPtr, size_t* pitch, size_t width, size_t h
         rpc_read(&devPtr, sizeof(devPtr)) < 0 ||
         rpc_read(&pitch, sizeof(pitch)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10893,7 +10857,7 @@ cudaError_t cudaMallocArray(cudaArray_t* array, const struct cudaChannelFormatDe
         rpc_read(&array, sizeof(array)) < 0 ||
         rpc_read(&desc, sizeof(desc)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10906,7 +10870,7 @@ cudaError_t cudaFree(void* devPtr) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&devPtr, sizeof(devPtr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10919,7 +10883,7 @@ cudaError_t cudaFreeHost(void* ptr) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&ptr, sizeof(ptr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10931,7 +10895,7 @@ cudaError_t cudaFreeArray(cudaArray_t array) {
         rpc_write(&array, sizeof(array)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10943,7 +10907,7 @@ cudaError_t cudaFreeMipmappedArray(cudaMipmappedArray_t mipmappedArray) {
         rpc_write(&mipmappedArray, sizeof(mipmappedArray)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10958,7 +10922,7 @@ cudaError_t cudaHostAlloc(void** pHost, size_t size, unsigned int flags) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pHost, sizeof(pHost)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10973,7 +10937,7 @@ cudaError_t cudaHostRegister(void* ptr, size_t size, unsigned int flags) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&ptr, sizeof(ptr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -10986,7 +10950,7 @@ cudaError_t cudaHostUnregister(void* ptr) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&ptr, sizeof(ptr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11002,7 +10966,7 @@ cudaError_t cudaHostGetDevicePointer(void** pDevice, void* pHost, unsigned int f
         rpc_read(&pDevice, sizeof(pDevice)) < 0 ||
         rpc_read(&pHost, sizeof(pHost)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11017,7 +10981,7 @@ cudaError_t cudaHostGetFlags(unsigned int* pFlags, void* pHost) {
         rpc_read(&pFlags, sizeof(pFlags)) < 0 ||
         rpc_read(&pHost, sizeof(pHost)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11031,7 +10995,7 @@ cudaError_t cudaMalloc3D(struct cudaPitchedPtr* pitchedDevPtr, struct cudaExtent
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pitchedDevPtr, sizeof(pitchedDevPtr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11048,7 +11012,7 @@ cudaError_t cudaMalloc3DArray(cudaArray_t* array, const struct cudaChannelFormat
         rpc_read(&array, sizeof(array)) < 0 ||
         rpc_read(&desc, sizeof(desc)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11066,7 +11030,7 @@ cudaError_t cudaMallocMipmappedArray(cudaMipmappedArray_t* mipmappedArray, const
         rpc_read(&mipmappedArray, sizeof(mipmappedArray)) < 0 ||
         rpc_read(&desc, sizeof(desc)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11081,7 +11045,7 @@ cudaError_t cudaGetMipmappedArrayLevel(cudaArray_t* levelArray, cudaMipmappedArr
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&levelArray, sizeof(levelArray)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11094,7 +11058,7 @@ cudaError_t cudaMemcpy3D(const struct cudaMemcpy3DParms* p) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&p, sizeof(p)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11107,7 +11071,7 @@ cudaError_t cudaMemcpy3DPeer(const struct cudaMemcpy3DPeerParms* p) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&p, sizeof(p)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11121,7 +11085,7 @@ cudaError_t cudaMemcpy3DAsync(const struct cudaMemcpy3DParms* p, cudaStream_t st
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&p, sizeof(p)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11135,7 +11099,7 @@ cudaError_t cudaMemcpy3DPeerAsync(const struct cudaMemcpy3DPeerParms* p, cudaStr
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&p, sizeof(p)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11150,7 +11114,7 @@ cudaError_t cudaMemGetInfo(size_t* free, size_t* total) {
         rpc_read(&free, sizeof(free)) < 0 ||
         rpc_read(&total, sizeof(total)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11168,7 +11132,7 @@ cudaError_t cudaArrayGetInfo(struct cudaChannelFormatDesc* desc, struct cudaExte
         rpc_read(&extent, sizeof(extent)) < 0 ||
         rpc_read(&flags, sizeof(flags)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11183,7 +11147,7 @@ cudaError_t cudaArrayGetPlane(cudaArray_t* pPlaneArray, cudaArray_t hArray, unsi
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pPlaneArray, sizeof(pPlaneArray)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11198,7 +11162,7 @@ cudaError_t cudaArrayGetMemoryRequirements(struct cudaArrayMemoryRequirements* m
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&memoryRequirements, sizeof(memoryRequirements)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11213,7 +11177,7 @@ cudaError_t cudaMipmappedArrayGetMemoryRequirements(struct cudaArrayMemoryRequir
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&memoryRequirements, sizeof(memoryRequirements)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11227,7 +11191,7 @@ cudaError_t cudaArrayGetSparseProperties(struct cudaArraySparseProperties* spars
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&sparseProperties, sizeof(sparseProperties)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11241,7 +11205,7 @@ cudaError_t cudaMipmappedArrayGetSparseProperties(struct cudaArraySparseProperti
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&sparseProperties, sizeof(sparseProperties)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11258,7 +11222,7 @@ cudaError_t cudaMemcpy(void* dst, const void* src, size_t count, enum cudaMemcpy
         rpc_read(&dst, sizeof(dst)) < 0 ||
         rpc_read(&src, sizeof(src)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11276,7 +11240,7 @@ cudaError_t cudaMemcpyPeer(void* dst, int dstDevice, const void* src, int srcDev
         rpc_read(&dst, sizeof(dst)) < 0 ||
         rpc_read(&src, sizeof(src)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11296,7 +11260,7 @@ cudaError_t cudaMemcpy2D(void* dst, size_t dpitch, const void* src, size_t spitc
         rpc_read(&dst, sizeof(dst)) < 0 ||
         rpc_read(&src, sizeof(src)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11316,7 +11280,7 @@ cudaError_t cudaMemcpy2DToArray(cudaArray_t dst, size_t wOffset, size_t hOffset,
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&src, sizeof(src)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11336,7 +11300,7 @@ cudaError_t cudaMemcpy2DFromArray(void* dst, size_t dpitch, cudaArray_const_t sr
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&dst, sizeof(dst)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11356,7 +11320,7 @@ cudaError_t cudaMemcpy2DArrayToArray(cudaArray_t dst, size_t wOffsetDst, size_t 
         rpc_write(&kind, sizeof(kind)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11374,7 +11338,7 @@ cudaError_t cudaMemcpyToSymbol(const void* symbol, const void* src, size_t count
         rpc_read(&symbol, sizeof(symbol)) < 0 ||
         rpc_read(&src, sizeof(src)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11392,7 +11356,7 @@ cudaError_t cudaMemcpyFromSymbol(void* dst, const void* symbol, size_t count, si
         rpc_read(&dst, sizeof(dst)) < 0 ||
         rpc_read(&symbol, sizeof(symbol)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11410,7 +11374,7 @@ cudaError_t cudaMemcpyAsync(void* dst, const void* src, size_t count, enum cudaM
         rpc_read(&dst, sizeof(dst)) < 0 ||
         rpc_read(&src, sizeof(src)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11429,7 +11393,7 @@ cudaError_t cudaMemcpyPeerAsync(void* dst, int dstDevice, const void* src, int s
         rpc_read(&dst, sizeof(dst)) < 0 ||
         rpc_read(&src, sizeof(src)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11450,7 +11414,7 @@ cudaError_t cudaMemcpy2DAsync(void* dst, size_t dpitch, const void* src, size_t 
         rpc_read(&dst, sizeof(dst)) < 0 ||
         rpc_read(&src, sizeof(src)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11471,7 +11435,7 @@ cudaError_t cudaMemcpy2DToArrayAsync(cudaArray_t dst, size_t wOffset, size_t hOf
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&src, sizeof(src)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11492,7 +11456,7 @@ cudaError_t cudaMemcpy2DFromArrayAsync(void* dst, size_t dpitch, cudaArray_const
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&dst, sizeof(dst)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11511,7 +11475,7 @@ cudaError_t cudaMemcpyToSymbolAsync(const void* symbol, const void* src, size_t 
         rpc_read(&symbol, sizeof(symbol)) < 0 ||
         rpc_read(&src, sizeof(src)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11530,7 +11494,7 @@ cudaError_t cudaMemcpyFromSymbolAsync(void* dst, const void* symbol, size_t coun
         rpc_read(&dst, sizeof(dst)) < 0 ||
         rpc_read(&symbol, sizeof(symbol)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11545,7 +11509,7 @@ cudaError_t cudaMemset(void* devPtr, int value, size_t count) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&devPtr, sizeof(devPtr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11562,7 +11526,7 @@ cudaError_t cudaMemset2D(void* devPtr, size_t pitch, int value, size_t width, si
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&devPtr, sizeof(devPtr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11576,7 +11540,7 @@ cudaError_t cudaMemset3D(struct cudaPitchedPtr pitchedDevPtr, int value, struct 
         rpc_write(&extent, sizeof(extent)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11592,7 +11556,7 @@ cudaError_t cudaMemsetAsync(void* devPtr, int value, size_t count, cudaStream_t 
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&devPtr, sizeof(devPtr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11610,7 +11574,7 @@ cudaError_t cudaMemset2DAsync(void* devPtr, size_t pitch, int value, size_t widt
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&devPtr, sizeof(devPtr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11625,7 +11589,7 @@ cudaError_t cudaMemset3DAsync(struct cudaPitchedPtr pitchedDevPtr, int value, st
         rpc_write(&stream, sizeof(stream)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11640,7 +11604,7 @@ cudaError_t cudaGetSymbolAddress(void** devPtr, const void* symbol) {
         rpc_read(&devPtr, sizeof(devPtr)) < 0 ||
         rpc_read(&symbol, sizeof(symbol)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11655,7 +11619,7 @@ cudaError_t cudaGetSymbolSize(size_t* size, const void* symbol) {
         rpc_read(&size, sizeof(size)) < 0 ||
         rpc_read(&symbol, sizeof(symbol)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11671,7 +11635,7 @@ cudaError_t cudaMemPrefetchAsync(const void* devPtr, size_t count, int dstDevice
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&devPtr, sizeof(devPtr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11687,7 +11651,7 @@ cudaError_t cudaMemAdvise(const void* devPtr, size_t count, enum cudaMemoryAdvis
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&devPtr, sizeof(devPtr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11705,7 +11669,7 @@ cudaError_t cudaMemRangeGetAttribute(void* data, size_t dataSize, enum cudaMemRa
         rpc_read(&data, sizeof(data)) < 0 ||
         rpc_read(&devPtr, sizeof(devPtr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11726,7 +11690,7 @@ cudaError_t cudaMemRangeGetAttributes(void** data, size_t* dataSizes, enum cudaM
         rpc_read(&attributes, sizeof(attributes)) < 0 ||
         rpc_read(&devPtr, sizeof(devPtr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11744,7 +11708,7 @@ cudaError_t cudaMemcpyToArray(cudaArray_t dst, size_t wOffset, size_t hOffset, c
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&src, sizeof(src)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11762,7 +11726,7 @@ cudaError_t cudaMemcpyFromArray(void* dst, cudaArray_const_t src, size_t wOffset
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&dst, sizeof(dst)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11781,7 +11745,7 @@ cudaError_t cudaMemcpyArrayToArray(cudaArray_t dst, size_t wOffsetDst, size_t hO
         rpc_write(&kind, sizeof(kind)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11800,7 +11764,7 @@ cudaError_t cudaMemcpyToArrayAsync(cudaArray_t dst, size_t wOffset, size_t hOffs
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&src, sizeof(src)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11819,7 +11783,7 @@ cudaError_t cudaMemcpyFromArrayAsync(void* dst, cudaArray_const_t src, size_t wO
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&dst, sizeof(dst)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11834,7 +11798,7 @@ cudaError_t cudaMallocAsync(void** devPtr, size_t size, cudaStream_t hStream) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&devPtr, sizeof(devPtr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11848,7 +11812,7 @@ cudaError_t cudaFreeAsync(void* devPtr, cudaStream_t hStream) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&devPtr, sizeof(devPtr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11861,7 +11825,7 @@ cudaError_t cudaMemPoolTrimTo(cudaMemPool_t memPool, size_t minBytesToKeep) {
         rpc_write(&minBytesToKeep, sizeof(minBytesToKeep)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11876,7 +11840,7 @@ cudaError_t cudaMemPoolSetAttribute(cudaMemPool_t memPool, enum cudaMemPoolAttr 
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&value, sizeof(value)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11891,7 +11855,7 @@ cudaError_t cudaMemPoolGetAttribute(cudaMemPool_t memPool, enum cudaMemPoolAttr 
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&value, sizeof(value)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11906,7 +11870,7 @@ cudaError_t cudaMemPoolSetAccess(cudaMemPool_t memPool, const struct cudaMemAcce
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&descList, sizeof(descList)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11922,7 +11886,7 @@ cudaError_t cudaMemPoolGetAccess(enum cudaMemAccessFlags* flags, cudaMemPool_t m
         rpc_read(&flags, sizeof(flags)) < 0 ||
         rpc_read(&location, sizeof(location)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11937,7 +11901,7 @@ cudaError_t cudaMemPoolCreate(cudaMemPool_t* memPool, const struct cudaMemPoolPr
         rpc_read(&memPool, sizeof(memPool)) < 0 ||
         rpc_read(&poolProps, sizeof(poolProps)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11949,7 +11913,7 @@ cudaError_t cudaMemPoolDestroy(cudaMemPool_t memPool) {
         rpc_write(&memPool, sizeof(memPool)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11965,7 +11929,7 @@ cudaError_t cudaMallocFromPoolAsync(void** ptr, size_t size, cudaMemPool_t memPo
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&ptr, sizeof(ptr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11981,7 +11945,7 @@ cudaError_t cudaMemPoolExportToShareableHandle(void* shareableHandle, cudaMemPoo
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&shareableHandle, sizeof(shareableHandle)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -11998,7 +11962,7 @@ cudaError_t cudaMemPoolImportFromShareableHandle(cudaMemPool_t* memPool, void* s
         rpc_read(&memPool, sizeof(memPool)) < 0 ||
         rpc_read(&shareableHandle, sizeof(shareableHandle)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12013,7 +11977,7 @@ cudaError_t cudaMemPoolExportPointer(struct cudaMemPoolPtrExportData* exportData
         rpc_read(&exportData, sizeof(exportData)) < 0 ||
         rpc_read(&ptr, sizeof(ptr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12029,7 +11993,7 @@ cudaError_t cudaMemPoolImportPointer(void** ptr, cudaMemPool_t memPool, struct c
         rpc_read(&ptr, sizeof(ptr)) < 0 ||
         rpc_read(&exportData, sizeof(exportData)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12044,7 +12008,7 @@ cudaError_t cudaPointerGetAttributes(struct cudaPointerAttributes* attributes, c
         rpc_read(&attributes, sizeof(attributes)) < 0 ||
         rpc_read(&ptr, sizeof(ptr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12059,7 +12023,7 @@ cudaError_t cudaDeviceCanAccessPeer(int* canAccessPeer, int device, int peerDevi
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&canAccessPeer, sizeof(canAccessPeer)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12072,7 +12036,7 @@ cudaError_t cudaDeviceEnablePeerAccess(int peerDevice, unsigned int flags) {
         rpc_write(&flags, sizeof(flags)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12084,7 +12048,7 @@ cudaError_t cudaDeviceDisablePeerAccess(int peerDevice) {
         rpc_write(&peerDevice, sizeof(peerDevice)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12096,7 +12060,7 @@ cudaError_t cudaGraphicsUnregisterResource(cudaGraphicsResource_t resource) {
         rpc_write(&resource, sizeof(resource)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12109,7 +12073,7 @@ cudaError_t cudaGraphicsResourceSetMapFlags(cudaGraphicsResource_t resource, uns
         rpc_write(&flags, sizeof(flags)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12124,7 +12088,7 @@ cudaError_t cudaGraphicsMapResources(int count, cudaGraphicsResource_t* resource
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&resources, sizeof(resources)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12139,7 +12103,7 @@ cudaError_t cudaGraphicsUnmapResources(int count, cudaGraphicsResource_t* resour
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&resources, sizeof(resources)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12155,7 +12119,7 @@ cudaError_t cudaGraphicsResourceGetMappedPointer(void** devPtr, size_t* size, cu
         rpc_read(&devPtr, sizeof(devPtr)) < 0 ||
         rpc_read(&size, sizeof(size)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12171,7 +12135,7 @@ cudaError_t cudaGraphicsSubResourceGetMappedArray(cudaArray_t* array, cudaGraphi
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&array, sizeof(array)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12185,7 +12149,7 @@ cudaError_t cudaGraphicsResourceGetMappedMipmappedArray(cudaMipmappedArray_t* mi
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&mipmappedArray, sizeof(mipmappedArray)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12199,23 +12163,7 @@ cudaError_t cudaGetChannelDesc(struct cudaChannelFormatDesc* desc, cudaArray_con
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&desc, sizeof(desc)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-struct cudaChannelFormatDesc cudaCreateChannelDesc(int x, int y, int z, int w, enum cudaChannelFormatKind f) {
-    struct cudaChannelFormatDesc return_value;
-
-    int request_id = rpc_start_request(RPC_cudaCreateChannelDesc);
-    if (request_id < 0 ||
-        rpc_write(&x, sizeof(x)) < 0 ||
-        rpc_write(&y, sizeof(y)) < 0 ||
-        rpc_write(&z, sizeof(z)) < 0 ||
-        rpc_write(&w, sizeof(w)) < 0 ||
-        rpc_write(&f, sizeof(f)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12234,7 +12182,7 @@ cudaError_t cudaCreateTextureObject(cudaTextureObject_t* pTexObject, const struc
         rpc_read(&pTexDesc, sizeof(pTexDesc)) < 0 ||
         rpc_read(&pResViewDesc, sizeof(pResViewDesc)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12246,7 +12194,7 @@ cudaError_t cudaDestroyTextureObject(cudaTextureObject_t texObject) {
         rpc_write(&texObject, sizeof(texObject)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12260,7 +12208,7 @@ cudaError_t cudaGetTextureObjectResourceDesc(struct cudaResourceDesc* pResDesc, 
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pResDesc, sizeof(pResDesc)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12274,7 +12222,7 @@ cudaError_t cudaGetTextureObjectTextureDesc(struct cudaTextureDesc* pTexDesc, cu
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pTexDesc, sizeof(pTexDesc)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12288,7 +12236,7 @@ cudaError_t cudaGetTextureObjectResourceViewDesc(struct cudaResourceViewDesc* pR
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pResViewDesc, sizeof(pResViewDesc)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12303,7 +12251,7 @@ cudaError_t cudaCreateSurfaceObject(cudaSurfaceObject_t* pSurfObject, const stru
         rpc_read(&pSurfObject, sizeof(pSurfObject)) < 0 ||
         rpc_read(&pResDesc, sizeof(pResDesc)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12315,7 +12263,7 @@ cudaError_t cudaDestroySurfaceObject(cudaSurfaceObject_t surfObject) {
         rpc_write(&surfObject, sizeof(surfObject)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12329,7 +12277,7 @@ cudaError_t cudaGetSurfaceObjectResourceDesc(struct cudaResourceDesc* pResDesc, 
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pResDesc, sizeof(pResDesc)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12342,7 +12290,7 @@ cudaError_t cudaDriverGetVersion(int* driverVersion) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&driverVersion, sizeof(driverVersion)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12355,7 +12303,7 @@ cudaError_t cudaRuntimeGetVersion(int* runtimeVersion) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&runtimeVersion, sizeof(runtimeVersion)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12369,7 +12317,7 @@ cudaError_t cudaGraphCreate(cudaGraph_t* pGraph, unsigned int flags) {
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pGraph, sizeof(pGraph)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12388,7 +12336,7 @@ cudaError_t cudaGraphAddKernelNode(cudaGraphNode_t* pGraphNode, cudaGraph_t grap
         rpc_read(&pDependencies, sizeof(pDependencies)) < 0 ||
         rpc_read(&pNodeParams, sizeof(pNodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12402,7 +12350,7 @@ cudaError_t cudaGraphKernelNodeGetParams(cudaGraphNode_t node, struct cudaKernel
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pNodeParams, sizeof(pNodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12416,7 +12364,7 @@ cudaError_t cudaGraphKernelNodeSetParams(cudaGraphNode_t node, const struct cuda
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pNodeParams, sizeof(pNodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12429,7 +12377,7 @@ cudaError_t cudaGraphKernelNodeCopyAttributes(cudaGraphNode_t hSrc, cudaGraphNod
         rpc_write(&hDst, sizeof(hDst)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12444,7 +12392,7 @@ cudaError_t cudaGraphKernelNodeGetAttribute(cudaGraphNode_t hNode, cudaLaunchAtt
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&value_out, sizeof(value_out)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12459,7 +12407,7 @@ cudaError_t cudaGraphKernelNodeSetAttribute(cudaGraphNode_t hNode, cudaLaunchAtt
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&value, sizeof(value)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12478,7 +12426,7 @@ cudaError_t cudaGraphAddMemcpyNode(cudaGraphNode_t* pGraphNode, cudaGraph_t grap
         rpc_read(&pDependencies, sizeof(pDependencies)) < 0 ||
         rpc_read(&pCopyParams, sizeof(pCopyParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12502,7 +12450,7 @@ cudaError_t cudaGraphAddMemcpyNodeToSymbol(cudaGraphNode_t* pGraphNode, cudaGrap
         rpc_read(&symbol, sizeof(symbol)) < 0 ||
         rpc_read(&src, sizeof(src)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12526,7 +12474,7 @@ cudaError_t cudaGraphAddMemcpyNodeFromSymbol(cudaGraphNode_t* pGraphNode, cudaGr
         rpc_read(&dst, sizeof(dst)) < 0 ||
         rpc_read(&symbol, sizeof(symbol)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12549,7 +12497,7 @@ cudaError_t cudaGraphAddMemcpyNode1D(cudaGraphNode_t* pGraphNode, cudaGraph_t gr
         rpc_read(&dst, sizeof(dst)) < 0 ||
         rpc_read(&src, sizeof(src)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12563,7 +12511,7 @@ cudaError_t cudaGraphMemcpyNodeGetParams(cudaGraphNode_t node, struct cudaMemcpy
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pNodeParams, sizeof(pNodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12577,7 +12525,7 @@ cudaError_t cudaGraphMemcpyNodeSetParams(cudaGraphNode_t node, const struct cuda
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pNodeParams, sizeof(pNodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12596,7 +12544,7 @@ cudaError_t cudaGraphMemcpyNodeSetParamsToSymbol(cudaGraphNode_t node, const voi
         rpc_read(&symbol, sizeof(symbol)) < 0 ||
         rpc_read(&src, sizeof(src)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12615,7 +12563,7 @@ cudaError_t cudaGraphMemcpyNodeSetParamsFromSymbol(cudaGraphNode_t node, void* d
         rpc_read(&dst, sizeof(dst)) < 0 ||
         rpc_read(&symbol, sizeof(symbol)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12633,7 +12581,7 @@ cudaError_t cudaGraphMemcpyNodeSetParams1D(cudaGraphNode_t node, void* dst, cons
         rpc_read(&dst, sizeof(dst)) < 0 ||
         rpc_read(&src, sizeof(src)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12652,7 +12600,7 @@ cudaError_t cudaGraphAddMemsetNode(cudaGraphNode_t* pGraphNode, cudaGraph_t grap
         rpc_read(&pDependencies, sizeof(pDependencies)) < 0 ||
         rpc_read(&pMemsetParams, sizeof(pMemsetParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12666,7 +12614,7 @@ cudaError_t cudaGraphMemsetNodeGetParams(cudaGraphNode_t node, struct cudaMemset
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pNodeParams, sizeof(pNodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12680,7 +12628,7 @@ cudaError_t cudaGraphMemsetNodeSetParams(cudaGraphNode_t node, const struct cuda
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pNodeParams, sizeof(pNodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12699,7 +12647,7 @@ cudaError_t cudaGraphAddHostNode(cudaGraphNode_t* pGraphNode, cudaGraph_t graph,
         rpc_read(&pDependencies, sizeof(pDependencies)) < 0 ||
         rpc_read(&pNodeParams, sizeof(pNodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12713,7 +12661,7 @@ cudaError_t cudaGraphHostNodeGetParams(cudaGraphNode_t node, struct cudaHostNode
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pNodeParams, sizeof(pNodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12727,7 +12675,7 @@ cudaError_t cudaGraphHostNodeSetParams(cudaGraphNode_t node, const struct cudaHo
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pNodeParams, sizeof(pNodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12745,7 +12693,7 @@ cudaError_t cudaGraphAddChildGraphNode(cudaGraphNode_t* pGraphNode, cudaGraph_t 
         rpc_read(&pGraphNode, sizeof(pGraphNode)) < 0 ||
         rpc_read(&pDependencies, sizeof(pDependencies)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12759,7 +12707,7 @@ cudaError_t cudaGraphChildGraphNodeGetGraph(cudaGraphNode_t node, cudaGraph_t* p
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pGraph, sizeof(pGraph)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12776,7 +12724,7 @@ cudaError_t cudaGraphAddEmptyNode(cudaGraphNode_t* pGraphNode, cudaGraph_t graph
         rpc_read(&pGraphNode, sizeof(pGraphNode)) < 0 ||
         rpc_read(&pDependencies, sizeof(pDependencies)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12794,7 +12742,7 @@ cudaError_t cudaGraphAddEventRecordNode(cudaGraphNode_t* pGraphNode, cudaGraph_t
         rpc_read(&pGraphNode, sizeof(pGraphNode)) < 0 ||
         rpc_read(&pDependencies, sizeof(pDependencies)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12808,7 +12756,7 @@ cudaError_t cudaGraphEventRecordNodeGetEvent(cudaGraphNode_t node, cudaEvent_t* 
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&event_out, sizeof(event_out)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12821,7 +12769,7 @@ cudaError_t cudaGraphEventRecordNodeSetEvent(cudaGraphNode_t node, cudaEvent_t e
         rpc_write(&event, sizeof(event)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12839,7 +12787,7 @@ cudaError_t cudaGraphAddEventWaitNode(cudaGraphNode_t* pGraphNode, cudaGraph_t g
         rpc_read(&pGraphNode, sizeof(pGraphNode)) < 0 ||
         rpc_read(&pDependencies, sizeof(pDependencies)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12853,7 +12801,7 @@ cudaError_t cudaGraphEventWaitNodeGetEvent(cudaGraphNode_t node, cudaEvent_t* ev
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&event_out, sizeof(event_out)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12866,7 +12814,7 @@ cudaError_t cudaGraphEventWaitNodeSetEvent(cudaGraphNode_t node, cudaEvent_t eve
         rpc_write(&event, sizeof(event)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12885,7 +12833,7 @@ cudaError_t cudaGraphAddExternalSemaphoresSignalNode(cudaGraphNode_t* pGraphNode
         rpc_read(&pDependencies, sizeof(pDependencies)) < 0 ||
         rpc_read(&nodeParams, sizeof(nodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12899,7 +12847,7 @@ cudaError_t cudaGraphExternalSemaphoresSignalNodeGetParams(cudaGraphNode_t hNode
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&params_out, sizeof(params_out)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12913,7 +12861,7 @@ cudaError_t cudaGraphExternalSemaphoresSignalNodeSetParams(cudaGraphNode_t hNode
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&nodeParams, sizeof(nodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12932,7 +12880,7 @@ cudaError_t cudaGraphAddExternalSemaphoresWaitNode(cudaGraphNode_t* pGraphNode, 
         rpc_read(&pDependencies, sizeof(pDependencies)) < 0 ||
         rpc_read(&nodeParams, sizeof(nodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12946,7 +12894,7 @@ cudaError_t cudaGraphExternalSemaphoresWaitNodeGetParams(cudaGraphNode_t hNode, 
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&params_out, sizeof(params_out)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12960,7 +12908,7 @@ cudaError_t cudaGraphExternalSemaphoresWaitNodeSetParams(cudaGraphNode_t hNode, 
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&nodeParams, sizeof(nodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12979,7 +12927,7 @@ cudaError_t cudaGraphAddMemAllocNode(cudaGraphNode_t* pGraphNode, cudaGraph_t gr
         rpc_read(&pDependencies, sizeof(pDependencies)) < 0 ||
         rpc_read(&nodeParams, sizeof(nodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -12993,7 +12941,7 @@ cudaError_t cudaGraphMemAllocNodeGetParams(cudaGraphNode_t node, struct cudaMemA
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&params_out, sizeof(params_out)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13012,7 +12960,7 @@ cudaError_t cudaGraphAddMemFreeNode(cudaGraphNode_t* pGraphNode, cudaGraph_t gra
         rpc_read(&pDependencies, sizeof(pDependencies)) < 0 ||
         rpc_read(&dptr, sizeof(dptr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13026,7 +12974,7 @@ cudaError_t cudaGraphMemFreeNodeGetParams(cudaGraphNode_t node, void* dptr_out) 
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&dptr_out, sizeof(dptr_out)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13038,7 +12986,7 @@ cudaError_t cudaDeviceGraphMemTrim(int device) {
         rpc_write(&device, sizeof(device)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13053,7 +13001,7 @@ cudaError_t cudaDeviceGetGraphMemAttribute(int device, enum cudaGraphMemAttribut
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&value, sizeof(value)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13068,7 +13016,7 @@ cudaError_t cudaDeviceSetGraphMemAttribute(int device, enum cudaGraphMemAttribut
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&value, sizeof(value)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13082,7 +13030,7 @@ cudaError_t cudaGraphClone(cudaGraph_t* pGraphClone, cudaGraph_t originalGraph) 
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pGraphClone, sizeof(pGraphClone)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13097,7 +13045,7 @@ cudaError_t cudaGraphNodeFindInClone(cudaGraphNode_t* pNode, cudaGraphNode_t ori
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pNode, sizeof(pNode)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13111,7 +13059,7 @@ cudaError_t cudaGraphNodeGetType(cudaGraphNode_t node, enum cudaGraphNodeType* p
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pType, sizeof(pType)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13127,7 +13075,7 @@ cudaError_t cudaGraphGetNodes(cudaGraph_t graph, cudaGraphNode_t* nodes, size_t*
         rpc_read(&nodes, sizeof(nodes)) < 0 ||
         rpc_read(&numNodes, sizeof(numNodes)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13143,7 +13091,7 @@ cudaError_t cudaGraphGetRootNodes(cudaGraph_t graph, cudaGraphNode_t* pRootNodes
         rpc_read(&pRootNodes, sizeof(pRootNodes)) < 0 ||
         rpc_read(&pNumRootNodes, sizeof(pNumRootNodes)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13161,7 +13109,7 @@ cudaError_t cudaGraphGetEdges(cudaGraph_t graph, cudaGraphNode_t* from, cudaGrap
         rpc_read(&to, sizeof(to)) < 0 ||
         rpc_read(&numEdges, sizeof(numEdges)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13177,7 +13125,7 @@ cudaError_t cudaGraphNodeGetDependencies(cudaGraphNode_t node, cudaGraphNode_t* 
         rpc_read(&pDependencies, sizeof(pDependencies)) < 0 ||
         rpc_read(&pNumDependencies, sizeof(pNumDependencies)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13193,7 +13141,7 @@ cudaError_t cudaGraphNodeGetDependentNodes(cudaGraphNode_t node, cudaGraphNode_t
         rpc_read(&pDependentNodes, sizeof(pDependentNodes)) < 0 ||
         rpc_read(&pNumDependentNodes, sizeof(pNumDependentNodes)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13210,7 +13158,7 @@ cudaError_t cudaGraphAddDependencies(cudaGraph_t graph, const cudaGraphNode_t* f
         rpc_read(&from, sizeof(from)) < 0 ||
         rpc_read(&to, sizeof(to)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13227,7 +13175,7 @@ cudaError_t cudaGraphRemoveDependencies(cudaGraph_t graph, const cudaGraphNode_t
         rpc_read(&from, sizeof(from)) < 0 ||
         rpc_read(&to, sizeof(to)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13239,7 +13187,7 @@ cudaError_t cudaGraphDestroyNode(cudaGraphNode_t node) {
         rpc_write(&node, sizeof(node)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13254,7 +13202,7 @@ cudaError_t cudaGraphInstantiate(cudaGraphExec_t* pGraphExec, cudaGraph_t graph,
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pGraphExec, sizeof(pGraphExec)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13269,7 +13217,7 @@ cudaError_t cudaGraphInstantiateWithFlags(cudaGraphExec_t* pGraphExec, cudaGraph
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pGraphExec, sizeof(pGraphExec)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13285,7 +13233,7 @@ cudaError_t cudaGraphInstantiateWithParams(cudaGraphExec_t* pGraphExec, cudaGrap
         rpc_read(&pGraphExec, sizeof(pGraphExec)) < 0 ||
         rpc_read(&instantiateParams, sizeof(instantiateParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13299,7 +13247,7 @@ cudaError_t cudaGraphExecGetFlags(cudaGraphExec_t graphExec, unsigned long long*
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&flags, sizeof(flags)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13314,7 +13262,7 @@ cudaError_t cudaGraphExecKernelNodeSetParams(cudaGraphExec_t hGraphExec, cudaGra
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pNodeParams, sizeof(pNodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13329,7 +13277,7 @@ cudaError_t cudaGraphExecMemcpyNodeSetParams(cudaGraphExec_t hGraphExec, cudaGra
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pNodeParams, sizeof(pNodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13349,7 +13297,7 @@ cudaError_t cudaGraphExecMemcpyNodeSetParamsToSymbol(cudaGraphExec_t hGraphExec,
         rpc_read(&symbol, sizeof(symbol)) < 0 ||
         rpc_read(&src, sizeof(src)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13369,7 +13317,7 @@ cudaError_t cudaGraphExecMemcpyNodeSetParamsFromSymbol(cudaGraphExec_t hGraphExe
         rpc_read(&dst, sizeof(dst)) < 0 ||
         rpc_read(&symbol, sizeof(symbol)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13388,7 +13336,7 @@ cudaError_t cudaGraphExecMemcpyNodeSetParams1D(cudaGraphExec_t hGraphExec, cudaG
         rpc_read(&dst, sizeof(dst)) < 0 ||
         rpc_read(&src, sizeof(src)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13403,7 +13351,7 @@ cudaError_t cudaGraphExecMemsetNodeSetParams(cudaGraphExec_t hGraphExec, cudaGra
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pNodeParams, sizeof(pNodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13418,7 +13366,7 @@ cudaError_t cudaGraphExecHostNodeSetParams(cudaGraphExec_t hGraphExec, cudaGraph
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&pNodeParams, sizeof(pNodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13432,7 +13380,7 @@ cudaError_t cudaGraphExecChildGraphNodeSetParams(cudaGraphExec_t hGraphExec, cud
         rpc_write(&childGraph, sizeof(childGraph)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13446,7 +13394,7 @@ cudaError_t cudaGraphExecEventRecordNodeSetEvent(cudaGraphExec_t hGraphExec, cud
         rpc_write(&event, sizeof(event)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13460,7 +13408,7 @@ cudaError_t cudaGraphExecEventWaitNodeSetEvent(cudaGraphExec_t hGraphExec, cudaG
         rpc_write(&event, sizeof(event)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13475,7 +13423,7 @@ cudaError_t cudaGraphExecExternalSemaphoresSignalNodeSetParams(cudaGraphExec_t h
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&nodeParams, sizeof(nodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13490,7 +13438,7 @@ cudaError_t cudaGraphExecExternalSemaphoresWaitNodeSetParams(cudaGraphExec_t hGr
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&nodeParams, sizeof(nodeParams)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13504,7 +13452,7 @@ cudaError_t cudaGraphNodeSetEnabled(cudaGraphExec_t hGraphExec, cudaGraphNode_t 
         rpc_write(&isEnabled, sizeof(isEnabled)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13519,7 +13467,7 @@ cudaError_t cudaGraphNodeGetEnabled(cudaGraphExec_t hGraphExec, cudaGraphNode_t 
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&isEnabled, sizeof(isEnabled)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13534,7 +13482,7 @@ cudaError_t cudaGraphExecUpdate(cudaGraphExec_t hGraphExec, cudaGraph_t hGraph, 
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&resultInfo, sizeof(resultInfo)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13547,7 +13495,7 @@ cudaError_t cudaGraphUpload(cudaGraphExec_t graphExec, cudaStream_t stream) {
         rpc_write(&stream, sizeof(stream)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13560,7 +13508,7 @@ cudaError_t cudaGraphLaunch(cudaGraphExec_t graphExec, cudaStream_t stream) {
         rpc_write(&stream, sizeof(stream)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13572,7 +13520,7 @@ cudaError_t cudaGraphExecDestroy(cudaGraphExec_t graphExec) {
         rpc_write(&graphExec, sizeof(graphExec)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13584,7 +13532,7 @@ cudaError_t cudaGraphDestroy(cudaGraph_t graph) {
         rpc_write(&graph, sizeof(graph)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13599,7 +13547,7 @@ cudaError_t cudaGraphDebugDotPrint(cudaGraph_t graph, const char* path, unsigned
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&path, sizeof(path)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13617,7 +13565,7 @@ cudaError_t cudaUserObjectCreate(cudaUserObject_t* object_out, void* ptr, cudaHo
         rpc_read(&object_out, sizeof(object_out)) < 0 ||
         rpc_read(&ptr, sizeof(ptr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13630,7 +13578,7 @@ cudaError_t cudaUserObjectRetain(cudaUserObject_t object, unsigned int count) {
         rpc_write(&count, sizeof(count)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13643,7 +13591,7 @@ cudaError_t cudaUserObjectRelease(cudaUserObject_t object, unsigned int count) {
         rpc_write(&count, sizeof(count)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13658,7 +13606,7 @@ cudaError_t cudaGraphRetainUserObject(cudaGraph_t graph, cudaUserObject_t object
         rpc_write(&flags, sizeof(flags)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13672,7 +13620,7 @@ cudaError_t cudaGraphReleaseUserObject(cudaGraph_t graph, cudaUserObject_t objec
         rpc_write(&count, sizeof(count)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13690,7 +13638,7 @@ cudaError_t cudaGetDriverEntryPoint(const char* symbol, void** funcPtr, unsigned
         rpc_read(&funcPtr, sizeof(funcPtr)) < 0 ||
         rpc_read(&driverStatus, sizeof(driverStatus)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13705,7 +13653,7 @@ cudaError_t cudaGetExportTable(const void** ppExportTable, const cudaUUID_t* pEx
         rpc_read(&ppExportTable, sizeof(ppExportTable)) < 0 ||
         rpc_read(&pExportTableId, sizeof(pExportTableId)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13720,7 +13668,7 @@ cudaError_t cudaGetFuncBySymbol(cudaFunction_t* functionPtr, const void* symbolP
         rpc_read(&functionPtr, sizeof(functionPtr)) < 0 ||
         rpc_read(&symbolPtr, sizeof(symbolPtr)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -13728,7 +13676,6 @@ std::unordered_map<std::string, void *> functionMap = {
     {"nvmlInit_v2", (void *)nvmlInit_v2},
     {"nvmlInitWithFlags", (void *)nvmlInitWithFlags},
     {"nvmlShutdown", (void *)nvmlShutdown},
-    {"nvmlErrorString", (void *)nvmlErrorString},
     {"nvmlSystemGetDriverVersion", (void *)nvmlSystemGetDriverVersion},
     {"nvmlSystemGetNVMLVersion", (void *)nvmlSystemGetNVMLVersion},
     {"nvmlSystemGetCudaDriverVersion", (void *)nvmlSystemGetCudaDriverVersion},
@@ -14410,8 +14357,6 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cudaThreadSetCacheConfig", (void *)cudaThreadSetCacheConfig},
     {"cudaGetLastError", (void *)cudaGetLastError},
     {"cudaPeekAtLastError", (void *)cudaPeekAtLastError},
-    {"cudaGetErrorName", (void *)cudaGetErrorName},
-    {"cudaGetErrorString", (void *)cudaGetErrorString},
     {"cudaGetDeviceCount", (void *)cudaGetDeviceCount},
     {"cudaGetDeviceProperties_v2", (void *)cudaGetDeviceProperties_v2},
     {"cudaDeviceGetAttribute", (void *)cudaDeviceGetAttribute},
@@ -14568,7 +14513,6 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cudaGraphicsSubResourceGetMappedArray", (void *)cudaGraphicsSubResourceGetMappedArray},
     {"cudaGraphicsResourceGetMappedMipmappedArray", (void *)cudaGraphicsResourceGetMappedMipmappedArray},
     {"cudaGetChannelDesc", (void *)cudaGetChannelDesc},
-    {"cudaCreateChannelDesc", (void *)cudaCreateChannelDesc},
     {"cudaCreateTextureObject", (void *)cudaCreateTextureObject},
     {"cudaDestroyTextureObject", (void *)cudaDestroyTextureObject},
     {"cudaGetTextureObjectResourceDesc", (void *)cudaGetTextureObjectResourceDesc},

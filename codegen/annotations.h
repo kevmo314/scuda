@@ -11,7 +11,7 @@ nvmlReturn_t nvmlShutdown();
 /**
  * @param result SEND_ONLY
  */
-const char *nvmlErrorString(nvmlReturn_t result);
+// const char *nvmlErrorString(nvmlReturn_t result);
 /**
  * @param length SEND_ONLY
  * @param version RECV_ONLY LENGTH:length
@@ -3944,11 +3944,11 @@ cudaError_t cudaPeekAtLastError();
 /**
  * @param error SEND_ONLY
  */
-const char *cudaGetErrorName(cudaError_t error);
+// const char *cudaGetErrorName(cudaError_t error);
 /**
  * @param error SEND_ONLY
  */
-const char *cudaGetErrorString(cudaError_t error);
+// const char *cudaGetErrorString(cudaError_t error);
 /**
  * @param count SEND_RECV
  */
@@ -4910,7 +4910,7 @@ cudaError_t cudaGetChannelDesc(struct cudaChannelFormatDesc *desc, cudaArray_con
  * @param w SEND_ONLY
  * @param f SEND_ONLY
  */
-struct cudaChannelFormatDesc cudaCreateChannelDesc(int x, int y, int z, int w, enum cudaChannelFormatKind f);
+// struct cudaChannelFormatDesc cudaCreateChannelDesc(int x, int y, int z, int w, enum cudaChannelFormatKind f);
 /**
  * @param pTexObject SEND_RECV
  * @param pResDesc SEND_RECV
