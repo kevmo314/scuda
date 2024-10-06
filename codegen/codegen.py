@@ -104,7 +104,7 @@ def main():
                 value=value,
             ))
 
-    with open("gen_client2.cpp", "w") as f:
+    with open("gen_client.cpp", "w") as f:
         f.write(
             "#include <nvml.h>\n"
             "#include <cuda.h>\n"
@@ -212,7 +212,7 @@ def main():
         f.write("    return it->second;\n")
         f.write("}\n")
 
-    with open("gen_server2.cpp", "w") as f:
+    with open("gen_server.cpp", "w") as f:
         f.write(
             "#include <nvml.h>\n"
             "#include <cuda.h>\n"
