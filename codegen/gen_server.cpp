@@ -10,8 +10,8 @@
 
 #include "gen_server.h"
 
-extern int rpc_read(const void *conn, void *data, const size_t size);
-extern int rpc_write(const void *conn, const void *data, const size_t size);
+extern int rpc_read(const void *conn, void *data, const std::size_t size);
+extern int rpc_write(const void *conn, const void *data, const std::size_t size);
 extern int rpc_end_request(const void *conn);
 extern int rpc_start_response(const void *conn, const int request_id);
 
@@ -403,7 +403,7 @@ int handle_nvmlDeviceGetHandleByIndex_v2(void *conn)
 
 int handle_nvmlDeviceGetHandleBySerial(void *conn)
 {
-    size_t serial_len;
+    std::size_t serial_len;
     const char* serial;
     nvmlDevice_t* device;
 
@@ -426,7 +426,7 @@ int handle_nvmlDeviceGetHandleBySerial(void *conn)
 
 int handle_nvmlDeviceGetHandleByUUID(void *conn)
 {
-    size_t uuid_len;
+    std::size_t uuid_len;
     const char* uuid;
     nvmlDevice_t* device;
 
@@ -449,7 +449,7 @@ int handle_nvmlDeviceGetHandleByUUID(void *conn)
 
 int handle_nvmlDeviceGetHandleByPciBusId_v2(void *conn)
 {
-    size_t pciBusId_len;
+    std::size_t pciBusId_len;
     const char* pciBusId;
     nvmlDevice_t* device;
 
@@ -473,7 +473,7 @@ int handle_nvmlDeviceGetHandleByPciBusId_v2(void *conn)
 int handle_nvmlDeviceGetName(void *conn)
 {
     nvmlDevice_t device;
-    size_t name_len;
+    std::size_t name_len;
     char* name;
     unsigned int length;
 
@@ -539,7 +539,7 @@ int handle_nvmlDeviceGetIndex(void *conn)
 int handle_nvmlDeviceGetSerial(void *conn)
 {
     nvmlDevice_t device;
-    size_t serial_len;
+    std::size_t serial_len;
     char* serial;
     unsigned int length;
 
@@ -776,7 +776,7 @@ int handle_nvmlDeviceGetP2PStatus(void *conn)
 int handle_nvmlDeviceGetUUID(void *conn)
 {
     nvmlDevice_t device;
-    size_t uuid_len;
+    std::size_t uuid_len;
     char* uuid;
     unsigned int length;
 
@@ -802,7 +802,7 @@ int handle_nvmlDeviceGetUUID(void *conn)
 int handle_nvmlVgpuInstanceGetMdevUUID(void *conn)
 {
     nvmlVgpuInstance_t vgpuInstance;
-    size_t mdevUuid_len;
+    std::size_t mdevUuid_len;
     char* mdevUuid;
     unsigned int size;
 
@@ -2427,7 +2427,7 @@ int handle_nvmlDeviceGetDriverModel(void *conn)
 int handle_nvmlDeviceGetVbiosVersion(void *conn)
 {
     nvmlDevice_t device;
-    size_t version_len;
+    std::size_t version_len;
     char* version;
     unsigned int length;
 
@@ -6415,7 +6415,7 @@ int handle_cuDeviceGetUuid_v2(void *conn)
 
 int handle_cuDeviceGetLuid(void *conn)
 {
-    size_t luid_len;
+    std::size_t luid_len;
     char* luid;
     unsigned int* deviceNodeMask;
     CUdevice dev;
@@ -7178,7 +7178,7 @@ int handle_cuCtxDetach(void *conn)
 int handle_cuModuleLoad(void *conn)
 {
     CUmodule* module;
-    size_t fname_len;
+    std::size_t fname_len;
     const char* fname;
 
     if (rpc_read(conn, &fname_len, sizeof(fname_len)) < 0)
@@ -7195,40 +7195,6 @@ int handle_cuModuleLoad(void *conn)
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
     if (rpc_write(conn, &module, sizeof(module)) < 0)
-        return -1;
-}
-
-int handle_cuModuleLoadDataEx(void *conn)
-{
-    CUmodule* module;
-    size_t image_len;
-    const void* image;
-    unsigned int numOptions;
-    CUjit_option* options;
-    void** optionValues;
-
-    if (rpc_read(conn, &image_len, sizeof(image_len)) < 0)
-        return -1;
-    if (rpc_read(conn, &image, image_len) < 0)
-        return -1;
-    if (rpc_read(conn, &numOptions, sizeof(numOptions)) < 0)
-        return -1;
-    if (rpc_read(conn, &options, sizeof(options)) < 0)
-        return -1;
-    if (rpc_read(conn, &optionValues, sizeof(optionValues)) < 0)
-        return -1;
-
-    int request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        return -1;
-
-    CUresult return_value = cuModuleLoadDataEx(module, image, numOptions, options, optionValues);
-
-    if (rpc_start_response(conn, request_id) < 0)
-        return -1;
-    if (rpc_write(conn, &module, sizeof(module)) < 0)
-        return -1;
-    if (rpc_write(conn, &optionValues, sizeof(optionValues)) < 0)
         return -1;
 }
 
@@ -22788,7 +22754,6 @@ static RequestHandler opHandlers[] = {
     handle_cuCtxAttach,
     handle_cuCtxDetach,
     handle_cuModuleLoad,
-    handle_cuModuleLoadDataEx,
     handle_cuModuleUnload,
     handle_cuModuleGetLoadingMode,
     handle_cuModuleGetFunction,

@@ -128,8 +128,8 @@ def main():
             "#include <unordered_map>\n\n"
             '#include "gen_api.h"\n\n'
             "extern int rpc_start_request(const unsigned int request);\n"
-            "extern int rpc_write(const void *data, const size_t size);\n"
-            "extern int rpc_read(void *data, const size_t size);\n"
+            "extern int rpc_write(const void *data, const std::size_t size);\n"
+            "extern int rpc_read(void *data, const std::size_t size);\n"
             "extern int rpc_wait_for_response(const unsigned int request_id);\n"
             "extern int rpc_end_request(void *return_value, const unsigned int request_id);\n"
         )
@@ -167,7 +167,7 @@ def main():
             for operation in operations:
                 if operation.null_terminated:
                     f.write(
-                        "    size_t {param_name}_len = strlen({param_name}) + 1;\n".format(
+                        "    std::size_t {param_name}_len = std::strlen({param_name}) + 1;\n".format(
                             param_name=operation.param_name
                         )
                     )
@@ -264,8 +264,8 @@ def main():
             "#include <unordered_map>\n\n"
             '#include "gen_api.h"\n\n'
             '#include "gen_server.h"\n\n'
-            "extern int rpc_read(const void *conn, void *data, const size_t size);\n"
-            "extern int rpc_write(const void *conn, const void *data, const size_t size);\n"
+            "extern int rpc_read(const void *conn, void *data, const std::size_t size);\n"
+            "extern int rpc_write(const void *conn, const void *data, const std::size_t size);\n"
             "extern int rpc_end_request(const void *conn);\n"
             "extern int rpc_start_response(const void *conn, const int request_id);\n\n"
         )
@@ -291,7 +291,7 @@ def main():
             for operation, param in operations:
                 if operation.null_terminated:
                     f.write(
-                        "    size_t {param_name}_len;\n".format(
+                        "    std::size_t {param_name}_len;\n".format(
                             param_name=operation.param_name
                         )
                     )

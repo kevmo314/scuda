@@ -9,8 +9,8 @@
 #include "gen_api.h"
 
 extern int rpc_start_request(const unsigned int request);
-extern int rpc_write(const void *data, const size_t size);
-extern int rpc_read(void *data, const size_t size);
+extern int rpc_write(const void *data, const std::size_t size);
+extern int rpc_read(void *data, const std::size_t size);
 extern int rpc_wait_for_response(const unsigned int request_id);
 extern int rpc_end_request(void *return_value, const unsigned int request_id);
 nvmlReturn_t nvmlInit_v2() {
@@ -273,7 +273,7 @@ nvmlReturn_t nvmlDeviceGetHandleBySerial(const char* serial, nvmlDevice_t* devic
     nvmlReturn_t return_value;
 
     int request_id = rpc_start_request(RPC_nvmlDeviceGetHandleBySerial);
-    size_t serial_len = strlen(serial) + 1;
+    std::size_t serial_len = std::strlen(serial) + 1;
     if (request_id < 0 ||
         rpc_write(&serial_len, sizeof(serial_len)) < 0 ||
         rpc_write(serial, serial_len) < 0 ||
@@ -288,7 +288,7 @@ nvmlReturn_t nvmlDeviceGetHandleByUUID(const char* uuid, nvmlDevice_t* device) {
     nvmlReturn_t return_value;
 
     int request_id = rpc_start_request(RPC_nvmlDeviceGetHandleByUUID);
-    size_t uuid_len = strlen(uuid) + 1;
+    std::size_t uuid_len = std::strlen(uuid) + 1;
     if (request_id < 0 ||
         rpc_write(&uuid_len, sizeof(uuid_len)) < 0 ||
         rpc_write(uuid, uuid_len) < 0 ||
@@ -303,7 +303,7 @@ nvmlReturn_t nvmlDeviceGetHandleByPciBusId_v2(const char* pciBusId, nvmlDevice_t
     nvmlReturn_t return_value;
 
     int request_id = rpc_start_request(RPC_nvmlDeviceGetHandleByPciBusId_v2);
-    size_t pciBusId_len = strlen(pciBusId) + 1;
+    std::size_t pciBusId_len = std::strlen(pciBusId) + 1;
     if (request_id < 0 ||
         rpc_write(&pciBusId_len, sizeof(pciBusId_len)) < 0 ||
         rpc_write(pciBusId, pciBusId_len) < 0 ||
@@ -318,7 +318,7 @@ nvmlReturn_t nvmlDeviceGetName(nvmlDevice_t device, char* name, unsigned int len
     nvmlReturn_t return_value;
 
     int request_id = rpc_start_request(RPC_nvmlDeviceGetName);
-    size_t name_len = strlen(name) + 1;
+    std::size_t name_len = std::strlen(name) + 1;
     if (request_id < 0 ||
         rpc_write(&device, sizeof(device)) < 0 ||
         rpc_write(&length, sizeof(length)) < 0 ||
@@ -360,7 +360,7 @@ nvmlReturn_t nvmlDeviceGetSerial(nvmlDevice_t device, char* serial, unsigned int
     nvmlReturn_t return_value;
 
     int request_id = rpc_start_request(RPC_nvmlDeviceGetSerial);
-    size_t serial_len = strlen(serial) + 1;
+    std::size_t serial_len = std::strlen(serial) + 1;
     if (request_id < 0 ||
         rpc_write(&device, sizeof(device)) < 0 ||
         rpc_write(&length, sizeof(length)) < 0 ||
@@ -504,7 +504,7 @@ nvmlReturn_t nvmlDeviceGetUUID(nvmlDevice_t device, char* uuid, unsigned int len
     nvmlReturn_t return_value;
 
     int request_id = rpc_start_request(RPC_nvmlDeviceGetUUID);
-    size_t uuid_len = strlen(uuid) + 1;
+    std::size_t uuid_len = std::strlen(uuid) + 1;
     if (request_id < 0 ||
         rpc_write(&device, sizeof(device)) < 0 ||
         rpc_write(&length, sizeof(length)) < 0 ||
@@ -520,7 +520,7 @@ nvmlReturn_t nvmlVgpuInstanceGetMdevUUID(nvmlVgpuInstance_t vgpuInstance, char* 
     nvmlReturn_t return_value;
 
     int request_id = rpc_start_request(RPC_nvmlVgpuInstanceGetMdevUUID);
-    size_t mdevUuid_len = strlen(mdevUuid) + 1;
+    std::size_t mdevUuid_len = std::strlen(mdevUuid) + 1;
     if (request_id < 0 ||
         rpc_write(&vgpuInstance, sizeof(vgpuInstance)) < 0 ||
         rpc_write(&size, sizeof(size)) < 0 ||
@@ -1533,7 +1533,7 @@ nvmlReturn_t nvmlDeviceGetVbiosVersion(nvmlDevice_t device, char* version, unsig
     nvmlReturn_t return_value;
 
     int request_id = rpc_start_request(RPC_nvmlDeviceGetVbiosVersion);
-    size_t version_len = strlen(version) + 1;
+    std::size_t version_len = std::strlen(version) + 1;
     if (request_id < 0 ||
         rpc_write(&device, sizeof(device)) < 0 ||
         rpc_write(&length, sizeof(length)) < 0 ||
@@ -4019,7 +4019,7 @@ CUresult cuDeviceGetLuid(char* luid, unsigned int* deviceNodeMask, CUdevice dev)
     CUresult return_value;
 
     int request_id = rpc_start_request(RPC_cuDeviceGetLuid);
-    size_t luid_len = strlen(luid) + 1;
+    std::size_t luid_len = std::strlen(luid) + 1;
     if (request_id < 0 ||
         rpc_write(&dev, sizeof(dev)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
@@ -4521,31 +4521,12 @@ CUresult cuModuleLoad(CUmodule* module, const char* fname) {
     CUresult return_value;
 
     int request_id = rpc_start_request(RPC_cuModuleLoad);
-    size_t fname_len = strlen(fname) + 1;
+    std::size_t fname_len = std::strlen(fname) + 1;
     if (request_id < 0 ||
         rpc_write(&fname_len, sizeof(fname_len)) < 0 ||
         rpc_write(fname, fname_len) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(&module, sizeof(module)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    return return_value;
-}
-
-CUresult cuModuleLoadDataEx(CUmodule* module, const void* image, unsigned int numOptions, CUjit_option* options, void** optionValues) {
-    CUresult return_value;
-
-    int request_id = rpc_start_request(RPC_cuModuleLoadDataEx);
-    size_t image_len = strlen(image) + 1;
-    if (request_id < 0 ||
-        rpc_write(&image_len, sizeof(image_len)) < 0 ||
-        rpc_write(image, image_len) < 0 ||
-        rpc_write(&numOptions, sizeof(numOptions)) < 0 ||
-        rpc_write(&options, sizeof(options)) < 0 ||
-        rpc_write(&optionValues, sizeof(optionValues)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(&module, sizeof(module)) < 0 ||
-        rpc_read(&optionValues, sizeof(optionValues)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
@@ -14005,7 +13986,6 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cuCtxAttach", (void *)cuCtxAttach},
     {"cuCtxDetach", (void *)cuCtxDetach},
     {"cuModuleLoad", (void *)cuModuleLoad},
-    {"cuModuleLoadDataEx", (void *)cuModuleLoadDataEx},
     {"cuModuleUnload", (void *)cuModuleUnload},
     {"cuModuleGetLoadingMode", (void *)cuModuleGetLoadingMode},
     {"cuModuleGetFunction", (void *)cuModuleGetFunction},

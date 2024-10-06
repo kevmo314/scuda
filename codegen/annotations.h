@@ -1837,7 +1837,7 @@ CUresult cuModuleLoad(CUmodule *module, const char *fname);
  * @param options SEND_ONLY LENGTH:numOptions
  * @param optionValues SEND_RECV
  */
-CUresult cuModuleLoadDataEx(CUmodule *module, const void *image, unsigned int numOptions, CUjit_option *options, void **optionValues);
+// CUresult cuModuleLoadDataEx(CUmodule *module, const void *image, unsigned int numOptions, CUjit_option *options, void **optionValues);
 /**
  * @param module SEND_RECV
  * @param fatCubin SEND_RECV
