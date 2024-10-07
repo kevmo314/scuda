@@ -1357,7 +1357,7 @@ nvmlReturn_t nvmlDeviceCreateGpuInstance(nvmlDevice_t device, unsigned int profi
  * @param placement SEND_ONLY
  * @param gpuInstance RECV_ONLY
  */
-nvmlReturn_t nvmlDeviceCreateGpuInstanceWithPlacement(nvmlDevice_t device, unsigned int profileId, const nvmlGpuInstancePlacement_t *placement, nvmlGpuInstance_t *gpuInstance);
+// nvmlReturn_t nvmlDeviceCreateGpuInstanceWithPlacement(nvmlDevice_t device, unsigned int profileId, const nvmlGpuInstancePlacement_t *placement, nvmlGpuInstance_t *gpuInstance);
 /**
  * @param gpuInstance SEND_ONLY
  */
@@ -1419,7 +1419,7 @@ nvmlReturn_t nvmlGpuInstanceCreateComputeInstance(nvmlGpuInstance_t gpuInstance,
  * @param placement SEND_ONLY DEREFERENCE
  * @param computeInstance RECV_ONLY
  */
-nvmlReturn_t nvmlGpuInstanceCreateComputeInstanceWithPlacement(nvmlGpuInstance_t gpuInstance, unsigned int profileId, const nvmlComputeInstancePlacement_t *placement, nvmlComputeInstance_t *computeInstance);
+// nvmlReturn_t nvmlGpuInstanceCreateComputeInstanceWithPlacement(nvmlGpuInstance_t gpuInstance, unsigned int profileId, const nvmlComputeInstancePlacement_t *placement, nvmlComputeInstance_t *computeInstance);
 /**
  * @param computeInstance SEND_ONLY
  */
@@ -1926,7 +1926,7 @@ CUresult cuModuleGetSurfRef(CUsurfref *pSurfRef, CUmodule hmod, const char *name
  * @param libraryOptions SEND_ONLY LENGTH:numLibraryOptions
  * @param libraryOptionValues SEND_ONLY LENGTH:numLibraryOptions
  */
-CUresult cuLibraryLoadData(CUlibrary *library, const void *code, CUjit_option *jitOptions, void **jitOptionsValues, unsigned int numJitOptions, CUlibraryOption *libraryOptions, void **libraryOptionValues, unsigned int numLibraryOptions);
+// CUresult cuLibraryLoadData(CUlibrary *library, const void *code, CUjit_option *jitOptions, void **jitOptionsValues, unsigned int numJitOptions, CUlibraryOption *libraryOptions, void **libraryOptionValues, unsigned int numLibraryOptions);
 /**
  * @param library RECV_ONLY
  * @param fileName SEND_ONLY NULL_TERMINATED
@@ -2156,7 +2156,7 @@ CUresult cuMemcpyAtoD_v2(CUdeviceptr dstDevice, CUarray srcArray, size_t srcOffs
  * @param srcHost SEND_ONLY
  * @param ByteCount SEND_ONLY
  */
-CUresult cuMemcpyHtoA_v2(CUarray dstArray, size_t dstOffset, const void *srcHost, size_t ByteCount);
+// CUresult cuMemcpyHtoA_v2(CUarray dstArray, size_t dstOffset, const void *srcHost, size_t ByteCount);
 /**
  * @param dstHost SEND_ONLY
  * @param srcArray SEND_ONLY
@@ -2175,19 +2175,19 @@ CUresult cuMemcpyAtoA_v2(CUarray dstArray, size_t dstOffset, CUarray srcArray, s
 /**
  * @param pCopy SEND_ONLY
  */
-CUresult cuMemcpy2D_v2(const CUDA_MEMCPY2D *pCopy);
+// CUresult cuMemcpy2D_v2(const CUDA_MEMCPY2D *pCopy);
 /**
  * @param pCopy SEND_ONLY
  */
-CUresult cuMemcpy2DUnaligned_v2(const CUDA_MEMCPY2D *pCopy);
+// CUresult cuMemcpy2DUnaligned_v2(const CUDA_MEMCPY2D *pCopy);
 /**
  * @param pCopy SEND_ONLY
  */
-CUresult cuMemcpy3D_v2(const CUDA_MEMCPY3D *pCopy);
+// CUresult cuMemcpy3D_v2(const CUDA_MEMCPY3D *pCopy);
 /**
  * @param pCopy SEND_ONLY
  */
-CUresult cuMemcpy3DPeer(const CUDA_MEMCPY3D_PEER *pCopy);
+// CUresult cuMemcpy3DPeer(const CUDA_MEMCPY3D_PEER *pCopy);
 /**
  * @param dst SEND_ONLY
  * @param src SEND_ONLY
@@ -2232,7 +2232,7 @@ CUresult cuMemcpyDtoDAsync_v2(CUdeviceptr dstDevice, CUdeviceptr srcDevice, size
  * @param ByteCount SEND_ONLY
  * @param hStream SEND_ONLY
  */
-CUresult cuMemcpyHtoAAsync_v2(CUarray dstArray, size_t dstOffset, const void *srcHost, size_t ByteCount, CUstream hStream);
+// CUresult cuMemcpyHtoAAsync_v2(CUarray dstArray, size_t dstOffset, const void *srcHost, size_t ByteCount, CUstream hStream);
 /**
  * @param dstHost SEND_RECV
  * @param srcArray SEND_ONLY
@@ -2245,17 +2245,17 @@ CUresult cuMemcpyAtoHAsync_v2(void *dstHost, CUarray srcArray, size_t srcOffset,
  * @param pCopy SEND_ONLY
  * @param hStream SEND_ONLY
  */
-CUresult cuMemcpy2DAsync_v2(const CUDA_MEMCPY2D *pCopy, CUstream hStream);
+// CUresult cuMemcpy2DAsync_v2(const CUDA_MEMCPY2D *pCopy, CUstream hStream);
 /**
  * @param pCopy SEND_ONLY
  * @param hStream SEND_ONLY
  */
-CUresult cuMemcpy3DAsync_v2(const CUDA_MEMCPY3D *pCopy, CUstream hStream);
+// CUresult cuMemcpy3DAsync_v2(const CUDA_MEMCPY3D *pCopy, CUstream hStream);
 /**
  * @param pCopy SEND_ONLY
  * @param hStream SEND_ONLY
  */
-CUresult cuMemcpy3DPeerAsync(const CUDA_MEMCPY3D_PEER *pCopy, CUstream hStream);
+// CUresult cuMemcpy3DPeerAsync(const CUDA_MEMCPY3D_PEER *pCopy, CUstream hStream);
 /**
  * @param dstDevice SEND_ONLY
  * @param uc SEND_ONLY
@@ -2709,7 +2709,7 @@ CUresult cuStreamIsCapturing(CUstream hStream, CUstreamCaptureStatus *captureSta
  * @param numDependencies_out RECV_ONLY
  * @param dependencies_out RECV_ONLY LENGTH:numDependencies_out
  */
-CUresult cuStreamGetCaptureInfo_v2(CUstream hStream, CUstreamCaptureStatus *captureStatus_out, cuuint64_t *id_out, CUgraph *graph_out, const CUgraphNode **dependencies_out, size_t *numDependencies_out);
+// CUresult cuStreamGetCaptureInfo_v2(CUstream hStream, CUstreamCaptureStatus *captureStatus_out, cuuint64_t *id_out, CUgraph *graph_out, const CUgraphNode **dependencies_out, size_t *numDependencies_out);
 /**
  * @param hStream SEND_ONLY
  * @param dependencies SEND_RECV
@@ -2916,7 +2916,7 @@ CUresult cuLaunchKernel(CUfunction f, unsigned int gridDimX, unsigned int gridDi
  * @param kernelParams SEND_ONLY
  * @param extra SEND_ONLY
  */
-CUresult cuLaunchKernelEx(const CUlaunchConfig *config, CUfunction f, void **kernelParams, void **extra);
+// CUresult cuLaunchKernelEx(const CUlaunchConfig *config, CUfunction f, void **kernelParams, void **extra);
 /**
  * @param f SEND_ONLY
  * @param gridDimX SEND_ONLY

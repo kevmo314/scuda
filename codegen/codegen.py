@@ -103,7 +103,7 @@ def parse_annotation(annotation: str, params: list[Parameter]) -> list[Operation
                 else:
                     # otherwise, this is a pointer to a single value
                     server_type = param.type.ptr_to
-                    server_type.ptr_to.const = False
+                    server_type.const = False
             elif isinstance(param.type, Type):
                 server_type = param.type
             else:
