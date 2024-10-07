@@ -43,9 +43,10 @@ class Operation:
 
     @property
     def server_reference(self) -> str:
-        if isinstance(self.server_type, Type) and isinstance(
-            self.parameter.type, Pointer
-        ):
+        if (
+            isinstance(self.server_type, Type)
+            and isinstance(self.parameter.type, Pointer)
+        ) or self.is_opaque_pointer:
             return "&" + self.parameter.name
         return self.parameter.name
 
@@ -65,30 +66,44 @@ def parse_annotation(annotation: str, params: list[Parameter]) -> list[Operation
             parts = line.split()
             if len(parts) < 3:
                 continue
-            param = next(p for p in params if p.name == parts[1])
+            try:
+                param = next(p for p in params if p.name == parts[1])
+            except StopIteration:
+                raise NotImplementedError(f"Parameter {parts[1]} not found")
             args = parts[3:]
             send = parts[2] == "SEND_ONLY" or parts[2] == "SEND_RECV"
             length_parameter = None
             if isinstance(param.type, Pointer):
                 # if there's a length or size arg, use the type, otherwise use the ptr_to type
-                if (
-                    any(
-                        arg.startswith("LENGTH:")
-                        or arg.startswith("SIZE:")
-                        or arg == "NULL_TERMINATED"
-                        for arg in args
+                length_arg = next(
+                    (arg for arg in args if arg.startswith("LENGTH:")), None
+                )
+                size_arg = next((arg for arg in args if arg.startswith("SIZE:")), None)
+                null_terminated = "NULL_TERMINATED" in args
+                if param.type.ptr_to.const and parts[2] != "SEND_ONLY":
+                    # if the parameter is const, then it's a sending parameter only.
+                    # validate it as such.
+                    raise NotImplementedError(
+                        f"const pointer parameter {param.name} must be SEND_ONLY"
                     )
-                    or param.type.ptr_to.const
-                ):
+                if length_arg or size_arg:
+                    # if it has a length or size, it's an array parameter
+                    if length_arg:
+                        length_parameter = next(
+                            p for p in params if p.name == length_arg.split(":")[1]
+                        )
                     server_type = copy.deepcopy(param.type)
                     server_type.ptr_to.const = False
-                    for arg in args:
-                        if arg.startswith("LENGTH:"):
-                            length_parameter = next(
-                                p for p in params if p.name == arg.split(":")[1]
-                            )
+                elif param.type.ptr_to.format() == "void":
+                    # treat void pointers as opaque
+                    server_type = param.type
+                elif null_terminated:
+                    # treat null-terminated strings as a special case
+                    server_type = param.type
                 else:
+                    # otherwise, this is a pointer to a single value
                     server_type = param.type.ptr_to
+                    server_type.ptr_to.const = False
             elif isinstance(param.type, Type):
                 server_type = param.type
             else:
@@ -140,7 +155,11 @@ def main():
         except StopIteration:
             print(f"Annotation for {function.name} not found")
             continue
-        operations = parse_annotation(annotation.doxygen, function.parameters)
+        try:
+            operations = parse_annotation(annotation.doxygen, function.parameters)
+        except Exception as e:
+            print(f"Error parsing annotation for {function.name}: {e}")
+            continue
         functions_with_annotations.append((function, annotation, operations))
 
     with open("gen_api.h", "w") as f:

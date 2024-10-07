@@ -78,32 +78,6 @@ nvmlReturn_t nvmlSystemGetNVMLVersion(char* version, unsigned int length)
     return return_value;
 }
 
-nvmlReturn_t nvmlSystemGetCudaDriverVersion(int* cudaDriverVersion)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlSystemGetCudaDriverVersion);
-    if (request_id < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(cudaDriverVersion, sizeof(int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlSystemGetCudaDriverVersion_v2(int* cudaDriverVersion)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlSystemGetCudaDriverVersion_v2);
-    if (request_id < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(cudaDriverVersion, sizeof(int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
 nvmlReturn_t nvmlSystemGetProcessName(unsigned int pid, char* name, unsigned int length)
 {
     nvmlReturn_t return_value;
@@ -114,224 +88,6 @@ nvmlReturn_t nvmlSystemGetProcessName(unsigned int pid, char* name, unsigned int
         rpc_write(&length, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(name, length * sizeof(char)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlUnitGetCount(unsigned int* unitCount)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlUnitGetCount);
-    if (request_id < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(unitCount, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlUnitGetHandleByIndex(unsigned int index, nvmlUnit_t* unit)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlUnitGetHandleByIndex);
-    if (request_id < 0 ||
-        rpc_write(&index, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(unit, sizeof(nvmlUnit_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlUnitGetUnitInfo(nvmlUnit_t unit, nvmlUnitInfo_t* info)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlUnitGetUnitInfo);
-    if (request_id < 0 ||
-        rpc_write(&unit, sizeof(nvmlUnit_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(info, sizeof(nvmlUnitInfo_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlUnitGetLedState(nvmlUnit_t unit, nvmlLedState_t* state)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlUnitGetLedState);
-    if (request_id < 0 ||
-        rpc_write(&unit, sizeof(nvmlUnit_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(state, sizeof(nvmlLedState_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlUnitGetPsuInfo(nvmlUnit_t unit, nvmlPSUInfo_t* psu)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlUnitGetPsuInfo);
-    if (request_id < 0 ||
-        rpc_write(&unit, sizeof(nvmlUnit_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(psu, sizeof(nvmlPSUInfo_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlUnitGetTemperature(nvmlUnit_t unit, unsigned int type, unsigned int* temp)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlUnitGetTemperature);
-    if (request_id < 0 ||
-        rpc_write(&unit, sizeof(nvmlUnit_t)) < 0 ||
-        rpc_write(&type, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(temp, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlUnitGetFanSpeedInfo(nvmlUnit_t unit, nvmlUnitFanSpeeds_t* fanSpeeds)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlUnitGetFanSpeedInfo);
-    if (request_id < 0 ||
-        rpc_write(&unit, sizeof(nvmlUnit_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(fanSpeeds, sizeof(nvmlUnitFanSpeeds_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlUnitGetDevices(nvmlUnit_t unit, unsigned int* deviceCount, nvmlDevice_t* devices)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlUnitGetDevices);
-    if (request_id < 0 ||
-        rpc_write(&unit, sizeof(nvmlUnit_t)) < 0 ||
-        rpc_write(&deviceCount, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(deviceCount, sizeof(unsigned int)) < 0 ||
-        rpc_read(devices, *deviceCount * sizeof(nvmlDevice_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlSystemGetHicVersion(unsigned int* hwbcCount, nvmlHwbcEntry_t* hwbcEntries)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlSystemGetHicVersion);
-    if (request_id < 0 ||
-        rpc_write(&hwbcCount, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(hwbcCount, sizeof(unsigned int)) < 0 ||
-        rpc_read(hwbcEntries, *hwbcCount * sizeof(nvmlHwbcEntry_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetCount_v2(unsigned int* deviceCount)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetCount_v2);
-    if (request_id < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(deviceCount, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetAttributes_v2(nvmlDevice_t device, nvmlDeviceAttributes_t* attributes)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetAttributes_v2);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(attributes, sizeof(nvmlDeviceAttributes_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetHandleByIndex_v2(unsigned int index, nvmlDevice_t* device)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetHandleByIndex_v2);
-    if (request_id < 0 ||
-        rpc_write(&index, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetHandleBySerial(const char* serial, nvmlDevice_t* device)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetHandleBySerial);
-    std::size_t serial_len = std::strlen(serial) + 1;
-    if (request_id < 0 ||
-        rpc_write(&serial_len, sizeof(std::size_t)) < 0 ||
-        rpc_write(serial, serial_len) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetHandleByUUID(const char* uuid, nvmlDevice_t* device)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetHandleByUUID);
-    std::size_t uuid_len = std::strlen(uuid) + 1;
-    if (request_id < 0 ||
-        rpc_write(&uuid_len, sizeof(std::size_t)) < 0 ||
-        rpc_write(uuid, uuid_len) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetHandleByPciBusId_v2(const char* pciBusId, nvmlDevice_t* device)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetHandleByPciBusId_v2);
-    std::size_t pciBusId_len = std::strlen(pciBusId) + 1;
-    if (request_id < 0 ||
-        rpc_write(&pciBusId_len, sizeof(std::size_t)) < 0 ||
-        rpc_write(pciBusId, pciBusId_len) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
         return NVML_ERROR_GPU_IS_LOST;
     return return_value;
@@ -352,46 +108,16 @@ nvmlReturn_t nvmlDeviceGetName(nvmlDevice_t device, char* name, unsigned int len
     return return_value;
 }
 
-nvmlReturn_t nvmlDeviceGetBrand(nvmlDevice_t device, nvmlBrandType_t* type)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetBrand);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(type, sizeof(nvmlBrandType_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetIndex(nvmlDevice_t device, unsigned int* index)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetIndex);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(index, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
 nvmlReturn_t nvmlDeviceGetSerial(nvmlDevice_t device, char* serial, unsigned int length)
 {
     nvmlReturn_t return_value;
 
     int request_id = rpc_start_request(RPC_nvmlDeviceGetSerial);
-    std::size_t serial_len = std::strlen(serial) + 1;
     if (request_id < 0 ||
         rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(&length, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(&serial_len, sizeof(serial_len)) < 0 ||
-        rpc_read(serial, serial_len) < 0 ||
+        rpc_read(serial, length * sizeof(char)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
         return NVML_ERROR_GPU_IS_LOST;
     return return_value;
@@ -470,82 +196,16 @@ nvmlReturn_t nvmlDeviceClearCpuAffinity(nvmlDevice_t device)
     return return_value;
 }
 
-nvmlReturn_t nvmlDeviceGetTopologyCommonAncestor(nvmlDevice_t device1, nvmlDevice_t device2, nvmlGpuTopologyLevel_t* pathInfo)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetTopologyCommonAncestor);
-    if (request_id < 0 ||
-        rpc_write(&device1, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&device2, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(pathInfo, sizeof(nvmlGpuTopologyLevel_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetTopologyNearestGpus(nvmlDevice_t device, nvmlGpuTopologyLevel_t level, unsigned int* count, nvmlDevice_t* deviceArray)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetTopologyNearestGpus);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&level, sizeof(nvmlGpuTopologyLevel_t)) < 0 ||
-        rpc_write(&count, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(count, sizeof(unsigned int)) < 0 ||
-        rpc_read(deviceArray, *count * sizeof(nvmlDevice_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlSystemGetTopologyGpuSet(unsigned int cpuNumber, unsigned int* count, nvmlDevice_t* deviceArray)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlSystemGetTopologyGpuSet);
-    if (request_id < 0 ||
-        rpc_write(&cpuNumber, sizeof(unsigned int)) < 0 ||
-        rpc_write(&count, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(count, sizeof(unsigned int)) < 0 ||
-        rpc_read(deviceArray, *count * sizeof(nvmlDevice_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetP2PStatus(nvmlDevice_t device1, nvmlDevice_t device2, nvmlGpuP2PCapsIndex_t p2pIndex, nvmlGpuP2PStatus_t* p2pStatus)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetP2PStatus);
-    if (request_id < 0 ||
-        rpc_write(&device1, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&device2, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&p2pIndex, sizeof(nvmlGpuP2PCapsIndex_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(p2pStatus, sizeof(nvmlGpuP2PStatus_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
 nvmlReturn_t nvmlDeviceGetUUID(nvmlDevice_t device, char* uuid, unsigned int length)
 {
     nvmlReturn_t return_value;
 
     int request_id = rpc_start_request(RPC_nvmlDeviceGetUUID);
-    std::size_t uuid_len = std::strlen(uuid) + 1;
     if (request_id < 0 ||
         rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(&length, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(&uuid_len, sizeof(uuid_len)) < 0 ||
-        rpc_read(uuid, uuid_len) < 0 ||
+        rpc_read(uuid, length * sizeof(char)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
         return NVML_ERROR_GPU_IS_LOST;
     return return_value;
@@ -556,27 +216,11 @@ nvmlReturn_t nvmlVgpuInstanceGetMdevUUID(nvmlVgpuInstance_t vgpuInstance, char* 
     nvmlReturn_t return_value;
 
     int request_id = rpc_start_request(RPC_nvmlVgpuInstanceGetMdevUUID);
-    std::size_t mdevUuid_len = std::strlen(mdevUuid) + 1;
     if (request_id < 0 ||
         rpc_write(&vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
         rpc_write(&size, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(&mdevUuid_len, sizeof(mdevUuid_len)) < 0 ||
-        rpc_read(mdevUuid, mdevUuid_len) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetMinorNumber(nvmlDevice_t device, unsigned int* minorNumber)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetMinorNumber);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(minorNumber, sizeof(unsigned int)) < 0 ||
+        rpc_read(mdevUuid, size * sizeof(char)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
         return NVML_ERROR_GPU_IS_LOST;
     return return_value;
@@ -628,20 +272,6 @@ nvmlReturn_t nvmlDeviceGetInforomImageVersion(nvmlDevice_t device, char* version
     return return_value;
 }
 
-nvmlReturn_t nvmlDeviceGetInforomConfigurationChecksum(nvmlDevice_t device, unsigned int* checksum)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetInforomConfigurationChecksum);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(checksum, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
 nvmlReturn_t nvmlDeviceValidateInforom(nvmlDevice_t device)
 {
     nvmlReturn_t return_value;
@@ -655,221 +285,6 @@ nvmlReturn_t nvmlDeviceValidateInforom(nvmlDevice_t device)
     return return_value;
 }
 
-nvmlReturn_t nvmlDeviceGetDisplayMode(nvmlDevice_t device, nvmlEnableState_t* display)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetDisplayMode);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(display, sizeof(nvmlEnableState_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetDisplayActive(nvmlDevice_t device, nvmlEnableState_t* isActive)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetDisplayActive);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(isActive, sizeof(nvmlEnableState_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetPersistenceMode(nvmlDevice_t device, nvmlEnableState_t* mode)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetPersistenceMode);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(mode, sizeof(nvmlEnableState_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetPciInfo_v3(nvmlDevice_t device, nvmlPciInfo_t* pci)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetPciInfo_v3);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(pci, sizeof(nvmlPciInfo_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetMaxPcieLinkGeneration(nvmlDevice_t device, unsigned int* maxLinkGen)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetMaxPcieLinkGeneration);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(maxLinkGen, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetGpuMaxPcieLinkGeneration(nvmlDevice_t device, unsigned int* maxLinkGenDevice)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetGpuMaxPcieLinkGeneration);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(maxLinkGenDevice, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetMaxPcieLinkWidth(nvmlDevice_t device, unsigned int* maxLinkWidth)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetMaxPcieLinkWidth);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(maxLinkWidth, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetCurrPcieLinkGeneration(nvmlDevice_t device, unsigned int* currLinkGen)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetCurrPcieLinkGeneration);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(currLinkGen, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetCurrPcieLinkWidth(nvmlDevice_t device, unsigned int* currLinkWidth)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetCurrPcieLinkWidth);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(currLinkWidth, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetPcieThroughput(nvmlDevice_t device, nvmlPcieUtilCounter_t counter, unsigned int* value)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetPcieThroughput);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&counter, sizeof(nvmlPcieUtilCounter_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(value, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetPcieReplayCounter(nvmlDevice_t device, unsigned int* value)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetPcieReplayCounter);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(value, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetClockInfo(nvmlDevice_t device, nvmlClockType_t type, unsigned int* clock)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetClockInfo);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&type, sizeof(nvmlClockType_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(clock, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetMaxClockInfo(nvmlDevice_t device, nvmlClockType_t type, unsigned int* clock)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetMaxClockInfo);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&type, sizeof(nvmlClockType_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(clock, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetApplicationsClock(nvmlDevice_t device, nvmlClockType_t clockType, unsigned int* clockMHz)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetApplicationsClock);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&clockType, sizeof(nvmlClockType_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(clockMHz, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetDefaultApplicationsClock(nvmlDevice_t device, nvmlClockType_t clockType, unsigned int* clockMHz)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetDefaultApplicationsClock);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&clockType, sizeof(nvmlClockType_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(clockMHz, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
 nvmlReturn_t nvmlDeviceResetApplicationsClocks(nvmlDevice_t device)
 {
     nvmlReturn_t return_value;
@@ -878,85 +293,6 @@ nvmlReturn_t nvmlDeviceResetApplicationsClocks(nvmlDevice_t device)
     if (request_id < 0 ||
         rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetClock(nvmlDevice_t device, nvmlClockType_t clockType, nvmlClockId_t clockId, unsigned int* clockMHz)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetClock);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&clockType, sizeof(nvmlClockType_t)) < 0 ||
-        rpc_write(&clockId, sizeof(nvmlClockId_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(clockMHz, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetMaxCustomerBoostClock(nvmlDevice_t device, nvmlClockType_t clockType, unsigned int* clockMHz)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetMaxCustomerBoostClock);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&clockType, sizeof(nvmlClockType_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(clockMHz, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetSupportedMemoryClocks(nvmlDevice_t device, unsigned int* count, unsigned int* clocksMHz)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetSupportedMemoryClocks);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&count, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(count, sizeof(unsigned int)) < 0 ||
-        rpc_read(clocksMHz, *count * sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetSupportedGraphicsClocks(nvmlDevice_t device, unsigned int memoryClockMHz, unsigned int* count, unsigned int* clocksMHz)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetSupportedGraphicsClocks);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&memoryClockMHz, sizeof(unsigned int)) < 0 ||
-        rpc_write(&count, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(count, sizeof(unsigned int)) < 0 ||
-        rpc_read(clocksMHz, *count * sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetAutoBoostedClocksEnabled(nvmlDevice_t device, nvmlEnableState_t* isEnabled, nvmlEnableState_t* defaultIsEnabled)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetAutoBoostedClocksEnabled);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(isEnabled, sizeof(nvmlEnableState_t)) < 0 ||
-        rpc_read(defaultIsEnabled, sizeof(nvmlEnableState_t)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
         return NVML_ERROR_GPU_IS_LOST;
     return return_value;
@@ -991,50 +327,6 @@ nvmlReturn_t nvmlDeviceSetDefaultAutoBoostedClocksEnabled(nvmlDevice_t device, n
     return return_value;
 }
 
-nvmlReturn_t nvmlDeviceGetFanSpeed(nvmlDevice_t device, unsigned int* speed)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetFanSpeed);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(speed, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetFanSpeed_v2(nvmlDevice_t device, unsigned int fan, unsigned int* speed)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetFanSpeed_v2);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&fan, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(speed, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetTargetFanSpeed(nvmlDevice_t device, unsigned int fan, unsigned int* targetSpeed)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetTargetFanSpeed);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&fan, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(targetSpeed, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
 nvmlReturn_t nvmlDeviceSetDefaultFanSpeed_v2(nvmlDevice_t device, unsigned int fan)
 {
     nvmlReturn_t return_value;
@@ -1044,36 +336,6 @@ nvmlReturn_t nvmlDeviceSetDefaultFanSpeed_v2(nvmlDevice_t device, unsigned int f
         rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(&fan, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetMinMaxFanSpeed(nvmlDevice_t device, unsigned int* minSpeed, unsigned int* maxSpeed)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetMinMaxFanSpeed);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(minSpeed, sizeof(unsigned int)) < 0 ||
-        rpc_read(maxSpeed, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetFanControlPolicy_v2(nvmlDevice_t device, unsigned int fan, nvmlFanControlPolicy_t* policy)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetFanControlPolicy_v2);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&fan, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(policy, sizeof(nvmlFanControlPolicy_t)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
         return NVML_ERROR_GPU_IS_LOST;
     return return_value;
@@ -1094,953 +356,16 @@ nvmlReturn_t nvmlDeviceSetFanControlPolicy(nvmlDevice_t device, unsigned int fan
     return return_value;
 }
 
-nvmlReturn_t nvmlDeviceGetNumFans(nvmlDevice_t device, unsigned int* numFans)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetNumFans);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(numFans, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetTemperature(nvmlDevice_t device, nvmlTemperatureSensors_t sensorType, unsigned int* temp)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetTemperature);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&sensorType, sizeof(nvmlTemperatureSensors_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(temp, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetTemperatureThreshold(nvmlDevice_t device, nvmlTemperatureThresholds_t thresholdType, unsigned int* temp)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetTemperatureThreshold);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&thresholdType, sizeof(nvmlTemperatureThresholds_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(temp, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceSetTemperatureThreshold(nvmlDevice_t device, nvmlTemperatureThresholds_t thresholdType, int* temp)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceSetTemperatureThreshold);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&thresholdType, sizeof(nvmlTemperatureThresholds_t)) < 0 ||
-        rpc_write(&temp, sizeof(int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(temp, sizeof(int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetThermalSettings(nvmlDevice_t device, unsigned int sensorIndex, nvmlGpuThermalSettings_t* pThermalSettings)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetThermalSettings);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&sensorIndex, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(pThermalSettings, sizeof(nvmlGpuThermalSettings_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetPerformanceState(nvmlDevice_t device, nvmlPstates_t* pState)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetPerformanceState);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(pState, sizeof(nvmlPstates_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetCurrentClocksThrottleReasons(nvmlDevice_t device, unsigned long long* clocksThrottleReasons)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetCurrentClocksThrottleReasons);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(clocksThrottleReasons, sizeof(unsigned long long)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetSupportedClocksThrottleReasons(nvmlDevice_t device, unsigned long long* supportedClocksThrottleReasons)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetSupportedClocksThrottleReasons);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(supportedClocksThrottleReasons, sizeof(unsigned long long)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetPowerState(nvmlDevice_t device, nvmlPstates_t* pState)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetPowerState);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(pState, sizeof(nvmlPstates_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetPowerManagementMode(nvmlDevice_t device, nvmlEnableState_t* mode)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetPowerManagementMode);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(mode, sizeof(nvmlEnableState_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetPowerManagementLimit(nvmlDevice_t device, unsigned int* limit)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetPowerManagementLimit);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(limit, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetPowerManagementLimitConstraints(nvmlDevice_t device, unsigned int* minLimit, unsigned int* maxLimit)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetPowerManagementLimitConstraints);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(minLimit, sizeof(unsigned int)) < 0 ||
-        rpc_read(maxLimit, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetPowerManagementDefaultLimit(nvmlDevice_t device, unsigned int* defaultLimit)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetPowerManagementDefaultLimit);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(defaultLimit, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetPowerUsage(nvmlDevice_t device, unsigned int* power)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetPowerUsage);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(power, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetTotalEnergyConsumption(nvmlDevice_t device, unsigned long long* energy)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetTotalEnergyConsumption);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(energy, sizeof(unsigned long long)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetEnforcedPowerLimit(nvmlDevice_t device, unsigned int* limit)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetEnforcedPowerLimit);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(limit, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetGpuOperationMode(nvmlDevice_t device, nvmlGpuOperationMode_t* current, nvmlGpuOperationMode_t* pending)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetGpuOperationMode);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(current, sizeof(nvmlGpuOperationMode_t)) < 0 ||
-        rpc_read(pending, sizeof(nvmlGpuOperationMode_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetMemoryInfo(nvmlDevice_t device, nvmlMemory_t* memory)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetMemoryInfo);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(memory, sizeof(nvmlMemory_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetMemoryInfo_v2(nvmlDevice_t device, nvmlMemory_v2_t* memory)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetMemoryInfo_v2);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(memory, sizeof(nvmlMemory_v2_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetComputeMode(nvmlDevice_t device, nvmlComputeMode_t* mode)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetComputeMode);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(mode, sizeof(nvmlComputeMode_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetCudaComputeCapability(nvmlDevice_t device, int* major, int* minor)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetCudaComputeCapability);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(major, sizeof(int)) < 0 ||
-        rpc_read(minor, sizeof(int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetEccMode(nvmlDevice_t device, nvmlEnableState_t* current, nvmlEnableState_t* pending)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetEccMode);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(current, sizeof(nvmlEnableState_t)) < 0 ||
-        rpc_read(pending, sizeof(nvmlEnableState_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetDefaultEccMode(nvmlDevice_t device, nvmlEnableState_t* defaultMode)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetDefaultEccMode);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(defaultMode, sizeof(nvmlEnableState_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetBoardId(nvmlDevice_t device, unsigned int* boardId)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetBoardId);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(boardId, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetMultiGpuBoard(nvmlDevice_t device, unsigned int* multiGpuBool)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetMultiGpuBoard);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(multiGpuBool, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetTotalEccErrors(nvmlDevice_t device, nvmlMemoryErrorType_t errorType, nvmlEccCounterType_t counterType, unsigned long long* eccCounts)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetTotalEccErrors);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&errorType, sizeof(nvmlMemoryErrorType_t)) < 0 ||
-        rpc_write(&counterType, sizeof(nvmlEccCounterType_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(eccCounts, sizeof(unsigned long long)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetDetailedEccErrors(nvmlDevice_t device, nvmlMemoryErrorType_t errorType, nvmlEccCounterType_t counterType, nvmlEccErrorCounts_t* eccCounts)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetDetailedEccErrors);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&errorType, sizeof(nvmlMemoryErrorType_t)) < 0 ||
-        rpc_write(&counterType, sizeof(nvmlEccCounterType_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(eccCounts, sizeof(nvmlEccErrorCounts_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetMemoryErrorCounter(nvmlDevice_t device, nvmlMemoryErrorType_t errorType, nvmlEccCounterType_t counterType, nvmlMemoryLocation_t locationType, unsigned long long* count)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetMemoryErrorCounter);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&errorType, sizeof(nvmlMemoryErrorType_t)) < 0 ||
-        rpc_write(&counterType, sizeof(nvmlEccCounterType_t)) < 0 ||
-        rpc_write(&locationType, sizeof(nvmlMemoryLocation_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(count, sizeof(unsigned long long)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetUtilizationRates(nvmlDevice_t device, nvmlUtilization_t* utilization)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetUtilizationRates);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(utilization, sizeof(nvmlUtilization_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetEncoderUtilization(nvmlDevice_t device, unsigned int* utilization, unsigned int* samplingPeriodUs)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetEncoderUtilization);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(utilization, sizeof(unsigned int)) < 0 ||
-        rpc_read(samplingPeriodUs, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetEncoderCapacity(nvmlDevice_t device, nvmlEncoderType_t encoderQueryType, unsigned int* encoderCapacity)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetEncoderCapacity);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&encoderQueryType, sizeof(nvmlEncoderType_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(encoderCapacity, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetEncoderStats(nvmlDevice_t device, unsigned int* sessionCount, unsigned int* averageFps, unsigned int* averageLatency)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetEncoderStats);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(sessionCount, sizeof(unsigned int)) < 0 ||
-        rpc_read(averageFps, sizeof(unsigned int)) < 0 ||
-        rpc_read(averageLatency, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetEncoderSessions(nvmlDevice_t device, unsigned int* sessionCount, nvmlEncoderSessionInfo_t* sessionInfos)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetEncoderSessions);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&sessionCount, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(sessionCount, sizeof(unsigned int)) < 0 ||
-        rpc_read(sessionInfos, *sessionCount * sizeof(nvmlEncoderSessionInfo_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetDecoderUtilization(nvmlDevice_t device, unsigned int* utilization, unsigned int* samplingPeriodUs)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetDecoderUtilization);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(utilization, sizeof(unsigned int)) < 0 ||
-        rpc_read(samplingPeriodUs, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetFBCStats(nvmlDevice_t device, nvmlFBCStats_t* fbcStats)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetFBCStats);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(fbcStats, sizeof(nvmlFBCStats_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetFBCSessions(nvmlDevice_t device, unsigned int* sessionCount, nvmlFBCSessionInfo_t* sessionInfo)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetFBCSessions);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&sessionCount, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(sessionCount, sizeof(unsigned int)) < 0 ||
-        rpc_read(sessionInfo, *sessionCount * sizeof(nvmlFBCSessionInfo_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetDriverModel(nvmlDevice_t device, nvmlDriverModel_t* current, nvmlDriverModel_t* pending)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetDriverModel);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(current, sizeof(nvmlDriverModel_t)) < 0 ||
-        rpc_read(pending, sizeof(nvmlDriverModel_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
 nvmlReturn_t nvmlDeviceGetVbiosVersion(nvmlDevice_t device, char* version, unsigned int length)
 {
     nvmlReturn_t return_value;
 
     int request_id = rpc_start_request(RPC_nvmlDeviceGetVbiosVersion);
-    std::size_t version_len = std::strlen(version) + 1;
     if (request_id < 0 ||
         rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(&length, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(&version_len, sizeof(version_len)) < 0 ||
-        rpc_read(version, version_len) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetBridgeChipInfo(nvmlDevice_t device, nvmlBridgeChipHierarchy_t* bridgeHierarchy)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetBridgeChipInfo);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(bridgeHierarchy, sizeof(nvmlBridgeChipHierarchy_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetComputeRunningProcesses_v3(nvmlDevice_t device, unsigned int* infoCount, nvmlProcessInfo_t* infos)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetComputeRunningProcesses_v3);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&infoCount, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(infoCount, sizeof(unsigned int)) < 0 ||
-        rpc_read(infos, *infoCount * sizeof(nvmlProcessInfo_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetGraphicsRunningProcesses_v3(nvmlDevice_t device, unsigned int* infoCount, nvmlProcessInfo_t* infos)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetGraphicsRunningProcesses_v3);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&infoCount, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(infoCount, sizeof(unsigned int)) < 0 ||
-        rpc_read(infos, *infoCount * sizeof(nvmlProcessInfo_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetMPSComputeRunningProcesses_v3(nvmlDevice_t device, unsigned int* infoCount, nvmlProcessInfo_t* infos)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetMPSComputeRunningProcesses_v3);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&infoCount, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(infoCount, sizeof(unsigned int)) < 0 ||
-        rpc_read(infos, *infoCount * sizeof(nvmlProcessInfo_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceOnSameBoard(nvmlDevice_t device1, nvmlDevice_t device2, int* onSameBoard)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceOnSameBoard);
-    if (request_id < 0 ||
-        rpc_write(&device1, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&device2, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(onSameBoard, sizeof(int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetAPIRestriction(nvmlDevice_t device, nvmlRestrictedAPI_t apiType, nvmlEnableState_t* isRestricted)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetAPIRestriction);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&apiType, sizeof(nvmlRestrictedAPI_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(isRestricted, sizeof(nvmlEnableState_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetSamples(nvmlDevice_t device, nvmlSamplingType_t type, unsigned long long lastSeenTimeStamp, nvmlValueType_t* sampleValType, unsigned int* sampleCount, nvmlSample_t* samples)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetSamples);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&type, sizeof(nvmlSamplingType_t)) < 0 ||
-        rpc_write(&lastSeenTimeStamp, sizeof(unsigned long long)) < 0 ||
-        rpc_write(&sampleCount, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(sampleValType, sizeof(nvmlValueType_t)) < 0 ||
-        rpc_read(sampleCount, sizeof(unsigned int)) < 0 ||
-        rpc_read(samples, *sampleCount * sizeof(nvmlSample_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetBAR1MemoryInfo(nvmlDevice_t device, nvmlBAR1Memory_t* bar1Memory)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetBAR1MemoryInfo);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(bar1Memory, sizeof(nvmlBAR1Memory_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetViolationStatus(nvmlDevice_t device, nvmlPerfPolicyType_t perfPolicyType, nvmlViolationTime_t* violTime)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetViolationStatus);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&perfPolicyType, sizeof(nvmlPerfPolicyType_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(violTime, sizeof(nvmlViolationTime_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetIrqNum(nvmlDevice_t device, unsigned int* irqNum)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetIrqNum);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(irqNum, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetNumGpuCores(nvmlDevice_t device, unsigned int* numCores)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetNumGpuCores);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(numCores, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetPowerSource(nvmlDevice_t device, nvmlPowerSource_t* powerSource)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetPowerSource);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(powerSource, sizeof(nvmlPowerSource_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetMemoryBusWidth(nvmlDevice_t device, unsigned int* busWidth)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetMemoryBusWidth);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(busWidth, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetPcieLinkMaxSpeed(nvmlDevice_t device, unsigned int* maxSpeed)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetPcieLinkMaxSpeed);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(maxSpeed, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetPcieSpeed(nvmlDevice_t device, unsigned int* pcieSpeed)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetPcieSpeed);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(pcieSpeed, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetAdaptiveClockInfoStatus(nvmlDevice_t device, unsigned int* adaptiveClockStatus)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetAdaptiveClockInfoStatus);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(adaptiveClockStatus, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetAccountingMode(nvmlDevice_t device, nvmlEnableState_t* mode)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetAccountingMode);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(mode, sizeof(nvmlEnableState_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetAccountingStats(nvmlDevice_t device, unsigned int pid, nvmlAccountingStats_t* stats)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetAccountingStats);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&pid, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(stats, sizeof(nvmlAccountingStats_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetAccountingPids(nvmlDevice_t device, unsigned int* count, unsigned int* pids)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetAccountingPids);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&count, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(count, sizeof(unsigned int)) < 0 ||
-        rpc_read(pids, *count * sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetAccountingBufferSize(nvmlDevice_t device, unsigned int* bufferSize)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetAccountingBufferSize);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(bufferSize, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetRetiredPages(nvmlDevice_t device, nvmlPageRetirementCause_t cause, unsigned int* pageCount, unsigned long long* addresses)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetRetiredPages);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&cause, sizeof(nvmlPageRetirementCause_t)) < 0 ||
-        rpc_write(&pageCount, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(pageCount, sizeof(unsigned int)) < 0 ||
-        rpc_read(addresses, *pageCount * sizeof(unsigned long long)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetRetiredPages_v2(nvmlDevice_t device, nvmlPageRetirementCause_t cause, unsigned int* pageCount, unsigned long long* addresses, unsigned long long* timestamps)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetRetiredPages_v2);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&cause, sizeof(nvmlPageRetirementCause_t)) < 0 ||
-        rpc_write(&pageCount, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(pageCount, sizeof(unsigned int)) < 0 ||
-        rpc_read(addresses, *pageCount * sizeof(unsigned long long)) < 0 ||
-        rpc_read(timestamps, *pageCount * sizeof(unsigned long long)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetRetiredPagesPendingStatus(nvmlDevice_t device, nvmlEnableState_t* isPending)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetRetiredPagesPendingStatus);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(isPending, sizeof(nvmlEnableState_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetRemappedRows(nvmlDevice_t device, unsigned int* corrRows, unsigned int* uncRows, unsigned int* isPending, unsigned int* failureOccurred)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetRemappedRows);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(corrRows, sizeof(unsigned int)) < 0 ||
-        rpc_read(uncRows, sizeof(unsigned int)) < 0 ||
-        rpc_read(isPending, sizeof(unsigned int)) < 0 ||
-        rpc_read(failureOccurred, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetRowRemapperHistogram(nvmlDevice_t device, nvmlRowRemapperHistogramValues_t* values)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetRowRemapperHistogram);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(values, sizeof(nvmlRowRemapperHistogramValues_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetArchitecture(nvmlDevice_t device, nvmlDeviceArchitecture_t* arch)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetArchitecture);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(arch, sizeof(nvmlDeviceArchitecture_t)) < 0 ||
+        rpc_read(version, length * sizeof(char)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
         return NVML_ERROR_GPU_IS_LOST;
     return return_value;
@@ -2202,20 +527,6 @@ nvmlReturn_t nvmlDeviceSetApplicationsClocks(nvmlDevice_t device, unsigned int m
     return return_value;
 }
 
-nvmlReturn_t nvmlDeviceGetClkMonStatus(nvmlDevice_t device, nvmlClkMonStatus_t* status)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetClkMonStatus);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(status, sizeof(nvmlClkMonStatus_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
 nvmlReturn_t nvmlDeviceSetPowerManagementLimit(nvmlDevice_t device, unsigned int limit)
 {
     nvmlReturn_t return_value;
@@ -2286,83 +597,6 @@ nvmlReturn_t nvmlDeviceClearAccountingPids(nvmlDevice_t device)
     return return_value;
 }
 
-nvmlReturn_t nvmlDeviceGetNvLinkState(nvmlDevice_t device, unsigned int link, nvmlEnableState_t* isActive)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetNvLinkState);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&link, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(isActive, sizeof(nvmlEnableState_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetNvLinkVersion(nvmlDevice_t device, unsigned int link, unsigned int* version)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetNvLinkVersion);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&link, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(version, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetNvLinkCapability(nvmlDevice_t device, unsigned int link, nvmlNvLinkCapability_t capability, unsigned int* capResult)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetNvLinkCapability);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&link, sizeof(unsigned int)) < 0 ||
-        rpc_write(&capability, sizeof(nvmlNvLinkCapability_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(capResult, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetNvLinkRemotePciInfo_v2(nvmlDevice_t device, unsigned int link, nvmlPciInfo_t* pci)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetNvLinkRemotePciInfo_v2);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&link, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(pci, sizeof(nvmlPciInfo_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetNvLinkErrorCounter(nvmlDevice_t device, unsigned int link, nvmlNvLinkErrorCounter_t counter, unsigned long long* counterValue)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetNvLinkErrorCounter);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&link, sizeof(unsigned int)) < 0 ||
-        rpc_write(&counter, sizeof(nvmlNvLinkErrorCounter_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(counterValue, sizeof(unsigned long long)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
 nvmlReturn_t nvmlDeviceResetNvLinkErrorCounters(nvmlDevice_t device, unsigned int link)
 {
     nvmlReturn_t return_value;
@@ -2372,56 +606,6 @@ nvmlReturn_t nvmlDeviceResetNvLinkErrorCounters(nvmlDevice_t device, unsigned in
         rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(&link, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceSetNvLinkUtilizationControl(nvmlDevice_t device, unsigned int link, unsigned int counter, nvmlNvLinkUtilizationControl_t* control, unsigned int reset)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceSetNvLinkUtilizationControl);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&link, sizeof(unsigned int)) < 0 ||
-        rpc_write(&counter, sizeof(unsigned int)) < 0 ||
-        rpc_write(&control, sizeof(nvmlNvLinkUtilizationControl_t)) < 0 ||
-        rpc_write(&reset, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetNvLinkUtilizationControl(nvmlDevice_t device, unsigned int link, unsigned int counter, nvmlNvLinkUtilizationControl_t* control)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetNvLinkUtilizationControl);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&link, sizeof(unsigned int)) < 0 ||
-        rpc_write(&counter, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(control, sizeof(nvmlNvLinkUtilizationControl_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetNvLinkUtilizationCounter(nvmlDevice_t device, unsigned int link, unsigned int counter, unsigned long long* rxcounter, unsigned long long* txcounter)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetNvLinkUtilizationCounter);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&link, sizeof(unsigned int)) < 0 ||
-        rpc_write(&counter, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(rxcounter, sizeof(unsigned long long)) < 0 ||
-        rpc_read(txcounter, sizeof(unsigned long long)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
         return NVML_ERROR_GPU_IS_LOST;
     return return_value;
@@ -2458,34 +642,6 @@ nvmlReturn_t nvmlDeviceResetNvLinkUtilizationCounter(nvmlDevice_t device, unsign
     return return_value;
 }
 
-nvmlReturn_t nvmlDeviceGetNvLinkRemoteDeviceType(nvmlDevice_t device, unsigned int link, nvmlIntNvLinkDeviceType_t* pNvLinkDeviceType)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetNvLinkRemoteDeviceType);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&link, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(pNvLinkDeviceType, sizeof(nvmlIntNvLinkDeviceType_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlEventSetCreate(nvmlEventSet_t* set)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlEventSetCreate);
-    if (request_id < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(set, sizeof(nvmlEventSet_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
 nvmlReturn_t nvmlDeviceRegisterEvents(nvmlDevice_t device, unsigned long long eventTypes, nvmlEventSet_t set)
 {
     nvmlReturn_t return_value;
@@ -2501,35 +657,6 @@ nvmlReturn_t nvmlDeviceRegisterEvents(nvmlDevice_t device, unsigned long long ev
     return return_value;
 }
 
-nvmlReturn_t nvmlDeviceGetSupportedEventTypes(nvmlDevice_t device, unsigned long long* eventTypes)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetSupportedEventTypes);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(eventTypes, sizeof(unsigned long long)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlEventSetWait_v2(nvmlEventSet_t set, nvmlEventData_t* data, unsigned int timeoutms)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlEventSetWait_v2);
-    if (request_id < 0 ||
-        rpc_write(&set, sizeof(nvmlEventSet_t)) < 0 ||
-        rpc_write(&timeoutms, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(data, sizeof(nvmlEventData_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
 nvmlReturn_t nvmlEventSetFree(nvmlEventSet_t set)
 {
     nvmlReturn_t return_value;
@@ -2537,62 +664,6 @@ nvmlReturn_t nvmlEventSetFree(nvmlEventSet_t set)
     int request_id = rpc_start_request(RPC_nvmlEventSetFree);
     if (request_id < 0 ||
         rpc_write(&set, sizeof(nvmlEventSet_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceModifyDrainState(nvmlPciInfo_t* pciInfo, nvmlEnableState_t newState)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceModifyDrainState);
-    if (request_id < 0 ||
-        rpc_write(&pciInfo, sizeof(nvmlPciInfo_t)) < 0 ||
-        rpc_write(&newState, sizeof(nvmlEnableState_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceQueryDrainState(nvmlPciInfo_t* pciInfo, nvmlEnableState_t* currentState)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceQueryDrainState);
-    if (request_id < 0 ||
-        rpc_write(&pciInfo, sizeof(nvmlPciInfo_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(currentState, sizeof(nvmlEnableState_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceRemoveGpu_v2(nvmlPciInfo_t* pciInfo, nvmlDetachGpuState_t gpuState, nvmlPcieLinkState_t linkState)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceRemoveGpu_v2);
-    if (request_id < 0 ||
-        rpc_write(&pciInfo, sizeof(nvmlPciInfo_t)) < 0 ||
-        rpc_write(&gpuState, sizeof(nvmlDetachGpuState_t)) < 0 ||
-        rpc_write(&linkState, sizeof(nvmlPcieLinkState_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceDiscoverGpus(nvmlPciInfo_t* pciInfo)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceDiscoverGpus);
-    if (request_id < 0 ||
-        rpc_write(&pciInfo, sizeof(nvmlPciInfo_t)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
         return NVML_ERROR_GPU_IS_LOST;
@@ -2629,34 +700,6 @@ nvmlReturn_t nvmlDeviceClearFieldValues(nvmlDevice_t device, int valuesCount, nv
     return return_value;
 }
 
-nvmlReturn_t nvmlDeviceGetVirtualizationMode(nvmlDevice_t device, nvmlGpuVirtualizationMode_t* pVirtualMode)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetVirtualizationMode);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(pVirtualMode, sizeof(nvmlGpuVirtualizationMode_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetHostVgpuMode(nvmlDevice_t device, nvmlHostVgpuMode_t* pHostVgpuMode)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetHostVgpuMode);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(pHostVgpuMode, sizeof(nvmlHostVgpuMode_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
 nvmlReturn_t nvmlDeviceSetVirtualizationMode(nvmlDevice_t device, nvmlGpuVirtualizationMode_t virtualMode)
 {
     nvmlReturn_t return_value;
@@ -2666,231 +709,6 @@ nvmlReturn_t nvmlDeviceSetVirtualizationMode(nvmlDevice_t device, nvmlGpuVirtual
         rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(&virtualMode, sizeof(nvmlGpuVirtualizationMode_t)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetGridLicensableFeatures_v4(nvmlDevice_t device, nvmlGridLicensableFeatures_t* pGridLicensableFeatures)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetGridLicensableFeatures_v4);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(pGridLicensableFeatures, sizeof(nvmlGridLicensableFeatures_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetProcessUtilization(nvmlDevice_t device, nvmlProcessUtilizationSample_t* utilization, unsigned int* processSamplesCount, unsigned long long lastSeenTimeStamp)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetProcessUtilization);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&processSamplesCount, sizeof(unsigned int)) < 0 ||
-        rpc_write(&lastSeenTimeStamp, sizeof(unsigned long long)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(processSamplesCount, sizeof(unsigned int)) < 0 ||
-        rpc_read(utilization, *processSamplesCount * sizeof(nvmlProcessUtilizationSample_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetGspFirmwareVersion(nvmlDevice_t device, char* version)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetGspFirmwareVersion);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(version, sizeof(char)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetGspFirmwareMode(nvmlDevice_t device, unsigned int* isEnabled, unsigned int* defaultMode)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetGspFirmwareMode);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(isEnabled, sizeof(unsigned int)) < 0 ||
-        rpc_read(defaultMode, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlGetVgpuDriverCapabilities(nvmlVgpuDriverCapability_t capability, unsigned int* capResult)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlGetVgpuDriverCapabilities);
-    if (request_id < 0 ||
-        rpc_write(&capability, sizeof(nvmlVgpuDriverCapability_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(capResult, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetVgpuCapabilities(nvmlDevice_t device, nvmlDeviceVgpuCapability_t capability, unsigned int* capResult)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetVgpuCapabilities);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&capability, sizeof(nvmlDeviceVgpuCapability_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(capResult, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetSupportedVgpus(nvmlDevice_t device, unsigned int* vgpuCount, nvmlVgpuTypeId_t* vgpuTypeIds)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetSupportedVgpus);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&vgpuCount, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(vgpuCount, sizeof(unsigned int)) < 0 ||
-        rpc_read(vgpuTypeIds, *vgpuCount * sizeof(nvmlVgpuTypeId_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetCreatableVgpus(nvmlDevice_t device, unsigned int* vgpuCount, nvmlVgpuTypeId_t* vgpuTypeIds)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetCreatableVgpus);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&vgpuCount, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(vgpuCount, sizeof(unsigned int)) < 0 ||
-        rpc_read(vgpuTypeIds, *vgpuCount * sizeof(nvmlVgpuTypeId_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlVgpuTypeGetClass(nvmlVgpuTypeId_t vgpuTypeId, char* vgpuTypeClass, unsigned int* size)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlVgpuTypeGetClass);
-    if (request_id < 0 ||
-        rpc_write(&vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(size, sizeof(unsigned int)) < 0 ||
-        rpc_read(vgpuTypeClass, *size * sizeof(char)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlVgpuTypeGetName(nvmlVgpuTypeId_t vgpuTypeId, char* vgpuTypeName, unsigned int* size)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlVgpuTypeGetName);
-    if (request_id < 0 ||
-        rpc_write(&vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
-        rpc_write(&size, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(size, sizeof(unsigned int)) < 0 ||
-        rpc_read(vgpuTypeName, *size * sizeof(char)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlVgpuTypeGetGpuInstanceProfileId(nvmlVgpuTypeId_t vgpuTypeId, unsigned int* gpuInstanceProfileId)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlVgpuTypeGetGpuInstanceProfileId);
-    if (request_id < 0 ||
-        rpc_write(&vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(gpuInstanceProfileId, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlVgpuTypeGetDeviceID(nvmlVgpuTypeId_t vgpuTypeId, unsigned long long* deviceID, unsigned long long* subsystemID)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlVgpuTypeGetDeviceID);
-    if (request_id < 0 ||
-        rpc_write(&vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(deviceID, sizeof(unsigned long long)) < 0 ||
-        rpc_read(subsystemID, sizeof(unsigned long long)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlVgpuTypeGetFramebufferSize(nvmlVgpuTypeId_t vgpuTypeId, unsigned long long* fbSize)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlVgpuTypeGetFramebufferSize);
-    if (request_id < 0 ||
-        rpc_write(&vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(fbSize, sizeof(unsigned long long)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlVgpuTypeGetNumDisplayHeads(nvmlVgpuTypeId_t vgpuTypeId, unsigned int* numDisplayHeads)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlVgpuTypeGetNumDisplayHeads);
-    if (request_id < 0 ||
-        rpc_write(&vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(numDisplayHeads, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlVgpuTypeGetResolution(nvmlVgpuTypeId_t vgpuTypeId, unsigned int displayIndex, unsigned int* xdim, unsigned int* ydim)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlVgpuTypeGetResolution);
-    if (request_id < 0 ||
-        rpc_write(&vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
-        rpc_write(&displayIndex, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(xdim, sizeof(unsigned int)) < 0 ||
-        rpc_read(ydim, sizeof(unsigned int)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
         return NVML_ERROR_GPU_IS_LOST;
     return return_value;
@@ -2906,81 +724,6 @@ nvmlReturn_t nvmlVgpuTypeGetLicense(nvmlVgpuTypeId_t vgpuTypeId, char* vgpuTypeL
         rpc_write(&size, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(vgpuTypeLicenseString, size * sizeof(char)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlVgpuTypeGetFrameRateLimit(nvmlVgpuTypeId_t vgpuTypeId, unsigned int* frameRateLimit)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlVgpuTypeGetFrameRateLimit);
-    if (request_id < 0 ||
-        rpc_write(&vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(frameRateLimit, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlVgpuTypeGetMaxInstances(nvmlDevice_t device, nvmlVgpuTypeId_t vgpuTypeId, unsigned int* vgpuInstanceCount)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlVgpuTypeGetMaxInstances);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(vgpuInstanceCount, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlVgpuTypeGetMaxInstancesPerVm(nvmlVgpuTypeId_t vgpuTypeId, unsigned int* vgpuInstanceCountPerVm)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlVgpuTypeGetMaxInstancesPerVm);
-    if (request_id < 0 ||
-        rpc_write(&vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(vgpuInstanceCountPerVm, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetActiveVgpus(nvmlDevice_t device, unsigned int* vgpuCount, nvmlVgpuInstance_t* vgpuInstances)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetActiveVgpus);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&vgpuCount, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(vgpuCount, sizeof(unsigned int)) < 0 ||
-        rpc_read(vgpuInstances, *vgpuCount * sizeof(nvmlVgpuInstance_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlVgpuInstanceGetVmID(nvmlVgpuInstance_t vgpuInstance, char* vmId, unsigned int size, nvmlVgpuVmIdType_t* vmIdType)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlVgpuInstanceGetVmID);
-    if (request_id < 0 ||
-        rpc_write(&vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
-        rpc_write(&size, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(vmId, size * sizeof(char)) < 0 ||
-        rpc_read(vmIdType, sizeof(nvmlVgpuVmIdType_t)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
         return NVML_ERROR_GPU_IS_LOST;
     return return_value;
@@ -3016,90 +759,6 @@ nvmlReturn_t nvmlVgpuInstanceGetVmDriverVersion(nvmlVgpuInstance_t vgpuInstance,
     return return_value;
 }
 
-nvmlReturn_t nvmlVgpuInstanceGetFbUsage(nvmlVgpuInstance_t vgpuInstance, unsigned long long* fbUsage)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlVgpuInstanceGetFbUsage);
-    if (request_id < 0 ||
-        rpc_write(&vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(fbUsage, sizeof(unsigned long long)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlVgpuInstanceGetLicenseStatus(nvmlVgpuInstance_t vgpuInstance, unsigned int* licensed)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlVgpuInstanceGetLicenseStatus);
-    if (request_id < 0 ||
-        rpc_write(&vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(licensed, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlVgpuInstanceGetType(nvmlVgpuInstance_t vgpuInstance, nvmlVgpuTypeId_t* vgpuTypeId)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlVgpuInstanceGetType);
-    if (request_id < 0 ||
-        rpc_write(&vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlVgpuInstanceGetFrameRateLimit(nvmlVgpuInstance_t vgpuInstance, unsigned int* frameRateLimit)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlVgpuInstanceGetFrameRateLimit);
-    if (request_id < 0 ||
-        rpc_write(&vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(frameRateLimit, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlVgpuInstanceGetEccMode(nvmlVgpuInstance_t vgpuInstance, nvmlEnableState_t* eccMode)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlVgpuInstanceGetEccMode);
-    if (request_id < 0 ||
-        rpc_write(&vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(eccMode, sizeof(nvmlEnableState_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlVgpuInstanceGetEncoderCapacity(nvmlVgpuInstance_t vgpuInstance, unsigned int* encoderCapacity)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlVgpuInstanceGetEncoderCapacity);
-    if (request_id < 0 ||
-        rpc_write(&vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(encoderCapacity, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
 nvmlReturn_t nvmlVgpuInstanceSetEncoderCapacity(nvmlVgpuInstance_t vgpuInstance, unsigned int encoderCapacity)
 {
     nvmlReturn_t return_value;
@@ -3109,327 +768,6 @@ nvmlReturn_t nvmlVgpuInstanceSetEncoderCapacity(nvmlVgpuInstance_t vgpuInstance,
         rpc_write(&vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
         rpc_write(&encoderCapacity, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlVgpuInstanceGetEncoderStats(nvmlVgpuInstance_t vgpuInstance, unsigned int* sessionCount, unsigned int* averageFps, unsigned int* averageLatency)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlVgpuInstanceGetEncoderStats);
-    if (request_id < 0 ||
-        rpc_write(&vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(sessionCount, sizeof(unsigned int)) < 0 ||
-        rpc_read(averageFps, sizeof(unsigned int)) < 0 ||
-        rpc_read(averageLatency, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlVgpuInstanceGetEncoderSessions(nvmlVgpuInstance_t vgpuInstance, unsigned int* sessionCount, nvmlEncoderSessionInfo_t* sessionInfo)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlVgpuInstanceGetEncoderSessions);
-    if (request_id < 0 ||
-        rpc_write(&vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
-        rpc_write(&sessionCount, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(sessionCount, sizeof(unsigned int)) < 0 ||
-        rpc_read(sessionInfo, *sessionCount * sizeof(nvmlEncoderSessionInfo_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlVgpuInstanceGetFBCStats(nvmlVgpuInstance_t vgpuInstance, nvmlFBCStats_t* fbcStats)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlVgpuInstanceGetFBCStats);
-    if (request_id < 0 ||
-        rpc_write(&vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(fbcStats, sizeof(nvmlFBCStats_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlVgpuInstanceGetFBCSessions(nvmlVgpuInstance_t vgpuInstance, unsigned int* sessionCount, nvmlFBCSessionInfo_t* sessionInfo)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlVgpuInstanceGetFBCSessions);
-    if (request_id < 0 ||
-        rpc_write(&vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
-        rpc_write(&sessionCount, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(sessionCount, sizeof(unsigned int)) < 0 ||
-        rpc_read(sessionInfo, *sessionCount * sizeof(nvmlFBCSessionInfo_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlVgpuInstanceGetGpuInstanceId(nvmlVgpuInstance_t vgpuInstance, unsigned int* gpuInstanceId)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlVgpuInstanceGetGpuInstanceId);
-    if (request_id < 0 ||
-        rpc_write(&vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(gpuInstanceId, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlVgpuInstanceGetGpuPciId(nvmlVgpuInstance_t vgpuInstance, char* vgpuPciId, unsigned int* length)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlVgpuInstanceGetGpuPciId);
-    if (request_id < 0 ||
-        rpc_write(&vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
-        rpc_write(&length, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(length, sizeof(unsigned int)) < 0 ||
-        rpc_read(vgpuPciId, *length * sizeof(char)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlVgpuTypeGetCapabilities(nvmlVgpuTypeId_t vgpuTypeId, nvmlVgpuCapability_t capability, unsigned int* capResult)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlVgpuTypeGetCapabilities);
-    if (request_id < 0 ||
-        rpc_write(&vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
-        rpc_write(&capability, sizeof(nvmlVgpuCapability_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(capResult, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlVgpuInstanceGetMetadata(nvmlVgpuInstance_t vgpuInstance, nvmlVgpuMetadata_t* vgpuMetadata, unsigned int* bufferSize)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlVgpuInstanceGetMetadata);
-    if (request_id < 0 ||
-        rpc_write(&vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
-        rpc_write(&bufferSize, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(bufferSize, sizeof(unsigned int)) < 0 ||
-        rpc_read(vgpuMetadata, *bufferSize * sizeof(nvmlVgpuMetadata_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetVgpuMetadata(nvmlDevice_t device, nvmlVgpuPgpuMetadata_t* pgpuMetadata, unsigned int* bufferSize)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetVgpuMetadata);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&bufferSize, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(bufferSize, sizeof(unsigned int)) < 0 ||
-        rpc_read(pgpuMetadata, *bufferSize * sizeof(nvmlVgpuPgpuMetadata_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlGetVgpuCompatibility(nvmlVgpuMetadata_t* vgpuMetadata, nvmlVgpuPgpuMetadata_t* pgpuMetadata, nvmlVgpuPgpuCompatibility_t* compatibilityInfo)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlGetVgpuCompatibility);
-    if (request_id < 0 ||
-        rpc_write(&vgpuMetadata, sizeof(nvmlVgpuMetadata_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(vgpuMetadata, sizeof(nvmlVgpuMetadata_t)) < 0 ||
-        rpc_read(pgpuMetadata, sizeof(nvmlVgpuPgpuMetadata_t)) < 0 ||
-        rpc_read(compatibilityInfo, sizeof(nvmlVgpuPgpuCompatibility_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetPgpuMetadataString(nvmlDevice_t device, char* pgpuMetadata, unsigned int* bufferSize)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetPgpuMetadataString);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&bufferSize, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(bufferSize, sizeof(unsigned int)) < 0 ||
-        rpc_read(pgpuMetadata, *bufferSize * sizeof(char)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetVgpuSchedulerLog(nvmlDevice_t device, nvmlVgpuSchedulerLog_t* pSchedulerLog)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetVgpuSchedulerLog);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(pSchedulerLog, sizeof(nvmlVgpuSchedulerLog_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetVgpuSchedulerState(nvmlDevice_t device, nvmlVgpuSchedulerGetState_t* pSchedulerState)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetVgpuSchedulerState);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(pSchedulerState, sizeof(nvmlVgpuSchedulerGetState_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetVgpuSchedulerCapabilities(nvmlDevice_t device, nvmlVgpuSchedulerCapabilities_t* pCapabilities)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetVgpuSchedulerCapabilities);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(pCapabilities, sizeof(nvmlVgpuSchedulerCapabilities_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlGetVgpuVersion(nvmlVgpuVersion_t* supported, nvmlVgpuVersion_t* current)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlGetVgpuVersion);
-    if (request_id < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(supported, sizeof(nvmlVgpuVersion_t)) < 0 ||
-        rpc_read(current, sizeof(nvmlVgpuVersion_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlSetVgpuVersion(nvmlVgpuVersion_t* vgpuVersion)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlSetVgpuVersion);
-    if (request_id < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(vgpuVersion, sizeof(nvmlVgpuVersion_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetVgpuUtilization(nvmlDevice_t device, unsigned long long lastSeenTimeStamp, nvmlValueType_t* sampleValType, unsigned int* vgpuInstanceSamplesCount, nvmlVgpuInstanceUtilizationSample_t* utilizationSamples)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetVgpuUtilization);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&lastSeenTimeStamp, sizeof(unsigned long long)) < 0 ||
-        rpc_write(&sampleValType, sizeof(nvmlValueType_t)) < 0 ||
-        rpc_write(&vgpuInstanceSamplesCount, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(sampleValType, sizeof(nvmlValueType_t)) < 0 ||
-        rpc_read(vgpuInstanceSamplesCount, sizeof(unsigned int)) < 0 ||
-        rpc_read(utilizationSamples, *vgpuInstanceSamplesCount * sizeof(nvmlVgpuInstanceUtilizationSample_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetVgpuProcessUtilization(nvmlDevice_t device, unsigned long long lastSeenTimeStamp, unsigned int* vgpuProcessSamplesCount, nvmlVgpuProcessUtilizationSample_t* utilizationSamples)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetVgpuProcessUtilization);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&lastSeenTimeStamp, sizeof(unsigned long long)) < 0 ||
-        rpc_write(&vgpuProcessSamplesCount, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(vgpuProcessSamplesCount, sizeof(unsigned int)) < 0 ||
-        rpc_read(utilizationSamples, *vgpuProcessSamplesCount * sizeof(nvmlVgpuProcessUtilizationSample_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlVgpuInstanceGetAccountingMode(nvmlVgpuInstance_t vgpuInstance, nvmlEnableState_t* mode)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlVgpuInstanceGetAccountingMode);
-    if (request_id < 0 ||
-        rpc_write(&vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(mode, sizeof(nvmlEnableState_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlVgpuInstanceGetAccountingPids(nvmlVgpuInstance_t vgpuInstance, unsigned int* count, unsigned int* pids)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlVgpuInstanceGetAccountingPids);
-    if (request_id < 0 ||
-        rpc_write(&vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
-        rpc_write(&count, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(count, sizeof(unsigned int)) < 0 ||
-        rpc_read(pids, *count * sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlVgpuInstanceGetAccountingStats(nvmlVgpuInstance_t vgpuInstance, unsigned int pid, nvmlAccountingStats_t* stats)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlVgpuInstanceGetAccountingStats);
-    if (request_id < 0 ||
-        rpc_write(&vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
-        rpc_write(&pid, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(stats, sizeof(nvmlAccountingStats_t)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
         return NVML_ERROR_GPU_IS_LOST;
     return return_value;
@@ -3448,171 +786,6 @@ nvmlReturn_t nvmlVgpuInstanceClearAccountingPids(nvmlVgpuInstance_t vgpuInstance
     return return_value;
 }
 
-nvmlReturn_t nvmlVgpuInstanceGetLicenseInfo_v2(nvmlVgpuInstance_t vgpuInstance, nvmlVgpuLicenseInfo_t* licenseInfo)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlVgpuInstanceGetLicenseInfo_v2);
-    if (request_id < 0 ||
-        rpc_write(&vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(licenseInfo, sizeof(nvmlVgpuLicenseInfo_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlGetExcludedDeviceCount(unsigned int* deviceCount)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlGetExcludedDeviceCount);
-    if (request_id < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(deviceCount, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlGetExcludedDeviceInfoByIndex(unsigned int index, nvmlExcludedDeviceInfo_t* info)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlGetExcludedDeviceInfoByIndex);
-    if (request_id < 0 ||
-        rpc_write(&index, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(info, sizeof(nvmlExcludedDeviceInfo_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceSetMigMode(nvmlDevice_t device, unsigned int mode, nvmlReturn_t* activationStatus)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceSetMigMode);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&mode, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(activationStatus, sizeof(nvmlReturn_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetMigMode(nvmlDevice_t device, unsigned int* currentMode, unsigned int* pendingMode)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetMigMode);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(currentMode, sizeof(unsigned int)) < 0 ||
-        rpc_read(pendingMode, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetGpuInstanceProfileInfo(nvmlDevice_t device, unsigned int profile, nvmlGpuInstanceProfileInfo_t* info)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetGpuInstanceProfileInfo);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&profile, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(info, sizeof(nvmlGpuInstanceProfileInfo_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetGpuInstanceProfileInfoV(nvmlDevice_t device, unsigned int profile, nvmlGpuInstanceProfileInfo_v2_t* info)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetGpuInstanceProfileInfoV);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&profile, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(info, sizeof(nvmlGpuInstanceProfileInfo_v2_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetGpuInstancePossiblePlacements_v2(nvmlDevice_t device, unsigned int profileId, nvmlGpuInstancePlacement_t* placements, unsigned int* count)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetGpuInstancePossiblePlacements_v2);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&profileId, sizeof(unsigned int)) < 0 ||
-        rpc_write(&count, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(count, sizeof(unsigned int)) < 0 ||
-        rpc_read(placements, *count * sizeof(nvmlGpuInstancePlacement_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetGpuInstanceRemainingCapacity(nvmlDevice_t device, unsigned int profileId, unsigned int* count)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetGpuInstanceRemainingCapacity);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&profileId, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(count, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceCreateGpuInstance(nvmlDevice_t device, unsigned int profileId, nvmlGpuInstance_t* gpuInstance)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceCreateGpuInstance);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&profileId, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(gpuInstance, sizeof(nvmlGpuInstance_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceCreateGpuInstanceWithPlacement(nvmlDevice_t device, unsigned int profileId, const nvmlGpuInstancePlacement_t* placement, nvmlGpuInstance_t* gpuInstance)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceCreateGpuInstanceWithPlacement);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&profileId, sizeof(unsigned int)) < 0 ||
-        rpc_write(&placement, sizeof(nvmlGpuInstancePlacement_t*)) < 0 ||
-        (placement != nullptr && rpc_write(placement, sizeof(nvmlGpuInstancePlacement_t)) < 0) ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(gpuInstance, sizeof(nvmlGpuInstance_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
 nvmlReturn_t nvmlGpuInstanceDestroy(nvmlGpuInstance_t gpuInstance)
 {
     nvmlReturn_t return_value;
@@ -3626,148 +799,6 @@ nvmlReturn_t nvmlGpuInstanceDestroy(nvmlGpuInstance_t gpuInstance)
     return return_value;
 }
 
-nvmlReturn_t nvmlDeviceGetGpuInstances(nvmlDevice_t device, unsigned int profileId, nvmlGpuInstance_t* gpuInstances, unsigned int* count)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetGpuInstances);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&profileId, sizeof(unsigned int)) < 0 ||
-        rpc_write(&count, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(count, sizeof(unsigned int)) < 0 ||
-        rpc_read(gpuInstances, *count * sizeof(nvmlGpuInstance_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetGpuInstanceById(nvmlDevice_t device, unsigned int id, nvmlGpuInstance_t* gpuInstance)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetGpuInstanceById);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&id, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(gpuInstance, sizeof(nvmlGpuInstance_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlGpuInstanceGetInfo(nvmlGpuInstance_t gpuInstance, nvmlGpuInstanceInfo_t* info)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlGpuInstanceGetInfo);
-    if (request_id < 0 ||
-        rpc_write(&gpuInstance, sizeof(nvmlGpuInstance_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(info, sizeof(nvmlGpuInstanceInfo_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlGpuInstanceGetComputeInstanceProfileInfo(nvmlGpuInstance_t gpuInstance, unsigned int profile, unsigned int engProfile, nvmlComputeInstanceProfileInfo_t* info)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlGpuInstanceGetComputeInstanceProfileInfo);
-    if (request_id < 0 ||
-        rpc_write(&gpuInstance, sizeof(nvmlGpuInstance_t)) < 0 ||
-        rpc_write(&profile, sizeof(unsigned int)) < 0 ||
-        rpc_write(&engProfile, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(info, sizeof(nvmlComputeInstanceProfileInfo_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlGpuInstanceGetComputeInstanceProfileInfoV(nvmlGpuInstance_t gpuInstance, unsigned int profile, unsigned int engProfile, nvmlComputeInstanceProfileInfo_v2_t* info)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlGpuInstanceGetComputeInstanceProfileInfoV);
-    if (request_id < 0 ||
-        rpc_write(&gpuInstance, sizeof(nvmlGpuInstance_t)) < 0 ||
-        rpc_write(&profile, sizeof(unsigned int)) < 0 ||
-        rpc_write(&engProfile, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(info, sizeof(nvmlComputeInstanceProfileInfo_v2_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlGpuInstanceGetComputeInstanceRemainingCapacity(nvmlGpuInstance_t gpuInstance, unsigned int profileId, unsigned int* count)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlGpuInstanceGetComputeInstanceRemainingCapacity);
-    if (request_id < 0 ||
-        rpc_write(&gpuInstance, sizeof(nvmlGpuInstance_t)) < 0 ||
-        rpc_write(&profileId, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(count, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlGpuInstanceGetComputeInstancePossiblePlacements(nvmlGpuInstance_t gpuInstance, unsigned int profileId, nvmlComputeInstancePlacement_t* placements, unsigned int* count)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlGpuInstanceGetComputeInstancePossiblePlacements);
-    if (request_id < 0 ||
-        rpc_write(&gpuInstance, sizeof(nvmlGpuInstance_t)) < 0 ||
-        rpc_write(&profileId, sizeof(unsigned int)) < 0 ||
-        rpc_write(&count, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(count, sizeof(unsigned int)) < 0 ||
-        rpc_read(placements, *count * sizeof(nvmlComputeInstancePlacement_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlGpuInstanceCreateComputeInstance(nvmlGpuInstance_t gpuInstance, unsigned int profileId, nvmlComputeInstance_t* computeInstance)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlGpuInstanceCreateComputeInstance);
-    if (request_id < 0 ||
-        rpc_write(&gpuInstance, sizeof(nvmlGpuInstance_t)) < 0 ||
-        rpc_write(&profileId, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(computeInstance, sizeof(nvmlComputeInstance_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlGpuInstanceCreateComputeInstanceWithPlacement(nvmlGpuInstance_t gpuInstance, unsigned int profileId, const nvmlComputeInstancePlacement_t* placement, nvmlComputeInstance_t* computeInstance)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlGpuInstanceCreateComputeInstanceWithPlacement);
-    if (request_id < 0 ||
-        rpc_write(&gpuInstance, sizeof(nvmlGpuInstance_t)) < 0 ||
-        rpc_write(&profileId, sizeof(unsigned int)) < 0 ||
-        rpc_write(&placement, sizeof(nvmlComputeInstancePlacement_t*)) < 0 ||
-        (placement != nullptr && rpc_write(placement, sizeof(nvmlComputeInstancePlacement_t)) < 0) ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(computeInstance, sizeof(nvmlComputeInstance_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
 nvmlReturn_t nvmlComputeInstanceDestroy(nvmlComputeInstance_t computeInstance)
 {
     nvmlReturn_t return_value;
@@ -3776,165 +807,6 @@ nvmlReturn_t nvmlComputeInstanceDestroy(nvmlComputeInstance_t computeInstance)
     if (request_id < 0 ||
         rpc_write(&computeInstance, sizeof(nvmlComputeInstance_t)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlGpuInstanceGetComputeInstances(nvmlGpuInstance_t gpuInstance, unsigned int profileId, nvmlComputeInstance_t* computeInstances, unsigned int* count)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlGpuInstanceGetComputeInstances);
-    if (request_id < 0 ||
-        rpc_write(&gpuInstance, sizeof(nvmlGpuInstance_t)) < 0 ||
-        rpc_write(&profileId, sizeof(unsigned int)) < 0 ||
-        rpc_write(&count, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(count, sizeof(unsigned int)) < 0 ||
-        rpc_read(computeInstances, *count * sizeof(nvmlComputeInstance_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlGpuInstanceGetComputeInstanceById(nvmlGpuInstance_t gpuInstance, unsigned int id, nvmlComputeInstance_t* computeInstance)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlGpuInstanceGetComputeInstanceById);
-    if (request_id < 0 ||
-        rpc_write(&gpuInstance, sizeof(nvmlGpuInstance_t)) < 0 ||
-        rpc_write(&id, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(computeInstance, sizeof(nvmlComputeInstance_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlComputeInstanceGetInfo_v2(nvmlComputeInstance_t computeInstance, nvmlComputeInstanceInfo_t* info)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlComputeInstanceGetInfo_v2);
-    if (request_id < 0 ||
-        rpc_write(&computeInstance, sizeof(nvmlComputeInstance_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(info, sizeof(nvmlComputeInstanceInfo_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceIsMigDeviceHandle(nvmlDevice_t device, unsigned int* isMigDevice)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceIsMigDeviceHandle);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(isMigDevice, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetGpuInstanceId(nvmlDevice_t device, unsigned int* id)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetGpuInstanceId);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(id, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetComputeInstanceId(nvmlDevice_t device, unsigned int* id)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetComputeInstanceId);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(id, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetMaxMigDeviceCount(nvmlDevice_t device, unsigned int* count)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetMaxMigDeviceCount);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(count, sizeof(unsigned int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetMigDeviceHandleByIndex(nvmlDevice_t device, unsigned int index, nvmlDevice_t* migDevice)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetMigDeviceHandleByIndex);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&index, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(migDevice, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetDeviceHandleFromMigDeviceHandle(nvmlDevice_t migDevice, nvmlDevice_t* device)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetDeviceHandleFromMigDeviceHandle);
-    if (request_id < 0 ||
-        rpc_write(&migDevice, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetBusType(nvmlDevice_t device, nvmlBusType_t* type)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetBusType);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(type, sizeof(nvmlBusType_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetDynamicPstatesInfo(nvmlDevice_t device, nvmlGpuDynamicPstatesInfo_t* pDynamicPstatesInfo)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetDynamicPstatesInfo);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(pDynamicPstatesInfo, sizeof(nvmlGpuDynamicPstatesInfo_t)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
         return NVML_ERROR_GPU_IS_LOST;
     return return_value;
@@ -3955,20 +827,6 @@ nvmlReturn_t nvmlDeviceSetFanSpeed_v2(nvmlDevice_t device, unsigned int fan, uns
     return return_value;
 }
 
-nvmlReturn_t nvmlDeviceGetGpcClkVfOffset(nvmlDevice_t device, int* offset)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetGpcClkVfOffset);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(offset, sizeof(int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
 nvmlReturn_t nvmlDeviceSetGpcClkVfOffset(nvmlDevice_t device, int offset)
 {
     nvmlReturn_t return_value;
@@ -3983,20 +841,6 @@ nvmlReturn_t nvmlDeviceSetGpcClkVfOffset(nvmlDevice_t device, int offset)
     return return_value;
 }
 
-nvmlReturn_t nvmlDeviceGetMemClkVfOffset(nvmlDevice_t device, int* offset)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetMemClkVfOffset);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(offset, sizeof(int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
 nvmlReturn_t nvmlDeviceSetMemClkVfOffset(nvmlDevice_t device, int offset)
 {
     nvmlReturn_t return_value;
@@ -4006,23 +850,6 @@ nvmlReturn_t nvmlDeviceSetMemClkVfOffset(nvmlDevice_t device, int offset)
         rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(&offset, sizeof(int)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetMinMaxClockOfPState(nvmlDevice_t device, nvmlClockType_t type, nvmlPstates_t pstate, unsigned int* minClockMHz, unsigned int* maxClockMHz)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetMinMaxClockOfPState);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(&type, sizeof(nvmlClockType_t)) < 0 ||
-        rpc_write(&pstate, sizeof(nvmlPstates_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(minClockMHz, sizeof(unsigned int)) < 0 ||
-        rpc_read(maxClockMHz, sizeof(unsigned int)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
         return NVML_ERROR_GPU_IS_LOST;
     return return_value;
@@ -4043,81 +870,11 @@ nvmlReturn_t nvmlDeviceGetSupportedPerformanceStates(nvmlDevice_t device, nvmlPs
     return return_value;
 }
 
-nvmlReturn_t nvmlDeviceGetGpcClkMinMaxVfOffset(nvmlDevice_t device, int* minOffset, int* maxOffset)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetGpcClkMinMaxVfOffset);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(minOffset, sizeof(int)) < 0 ||
-        rpc_read(maxOffset, sizeof(int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetMemClkMinMaxVfOffset(nvmlDevice_t device, int* minOffset, int* maxOffset)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetMemClkMinMaxVfOffset);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(minOffset, sizeof(int)) < 0 ||
-        rpc_read(maxOffset, sizeof(int)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlDeviceGetGpuFabricInfo(nvmlDevice_t device, nvmlGpuFabricInfo_t* gpuFabricInfo)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlDeviceGetGpuFabricInfo);
-    if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(gpuFabricInfo, sizeof(nvmlGpuFabricInfo_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlGpmMetricsGet(nvmlGpmMetricsGet_t* metricsGet)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlGpmMetricsGet);
-    if (request_id < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(metricsGet, sizeof(nvmlGpmMetricsGet_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
 nvmlReturn_t nvmlGpmSampleFree(nvmlGpmSample_t gpmSample)
 {
     nvmlReturn_t return_value;
 
     int request_id = rpc_start_request(RPC_nvmlGpmSampleFree);
-    if (request_id < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(gpmSample, sizeof(nvmlGpmSample_t)) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlGpmSampleAlloc(nvmlGpmSample_t* gpmSample)
-{
-    nvmlReturn_t return_value;
-
-    int request_id = rpc_start_request(RPC_nvmlGpmSampleAlloc);
     if (request_id < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(gpmSample, sizeof(nvmlGpmSample_t)) < 0 ||
@@ -4155,31 +912,2241 @@ nvmlReturn_t nvmlGpmMigSampleGet(nvmlDevice_t device, unsigned int gpuInstanceId
     return return_value;
 }
 
-nvmlReturn_t nvmlGpmQueryDeviceSupport(nvmlDevice_t device, nvmlGpmSupport_t* gpmSupport)
+CUresult cuInit(unsigned int Flags)
 {
-    nvmlReturn_t return_value;
+    CUresult return_value;
 
-    int request_id = rpc_start_request(RPC_nvmlGpmQueryDeviceSupport);
+    int request_id = rpc_start_request(RPC_cuInit);
     if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_write(&Flags, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(gpmSupport, sizeof(nvmlGpmSupport_t)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
-nvmlReturn_t nvmlDeviceSetNvLinkDeviceLowPowerThreshold(nvmlDevice_t device, nvmlNvLinkPowerThres_t* info)
+CUresult cuDeviceGetName(char* name, int len, CUdevice dev)
 {
-    nvmlReturn_t return_value;
+    CUresult return_value;
 
-    int request_id = rpc_start_request(RPC_nvmlDeviceSetNvLinkDeviceLowPowerThreshold);
+    int request_id = rpc_start_request(RPC_cuDeviceGetName);
     if (request_id < 0 ||
-        rpc_write(&device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_write(&len, sizeof(int)) < 0 ||
+        rpc_write(&dev, sizeof(CUdevice)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(info, sizeof(nvmlNvLinkPowerThres_t)) < 0 ||
+        rpc_read(name, len * sizeof(char)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuDeviceGetUuid(CUuuid* uuid, CUdevice dev)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuDeviceGetUuid);
+    if (request_id < 0 ||
+        rpc_write(&dev, sizeof(CUdevice)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(uuid, 16) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuDeviceGetUuid_v2(CUuuid* uuid, CUdevice dev)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuDeviceGetUuid_v2);
+    if (request_id < 0 ||
+        rpc_write(&dev, sizeof(CUdevice)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(uuid, 16) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuDeviceSetMemPool(CUdevice dev, CUmemoryPool pool)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuDeviceSetMemPool);
+    if (request_id < 0 ||
+        rpc_write(&dev, sizeof(CUdevice)) < 0 ||
+        rpc_write(&pool, sizeof(CUmemoryPool)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuFlushGPUDirectRDMAWrites(CUflushGPUDirectRDMAWritesTarget target, CUflushGPUDirectRDMAWritesScope scope)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuFlushGPUDirectRDMAWrites);
+    if (request_id < 0 ||
+        rpc_write(&target, sizeof(CUflushGPUDirectRDMAWritesTarget)) < 0 ||
+        rpc_write(&scope, sizeof(CUflushGPUDirectRDMAWritesScope)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuDevicePrimaryCtxRelease_v2(CUdevice dev)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuDevicePrimaryCtxRelease_v2);
+    if (request_id < 0 ||
+        rpc_write(&dev, sizeof(CUdevice)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuDevicePrimaryCtxSetFlags_v2(CUdevice dev, unsigned int flags)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuDevicePrimaryCtxSetFlags_v2);
+    if (request_id < 0 ||
+        rpc_write(&dev, sizeof(CUdevice)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuDevicePrimaryCtxReset_v2(CUdevice dev)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuDevicePrimaryCtxReset_v2);
+    if (request_id < 0 ||
+        rpc_write(&dev, sizeof(CUdevice)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuCtxDestroy_v2(CUcontext ctx)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuCtxDestroy_v2);
+    if (request_id < 0 ||
+        rpc_write(&ctx, sizeof(CUcontext)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuCtxPushCurrent_v2(CUcontext ctx)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuCtxPushCurrent_v2);
+    if (request_id < 0 ||
+        rpc_write(&ctx, sizeof(CUcontext)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuCtxSetCurrent(CUcontext ctx)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuCtxSetCurrent);
+    if (request_id < 0 ||
+        rpc_write(&ctx, sizeof(CUcontext)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuCtxSynchronize()
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuCtxSynchronize);
+    if (request_id < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuCtxSetLimit(CUlimit limit, size_t value)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuCtxSetLimit);
+    if (request_id < 0 ||
+        rpc_write(&limit, sizeof(CUlimit)) < 0 ||
+        rpc_write(&value, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuCtxSetCacheConfig(CUfunc_cache config)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuCtxSetCacheConfig);
+    if (request_id < 0 ||
+        rpc_write(&config, sizeof(CUfunc_cache)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuCtxSetSharedMemConfig(CUsharedconfig config)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuCtxSetSharedMemConfig);
+    if (request_id < 0 ||
+        rpc_write(&config, sizeof(CUsharedconfig)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuCtxResetPersistingL2Cache()
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuCtxResetPersistingL2Cache);
+    if (request_id < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuCtxDetach(CUcontext ctx)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuCtxDetach);
+    if (request_id < 0 ||
+        rpc_write(&ctx, sizeof(CUcontext)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuModuleUnload(CUmodule hmod)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuModuleUnload);
+    if (request_id < 0 ||
+        rpc_write(&hmod, sizeof(CUmodule)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuLinkAddData_v2(CUlinkState state, CUjitInputType type, void* data, size_t size, const char* name, unsigned int numOptions, CUjit_option* options, void** optionValues)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuLinkAddData_v2);
+    std::size_t name_len = std::strlen(name) + 1;
+    if (request_id < 0 ||
+        rpc_write(&state, sizeof(CUlinkState)) < 0 ||
+        rpc_write(&type, sizeof(CUjitInputType)) < 0 ||
+        rpc_write(&data, sizeof(void*)) < 0 ||
+        rpc_write(&size, sizeof(size_t)) < 0 ||
+        rpc_write(&name_len, sizeof(std::size_t)) < 0 ||
+        rpc_write(name, name_len) < 0 ||
+        rpc_write(&numOptions, sizeof(unsigned int)) < 0 ||
+        rpc_write(&options, sizeof(CUjit_option*)) < 0 ||
+        rpc_write(&optionValues, sizeof(void**)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(data, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuLinkAddFile_v2(CUlinkState state, CUjitInputType type, const char* path, unsigned int numOptions, CUjit_option* options, void** optionValues)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuLinkAddFile_v2);
+    std::size_t path_len = std::strlen(path) + 1;
+    if (request_id < 0 ||
+        rpc_write(&state, sizeof(CUlinkState)) < 0 ||
+        rpc_write(&type, sizeof(CUjitInputType)) < 0 ||
+        rpc_write(&path_len, sizeof(std::size_t)) < 0 ||
+        rpc_write(path, path_len) < 0 ||
+        rpc_write(&numOptions, sizeof(unsigned int)) < 0 ||
+        rpc_write(&options, sizeof(CUjit_option*)) < 0 ||
+        rpc_write(&optionValues, sizeof(void**)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuLinkDestroy(CUlinkState state)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuLinkDestroy);
+    if (request_id < 0 ||
+        rpc_write(&state, sizeof(CUlinkState)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuLibraryUnload(CUlibrary library)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuLibraryUnload);
+    if (request_id < 0 ||
+        rpc_write(&library, sizeof(CUlibrary)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuLibraryGetUnifiedFunction(void** fptr, CUlibrary library, const char* symbol)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuLibraryGetUnifiedFunction);
+    std::size_t symbol_len = std::strlen(symbol) + 1;
+    if (request_id < 0 ||
+        rpc_write(&library, sizeof(CUlibrary)) < 0 ||
+        rpc_write(&symbol_len, sizeof(std::size_t)) < 0 ||
+        rpc_write(symbol, symbol_len) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(fptr, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuKernelSetAttribute(CUfunction_attribute attrib, int val, CUkernel kernel, CUdevice dev)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuKernelSetAttribute);
+    if (request_id < 0 ||
+        rpc_write(&attrib, sizeof(CUfunction_attribute)) < 0 ||
+        rpc_write(&val, sizeof(int)) < 0 ||
+        rpc_write(&kernel, sizeof(CUkernel)) < 0 ||
+        rpc_write(&dev, sizeof(CUdevice)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuKernelSetCacheConfig(CUkernel kernel, CUfunc_cache config, CUdevice dev)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuKernelSetCacheConfig);
+    if (request_id < 0 ||
+        rpc_write(&kernel, sizeof(CUkernel)) < 0 ||
+        rpc_write(&config, sizeof(CUfunc_cache)) < 0 ||
+        rpc_write(&dev, sizeof(CUdevice)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemFree_v2(CUdeviceptr dptr)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemFree_v2);
+    if (request_id < 0 ||
+        rpc_write(&dptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemAllocHost_v2(void** pp, size_t bytesize)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemAllocHost_v2);
+    if (request_id < 0 ||
+        rpc_write(&pp, sizeof(void*)) < 0 ||
+        rpc_write(&bytesize, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pp, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemFreeHost(void* p)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemFreeHost);
+    if (request_id < 0 ||
+        rpc_write(&p, sizeof(void*)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(p, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemHostAlloc(void** pp, size_t bytesize, unsigned int Flags)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemHostAlloc);
+    if (request_id < 0 ||
+        rpc_write(&pp, sizeof(void*)) < 0 ||
+        rpc_write(&bytesize, sizeof(size_t)) < 0 ||
+        rpc_write(&Flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pp, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuDeviceGetPCIBusId(char* pciBusId, int len, CUdevice dev)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuDeviceGetPCIBusId);
+    if (request_id < 0 ||
+        rpc_write(&len, sizeof(int)) < 0 ||
+        rpc_write(&dev, sizeof(CUdevice)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pciBusId, len * sizeof(char)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuIpcCloseMemHandle(CUdeviceptr dptr)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuIpcCloseMemHandle);
+    if (request_id < 0 ||
+        rpc_write(&dptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemHostRegister_v2(void* p, size_t bytesize, unsigned int Flags)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemHostRegister_v2);
+    if (request_id < 0 ||
+        rpc_write(&p, sizeof(void*)) < 0 ||
+        rpc_write(&bytesize, sizeof(size_t)) < 0 ||
+        rpc_write(&Flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(p, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemHostUnregister(void* p)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemHostUnregister);
+    if (request_id < 0 ||
+        rpc_write(&p, sizeof(void*)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(p, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemcpy(CUdeviceptr dst, CUdeviceptr src, size_t ByteCount)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemcpy);
+    if (request_id < 0 ||
+        rpc_write(&dst, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&src, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&ByteCount, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemcpyPeer(CUdeviceptr dstDevice, CUcontext dstContext, CUdeviceptr srcDevice, CUcontext srcContext, size_t ByteCount)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemcpyPeer);
+    if (request_id < 0 ||
+        rpc_write(&dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&dstContext, sizeof(CUcontext)) < 0 ||
+        rpc_write(&srcDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&srcContext, sizeof(CUcontext)) < 0 ||
+        rpc_write(&ByteCount, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemcpyDtoH_v2(void* dstHost, CUdeviceptr srcDevice, size_t ByteCount)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemcpyDtoH_v2);
+    if (request_id < 0 ||
+        rpc_write(&dstHost, sizeof(void*)) < 0 ||
+        rpc_write(&srcDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&ByteCount, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(dstHost, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemcpyDtoD_v2(CUdeviceptr dstDevice, CUdeviceptr srcDevice, size_t ByteCount)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemcpyDtoD_v2);
+    if (request_id < 0 ||
+        rpc_write(&dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&srcDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&ByteCount, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemcpyDtoA_v2(CUarray dstArray, size_t dstOffset, CUdeviceptr srcDevice, size_t ByteCount)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemcpyDtoA_v2);
+    if (request_id < 0 ||
+        rpc_write(&dstArray, sizeof(CUarray)) < 0 ||
+        rpc_write(&dstOffset, sizeof(size_t)) < 0 ||
+        rpc_write(&srcDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&ByteCount, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemcpyAtoD_v2(CUdeviceptr dstDevice, CUarray srcArray, size_t srcOffset, size_t ByteCount)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemcpyAtoD_v2);
+    if (request_id < 0 ||
+        rpc_write(&dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&srcArray, sizeof(CUarray)) < 0 ||
+        rpc_write(&srcOffset, sizeof(size_t)) < 0 ||
+        rpc_write(&ByteCount, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemcpyAtoH_v2(void* dstHost, CUarray srcArray, size_t srcOffset, size_t ByteCount)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemcpyAtoH_v2);
+    if (request_id < 0 ||
+        rpc_write(&dstHost, sizeof(void*)) < 0 ||
+        rpc_write(&srcArray, sizeof(CUarray)) < 0 ||
+        rpc_write(&srcOffset, sizeof(size_t)) < 0 ||
+        rpc_write(&ByteCount, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemcpyAtoA_v2(CUarray dstArray, size_t dstOffset, CUarray srcArray, size_t srcOffset, size_t ByteCount)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemcpyAtoA_v2);
+    if (request_id < 0 ||
+        rpc_write(&dstArray, sizeof(CUarray)) < 0 ||
+        rpc_write(&dstOffset, sizeof(size_t)) < 0 ||
+        rpc_write(&srcArray, sizeof(CUarray)) < 0 ||
+        rpc_write(&srcOffset, sizeof(size_t)) < 0 ||
+        rpc_write(&ByteCount, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemcpyAsync(CUdeviceptr dst, CUdeviceptr src, size_t ByteCount, CUstream hStream)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemcpyAsync);
+    if (request_id < 0 ||
+        rpc_write(&dst, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&src, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&ByteCount, sizeof(size_t)) < 0 ||
+        rpc_write(&hStream, sizeof(CUstream)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemcpyPeerAsync(CUdeviceptr dstDevice, CUcontext dstContext, CUdeviceptr srcDevice, CUcontext srcContext, size_t ByteCount, CUstream hStream)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemcpyPeerAsync);
+    if (request_id < 0 ||
+        rpc_write(&dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&dstContext, sizeof(CUcontext)) < 0 ||
+        rpc_write(&srcDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&srcContext, sizeof(CUcontext)) < 0 ||
+        rpc_write(&ByteCount, sizeof(size_t)) < 0 ||
+        rpc_write(&hStream, sizeof(CUstream)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemcpyDtoHAsync_v2(void* dstHost, CUdeviceptr srcDevice, size_t ByteCount, CUstream hStream)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemcpyDtoHAsync_v2);
+    if (request_id < 0 ||
+        rpc_write(&dstHost, sizeof(void*)) < 0 ||
+        rpc_write(&srcDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&ByteCount, sizeof(size_t)) < 0 ||
+        rpc_write(&hStream, sizeof(CUstream)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(dstHost, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemcpyDtoDAsync_v2(CUdeviceptr dstDevice, CUdeviceptr srcDevice, size_t ByteCount, CUstream hStream)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemcpyDtoDAsync_v2);
+    if (request_id < 0 ||
+        rpc_write(&dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&srcDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&ByteCount, sizeof(size_t)) < 0 ||
+        rpc_write(&hStream, sizeof(CUstream)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemcpyAtoHAsync_v2(void* dstHost, CUarray srcArray, size_t srcOffset, size_t ByteCount, CUstream hStream)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemcpyAtoHAsync_v2);
+    if (request_id < 0 ||
+        rpc_write(&dstHost, sizeof(void*)) < 0 ||
+        rpc_write(&srcArray, sizeof(CUarray)) < 0 ||
+        rpc_write(&srcOffset, sizeof(size_t)) < 0 ||
+        rpc_write(&ByteCount, sizeof(size_t)) < 0 ||
+        rpc_write(&hStream, sizeof(CUstream)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(dstHost, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemsetD8_v2(CUdeviceptr dstDevice, unsigned char uc, size_t N)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemsetD8_v2);
+    if (request_id < 0 ||
+        rpc_write(&dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&uc, sizeof(unsigned char)) < 0 ||
+        rpc_write(&N, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemsetD16_v2(CUdeviceptr dstDevice, unsigned short us, size_t N)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemsetD16_v2);
+    if (request_id < 0 ||
+        rpc_write(&dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&us, sizeof(unsigned short)) < 0 ||
+        rpc_write(&N, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemsetD32_v2(CUdeviceptr dstDevice, unsigned int ui, size_t N)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemsetD32_v2);
+    if (request_id < 0 ||
+        rpc_write(&dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&ui, sizeof(unsigned int)) < 0 ||
+        rpc_write(&N, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemsetD2D8_v2(CUdeviceptr dstDevice, size_t dstPitch, unsigned char uc, size_t Width, size_t Height)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemsetD2D8_v2);
+    if (request_id < 0 ||
+        rpc_write(&dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&dstPitch, sizeof(size_t)) < 0 ||
+        rpc_write(&uc, sizeof(unsigned char)) < 0 ||
+        rpc_write(&Width, sizeof(size_t)) < 0 ||
+        rpc_write(&Height, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemsetD2D16_v2(CUdeviceptr dstDevice, size_t dstPitch, unsigned short us, size_t Width, size_t Height)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemsetD2D16_v2);
+    if (request_id < 0 ||
+        rpc_write(&dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&dstPitch, sizeof(size_t)) < 0 ||
+        rpc_write(&us, sizeof(unsigned short)) < 0 ||
+        rpc_write(&Width, sizeof(size_t)) < 0 ||
+        rpc_write(&Height, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemsetD2D32_v2(CUdeviceptr dstDevice, size_t dstPitch, unsigned int ui, size_t Width, size_t Height)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemsetD2D32_v2);
+    if (request_id < 0 ||
+        rpc_write(&dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&dstPitch, sizeof(size_t)) < 0 ||
+        rpc_write(&ui, sizeof(unsigned int)) < 0 ||
+        rpc_write(&Width, sizeof(size_t)) < 0 ||
+        rpc_write(&Height, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemsetD8Async(CUdeviceptr dstDevice, unsigned char uc, size_t N, CUstream hStream)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemsetD8Async);
+    if (request_id < 0 ||
+        rpc_write(&dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&uc, sizeof(unsigned char)) < 0 ||
+        rpc_write(&N, sizeof(size_t)) < 0 ||
+        rpc_write(&hStream, sizeof(CUstream)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemsetD16Async(CUdeviceptr dstDevice, unsigned short us, size_t N, CUstream hStream)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemsetD16Async);
+    if (request_id < 0 ||
+        rpc_write(&dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&us, sizeof(unsigned short)) < 0 ||
+        rpc_write(&N, sizeof(size_t)) < 0 ||
+        rpc_write(&hStream, sizeof(CUstream)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemsetD32Async(CUdeviceptr dstDevice, unsigned int ui, size_t N, CUstream hStream)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemsetD32Async);
+    if (request_id < 0 ||
+        rpc_write(&dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&ui, sizeof(unsigned int)) < 0 ||
+        rpc_write(&N, sizeof(size_t)) < 0 ||
+        rpc_write(&hStream, sizeof(CUstream)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemsetD2D8Async(CUdeviceptr dstDevice, size_t dstPitch, unsigned char uc, size_t Width, size_t Height, CUstream hStream)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemsetD2D8Async);
+    if (request_id < 0 ||
+        rpc_write(&dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&dstPitch, sizeof(size_t)) < 0 ||
+        rpc_write(&uc, sizeof(unsigned char)) < 0 ||
+        rpc_write(&Width, sizeof(size_t)) < 0 ||
+        rpc_write(&Height, sizeof(size_t)) < 0 ||
+        rpc_write(&hStream, sizeof(CUstream)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemsetD2D16Async(CUdeviceptr dstDevice, size_t dstPitch, unsigned short us, size_t Width, size_t Height, CUstream hStream)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemsetD2D16Async);
+    if (request_id < 0 ||
+        rpc_write(&dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&dstPitch, sizeof(size_t)) < 0 ||
+        rpc_write(&us, sizeof(unsigned short)) < 0 ||
+        rpc_write(&Width, sizeof(size_t)) < 0 ||
+        rpc_write(&Height, sizeof(size_t)) < 0 ||
+        rpc_write(&hStream, sizeof(CUstream)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemsetD2D32Async(CUdeviceptr dstDevice, size_t dstPitch, unsigned int ui, size_t Width, size_t Height, CUstream hStream)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemsetD2D32Async);
+    if (request_id < 0 ||
+        rpc_write(&dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&dstPitch, sizeof(size_t)) < 0 ||
+        rpc_write(&ui, sizeof(unsigned int)) < 0 ||
+        rpc_write(&Width, sizeof(size_t)) < 0 ||
+        rpc_write(&Height, sizeof(size_t)) < 0 ||
+        rpc_write(&hStream, sizeof(CUstream)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuArrayDestroy(CUarray hArray)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuArrayDestroy);
+    if (request_id < 0 ||
+        rpc_write(&hArray, sizeof(CUarray)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMipmappedArrayDestroy(CUmipmappedArray hMipmappedArray)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMipmappedArrayDestroy);
+    if (request_id < 0 ||
+        rpc_write(&hMipmappedArray, sizeof(CUmipmappedArray)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemGetHandleForAddressRange(void* handle, CUdeviceptr dptr, size_t size, CUmemRangeHandleType handleType, unsigned long long flags)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemGetHandleForAddressRange);
+    if (request_id < 0 ||
+        rpc_write(&handle, sizeof(void*)) < 0 ||
+        rpc_write(&dptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&size, sizeof(size_t)) < 0 ||
+        rpc_write(&handleType, sizeof(CUmemRangeHandleType)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned long long)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(handle, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemAddressFree(CUdeviceptr ptr, size_t size)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemAddressFree);
+    if (request_id < 0 ||
+        rpc_write(&ptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&size, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemRelease(CUmemGenericAllocationHandle handle)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemRelease);
+    if (request_id < 0 ||
+        rpc_write(&handle, sizeof(CUmemGenericAllocationHandle)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemMap(CUdeviceptr ptr, size_t size, size_t offset, CUmemGenericAllocationHandle handle, unsigned long long flags)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemMap);
+    if (request_id < 0 ||
+        rpc_write(&ptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&size, sizeof(size_t)) < 0 ||
+        rpc_write(&offset, sizeof(size_t)) < 0 ||
+        rpc_write(&handle, sizeof(CUmemGenericAllocationHandle)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned long long)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemUnmap(CUdeviceptr ptr, size_t size)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemUnmap);
+    if (request_id < 0 ||
+        rpc_write(&ptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&size, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemExportToShareableHandle(void* shareableHandle, CUmemGenericAllocationHandle handle, CUmemAllocationHandleType handleType, unsigned long long flags)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemExportToShareableHandle);
+    if (request_id < 0 ||
+        rpc_write(&shareableHandle, sizeof(void*)) < 0 ||
+        rpc_write(&handle, sizeof(CUmemGenericAllocationHandle)) < 0 ||
+        rpc_write(&handleType, sizeof(CUmemAllocationHandleType)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned long long)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(shareableHandle, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemFreeAsync(CUdeviceptr dptr, CUstream hStream)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemFreeAsync);
+    if (request_id < 0 ||
+        rpc_write(&dptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&hStream, sizeof(CUstream)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemPoolTrimTo(CUmemoryPool pool, size_t minBytesToKeep)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemPoolTrimTo);
+    if (request_id < 0 ||
+        rpc_write(&pool, sizeof(CUmemoryPool)) < 0 ||
+        rpc_write(&minBytesToKeep, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemPoolSetAttribute(CUmemoryPool pool, CUmemPool_attribute attr, void* value)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemPoolSetAttribute);
+    if (request_id < 0 ||
+        rpc_write(&pool, sizeof(CUmemoryPool)) < 0 ||
+        rpc_write(&attr, sizeof(CUmemPool_attribute)) < 0 ||
+        rpc_write(&value, sizeof(void*)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(value, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemPoolGetAttribute(CUmemoryPool pool, CUmemPool_attribute attr, void* value)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemPoolGetAttribute);
+    if (request_id < 0 ||
+        rpc_write(&pool, sizeof(CUmemoryPool)) < 0 ||
+        rpc_write(&attr, sizeof(CUmemPool_attribute)) < 0 ||
+        rpc_write(&value, sizeof(void*)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(value, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemPoolDestroy(CUmemoryPool pool)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemPoolDestroy);
+    if (request_id < 0 ||
+        rpc_write(&pool, sizeof(CUmemoryPool)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemPoolExportToShareableHandle(void* handle_out, CUmemoryPool pool, CUmemAllocationHandleType handleType, unsigned long long flags)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemPoolExportToShareableHandle);
+    if (request_id < 0 ||
+        rpc_write(&handle_out, sizeof(void*)) < 0 ||
+        rpc_write(&pool, sizeof(CUmemoryPool)) < 0 ||
+        rpc_write(&handleType, sizeof(CUmemAllocationHandleType)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned long long)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(handle_out, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuPointerGetAttribute(void* data, CUpointer_attribute attribute, CUdeviceptr ptr)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuPointerGetAttribute);
+    if (request_id < 0 ||
+        rpc_write(&data, sizeof(void*)) < 0 ||
+        rpc_write(&attribute, sizeof(CUpointer_attribute)) < 0 ||
+        rpc_write(&ptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(data, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemPrefetchAsync(CUdeviceptr devPtr, size_t count, CUdevice dstDevice, CUstream hStream)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemPrefetchAsync);
+    if (request_id < 0 ||
+        rpc_write(&devPtr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&count, sizeof(size_t)) < 0 ||
+        rpc_write(&dstDevice, sizeof(CUdevice)) < 0 ||
+        rpc_write(&hStream, sizeof(CUstream)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemAdvise(CUdeviceptr devPtr, size_t count, CUmem_advise advice, CUdevice device)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemAdvise);
+    if (request_id < 0 ||
+        rpc_write(&devPtr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&count, sizeof(size_t)) < 0 ||
+        rpc_write(&advice, sizeof(CUmem_advise)) < 0 ||
+        rpc_write(&device, sizeof(CUdevice)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemRangeGetAttribute(void* data, size_t dataSize, CUmem_range_attribute attribute, CUdeviceptr devPtr, size_t count)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuMemRangeGetAttribute);
+    if (request_id < 0 ||
+        rpc_write(&data, sizeof(void*)) < 0 ||
+        rpc_write(&dataSize, sizeof(size_t)) < 0 ||
+        rpc_write(&attribute, sizeof(CUmem_range_attribute)) < 0 ||
+        rpc_write(&devPtr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&count, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(data, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuStreamWaitEvent(CUstream hStream, CUevent hEvent, unsigned int Flags)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuStreamWaitEvent);
+    if (request_id < 0 ||
+        rpc_write(&hStream, sizeof(CUstream)) < 0 ||
+        rpc_write(&hEvent, sizeof(CUevent)) < 0 ||
+        rpc_write(&Flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuStreamAddCallback(CUstream hStream, CUstreamCallback callback, void* userData, unsigned int flags)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuStreamAddCallback);
+    if (request_id < 0 ||
+        rpc_write(&hStream, sizeof(CUstream)) < 0 ||
+        rpc_write(&callback, sizeof(CUstreamCallback)) < 0 ||
+        rpc_write(&userData, sizeof(void*)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(userData, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuStreamBeginCapture_v2(CUstream hStream, CUstreamCaptureMode mode)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuStreamBeginCapture_v2);
+    if (request_id < 0 ||
+        rpc_write(&hStream, sizeof(CUstream)) < 0 ||
+        rpc_write(&mode, sizeof(CUstreamCaptureMode)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuStreamAttachMemAsync(CUstream hStream, CUdeviceptr dptr, size_t length, unsigned int flags)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuStreamAttachMemAsync);
+    if (request_id < 0 ||
+        rpc_write(&hStream, sizeof(CUstream)) < 0 ||
+        rpc_write(&dptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&length, sizeof(size_t)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuStreamQuery(CUstream hStream)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuStreamQuery);
+    if (request_id < 0 ||
+        rpc_write(&hStream, sizeof(CUstream)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuStreamSynchronize(CUstream hStream)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuStreamSynchronize);
+    if (request_id < 0 ||
+        rpc_write(&hStream, sizeof(CUstream)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuStreamDestroy_v2(CUstream hStream)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuStreamDestroy_v2);
+    if (request_id < 0 ||
+        rpc_write(&hStream, sizeof(CUstream)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuStreamCopyAttributes(CUstream dst, CUstream src)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuStreamCopyAttributes);
+    if (request_id < 0 ||
+        rpc_write(&dst, sizeof(CUstream)) < 0 ||
+        rpc_write(&src, sizeof(CUstream)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuEventRecord(CUevent hEvent, CUstream hStream)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuEventRecord);
+    if (request_id < 0 ||
+        rpc_write(&hEvent, sizeof(CUevent)) < 0 ||
+        rpc_write(&hStream, sizeof(CUstream)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuEventRecordWithFlags(CUevent hEvent, CUstream hStream, unsigned int flags)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuEventRecordWithFlags);
+    if (request_id < 0 ||
+        rpc_write(&hEvent, sizeof(CUevent)) < 0 ||
+        rpc_write(&hStream, sizeof(CUstream)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuEventQuery(CUevent hEvent)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuEventQuery);
+    if (request_id < 0 ||
+        rpc_write(&hEvent, sizeof(CUevent)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuEventSynchronize(CUevent hEvent)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuEventSynchronize);
+    if (request_id < 0 ||
+        rpc_write(&hEvent, sizeof(CUevent)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuEventDestroy_v2(CUevent hEvent)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuEventDestroy_v2);
+    if (request_id < 0 ||
+        rpc_write(&hEvent, sizeof(CUevent)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuDestroyExternalMemory(CUexternalMemory extMem)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuDestroyExternalMemory);
+    if (request_id < 0 ||
+        rpc_write(&extMem, sizeof(CUexternalMemory)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuDestroyExternalSemaphore(CUexternalSemaphore extSem)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuDestroyExternalSemaphore);
+    if (request_id < 0 ||
+        rpc_write(&extSem, sizeof(CUexternalSemaphore)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuStreamWaitValue32_v2(CUstream stream, CUdeviceptr addr, cuuint32_t value, unsigned int flags)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuStreamWaitValue32_v2);
+    if (request_id < 0 ||
+        rpc_write(&stream, sizeof(CUstream)) < 0 ||
+        rpc_write(&addr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&value, sizeof(cuuint32_t)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuStreamWaitValue64_v2(CUstream stream, CUdeviceptr addr, cuuint64_t value, unsigned int flags)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuStreamWaitValue64_v2);
+    if (request_id < 0 ||
+        rpc_write(&stream, sizeof(CUstream)) < 0 ||
+        rpc_write(&addr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&value, sizeof(cuuint64_t)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuStreamWriteValue32_v2(CUstream stream, CUdeviceptr addr, cuuint32_t value, unsigned int flags)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuStreamWriteValue32_v2);
+    if (request_id < 0 ||
+        rpc_write(&stream, sizeof(CUstream)) < 0 ||
+        rpc_write(&addr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&value, sizeof(cuuint32_t)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuStreamWriteValue64_v2(CUstream stream, CUdeviceptr addr, cuuint64_t value, unsigned int flags)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuStreamWriteValue64_v2);
+    if (request_id < 0 ||
+        rpc_write(&stream, sizeof(CUstream)) < 0 ||
+        rpc_write(&addr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(&value, sizeof(cuuint64_t)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuFuncSetAttribute(CUfunction hfunc, CUfunction_attribute attrib, int value)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuFuncSetAttribute);
+    if (request_id < 0 ||
+        rpc_write(&hfunc, sizeof(CUfunction)) < 0 ||
+        rpc_write(&attrib, sizeof(CUfunction_attribute)) < 0 ||
+        rpc_write(&value, sizeof(int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuFuncSetCacheConfig(CUfunction hfunc, CUfunc_cache config)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuFuncSetCacheConfig);
+    if (request_id < 0 ||
+        rpc_write(&hfunc, sizeof(CUfunction)) < 0 ||
+        rpc_write(&config, sizeof(CUfunc_cache)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuFuncSetSharedMemConfig(CUfunction hfunc, CUsharedconfig config)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuFuncSetSharedMemConfig);
+    if (request_id < 0 ||
+        rpc_write(&hfunc, sizeof(CUfunction)) < 0 ||
+        rpc_write(&config, sizeof(CUsharedconfig)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuLaunchKernel(CUfunction f, unsigned int gridDimX, unsigned int gridDimY, unsigned int gridDimZ, unsigned int blockDimX, unsigned int blockDimY, unsigned int blockDimZ, unsigned int sharedMemBytes, CUstream hStream, void** kernelParams, void** extra)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuLaunchKernel);
+    if (request_id < 0 ||
+        rpc_write(&f, sizeof(CUfunction)) < 0 ||
+        rpc_write(&gridDimX, sizeof(unsigned int)) < 0 ||
+        rpc_write(&gridDimY, sizeof(unsigned int)) < 0 ||
+        rpc_write(&gridDimZ, sizeof(unsigned int)) < 0 ||
+        rpc_write(&blockDimX, sizeof(unsigned int)) < 0 ||
+        rpc_write(&blockDimY, sizeof(unsigned int)) < 0 ||
+        rpc_write(&blockDimZ, sizeof(unsigned int)) < 0 ||
+        rpc_write(&sharedMemBytes, sizeof(unsigned int)) < 0 ||
+        rpc_write(&hStream, sizeof(CUstream)) < 0 ||
+        rpc_write(&kernelParams, sizeof(void*)) < 0 ||
+        rpc_write(&extra, sizeof(void*)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuLaunchCooperativeKernel(CUfunction f, unsigned int gridDimX, unsigned int gridDimY, unsigned int gridDimZ, unsigned int blockDimX, unsigned int blockDimY, unsigned int blockDimZ, unsigned int sharedMemBytes, CUstream hStream, void** kernelParams)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuLaunchCooperativeKernel);
+    if (request_id < 0 ||
+        rpc_write(&f, sizeof(CUfunction)) < 0 ||
+        rpc_write(&gridDimX, sizeof(unsigned int)) < 0 ||
+        rpc_write(&gridDimY, sizeof(unsigned int)) < 0 ||
+        rpc_write(&gridDimZ, sizeof(unsigned int)) < 0 ||
+        rpc_write(&blockDimX, sizeof(unsigned int)) < 0 ||
+        rpc_write(&blockDimY, sizeof(unsigned int)) < 0 ||
+        rpc_write(&blockDimZ, sizeof(unsigned int)) < 0 ||
+        rpc_write(&sharedMemBytes, sizeof(unsigned int)) < 0 ||
+        rpc_write(&hStream, sizeof(CUstream)) < 0 ||
+        rpc_write(&kernelParams, sizeof(void*)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(kernelParams, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuLaunchHostFunc(CUstream hStream, CUhostFn fn, void* userData)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuLaunchHostFunc);
+    if (request_id < 0 ||
+        rpc_write(&hStream, sizeof(CUstream)) < 0 ||
+        rpc_write(&fn, sizeof(CUhostFn)) < 0 ||
+        rpc_write(&userData, sizeof(void*)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(userData, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuFuncSetBlockShape(CUfunction hfunc, int x, int y, int z)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuFuncSetBlockShape);
+    if (request_id < 0 ||
+        rpc_write(&hfunc, sizeof(CUfunction)) < 0 ||
+        rpc_write(&x, sizeof(int)) < 0 ||
+        rpc_write(&y, sizeof(int)) < 0 ||
+        rpc_write(&z, sizeof(int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuFuncSetSharedSize(CUfunction hfunc, unsigned int bytes)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuFuncSetSharedSize);
+    if (request_id < 0 ||
+        rpc_write(&hfunc, sizeof(CUfunction)) < 0 ||
+        rpc_write(&bytes, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuParamSetSize(CUfunction hfunc, unsigned int numbytes)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuParamSetSize);
+    if (request_id < 0 ||
+        rpc_write(&hfunc, sizeof(CUfunction)) < 0 ||
+        rpc_write(&numbytes, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuParamSeti(CUfunction hfunc, int offset, unsigned int value)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuParamSeti);
+    if (request_id < 0 ||
+        rpc_write(&hfunc, sizeof(CUfunction)) < 0 ||
+        rpc_write(&offset, sizeof(int)) < 0 ||
+        rpc_write(&value, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuParamSetf(CUfunction hfunc, int offset, float value)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuParamSetf);
+    if (request_id < 0 ||
+        rpc_write(&hfunc, sizeof(CUfunction)) < 0 ||
+        rpc_write(&offset, sizeof(int)) < 0 ||
+        rpc_write(&value, sizeof(float)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuParamSetv(CUfunction hfunc, int offset, void* ptr, unsigned int numbytes)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuParamSetv);
+    if (request_id < 0 ||
+        rpc_write(&hfunc, sizeof(CUfunction)) < 0 ||
+        rpc_write(&offset, sizeof(int)) < 0 ||
+        rpc_write(&ptr, sizeof(void*)) < 0 ||
+        rpc_write(&numbytes, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(ptr, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuLaunch(CUfunction f)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuLaunch);
+    if (request_id < 0 ||
+        rpc_write(&f, sizeof(CUfunction)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuLaunchGrid(CUfunction f, int grid_width, int grid_height)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuLaunchGrid);
+    if (request_id < 0 ||
+        rpc_write(&f, sizeof(CUfunction)) < 0 ||
+        rpc_write(&grid_width, sizeof(int)) < 0 ||
+        rpc_write(&grid_height, sizeof(int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuLaunchGridAsync(CUfunction f, int grid_width, int grid_height, CUstream hStream)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuLaunchGridAsync);
+    if (request_id < 0 ||
+        rpc_write(&f, sizeof(CUfunction)) < 0 ||
+        rpc_write(&grid_width, sizeof(int)) < 0 ||
+        rpc_write(&grid_height, sizeof(int)) < 0 ||
+        rpc_write(&hStream, sizeof(CUstream)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuParamSetTexRef(CUfunction hfunc, int texunit, CUtexref hTexRef)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuParamSetTexRef);
+    if (request_id < 0 ||
+        rpc_write(&hfunc, sizeof(CUfunction)) < 0 ||
+        rpc_write(&texunit, sizeof(int)) < 0 ||
+        rpc_write(&hTexRef, sizeof(CUtexref)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphEventRecordNodeSetEvent(CUgraphNode hNode, CUevent event)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuGraphEventRecordNodeSetEvent);
+    if (request_id < 0 ||
+        rpc_write(&hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(&event, sizeof(CUevent)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphEventWaitNodeSetEvent(CUgraphNode hNode, CUevent event)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuGraphEventWaitNodeSetEvent);
+    if (request_id < 0 ||
+        rpc_write(&hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(&event, sizeof(CUevent)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuDeviceGraphMemTrim(CUdevice device)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuDeviceGraphMemTrim);
+    if (request_id < 0 ||
+        rpc_write(&device, sizeof(CUdevice)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuDeviceGetGraphMemAttribute(CUdevice device, CUgraphMem_attribute attr, void* value)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuDeviceGetGraphMemAttribute);
+    if (request_id < 0 ||
+        rpc_write(&device, sizeof(CUdevice)) < 0 ||
+        rpc_write(&attr, sizeof(CUgraphMem_attribute)) < 0 ||
+        rpc_write(&value, sizeof(void*)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(value, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuDeviceSetGraphMemAttribute(CUdevice device, CUgraphMem_attribute attr, void* value)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuDeviceSetGraphMemAttribute);
+    if (request_id < 0 ||
+        rpc_write(&device, sizeof(CUdevice)) < 0 ||
+        rpc_write(&attr, sizeof(CUgraphMem_attribute)) < 0 ||
+        rpc_write(&value, sizeof(void*)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(value, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphDestroyNode(CUgraphNode hNode)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuGraphDestroyNode);
+    if (request_id < 0 ||
+        rpc_write(&hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphExecChildGraphNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNode, CUgraph childGraph)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuGraphExecChildGraphNodeSetParams);
+    if (request_id < 0 ||
+        rpc_write(&hGraphExec, sizeof(CUgraphExec)) < 0 ||
+        rpc_write(&hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(&childGraph, sizeof(CUgraph)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphExecEventRecordNodeSetEvent(CUgraphExec hGraphExec, CUgraphNode hNode, CUevent event)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuGraphExecEventRecordNodeSetEvent);
+    if (request_id < 0 ||
+        rpc_write(&hGraphExec, sizeof(CUgraphExec)) < 0 ||
+        rpc_write(&hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(&event, sizeof(CUevent)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphExecEventWaitNodeSetEvent(CUgraphExec hGraphExec, CUgraphNode hNode, CUevent event)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuGraphExecEventWaitNodeSetEvent);
+    if (request_id < 0 ||
+        rpc_write(&hGraphExec, sizeof(CUgraphExec)) < 0 ||
+        rpc_write(&hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(&event, sizeof(CUevent)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphNodeSetEnabled(CUgraphExec hGraphExec, CUgraphNode hNode, unsigned int isEnabled)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuGraphNodeSetEnabled);
+    if (request_id < 0 ||
+        rpc_write(&hGraphExec, sizeof(CUgraphExec)) < 0 ||
+        rpc_write(&hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(&isEnabled, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphUpload(CUgraphExec hGraphExec, CUstream hStream)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuGraphUpload);
+    if (request_id < 0 ||
+        rpc_write(&hGraphExec, sizeof(CUgraphExec)) < 0 ||
+        rpc_write(&hStream, sizeof(CUstream)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphLaunch(CUgraphExec hGraphExec, CUstream hStream)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuGraphLaunch);
+    if (request_id < 0 ||
+        rpc_write(&hGraphExec, sizeof(CUgraphExec)) < 0 ||
+        rpc_write(&hStream, sizeof(CUstream)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphExecDestroy(CUgraphExec hGraphExec)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuGraphExecDestroy);
+    if (request_id < 0 ||
+        rpc_write(&hGraphExec, sizeof(CUgraphExec)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphDestroy(CUgraph hGraph)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuGraphDestroy);
+    if (request_id < 0 ||
+        rpc_write(&hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphKernelNodeCopyAttributes(CUgraphNode dst, CUgraphNode src)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuGraphKernelNodeCopyAttributes);
+    if (request_id < 0 ||
+        rpc_write(&dst, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(&src, sizeof(CUgraphNode)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuUserObjectRetain(CUuserObject object, unsigned int count)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuUserObjectRetain);
+    if (request_id < 0 ||
+        rpc_write(&object, sizeof(CUuserObject)) < 0 ||
+        rpc_write(&count, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuUserObjectRelease(CUuserObject object, unsigned int count)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuUserObjectRelease);
+    if (request_id < 0 ||
+        rpc_write(&object, sizeof(CUuserObject)) < 0 ||
+        rpc_write(&count, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphRetainUserObject(CUgraph graph, CUuserObject object, unsigned int count, unsigned int flags)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuGraphRetainUserObject);
+    if (request_id < 0 ||
+        rpc_write(&graph, sizeof(CUgraph)) < 0 ||
+        rpc_write(&object, sizeof(CUuserObject)) < 0 ||
+        rpc_write(&count, sizeof(unsigned int)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphReleaseUserObject(CUgraph graph, CUuserObject object, unsigned int count)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuGraphReleaseUserObject);
+    if (request_id < 0 ||
+        rpc_write(&graph, sizeof(CUgraph)) < 0 ||
+        rpc_write(&object, sizeof(CUuserObject)) < 0 ||
+        rpc_write(&count, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuTexRefSetArray(CUtexref hTexRef, CUarray hArray, unsigned int Flags)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuTexRefSetArray);
+    if (request_id < 0 ||
+        rpc_write(&hTexRef, sizeof(CUtexref)) < 0 ||
+        rpc_write(&hArray, sizeof(CUarray)) < 0 ||
+        rpc_write(&Flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuTexRefSetMipmappedArray(CUtexref hTexRef, CUmipmappedArray hMipmappedArray, unsigned int Flags)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuTexRefSetMipmappedArray);
+    if (request_id < 0 ||
+        rpc_write(&hTexRef, sizeof(CUtexref)) < 0 ||
+        rpc_write(&hMipmappedArray, sizeof(CUmipmappedArray)) < 0 ||
+        rpc_write(&Flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuTexRefSetFormat(CUtexref hTexRef, CUarray_format fmt, int NumPackedComponents)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuTexRefSetFormat);
+    if (request_id < 0 ||
+        rpc_write(&hTexRef, sizeof(CUtexref)) < 0 ||
+        rpc_write(&fmt, sizeof(CUarray_format)) < 0 ||
+        rpc_write(&NumPackedComponents, sizeof(int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuTexRefSetAddressMode(CUtexref hTexRef, int dim, CUaddress_mode am)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuTexRefSetAddressMode);
+    if (request_id < 0 ||
+        rpc_write(&hTexRef, sizeof(CUtexref)) < 0 ||
+        rpc_write(&dim, sizeof(int)) < 0 ||
+        rpc_write(&am, sizeof(CUaddress_mode)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuTexRefSetFilterMode(CUtexref hTexRef, CUfilter_mode fm)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuTexRefSetFilterMode);
+    if (request_id < 0 ||
+        rpc_write(&hTexRef, sizeof(CUtexref)) < 0 ||
+        rpc_write(&fm, sizeof(CUfilter_mode)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuTexRefSetMipmapFilterMode(CUtexref hTexRef, CUfilter_mode fm)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuTexRefSetMipmapFilterMode);
+    if (request_id < 0 ||
+        rpc_write(&hTexRef, sizeof(CUtexref)) < 0 ||
+        rpc_write(&fm, sizeof(CUfilter_mode)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuTexRefSetMipmapLevelBias(CUtexref hTexRef, float bias)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuTexRefSetMipmapLevelBias);
+    if (request_id < 0 ||
+        rpc_write(&hTexRef, sizeof(CUtexref)) < 0 ||
+        rpc_write(&bias, sizeof(float)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuTexRefSetMipmapLevelClamp(CUtexref hTexRef, float minMipmapLevelClamp, float maxMipmapLevelClamp)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuTexRefSetMipmapLevelClamp);
+    if (request_id < 0 ||
+        rpc_write(&hTexRef, sizeof(CUtexref)) < 0 ||
+        rpc_write(&minMipmapLevelClamp, sizeof(float)) < 0 ||
+        rpc_write(&maxMipmapLevelClamp, sizeof(float)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuTexRefSetMaxAnisotropy(CUtexref hTexRef, unsigned int maxAniso)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuTexRefSetMaxAnisotropy);
+    if (request_id < 0 ||
+        rpc_write(&hTexRef, sizeof(CUtexref)) < 0 ||
+        rpc_write(&maxAniso, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuTexRefSetFlags(CUtexref hTexRef, unsigned int Flags)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuTexRefSetFlags);
+    if (request_id < 0 ||
+        rpc_write(&hTexRef, sizeof(CUtexref)) < 0 ||
+        rpc_write(&Flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuTexRefDestroy(CUtexref hTexRef)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuTexRefDestroy);
+    if (request_id < 0 ||
+        rpc_write(&hTexRef, sizeof(CUtexref)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuSurfRefSetArray(CUsurfref hSurfRef, CUarray hArray, unsigned int Flags)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuSurfRefSetArray);
+    if (request_id < 0 ||
+        rpc_write(&hSurfRef, sizeof(CUsurfref)) < 0 ||
+        rpc_write(&hArray, sizeof(CUarray)) < 0 ||
+        rpc_write(&Flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuTexObjectDestroy(CUtexObject texObject)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuTexObjectDestroy);
+    if (request_id < 0 ||
+        rpc_write(&texObject, sizeof(CUtexObject)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuSurfObjectDestroy(CUsurfObject surfObject)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuSurfObjectDestroy);
+    if (request_id < 0 ||
+        rpc_write(&surfObject, sizeof(CUsurfObject)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuCtxEnablePeerAccess(CUcontext peerContext, unsigned int Flags)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuCtxEnablePeerAccess);
+    if (request_id < 0 ||
+        rpc_write(&peerContext, sizeof(CUcontext)) < 0 ||
+        rpc_write(&Flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuCtxDisablePeerAccess(CUcontext peerContext)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuCtxDisablePeerAccess);
+    if (request_id < 0 ||
+        rpc_write(&peerContext, sizeof(CUcontext)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphicsUnregisterResource(CUgraphicsResource resource)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuGraphicsUnregisterResource);
+    if (request_id < 0 ||
+        rpc_write(&resource, sizeof(CUgraphicsResource)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphicsResourceSetMapFlags_v2(CUgraphicsResource resource, unsigned int flags)
+{
+    CUresult return_value;
+
+    int request_id = rpc_start_request(RPC_cuGraphicsResourceSetMapFlags_v2);
+    if (request_id < 0 ||
+        rpc_write(&resource, sizeof(CUgraphicsResource)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+cudaError_t cudaDeviceReset()
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaDeviceReset);
+    if (request_id < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
@@ -4189,139 +3156,26 @@ std::unordered_map<std::string, void *> functionMap = {
     {"nvmlShutdown", (void *)nvmlShutdown},
     {"nvmlSystemGetDriverVersion", (void *)nvmlSystemGetDriverVersion},
     {"nvmlSystemGetNVMLVersion", (void *)nvmlSystemGetNVMLVersion},
-    {"nvmlSystemGetCudaDriverVersion", (void *)nvmlSystemGetCudaDriverVersion},
-    {"nvmlSystemGetCudaDriverVersion_v2", (void *)nvmlSystemGetCudaDriverVersion_v2},
     {"nvmlSystemGetProcessName", (void *)nvmlSystemGetProcessName},
-    {"nvmlUnitGetCount", (void *)nvmlUnitGetCount},
-    {"nvmlUnitGetHandleByIndex", (void *)nvmlUnitGetHandleByIndex},
-    {"nvmlUnitGetUnitInfo", (void *)nvmlUnitGetUnitInfo},
-    {"nvmlUnitGetLedState", (void *)nvmlUnitGetLedState},
-    {"nvmlUnitGetPsuInfo", (void *)nvmlUnitGetPsuInfo},
-    {"nvmlUnitGetTemperature", (void *)nvmlUnitGetTemperature},
-    {"nvmlUnitGetFanSpeedInfo", (void *)nvmlUnitGetFanSpeedInfo},
-    {"nvmlUnitGetDevices", (void *)nvmlUnitGetDevices},
-    {"nvmlSystemGetHicVersion", (void *)nvmlSystemGetHicVersion},
-    {"nvmlDeviceGetCount_v2", (void *)nvmlDeviceGetCount_v2},
-    {"nvmlDeviceGetAttributes_v2", (void *)nvmlDeviceGetAttributes_v2},
-    {"nvmlDeviceGetHandleByIndex_v2", (void *)nvmlDeviceGetHandleByIndex_v2},
-    {"nvmlDeviceGetHandleBySerial", (void *)nvmlDeviceGetHandleBySerial},
-    {"nvmlDeviceGetHandleByUUID", (void *)nvmlDeviceGetHandleByUUID},
-    {"nvmlDeviceGetHandleByPciBusId_v2", (void *)nvmlDeviceGetHandleByPciBusId_v2},
     {"nvmlDeviceGetName", (void *)nvmlDeviceGetName},
-    {"nvmlDeviceGetBrand", (void *)nvmlDeviceGetBrand},
-    {"nvmlDeviceGetIndex", (void *)nvmlDeviceGetIndex},
     {"nvmlDeviceGetSerial", (void *)nvmlDeviceGetSerial},
     {"nvmlDeviceGetMemoryAffinity", (void *)nvmlDeviceGetMemoryAffinity},
     {"nvmlDeviceGetCpuAffinityWithinScope", (void *)nvmlDeviceGetCpuAffinityWithinScope},
     {"nvmlDeviceGetCpuAffinity", (void *)nvmlDeviceGetCpuAffinity},
     {"nvmlDeviceSetCpuAffinity", (void *)nvmlDeviceSetCpuAffinity},
     {"nvmlDeviceClearCpuAffinity", (void *)nvmlDeviceClearCpuAffinity},
-    {"nvmlDeviceGetTopologyCommonAncestor", (void *)nvmlDeviceGetTopologyCommonAncestor},
-    {"nvmlDeviceGetTopologyNearestGpus", (void *)nvmlDeviceGetTopologyNearestGpus},
-    {"nvmlSystemGetTopologyGpuSet", (void *)nvmlSystemGetTopologyGpuSet},
-    {"nvmlDeviceGetP2PStatus", (void *)nvmlDeviceGetP2PStatus},
     {"nvmlDeviceGetUUID", (void *)nvmlDeviceGetUUID},
     {"nvmlVgpuInstanceGetMdevUUID", (void *)nvmlVgpuInstanceGetMdevUUID},
-    {"nvmlDeviceGetMinorNumber", (void *)nvmlDeviceGetMinorNumber},
     {"nvmlDeviceGetBoardPartNumber", (void *)nvmlDeviceGetBoardPartNumber},
     {"nvmlDeviceGetInforomVersion", (void *)nvmlDeviceGetInforomVersion},
     {"nvmlDeviceGetInforomImageVersion", (void *)nvmlDeviceGetInforomImageVersion},
-    {"nvmlDeviceGetInforomConfigurationChecksum", (void *)nvmlDeviceGetInforomConfigurationChecksum},
     {"nvmlDeviceValidateInforom", (void *)nvmlDeviceValidateInforom},
-    {"nvmlDeviceGetDisplayMode", (void *)nvmlDeviceGetDisplayMode},
-    {"nvmlDeviceGetDisplayActive", (void *)nvmlDeviceGetDisplayActive},
-    {"nvmlDeviceGetPersistenceMode", (void *)nvmlDeviceGetPersistenceMode},
-    {"nvmlDeviceGetPciInfo_v3", (void *)nvmlDeviceGetPciInfo_v3},
-    {"nvmlDeviceGetMaxPcieLinkGeneration", (void *)nvmlDeviceGetMaxPcieLinkGeneration},
-    {"nvmlDeviceGetGpuMaxPcieLinkGeneration", (void *)nvmlDeviceGetGpuMaxPcieLinkGeneration},
-    {"nvmlDeviceGetMaxPcieLinkWidth", (void *)nvmlDeviceGetMaxPcieLinkWidth},
-    {"nvmlDeviceGetCurrPcieLinkGeneration", (void *)nvmlDeviceGetCurrPcieLinkGeneration},
-    {"nvmlDeviceGetCurrPcieLinkWidth", (void *)nvmlDeviceGetCurrPcieLinkWidth},
-    {"nvmlDeviceGetPcieThroughput", (void *)nvmlDeviceGetPcieThroughput},
-    {"nvmlDeviceGetPcieReplayCounter", (void *)nvmlDeviceGetPcieReplayCounter},
-    {"nvmlDeviceGetClockInfo", (void *)nvmlDeviceGetClockInfo},
-    {"nvmlDeviceGetMaxClockInfo", (void *)nvmlDeviceGetMaxClockInfo},
-    {"nvmlDeviceGetApplicationsClock", (void *)nvmlDeviceGetApplicationsClock},
-    {"nvmlDeviceGetDefaultApplicationsClock", (void *)nvmlDeviceGetDefaultApplicationsClock},
     {"nvmlDeviceResetApplicationsClocks", (void *)nvmlDeviceResetApplicationsClocks},
-    {"nvmlDeviceGetClock", (void *)nvmlDeviceGetClock},
-    {"nvmlDeviceGetMaxCustomerBoostClock", (void *)nvmlDeviceGetMaxCustomerBoostClock},
-    {"nvmlDeviceGetSupportedMemoryClocks", (void *)nvmlDeviceGetSupportedMemoryClocks},
-    {"nvmlDeviceGetSupportedGraphicsClocks", (void *)nvmlDeviceGetSupportedGraphicsClocks},
-    {"nvmlDeviceGetAutoBoostedClocksEnabled", (void *)nvmlDeviceGetAutoBoostedClocksEnabled},
     {"nvmlDeviceSetAutoBoostedClocksEnabled", (void *)nvmlDeviceSetAutoBoostedClocksEnabled},
     {"nvmlDeviceSetDefaultAutoBoostedClocksEnabled", (void *)nvmlDeviceSetDefaultAutoBoostedClocksEnabled},
-    {"nvmlDeviceGetFanSpeed", (void *)nvmlDeviceGetFanSpeed},
-    {"nvmlDeviceGetFanSpeed_v2", (void *)nvmlDeviceGetFanSpeed_v2},
-    {"nvmlDeviceGetTargetFanSpeed", (void *)nvmlDeviceGetTargetFanSpeed},
     {"nvmlDeviceSetDefaultFanSpeed_v2", (void *)nvmlDeviceSetDefaultFanSpeed_v2},
-    {"nvmlDeviceGetMinMaxFanSpeed", (void *)nvmlDeviceGetMinMaxFanSpeed},
-    {"nvmlDeviceGetFanControlPolicy_v2", (void *)nvmlDeviceGetFanControlPolicy_v2},
     {"nvmlDeviceSetFanControlPolicy", (void *)nvmlDeviceSetFanControlPolicy},
-    {"nvmlDeviceGetNumFans", (void *)nvmlDeviceGetNumFans},
-    {"nvmlDeviceGetTemperature", (void *)nvmlDeviceGetTemperature},
-    {"nvmlDeviceGetTemperatureThreshold", (void *)nvmlDeviceGetTemperatureThreshold},
-    {"nvmlDeviceSetTemperatureThreshold", (void *)nvmlDeviceSetTemperatureThreshold},
-    {"nvmlDeviceGetThermalSettings", (void *)nvmlDeviceGetThermalSettings},
-    {"nvmlDeviceGetPerformanceState", (void *)nvmlDeviceGetPerformanceState},
-    {"nvmlDeviceGetCurrentClocksThrottleReasons", (void *)nvmlDeviceGetCurrentClocksThrottleReasons},
-    {"nvmlDeviceGetSupportedClocksThrottleReasons", (void *)nvmlDeviceGetSupportedClocksThrottleReasons},
-    {"nvmlDeviceGetPowerState", (void *)nvmlDeviceGetPowerState},
-    {"nvmlDeviceGetPowerManagementMode", (void *)nvmlDeviceGetPowerManagementMode},
-    {"nvmlDeviceGetPowerManagementLimit", (void *)nvmlDeviceGetPowerManagementLimit},
-    {"nvmlDeviceGetPowerManagementLimitConstraints", (void *)nvmlDeviceGetPowerManagementLimitConstraints},
-    {"nvmlDeviceGetPowerManagementDefaultLimit", (void *)nvmlDeviceGetPowerManagementDefaultLimit},
-    {"nvmlDeviceGetPowerUsage", (void *)nvmlDeviceGetPowerUsage},
-    {"nvmlDeviceGetTotalEnergyConsumption", (void *)nvmlDeviceGetTotalEnergyConsumption},
-    {"nvmlDeviceGetEnforcedPowerLimit", (void *)nvmlDeviceGetEnforcedPowerLimit},
-    {"nvmlDeviceGetGpuOperationMode", (void *)nvmlDeviceGetGpuOperationMode},
-    {"nvmlDeviceGetMemoryInfo", (void *)nvmlDeviceGetMemoryInfo},
-    {"nvmlDeviceGetMemoryInfo_v2", (void *)nvmlDeviceGetMemoryInfo_v2},
-    {"nvmlDeviceGetComputeMode", (void *)nvmlDeviceGetComputeMode},
-    {"nvmlDeviceGetCudaComputeCapability", (void *)nvmlDeviceGetCudaComputeCapability},
-    {"nvmlDeviceGetEccMode", (void *)nvmlDeviceGetEccMode},
-    {"nvmlDeviceGetDefaultEccMode", (void *)nvmlDeviceGetDefaultEccMode},
-    {"nvmlDeviceGetBoardId", (void *)nvmlDeviceGetBoardId},
-    {"nvmlDeviceGetMultiGpuBoard", (void *)nvmlDeviceGetMultiGpuBoard},
-    {"nvmlDeviceGetTotalEccErrors", (void *)nvmlDeviceGetTotalEccErrors},
-    {"nvmlDeviceGetDetailedEccErrors", (void *)nvmlDeviceGetDetailedEccErrors},
-    {"nvmlDeviceGetMemoryErrorCounter", (void *)nvmlDeviceGetMemoryErrorCounter},
-    {"nvmlDeviceGetUtilizationRates", (void *)nvmlDeviceGetUtilizationRates},
-    {"nvmlDeviceGetEncoderUtilization", (void *)nvmlDeviceGetEncoderUtilization},
-    {"nvmlDeviceGetEncoderCapacity", (void *)nvmlDeviceGetEncoderCapacity},
-    {"nvmlDeviceGetEncoderStats", (void *)nvmlDeviceGetEncoderStats},
-    {"nvmlDeviceGetEncoderSessions", (void *)nvmlDeviceGetEncoderSessions},
-    {"nvmlDeviceGetDecoderUtilization", (void *)nvmlDeviceGetDecoderUtilization},
-    {"nvmlDeviceGetFBCStats", (void *)nvmlDeviceGetFBCStats},
-    {"nvmlDeviceGetFBCSessions", (void *)nvmlDeviceGetFBCSessions},
-    {"nvmlDeviceGetDriverModel", (void *)nvmlDeviceGetDriverModel},
     {"nvmlDeviceGetVbiosVersion", (void *)nvmlDeviceGetVbiosVersion},
-    {"nvmlDeviceGetBridgeChipInfo", (void *)nvmlDeviceGetBridgeChipInfo},
-    {"nvmlDeviceGetComputeRunningProcesses_v3", (void *)nvmlDeviceGetComputeRunningProcesses_v3},
-    {"nvmlDeviceGetGraphicsRunningProcesses_v3", (void *)nvmlDeviceGetGraphicsRunningProcesses_v3},
-    {"nvmlDeviceGetMPSComputeRunningProcesses_v3", (void *)nvmlDeviceGetMPSComputeRunningProcesses_v3},
-    {"nvmlDeviceOnSameBoard", (void *)nvmlDeviceOnSameBoard},
-    {"nvmlDeviceGetAPIRestriction", (void *)nvmlDeviceGetAPIRestriction},
-    {"nvmlDeviceGetSamples", (void *)nvmlDeviceGetSamples},
-    {"nvmlDeviceGetBAR1MemoryInfo", (void *)nvmlDeviceGetBAR1MemoryInfo},
-    {"nvmlDeviceGetViolationStatus", (void *)nvmlDeviceGetViolationStatus},
-    {"nvmlDeviceGetIrqNum", (void *)nvmlDeviceGetIrqNum},
-    {"nvmlDeviceGetNumGpuCores", (void *)nvmlDeviceGetNumGpuCores},
-    {"nvmlDeviceGetPowerSource", (void *)nvmlDeviceGetPowerSource},
-    {"nvmlDeviceGetMemoryBusWidth", (void *)nvmlDeviceGetMemoryBusWidth},
-    {"nvmlDeviceGetPcieLinkMaxSpeed", (void *)nvmlDeviceGetPcieLinkMaxSpeed},
-    {"nvmlDeviceGetPcieSpeed", (void *)nvmlDeviceGetPcieSpeed},
-    {"nvmlDeviceGetAdaptiveClockInfoStatus", (void *)nvmlDeviceGetAdaptiveClockInfoStatus},
-    {"nvmlDeviceGetAccountingMode", (void *)nvmlDeviceGetAccountingMode},
-    {"nvmlDeviceGetAccountingStats", (void *)nvmlDeviceGetAccountingStats},
-    {"nvmlDeviceGetAccountingPids", (void *)nvmlDeviceGetAccountingPids},
-    {"nvmlDeviceGetAccountingBufferSize", (void *)nvmlDeviceGetAccountingBufferSize},
-    {"nvmlDeviceGetRetiredPages", (void *)nvmlDeviceGetRetiredPages},
-    {"nvmlDeviceGetRetiredPages_v2", (void *)nvmlDeviceGetRetiredPages_v2},
-    {"nvmlDeviceGetRetiredPagesPendingStatus", (void *)nvmlDeviceGetRetiredPagesPendingStatus},
-    {"nvmlDeviceGetRemappedRows", (void *)nvmlDeviceGetRemappedRows},
-    {"nvmlDeviceGetRowRemapperHistogram", (void *)nvmlDeviceGetRowRemapperHistogram},
-    {"nvmlDeviceGetArchitecture", (void *)nvmlDeviceGetArchitecture},
     {"nvmlUnitSetLedState", (void *)nvmlUnitSetLedState},
     {"nvmlDeviceSetPersistenceMode", (void *)nvmlDeviceSetPersistenceMode},
     {"nvmlDeviceSetComputeMode", (void *)nvmlDeviceSetComputeMode},
@@ -4333,140 +3187,183 @@ std::unordered_map<std::string, void *> functionMap = {
     {"nvmlDeviceSetMemoryLockedClocks", (void *)nvmlDeviceSetMemoryLockedClocks},
     {"nvmlDeviceResetMemoryLockedClocks", (void *)nvmlDeviceResetMemoryLockedClocks},
     {"nvmlDeviceSetApplicationsClocks", (void *)nvmlDeviceSetApplicationsClocks},
-    {"nvmlDeviceGetClkMonStatus", (void *)nvmlDeviceGetClkMonStatus},
     {"nvmlDeviceSetPowerManagementLimit", (void *)nvmlDeviceSetPowerManagementLimit},
     {"nvmlDeviceSetGpuOperationMode", (void *)nvmlDeviceSetGpuOperationMode},
     {"nvmlDeviceSetAPIRestriction", (void *)nvmlDeviceSetAPIRestriction},
     {"nvmlDeviceSetAccountingMode", (void *)nvmlDeviceSetAccountingMode},
     {"nvmlDeviceClearAccountingPids", (void *)nvmlDeviceClearAccountingPids},
-    {"nvmlDeviceGetNvLinkState", (void *)nvmlDeviceGetNvLinkState},
-    {"nvmlDeviceGetNvLinkVersion", (void *)nvmlDeviceGetNvLinkVersion},
-    {"nvmlDeviceGetNvLinkCapability", (void *)nvmlDeviceGetNvLinkCapability},
-    {"nvmlDeviceGetNvLinkRemotePciInfo_v2", (void *)nvmlDeviceGetNvLinkRemotePciInfo_v2},
-    {"nvmlDeviceGetNvLinkErrorCounter", (void *)nvmlDeviceGetNvLinkErrorCounter},
     {"nvmlDeviceResetNvLinkErrorCounters", (void *)nvmlDeviceResetNvLinkErrorCounters},
-    {"nvmlDeviceSetNvLinkUtilizationControl", (void *)nvmlDeviceSetNvLinkUtilizationControl},
-    {"nvmlDeviceGetNvLinkUtilizationControl", (void *)nvmlDeviceGetNvLinkUtilizationControl},
-    {"nvmlDeviceGetNvLinkUtilizationCounter", (void *)nvmlDeviceGetNvLinkUtilizationCounter},
     {"nvmlDeviceFreezeNvLinkUtilizationCounter", (void *)nvmlDeviceFreezeNvLinkUtilizationCounter},
     {"nvmlDeviceResetNvLinkUtilizationCounter", (void *)nvmlDeviceResetNvLinkUtilizationCounter},
-    {"nvmlDeviceGetNvLinkRemoteDeviceType", (void *)nvmlDeviceGetNvLinkRemoteDeviceType},
-    {"nvmlEventSetCreate", (void *)nvmlEventSetCreate},
     {"nvmlDeviceRegisterEvents", (void *)nvmlDeviceRegisterEvents},
-    {"nvmlDeviceGetSupportedEventTypes", (void *)nvmlDeviceGetSupportedEventTypes},
-    {"nvmlEventSetWait_v2", (void *)nvmlEventSetWait_v2},
     {"nvmlEventSetFree", (void *)nvmlEventSetFree},
-    {"nvmlDeviceModifyDrainState", (void *)nvmlDeviceModifyDrainState},
-    {"nvmlDeviceQueryDrainState", (void *)nvmlDeviceQueryDrainState},
-    {"nvmlDeviceRemoveGpu_v2", (void *)nvmlDeviceRemoveGpu_v2},
-    {"nvmlDeviceDiscoverGpus", (void *)nvmlDeviceDiscoverGpus},
     {"nvmlDeviceGetFieldValues", (void *)nvmlDeviceGetFieldValues},
     {"nvmlDeviceClearFieldValues", (void *)nvmlDeviceClearFieldValues},
-    {"nvmlDeviceGetVirtualizationMode", (void *)nvmlDeviceGetVirtualizationMode},
-    {"nvmlDeviceGetHostVgpuMode", (void *)nvmlDeviceGetHostVgpuMode},
     {"nvmlDeviceSetVirtualizationMode", (void *)nvmlDeviceSetVirtualizationMode},
-    {"nvmlDeviceGetGridLicensableFeatures_v4", (void *)nvmlDeviceGetGridLicensableFeatures_v4},
-    {"nvmlDeviceGetProcessUtilization", (void *)nvmlDeviceGetProcessUtilization},
-    {"nvmlDeviceGetGspFirmwareVersion", (void *)nvmlDeviceGetGspFirmwareVersion},
-    {"nvmlDeviceGetGspFirmwareMode", (void *)nvmlDeviceGetGspFirmwareMode},
-    {"nvmlGetVgpuDriverCapabilities", (void *)nvmlGetVgpuDriverCapabilities},
-    {"nvmlDeviceGetVgpuCapabilities", (void *)nvmlDeviceGetVgpuCapabilities},
-    {"nvmlDeviceGetSupportedVgpus", (void *)nvmlDeviceGetSupportedVgpus},
-    {"nvmlDeviceGetCreatableVgpus", (void *)nvmlDeviceGetCreatableVgpus},
-    {"nvmlVgpuTypeGetClass", (void *)nvmlVgpuTypeGetClass},
-    {"nvmlVgpuTypeGetName", (void *)nvmlVgpuTypeGetName},
-    {"nvmlVgpuTypeGetGpuInstanceProfileId", (void *)nvmlVgpuTypeGetGpuInstanceProfileId},
-    {"nvmlVgpuTypeGetDeviceID", (void *)nvmlVgpuTypeGetDeviceID},
-    {"nvmlVgpuTypeGetFramebufferSize", (void *)nvmlVgpuTypeGetFramebufferSize},
-    {"nvmlVgpuTypeGetNumDisplayHeads", (void *)nvmlVgpuTypeGetNumDisplayHeads},
-    {"nvmlVgpuTypeGetResolution", (void *)nvmlVgpuTypeGetResolution},
     {"nvmlVgpuTypeGetLicense", (void *)nvmlVgpuTypeGetLicense},
-    {"nvmlVgpuTypeGetFrameRateLimit", (void *)nvmlVgpuTypeGetFrameRateLimit},
-    {"nvmlVgpuTypeGetMaxInstances", (void *)nvmlVgpuTypeGetMaxInstances},
-    {"nvmlVgpuTypeGetMaxInstancesPerVm", (void *)nvmlVgpuTypeGetMaxInstancesPerVm},
-    {"nvmlDeviceGetActiveVgpus", (void *)nvmlDeviceGetActiveVgpus},
-    {"nvmlVgpuInstanceGetVmID", (void *)nvmlVgpuInstanceGetVmID},
     {"nvmlVgpuInstanceGetUUID", (void *)nvmlVgpuInstanceGetUUID},
     {"nvmlVgpuInstanceGetVmDriverVersion", (void *)nvmlVgpuInstanceGetVmDriverVersion},
-    {"nvmlVgpuInstanceGetFbUsage", (void *)nvmlVgpuInstanceGetFbUsage},
-    {"nvmlVgpuInstanceGetLicenseStatus", (void *)nvmlVgpuInstanceGetLicenseStatus},
-    {"nvmlVgpuInstanceGetType", (void *)nvmlVgpuInstanceGetType},
-    {"nvmlVgpuInstanceGetFrameRateLimit", (void *)nvmlVgpuInstanceGetFrameRateLimit},
-    {"nvmlVgpuInstanceGetEccMode", (void *)nvmlVgpuInstanceGetEccMode},
-    {"nvmlVgpuInstanceGetEncoderCapacity", (void *)nvmlVgpuInstanceGetEncoderCapacity},
     {"nvmlVgpuInstanceSetEncoderCapacity", (void *)nvmlVgpuInstanceSetEncoderCapacity},
-    {"nvmlVgpuInstanceGetEncoderStats", (void *)nvmlVgpuInstanceGetEncoderStats},
-    {"nvmlVgpuInstanceGetEncoderSessions", (void *)nvmlVgpuInstanceGetEncoderSessions},
-    {"nvmlVgpuInstanceGetFBCStats", (void *)nvmlVgpuInstanceGetFBCStats},
-    {"nvmlVgpuInstanceGetFBCSessions", (void *)nvmlVgpuInstanceGetFBCSessions},
-    {"nvmlVgpuInstanceGetGpuInstanceId", (void *)nvmlVgpuInstanceGetGpuInstanceId},
-    {"nvmlVgpuInstanceGetGpuPciId", (void *)nvmlVgpuInstanceGetGpuPciId},
-    {"nvmlVgpuTypeGetCapabilities", (void *)nvmlVgpuTypeGetCapabilities},
-    {"nvmlVgpuInstanceGetMetadata", (void *)nvmlVgpuInstanceGetMetadata},
-    {"nvmlDeviceGetVgpuMetadata", (void *)nvmlDeviceGetVgpuMetadata},
-    {"nvmlGetVgpuCompatibility", (void *)nvmlGetVgpuCompatibility},
-    {"nvmlDeviceGetPgpuMetadataString", (void *)nvmlDeviceGetPgpuMetadataString},
-    {"nvmlDeviceGetVgpuSchedulerLog", (void *)nvmlDeviceGetVgpuSchedulerLog},
-    {"nvmlDeviceGetVgpuSchedulerState", (void *)nvmlDeviceGetVgpuSchedulerState},
-    {"nvmlDeviceGetVgpuSchedulerCapabilities", (void *)nvmlDeviceGetVgpuSchedulerCapabilities},
-    {"nvmlGetVgpuVersion", (void *)nvmlGetVgpuVersion},
-    {"nvmlSetVgpuVersion", (void *)nvmlSetVgpuVersion},
-    {"nvmlDeviceGetVgpuUtilization", (void *)nvmlDeviceGetVgpuUtilization},
-    {"nvmlDeviceGetVgpuProcessUtilization", (void *)nvmlDeviceGetVgpuProcessUtilization},
-    {"nvmlVgpuInstanceGetAccountingMode", (void *)nvmlVgpuInstanceGetAccountingMode},
-    {"nvmlVgpuInstanceGetAccountingPids", (void *)nvmlVgpuInstanceGetAccountingPids},
-    {"nvmlVgpuInstanceGetAccountingStats", (void *)nvmlVgpuInstanceGetAccountingStats},
     {"nvmlVgpuInstanceClearAccountingPids", (void *)nvmlVgpuInstanceClearAccountingPids},
-    {"nvmlVgpuInstanceGetLicenseInfo_v2", (void *)nvmlVgpuInstanceGetLicenseInfo_v2},
-    {"nvmlGetExcludedDeviceCount", (void *)nvmlGetExcludedDeviceCount},
-    {"nvmlGetExcludedDeviceInfoByIndex", (void *)nvmlGetExcludedDeviceInfoByIndex},
-    {"nvmlDeviceSetMigMode", (void *)nvmlDeviceSetMigMode},
-    {"nvmlDeviceGetMigMode", (void *)nvmlDeviceGetMigMode},
-    {"nvmlDeviceGetGpuInstanceProfileInfo", (void *)nvmlDeviceGetGpuInstanceProfileInfo},
-    {"nvmlDeviceGetGpuInstanceProfileInfoV", (void *)nvmlDeviceGetGpuInstanceProfileInfoV},
-    {"nvmlDeviceGetGpuInstancePossiblePlacements_v2", (void *)nvmlDeviceGetGpuInstancePossiblePlacements_v2},
-    {"nvmlDeviceGetGpuInstanceRemainingCapacity", (void *)nvmlDeviceGetGpuInstanceRemainingCapacity},
-    {"nvmlDeviceCreateGpuInstance", (void *)nvmlDeviceCreateGpuInstance},
-    {"nvmlDeviceCreateGpuInstanceWithPlacement", (void *)nvmlDeviceCreateGpuInstanceWithPlacement},
     {"nvmlGpuInstanceDestroy", (void *)nvmlGpuInstanceDestroy},
-    {"nvmlDeviceGetGpuInstances", (void *)nvmlDeviceGetGpuInstances},
-    {"nvmlDeviceGetGpuInstanceById", (void *)nvmlDeviceGetGpuInstanceById},
-    {"nvmlGpuInstanceGetInfo", (void *)nvmlGpuInstanceGetInfo},
-    {"nvmlGpuInstanceGetComputeInstanceProfileInfo", (void *)nvmlGpuInstanceGetComputeInstanceProfileInfo},
-    {"nvmlGpuInstanceGetComputeInstanceProfileInfoV", (void *)nvmlGpuInstanceGetComputeInstanceProfileInfoV},
-    {"nvmlGpuInstanceGetComputeInstanceRemainingCapacity", (void *)nvmlGpuInstanceGetComputeInstanceRemainingCapacity},
-    {"nvmlGpuInstanceGetComputeInstancePossiblePlacements", (void *)nvmlGpuInstanceGetComputeInstancePossiblePlacements},
-    {"nvmlGpuInstanceCreateComputeInstance", (void *)nvmlGpuInstanceCreateComputeInstance},
-    {"nvmlGpuInstanceCreateComputeInstanceWithPlacement", (void *)nvmlGpuInstanceCreateComputeInstanceWithPlacement},
     {"nvmlComputeInstanceDestroy", (void *)nvmlComputeInstanceDestroy},
-    {"nvmlGpuInstanceGetComputeInstances", (void *)nvmlGpuInstanceGetComputeInstances},
-    {"nvmlGpuInstanceGetComputeInstanceById", (void *)nvmlGpuInstanceGetComputeInstanceById},
-    {"nvmlComputeInstanceGetInfo_v2", (void *)nvmlComputeInstanceGetInfo_v2},
-    {"nvmlDeviceIsMigDeviceHandle", (void *)nvmlDeviceIsMigDeviceHandle},
-    {"nvmlDeviceGetGpuInstanceId", (void *)nvmlDeviceGetGpuInstanceId},
-    {"nvmlDeviceGetComputeInstanceId", (void *)nvmlDeviceGetComputeInstanceId},
-    {"nvmlDeviceGetMaxMigDeviceCount", (void *)nvmlDeviceGetMaxMigDeviceCount},
-    {"nvmlDeviceGetMigDeviceHandleByIndex", (void *)nvmlDeviceGetMigDeviceHandleByIndex},
-    {"nvmlDeviceGetDeviceHandleFromMigDeviceHandle", (void *)nvmlDeviceGetDeviceHandleFromMigDeviceHandle},
-    {"nvmlDeviceGetBusType", (void *)nvmlDeviceGetBusType},
-    {"nvmlDeviceGetDynamicPstatesInfo", (void *)nvmlDeviceGetDynamicPstatesInfo},
     {"nvmlDeviceSetFanSpeed_v2", (void *)nvmlDeviceSetFanSpeed_v2},
-    {"nvmlDeviceGetGpcClkVfOffset", (void *)nvmlDeviceGetGpcClkVfOffset},
     {"nvmlDeviceSetGpcClkVfOffset", (void *)nvmlDeviceSetGpcClkVfOffset},
-    {"nvmlDeviceGetMemClkVfOffset", (void *)nvmlDeviceGetMemClkVfOffset},
     {"nvmlDeviceSetMemClkVfOffset", (void *)nvmlDeviceSetMemClkVfOffset},
-    {"nvmlDeviceGetMinMaxClockOfPState", (void *)nvmlDeviceGetMinMaxClockOfPState},
     {"nvmlDeviceGetSupportedPerformanceStates", (void *)nvmlDeviceGetSupportedPerformanceStates},
-    {"nvmlDeviceGetGpcClkMinMaxVfOffset", (void *)nvmlDeviceGetGpcClkMinMaxVfOffset},
-    {"nvmlDeviceGetMemClkMinMaxVfOffset", (void *)nvmlDeviceGetMemClkMinMaxVfOffset},
-    {"nvmlDeviceGetGpuFabricInfo", (void *)nvmlDeviceGetGpuFabricInfo},
-    {"nvmlGpmMetricsGet", (void *)nvmlGpmMetricsGet},
     {"nvmlGpmSampleFree", (void *)nvmlGpmSampleFree},
-    {"nvmlGpmSampleAlloc", (void *)nvmlGpmSampleAlloc},
     {"nvmlGpmSampleGet", (void *)nvmlGpmSampleGet},
     {"nvmlGpmMigSampleGet", (void *)nvmlGpmMigSampleGet},
-    {"nvmlGpmQueryDeviceSupport", (void *)nvmlGpmQueryDeviceSupport},
-    {"nvmlDeviceSetNvLinkDeviceLowPowerThreshold", (void *)nvmlDeviceSetNvLinkDeviceLowPowerThreshold},
+    {"cuInit", (void *)cuInit},
+    {"cuDeviceGetName", (void *)cuDeviceGetName},
+    {"cuDeviceGetUuid", (void *)cuDeviceGetUuid},
+    {"cuDeviceGetUuid_v2", (void *)cuDeviceGetUuid_v2},
+    {"cuDeviceSetMemPool", (void *)cuDeviceSetMemPool},
+    {"cuFlushGPUDirectRDMAWrites", (void *)cuFlushGPUDirectRDMAWrites},
+    {"cuDevicePrimaryCtxRelease_v2", (void *)cuDevicePrimaryCtxRelease_v2},
+    {"cuDevicePrimaryCtxSetFlags_v2", (void *)cuDevicePrimaryCtxSetFlags_v2},
+    {"cuDevicePrimaryCtxReset_v2", (void *)cuDevicePrimaryCtxReset_v2},
+    {"cuCtxDestroy_v2", (void *)cuCtxDestroy_v2},
+    {"cuCtxPushCurrent_v2", (void *)cuCtxPushCurrent_v2},
+    {"cuCtxSetCurrent", (void *)cuCtxSetCurrent},
+    {"cuCtxSynchronize", (void *)cuCtxSynchronize},
+    {"cuCtxSetLimit", (void *)cuCtxSetLimit},
+    {"cuCtxSetCacheConfig", (void *)cuCtxSetCacheConfig},
+    {"cuCtxSetSharedMemConfig", (void *)cuCtxSetSharedMemConfig},
+    {"cuCtxResetPersistingL2Cache", (void *)cuCtxResetPersistingL2Cache},
+    {"cuCtxDetach", (void *)cuCtxDetach},
+    {"cuModuleUnload", (void *)cuModuleUnload},
+    {"cuLinkAddData_v2", (void *)cuLinkAddData_v2},
+    {"cuLinkAddFile_v2", (void *)cuLinkAddFile_v2},
+    {"cuLinkDestroy", (void *)cuLinkDestroy},
+    {"cuLibraryUnload", (void *)cuLibraryUnload},
+    {"cuLibraryGetUnifiedFunction", (void *)cuLibraryGetUnifiedFunction},
+    {"cuKernelSetAttribute", (void *)cuKernelSetAttribute},
+    {"cuKernelSetCacheConfig", (void *)cuKernelSetCacheConfig},
+    {"cuMemFree_v2", (void *)cuMemFree_v2},
+    {"cuMemAllocHost_v2", (void *)cuMemAllocHost_v2},
+    {"cuMemFreeHost", (void *)cuMemFreeHost},
+    {"cuMemHostAlloc", (void *)cuMemHostAlloc},
+    {"cuDeviceGetPCIBusId", (void *)cuDeviceGetPCIBusId},
+    {"cuIpcCloseMemHandle", (void *)cuIpcCloseMemHandle},
+    {"cuMemHostRegister_v2", (void *)cuMemHostRegister_v2},
+    {"cuMemHostUnregister", (void *)cuMemHostUnregister},
+    {"cuMemcpy", (void *)cuMemcpy},
+    {"cuMemcpyPeer", (void *)cuMemcpyPeer},
+    {"cuMemcpyDtoH_v2", (void *)cuMemcpyDtoH_v2},
+    {"cuMemcpyDtoD_v2", (void *)cuMemcpyDtoD_v2},
+    {"cuMemcpyDtoA_v2", (void *)cuMemcpyDtoA_v2},
+    {"cuMemcpyAtoD_v2", (void *)cuMemcpyAtoD_v2},
+    {"cuMemcpyAtoH_v2", (void *)cuMemcpyAtoH_v2},
+    {"cuMemcpyAtoA_v2", (void *)cuMemcpyAtoA_v2},
+    {"cuMemcpyAsync", (void *)cuMemcpyAsync},
+    {"cuMemcpyPeerAsync", (void *)cuMemcpyPeerAsync},
+    {"cuMemcpyDtoHAsync_v2", (void *)cuMemcpyDtoHAsync_v2},
+    {"cuMemcpyDtoDAsync_v2", (void *)cuMemcpyDtoDAsync_v2},
+    {"cuMemcpyAtoHAsync_v2", (void *)cuMemcpyAtoHAsync_v2},
+    {"cuMemsetD8_v2", (void *)cuMemsetD8_v2},
+    {"cuMemsetD16_v2", (void *)cuMemsetD16_v2},
+    {"cuMemsetD32_v2", (void *)cuMemsetD32_v2},
+    {"cuMemsetD2D8_v2", (void *)cuMemsetD2D8_v2},
+    {"cuMemsetD2D16_v2", (void *)cuMemsetD2D16_v2},
+    {"cuMemsetD2D32_v2", (void *)cuMemsetD2D32_v2},
+    {"cuMemsetD8Async", (void *)cuMemsetD8Async},
+    {"cuMemsetD16Async", (void *)cuMemsetD16Async},
+    {"cuMemsetD32Async", (void *)cuMemsetD32Async},
+    {"cuMemsetD2D8Async", (void *)cuMemsetD2D8Async},
+    {"cuMemsetD2D16Async", (void *)cuMemsetD2D16Async},
+    {"cuMemsetD2D32Async", (void *)cuMemsetD2D32Async},
+    {"cuArrayDestroy", (void *)cuArrayDestroy},
+    {"cuMipmappedArrayDestroy", (void *)cuMipmappedArrayDestroy},
+    {"cuMemGetHandleForAddressRange", (void *)cuMemGetHandleForAddressRange},
+    {"cuMemAddressFree", (void *)cuMemAddressFree},
+    {"cuMemRelease", (void *)cuMemRelease},
+    {"cuMemMap", (void *)cuMemMap},
+    {"cuMemUnmap", (void *)cuMemUnmap},
+    {"cuMemExportToShareableHandle", (void *)cuMemExportToShareableHandle},
+    {"cuMemFreeAsync", (void *)cuMemFreeAsync},
+    {"cuMemPoolTrimTo", (void *)cuMemPoolTrimTo},
+    {"cuMemPoolSetAttribute", (void *)cuMemPoolSetAttribute},
+    {"cuMemPoolGetAttribute", (void *)cuMemPoolGetAttribute},
+    {"cuMemPoolDestroy", (void *)cuMemPoolDestroy},
+    {"cuMemPoolExportToShareableHandle", (void *)cuMemPoolExportToShareableHandle},
+    {"cuPointerGetAttribute", (void *)cuPointerGetAttribute},
+    {"cuMemPrefetchAsync", (void *)cuMemPrefetchAsync},
+    {"cuMemAdvise", (void *)cuMemAdvise},
+    {"cuMemRangeGetAttribute", (void *)cuMemRangeGetAttribute},
+    {"cuStreamWaitEvent", (void *)cuStreamWaitEvent},
+    {"cuStreamAddCallback", (void *)cuStreamAddCallback},
+    {"cuStreamBeginCapture_v2", (void *)cuStreamBeginCapture_v2},
+    {"cuStreamAttachMemAsync", (void *)cuStreamAttachMemAsync},
+    {"cuStreamQuery", (void *)cuStreamQuery},
+    {"cuStreamSynchronize", (void *)cuStreamSynchronize},
+    {"cuStreamDestroy_v2", (void *)cuStreamDestroy_v2},
+    {"cuStreamCopyAttributes", (void *)cuStreamCopyAttributes},
+    {"cuEventRecord", (void *)cuEventRecord},
+    {"cuEventRecordWithFlags", (void *)cuEventRecordWithFlags},
+    {"cuEventQuery", (void *)cuEventQuery},
+    {"cuEventSynchronize", (void *)cuEventSynchronize},
+    {"cuEventDestroy_v2", (void *)cuEventDestroy_v2},
+    {"cuDestroyExternalMemory", (void *)cuDestroyExternalMemory},
+    {"cuDestroyExternalSemaphore", (void *)cuDestroyExternalSemaphore},
+    {"cuStreamWaitValue32_v2", (void *)cuStreamWaitValue32_v2},
+    {"cuStreamWaitValue64_v2", (void *)cuStreamWaitValue64_v2},
+    {"cuStreamWriteValue32_v2", (void *)cuStreamWriteValue32_v2},
+    {"cuStreamWriteValue64_v2", (void *)cuStreamWriteValue64_v2},
+    {"cuFuncSetAttribute", (void *)cuFuncSetAttribute},
+    {"cuFuncSetCacheConfig", (void *)cuFuncSetCacheConfig},
+    {"cuFuncSetSharedMemConfig", (void *)cuFuncSetSharedMemConfig},
+    {"cuLaunchKernel", (void *)cuLaunchKernel},
+    {"cuLaunchCooperativeKernel", (void *)cuLaunchCooperativeKernel},
+    {"cuLaunchHostFunc", (void *)cuLaunchHostFunc},
+    {"cuFuncSetBlockShape", (void *)cuFuncSetBlockShape},
+    {"cuFuncSetSharedSize", (void *)cuFuncSetSharedSize},
+    {"cuParamSetSize", (void *)cuParamSetSize},
+    {"cuParamSeti", (void *)cuParamSeti},
+    {"cuParamSetf", (void *)cuParamSetf},
+    {"cuParamSetv", (void *)cuParamSetv},
+    {"cuLaunch", (void *)cuLaunch},
+    {"cuLaunchGrid", (void *)cuLaunchGrid},
+    {"cuLaunchGridAsync", (void *)cuLaunchGridAsync},
+    {"cuParamSetTexRef", (void *)cuParamSetTexRef},
+    {"cuGraphEventRecordNodeSetEvent", (void *)cuGraphEventRecordNodeSetEvent},
+    {"cuGraphEventWaitNodeSetEvent", (void *)cuGraphEventWaitNodeSetEvent},
+    {"cuDeviceGraphMemTrim", (void *)cuDeviceGraphMemTrim},
+    {"cuDeviceGetGraphMemAttribute", (void *)cuDeviceGetGraphMemAttribute},
+    {"cuDeviceSetGraphMemAttribute", (void *)cuDeviceSetGraphMemAttribute},
+    {"cuGraphDestroyNode", (void *)cuGraphDestroyNode},
+    {"cuGraphExecChildGraphNodeSetParams", (void *)cuGraphExecChildGraphNodeSetParams},
+    {"cuGraphExecEventRecordNodeSetEvent", (void *)cuGraphExecEventRecordNodeSetEvent},
+    {"cuGraphExecEventWaitNodeSetEvent", (void *)cuGraphExecEventWaitNodeSetEvent},
+    {"cuGraphNodeSetEnabled", (void *)cuGraphNodeSetEnabled},
+    {"cuGraphUpload", (void *)cuGraphUpload},
+    {"cuGraphLaunch", (void *)cuGraphLaunch},
+    {"cuGraphExecDestroy", (void *)cuGraphExecDestroy},
+    {"cuGraphDestroy", (void *)cuGraphDestroy},
+    {"cuGraphKernelNodeCopyAttributes", (void *)cuGraphKernelNodeCopyAttributes},
+    {"cuUserObjectRetain", (void *)cuUserObjectRetain},
+    {"cuUserObjectRelease", (void *)cuUserObjectRelease},
+    {"cuGraphRetainUserObject", (void *)cuGraphRetainUserObject},
+    {"cuGraphReleaseUserObject", (void *)cuGraphReleaseUserObject},
+    {"cuTexRefSetArray", (void *)cuTexRefSetArray},
+    {"cuTexRefSetMipmappedArray", (void *)cuTexRefSetMipmappedArray},
+    {"cuTexRefSetFormat", (void *)cuTexRefSetFormat},
+    {"cuTexRefSetAddressMode", (void *)cuTexRefSetAddressMode},
+    {"cuTexRefSetFilterMode", (void *)cuTexRefSetFilterMode},
+    {"cuTexRefSetMipmapFilterMode", (void *)cuTexRefSetMipmapFilterMode},
+    {"cuTexRefSetMipmapLevelBias", (void *)cuTexRefSetMipmapLevelBias},
+    {"cuTexRefSetMipmapLevelClamp", (void *)cuTexRefSetMipmapLevelClamp},
+    {"cuTexRefSetMaxAnisotropy", (void *)cuTexRefSetMaxAnisotropy},
+    {"cuTexRefSetFlags", (void *)cuTexRefSetFlags},
+    {"cuTexRefDestroy", (void *)cuTexRefDestroy},
+    {"cuSurfRefSetArray", (void *)cuSurfRefSetArray},
+    {"cuTexObjectDestroy", (void *)cuTexObjectDestroy},
+    {"cuSurfObjectDestroy", (void *)cuSurfObjectDestroy},
+    {"cuCtxEnablePeerAccess", (void *)cuCtxEnablePeerAccess},
+    {"cuCtxDisablePeerAccess", (void *)cuCtxDisablePeerAccess},
+    {"cuGraphicsUnregisterResource", (void *)cuGraphicsUnregisterResource},
+    {"cuGraphicsResourceSetMapFlags_v2", (void *)cuGraphicsResourceSetMapFlags_v2},
+    {"cudaDeviceReset", (void *)cudaDeviceReset},
 };
 
 void *get_function_pointer(const char *name)

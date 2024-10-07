@@ -129,8 +129,8 @@ nvmlReturn_t nvmlDeviceGetBrand(nvmlDevice_t device, nvmlBrandType_t *type);
 nvmlReturn_t nvmlDeviceGetIndex(nvmlDevice_t device, unsigned int *index);
 /**
  * @param device SEND_ONLY
- * @param serial RECV_ONLY NULL_TERMINATED
  * @param length SEND_ONLY
+ * @param serial RECV_ONLY LENGTH:length
  */
 nvmlReturn_t nvmlDeviceGetSerial(nvmlDevice_t device, char *serial, unsigned int length);
 /**
@@ -189,14 +189,14 @@ nvmlReturn_t nvmlSystemGetTopologyGpuSet(unsigned int cpuNumber, unsigned int *c
 nvmlReturn_t nvmlDeviceGetP2PStatus(nvmlDevice_t device1, nvmlDevice_t device2, nvmlGpuP2PCapsIndex_t p2pIndex, nvmlGpuP2PStatus_t *p2pStatus);
 /**
  * @param device SEND_ONLY
- * @param uuid RECV_ONLY NULL_TERMINATED
  * @param length SEND_ONLY
+ * @param uuid RECV_ONLY LENGTH:length
  */
 nvmlReturn_t nvmlDeviceGetUUID(nvmlDevice_t device, char *uuid, unsigned int length);
 /**
  * @param vgpuInstance SEND_ONLY
- * @param mdevUuid RECV_ONLY NULL_TERMINATED
  * @param size SEND_ONLY
+ * @param mdevUuid RECV_ONLY LENGTH:size
  */
 nvmlReturn_t nvmlVgpuInstanceGetMdevUUID(nvmlVgpuInstance_t vgpuInstance, char *mdevUuid, unsigned int size);
 /**
@@ -609,8 +609,8 @@ nvmlReturn_t nvmlDeviceGetFBCSessions(nvmlDevice_t device, unsigned int *session
 nvmlReturn_t nvmlDeviceGetDriverModel(nvmlDevice_t device, nvmlDriverModel_t *current, nvmlDriverModel_t *pending);
 /**
  * @param device SEND_ONLY
- * @param version RECV_ONLY NULL_TERMINATED
  * @param length SEND_ONLY
+ * @param version RECV_ONLY LENGTH:length
  */
 nvmlReturn_t nvmlDeviceGetVbiosVersion(nvmlDevice_t device, char *version, unsigned int length);
 /**
@@ -1593,2243 +1593,2243 @@ nvmlReturn_t nvmlDeviceSetNvLinkDeviceLowPowerThreshold(nvmlDevice_t device, nvm
  * @param pStr SEND_RECV
  */
 // CUresult cuGetErrorName(CUresult error, const char **pStr);
-// /**
-//  * @param Flags SEND_ONLY
-//  */
-// CUresult cuInit(unsigned int Flags);
-// /**
-//  * @param driverVersion RECV_ONLY
-//  */
-// CUresult cuDriverGetVersion(int *driverVersion);
-// /**
-//  * @param device RECV_ONLY
-//  * @param ordinal SEND_ONLY
-//  */
-// CUresult cuDeviceGet(CUdevice *device, int ordinal);
-// /**
-//  * @param count RECV_ONLY
-//  */
-// CUresult cuDeviceGetCount(int *count);
-// /**
-//  * @param len SEND_ONLY
-//  * @param name RECV_ONLY LENGTH:len
-//  * @param dev SEND_ONLY
-//  */
-// CUresult cuDeviceGetName(char *name, int len, CUdevice dev);
-// /**
-//  * @param uuid RECV_ONLY SIZE:16
-//  * @param dev SEND_ONLY
-//  */
-// CUresult cuDeviceGetUuid(CUuuid *uuid, CUdevice dev);
-// /**
-//  * @param uuid RECV_ONLY SIZE:16
-//  * @param dev SEND_ONLY
-//  */
-// CUresult cuDeviceGetUuid_v2(CUuuid *uuid, CUdevice dev);
-// /**
-//  * @param luid RECV_ONLY NULL_TERMINATED
-//  * @param deviceNodeMask RECV_ONLY
-//  * @param dev SEND_ONLY
-//  */
-// CUresult cuDeviceGetLuid(char *luid, unsigned int *deviceNodeMask, CUdevice dev);
-// /**
-//  * @param bytes RECV_ONLY
-//  * @param dev SEND_ONLY
-//  */
-// CUresult cuDeviceTotalMem_v2(size_t *bytes, CUdevice dev);
-// /**
-//  * @param maxWidthInElements RECV_ONLY
-//  * @param format SEND_ONLY
-//  * @param numChannels SEND_ONLY
-//  * @param dev SEND_ONLY
-//  */
-// CUresult cuDeviceGetTexture1DLinearMaxWidth(size_t *maxWidthInElements, CUarray_format format, unsigned numChannels, CUdevice dev);
-// /**
-//  * @param pi RECV_ONLY
-//  * @param attrib SEND_ONLY
-//  * @param dev SEND_ONLY
-//  */
-// CUresult cuDeviceGetAttribute(int *pi, CUdevice_attribute attrib, CUdevice dev);
-// /**
-//  * @param nvSciSyncAttrList SEND_RECV
-//  * @param dev SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// // CUresult cuDeviceGetNvSciSyncAttributes(void *nvSciSyncAttrList, CUdevice dev, int flags);
-// /**
-//  * @param dev SEND_ONLY
-//  * @param pool SEND_ONLY
-//  */
-// CUresult cuDeviceSetMemPool(CUdevice dev, CUmemoryPool pool);
-// /**
-//  * @param pool RECV_ONLY
-//  * @param dev SEND_ONLY
-//  */
-// CUresult cuDeviceGetMemPool(CUmemoryPool *pool, CUdevice dev);
-// /**
-//  * @param pool_out RECV_ONLY
-//  * @param dev SEND_ONLY
-//  */
-// CUresult cuDeviceGetDefaultMemPool(CUmemoryPool *pool_out, CUdevice dev);
-// /**
-//  * @param pi RECV_ONLY
-//  * @param type SEND_ONLY
-//  * @param dev SEND_ONLY
-//  */
-// CUresult cuDeviceGetExecAffinitySupport(int *pi, CUexecAffinityType type, CUdevice dev);
-// /**
-//  * @param target SEND_ONLY
-//  * @param scope SEND_ONLY
-//  */
-// CUresult cuFlushGPUDirectRDMAWrites(CUflushGPUDirectRDMAWritesTarget target, CUflushGPUDirectRDMAWritesScope scope);
-// /**
-//  * @param prop RECV_ONLY
-//  * @param dev SEND_ONLY
-//  */
-// CUresult cuDeviceGetProperties(CUdevprop *prop, CUdevice dev);
-// /**
-//  * @param major RECV_ONLY
-//  * @param minor RECV_ONLY
-//  * @param dev SEND_ONLY
-//  */
-// CUresult cuDeviceComputeCapability(int *major, int *minor, CUdevice dev);
-// /**
-//  * @param pctx RECV_ONLY
-//  * @param dev SEND_ONLY
-//  */
-// CUresult cuDevicePrimaryCtxRetain(CUcontext *pctx, CUdevice dev);
-// /**
-//  * @param dev SEND_ONLY
-//  */
-// CUresult cuDevicePrimaryCtxRelease_v2(CUdevice dev);
-// /**
-//  * @param dev SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// CUresult cuDevicePrimaryCtxSetFlags_v2(CUdevice dev, unsigned int flags);
-// /**
-//  * @param dev SEND_ONLY
-//  * @param flags RECV_ONLY
-//  * @param active RECV_ONLY
-//  */
-// CUresult cuDevicePrimaryCtxGetState(CUdevice dev, unsigned int *flags, int *active);
-// /**
-//  * @param dev SEND_ONLY
-//  */
-// CUresult cuDevicePrimaryCtxReset_v2(CUdevice dev);
-// /**
-//  * @param pctx RECV_ONLY
-//  * @param flags SEND_ONLY
-//  * @param dev SEND_ONLY
-//  */
-// CUresult cuCtxCreate_v2(CUcontext *pctx, unsigned int flags, CUdevice dev);
-// /**
-//  * @param pctx RECV_ONLY
-//  * @param numParams SEND_ONLY
-//  * @param paramsArray RECV_ONLY LENGTH:numParams
-//  * @param flags SEND_ONLY
-//  * @param dev SEND_ONLY
-//  */
-// CUresult cuCtxCreate_v3(CUcontext *pctx, CUexecAffinityParam *paramsArray, int numParams, unsigned int flags, CUdevice dev);
-// /**
-//  * @param ctx SEND_ONLY
-//  */
-// CUresult cuCtxDestroy_v2(CUcontext ctx);
-// /**
-//  * @param ctx SEND_ONLY
-//  */
-// CUresult cuCtxPushCurrent_v2(CUcontext ctx);
-// /**
-//  * @param pctx RECV_ONLY
-//  */
-// CUresult cuCtxPopCurrent_v2(CUcontext *pctx);
-// /**
-//  * @param ctx SEND_ONLY
-//  */
-// CUresult cuCtxSetCurrent(CUcontext ctx);
-// /**
-//  * @param pctx RECV_ONLY
-//  */
-// CUresult cuCtxGetCurrent(CUcontext *pctx);
-// /**
-//  * @param device RECV_ONLY
-//  */
-// CUresult cuCtxGetDevice(CUdevice *device);
-// /**
-//  * @param flags RECV_ONLY
-//  */
-// CUresult cuCtxGetFlags(unsigned int *flags);
-// /**
-//  * @param ctx SEND_ONLY
-//  * @param ctxId RECV_ONLY
-//  */
-// CUresult cuCtxGetId(CUcontext ctx, unsigned long long *ctxId);
-// /**
-//  */
-// CUresult cuCtxSynchronize();
-// /**
-//  * @param limit SEND_ONLY
-//  * @param value SEND_ONLY
-//  */
-// CUresult cuCtxSetLimit(CUlimit limit, size_t value);
-// /**
-//  * @param pvalue RECV_ONLY
-//  * @param limit SEND_ONLY
-//  */
-// CUresult cuCtxGetLimit(size_t *pvalue, CUlimit limit);
-// /**
-//  * @param pconfig RECV_ONLY
-//  */
-// CUresult cuCtxGetCacheConfig(CUfunc_cache *pconfig);
-// /**
-//  * @param config SEND_ONLY
-//  */
-// CUresult cuCtxSetCacheConfig(CUfunc_cache config);
-// /**
-//  * @param pConfig RECV_ONLY
-//  */
-// CUresult cuCtxGetSharedMemConfig(CUsharedconfig *pConfig);
-// /**
-//  * @param config SEND_ONLY
-//  */
-// CUresult cuCtxSetSharedMemConfig(CUsharedconfig config);
-// /**
-//  * @param ctx SEND_ONLY
-//  * @param version RECV_ONLY
-//  */
-// CUresult cuCtxGetApiVersion(CUcontext ctx, unsigned int *version);
-// /**
-//  * @param leastPriority RECV_ONLY
-//  * @param greatestPriority RECV_ONLY
-//  */
-// CUresult cuCtxGetStreamPriorityRange(int *leastPriority, int *greatestPriority);
-// /**
-//  */
-// CUresult cuCtxResetPersistingL2Cache();
-// /**
-//  * @param pExecAffinity RECV_ONLY
-//  * @param type SEND_ONLY
-//  */
-// CUresult cuCtxGetExecAffinity(CUexecAffinityParam *pExecAffinity, CUexecAffinityType type);
-// /**
-//  * @param pctx RECV_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// CUresult cuCtxAttach(CUcontext *pctx, unsigned int flags);
-// /**
-//  * @param ctx SEND_ONLY
-//  */
-// CUresult cuCtxDetach(CUcontext ctx);
-// /**
-//  * @param module RECV_ONLY
-//  * @param fname SEND_ONLY NULL_TERMINATED
-//  */
-// CUresult cuModuleLoad(CUmodule *module, const char *fname);
-// /**
-//  * @param module RECV_ONLY
-//  * @param image SEND_ONLY
-//  */
-// // CUresult cuModuleLoadData(CUmodule *module, const void *image);
-// /**
-//  * @param module RECV_ONLY
-//  * @param image SEND_ONLY NULL_TERMINATED
-//  * @param numOptions SEND_ONLY
-//  * @param options SEND_ONLY LENGTH:numOptions
-//  * @param optionValues SEND_RECV
-//  */
-// // CUresult cuModuleLoadDataEx(CUmodule *module, const void *image, unsigned int numOptions, CUjit_option *options, void **optionValues);
-// /**
-//  * @param module SEND_RECV
-//  * @param fatCubin SEND_RECV
-//  */
-// // CUresult cuModuleLoadFatBinary(CUmodule *module, const void *fatCubin);
-// /**
-//  * @param hmod SEND_ONLY
-//  */
-// CUresult cuModuleUnload(CUmodule hmod);
+/**
+ * @param Flags SEND_ONLY
+ */
+CUresult cuInit(unsigned int Flags);
+/**
+ * @param driverVersion RECV_ONLY
+ */
+CUresult cuDriverGetVersion(int *driverVersion);
+/**
+ * @param device RECV_ONLY
+ * @param ordinal SEND_ONLY
+ */
+CUresult cuDeviceGet(CUdevice *device, int ordinal);
+/**
+ * @param count RECV_ONLY
+ */
+CUresult cuDeviceGetCount(int *count);
+/**
+ * @param len SEND_ONLY
+ * @param name RECV_ONLY LENGTH:len
+ * @param dev SEND_ONLY
+ */
+CUresult cuDeviceGetName(char *name, int len, CUdevice dev);
+/**
+ * @param uuid RECV_ONLY SIZE:16
+ * @param dev SEND_ONLY
+ */
+CUresult cuDeviceGetUuid(CUuuid *uuid, CUdevice dev);
+/**
+ * @param uuid RECV_ONLY SIZE:16
+ * @param dev SEND_ONLY
+ */
+CUresult cuDeviceGetUuid_v2(CUuuid *uuid, CUdevice dev);
+/**
+ * @param luid RECV_ONLY NULL_TERMINATED
+ * @param deviceNodeMask RECV_ONLY
+ * @param dev SEND_ONLY
+ */
+CUresult cuDeviceGetLuid(char *luid, unsigned int *deviceNodeMask, CUdevice dev);
+/**
+ * @param bytes RECV_ONLY
+ * @param dev SEND_ONLY
+ */
+CUresult cuDeviceTotalMem_v2(size_t *bytes, CUdevice dev);
+/**
+ * @param maxWidthInElements RECV_ONLY
+ * @param format SEND_ONLY
+ * @param numChannels SEND_ONLY
+ * @param dev SEND_ONLY
+ */
+CUresult cuDeviceGetTexture1DLinearMaxWidth(size_t *maxWidthInElements, CUarray_format format, unsigned numChannels, CUdevice dev);
+/**
+ * @param pi RECV_ONLY
+ * @param attrib SEND_ONLY
+ * @param dev SEND_ONLY
+ */
+CUresult cuDeviceGetAttribute(int *pi, CUdevice_attribute attrib, CUdevice dev);
+/**
+ * @param nvSciSyncAttrList SEND_RECV
+ * @param dev SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+// CUresult cuDeviceGetNvSciSyncAttributes(void *nvSciSyncAttrList, CUdevice dev, int flags);
+/**
+ * @param dev SEND_ONLY
+ * @param pool SEND_ONLY
+ */
+CUresult cuDeviceSetMemPool(CUdevice dev, CUmemoryPool pool);
+/**
+ * @param pool RECV_ONLY
+ * @param dev SEND_ONLY
+ */
+CUresult cuDeviceGetMemPool(CUmemoryPool *pool, CUdevice dev);
+/**
+ * @param pool_out RECV_ONLY
+ * @param dev SEND_ONLY
+ */
+CUresult cuDeviceGetDefaultMemPool(CUmemoryPool *pool_out, CUdevice dev);
+/**
+ * @param pi RECV_ONLY
+ * @param type SEND_ONLY
+ * @param dev SEND_ONLY
+ */
+CUresult cuDeviceGetExecAffinitySupport(int *pi, CUexecAffinityType type, CUdevice dev);
+/**
+ * @param target SEND_ONLY
+ * @param scope SEND_ONLY
+ */
+CUresult cuFlushGPUDirectRDMAWrites(CUflushGPUDirectRDMAWritesTarget target, CUflushGPUDirectRDMAWritesScope scope);
+/**
+ * @param prop RECV_ONLY
+ * @param dev SEND_ONLY
+ */
+CUresult cuDeviceGetProperties(CUdevprop *prop, CUdevice dev);
+/**
+ * @param major RECV_ONLY
+ * @param minor RECV_ONLY
+ * @param dev SEND_ONLY
+ */
+CUresult cuDeviceComputeCapability(int *major, int *minor, CUdevice dev);
+/**
+ * @param pctx RECV_ONLY
+ * @param dev SEND_ONLY
+ */
+CUresult cuDevicePrimaryCtxRetain(CUcontext *pctx, CUdevice dev);
+/**
+ * @param dev SEND_ONLY
+ */
+CUresult cuDevicePrimaryCtxRelease_v2(CUdevice dev);
+/**
+ * @param dev SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+CUresult cuDevicePrimaryCtxSetFlags_v2(CUdevice dev, unsigned int flags);
+/**
+ * @param dev SEND_ONLY
+ * @param flags RECV_ONLY
+ * @param active RECV_ONLY
+ */
+CUresult cuDevicePrimaryCtxGetState(CUdevice dev, unsigned int *flags, int *active);
+/**
+ * @param dev SEND_ONLY
+ */
+CUresult cuDevicePrimaryCtxReset_v2(CUdevice dev);
+/**
+ * @param pctx RECV_ONLY
+ * @param flags SEND_ONLY
+ * @param dev SEND_ONLY
+ */
+CUresult cuCtxCreate_v2(CUcontext *pctx, unsigned int flags, CUdevice dev);
+/**
+ * @param pctx RECV_ONLY
+ * @param numParams SEND_ONLY
+ * @param paramsArray RECV_ONLY LENGTH:numParams
+ * @param flags SEND_ONLY
+ * @param dev SEND_ONLY
+ */
+CUresult cuCtxCreate_v3(CUcontext *pctx, CUexecAffinityParam *paramsArray, int numParams, unsigned int flags, CUdevice dev);
+/**
+ * @param ctx SEND_ONLY
+ */
+CUresult cuCtxDestroy_v2(CUcontext ctx);
+/**
+ * @param ctx SEND_ONLY
+ */
+CUresult cuCtxPushCurrent_v2(CUcontext ctx);
+/**
+ * @param pctx RECV_ONLY
+ */
+CUresult cuCtxPopCurrent_v2(CUcontext *pctx);
+/**
+ * @param ctx SEND_ONLY
+ */
+CUresult cuCtxSetCurrent(CUcontext ctx);
+/**
+ * @param pctx RECV_ONLY
+ */
+CUresult cuCtxGetCurrent(CUcontext *pctx);
+/**
+ * @param device RECV_ONLY
+ */
+CUresult cuCtxGetDevice(CUdevice *device);
+/**
+ * @param flags RECV_ONLY
+ */
+CUresult cuCtxGetFlags(unsigned int *flags);
+/**
+ * @param ctx SEND_ONLY
+ * @param ctxId RECV_ONLY
+ */
+CUresult cuCtxGetId(CUcontext ctx, unsigned long long *ctxId);
+/**
+ */
+CUresult cuCtxSynchronize();
+/**
+ * @param limit SEND_ONLY
+ * @param value SEND_ONLY
+ */
+CUresult cuCtxSetLimit(CUlimit limit, size_t value);
+/**
+ * @param pvalue RECV_ONLY
+ * @param limit SEND_ONLY
+ */
+CUresult cuCtxGetLimit(size_t *pvalue, CUlimit limit);
+/**
+ * @param pconfig RECV_ONLY
+ */
+CUresult cuCtxGetCacheConfig(CUfunc_cache *pconfig);
+/**
+ * @param config SEND_ONLY
+ */
+CUresult cuCtxSetCacheConfig(CUfunc_cache config);
+/**
+ * @param pConfig RECV_ONLY
+ */
+CUresult cuCtxGetSharedMemConfig(CUsharedconfig *pConfig);
+/**
+ * @param config SEND_ONLY
+ */
+CUresult cuCtxSetSharedMemConfig(CUsharedconfig config);
+/**
+ * @param ctx SEND_ONLY
+ * @param version RECV_ONLY
+ */
+CUresult cuCtxGetApiVersion(CUcontext ctx, unsigned int *version);
+/**
+ * @param leastPriority RECV_ONLY
+ * @param greatestPriority RECV_ONLY
+ */
+CUresult cuCtxGetStreamPriorityRange(int *leastPriority, int *greatestPriority);
+/**
+ */
+CUresult cuCtxResetPersistingL2Cache();
+/**
+ * @param pExecAffinity RECV_ONLY
+ * @param type SEND_ONLY
+ */
+CUresult cuCtxGetExecAffinity(CUexecAffinityParam *pExecAffinity, CUexecAffinityType type);
+/**
+ * @param pctx RECV_ONLY
+ * @param flags SEND_ONLY
+ */
+CUresult cuCtxAttach(CUcontext *pctx, unsigned int flags);
+/**
+ * @param ctx SEND_ONLY
+ */
+CUresult cuCtxDetach(CUcontext ctx);
+/**
+ * @param module RECV_ONLY
+ * @param fname SEND_ONLY NULL_TERMINATED
+ */
+CUresult cuModuleLoad(CUmodule *module, const char *fname);
+/**
+ * @param module RECV_ONLY
+ * @param image SEND_ONLY
+ */
+// CUresult cuModuleLoadData(CUmodule *module, const void *image);
+/**
+ * @param module RECV_ONLY
+ * @param image SEND_ONLY NULL_TERMINATED
+ * @param numOptions SEND_ONLY
+ * @param options SEND_ONLY LENGTH:numOptions
+ * @param optionValues SEND_RECV
+ */
+// CUresult cuModuleLoadDataEx(CUmodule *module, const void *image, unsigned int numOptions, CUjit_option *options, void **optionValues);
+/**
+ * @param module SEND_RECV
+ * @param fatCubin SEND_RECV
+ */
+// CUresult cuModuleLoadFatBinary(CUmodule *module, const void *fatCubin);
+/**
+ * @param hmod SEND_ONLY
+ */
+CUresult cuModuleUnload(CUmodule hmod);
 
-// // TODO: continue from here
+// TODO: continue from here
 
-// /**
-//  * @param mode SEND_RECV
-//  */
-// CUresult cuModuleGetLoadingMode(CUmoduleLoadingMode *mode);
-// /**
-//  * @param hfunc SEND_RECV
-//  * @param hmod SEND_ONLY
-//  * @param name SEND_RECV
-//  */
-// CUresult cuModuleGetFunction(CUfunction *hfunc, CUmodule hmod, const char *name);
-// /**
-//  * @param dptr SEND_RECV
-//  * @param bytes SEND_RECV
-//  * @param hmod SEND_ONLY
-//  * @param name SEND_RECV
-//  */
-// CUresult cuModuleGetGlobal_v2(CUdeviceptr *dptr, size_t *bytes, CUmodule hmod, const char *name);
-// /**
-//  * @param numOptions SEND_ONLY
-//  * @param options SEND_RECV
-//  * @param optionValues SEND_RECV
-//  * @param stateOut SEND_RECV
-//  */
-// CUresult cuLinkCreate_v2(unsigned int numOptions, CUjit_option *options, void **optionValues, CUlinkState *stateOut);
-// /**
-//  * @param state SEND_ONLY
-//  * @param type SEND_ONLY
-//  * @param data SEND_RECV
-//  * @param size SEND_ONLY
-//  * @param name SEND_RECV
-//  * @param numOptions SEND_ONLY
-//  * @param options SEND_RECV
-//  * @param optionValues SEND_RECV
-//  */
-// CUresult cuLinkAddData_v2(CUlinkState state, CUjitInputType type, void *data, size_t size, const char *name, unsigned int numOptions, CUjit_option *options, void **optionValues);
-// /**
-//  * @param state SEND_ONLY
-//  * @param type SEND_ONLY
-//  * @param path SEND_RECV
-//  * @param numOptions SEND_ONLY
-//  * @param options SEND_RECV
-//  * @param optionValues SEND_RECV
-//  */
-// CUresult cuLinkAddFile_v2(CUlinkState state, CUjitInputType type, const char *path, unsigned int numOptions, CUjit_option *options, void **optionValues);
-// /**
-//  * @param state SEND_ONLY
-//  * @param cubinOut SEND_RECV
-//  * @param sizeOut SEND_RECV
-//  */
-// CUresult cuLinkComplete(CUlinkState state, void **cubinOut, size_t *sizeOut);
-// /**
-//  * @param state SEND_ONLY
-//  */
-// CUresult cuLinkDestroy(CUlinkState state);
-// /**
-//  * @param pTexRef SEND_RECV
-//  * @param hmod SEND_ONLY
-//  * @param name SEND_RECV
-//  */
-// CUresult cuModuleGetTexRef(CUtexref *pTexRef, CUmodule hmod, const char *name);
-// /**
-//  * @param pSurfRef SEND_RECV
-//  * @param hmod SEND_ONLY
-//  * @param name SEND_RECV
-//  */
-// CUresult cuModuleGetSurfRef(CUsurfref *pSurfRef, CUmodule hmod, const char *name);
-// /**
-//  * @param library SEND_RECV
-//  * @param code SEND_RECV
-//  * @param jitOptions SEND_RECV
-//  * @param jitOptionsValues SEND_RECV
-//  * @param numJitOptions SEND_ONLY
-//  * @param libraryOptions SEND_RECV
-//  * @param libraryOptionValues SEND_RECV
-//  * @param numLibraryOptions SEND_ONLY
-//  */
-// CUresult cuLibraryLoadData(CUlibrary *library, const void *code, CUjit_option *jitOptions, void **jitOptionsValues, unsigned int numJitOptions, CUlibraryOption *libraryOptions, void **libraryOptionValues, unsigned int numLibraryOptions);
-// /**
-//  * @param library SEND_RECV
-//  * @param fileName SEND_RECV
-//  * @param jitOptions SEND_RECV
-//  * @param jitOptionsValues SEND_RECV
-//  * @param numJitOptions SEND_ONLY
-//  * @param libraryOptions SEND_RECV
-//  * @param libraryOptionValues SEND_RECV
-//  * @param numLibraryOptions SEND_ONLY
-//  */
-// CUresult cuLibraryLoadFromFile(CUlibrary *library, const char *fileName, CUjit_option *jitOptions, void **jitOptionsValues, unsigned int numJitOptions, CUlibraryOption *libraryOptions, void **libraryOptionValues, unsigned int numLibraryOptions);
-// /**
-//  * @param library SEND_ONLY
-//  */
-// CUresult cuLibraryUnload(CUlibrary library);
-// /**
-//  * @param pKernel SEND_RECV
-//  * @param library SEND_ONLY
-//  * @param name SEND_RECV
-//  */
-// CUresult cuLibraryGetKernel(CUkernel *pKernel, CUlibrary library, const char *name);
-// /**
-//  * @param pMod SEND_RECV
-//  * @param library SEND_ONLY
-//  */
-// CUresult cuLibraryGetModule(CUmodule *pMod, CUlibrary library);
-// /**
-//  * @param pFunc SEND_RECV
-//  * @param kernel SEND_ONLY
-//  */
-// CUresult cuKernelGetFunction(CUfunction *pFunc, CUkernel kernel);
-// /**
-//  * @param dptr SEND_RECV
-//  * @param bytes SEND_RECV
-//  * @param library SEND_ONLY
-//  * @param name SEND_RECV
-//  */
-// CUresult cuLibraryGetGlobal(CUdeviceptr *dptr, size_t *bytes, CUlibrary library, const char *name);
-// /**
-//  * @param dptr SEND_RECV
-//  * @param bytes SEND_RECV
-//  * @param library SEND_ONLY
-//  * @param name SEND_RECV
-//  */
-// CUresult cuLibraryGetManaged(CUdeviceptr *dptr, size_t *bytes, CUlibrary library, const char *name);
-// /**
-//  * @param fptr SEND_RECV
-//  * @param library SEND_ONLY
-//  * @param symbol SEND_RECV
-//  */
-// CUresult cuLibraryGetUnifiedFunction(void **fptr, CUlibrary library, const char *symbol);
-// /**
-//  * @param pi SEND_RECV
-//  * @param attrib SEND_ONLY
-//  * @param kernel SEND_ONLY
-//  * @param dev SEND_ONLY
-//  */
-// CUresult cuKernelGetAttribute(int *pi, CUfunction_attribute attrib, CUkernel kernel, CUdevice dev);
-// /**
-//  * @param attrib SEND_ONLY
-//  * @param val SEND_ONLY
-//  * @param kernel SEND_ONLY
-//  * @param dev SEND_ONLY
-//  */
-// CUresult cuKernelSetAttribute(CUfunction_attribute attrib, int val, CUkernel kernel, CUdevice dev);
-// /**
-//  * @param kernel SEND_ONLY
-//  * @param config SEND_ONLY
-//  * @param dev SEND_ONLY
-//  */
-// CUresult cuKernelSetCacheConfig(CUkernel kernel, CUfunc_cache config, CUdevice dev);
-// /**
-//  * @param free SEND_RECV
-//  * @param total SEND_RECV
-//  */
-// CUresult cuMemGetInfo_v2(size_t *free, size_t *total);
-// /**
-//  * @param dptr SEND_RECV
-//  * @param bytesize SEND_ONLY
-//  */
-// CUresult cuMemAlloc_v2(CUdeviceptr *dptr, size_t bytesize);
-// /**
-//  * @param dptr SEND_RECV
-//  * @param pPitch SEND_RECV
-//  * @param WidthInBytes SEND_ONLY
-//  * @param Height SEND_ONLY
-//  * @param ElementSizeBytes SEND_ONLY
-//  */
-// CUresult cuMemAllocPitch_v2(CUdeviceptr *dptr, size_t *pPitch, size_t WidthInBytes, size_t Height, unsigned int ElementSizeBytes);
-// /**
-//  * @param dptr SEND_ONLY
-//  */
-// CUresult cuMemFree_v2(CUdeviceptr dptr);
-// /**
-//  * @param pbase SEND_RECV
-//  * @param psize SEND_RECV
-//  * @param dptr SEND_ONLY
-//  */
-// CUresult cuMemGetAddressRange_v2(CUdeviceptr *pbase, size_t *psize, CUdeviceptr dptr);
-// /**
-//  * @param pp SEND_RECV
-//  * @param bytesize SEND_ONLY
-//  */
-// CUresult cuMemAllocHost_v2(void **pp, size_t bytesize);
-// /**
-//  * @param p SEND_RECV
-//  */
-// CUresult cuMemFreeHost(void *p);
-// /**
-//  * @param pp SEND_RECV
-//  * @param bytesize SEND_ONLY
-//  * @param Flags SEND_ONLY
-//  */
-// CUresult cuMemHostAlloc(void **pp, size_t bytesize, unsigned int Flags);
-// /**
-//  * @param pdptr SEND_RECV
-//  * @param p SEND_RECV
-//  * @param Flags SEND_ONLY
-//  */
-// CUresult cuMemHostGetDevicePointer_v2(CUdeviceptr *pdptr, void *p, unsigned int Flags);
-// /**
-//  * @param pFlags SEND_RECV
-//  * @param p SEND_RECV
-//  */
-// CUresult cuMemHostGetFlags(unsigned int *pFlags, void *p);
-// /**
-//  * @param dptr SEND_RECV
-//  * @param bytesize SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// CUresult cuMemAllocManaged(CUdeviceptr *dptr, size_t bytesize, unsigned int flags);
-// /**
-//  * @param dev SEND_RECV
-//  * @param pciBusId SEND_RECV
-//  */
-// CUresult cuDeviceGetByPCIBusId(CUdevice *dev, const char *pciBusId);
-// /**
-//  * @param pciBusId SEND_RECV
-//  * @param len SEND_ONLY
-//  * @param dev SEND_ONLY
-//  */
-// CUresult cuDeviceGetPCIBusId(char *pciBusId, int len, CUdevice dev);
-// /**
-//  * @param pHandle SEND_RECV
-//  * @param event SEND_ONLY
-//  */
-// CUresult cuIpcGetEventHandle(CUipcEventHandle *pHandle, CUevent event);
-// /**
-//  * @param phEvent SEND_RECV
-//  * @param handle SEND_ONLY
-//  */
-// CUresult cuIpcOpenEventHandle(CUevent *phEvent, CUipcEventHandle handle);
-// /**
-//  * @param pHandle SEND_RECV
-//  * @param dptr SEND_ONLY
-//  */
-// CUresult cuIpcGetMemHandle(CUipcMemHandle *pHandle, CUdeviceptr dptr);
-// /**
-//  * @param pdptr SEND_RECV
-//  * @param handle SEND_ONLY
-//  * @param Flags SEND_ONLY
-//  */
-// CUresult cuIpcOpenMemHandle_v2(CUdeviceptr *pdptr, CUipcMemHandle handle, unsigned int Flags);
-// /**
-//  * @param dptr SEND_ONLY
-//  */
-// CUresult cuIpcCloseMemHandle(CUdeviceptr dptr);
-// /**
-//  * @param p SEND_RECV
-//  * @param bytesize SEND_ONLY
-//  * @param Flags SEND_ONLY
-//  */
-// CUresult cuMemHostRegister_v2(void *p, size_t bytesize, unsigned int Flags);
-// /**
-//  * @param p SEND_RECV
-//  */
-// CUresult cuMemHostUnregister(void *p);
-// /**
-//  * @param dst SEND_ONLY
-//  * @param src SEND_ONLY
-//  * @param ByteCount SEND_ONLY
-//  */
-// CUresult cuMemcpy(CUdeviceptr dst, CUdeviceptr src, size_t ByteCount);
-// /**
-//  * @param dstDevice SEND_ONLY
-//  * @param dstContext SEND_ONLY
-//  * @param srcDevice SEND_ONLY
-//  * @param srcContext SEND_ONLY
-//  * @param ByteCount SEND_ONLY
-//  */
-// CUresult cuMemcpyPeer(CUdeviceptr dstDevice, CUcontext dstContext, CUdeviceptr srcDevice, CUcontext srcContext, size_t ByteCount);
-// /**
-//  * @param dstDevice SEND_ONLY
-//  * @param srcHost SEND_RECV
-//  * @param ByteCount SEND_ONLY
-//  */
-// CUresult cuMemcpyHtoD_v2(CUdeviceptr dstDevice, const void *srcHost, size_t ByteCount);
-// /**
-//  * @param dstHost SEND_RECV
-//  * @param srcDevice SEND_ONLY
-//  * @param ByteCount SEND_ONLY
-//  */
-// CUresult cuMemcpyDtoH_v2(void *dstHost, CUdeviceptr srcDevice, size_t ByteCount);
-// /**
-//  * @param dstDevice SEND_ONLY
-//  * @param srcDevice SEND_ONLY
-//  * @param ByteCount SEND_ONLY
-//  */
-// CUresult cuMemcpyDtoD_v2(CUdeviceptr dstDevice, CUdeviceptr srcDevice, size_t ByteCount);
-// /**
-//  * @param dstArray SEND_ONLY
-//  * @param dstOffset SEND_ONLY
-//  * @param srcDevice SEND_ONLY
-//  * @param ByteCount SEND_ONLY
-//  */
-// CUresult cuMemcpyDtoA_v2(CUarray dstArray, size_t dstOffset, CUdeviceptr srcDevice, size_t ByteCount);
-// /**
-//  * @param dstDevice SEND_ONLY
-//  * @param srcArray SEND_ONLY
-//  * @param srcOffset SEND_ONLY
-//  * @param ByteCount SEND_ONLY
-//  */
-// CUresult cuMemcpyAtoD_v2(CUdeviceptr dstDevice, CUarray srcArray, size_t srcOffset, size_t ByteCount);
-// /**
-//  * @param dstArray SEND_ONLY
-//  * @param dstOffset SEND_ONLY
-//  * @param srcHost SEND_RECV
-//  * @param ByteCount SEND_ONLY
-//  */
-// CUresult cuMemcpyHtoA_v2(CUarray dstArray, size_t dstOffset, const void *srcHost, size_t ByteCount);
-// /**
-//  * @param dstHost SEND_RECV
-//  * @param srcArray SEND_ONLY
-//  * @param srcOffset SEND_ONLY
-//  * @param ByteCount SEND_ONLY
-//  */
-// CUresult cuMemcpyAtoH_v2(void *dstHost, CUarray srcArray, size_t srcOffset, size_t ByteCount);
-// /**
-//  * @param dstArray SEND_ONLY
-//  * @param dstOffset SEND_ONLY
-//  * @param srcArray SEND_ONLY
-//  * @param srcOffset SEND_ONLY
-//  * @param ByteCount SEND_ONLY
-//  */
-// CUresult cuMemcpyAtoA_v2(CUarray dstArray, size_t dstOffset, CUarray srcArray, size_t srcOffset, size_t ByteCount);
-// /**
-//  * @param pCopy SEND_RECV
-//  */
-// CUresult cuMemcpy2D_v2(const CUDA_MEMCPY2D *pCopy);
-// /**
-//  * @param pCopy SEND_RECV
-//  */
-// CUresult cuMemcpy2DUnaligned_v2(const CUDA_MEMCPY2D *pCopy);
-// /**
-//  * @param pCopy SEND_RECV
-//  */
-// CUresult cuMemcpy3D_v2(const CUDA_MEMCPY3D *pCopy);
-// /**
-//  * @param pCopy SEND_RECV
-//  */
-// CUresult cuMemcpy3DPeer(const CUDA_MEMCPY3D_PEER *pCopy);
-// /**
-//  * @param dst SEND_ONLY
-//  * @param src SEND_ONLY
-//  * @param ByteCount SEND_ONLY
-//  * @param hStream SEND_ONLY
-//  */
-// CUresult cuMemcpyAsync(CUdeviceptr dst, CUdeviceptr src, size_t ByteCount, CUstream hStream);
-// /**
-//  * @param dstDevice SEND_ONLY
-//  * @param dstContext SEND_ONLY
-//  * @param srcDevice SEND_ONLY
-//  * @param srcContext SEND_ONLY
-//  * @param ByteCount SEND_ONLY
-//  * @param hStream SEND_ONLY
-//  */
-// CUresult cuMemcpyPeerAsync(CUdeviceptr dstDevice, CUcontext dstContext, CUdeviceptr srcDevice, CUcontext srcContext, size_t ByteCount, CUstream hStream);
-// /**
-//  * @param dstDevice SEND_ONLY
-//  * @param srcHost SEND_RECV
-//  * @param ByteCount SEND_ONLY
-//  * @param hStream SEND_ONLY
-//  */
-// CUresult cuMemcpyHtoDAsync_v2(CUdeviceptr dstDevice, const void *srcHost, size_t ByteCount, CUstream hStream);
-// /**
-//  * @param dstHost SEND_RECV
-//  * @param srcDevice SEND_ONLY
-//  * @param ByteCount SEND_ONLY
-//  * @param hStream SEND_ONLY
-//  */
-// CUresult cuMemcpyDtoHAsync_v2(void *dstHost, CUdeviceptr srcDevice, size_t ByteCount, CUstream hStream);
-// /**
-//  * @param dstDevice SEND_ONLY
-//  * @param srcDevice SEND_ONLY
-//  * @param ByteCount SEND_ONLY
-//  * @param hStream SEND_ONLY
-//  */
-// CUresult cuMemcpyDtoDAsync_v2(CUdeviceptr dstDevice, CUdeviceptr srcDevice, size_t ByteCount, CUstream hStream);
-// /**
-//  * @param dstArray SEND_ONLY
-//  * @param dstOffset SEND_ONLY
-//  * @param srcHost SEND_RECV
-//  * @param ByteCount SEND_ONLY
-//  * @param hStream SEND_ONLY
-//  */
-// CUresult cuMemcpyHtoAAsync_v2(CUarray dstArray, size_t dstOffset, const void *srcHost, size_t ByteCount, CUstream hStream);
-// /**
-//  * @param dstHost SEND_RECV
-//  * @param srcArray SEND_ONLY
-//  * @param srcOffset SEND_ONLY
-//  * @param ByteCount SEND_ONLY
-//  * @param hStream SEND_ONLY
-//  */
-// CUresult cuMemcpyAtoHAsync_v2(void *dstHost, CUarray srcArray, size_t srcOffset, size_t ByteCount, CUstream hStream);
-// /**
-//  * @param pCopy SEND_RECV
-//  * @param hStream SEND_ONLY
-//  */
-// CUresult cuMemcpy2DAsync_v2(const CUDA_MEMCPY2D *pCopy, CUstream hStream);
-// /**
-//  * @param pCopy SEND_RECV
-//  * @param hStream SEND_ONLY
-//  */
-// CUresult cuMemcpy3DAsync_v2(const CUDA_MEMCPY3D *pCopy, CUstream hStream);
-// /**
-//  * @param pCopy SEND_RECV
-//  * @param hStream SEND_ONLY
-//  */
-// CUresult cuMemcpy3DPeerAsync(const CUDA_MEMCPY3D_PEER *pCopy, CUstream hStream);
-// /**
-//  * @param dstDevice SEND_ONLY
-//  * @param uc SEND_ONLY
-//  * @param N SEND_ONLY
-//  */
-// CUresult cuMemsetD8_v2(CUdeviceptr dstDevice, unsigned char uc, size_t N);
-// /**
-//  * @param dstDevice SEND_ONLY
-//  * @param us SEND_ONLY
-//  * @param N SEND_ONLY
-//  */
-// CUresult cuMemsetD16_v2(CUdeviceptr dstDevice, unsigned short us, size_t N);
-// /**
-//  * @param dstDevice SEND_ONLY
-//  * @param ui SEND_ONLY
-//  * @param N SEND_ONLY
-//  */
-// CUresult cuMemsetD32_v2(CUdeviceptr dstDevice, unsigned int ui, size_t N);
-// /**
-//  * @param dstDevice SEND_ONLY
-//  * @param dstPitch SEND_ONLY
-//  * @param uc SEND_ONLY
-//  * @param Width SEND_ONLY
-//  * @param Height SEND_ONLY
-//  */
-// CUresult cuMemsetD2D8_v2(CUdeviceptr dstDevice, size_t dstPitch, unsigned char uc, size_t Width, size_t Height);
-// /**
-//  * @param dstDevice SEND_ONLY
-//  * @param dstPitch SEND_ONLY
-//  * @param us SEND_ONLY
-//  * @param Width SEND_ONLY
-//  * @param Height SEND_ONLY
-//  */
-// CUresult cuMemsetD2D16_v2(CUdeviceptr dstDevice, size_t dstPitch, unsigned short us, size_t Width, size_t Height);
-// /**
-//  * @param dstDevice SEND_ONLY
-//  * @param dstPitch SEND_ONLY
-//  * @param ui SEND_ONLY
-//  * @param Width SEND_ONLY
-//  * @param Height SEND_ONLY
-//  */
-// CUresult cuMemsetD2D32_v2(CUdeviceptr dstDevice, size_t dstPitch, unsigned int ui, size_t Width, size_t Height);
-// /**
-//  * @param dstDevice SEND_ONLY
-//  * @param uc SEND_ONLY
-//  * @param N SEND_ONLY
-//  * @param hStream SEND_ONLY
-//  */
-// CUresult cuMemsetD8Async(CUdeviceptr dstDevice, unsigned char uc, size_t N, CUstream hStream);
-// /**
-//  * @param dstDevice SEND_ONLY
-//  * @param us SEND_ONLY
-//  * @param N SEND_ONLY
-//  * @param hStream SEND_ONLY
-//  */
-// CUresult cuMemsetD16Async(CUdeviceptr dstDevice, unsigned short us, size_t N, CUstream hStream);
-// /**
-//  * @param dstDevice SEND_ONLY
-//  * @param ui SEND_ONLY
-//  * @param N SEND_ONLY
-//  * @param hStream SEND_ONLY
-//  */
-// CUresult cuMemsetD32Async(CUdeviceptr dstDevice, unsigned int ui, size_t N, CUstream hStream);
-// /**
-//  * @param dstDevice SEND_ONLY
-//  * @param dstPitch SEND_ONLY
-//  * @param uc SEND_ONLY
-//  * @param Width SEND_ONLY
-//  * @param Height SEND_ONLY
-//  * @param hStream SEND_ONLY
-//  */
-// CUresult cuMemsetD2D8Async(CUdeviceptr dstDevice, size_t dstPitch, unsigned char uc, size_t Width, size_t Height, CUstream hStream);
-// /**
-//  * @param dstDevice SEND_ONLY
-//  * @param dstPitch SEND_ONLY
-//  * @param us SEND_ONLY
-//  * @param Width SEND_ONLY
-//  * @param Height SEND_ONLY
-//  * @param hStream SEND_ONLY
-//  */
-// CUresult cuMemsetD2D16Async(CUdeviceptr dstDevice, size_t dstPitch, unsigned short us, size_t Width, size_t Height, CUstream hStream);
-// /**
-//  * @param dstDevice SEND_ONLY
-//  * @param dstPitch SEND_ONLY
-//  * @param ui SEND_ONLY
-//  * @param Width SEND_ONLY
-//  * @param Height SEND_ONLY
-//  * @param hStream SEND_ONLY
-//  */
-// CUresult cuMemsetD2D32Async(CUdeviceptr dstDevice, size_t dstPitch, unsigned int ui, size_t Width, size_t Height, CUstream hStream);
-// /**
-//  * @param pHandle SEND_RECV
-//  * @param pAllocateArray SEND_RECV
-//  */
-// CUresult cuArrayCreate_v2(CUarray *pHandle, const CUDA_ARRAY_DESCRIPTOR *pAllocateArray);
-// /**
-//  * @param pArrayDescriptor SEND_RECV
-//  * @param hArray SEND_ONLY
-//  */
-// CUresult cuArrayGetDescriptor_v2(CUDA_ARRAY_DESCRIPTOR *pArrayDescriptor, CUarray hArray);
-// /**
-//  * @param sparseProperties SEND_RECV
-//  * @param array SEND_ONLY
-//  */
-// CUresult cuArrayGetSparseProperties(CUDA_ARRAY_SPARSE_PROPERTIES *sparseProperties, CUarray array);
-// /**
-//  * @param sparseProperties SEND_RECV
-//  * @param mipmap SEND_ONLY
-//  */
-// CUresult cuMipmappedArrayGetSparseProperties(CUDA_ARRAY_SPARSE_PROPERTIES *sparseProperties, CUmipmappedArray mipmap);
-// /**
-//  * @param memoryRequirements SEND_RECV
-//  * @param array SEND_ONLY
-//  * @param device SEND_ONLY
-//  */
-// CUresult cuArrayGetMemoryRequirements(CUDA_ARRAY_MEMORY_REQUIREMENTS *memoryRequirements, CUarray array, CUdevice device);
-// /**
-//  * @param memoryRequirements SEND_RECV
-//  * @param mipmap SEND_ONLY
-//  * @param device SEND_ONLY
-//  */
-// CUresult cuMipmappedArrayGetMemoryRequirements(CUDA_ARRAY_MEMORY_REQUIREMENTS *memoryRequirements, CUmipmappedArray mipmap, CUdevice device);
-// /**
-//  * @param pPlaneArray SEND_RECV
-//  * @param hArray SEND_ONLY
-//  * @param planeIdx SEND_ONLY
-//  */
-// CUresult cuArrayGetPlane(CUarray *pPlaneArray, CUarray hArray, unsigned int planeIdx);
-// /**
-//  * @param hArray SEND_ONLY
-//  */
-// CUresult cuArrayDestroy(CUarray hArray);
-// /**
-//  * @param pHandle SEND_RECV
-//  * @param pAllocateArray SEND_RECV
-//  */
-// CUresult cuArray3DCreate_v2(CUarray *pHandle, const CUDA_ARRAY3D_DESCRIPTOR *pAllocateArray);
-// /**
-//  * @param pArrayDescriptor SEND_RECV
-//  * @param hArray SEND_ONLY
-//  */
-// CUresult cuArray3DGetDescriptor_v2(CUDA_ARRAY3D_DESCRIPTOR *pArrayDescriptor, CUarray hArray);
-// /**
-//  * @param pHandle SEND_RECV
-//  * @param pMipmappedArrayDesc SEND_RECV
-//  * @param numMipmapLevels SEND_ONLY
-//  */
-// CUresult cuMipmappedArrayCreate(CUmipmappedArray *pHandle, const CUDA_ARRAY3D_DESCRIPTOR *pMipmappedArrayDesc, unsigned int numMipmapLevels);
-// /**
-//  * @param pLevelArray SEND_RECV
-//  * @param hMipmappedArray SEND_ONLY
-//  * @param level SEND_ONLY
-//  */
-// CUresult cuMipmappedArrayGetLevel(CUarray *pLevelArray, CUmipmappedArray hMipmappedArray, unsigned int level);
-// /**
-//  * @param hMipmappedArray SEND_ONLY
-//  */
-// CUresult cuMipmappedArrayDestroy(CUmipmappedArray hMipmappedArray);
-// /**
-//  * @param handle SEND_RECV
-//  * @param dptr SEND_ONLY
-//  * @param size SEND_ONLY
-//  * @param handleType SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// CUresult cuMemGetHandleForAddressRange(void *handle, CUdeviceptr dptr, size_t size, CUmemRangeHandleType handleType, unsigned long long flags);
-// /**
-//  * @param ptr SEND_RECV
-//  * @param size SEND_ONLY
-//  * @param alignment SEND_ONLY
-//  * @param addr SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// CUresult cuMemAddressReserve(CUdeviceptr *ptr, size_t size, size_t alignment, CUdeviceptr addr, unsigned long long flags);
-// /**
-//  * @param ptr SEND_ONLY
-//  * @param size SEND_ONLY
-//  */
-// CUresult cuMemAddressFree(CUdeviceptr ptr, size_t size);
-// /**
-//  * @param handle SEND_RECV
-//  * @param size SEND_ONLY
-//  * @param prop SEND_RECV
-//  * @param flags SEND_ONLY
-//  */
-// CUresult cuMemCreate(CUmemGenericAllocationHandle *handle, size_t size, const CUmemAllocationProp *prop, unsigned long long flags);
-// /**
-//  * @param handle SEND_ONLY
-//  */
-// CUresult cuMemRelease(CUmemGenericAllocationHandle handle);
-// /**
-//  * @param ptr SEND_ONLY
-//  * @param size SEND_ONLY
-//  * @param offset SEND_ONLY
-//  * @param handle SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// CUresult cuMemMap(CUdeviceptr ptr, size_t size, size_t offset, CUmemGenericAllocationHandle handle, unsigned long long flags);
-// /**
-//  * @param mapInfoList SEND_RECV
-//  * @param count SEND_ONLY
-//  * @param hStream SEND_ONLY
-//  */
-// CUresult cuMemMapArrayAsync(CUarrayMapInfo *mapInfoList, unsigned int count, CUstream hStream);
-// /**
-//  * @param ptr SEND_ONLY
-//  * @param size SEND_ONLY
-//  */
-// CUresult cuMemUnmap(CUdeviceptr ptr, size_t size);
-// /**
-//  * @param ptr SEND_ONLY
-//  * @param size SEND_ONLY
-//  * @param desc SEND_RECV
-//  * @param count SEND_ONLY
-//  */
-// CUresult cuMemSetAccess(CUdeviceptr ptr, size_t size, const CUmemAccessDesc *desc, size_t count);
-// /**
-//  * @param flags SEND_RECV
-//  * @param location SEND_RECV
-//  * @param ptr SEND_ONLY
-//  */
-// CUresult cuMemGetAccess(unsigned long long *flags, const CUmemLocation *location, CUdeviceptr ptr);
-// /**
-//  * @param shareableHandle SEND_RECV
-//  * @param handle SEND_ONLY
-//  * @param handleType SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// CUresult cuMemExportToShareableHandle(void *shareableHandle, CUmemGenericAllocationHandle handle, CUmemAllocationHandleType handleType, unsigned long long flags);
-// /**
-//  * @param handle SEND_RECV
-//  * @param osHandle SEND_RECV
-//  * @param shHandleType SEND_ONLY
-//  */
-// CUresult cuMemImportFromShareableHandle(CUmemGenericAllocationHandle *handle, void *osHandle, CUmemAllocationHandleType shHandleType);
-// /**
-//  * @param granularity SEND_RECV
-//  * @param prop SEND_RECV
-//  * @param option SEND_ONLY
-//  */
-// CUresult cuMemGetAllocationGranularity(size_t *granularity, const CUmemAllocationProp *prop, CUmemAllocationGranularity_flags option);
-// /**
-//  * @param prop SEND_RECV
-//  * @param handle SEND_ONLY
-//  */
-// CUresult cuMemGetAllocationPropertiesFromHandle(CUmemAllocationProp *prop, CUmemGenericAllocationHandle handle);
-// /**
-//  * @param handle SEND_RECV
-//  * @param addr SEND_RECV
-//  */
-// CUresult cuMemRetainAllocationHandle(CUmemGenericAllocationHandle *handle, void *addr);
-// /**
-//  * @param dptr SEND_ONLY
-//  * @param hStream SEND_ONLY
-//  */
-// CUresult cuMemFreeAsync(CUdeviceptr dptr, CUstream hStream);
-// /**
-//  * @param dptr SEND_RECV
-//  * @param bytesize SEND_ONLY
-//  * @param hStream SEND_ONLY
-//  */
-// CUresult cuMemAllocAsync(CUdeviceptr *dptr, size_t bytesize, CUstream hStream);
-// /**
-//  * @param pool SEND_ONLY
-//  * @param minBytesToKeep SEND_ONLY
-//  */
-// CUresult cuMemPoolTrimTo(CUmemoryPool pool, size_t minBytesToKeep);
-// /**
-//  * @param pool SEND_ONLY
-//  * @param attr SEND_ONLY
-//  * @param value SEND_RECV
-//  */
-// CUresult cuMemPoolSetAttribute(CUmemoryPool pool, CUmemPool_attribute attr, void *value);
-// /**
-//  * @param pool SEND_ONLY
-//  * @param attr SEND_ONLY
-//  * @param value SEND_RECV
-//  */
-// CUresult cuMemPoolGetAttribute(CUmemoryPool pool, CUmemPool_attribute attr, void *value);
-// /**
-//  * @param pool SEND_ONLY
-//  * @param map SEND_RECV
-//  * @param count SEND_ONLY
-//  */
-// CUresult cuMemPoolSetAccess(CUmemoryPool pool, const CUmemAccessDesc *map, size_t count);
-// /**
-//  * @param flags SEND_RECV
-//  * @param memPool SEND_ONLY
-//  * @param location SEND_RECV
-//  */
-// CUresult cuMemPoolGetAccess(CUmemAccess_flags *flags, CUmemoryPool memPool, CUmemLocation *location);
-// /**
-//  * @param pool SEND_RECV
-//  * @param poolProps SEND_RECV
-//  */
-// CUresult cuMemPoolCreate(CUmemoryPool *pool, const CUmemPoolProps *poolProps);
-// /**
-//  * @param pool SEND_ONLY
-//  */
-// CUresult cuMemPoolDestroy(CUmemoryPool pool);
-// /**
-//  * @param dptr SEND_RECV
-//  * @param bytesize SEND_ONLY
-//  * @param pool SEND_ONLY
-//  * @param hStream SEND_ONLY
-//  */
-// CUresult cuMemAllocFromPoolAsync(CUdeviceptr *dptr, size_t bytesize, CUmemoryPool pool, CUstream hStream);
-// /**
-//  * @param handle_out SEND_RECV
-//  * @param pool SEND_ONLY
-//  * @param handleType SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// CUresult cuMemPoolExportToShareableHandle(void *handle_out, CUmemoryPool pool, CUmemAllocationHandleType handleType, unsigned long long flags);
-// /**
-//  * @param pool_out SEND_RECV
-//  * @param handle SEND_RECV
-//  * @param handleType SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// CUresult cuMemPoolImportFromShareableHandle(CUmemoryPool *pool_out, void *handle, CUmemAllocationHandleType handleType, unsigned long long flags);
-// /**
-//  * @param shareData_out SEND_RECV
-//  * @param ptr SEND_ONLY
-//  */
-// CUresult cuMemPoolExportPointer(CUmemPoolPtrExportData *shareData_out, CUdeviceptr ptr);
-// /**
-//  * @param ptr_out SEND_RECV
-//  * @param pool SEND_ONLY
-//  * @param shareData SEND_RECV
-//  */
-// CUresult cuMemPoolImportPointer(CUdeviceptr *ptr_out, CUmemoryPool pool, CUmemPoolPtrExportData *shareData);
-// /**
-//  * @param data SEND_RECV
-//  * @param attribute SEND_ONLY
-//  * @param ptr SEND_ONLY
-//  */
-// CUresult cuPointerGetAttribute(void *data, CUpointer_attribute attribute, CUdeviceptr ptr);
-// /**
-//  * @param devPtr SEND_ONLY
-//  * @param count SEND_ONLY
-//  * @param dstDevice SEND_ONLY
-//  * @param hStream SEND_ONLY
-//  */
-// CUresult cuMemPrefetchAsync(CUdeviceptr devPtr, size_t count, CUdevice dstDevice, CUstream hStream);
-// /**
-//  * @param devPtr SEND_ONLY
-//  * @param count SEND_ONLY
-//  * @param advice SEND_ONLY
-//  * @param device SEND_ONLY
-//  */
-// CUresult cuMemAdvise(CUdeviceptr devPtr, size_t count, CUmem_advise advice, CUdevice device);
-// /**
-//  * @param data SEND_RECV
-//  * @param dataSize SEND_ONLY
-//  * @param attribute SEND_ONLY
-//  * @param devPtr SEND_ONLY
-//  * @param count SEND_ONLY
-//  */
-// CUresult cuMemRangeGetAttribute(void *data, size_t dataSize, CUmem_range_attribute attribute, CUdeviceptr devPtr, size_t count);
-// /**
-//  * @param data SEND_RECV
-//  * @param dataSizes SEND_RECV
-//  * @param attributes SEND_RECV
-//  * @param numAttributes SEND_ONLY
-//  * @param devPtr SEND_ONLY
-//  * @param count SEND_ONLY
-//  */
-// CUresult cuMemRangeGetAttributes(void **data, size_t *dataSizes, CUmem_range_attribute *attributes, size_t numAttributes, CUdeviceptr devPtr, size_t count);
-// /**
-//  * @param value SEND_RECV
-//  * @param attribute SEND_ONLY
-//  * @param ptr SEND_ONLY
-//  */
-// CUresult cuPointerSetAttribute(const void *value, CUpointer_attribute attribute, CUdeviceptr ptr);
-// /**
-//  * @param numAttributes SEND_ONLY
-//  * @param attributes SEND_RECV
-//  * @param data SEND_RECV
-//  * @param ptr SEND_ONLY
-//  */
-// CUresult cuPointerGetAttributes(unsigned int numAttributes, CUpointer_attribute *attributes, void **data, CUdeviceptr ptr);
-// /**
-//  * @param phStream SEND_RECV
-//  * @param Flags SEND_ONLY
-//  */
-// CUresult cuStreamCreate(CUstream *phStream, unsigned int Flags);
-// /**
-//  * @param phStream SEND_RECV
-//  * @param flags SEND_ONLY
-//  * @param priority SEND_ONLY
-//  */
-// CUresult cuStreamCreateWithPriority(CUstream *phStream, unsigned int flags, int priority);
-// /**
-//  * @param hStream SEND_ONLY
-//  * @param priority SEND_RECV
-//  */
-// CUresult cuStreamGetPriority(CUstream hStream, int *priority);
-// /**
-//  * @param hStream SEND_ONLY
-//  * @param flags SEND_RECV
-//  */
-// CUresult cuStreamGetFlags(CUstream hStream, unsigned int *flags);
-// /**
-//  * @param hStream SEND_ONLY
-//  * @param streamId SEND_RECV
-//  */
-// CUresult cuStreamGetId(CUstream hStream, unsigned long long *streamId);
-// /**
-//  * @param hStream SEND_ONLY
-//  * @param pctx SEND_RECV
-//  */
-// CUresult cuStreamGetCtx(CUstream hStream, CUcontext *pctx);
-// /**
-//  * @param hStream SEND_ONLY
-//  * @param hEvent SEND_ONLY
-//  * @param Flags SEND_ONLY
-//  */
-// CUresult cuStreamWaitEvent(CUstream hStream, CUevent hEvent, unsigned int Flags);
-// /**
-//  * @param hStream SEND_ONLY
-//  * @param callback SEND_ONLY
-//  * @param userData SEND_RECV
-//  * @param flags SEND_ONLY
-//  */
-// CUresult cuStreamAddCallback(CUstream hStream, CUstreamCallback callback, void *userData, unsigned int flags);
-// /**
-//  * @param hStream SEND_ONLY
-//  * @param mode SEND_ONLY
-//  */
-// CUresult cuStreamBeginCapture_v2(CUstream hStream, CUstreamCaptureMode mode);
-// /**
-//  * @param mode SEND_RECV
-//  */
-// CUresult cuThreadExchangeStreamCaptureMode(CUstreamCaptureMode *mode);
-// /**
-//  * @param hStream SEND_ONLY
-//  * @param phGraph SEND_RECV
-//  */
-// CUresult cuStreamEndCapture(CUstream hStream, CUgraph *phGraph);
-// /**
-//  * @param hStream SEND_ONLY
-//  * @param captureStatus SEND_RECV
-//  */
-// CUresult cuStreamIsCapturing(CUstream hStream, CUstreamCaptureStatus *captureStatus);
-// /**
-//  * @param hStream SEND_ONLY
-//  * @param captureStatus_out RECV_ONLY
-//  * @param id_out RECV_ONLY
-//  * @param graph_out RECV_ONLY
-//  * @param numDependencies_out RECV_ONLY
-//  * @param dependencies_out RECV_ONLY LENGTH:numDependencies_out
-//  */
-// CUresult cuStreamGetCaptureInfo_v2(CUstream hStream, CUstreamCaptureStatus *captureStatus_out, cuuint64_t *id_out, CUgraph *graph_out, const CUgraphNode **dependencies_out, size_t *numDependencies_out);
-// /**
-//  * @param hStream SEND_ONLY
-//  * @param dependencies SEND_RECV
-//  * @param numDependencies SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// CUresult cuStreamUpdateCaptureDependencies(CUstream hStream, CUgraphNode *dependencies, size_t numDependencies, unsigned int flags);
-// /**
-//  * @param hStream SEND_ONLY
-//  * @param dptr SEND_ONLY
-//  * @param length SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// CUresult cuStreamAttachMemAsync(CUstream hStream, CUdeviceptr dptr, size_t length, unsigned int flags);
-// /**
-//  * @param hStream SEND_ONLY
-//  */
-// CUresult cuStreamQuery(CUstream hStream);
-// /**
-//  * @param hStream SEND_ONLY
-//  */
-// CUresult cuStreamSynchronize(CUstream hStream);
-// /**
-//  * @param hStream SEND_ONLY
-//  */
-// CUresult cuStreamDestroy_v2(CUstream hStream);
-// /**
-//  * @param dst SEND_ONLY
-//  * @param src SEND_ONLY
-//  */
-// CUresult cuStreamCopyAttributes(CUstream dst, CUstream src);
-// /**
-//  * @param hStream SEND_ONLY
-//  * @param attr SEND_ONLY
-//  * @param value_out SEND_RECV
-//  */
-// CUresult cuStreamGetAttribute(CUstream hStream, CUstreamAttrID attr, CUstreamAttrValue *value_out);
-// /**
-//  * @param hStream SEND_ONLY
-//  * @param attr SEND_ONLY
-//  * @param value SEND_RECV
-//  */
-// CUresult cuStreamSetAttribute(CUstream hStream, CUstreamAttrID attr, const CUstreamAttrValue *value);
-// /**
-//  * @param phEvent SEND_RECV
-//  * @param Flags SEND_ONLY
-//  */
-// CUresult cuEventCreate(CUevent *phEvent, unsigned int Flags);
-// /**
-//  * @param hEvent SEND_ONLY
-//  * @param hStream SEND_ONLY
-//  */
-// CUresult cuEventRecord(CUevent hEvent, CUstream hStream);
-// /**
-//  * @param hEvent SEND_ONLY
-//  * @param hStream SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// CUresult cuEventRecordWithFlags(CUevent hEvent, CUstream hStream, unsigned int flags);
-// /**
-//  * @param hEvent SEND_ONLY
-//  */
-// CUresult cuEventQuery(CUevent hEvent);
-// /**
-//  * @param hEvent SEND_ONLY
-//  */
-// CUresult cuEventSynchronize(CUevent hEvent);
-// /**
-//  * @param hEvent SEND_ONLY
-//  */
-// CUresult cuEventDestroy_v2(CUevent hEvent);
-// /**
-//  * @param pMilliseconds SEND_RECV
-//  * @param hStart SEND_ONLY
-//  * @param hEnd SEND_ONLY
-//  */
-// CUresult cuEventElapsedTime(float *pMilliseconds, CUevent hStart, CUevent hEnd);
-// /**
-//  * @param extMem_out SEND_RECV
-//  * @param memHandleDesc SEND_RECV
-//  */
-// CUresult cuImportExternalMemory(CUexternalMemory *extMem_out, const CUDA_EXTERNAL_MEMORY_HANDLE_DESC *memHandleDesc);
-// /**
-//  * @param devPtr SEND_RECV
-//  * @param extMem SEND_ONLY
-//  * @param bufferDesc SEND_RECV
-//  */
-// CUresult cuExternalMemoryGetMappedBuffer(CUdeviceptr *devPtr, CUexternalMemory extMem, const CUDA_EXTERNAL_MEMORY_BUFFER_DESC *bufferDesc);
-// /**
-//  * @param mipmap SEND_RECV
-//  * @param extMem SEND_ONLY
-//  * @param mipmapDesc SEND_RECV
-//  */
-// CUresult cuExternalMemoryGetMappedMipmappedArray(CUmipmappedArray *mipmap, CUexternalMemory extMem, const CUDA_EXTERNAL_MEMORY_MIPMAPPED_ARRAY_DESC *mipmapDesc);
-// /**
-//  * @param extMem SEND_ONLY
-//  */
-// CUresult cuDestroyExternalMemory(CUexternalMemory extMem);
-// /**
-//  * @param extSem_out SEND_RECV
-//  * @param semHandleDesc SEND_RECV
-//  */
-// CUresult cuImportExternalSemaphore(CUexternalSemaphore *extSem_out, const CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC *semHandleDesc);
-// /**
-//  * @param extSemArray SEND_RECV
-//  * @param paramsArray SEND_RECV
-//  * @param numExtSems SEND_ONLY
-//  * @param stream SEND_ONLY
-//  */
-// CUresult cuSignalExternalSemaphoresAsync(const CUexternalSemaphore *extSemArray, const CUDA_EXTERNAL_SEMAPHORE_SIGNAL_PARAMS *paramsArray, unsigned int numExtSems, CUstream stream);
-// /**
-//  * @param extSemArray SEND_RECV
-//  * @param paramsArray SEND_RECV
-//  * @param numExtSems SEND_ONLY
-//  * @param stream SEND_ONLY
-//  */
-// CUresult cuWaitExternalSemaphoresAsync(const CUexternalSemaphore *extSemArray, const CUDA_EXTERNAL_SEMAPHORE_WAIT_PARAMS *paramsArray, unsigned int numExtSems, CUstream stream);
-// /**
-//  * @param extSem SEND_ONLY
-//  */
-// CUresult cuDestroyExternalSemaphore(CUexternalSemaphore extSem);
-// /**
-//  * @param stream SEND_ONLY
-//  * @param addr SEND_ONLY
-//  * @param value SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// CUresult cuStreamWaitValue32_v2(CUstream stream, CUdeviceptr addr, cuuint32_t value, unsigned int flags);
-// /**
-//  * @param stream SEND_ONLY
-//  * @param addr SEND_ONLY
-//  * @param value SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// CUresult cuStreamWaitValue64_v2(CUstream stream, CUdeviceptr addr, cuuint64_t value, unsigned int flags);
-// /**
-//  * @param stream SEND_ONLY
-//  * @param addr SEND_ONLY
-//  * @param value SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// CUresult cuStreamWriteValue32_v2(CUstream stream, CUdeviceptr addr, cuuint32_t value, unsigned int flags);
-// /**
-//  * @param stream SEND_ONLY
-//  * @param addr SEND_ONLY
-//  * @param value SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// CUresult cuStreamWriteValue64_v2(CUstream stream, CUdeviceptr addr, cuuint64_t value, unsigned int flags);
-// /**
-//  * @param stream SEND_ONLY
-//  * @param count SEND_ONLY
-//  * @param paramArray SEND_RECV
-//  * @param flags SEND_ONLY
-//  */
-// CUresult cuStreamBatchMemOp_v2(CUstream stream, unsigned int count, CUstreamBatchMemOpParams *paramArray, unsigned int flags);
-// /**
-//  * @param pi SEND_RECV
-//  * @param attrib SEND_ONLY
-//  * @param hfunc SEND_ONLY
-//  */
-// CUresult cuFuncGetAttribute(int *pi, CUfunction_attribute attrib, CUfunction hfunc);
-// /**
-//  * @param hfunc SEND_ONLY
-//  * @param attrib SEND_ONLY
-//  * @param value SEND_ONLY
-//  */
-// CUresult cuFuncSetAttribute(CUfunction hfunc, CUfunction_attribute attrib, int value);
-// /**
-//  * @param hfunc SEND_ONLY
-//  * @param config SEND_ONLY
-//  */
-// CUresult cuFuncSetCacheConfig(CUfunction hfunc, CUfunc_cache config);
-// /**
-//  * @param hfunc SEND_ONLY
-//  * @param config SEND_ONLY
-//  */
-// CUresult cuFuncSetSharedMemConfig(CUfunction hfunc, CUsharedconfig config);
-// /**
-//  * @param hmod SEND_RECV
-//  * @param hfunc SEND_ONLY
-//  */
-// CUresult cuFuncGetModule(CUmodule *hmod, CUfunction hfunc);
+/**
+ * @param mode SEND_RECV
+ */
+CUresult cuModuleGetLoadingMode(CUmoduleLoadingMode *mode);
+/**
+ * @param hfunc RECV_ONLY
+ * @param hmod SEND_ONLY
+ * @param name SEND_ONLY NULL_TERMINATED
+ */
+CUresult cuModuleGetFunction(CUfunction *hfunc, CUmodule hmod, const char *name);
+/**
+ * @param dptr RECV_ONLY
+ * @param bytes RECV_ONLY
+ * @param hmod SEND_ONLY
+ * @param name SEND_ONLY NULL_TERMINATED
+ */
+CUresult cuModuleGetGlobal_v2(CUdeviceptr *dptr, size_t *bytes, CUmodule hmod, const char *name);
+/**
+ * @param numOptions SEND_ONLY
+ * @param options SEND_RECV
+ * @param optionValues SEND_RECV
+ * @param stateOut SEND_RECV
+ */
+CUresult cuLinkCreate_v2(unsigned int numOptions, CUjit_option *options, void **optionValues, CUlinkState *stateOut);
+/**
+ * @param state SEND_ONLY
+ * @param type SEND_ONLY
+ * @param data SEND_RECV
+ * @param size SEND_ONLY
+ * @param name SEND_ONLY NULL_TERMINATED
+ * @param numOptions SEND_ONLY
+ * @param options SEND_ONLY LENGTH:numOptions
+ * @param optionValues SEND_ONLY LENGTH:numOptions
+ */
+CUresult cuLinkAddData_v2(CUlinkState state, CUjitInputType type, void *data, size_t size, const char *name, unsigned int numOptions, CUjit_option *options, void **optionValues);
+/**
+ * @param state SEND_ONLY
+ * @param type SEND_ONLY
+ * @param path SEND_ONLY NULL_TERMINATED
+ * @param numOptions SEND_ONLY
+ * @param options SEND_ONLY LENGTH:numOptions
+ * @param optionValues SEND_ONLY LENGTH:numOptions
+ */
+CUresult cuLinkAddFile_v2(CUlinkState state, CUjitInputType type, const char *path, unsigned int numOptions, CUjit_option *options, void **optionValues);
+/**
+ * @param state SEND_ONLY
+ * @param cubinOut RECV_ONLY
+ * @param sizeOut RECV_ONLY
+ */
+CUresult cuLinkComplete(CUlinkState state, void **cubinOut, size_t *sizeOut);
+/**
+ * @param state SEND_ONLY
+ */
+CUresult cuLinkDestroy(CUlinkState state);
+/**
+ * @param pTexRef RECV_ONLY
+ * @param hmod SEND_ONLY
+ * @param name SEND_ONLY NULL_TERMINATED
+ */
+CUresult cuModuleGetTexRef(CUtexref *pTexRef, CUmodule hmod, const char *name);
+/**
+ * @param pSurfRef RECV_ONLY
+ * @param hmod SEND_ONLY
+ * @param name SEND_ONLY NULL_TERMINATED
+ */
+CUresult cuModuleGetSurfRef(CUsurfref *pSurfRef, CUmodule hmod, const char *name);
+/**
+ * @param library RECV_ONLY
+ * @param code SEND_ONLY
+ * @param numJitOptions SEND_ONLY
+ * @param jitOptions SEND_ONLY LENGTH:numJitOptions
+ * @param jitOptionsValues SEND_ONLY LENGTH:numJitOptions
+ * @param numLibraryOptions SEND_ONLY
+ * @param libraryOptions SEND_ONLY LENGTH:numLibraryOptions
+ * @param libraryOptionValues SEND_ONLY LENGTH:numLibraryOptions
+ */
+CUresult cuLibraryLoadData(CUlibrary *library, const void *code, CUjit_option *jitOptions, void **jitOptionsValues, unsigned int numJitOptions, CUlibraryOption *libraryOptions, void **libraryOptionValues, unsigned int numLibraryOptions);
+/**
+ * @param library RECV_ONLY
+ * @param fileName SEND_ONLY NULL_TERMINATED
+ * @param numJitOptions SEND_ONLY
+ * @param jitOptions SEND_ONLY LENGTH:numJitOptions
+ * @param jitOptionsValues SEND_ONLY LENGTH:numJitOptions
+ * @param numLibraryOptions SEND_ONLY
+ * @param libraryOptions SEND_ONLY LENGTH:numLibraryOptions
+ * @param libraryOptionValues SEND_ONLY LENGTH:numLibraryOptions
+ */
+CUresult cuLibraryLoadFromFile(CUlibrary *library, const char *fileName, CUjit_option *jitOptions, void **jitOptionsValues, unsigned int numJitOptions, CUlibraryOption *libraryOptions, void **libraryOptionValues, unsigned int numLibraryOptions);
+/**
+ * @param library SEND_ONLY
+ */
+CUresult cuLibraryUnload(CUlibrary library);
+/**
+ * @param pKernel RECV_ONLY
+ * @param library SEND_ONLY
+ * @param name SEND_ONLY NULL_TERMINATED
+ */
+CUresult cuLibraryGetKernel(CUkernel *pKernel, CUlibrary library, const char *name);
+/**
+ * @param pMod RECV_ONLY
+ * @param library SEND_ONLY
+ */
+CUresult cuLibraryGetModule(CUmodule *pMod, CUlibrary library);
+/**
+ * @param pFunc RECV_ONLY
+ * @param kernel SEND_ONLY
+ */
+CUresult cuKernelGetFunction(CUfunction *pFunc, CUkernel kernel);
+/**
+ * @param dptr RECV_ONLY
+ * @param bytes RECV_ONLY
+ * @param library SEND_ONLY
+ * @param name SEND_ONLY NULL_TERMINATED
+ */
+CUresult cuLibraryGetGlobal(CUdeviceptr *dptr, size_t *bytes, CUlibrary library, const char *name);
+/**
+ * @param dptr RECV_ONLY
+ * @param bytes RECV_ONLY
+ * @param library SEND_ONLY
+ * @param name SEND_ONLY NULL_TERMINATED
+ */
+CUresult cuLibraryGetManaged(CUdeviceptr *dptr, size_t *bytes, CUlibrary library, const char *name);
+/**
+ * @param fptr RECV_ONLY
+ * @param library SEND_ONLY
+ * @param symbol SEND_ONLY NULL_TERMINATED
+ */
+CUresult cuLibraryGetUnifiedFunction(void **fptr, CUlibrary library, const char *symbol);
+/**
+ * @param pi SEND_RECV
+ * @param attrib SEND_ONLY
+ * @param kernel SEND_ONLY
+ * @param dev SEND_ONLY
+ */
+CUresult cuKernelGetAttribute(int *pi, CUfunction_attribute attrib, CUkernel kernel, CUdevice dev);
+/**
+ * @param attrib SEND_ONLY
+ * @param val SEND_ONLY
+ * @param kernel SEND_ONLY
+ * @param dev SEND_ONLY
+ */
+CUresult cuKernelSetAttribute(CUfunction_attribute attrib, int val, CUkernel kernel, CUdevice dev);
+/**
+ * @param kernel SEND_ONLY
+ * @param config SEND_ONLY
+ * @param dev SEND_ONLY
+ */
+CUresult cuKernelSetCacheConfig(CUkernel kernel, CUfunc_cache config, CUdevice dev);
+/**
+ * @param free SEND_RECV
+ * @param total SEND_RECV
+ */
+CUresult cuMemGetInfo_v2(size_t *free, size_t *total);
+/**
+ * @param dptr SEND_RECV
+ * @param bytesize SEND_ONLY
+ */
+CUresult cuMemAlloc_v2(CUdeviceptr *dptr, size_t bytesize);
+/**
+ * @param dptr SEND_RECV
+ * @param pPitch SEND_RECV
+ * @param WidthInBytes SEND_ONLY
+ * @param Height SEND_ONLY
+ * @param ElementSizeBytes SEND_ONLY
+ */
+CUresult cuMemAllocPitch_v2(CUdeviceptr *dptr, size_t *pPitch, size_t WidthInBytes, size_t Height, unsigned int ElementSizeBytes);
+/**
+ * @param dptr SEND_ONLY
+ */
+CUresult cuMemFree_v2(CUdeviceptr dptr);
+/**
+ * @param pbase SEND_RECV
+ * @param psize SEND_RECV
+ * @param dptr SEND_ONLY
+ */
+CUresult cuMemGetAddressRange_v2(CUdeviceptr *pbase, size_t *psize, CUdeviceptr dptr);
+/**
+ * @param pp SEND_RECV
+ * @param bytesize SEND_ONLY
+ */
+CUresult cuMemAllocHost_v2(void **pp, size_t bytesize);
+/**
+ * @param p SEND_RECV
+ */
+CUresult cuMemFreeHost(void *p);
+/**
+ * @param pp SEND_RECV
+ * @param bytesize SEND_ONLY
+ * @param Flags SEND_ONLY
+ */
+CUresult cuMemHostAlloc(void **pp, size_t bytesize, unsigned int Flags);
+/**
+ * @param pdptr SEND_RECV
+ * @param p SEND_RECV
+ * @param Flags SEND_ONLY
+ */
+CUresult cuMemHostGetDevicePointer_v2(CUdeviceptr *pdptr, void *p, unsigned int Flags);
+/**
+ * @param pFlags SEND_RECV
+ * @param p SEND_RECV
+ */
+CUresult cuMemHostGetFlags(unsigned int *pFlags, void *p);
+/**
+ * @param dptr SEND_RECV
+ * @param bytesize SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+CUresult cuMemAllocManaged(CUdeviceptr *dptr, size_t bytesize, unsigned int flags);
+/**
+ * @param dev SEND_RECV
+ * @param pciBusId SEND_ONLY NULL_TERMINATED
+ */
+CUresult cuDeviceGetByPCIBusId(CUdevice *dev, const char *pciBusId);
+/**
+ * @param len SEND_ONLY
+ * @param pciBusId RECV_ONLY LENGTH:len
+ * @param dev SEND_ONLY
+ */
+CUresult cuDeviceGetPCIBusId(char *pciBusId, int len, CUdevice dev);
+/**
+ * @param pHandle SEND_RECV
+ * @param event SEND_ONLY
+ */
+CUresult cuIpcGetEventHandle(CUipcEventHandle *pHandle, CUevent event);
+/**
+ * @param phEvent SEND_RECV
+ * @param handle SEND_ONLY
+ */
+CUresult cuIpcOpenEventHandle(CUevent *phEvent, CUipcEventHandle handle);
+/**
+ * @param pHandle SEND_RECV
+ * @param dptr SEND_ONLY
+ */
+CUresult cuIpcGetMemHandle(CUipcMemHandle *pHandle, CUdeviceptr dptr);
+/**
+ * @param pdptr SEND_RECV
+ * @param handle SEND_ONLY
+ * @param Flags SEND_ONLY
+ */
+CUresult cuIpcOpenMemHandle_v2(CUdeviceptr *pdptr, CUipcMemHandle handle, unsigned int Flags);
+/**
+ * @param dptr SEND_ONLY
+ */
+CUresult cuIpcCloseMemHandle(CUdeviceptr dptr);
+/**
+ * @param p SEND_RECV
+ * @param bytesize SEND_ONLY
+ * @param Flags SEND_ONLY
+ */
+CUresult cuMemHostRegister_v2(void *p, size_t bytesize, unsigned int Flags);
+/**
+ * @param p SEND_RECV
+ */
+CUresult cuMemHostUnregister(void *p);
+/**
+ * @param dst SEND_ONLY
+ * @param src SEND_ONLY
+ * @param ByteCount SEND_ONLY
+ */
+CUresult cuMemcpy(CUdeviceptr dst, CUdeviceptr src, size_t ByteCount);
+/**
+ * @param dstDevice SEND_ONLY
+ * @param dstContext SEND_ONLY
+ * @param srcDevice SEND_ONLY
+ * @param srcContext SEND_ONLY
+ * @param ByteCount SEND_ONLY
+ */
+CUresult cuMemcpyPeer(CUdeviceptr dstDevice, CUcontext dstContext, CUdeviceptr srcDevice, CUcontext srcContext, size_t ByteCount);
+/**
+ * @param dstDevice SEND_ONLY
+ * @param srcHost SEND_RECV
+ * @param ByteCount SEND_ONLY
+ */
+CUresult cuMemcpyHtoD_v2(CUdeviceptr dstDevice, const void *srcHost, size_t ByteCount);
+/**
+ * @param dstHost SEND_RECV
+ * @param srcDevice SEND_ONLY
+ * @param ByteCount SEND_ONLY
+ */
+CUresult cuMemcpyDtoH_v2(void *dstHost, CUdeviceptr srcDevice, size_t ByteCount);
+/**
+ * @param dstDevice SEND_ONLY
+ * @param srcDevice SEND_ONLY
+ * @param ByteCount SEND_ONLY
+ */
+CUresult cuMemcpyDtoD_v2(CUdeviceptr dstDevice, CUdeviceptr srcDevice, size_t ByteCount);
+/**
+ * @param dstArray SEND_ONLY
+ * @param dstOffset SEND_ONLY
+ * @param srcDevice SEND_ONLY
+ * @param ByteCount SEND_ONLY
+ */
+CUresult cuMemcpyDtoA_v2(CUarray dstArray, size_t dstOffset, CUdeviceptr srcDevice, size_t ByteCount);
+/**
+ * @param dstDevice SEND_ONLY
+ * @param srcArray SEND_ONLY
+ * @param srcOffset SEND_ONLY
+ * @param ByteCount SEND_ONLY
+ */
+CUresult cuMemcpyAtoD_v2(CUdeviceptr dstDevice, CUarray srcArray, size_t srcOffset, size_t ByteCount);
+/**
+ * @param dstArray SEND_ONLY
+ * @param dstOffset SEND_ONLY
+ * @param srcHost SEND_ONLY
+ * @param ByteCount SEND_ONLY
+ */
+CUresult cuMemcpyHtoA_v2(CUarray dstArray, size_t dstOffset, const void *srcHost, size_t ByteCount);
+/**
+ * @param dstHost SEND_ONLY
+ * @param srcArray SEND_ONLY
+ * @param srcOffset SEND_ONLY
+ * @param ByteCount SEND_ONLY
+ */
+CUresult cuMemcpyAtoH_v2(void *dstHost, CUarray srcArray, size_t srcOffset, size_t ByteCount);
+/**
+ * @param dstArray SEND_ONLY
+ * @param dstOffset SEND_ONLY
+ * @param srcArray SEND_ONLY
+ * @param srcOffset SEND_ONLY
+ * @param ByteCount SEND_ONLY
+ */
+CUresult cuMemcpyAtoA_v2(CUarray dstArray, size_t dstOffset, CUarray srcArray, size_t srcOffset, size_t ByteCount);
+/**
+ * @param pCopy SEND_ONLY
+ */
+CUresult cuMemcpy2D_v2(const CUDA_MEMCPY2D *pCopy);
+/**
+ * @param pCopy SEND_ONLY
+ */
+CUresult cuMemcpy2DUnaligned_v2(const CUDA_MEMCPY2D *pCopy);
+/**
+ * @param pCopy SEND_ONLY
+ */
+CUresult cuMemcpy3D_v2(const CUDA_MEMCPY3D *pCopy);
+/**
+ * @param pCopy SEND_ONLY
+ */
+CUresult cuMemcpy3DPeer(const CUDA_MEMCPY3D_PEER *pCopy);
+/**
+ * @param dst SEND_ONLY
+ * @param src SEND_ONLY
+ * @param ByteCount SEND_ONLY
+ * @param hStream SEND_ONLY
+ */
+CUresult cuMemcpyAsync(CUdeviceptr dst, CUdeviceptr src, size_t ByteCount, CUstream hStream);
+/**
+ * @param dstDevice SEND_ONLY
+ * @param dstContext SEND_ONLY
+ * @param srcDevice SEND_ONLY
+ * @param srcContext SEND_ONLY
+ * @param ByteCount SEND_ONLY
+ * @param hStream SEND_ONLY
+ */
+CUresult cuMemcpyPeerAsync(CUdeviceptr dstDevice, CUcontext dstContext, CUdeviceptr srcDevice, CUcontext srcContext, size_t ByteCount, CUstream hStream);
+/**
+ * @param dstDevice SEND_ONLY
+ * @param srcHost SEND_RECV
+ * @param ByteCount SEND_ONLY
+ * @param hStream SEND_ONLY
+ */
+CUresult cuMemcpyHtoDAsync_v2(CUdeviceptr dstDevice, const void *srcHost, size_t ByteCount, CUstream hStream);
+/**
+ * @param dstHost SEND_RECV
+ * @param srcDevice SEND_ONLY
+ * @param ByteCount SEND_ONLY
+ * @param hStream SEND_ONLY
+ */
+CUresult cuMemcpyDtoHAsync_v2(void *dstHost, CUdeviceptr srcDevice, size_t ByteCount, CUstream hStream);
+/**
+ * @param dstDevice SEND_ONLY
+ * @param srcDevice SEND_ONLY
+ * @param ByteCount SEND_ONLY
+ * @param hStream SEND_ONLY
+ */
+CUresult cuMemcpyDtoDAsync_v2(CUdeviceptr dstDevice, CUdeviceptr srcDevice, size_t ByteCount, CUstream hStream);
+/**
+ * @param dstArray SEND_ONLY
+ * @param dstOffset SEND_ONLY
+ * @param srcHost SEND_ONLY
+ * @param ByteCount SEND_ONLY
+ * @param hStream SEND_ONLY
+ */
+CUresult cuMemcpyHtoAAsync_v2(CUarray dstArray, size_t dstOffset, const void *srcHost, size_t ByteCount, CUstream hStream);
+/**
+ * @param dstHost SEND_RECV
+ * @param srcArray SEND_ONLY
+ * @param srcOffset SEND_ONLY
+ * @param ByteCount SEND_ONLY
+ * @param hStream SEND_ONLY
+ */
+CUresult cuMemcpyAtoHAsync_v2(void *dstHost, CUarray srcArray, size_t srcOffset, size_t ByteCount, CUstream hStream);
+/**
+ * @param pCopy SEND_ONLY
+ * @param hStream SEND_ONLY
+ */
+CUresult cuMemcpy2DAsync_v2(const CUDA_MEMCPY2D *pCopy, CUstream hStream);
+/**
+ * @param pCopy SEND_ONLY
+ * @param hStream SEND_ONLY
+ */
+CUresult cuMemcpy3DAsync_v2(const CUDA_MEMCPY3D *pCopy, CUstream hStream);
+/**
+ * @param pCopy SEND_ONLY
+ * @param hStream SEND_ONLY
+ */
+CUresult cuMemcpy3DPeerAsync(const CUDA_MEMCPY3D_PEER *pCopy, CUstream hStream);
+/**
+ * @param dstDevice SEND_ONLY
+ * @param uc SEND_ONLY
+ * @param N SEND_ONLY
+ */
+CUresult cuMemsetD8_v2(CUdeviceptr dstDevice, unsigned char uc, size_t N);
+/**
+ * @param dstDevice SEND_ONLY
+ * @param us SEND_ONLY
+ * @param N SEND_ONLY
+ */
+CUresult cuMemsetD16_v2(CUdeviceptr dstDevice, unsigned short us, size_t N);
+/**
+ * @param dstDevice SEND_ONLY
+ * @param ui SEND_ONLY
+ * @param N SEND_ONLY
+ */
+CUresult cuMemsetD32_v2(CUdeviceptr dstDevice, unsigned int ui, size_t N);
+/**
+ * @param dstDevice SEND_ONLY
+ * @param dstPitch SEND_ONLY
+ * @param uc SEND_ONLY
+ * @param Width SEND_ONLY
+ * @param Height SEND_ONLY
+ */
+CUresult cuMemsetD2D8_v2(CUdeviceptr dstDevice, size_t dstPitch, unsigned char uc, size_t Width, size_t Height);
+/**
+ * @param dstDevice SEND_ONLY
+ * @param dstPitch SEND_ONLY
+ * @param us SEND_ONLY
+ * @param Width SEND_ONLY
+ * @param Height SEND_ONLY
+ */
+CUresult cuMemsetD2D16_v2(CUdeviceptr dstDevice, size_t dstPitch, unsigned short us, size_t Width, size_t Height);
+/**
+ * @param dstDevice SEND_ONLY
+ * @param dstPitch SEND_ONLY
+ * @param ui SEND_ONLY
+ * @param Width SEND_ONLY
+ * @param Height SEND_ONLY
+ */
+CUresult cuMemsetD2D32_v2(CUdeviceptr dstDevice, size_t dstPitch, unsigned int ui, size_t Width, size_t Height);
+/**
+ * @param dstDevice SEND_ONLY
+ * @param uc SEND_ONLY
+ * @param N SEND_ONLY
+ * @param hStream SEND_ONLY
+ */
+CUresult cuMemsetD8Async(CUdeviceptr dstDevice, unsigned char uc, size_t N, CUstream hStream);
+/**
+ * @param dstDevice SEND_ONLY
+ * @param us SEND_ONLY
+ * @param N SEND_ONLY
+ * @param hStream SEND_ONLY
+ */
+CUresult cuMemsetD16Async(CUdeviceptr dstDevice, unsigned short us, size_t N, CUstream hStream);
+/**
+ * @param dstDevice SEND_ONLY
+ * @param ui SEND_ONLY
+ * @param N SEND_ONLY
+ * @param hStream SEND_ONLY
+ */
+CUresult cuMemsetD32Async(CUdeviceptr dstDevice, unsigned int ui, size_t N, CUstream hStream);
+/**
+ * @param dstDevice SEND_ONLY
+ * @param dstPitch SEND_ONLY
+ * @param uc SEND_ONLY
+ * @param Width SEND_ONLY
+ * @param Height SEND_ONLY
+ * @param hStream SEND_ONLY
+ */
+CUresult cuMemsetD2D8Async(CUdeviceptr dstDevice, size_t dstPitch, unsigned char uc, size_t Width, size_t Height, CUstream hStream);
+/**
+ * @param dstDevice SEND_ONLY
+ * @param dstPitch SEND_ONLY
+ * @param us SEND_ONLY
+ * @param Width SEND_ONLY
+ * @param Height SEND_ONLY
+ * @param hStream SEND_ONLY
+ */
+CUresult cuMemsetD2D16Async(CUdeviceptr dstDevice, size_t dstPitch, unsigned short us, size_t Width, size_t Height, CUstream hStream);
+/**
+ * @param dstDevice SEND_ONLY
+ * @param dstPitch SEND_ONLY
+ * @param ui SEND_ONLY
+ * @param Width SEND_ONLY
+ * @param Height SEND_ONLY
+ * @param hStream SEND_ONLY
+ */
+CUresult cuMemsetD2D32Async(CUdeviceptr dstDevice, size_t dstPitch, unsigned int ui, size_t Width, size_t Height, CUstream hStream);
+/**
+ * @param pHandle SEND_RECV
+ * @param pAllocateArray SEND_RECV
+ */
+CUresult cuArrayCreate_v2(CUarray *pHandle, const CUDA_ARRAY_DESCRIPTOR *pAllocateArray);
+/**
+ * @param pArrayDescriptor SEND_RECV
+ * @param hArray SEND_ONLY
+ */
+CUresult cuArrayGetDescriptor_v2(CUDA_ARRAY_DESCRIPTOR *pArrayDescriptor, CUarray hArray);
+/**
+ * @param sparseProperties SEND_RECV
+ * @param array SEND_ONLY
+ */
+CUresult cuArrayGetSparseProperties(CUDA_ARRAY_SPARSE_PROPERTIES *sparseProperties, CUarray array);
+/**
+ * @param sparseProperties SEND_RECV
+ * @param mipmap SEND_ONLY
+ */
+CUresult cuMipmappedArrayGetSparseProperties(CUDA_ARRAY_SPARSE_PROPERTIES *sparseProperties, CUmipmappedArray mipmap);
+/**
+ * @param memoryRequirements SEND_RECV
+ * @param array SEND_ONLY
+ * @param device SEND_ONLY
+ */
+CUresult cuArrayGetMemoryRequirements(CUDA_ARRAY_MEMORY_REQUIREMENTS *memoryRequirements, CUarray array, CUdevice device);
+/**
+ * @param memoryRequirements SEND_RECV
+ * @param mipmap SEND_ONLY
+ * @param device SEND_ONLY
+ */
+CUresult cuMipmappedArrayGetMemoryRequirements(CUDA_ARRAY_MEMORY_REQUIREMENTS *memoryRequirements, CUmipmappedArray mipmap, CUdevice device);
+/**
+ * @param pPlaneArray SEND_RECV
+ * @param hArray SEND_ONLY
+ * @param planeIdx SEND_ONLY
+ */
+CUresult cuArrayGetPlane(CUarray *pPlaneArray, CUarray hArray, unsigned int planeIdx);
+/**
+ * @param hArray SEND_ONLY
+ */
+CUresult cuArrayDestroy(CUarray hArray);
+/**
+ * @param pHandle SEND_RECV
+ * @param pAllocateArray SEND_RECV
+ */
+CUresult cuArray3DCreate_v2(CUarray *pHandle, const CUDA_ARRAY3D_DESCRIPTOR *pAllocateArray);
+/**
+ * @param pArrayDescriptor SEND_RECV
+ * @param hArray SEND_ONLY
+ */
+CUresult cuArray3DGetDescriptor_v2(CUDA_ARRAY3D_DESCRIPTOR *pArrayDescriptor, CUarray hArray);
+/**
+ * @param pHandle SEND_RECV
+ * @param pMipmappedArrayDesc SEND_RECV
+ * @param numMipmapLevels SEND_ONLY
+ */
+CUresult cuMipmappedArrayCreate(CUmipmappedArray *pHandle, const CUDA_ARRAY3D_DESCRIPTOR *pMipmappedArrayDesc, unsigned int numMipmapLevels);
+/**
+ * @param pLevelArray SEND_RECV
+ * @param hMipmappedArray SEND_ONLY
+ * @param level SEND_ONLY
+ */
+CUresult cuMipmappedArrayGetLevel(CUarray *pLevelArray, CUmipmappedArray hMipmappedArray, unsigned int level);
+/**
+ * @param hMipmappedArray SEND_ONLY
+ */
+CUresult cuMipmappedArrayDestroy(CUmipmappedArray hMipmappedArray);
+/**
+ * @param handle SEND_RECV
+ * @param dptr SEND_ONLY
+ * @param size SEND_ONLY
+ * @param handleType SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+CUresult cuMemGetHandleForAddressRange(void *handle, CUdeviceptr dptr, size_t size, CUmemRangeHandleType handleType, unsigned long long flags);
+/**
+ * @param ptr SEND_RECV
+ * @param size SEND_ONLY
+ * @param alignment SEND_ONLY
+ * @param addr SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+CUresult cuMemAddressReserve(CUdeviceptr *ptr, size_t size, size_t alignment, CUdeviceptr addr, unsigned long long flags);
+/**
+ * @param ptr SEND_ONLY
+ * @param size SEND_ONLY
+ */
+CUresult cuMemAddressFree(CUdeviceptr ptr, size_t size);
+/**
+ * @param handle SEND_RECV
+ * @param size SEND_ONLY
+ * @param prop SEND_RECV
+ * @param flags SEND_ONLY
+ */
+CUresult cuMemCreate(CUmemGenericAllocationHandle *handle, size_t size, const CUmemAllocationProp *prop, unsigned long long flags);
+/**
+ * @param handle SEND_ONLY
+ */
+CUresult cuMemRelease(CUmemGenericAllocationHandle handle);
+/**
+ * @param ptr SEND_ONLY
+ * @param size SEND_ONLY
+ * @param offset SEND_ONLY
+ * @param handle SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+CUresult cuMemMap(CUdeviceptr ptr, size_t size, size_t offset, CUmemGenericAllocationHandle handle, unsigned long long flags);
+/**
+ * @param mapInfoList SEND_RECV
+ * @param count SEND_ONLY
+ * @param hStream SEND_ONLY
+ */
+CUresult cuMemMapArrayAsync(CUarrayMapInfo *mapInfoList, unsigned int count, CUstream hStream);
+/**
+ * @param ptr SEND_ONLY
+ * @param size SEND_ONLY
+ */
+CUresult cuMemUnmap(CUdeviceptr ptr, size_t size);
+/**
+ * @param ptr SEND_ONLY
+ * @param size SEND_ONLY
+ * @param desc SEND_RECV
+ * @param count SEND_ONLY
+ */
+CUresult cuMemSetAccess(CUdeviceptr ptr, size_t size, const CUmemAccessDesc *desc, size_t count);
+/**
+ * @param flags SEND_RECV
+ * @param location SEND_RECV
+ * @param ptr SEND_ONLY
+ */
+CUresult cuMemGetAccess(unsigned long long *flags, const CUmemLocation *location, CUdeviceptr ptr);
+/**
+ * @param shareableHandle SEND_RECV
+ * @param handle SEND_ONLY
+ * @param handleType SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+CUresult cuMemExportToShareableHandle(void *shareableHandle, CUmemGenericAllocationHandle handle, CUmemAllocationHandleType handleType, unsigned long long flags);
+/**
+ * @param handle SEND_RECV
+ * @param osHandle SEND_RECV
+ * @param shHandleType SEND_ONLY
+ */
+CUresult cuMemImportFromShareableHandle(CUmemGenericAllocationHandle *handle, void *osHandle, CUmemAllocationHandleType shHandleType);
+/**
+ * @param granularity SEND_RECV
+ * @param prop SEND_RECV
+ * @param option SEND_ONLY
+ */
+CUresult cuMemGetAllocationGranularity(size_t *granularity, const CUmemAllocationProp *prop, CUmemAllocationGranularity_flags option);
+/**
+ * @param prop SEND_RECV
+ * @param handle SEND_ONLY
+ */
+CUresult cuMemGetAllocationPropertiesFromHandle(CUmemAllocationProp *prop, CUmemGenericAllocationHandle handle);
+/**
+ * @param handle SEND_RECV
+ * @param addr SEND_RECV
+ */
+CUresult cuMemRetainAllocationHandle(CUmemGenericAllocationHandle *handle, void *addr);
+/**
+ * @param dptr SEND_ONLY
+ * @param hStream SEND_ONLY
+ */
+CUresult cuMemFreeAsync(CUdeviceptr dptr, CUstream hStream);
+/**
+ * @param dptr SEND_RECV
+ * @param bytesize SEND_ONLY
+ * @param hStream SEND_ONLY
+ */
+CUresult cuMemAllocAsync(CUdeviceptr *dptr, size_t bytesize, CUstream hStream);
+/**
+ * @param pool SEND_ONLY
+ * @param minBytesToKeep SEND_ONLY
+ */
+CUresult cuMemPoolTrimTo(CUmemoryPool pool, size_t minBytesToKeep);
+/**
+ * @param pool SEND_ONLY
+ * @param attr SEND_ONLY
+ * @param value SEND_RECV
+ */
+CUresult cuMemPoolSetAttribute(CUmemoryPool pool, CUmemPool_attribute attr, void *value);
+/**
+ * @param pool SEND_ONLY
+ * @param attr SEND_ONLY
+ * @param value SEND_RECV
+ */
+CUresult cuMemPoolGetAttribute(CUmemoryPool pool, CUmemPool_attribute attr, void *value);
+/**
+ * @param pool SEND_ONLY
+ * @param map SEND_RECV
+ * @param count SEND_ONLY
+ */
+CUresult cuMemPoolSetAccess(CUmemoryPool pool, const CUmemAccessDesc *map, size_t count);
+/**
+ * @param flags SEND_RECV
+ * @param memPool SEND_ONLY
+ * @param location SEND_RECV
+ */
+CUresult cuMemPoolGetAccess(CUmemAccess_flags *flags, CUmemoryPool memPool, CUmemLocation *location);
+/**
+ * @param pool SEND_RECV
+ * @param poolProps SEND_RECV
+ */
+CUresult cuMemPoolCreate(CUmemoryPool *pool, const CUmemPoolProps *poolProps);
+/**
+ * @param pool SEND_ONLY
+ */
+CUresult cuMemPoolDestroy(CUmemoryPool pool);
+/**
+ * @param dptr SEND_RECV
+ * @param bytesize SEND_ONLY
+ * @param pool SEND_ONLY
+ * @param hStream SEND_ONLY
+ */
+CUresult cuMemAllocFromPoolAsync(CUdeviceptr *dptr, size_t bytesize, CUmemoryPool pool, CUstream hStream);
+/**
+ * @param handle_out SEND_RECV
+ * @param pool SEND_ONLY
+ * @param handleType SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+CUresult cuMemPoolExportToShareableHandle(void *handle_out, CUmemoryPool pool, CUmemAllocationHandleType handleType, unsigned long long flags);
+/**
+ * @param pool_out SEND_RECV
+ * @param handle SEND_RECV
+ * @param handleType SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+CUresult cuMemPoolImportFromShareableHandle(CUmemoryPool *pool_out, void *handle, CUmemAllocationHandleType handleType, unsigned long long flags);
+/**
+ * @param shareData_out SEND_RECV
+ * @param ptr SEND_ONLY
+ */
+CUresult cuMemPoolExportPointer(CUmemPoolPtrExportData *shareData_out, CUdeviceptr ptr);
+/**
+ * @param ptr_out SEND_RECV
+ * @param pool SEND_ONLY
+ * @param shareData SEND_RECV
+ */
+CUresult cuMemPoolImportPointer(CUdeviceptr *ptr_out, CUmemoryPool pool, CUmemPoolPtrExportData *shareData);
+/**
+ * @param data SEND_RECV
+ * @param attribute SEND_ONLY
+ * @param ptr SEND_ONLY
+ */
+CUresult cuPointerGetAttribute(void *data, CUpointer_attribute attribute, CUdeviceptr ptr);
+/**
+ * @param devPtr SEND_ONLY
+ * @param count SEND_ONLY
+ * @param dstDevice SEND_ONLY
+ * @param hStream SEND_ONLY
+ */
+CUresult cuMemPrefetchAsync(CUdeviceptr devPtr, size_t count, CUdevice dstDevice, CUstream hStream);
+/**
+ * @param devPtr SEND_ONLY
+ * @param count SEND_ONLY
+ * @param advice SEND_ONLY
+ * @param device SEND_ONLY
+ */
+CUresult cuMemAdvise(CUdeviceptr devPtr, size_t count, CUmem_advise advice, CUdevice device);
+/**
+ * @param data SEND_RECV
+ * @param dataSize SEND_ONLY
+ * @param attribute SEND_ONLY
+ * @param devPtr SEND_ONLY
+ * @param count SEND_ONLY
+ */
+CUresult cuMemRangeGetAttribute(void *data, size_t dataSize, CUmem_range_attribute attribute, CUdeviceptr devPtr, size_t count);
+/**
+ * @param data SEND_RECV
+ * @param dataSizes SEND_RECV
+ * @param attributes SEND_RECV
+ * @param numAttributes SEND_ONLY
+ * @param devPtr SEND_ONLY
+ * @param count SEND_ONLY
+ */
+CUresult cuMemRangeGetAttributes(void **data, size_t *dataSizes, CUmem_range_attribute *attributes, size_t numAttributes, CUdeviceptr devPtr, size_t count);
+/**
+ * @param value SEND_RECV
+ * @param attribute SEND_ONLY
+ * @param ptr SEND_ONLY
+ */
+CUresult cuPointerSetAttribute(const void *value, CUpointer_attribute attribute, CUdeviceptr ptr);
+/**
+ * @param numAttributes SEND_ONLY
+ * @param attributes SEND_RECV
+ * @param data SEND_RECV
+ * @param ptr SEND_ONLY
+ */
+CUresult cuPointerGetAttributes(unsigned int numAttributes, CUpointer_attribute *attributes, void **data, CUdeviceptr ptr);
+/**
+ * @param phStream SEND_RECV
+ * @param Flags SEND_ONLY
+ */
+CUresult cuStreamCreate(CUstream *phStream, unsigned int Flags);
+/**
+ * @param phStream SEND_RECV
+ * @param flags SEND_ONLY
+ * @param priority SEND_ONLY
+ */
+CUresult cuStreamCreateWithPriority(CUstream *phStream, unsigned int flags, int priority);
+/**
+ * @param hStream SEND_ONLY
+ * @param priority SEND_RECV
+ */
+CUresult cuStreamGetPriority(CUstream hStream, int *priority);
+/**
+ * @param hStream SEND_ONLY
+ * @param flags SEND_RECV
+ */
+CUresult cuStreamGetFlags(CUstream hStream, unsigned int *flags);
+/**
+ * @param hStream SEND_ONLY
+ * @param streamId SEND_RECV
+ */
+CUresult cuStreamGetId(CUstream hStream, unsigned long long *streamId);
+/**
+ * @param hStream SEND_ONLY
+ * @param pctx SEND_RECV
+ */
+CUresult cuStreamGetCtx(CUstream hStream, CUcontext *pctx);
+/**
+ * @param hStream SEND_ONLY
+ * @param hEvent SEND_ONLY
+ * @param Flags SEND_ONLY
+ */
+CUresult cuStreamWaitEvent(CUstream hStream, CUevent hEvent, unsigned int Flags);
+/**
+ * @param hStream SEND_ONLY
+ * @param callback SEND_ONLY
+ * @param userData SEND_RECV
+ * @param flags SEND_ONLY
+ */
+CUresult cuStreamAddCallback(CUstream hStream, CUstreamCallback callback, void *userData, unsigned int flags);
+/**
+ * @param hStream SEND_ONLY
+ * @param mode SEND_ONLY
+ */
+CUresult cuStreamBeginCapture_v2(CUstream hStream, CUstreamCaptureMode mode);
+/**
+ * @param mode SEND_RECV
+ */
+CUresult cuThreadExchangeStreamCaptureMode(CUstreamCaptureMode *mode);
+/**
+ * @param hStream SEND_ONLY
+ * @param phGraph SEND_RECV
+ */
+CUresult cuStreamEndCapture(CUstream hStream, CUgraph *phGraph);
+/**
+ * @param hStream SEND_ONLY
+ * @param captureStatus SEND_RECV
+ */
+CUresult cuStreamIsCapturing(CUstream hStream, CUstreamCaptureStatus *captureStatus);
+/**
+ * @param hStream SEND_ONLY
+ * @param captureStatus_out RECV_ONLY
+ * @param id_out RECV_ONLY
+ * @param graph_out RECV_ONLY
+ * @param numDependencies_out RECV_ONLY
+ * @param dependencies_out RECV_ONLY LENGTH:numDependencies_out
+ */
+CUresult cuStreamGetCaptureInfo_v2(CUstream hStream, CUstreamCaptureStatus *captureStatus_out, cuuint64_t *id_out, CUgraph *graph_out, const CUgraphNode **dependencies_out, size_t *numDependencies_out);
+/**
+ * @param hStream SEND_ONLY
+ * @param dependencies SEND_RECV
+ * @param numDependencies SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+CUresult cuStreamUpdateCaptureDependencies(CUstream hStream, CUgraphNode *dependencies, size_t numDependencies, unsigned int flags);
+/**
+ * @param hStream SEND_ONLY
+ * @param dptr SEND_ONLY
+ * @param length SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+CUresult cuStreamAttachMemAsync(CUstream hStream, CUdeviceptr dptr, size_t length, unsigned int flags);
+/**
+ * @param hStream SEND_ONLY
+ */
+CUresult cuStreamQuery(CUstream hStream);
+/**
+ * @param hStream SEND_ONLY
+ */
+CUresult cuStreamSynchronize(CUstream hStream);
+/**
+ * @param hStream SEND_ONLY
+ */
+CUresult cuStreamDestroy_v2(CUstream hStream);
+/**
+ * @param dst SEND_ONLY
+ * @param src SEND_ONLY
+ */
+CUresult cuStreamCopyAttributes(CUstream dst, CUstream src);
+/**
+ * @param hStream SEND_ONLY
+ * @param attr SEND_ONLY
+ * @param value_out SEND_RECV
+ */
+CUresult cuStreamGetAttribute(CUstream hStream, CUstreamAttrID attr, CUstreamAttrValue *value_out);
+/**
+ * @param hStream SEND_ONLY
+ * @param attr SEND_ONLY
+ * @param value SEND_RECV
+ */
+CUresult cuStreamSetAttribute(CUstream hStream, CUstreamAttrID attr, const CUstreamAttrValue *value);
+/**
+ * @param phEvent SEND_RECV
+ * @param Flags SEND_ONLY
+ */
+CUresult cuEventCreate(CUevent *phEvent, unsigned int Flags);
+/**
+ * @param hEvent SEND_ONLY
+ * @param hStream SEND_ONLY
+ */
+CUresult cuEventRecord(CUevent hEvent, CUstream hStream);
+/**
+ * @param hEvent SEND_ONLY
+ * @param hStream SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+CUresult cuEventRecordWithFlags(CUevent hEvent, CUstream hStream, unsigned int flags);
+/**
+ * @param hEvent SEND_ONLY
+ */
+CUresult cuEventQuery(CUevent hEvent);
+/**
+ * @param hEvent SEND_ONLY
+ */
+CUresult cuEventSynchronize(CUevent hEvent);
+/**
+ * @param hEvent SEND_ONLY
+ */
+CUresult cuEventDestroy_v2(CUevent hEvent);
+/**
+ * @param pMilliseconds SEND_RECV
+ * @param hStart SEND_ONLY
+ * @param hEnd SEND_ONLY
+ */
+CUresult cuEventElapsedTime(float *pMilliseconds, CUevent hStart, CUevent hEnd);
+/**
+ * @param extMem_out SEND_RECV
+ * @param memHandleDesc SEND_RECV
+ */
+CUresult cuImportExternalMemory(CUexternalMemory *extMem_out, const CUDA_EXTERNAL_MEMORY_HANDLE_DESC *memHandleDesc);
+/**
+ * @param devPtr SEND_RECV
+ * @param extMem SEND_ONLY
+ * @param bufferDesc SEND_RECV
+ */
+CUresult cuExternalMemoryGetMappedBuffer(CUdeviceptr *devPtr, CUexternalMemory extMem, const CUDA_EXTERNAL_MEMORY_BUFFER_DESC *bufferDesc);
+/**
+ * @param mipmap SEND_RECV
+ * @param extMem SEND_ONLY
+ * @param mipmapDesc SEND_RECV
+ */
+CUresult cuExternalMemoryGetMappedMipmappedArray(CUmipmappedArray *mipmap, CUexternalMemory extMem, const CUDA_EXTERNAL_MEMORY_MIPMAPPED_ARRAY_DESC *mipmapDesc);
+/**
+ * @param extMem SEND_ONLY
+ */
+CUresult cuDestroyExternalMemory(CUexternalMemory extMem);
+/**
+ * @param extSem_out SEND_RECV
+ * @param semHandleDesc SEND_RECV
+ */
+CUresult cuImportExternalSemaphore(CUexternalSemaphore *extSem_out, const CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC *semHandleDesc);
+/**
+ * @param extSemArray SEND_RECV
+ * @param paramsArray SEND_RECV
+ * @param numExtSems SEND_ONLY
+ * @param stream SEND_ONLY
+ */
+CUresult cuSignalExternalSemaphoresAsync(const CUexternalSemaphore *extSemArray, const CUDA_EXTERNAL_SEMAPHORE_SIGNAL_PARAMS *paramsArray, unsigned int numExtSems, CUstream stream);
+/**
+ * @param extSemArray SEND_RECV
+ * @param paramsArray SEND_RECV
+ * @param numExtSems SEND_ONLY
+ * @param stream SEND_ONLY
+ */
+CUresult cuWaitExternalSemaphoresAsync(const CUexternalSemaphore *extSemArray, const CUDA_EXTERNAL_SEMAPHORE_WAIT_PARAMS *paramsArray, unsigned int numExtSems, CUstream stream);
+/**
+ * @param extSem SEND_ONLY
+ */
+CUresult cuDestroyExternalSemaphore(CUexternalSemaphore extSem);
+/**
+ * @param stream SEND_ONLY
+ * @param addr SEND_ONLY
+ * @param value SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+CUresult cuStreamWaitValue32_v2(CUstream stream, CUdeviceptr addr, cuuint32_t value, unsigned int flags);
+/**
+ * @param stream SEND_ONLY
+ * @param addr SEND_ONLY
+ * @param value SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+CUresult cuStreamWaitValue64_v2(CUstream stream, CUdeviceptr addr, cuuint64_t value, unsigned int flags);
+/**
+ * @param stream SEND_ONLY
+ * @param addr SEND_ONLY
+ * @param value SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+CUresult cuStreamWriteValue32_v2(CUstream stream, CUdeviceptr addr, cuuint32_t value, unsigned int flags);
+/**
+ * @param stream SEND_ONLY
+ * @param addr SEND_ONLY
+ * @param value SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+CUresult cuStreamWriteValue64_v2(CUstream stream, CUdeviceptr addr, cuuint64_t value, unsigned int flags);
+/**
+ * @param stream SEND_ONLY
+ * @param count SEND_ONLY
+ * @param paramArray SEND_RECV
+ * @param flags SEND_ONLY
+ */
+CUresult cuStreamBatchMemOp_v2(CUstream stream, unsigned int count, CUstreamBatchMemOpParams *paramArray, unsigned int flags);
+/**
+ * @param pi SEND_RECV
+ * @param attrib SEND_ONLY
+ * @param hfunc SEND_ONLY
+ */
+CUresult cuFuncGetAttribute(int *pi, CUfunction_attribute attrib, CUfunction hfunc);
+/**
+ * @param hfunc SEND_ONLY
+ * @param attrib SEND_ONLY
+ * @param value SEND_ONLY
+ */
+CUresult cuFuncSetAttribute(CUfunction hfunc, CUfunction_attribute attrib, int value);
+/**
+ * @param hfunc SEND_ONLY
+ * @param config SEND_ONLY
+ */
+CUresult cuFuncSetCacheConfig(CUfunction hfunc, CUfunc_cache config);
+/**
+ * @param hfunc SEND_ONLY
+ * @param config SEND_ONLY
+ */
+CUresult cuFuncSetSharedMemConfig(CUfunction hfunc, CUsharedconfig config);
+/**
+ * @param hmod SEND_RECV
+ * @param hfunc SEND_ONLY
+ */
+CUresult cuFuncGetModule(CUmodule *hmod, CUfunction hfunc);
 
-// // TODO: Spec from here
+// TODO: Spec from here
 
-// /**
-//  * @param f SEND_ONLY
-//  * @param gridDimX SEND_ONLY
-//  * @param gridDimY SEND_ONLY
-//  * @param gridDimZ SEND_ONLY
-//  * @param blockDimX SEND_ONLY
-//  * @param blockDimY SEND_ONLY
-//  * @param blockDimZ SEND_ONLY
-//  * @param sharedMemBytes SEND_ONLY
-//  * @param hStream SEND_ONLY
-//  * @param kernelParams SEND_ONLY
-//  * @param extra SEND_ONLY
-//  */
-// CUresult cuLaunchKernel(CUfunction f, unsigned int gridDimX, unsigned int gridDimY, unsigned int gridDimZ, unsigned int blockDimX, unsigned int blockDimY, unsigned int blockDimZ, unsigned int sharedMemBytes, CUstream hStream, void **kernelParams, void **extra);
-// /**
-//  * @param config SEND_ONLY DEREFERENCE
-//  * @param f SEND_ONLY
-//  * @param kernelParams SEND_ONLY
-//  * @param extra SEND_ONLY
-//  */
-// CUresult cuLaunchKernelEx(const CUlaunchConfig *config, CUfunction f, void **kernelParams, void **extra);
-// /**
-//  * @param f SEND_ONLY
-//  * @param gridDimX SEND_ONLY
-//  * @param gridDimY SEND_ONLY
-//  * @param gridDimZ SEND_ONLY
-//  * @param blockDimX SEND_ONLY
-//  * @param blockDimY SEND_ONLY
-//  * @param blockDimZ SEND_ONLY
-//  * @param sharedMemBytes SEND_ONLY
-//  * @param hStream SEND_ONLY
-//  * @param kernelParams SEND_RECV
-//  */
-// CUresult cuLaunchCooperativeKernel(CUfunction f, unsigned int gridDimX, unsigned int gridDimY, unsigned int gridDimZ, unsigned int blockDimX, unsigned int blockDimY, unsigned int blockDimZ, unsigned int sharedMemBytes, CUstream hStream, void **kernelParams);
-// /**
-//  * @param launchParamsList SEND_RECV
-//  * @param numDevices SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// CUresult cuLaunchCooperativeKernelMultiDevice(CUDA_LAUNCH_PARAMS *launchParamsList, unsigned int numDevices, unsigned int flags);
-// /**
-//  * @param hStream SEND_ONLY
-//  * @param fn SEND_ONLY
-//  * @param userData SEND_RECV
-//  */
-// CUresult cuLaunchHostFunc(CUstream hStream, CUhostFn fn, void *userData);
-// /**
-//  * @param hfunc SEND_ONLY
-//  * @param x SEND_ONLY
-//  * @param y SEND_ONLY
-//  * @param z SEND_ONLY
-//  */
-// CUresult cuFuncSetBlockShape(CUfunction hfunc, int x, int y, int z);
-// /**
-//  * @param hfunc SEND_ONLY
-//  * @param bytes SEND_ONLY
-//  */
-// CUresult cuFuncSetSharedSize(CUfunction hfunc, unsigned int bytes);
-// /**
-//  * @param hfunc SEND_ONLY
-//  * @param numbytes SEND_ONLY
-//  */
-// CUresult cuParamSetSize(CUfunction hfunc, unsigned int numbytes);
-// /**
-//  * @param hfunc SEND_ONLY
-//  * @param offset SEND_ONLY
-//  * @param value SEND_ONLY
-//  */
-// CUresult cuParamSeti(CUfunction hfunc, int offset, unsigned int value);
-// /**
-//  * @param hfunc SEND_ONLY
-//  * @param offset SEND_ONLY
-//  * @param value SEND_ONLY
-//  */
-// CUresult cuParamSetf(CUfunction hfunc, int offset, float value);
-// /**
-//  * @param hfunc SEND_ONLY
-//  * @param offset SEND_ONLY
-//  * @param ptr SEND_RECV
-//  * @param numbytes SEND_ONLY
-//  */
-// CUresult cuParamSetv(CUfunction hfunc, int offset, void *ptr, unsigned int numbytes);
-// /**
-//  * @param f SEND_ONLY
-//  */
-// CUresult cuLaunch(CUfunction f);
-// /**
-//  * @param f SEND_ONLY
-//  * @param grid_width SEND_ONLY
-//  * @param grid_height SEND_ONLY
-//  */
-// CUresult cuLaunchGrid(CUfunction f, int grid_width, int grid_height);
-// /**
-//  * @param f SEND_ONLY
-//  * @param grid_width SEND_ONLY
-//  * @param grid_height SEND_ONLY
-//  * @param hStream SEND_ONLY
-//  */
-// CUresult cuLaunchGridAsync(CUfunction f, int grid_width, int grid_height, CUstream hStream);
-// /**
-//  * @param hfunc SEND_ONLY
-//  * @param texunit SEND_ONLY
-//  * @param hTexRef SEND_ONLY
-//  */
-// CUresult cuParamSetTexRef(CUfunction hfunc, int texunit, CUtexref hTexRef);
-// /**
-//  * @param phGraph SEND_RECV
-//  * @param flags SEND_ONLY
-//  */
-// CUresult cuGraphCreate(CUgraph *phGraph, unsigned int flags);
-// /**
-//  * @param phGraphNode SEND_RECV
-//  * @param hGraph SEND_ONLY
-//  * @param dependencies SEND_RECV
-//  * @param numDependencies SEND_ONLY
-//  * @param nodeParams SEND_RECV
-//  */
-// CUresult cuGraphAddKernelNode_v2(CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies, size_t numDependencies, const CUDA_KERNEL_NODE_PARAMS *nodeParams);
-// /**
-//  * @param hNode SEND_ONLY
-//  * @param nodeParams SEND_RECV
-//  */
-// CUresult cuGraphKernelNodeGetParams_v2(CUgraphNode hNode, CUDA_KERNEL_NODE_PARAMS *nodeParams);
-// /**
-//  * @param hNode SEND_ONLY
-//  * @param nodeParams SEND_RECV
-//  */
-// CUresult cuGraphKernelNodeSetParams_v2(CUgraphNode hNode, const CUDA_KERNEL_NODE_PARAMS *nodeParams);
-// /**
-//  * @param phGraphNode SEND_RECV
-//  * @param hGraph SEND_ONLY
-//  * @param dependencies SEND_RECV
-//  * @param numDependencies SEND_ONLY
-//  * @param copyParams SEND_RECV
-//  * @param ctx SEND_ONLY
-//  */
-// CUresult cuGraphAddMemcpyNode(CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies, size_t numDependencies, const CUDA_MEMCPY3D *copyParams, CUcontext ctx);
-// /**
-//  * @param hNode SEND_ONLY
-//  * @param nodeParams SEND_RECV
-//  */
-// CUresult cuGraphMemcpyNodeGetParams(CUgraphNode hNode, CUDA_MEMCPY3D *nodeParams);
-// /**
-//  * @param hNode SEND_ONLY
-//  * @param nodeParams SEND_RECV
-//  */
-// CUresult cuGraphMemcpyNodeSetParams(CUgraphNode hNode, const CUDA_MEMCPY3D *nodeParams);
-// /**
-//  * @param phGraphNode SEND_RECV
-//  * @param hGraph SEND_ONLY
-//  * @param dependencies SEND_RECV
-//  * @param numDependencies SEND_ONLY
-//  * @param memsetParams SEND_RECV
-//  * @param ctx SEND_ONLY
-//  */
-// CUresult cuGraphAddMemsetNode(CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies, size_t numDependencies, const CUDA_MEMSET_NODE_PARAMS *memsetParams, CUcontext ctx);
-// /**
-//  * @param hNode SEND_ONLY
-//  * @param nodeParams SEND_RECV
-//  */
-// CUresult cuGraphMemsetNodeGetParams(CUgraphNode hNode, CUDA_MEMSET_NODE_PARAMS *nodeParams);
-// /**
-//  * @param hNode SEND_ONLY
-//  * @param nodeParams SEND_RECV
-//  */
-// CUresult cuGraphMemsetNodeSetParams(CUgraphNode hNode, const CUDA_MEMSET_NODE_PARAMS *nodeParams);
-// /**
-//  * @param phGraphNode SEND_RECV
-//  * @param hGraph SEND_ONLY
-//  * @param dependencies SEND_RECV
-//  * @param numDependencies SEND_ONLY
-//  * @param nodeParams SEND_RECV
-//  */
-// CUresult cuGraphAddHostNode(CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies, size_t numDependencies, const CUDA_HOST_NODE_PARAMS *nodeParams);
-// /**
-//  * @param hNode SEND_ONLY
-//  * @param nodeParams SEND_RECV
-//  */
-// CUresult cuGraphHostNodeGetParams(CUgraphNode hNode, CUDA_HOST_NODE_PARAMS *nodeParams);
-// /**
-//  * @param hNode SEND_ONLY
-//  * @param nodeParams SEND_RECV
-//  */
-// CUresult cuGraphHostNodeSetParams(CUgraphNode hNode, const CUDA_HOST_NODE_PARAMS *nodeParams);
-// /**
-//  * @param phGraphNode SEND_RECV
-//  * @param hGraph SEND_ONLY
-//  * @param dependencies SEND_RECV
-//  * @param numDependencies SEND_ONLY
-//  * @param childGraph SEND_ONLY
-//  */
-// CUresult cuGraphAddChildGraphNode(CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies, size_t numDependencies, CUgraph childGraph);
-// /**
-//  * @param hNode SEND_ONLY
-//  * @param phGraph SEND_RECV
-//  */
-// CUresult cuGraphChildGraphNodeGetGraph(CUgraphNode hNode, CUgraph *phGraph);
-// /**
-//  * @param phGraphNode SEND_RECV
-//  * @param hGraph SEND_ONLY
-//  * @param dependencies SEND_RECV
-//  * @param numDependencies SEND_ONLY
-//  */
-// CUresult cuGraphAddEmptyNode(CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies, size_t numDependencies);
-// /**
-//  * @param phGraphNode SEND_RECV
-//  * @param hGraph SEND_ONLY
-//  * @param dependencies SEND_RECV
-//  * @param numDependencies SEND_ONLY
-//  * @param event SEND_ONLY
-//  */
-// CUresult cuGraphAddEventRecordNode(CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies, size_t numDependencies, CUevent event);
-// /**
-//  * @param hNode SEND_ONLY
-//  * @param event_out SEND_RECV
-//  */
-// CUresult cuGraphEventRecordNodeGetEvent(CUgraphNode hNode, CUevent *event_out);
-// /**
-//  * @param hNode SEND_ONLY
-//  * @param event SEND_ONLY
-//  */
-// CUresult cuGraphEventRecordNodeSetEvent(CUgraphNode hNode, CUevent event);
-// /**
-//  * @param phGraphNode SEND_RECV
-//  * @param hGraph SEND_ONLY
-//  * @param dependencies SEND_RECV
-//  * @param numDependencies SEND_ONLY
-//  * @param event SEND_ONLY
-//  */
-// CUresult cuGraphAddEventWaitNode(CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies, size_t numDependencies, CUevent event);
-// /**
-//  * @param hNode SEND_ONLY
-//  * @param event_out SEND_RECV
-//  */
-// CUresult cuGraphEventWaitNodeGetEvent(CUgraphNode hNode, CUevent *event_out);
-// /**
-//  * @param hNode SEND_ONLY
-//  * @param event SEND_ONLY
-//  */
-// CUresult cuGraphEventWaitNodeSetEvent(CUgraphNode hNode, CUevent event);
-// /**
-//  * @param phGraphNode SEND_RECV
-//  * @param hGraph SEND_ONLY
-//  * @param dependencies SEND_RECV
-//  * @param numDependencies SEND_ONLY
-//  * @param nodeParams SEND_RECV
-//  */
-// CUresult cuGraphAddExternalSemaphoresSignalNode(CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies, size_t numDependencies, const CUDA_EXT_SEM_SIGNAL_NODE_PARAMS *nodeParams);
-// /**
-//  * @param hNode SEND_ONLY
-//  * @param params_out SEND_RECV
-//  */
-// CUresult cuGraphExternalSemaphoresSignalNodeGetParams(CUgraphNode hNode, CUDA_EXT_SEM_SIGNAL_NODE_PARAMS *params_out);
-// /**
-//  * @param hNode SEND_ONLY
-//  * @param nodeParams SEND_RECV
-//  */
-// CUresult cuGraphExternalSemaphoresSignalNodeSetParams(CUgraphNode hNode, const CUDA_EXT_SEM_SIGNAL_NODE_PARAMS *nodeParams);
-// /**
-//  * @param phGraphNode SEND_RECV
-//  * @param hGraph SEND_ONLY
-//  * @param dependencies SEND_RECV
-//  * @param numDependencies SEND_ONLY
-//  * @param nodeParams SEND_RECV
-//  */
-// CUresult cuGraphAddExternalSemaphoresWaitNode(CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies, size_t numDependencies, const CUDA_EXT_SEM_WAIT_NODE_PARAMS *nodeParams);
-// /**
-//  * @param hNode SEND_ONLY
-//  * @param params_out SEND_RECV
-//  */
-// CUresult cuGraphExternalSemaphoresWaitNodeGetParams(CUgraphNode hNode, CUDA_EXT_SEM_WAIT_NODE_PARAMS *params_out);
-// /**
-//  * @param hNode SEND_ONLY
-//  * @param nodeParams SEND_RECV
-//  */
-// CUresult cuGraphExternalSemaphoresWaitNodeSetParams(CUgraphNode hNode, const CUDA_EXT_SEM_WAIT_NODE_PARAMS *nodeParams);
-// /**
-//  * @param phGraphNode SEND_RECV
-//  * @param hGraph SEND_ONLY
-//  * @param dependencies SEND_RECV
-//  * @param numDependencies SEND_ONLY
-//  * @param nodeParams SEND_RECV
-//  */
-// CUresult cuGraphAddBatchMemOpNode(CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies, size_t numDependencies, const CUDA_BATCH_MEM_OP_NODE_PARAMS *nodeParams);
-// /**
-//  * @param hNode SEND_ONLY
-//  * @param nodeParams_out SEND_RECV
-//  */
-// CUresult cuGraphBatchMemOpNodeGetParams(CUgraphNode hNode, CUDA_BATCH_MEM_OP_NODE_PARAMS *nodeParams_out);
-// /**
-//  * @param hNode SEND_ONLY
-//  * @param nodeParams SEND_RECV
-//  */
-// CUresult cuGraphBatchMemOpNodeSetParams(CUgraphNode hNode, const CUDA_BATCH_MEM_OP_NODE_PARAMS *nodeParams);
-// /**
-//  * @param hGraphExec SEND_ONLY
-//  * @param hNode SEND_ONLY
-//  * @param nodeParams SEND_RECV
-//  */
-// CUresult cuGraphExecBatchMemOpNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNode, const CUDA_BATCH_MEM_OP_NODE_PARAMS *nodeParams);
-// /**
-//  * @param phGraphNode SEND_RECV
-//  * @param hGraph SEND_ONLY
-//  * @param dependencies SEND_RECV
-//  * @param numDependencies SEND_ONLY
-//  * @param nodeParams SEND_RECV
-//  */
-// CUresult cuGraphAddMemAllocNode(CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies, size_t numDependencies, CUDA_MEM_ALLOC_NODE_PARAMS *nodeParams);
-// /**
-//  * @param hNode SEND_ONLY
-//  * @param params_out SEND_RECV
-//  */
-// CUresult cuGraphMemAllocNodeGetParams(CUgraphNode hNode, CUDA_MEM_ALLOC_NODE_PARAMS *params_out);
-// /**
-//  * @param phGraphNode SEND_RECV
-//  * @param hGraph SEND_ONLY
-//  * @param dependencies SEND_RECV
-//  * @param numDependencies SEND_ONLY
-//  * @param dptr SEND_ONLY
-//  */
-// CUresult cuGraphAddMemFreeNode(CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies, size_t numDependencies, CUdeviceptr dptr);
-// /**
-//  * @param hNode SEND_ONLY
-//  * @param dptr_out SEND_RECV
-//  */
-// CUresult cuGraphMemFreeNodeGetParams(CUgraphNode hNode, CUdeviceptr *dptr_out);
-// /**
-//  * @param device SEND_ONLY
-//  */
-// CUresult cuDeviceGraphMemTrim(CUdevice device);
-// /**
-//  * @param device SEND_ONLY
-//  * @param attr SEND_ONLY
-//  * @param value SEND_RECV
-//  */
-// CUresult cuDeviceGetGraphMemAttribute(CUdevice device, CUgraphMem_attribute attr, void *value);
-// /**
-//  * @param device SEND_ONLY
-//  * @param attr SEND_ONLY
-//  * @param value SEND_RECV
-//  */
-// CUresult cuDeviceSetGraphMemAttribute(CUdevice device, CUgraphMem_attribute attr, void *value);
-// /**
-//  * @param phGraphClone SEND_RECV
-//  * @param originalGraph SEND_ONLY
-//  */
-// CUresult cuGraphClone(CUgraph *phGraphClone, CUgraph originalGraph);
-// /**
-//  * @param phNode SEND_RECV
-//  * @param hOriginalNode SEND_ONLY
-//  * @param hClonedGraph SEND_ONLY
-//  */
-// CUresult cuGraphNodeFindInClone(CUgraphNode *phNode, CUgraphNode hOriginalNode, CUgraph hClonedGraph);
-// /**
-//  * @param hNode SEND_ONLY
-//  * @param type SEND_RECV
-//  */
-// CUresult cuGraphNodeGetType(CUgraphNode hNode, CUgraphNodeType *type);
-// /**
-//  * @param hGraph SEND_ONLY
-//  * @param nodes SEND_RECV
-//  * @param numNodes SEND_RECV
-//  */
-// CUresult cuGraphGetNodes(CUgraph hGraph, CUgraphNode *nodes, size_t *numNodes);
-// /**
-//  * @param hGraph SEND_ONLY
-//  * @param rootNodes SEND_RECV
-//  * @param numRootNodes SEND_RECV
-//  */
-// CUresult cuGraphGetRootNodes(CUgraph hGraph, CUgraphNode *rootNodes, size_t *numRootNodes);
-// /**
-//  * @param hGraph SEND_ONLY
-//  * @param from SEND_RECV
-//  * @param to SEND_RECV
-//  * @param numEdges SEND_RECV
-//  */
-// CUresult cuGraphGetEdges(CUgraph hGraph, CUgraphNode *from, CUgraphNode *to, size_t *numEdges);
-// /**
-//  * @param hNode SEND_ONLY
-//  * @param dependencies SEND_RECV
-//  * @param numDependencies SEND_RECV
-//  */
-// CUresult cuGraphNodeGetDependencies(CUgraphNode hNode, CUgraphNode *dependencies, size_t *numDependencies);
-// /**
-//  * @param hNode SEND_ONLY
-//  * @param dependentNodes SEND_RECV
-//  * @param numDependentNodes SEND_RECV
-//  */
-// CUresult cuGraphNodeGetDependentNodes(CUgraphNode hNode, CUgraphNode *dependentNodes, size_t *numDependentNodes);
-// /**
-//  * @param hGraph SEND_ONLY
-//  * @param from SEND_RECV
-//  * @param to SEND_RECV
-//  * @param numDependencies SEND_ONLY
-//  */
-// CUresult cuGraphAddDependencies(CUgraph hGraph, const CUgraphNode *from, const CUgraphNode *to, size_t numDependencies);
-// /**
-//  * @param hGraph SEND_ONLY
-//  * @param from SEND_RECV
-//  * @param to SEND_RECV
-//  * @param numDependencies SEND_ONLY
-//  */
-// CUresult cuGraphRemoveDependencies(CUgraph hGraph, const CUgraphNode *from, const CUgraphNode *to, size_t numDependencies);
-// /**
-//  * @param hNode SEND_ONLY
-//  */
-// CUresult cuGraphDestroyNode(CUgraphNode hNode);
-// /**
-//  * @param phGraphExec SEND_RECV
-//  * @param hGraph SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// CUresult cuGraphInstantiateWithFlags(CUgraphExec *phGraphExec, CUgraph hGraph, unsigned long long flags);
-// /**
-//  * @param phGraphExec SEND_RECV
-//  * @param hGraph SEND_ONLY
-//  * @param instantiateParams SEND_RECV
-//  */
-// CUresult cuGraphInstantiateWithParams(CUgraphExec *phGraphExec, CUgraph hGraph, CUDA_GRAPH_INSTANTIATE_PARAMS *instantiateParams);
-// /**
-//  * @param hGraphExec SEND_ONLY
-//  * @param flags SEND_RECV
-//  */
-// CUresult cuGraphExecGetFlags(CUgraphExec hGraphExec, cuuint64_t *flags);
-// /**
-//  * @param hGraphExec SEND_ONLY
-//  * @param hNode SEND_ONLY
-//  * @param nodeParams SEND_RECV
-//  */
-// CUresult cuGraphExecKernelNodeSetParams_v2(CUgraphExec hGraphExec, CUgraphNode hNode, const CUDA_KERNEL_NODE_PARAMS *nodeParams);
-// /**
-//  * @param hGraphExec SEND_ONLY
-//  * @param hNode SEND_ONLY
-//  * @param copyParams SEND_RECV
-//  * @param ctx SEND_ONLY
-//  */
-// CUresult cuGraphExecMemcpyNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNode, const CUDA_MEMCPY3D *copyParams, CUcontext ctx);
-// /**
-//  * @param hGraphExec SEND_ONLY
-//  * @param hNode SEND_ONLY
-//  * @param memsetParams SEND_RECV
-//  * @param ctx SEND_ONLY
-//  */
-// CUresult cuGraphExecMemsetNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNode, const CUDA_MEMSET_NODE_PARAMS *memsetParams, CUcontext ctx);
-// /**
-//  * @param hGraphExec SEND_ONLY
-//  * @param hNode SEND_ONLY
-//  * @param nodeParams SEND_RECV
-//  */
-// CUresult cuGraphExecHostNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNode, const CUDA_HOST_NODE_PARAMS *nodeParams);
-// /**
-//  * @param hGraphExec SEND_ONLY
-//  * @param hNode SEND_ONLY
-//  * @param childGraph SEND_ONLY
-//  */
-// CUresult cuGraphExecChildGraphNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNode, CUgraph childGraph);
-// /**
-//  * @param hGraphExec SEND_ONLY
-//  * @param hNode SEND_ONLY
-//  * @param event SEND_ONLY
-//  */
-// CUresult cuGraphExecEventRecordNodeSetEvent(CUgraphExec hGraphExec, CUgraphNode hNode, CUevent event);
-// /**
-//  * @param hGraphExec SEND_ONLY
-//  * @param hNode SEND_ONLY
-//  * @param event SEND_ONLY
-//  */
-// CUresult cuGraphExecEventWaitNodeSetEvent(CUgraphExec hGraphExec, CUgraphNode hNode, CUevent event);
-// /**
-//  * @param hGraphExec SEND_ONLY
-//  * @param hNode SEND_ONLY
-//  * @param nodeParams SEND_RECV
-//  */
-// CUresult cuGraphExecExternalSemaphoresSignalNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNode, const CUDA_EXT_SEM_SIGNAL_NODE_PARAMS *nodeParams);
-// /**
-//  * @param hGraphExec SEND_ONLY
-//  * @param hNode SEND_ONLY
-//  * @param nodeParams SEND_RECV
-//  */
-// CUresult cuGraphExecExternalSemaphoresWaitNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNode, const CUDA_EXT_SEM_WAIT_NODE_PARAMS *nodeParams);
-// /**
-//  * @param hGraphExec SEND_ONLY
-//  * @param hNode SEND_ONLY
-//  * @param isEnabled SEND_ONLY
-//  */
-// CUresult cuGraphNodeSetEnabled(CUgraphExec hGraphExec, CUgraphNode hNode, unsigned int isEnabled);
-// /**
-//  * @param hGraphExec SEND_ONLY
-//  * @param hNode SEND_ONLY
-//  * @param isEnabled SEND_RECV
-//  */
-// CUresult cuGraphNodeGetEnabled(CUgraphExec hGraphExec, CUgraphNode hNode, unsigned int *isEnabled);
-// /**
-//  * @param hGraphExec SEND_ONLY
-//  * @param hStream SEND_ONLY
-//  */
-// CUresult cuGraphUpload(CUgraphExec hGraphExec, CUstream hStream);
-// /**
-//  * @param hGraphExec SEND_ONLY
-//  * @param hStream SEND_ONLY
-//  */
-// CUresult cuGraphLaunch(CUgraphExec hGraphExec, CUstream hStream);
-// /**
-//  * @param hGraphExec SEND_ONLY
-//  */
-// CUresult cuGraphExecDestroy(CUgraphExec hGraphExec);
-// /**
-//  * @param hGraph SEND_ONLY
-//  */
-// CUresult cuGraphDestroy(CUgraph hGraph);
-// /**
-//  * @param hGraphExec SEND_ONLY
-//  * @param hGraph SEND_ONLY
-//  * @param resultInfo SEND_RECV
-//  */
-// CUresult cuGraphExecUpdate_v2(CUgraphExec hGraphExec, CUgraph hGraph, CUgraphExecUpdateResultInfo *resultInfo);
-// /**
-//  * @param dst SEND_ONLY
-//  * @param src SEND_ONLY
-//  */
-// CUresult cuGraphKernelNodeCopyAttributes(CUgraphNode dst, CUgraphNode src);
-// /**
-//  * @param hNode SEND_ONLY
-//  * @param attr SEND_ONLY
-//  * @param value_out SEND_RECV
-//  */
-// CUresult cuGraphKernelNodeGetAttribute(CUgraphNode hNode, CUkernelNodeAttrID attr, CUkernelNodeAttrValue *value_out);
-// /**
-//  * @param hNode SEND_ONLY
-//  * @param attr SEND_ONLY
-//  * @param value SEND_RECV
-//  */
-// CUresult cuGraphKernelNodeSetAttribute(CUgraphNode hNode, CUkernelNodeAttrID attr, const CUkernelNodeAttrValue *value);
-// /**
-//  * @param hGraph SEND_ONLY
-//  * @param path SEND_RECV
-//  * @param flags SEND_ONLY
-//  */
-// CUresult cuGraphDebugDotPrint(CUgraph hGraph, const char *path, unsigned int flags);
-// /**
-//  * @param object_out SEND_RECV
-//  * @param ptr SEND_RECV
-//  * @param destroy SEND_ONLY
-//  * @param initialRefcount SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// CUresult cuUserObjectCreate(CUuserObject *object_out, void *ptr, CUhostFn destroy, unsigned int initialRefcount, unsigned int flags);
-// /**
-//  * @param object SEND_ONLY
-//  * @param count SEND_ONLY
-//  */
-// CUresult cuUserObjectRetain(CUuserObject object, unsigned int count);
-// /**
-//  * @param object SEND_ONLY
-//  * @param count SEND_ONLY
-//  */
-// CUresult cuUserObjectRelease(CUuserObject object, unsigned int count);
-// /**
-//  * @param graph SEND_ONLY
-//  * @param object SEND_ONLY
-//  * @param count SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// CUresult cuGraphRetainUserObject(CUgraph graph, CUuserObject object, unsigned int count, unsigned int flags);
-// /**
-//  * @param graph SEND_ONLY
-//  * @param object SEND_ONLY
-//  * @param count SEND_ONLY
-//  */
-// CUresult cuGraphReleaseUserObject(CUgraph graph, CUuserObject object, unsigned int count);
-// /**
-//  * @param numBlocks SEND_RECV
-//  * @param func SEND_ONLY
-//  * @param blockSize SEND_ONLY
-//  * @param dynamicSMemSize SEND_ONLY
-//  */
-// CUresult cuOccupancyMaxActiveBlocksPerMultiprocessor(int *numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize);
-// /**
-//  * @param numBlocks SEND_RECV
-//  * @param func SEND_ONLY
-//  * @param blockSize SEND_ONLY
-//  * @param dynamicSMemSize SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// CUresult cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(int *numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize, unsigned int flags);
-// /**
-//  * @param minGridSize SEND_RECV
-//  * @param blockSize SEND_RECV
-//  * @param func SEND_ONLY
-//  * @param blockSizeToDynamicSMemSize SEND_ONLY
-//  * @param dynamicSMemSize SEND_ONLY
-//  * @param blockSizeLimit SEND_ONLY
-//  */
-// // CUresult cuOccupancyMaxPotentialBlockSize(int *minGridSize, int *blockSize, CUfunction func, CUoccupancyB2DSize blockSizeToDynamicSMemSize, size_t dynamicSMemSize, int blockSizeLimit);
-// /**
-//  * @param minGridSize SEND_RECV
-//  * @param blockSize SEND_RECV
-//  * @param func SEND_ONLY
-//  * @param blockSizeToDynamicSMemSize SEND_ONLY
-//  * @param dynamicSMemSize SEND_ONLY
-//  * @param blockSizeLimit SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// // CUresult cuOccupancyMaxPotentialBlockSizeWithFlags(int *minGridSize, int *blockSize, CUfunction func, CUoccupancyB2DSize blockSizeToDynamicSMemSize, size_t dynamicSMemSize, int blockSizeLimit, unsigned int flags);
-// /**
-//  * @param dynamicSmemSize SEND_RECV
-//  * @param func SEND_ONLY
-//  * @param numBlocks SEND_ONLY
-//  * @param blockSize SEND_ONLY
-//  */
-// CUresult cuOccupancyAvailableDynamicSMemPerBlock(size_t *dynamicSmemSize, CUfunction func, int numBlocks, int blockSize);
-// /**
-//  * @param clusterSize SEND_RECV
-//  * @param func SEND_ONLY
-//  * @param config SEND_RECV
-//  */
-// CUresult cuOccupancyMaxPotentialClusterSize(int *clusterSize, CUfunction func, const CUlaunchConfig *config);
-// /**
-//  * @param numClusters SEND_RECV
-//  * @param func SEND_ONLY
-//  * @param config SEND_RECV
-//  */
-// CUresult cuOccupancyMaxActiveClusters(int *numClusters, CUfunction func, const CUlaunchConfig *config);
-// /**
-//  * @param hTexRef SEND_ONLY
-//  * @param hArray SEND_ONLY
-//  * @param Flags SEND_ONLY
-//  */
-// CUresult cuTexRefSetArray(CUtexref hTexRef, CUarray hArray, unsigned int Flags);
-// /**
-//  * @param hTexRef SEND_ONLY
-//  * @param hMipmappedArray SEND_ONLY
-//  * @param Flags SEND_ONLY
-//  */
-// CUresult cuTexRefSetMipmappedArray(CUtexref hTexRef, CUmipmappedArray hMipmappedArray, unsigned int Flags);
-// /**
-//  * @param ByteOffset SEND_RECV
-//  * @param hTexRef SEND_ONLY
-//  * @param dptr SEND_ONLY
-//  * @param bytes SEND_ONLY
-//  */
-// CUresult cuTexRefSetAddress_v2(size_t *ByteOffset, CUtexref hTexRef, CUdeviceptr dptr, size_t bytes);
-// /**
-//  * @param hTexRef SEND_ONLY
-//  * @param desc SEND_RECV
-//  * @param dptr SEND_ONLY
-//  * @param Pitch SEND_ONLY
-//  */
-// CUresult cuTexRefSetAddress2D_v3(CUtexref hTexRef, const CUDA_ARRAY_DESCRIPTOR *desc, CUdeviceptr dptr, size_t Pitch);
-// /**
-//  * @param hTexRef SEND_ONLY
-//  * @param fmt SEND_ONLY
-//  * @param NumPackedComponents SEND_ONLY
-//  */
-// CUresult cuTexRefSetFormat(CUtexref hTexRef, CUarray_format fmt, int NumPackedComponents);
-// /**
-//  * @param hTexRef SEND_ONLY
-//  * @param dim SEND_ONLY
-//  * @param am SEND_ONLY
-//  */
-// CUresult cuTexRefSetAddressMode(CUtexref hTexRef, int dim, CUaddress_mode am);
-// /**
-//  * @param hTexRef SEND_ONLY
-//  * @param fm SEND_ONLY
-//  */
-// CUresult cuTexRefSetFilterMode(CUtexref hTexRef, CUfilter_mode fm);
-// /**
-//  * @param hTexRef SEND_ONLY
-//  * @param fm SEND_ONLY
-//  */
-// CUresult cuTexRefSetMipmapFilterMode(CUtexref hTexRef, CUfilter_mode fm);
-// /**
-//  * @param hTexRef SEND_ONLY
-//  * @param bias SEND_ONLY
-//  */
-// CUresult cuTexRefSetMipmapLevelBias(CUtexref hTexRef, float bias);
-// /**
-//  * @param hTexRef SEND_ONLY
-//  * @param minMipmapLevelClamp SEND_ONLY
-//  * @param maxMipmapLevelClamp SEND_ONLY
-//  */
-// CUresult cuTexRefSetMipmapLevelClamp(CUtexref hTexRef, float minMipmapLevelClamp, float maxMipmapLevelClamp);
-// /**
-//  * @param hTexRef SEND_ONLY
-//  * @param maxAniso SEND_ONLY
-//  */
-// CUresult cuTexRefSetMaxAnisotropy(CUtexref hTexRef, unsigned int maxAniso);
-// /**
-//  * @param hTexRef SEND_ONLY
-//  * @param pBorderColor SEND_RECV
-//  */
-// CUresult cuTexRefSetBorderColor(CUtexref hTexRef, float *pBorderColor);
-// /**
-//  * @param hTexRef SEND_ONLY
-//  * @param Flags SEND_ONLY
-//  */
-// CUresult cuTexRefSetFlags(CUtexref hTexRef, unsigned int Flags);
-// /**
-//  * @param pdptr SEND_RECV
-//  * @param hTexRef SEND_ONLY
-//  */
-// CUresult cuTexRefGetAddress_v2(CUdeviceptr *pdptr, CUtexref hTexRef);
-// /**
-//  * @param phArray SEND_RECV
-//  * @param hTexRef SEND_ONLY
-//  */
-// CUresult cuTexRefGetArray(CUarray *phArray, CUtexref hTexRef);
-// /**
-//  * @param phMipmappedArray SEND_RECV
-//  * @param hTexRef SEND_ONLY
-//  */
-// CUresult cuTexRefGetMipmappedArray(CUmipmappedArray *phMipmappedArray, CUtexref hTexRef);
-// /**
-//  * @param pam SEND_RECV
-//  * @param hTexRef SEND_ONLY
-//  * @param dim SEND_ONLY
-//  */
-// CUresult cuTexRefGetAddressMode(CUaddress_mode *pam, CUtexref hTexRef, int dim);
-// /**
-//  * @param pfm SEND_RECV
-//  * @param hTexRef SEND_ONLY
-//  */
-// CUresult cuTexRefGetFilterMode(CUfilter_mode *pfm, CUtexref hTexRef);
-// /**
-//  * @param pFormat SEND_RECV
-//  * @param pNumChannels SEND_RECV
-//  * @param hTexRef SEND_ONLY
-//  */
-// CUresult cuTexRefGetFormat(CUarray_format *pFormat, int *pNumChannels, CUtexref hTexRef);
-// /**
-//  * @param pfm SEND_RECV
-//  * @param hTexRef SEND_ONLY
-//  */
-// CUresult cuTexRefGetMipmapFilterMode(CUfilter_mode *pfm, CUtexref hTexRef);
-// /**
-//  * @param pbias SEND_RECV
-//  * @param hTexRef SEND_ONLY
-//  */
-// CUresult cuTexRefGetMipmapLevelBias(float *pbias, CUtexref hTexRef);
-// /**
-//  * @param pminMipmapLevelClamp SEND_RECV
-//  * @param pmaxMipmapLevelClamp SEND_RECV
-//  * @param hTexRef SEND_ONLY
-//  */
-// CUresult cuTexRefGetMipmapLevelClamp(float *pminMipmapLevelClamp, float *pmaxMipmapLevelClamp, CUtexref hTexRef);
-// /**
-//  * @param pmaxAniso SEND_RECV
-//  * @param hTexRef SEND_ONLY
-//  */
-// CUresult cuTexRefGetMaxAnisotropy(int *pmaxAniso, CUtexref hTexRef);
-// /**
-//  * @param pBorderColor SEND_RECV
-//  * @param hTexRef SEND_ONLY
-//  */
-// CUresult cuTexRefGetBorderColor(float *pBorderColor, CUtexref hTexRef);
-// /**
-//  * @param pFlags SEND_RECV
-//  * @param hTexRef SEND_ONLY
-//  */
-// CUresult cuTexRefGetFlags(unsigned int *pFlags, CUtexref hTexRef);
-// /**
-//  * @param pTexRef SEND_RECV
-//  */
-// CUresult cuTexRefCreate(CUtexref *pTexRef);
-// /**
-//  * @param hTexRef SEND_ONLY
-//  */
-// CUresult cuTexRefDestroy(CUtexref hTexRef);
-// /**
-//  * @param hSurfRef SEND_ONLY
-//  * @param hArray SEND_ONLY
-//  * @param Flags SEND_ONLY
-//  */
-// CUresult cuSurfRefSetArray(CUsurfref hSurfRef, CUarray hArray, unsigned int Flags);
-// /**
-//  * @param phArray SEND_RECV
-//  * @param hSurfRef SEND_ONLY
-//  */
-// CUresult cuSurfRefGetArray(CUarray *phArray, CUsurfref hSurfRef);
-// /**
-//  * @param pTexObject SEND_RECV
-//  * @param pResDesc SEND_RECV
-//  * @param pTexDesc SEND_RECV
-//  * @param pResViewDesc SEND_RECV
-//  */
-// CUresult cuTexObjectCreate(CUtexObject *pTexObject, const CUDA_RESOURCE_DESC *pResDesc, const CUDA_TEXTURE_DESC *pTexDesc, const CUDA_RESOURCE_VIEW_DESC *pResViewDesc);
-// /**
-//  * @param texObject SEND_ONLY
-//  */
-// CUresult cuTexObjectDestroy(CUtexObject texObject);
-// /**
-//  * @param pResDesc SEND_RECV
-//  * @param texObject SEND_ONLY
-//  */
-// CUresult cuTexObjectGetResourceDesc(CUDA_RESOURCE_DESC *pResDesc, CUtexObject texObject);
-// /**
-//  * @param pTexDesc SEND_RECV
-//  * @param texObject SEND_ONLY
-//  */
-// CUresult cuTexObjectGetTextureDesc(CUDA_TEXTURE_DESC *pTexDesc, CUtexObject texObject);
-// /**
-//  * @param pResViewDesc SEND_RECV
-//  * @param texObject SEND_ONLY
-//  */
-// CUresult cuTexObjectGetResourceViewDesc(CUDA_RESOURCE_VIEW_DESC *pResViewDesc, CUtexObject texObject);
-// /**
-//  * @param pSurfObject SEND_RECV
-//  * @param pResDesc SEND_RECV
-//  */
-// CUresult cuSurfObjectCreate(CUsurfObject *pSurfObject, const CUDA_RESOURCE_DESC *pResDesc);
-// /**
-//  * @param surfObject SEND_ONLY
-//  */
-// CUresult cuSurfObjectDestroy(CUsurfObject surfObject);
-// /**
-//  * @param pResDesc SEND_RECV
-//  * @param surfObject SEND_ONLY
-//  */
-// CUresult cuSurfObjectGetResourceDesc(CUDA_RESOURCE_DESC *pResDesc, CUsurfObject surfObject);
-// /**
-//  * @param tensorMap SEND_RECV
-//  * @param tensorDataType SEND_ONLY
-//  * @param tensorRank SEND_ONLY
-//  * @param globalAddress SEND_RECV
-//  * @param globalDim SEND_RECV
-//  * @param globalStrides SEND_RECV
-//  * @param boxDim SEND_RECV
-//  * @param elementStrides SEND_RECV
-//  * @param interleave SEND_ONLY
-//  * @param swizzle SEND_ONLY
-//  * @param l2Promotion SEND_ONLY
-//  * @param oobFill SEND_ONLY
-//  */
-// CUresult cuTensorMapEncodeTiled(CUtensorMap *tensorMap, CUtensorMapDataType tensorDataType, cuuint32_t tensorRank, void *globalAddress, const cuuint64_t *globalDim, const cuuint64_t *globalStrides, const cuuint32_t *boxDim, const cuuint32_t *elementStrides, CUtensorMapInterleave interleave, CUtensorMapSwizzle swizzle, CUtensorMapL2promotion l2Promotion, CUtensorMapFloatOOBfill oobFill);
-// /**
-//  * @param tensorMap SEND_RECV
-//  * @param tensorDataType SEND_ONLY
-//  * @param tensorRank SEND_ONLY
-//  * @param globalAddress SEND_RECV
-//  * @param globalDim SEND_RECV
-//  * @param globalStrides SEND_RECV
-//  * @param pixelBoxLowerCorner SEND_RECV
-//  * @param pixelBoxUpperCorner SEND_RECV
-//  * @param channelsPerPixel SEND_ONLY
-//  * @param pixelsPerColumn SEND_ONLY
-//  * @param elementStrides SEND_RECV
-//  * @param interleave SEND_ONLY
-//  * @param swizzle SEND_ONLY
-//  * @param l2Promotion SEND_ONLY
-//  * @param oobFill SEND_ONLY
-//  */
-// CUresult cuTensorMapEncodeIm2col(CUtensorMap *tensorMap, CUtensorMapDataType tensorDataType, cuuint32_t tensorRank, void *globalAddress, const cuuint64_t *globalDim, const cuuint64_t *globalStrides, const int *pixelBoxLowerCorner, const int *pixelBoxUpperCorner, cuuint32_t channelsPerPixel, cuuint32_t pixelsPerColumn, const cuuint32_t *elementStrides, CUtensorMapInterleave interleave, CUtensorMapSwizzle swizzle, CUtensorMapL2promotion l2Promotion, CUtensorMapFloatOOBfill oobFill);
-// /**
-//  * @param tensorMap SEND_RECV
-//  * @param globalAddress SEND_RECV
-//  */
-// CUresult cuTensorMapReplaceAddress(CUtensorMap *tensorMap, void *globalAddress);
-// /**
-//  * @param canAccessPeer SEND_RECV
-//  * @param dev SEND_ONLY
-//  * @param peerDev SEND_ONLY
-//  */
-// CUresult cuDeviceCanAccessPeer(int *canAccessPeer, CUdevice dev, CUdevice peerDev);
-// /**
-//  * @param peerContext SEND_ONLY
-//  * @param Flags SEND_ONLY
-//  */
-// CUresult cuCtxEnablePeerAccess(CUcontext peerContext, unsigned int Flags);
-// /**
-//  * @param peerContext SEND_ONLY
-//  */
-// CUresult cuCtxDisablePeerAccess(CUcontext peerContext);
-// /**
-//  * @param value SEND_RECV
-//  * @param attrib SEND_ONLY
-//  * @param srcDevice SEND_ONLY
-//  * @param dstDevice SEND_ONLY
-//  */
-// CUresult cuDeviceGetP2PAttribute(int *value, CUdevice_P2PAttribute attrib, CUdevice srcDevice, CUdevice dstDevice);
-// /**
-//  * @param resource SEND_ONLY
-//  */
-// CUresult cuGraphicsUnregisterResource(CUgraphicsResource resource);
-// /**
-//  * @param pArray SEND_RECV
-//  * @param resource SEND_ONLY
-//  * @param arrayIndex SEND_ONLY
-//  * @param mipLevel SEND_ONLY
-//  */
-// CUresult cuGraphicsSubResourceGetMappedArray(CUarray *pArray, CUgraphicsResource resource, unsigned int arrayIndex, unsigned int mipLevel);
-// /**
-//  * @param pMipmappedArray SEND_RECV
-//  * @param resource SEND_ONLY
-//  */
-// CUresult cuGraphicsResourceGetMappedMipmappedArray(CUmipmappedArray *pMipmappedArray, CUgraphicsResource resource);
-// /**
-//  * @param pDevPtr SEND_RECV
-//  * @param pSize SEND_RECV
-//  * @param resource SEND_ONLY
-//  */
-// CUresult cuGraphicsResourceGetMappedPointer_v2(CUdeviceptr *pDevPtr, size_t *pSize, CUgraphicsResource resource);
-// /**
-//  * @param resource SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// CUresult cuGraphicsResourceSetMapFlags_v2(CUgraphicsResource resource, unsigned int flags);
-// /**
-//  * @param count SEND_ONLY
-//  * @param resources SEND_RECV
-//  * @param hStream SEND_ONLY
-//  */
-// CUresult cuGraphicsMapResources(unsigned int count, CUgraphicsResource *resources, CUstream hStream);
-// /**
-//  * @param count SEND_ONLY
-//  * @param resources SEND_RECV
-//  * @param hStream SEND_ONLY
-//  */
-// CUresult cuGraphicsUnmapResources(unsigned int count, CUgraphicsResource *resources, CUstream hStream);
-// /**
-//  * @param symbol SEND_RECV
-//  * @param pfn SEND_RECV
-//  * @param cudaVersion SEND_ONLY
-//  * @param flags SEND_ONLY
-//  * @param symbolStatus SEND_RECV
-//  */
-// // CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion, cuuint64_t flags, CUdriverProcAddressQueryResult *symbolStatus);
-// /**
-//  * @param ppExportTable SEND_RECV
-//  * @param pExportTableId SEND_RECV
-//  */
+/**
+ * @param f SEND_ONLY
+ * @param gridDimX SEND_ONLY
+ * @param gridDimY SEND_ONLY
+ * @param gridDimZ SEND_ONLY
+ * @param blockDimX SEND_ONLY
+ * @param blockDimY SEND_ONLY
+ * @param blockDimZ SEND_ONLY
+ * @param sharedMemBytes SEND_ONLY
+ * @param hStream SEND_ONLY
+ * @param kernelParams SEND_ONLY
+ * @param extra SEND_ONLY
+ */
+CUresult cuLaunchKernel(CUfunction f, unsigned int gridDimX, unsigned int gridDimY, unsigned int gridDimZ, unsigned int blockDimX, unsigned int blockDimY, unsigned int blockDimZ, unsigned int sharedMemBytes, CUstream hStream, void **kernelParams, void **extra);
+/**
+ * @param config SEND_ONLY DEREFERENCE
+ * @param f SEND_ONLY
+ * @param kernelParams SEND_ONLY
+ * @param extra SEND_ONLY
+ */
+CUresult cuLaunchKernelEx(const CUlaunchConfig *config, CUfunction f, void **kernelParams, void **extra);
+/**
+ * @param f SEND_ONLY
+ * @param gridDimX SEND_ONLY
+ * @param gridDimY SEND_ONLY
+ * @param gridDimZ SEND_ONLY
+ * @param blockDimX SEND_ONLY
+ * @param blockDimY SEND_ONLY
+ * @param blockDimZ SEND_ONLY
+ * @param sharedMemBytes SEND_ONLY
+ * @param hStream SEND_ONLY
+ * @param kernelParams SEND_RECV
+ */
+CUresult cuLaunchCooperativeKernel(CUfunction f, unsigned int gridDimX, unsigned int gridDimY, unsigned int gridDimZ, unsigned int blockDimX, unsigned int blockDimY, unsigned int blockDimZ, unsigned int sharedMemBytes, CUstream hStream, void **kernelParams);
+/**
+ * @param launchParamsList SEND_RECV
+ * @param numDevices SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+CUresult cuLaunchCooperativeKernelMultiDevice(CUDA_LAUNCH_PARAMS *launchParamsList, unsigned int numDevices, unsigned int flags);
+/**
+ * @param hStream SEND_ONLY
+ * @param fn SEND_ONLY
+ * @param userData SEND_RECV
+ */
+CUresult cuLaunchHostFunc(CUstream hStream, CUhostFn fn, void *userData);
+/**
+ * @param hfunc SEND_ONLY
+ * @param x SEND_ONLY
+ * @param y SEND_ONLY
+ * @param z SEND_ONLY
+ */
+CUresult cuFuncSetBlockShape(CUfunction hfunc, int x, int y, int z);
+/**
+ * @param hfunc SEND_ONLY
+ * @param bytes SEND_ONLY
+ */
+CUresult cuFuncSetSharedSize(CUfunction hfunc, unsigned int bytes);
+/**
+ * @param hfunc SEND_ONLY
+ * @param numbytes SEND_ONLY
+ */
+CUresult cuParamSetSize(CUfunction hfunc, unsigned int numbytes);
+/**
+ * @param hfunc SEND_ONLY
+ * @param offset SEND_ONLY
+ * @param value SEND_ONLY
+ */
+CUresult cuParamSeti(CUfunction hfunc, int offset, unsigned int value);
+/**
+ * @param hfunc SEND_ONLY
+ * @param offset SEND_ONLY
+ * @param value SEND_ONLY
+ */
+CUresult cuParamSetf(CUfunction hfunc, int offset, float value);
+/**
+ * @param hfunc SEND_ONLY
+ * @param offset SEND_ONLY
+ * @param ptr SEND_RECV
+ * @param numbytes SEND_ONLY
+ */
+CUresult cuParamSetv(CUfunction hfunc, int offset, void *ptr, unsigned int numbytes);
+/**
+ * @param f SEND_ONLY
+ */
+CUresult cuLaunch(CUfunction f);
+/**
+ * @param f SEND_ONLY
+ * @param grid_width SEND_ONLY
+ * @param grid_height SEND_ONLY
+ */
+CUresult cuLaunchGrid(CUfunction f, int grid_width, int grid_height);
+/**
+ * @param f SEND_ONLY
+ * @param grid_width SEND_ONLY
+ * @param grid_height SEND_ONLY
+ * @param hStream SEND_ONLY
+ */
+CUresult cuLaunchGridAsync(CUfunction f, int grid_width, int grid_height, CUstream hStream);
+/**
+ * @param hfunc SEND_ONLY
+ * @param texunit SEND_ONLY
+ * @param hTexRef SEND_ONLY
+ */
+CUresult cuParamSetTexRef(CUfunction hfunc, int texunit, CUtexref hTexRef);
+/**
+ * @param phGraph SEND_RECV
+ * @param flags SEND_ONLY
+ */
+CUresult cuGraphCreate(CUgraph *phGraph, unsigned int flags);
+/**
+ * @param phGraphNode SEND_RECV
+ * @param hGraph SEND_ONLY
+ * @param dependencies SEND_RECV
+ * @param numDependencies SEND_ONLY
+ * @param nodeParams SEND_RECV
+ */
+CUresult cuGraphAddKernelNode_v2(CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies, size_t numDependencies, const CUDA_KERNEL_NODE_PARAMS *nodeParams);
+/**
+ * @param hNode SEND_ONLY
+ * @param nodeParams SEND_RECV
+ */
+CUresult cuGraphKernelNodeGetParams_v2(CUgraphNode hNode, CUDA_KERNEL_NODE_PARAMS *nodeParams);
+/**
+ * @param hNode SEND_ONLY
+ * @param nodeParams SEND_RECV
+ */
+CUresult cuGraphKernelNodeSetParams_v2(CUgraphNode hNode, const CUDA_KERNEL_NODE_PARAMS *nodeParams);
+/**
+ * @param phGraphNode SEND_RECV
+ * @param hGraph SEND_ONLY
+ * @param dependencies SEND_RECV
+ * @param numDependencies SEND_ONLY
+ * @param copyParams SEND_RECV
+ * @param ctx SEND_ONLY
+ */
+CUresult cuGraphAddMemcpyNode(CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies, size_t numDependencies, const CUDA_MEMCPY3D *copyParams, CUcontext ctx);
+/**
+ * @param hNode SEND_ONLY
+ * @param nodeParams SEND_RECV
+ */
+CUresult cuGraphMemcpyNodeGetParams(CUgraphNode hNode, CUDA_MEMCPY3D *nodeParams);
+/**
+ * @param hNode SEND_ONLY
+ * @param nodeParams SEND_RECV
+ */
+CUresult cuGraphMemcpyNodeSetParams(CUgraphNode hNode, const CUDA_MEMCPY3D *nodeParams);
+/**
+ * @param phGraphNode SEND_RECV
+ * @param hGraph SEND_ONLY
+ * @param dependencies SEND_RECV
+ * @param numDependencies SEND_ONLY
+ * @param memsetParams SEND_RECV
+ * @param ctx SEND_ONLY
+ */
+CUresult cuGraphAddMemsetNode(CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies, size_t numDependencies, const CUDA_MEMSET_NODE_PARAMS *memsetParams, CUcontext ctx);
+/**
+ * @param hNode SEND_ONLY
+ * @param nodeParams SEND_RECV
+ */
+CUresult cuGraphMemsetNodeGetParams(CUgraphNode hNode, CUDA_MEMSET_NODE_PARAMS *nodeParams);
+/**
+ * @param hNode SEND_ONLY
+ * @param nodeParams SEND_RECV
+ */
+CUresult cuGraphMemsetNodeSetParams(CUgraphNode hNode, const CUDA_MEMSET_NODE_PARAMS *nodeParams);
+/**
+ * @param phGraphNode SEND_RECV
+ * @param hGraph SEND_ONLY
+ * @param dependencies SEND_RECV
+ * @param numDependencies SEND_ONLY
+ * @param nodeParams SEND_RECV
+ */
+CUresult cuGraphAddHostNode(CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies, size_t numDependencies, const CUDA_HOST_NODE_PARAMS *nodeParams);
+/**
+ * @param hNode SEND_ONLY
+ * @param nodeParams SEND_RECV
+ */
+CUresult cuGraphHostNodeGetParams(CUgraphNode hNode, CUDA_HOST_NODE_PARAMS *nodeParams);
+/**
+ * @param hNode SEND_ONLY
+ * @param nodeParams SEND_RECV
+ */
+CUresult cuGraphHostNodeSetParams(CUgraphNode hNode, const CUDA_HOST_NODE_PARAMS *nodeParams);
+/**
+ * @param phGraphNode SEND_RECV
+ * @param hGraph SEND_ONLY
+ * @param dependencies SEND_RECV
+ * @param numDependencies SEND_ONLY
+ * @param childGraph SEND_ONLY
+ */
+CUresult cuGraphAddChildGraphNode(CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies, size_t numDependencies, CUgraph childGraph);
+/**
+ * @param hNode SEND_ONLY
+ * @param phGraph SEND_RECV
+ */
+CUresult cuGraphChildGraphNodeGetGraph(CUgraphNode hNode, CUgraph *phGraph);
+/**
+ * @param phGraphNode SEND_RECV
+ * @param hGraph SEND_ONLY
+ * @param dependencies SEND_RECV
+ * @param numDependencies SEND_ONLY
+ */
+CUresult cuGraphAddEmptyNode(CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies, size_t numDependencies);
+/**
+ * @param phGraphNode SEND_RECV
+ * @param hGraph SEND_ONLY
+ * @param dependencies SEND_RECV
+ * @param numDependencies SEND_ONLY
+ * @param event SEND_ONLY
+ */
+CUresult cuGraphAddEventRecordNode(CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies, size_t numDependencies, CUevent event);
+/**
+ * @param hNode SEND_ONLY
+ * @param event_out SEND_RECV
+ */
+CUresult cuGraphEventRecordNodeGetEvent(CUgraphNode hNode, CUevent *event_out);
+/**
+ * @param hNode SEND_ONLY
+ * @param event SEND_ONLY
+ */
+CUresult cuGraphEventRecordNodeSetEvent(CUgraphNode hNode, CUevent event);
+/**
+ * @param phGraphNode SEND_RECV
+ * @param hGraph SEND_ONLY
+ * @param dependencies SEND_RECV
+ * @param numDependencies SEND_ONLY
+ * @param event SEND_ONLY
+ */
+CUresult cuGraphAddEventWaitNode(CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies, size_t numDependencies, CUevent event);
+/**
+ * @param hNode SEND_ONLY
+ * @param event_out SEND_RECV
+ */
+CUresult cuGraphEventWaitNodeGetEvent(CUgraphNode hNode, CUevent *event_out);
+/**
+ * @param hNode SEND_ONLY
+ * @param event SEND_ONLY
+ */
+CUresult cuGraphEventWaitNodeSetEvent(CUgraphNode hNode, CUevent event);
+/**
+ * @param phGraphNode SEND_RECV
+ * @param hGraph SEND_ONLY
+ * @param dependencies SEND_RECV
+ * @param numDependencies SEND_ONLY
+ * @param nodeParams SEND_RECV
+ */
+CUresult cuGraphAddExternalSemaphoresSignalNode(CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies, size_t numDependencies, const CUDA_EXT_SEM_SIGNAL_NODE_PARAMS *nodeParams);
+/**
+ * @param hNode SEND_ONLY
+ * @param params_out SEND_RECV
+ */
+CUresult cuGraphExternalSemaphoresSignalNodeGetParams(CUgraphNode hNode, CUDA_EXT_SEM_SIGNAL_NODE_PARAMS *params_out);
+/**
+ * @param hNode SEND_ONLY
+ * @param nodeParams SEND_RECV
+ */
+CUresult cuGraphExternalSemaphoresSignalNodeSetParams(CUgraphNode hNode, const CUDA_EXT_SEM_SIGNAL_NODE_PARAMS *nodeParams);
+/**
+ * @param phGraphNode SEND_RECV
+ * @param hGraph SEND_ONLY
+ * @param dependencies SEND_RECV
+ * @param numDependencies SEND_ONLY
+ * @param nodeParams SEND_RECV
+ */
+CUresult cuGraphAddExternalSemaphoresWaitNode(CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies, size_t numDependencies, const CUDA_EXT_SEM_WAIT_NODE_PARAMS *nodeParams);
+/**
+ * @param hNode SEND_ONLY
+ * @param params_out SEND_RECV
+ */
+CUresult cuGraphExternalSemaphoresWaitNodeGetParams(CUgraphNode hNode, CUDA_EXT_SEM_WAIT_NODE_PARAMS *params_out);
+/**
+ * @param hNode SEND_ONLY
+ * @param nodeParams SEND_RECV
+ */
+CUresult cuGraphExternalSemaphoresWaitNodeSetParams(CUgraphNode hNode, const CUDA_EXT_SEM_WAIT_NODE_PARAMS *nodeParams);
+/**
+ * @param phGraphNode SEND_RECV
+ * @param hGraph SEND_ONLY
+ * @param dependencies SEND_RECV
+ * @param numDependencies SEND_ONLY
+ * @param nodeParams SEND_RECV
+ */
+CUresult cuGraphAddBatchMemOpNode(CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies, size_t numDependencies, const CUDA_BATCH_MEM_OP_NODE_PARAMS *nodeParams);
+/**
+ * @param hNode SEND_ONLY
+ * @param nodeParams_out SEND_RECV
+ */
+CUresult cuGraphBatchMemOpNodeGetParams(CUgraphNode hNode, CUDA_BATCH_MEM_OP_NODE_PARAMS *nodeParams_out);
+/**
+ * @param hNode SEND_ONLY
+ * @param nodeParams SEND_RECV
+ */
+CUresult cuGraphBatchMemOpNodeSetParams(CUgraphNode hNode, const CUDA_BATCH_MEM_OP_NODE_PARAMS *nodeParams);
+/**
+ * @param hGraphExec SEND_ONLY
+ * @param hNode SEND_ONLY
+ * @param nodeParams SEND_RECV
+ */
+CUresult cuGraphExecBatchMemOpNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNode, const CUDA_BATCH_MEM_OP_NODE_PARAMS *nodeParams);
+/**
+ * @param phGraphNode SEND_RECV
+ * @param hGraph SEND_ONLY
+ * @param dependencies SEND_RECV
+ * @param numDependencies SEND_ONLY
+ * @param nodeParams SEND_RECV
+ */
+CUresult cuGraphAddMemAllocNode(CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies, size_t numDependencies, CUDA_MEM_ALLOC_NODE_PARAMS *nodeParams);
+/**
+ * @param hNode SEND_ONLY
+ * @param params_out SEND_RECV
+ */
+CUresult cuGraphMemAllocNodeGetParams(CUgraphNode hNode, CUDA_MEM_ALLOC_NODE_PARAMS *params_out);
+/**
+ * @param phGraphNode SEND_RECV
+ * @param hGraph SEND_ONLY
+ * @param dependencies SEND_RECV
+ * @param numDependencies SEND_ONLY
+ * @param dptr SEND_ONLY
+ */
+CUresult cuGraphAddMemFreeNode(CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies, size_t numDependencies, CUdeviceptr dptr);
+/**
+ * @param hNode SEND_ONLY
+ * @param dptr_out SEND_RECV
+ */
+CUresult cuGraphMemFreeNodeGetParams(CUgraphNode hNode, CUdeviceptr *dptr_out);
+/**
+ * @param device SEND_ONLY
+ */
+CUresult cuDeviceGraphMemTrim(CUdevice device);
+/**
+ * @param device SEND_ONLY
+ * @param attr SEND_ONLY
+ * @param value SEND_RECV
+ */
+CUresult cuDeviceGetGraphMemAttribute(CUdevice device, CUgraphMem_attribute attr, void *value);
+/**
+ * @param device SEND_ONLY
+ * @param attr SEND_ONLY
+ * @param value SEND_RECV
+ */
+CUresult cuDeviceSetGraphMemAttribute(CUdevice device, CUgraphMem_attribute attr, void *value);
+/**
+ * @param phGraphClone SEND_RECV
+ * @param originalGraph SEND_ONLY
+ */
+CUresult cuGraphClone(CUgraph *phGraphClone, CUgraph originalGraph);
+/**
+ * @param phNode SEND_RECV
+ * @param hOriginalNode SEND_ONLY
+ * @param hClonedGraph SEND_ONLY
+ */
+CUresult cuGraphNodeFindInClone(CUgraphNode *phNode, CUgraphNode hOriginalNode, CUgraph hClonedGraph);
+/**
+ * @param hNode SEND_ONLY
+ * @param type SEND_RECV
+ */
+CUresult cuGraphNodeGetType(CUgraphNode hNode, CUgraphNodeType *type);
+/**
+ * @param hGraph SEND_ONLY
+ * @param nodes SEND_RECV
+ * @param numNodes SEND_RECV
+ */
+CUresult cuGraphGetNodes(CUgraph hGraph, CUgraphNode *nodes, size_t *numNodes);
+/**
+ * @param hGraph SEND_ONLY
+ * @param rootNodes SEND_RECV
+ * @param numRootNodes SEND_RECV
+ */
+CUresult cuGraphGetRootNodes(CUgraph hGraph, CUgraphNode *rootNodes, size_t *numRootNodes);
+/**
+ * @param hGraph SEND_ONLY
+ * @param from SEND_RECV
+ * @param to SEND_RECV
+ * @param numEdges SEND_RECV
+ */
+CUresult cuGraphGetEdges(CUgraph hGraph, CUgraphNode *from, CUgraphNode *to, size_t *numEdges);
+/**
+ * @param hNode SEND_ONLY
+ * @param dependencies SEND_RECV
+ * @param numDependencies SEND_RECV
+ */
+CUresult cuGraphNodeGetDependencies(CUgraphNode hNode, CUgraphNode *dependencies, size_t *numDependencies);
+/**
+ * @param hNode SEND_ONLY
+ * @param dependentNodes SEND_RECV
+ * @param numDependentNodes SEND_RECV
+ */
+CUresult cuGraphNodeGetDependentNodes(CUgraphNode hNode, CUgraphNode *dependentNodes, size_t *numDependentNodes);
+/**
+ * @param hGraph SEND_ONLY
+ * @param from SEND_RECV
+ * @param to SEND_RECV
+ * @param numDependencies SEND_ONLY
+ */
+CUresult cuGraphAddDependencies(CUgraph hGraph, const CUgraphNode *from, const CUgraphNode *to, size_t numDependencies);
+/**
+ * @param hGraph SEND_ONLY
+ * @param from SEND_RECV
+ * @param to SEND_RECV
+ * @param numDependencies SEND_ONLY
+ */
+CUresult cuGraphRemoveDependencies(CUgraph hGraph, const CUgraphNode *from, const CUgraphNode *to, size_t numDependencies);
+/**
+ * @param hNode SEND_ONLY
+ */
+CUresult cuGraphDestroyNode(CUgraphNode hNode);
+/**
+ * @param phGraphExec SEND_RECV
+ * @param hGraph SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+CUresult cuGraphInstantiateWithFlags(CUgraphExec *phGraphExec, CUgraph hGraph, unsigned long long flags);
+/**
+ * @param phGraphExec SEND_RECV
+ * @param hGraph SEND_ONLY
+ * @param instantiateParams SEND_RECV
+ */
+CUresult cuGraphInstantiateWithParams(CUgraphExec *phGraphExec, CUgraph hGraph, CUDA_GRAPH_INSTANTIATE_PARAMS *instantiateParams);
+/**
+ * @param hGraphExec SEND_ONLY
+ * @param flags SEND_RECV
+ */
+CUresult cuGraphExecGetFlags(CUgraphExec hGraphExec, cuuint64_t *flags);
+/**
+ * @param hGraphExec SEND_ONLY
+ * @param hNode SEND_ONLY
+ * @param nodeParams SEND_RECV
+ */
+CUresult cuGraphExecKernelNodeSetParams_v2(CUgraphExec hGraphExec, CUgraphNode hNode, const CUDA_KERNEL_NODE_PARAMS *nodeParams);
+/**
+ * @param hGraphExec SEND_ONLY
+ * @param hNode SEND_ONLY
+ * @param copyParams SEND_RECV
+ * @param ctx SEND_ONLY
+ */
+CUresult cuGraphExecMemcpyNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNode, const CUDA_MEMCPY3D *copyParams, CUcontext ctx);
+/**
+ * @param hGraphExec SEND_ONLY
+ * @param hNode SEND_ONLY
+ * @param memsetParams SEND_RECV
+ * @param ctx SEND_ONLY
+ */
+CUresult cuGraphExecMemsetNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNode, const CUDA_MEMSET_NODE_PARAMS *memsetParams, CUcontext ctx);
+/**
+ * @param hGraphExec SEND_ONLY
+ * @param hNode SEND_ONLY
+ * @param nodeParams SEND_RECV
+ */
+CUresult cuGraphExecHostNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNode, const CUDA_HOST_NODE_PARAMS *nodeParams);
+/**
+ * @param hGraphExec SEND_ONLY
+ * @param hNode SEND_ONLY
+ * @param childGraph SEND_ONLY
+ */
+CUresult cuGraphExecChildGraphNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNode, CUgraph childGraph);
+/**
+ * @param hGraphExec SEND_ONLY
+ * @param hNode SEND_ONLY
+ * @param event SEND_ONLY
+ */
+CUresult cuGraphExecEventRecordNodeSetEvent(CUgraphExec hGraphExec, CUgraphNode hNode, CUevent event);
+/**
+ * @param hGraphExec SEND_ONLY
+ * @param hNode SEND_ONLY
+ * @param event SEND_ONLY
+ */
+CUresult cuGraphExecEventWaitNodeSetEvent(CUgraphExec hGraphExec, CUgraphNode hNode, CUevent event);
+/**
+ * @param hGraphExec SEND_ONLY
+ * @param hNode SEND_ONLY
+ * @param nodeParams SEND_RECV
+ */
+CUresult cuGraphExecExternalSemaphoresSignalNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNode, const CUDA_EXT_SEM_SIGNAL_NODE_PARAMS *nodeParams);
+/**
+ * @param hGraphExec SEND_ONLY
+ * @param hNode SEND_ONLY
+ * @param nodeParams SEND_RECV
+ */
+CUresult cuGraphExecExternalSemaphoresWaitNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNode, const CUDA_EXT_SEM_WAIT_NODE_PARAMS *nodeParams);
+/**
+ * @param hGraphExec SEND_ONLY
+ * @param hNode SEND_ONLY
+ * @param isEnabled SEND_ONLY
+ */
+CUresult cuGraphNodeSetEnabled(CUgraphExec hGraphExec, CUgraphNode hNode, unsigned int isEnabled);
+/**
+ * @param hGraphExec SEND_ONLY
+ * @param hNode SEND_ONLY
+ * @param isEnabled SEND_RECV
+ */
+CUresult cuGraphNodeGetEnabled(CUgraphExec hGraphExec, CUgraphNode hNode, unsigned int *isEnabled);
+/**
+ * @param hGraphExec SEND_ONLY
+ * @param hStream SEND_ONLY
+ */
+CUresult cuGraphUpload(CUgraphExec hGraphExec, CUstream hStream);
+/**
+ * @param hGraphExec SEND_ONLY
+ * @param hStream SEND_ONLY
+ */
+CUresult cuGraphLaunch(CUgraphExec hGraphExec, CUstream hStream);
+/**
+ * @param hGraphExec SEND_ONLY
+ */
+CUresult cuGraphExecDestroy(CUgraphExec hGraphExec);
+/**
+ * @param hGraph SEND_ONLY
+ */
+CUresult cuGraphDestroy(CUgraph hGraph);
+/**
+ * @param hGraphExec SEND_ONLY
+ * @param hGraph SEND_ONLY
+ * @param resultInfo SEND_RECV
+ */
+CUresult cuGraphExecUpdate_v2(CUgraphExec hGraphExec, CUgraph hGraph, CUgraphExecUpdateResultInfo *resultInfo);
+/**
+ * @param dst SEND_ONLY
+ * @param src SEND_ONLY
+ */
+CUresult cuGraphKernelNodeCopyAttributes(CUgraphNode dst, CUgraphNode src);
+/**
+ * @param hNode SEND_ONLY
+ * @param attr SEND_ONLY
+ * @param value_out SEND_RECV
+ */
+CUresult cuGraphKernelNodeGetAttribute(CUgraphNode hNode, CUkernelNodeAttrID attr, CUkernelNodeAttrValue *value_out);
+/**
+ * @param hNode SEND_ONLY
+ * @param attr SEND_ONLY
+ * @param value SEND_RECV
+ */
+CUresult cuGraphKernelNodeSetAttribute(CUgraphNode hNode, CUkernelNodeAttrID attr, const CUkernelNodeAttrValue *value);
+/**
+ * @param hGraph SEND_ONLY
+ * @param path SEND_RECV
+ * @param flags SEND_ONLY
+ */
+CUresult cuGraphDebugDotPrint(CUgraph hGraph, const char *path, unsigned int flags);
+/**
+ * @param object_out SEND_RECV
+ * @param ptr SEND_RECV
+ * @param destroy SEND_ONLY
+ * @param initialRefcount SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+CUresult cuUserObjectCreate(CUuserObject *object_out, void *ptr, CUhostFn destroy, unsigned int initialRefcount, unsigned int flags);
+/**
+ * @param object SEND_ONLY
+ * @param count SEND_ONLY
+ */
+CUresult cuUserObjectRetain(CUuserObject object, unsigned int count);
+/**
+ * @param object SEND_ONLY
+ * @param count SEND_ONLY
+ */
+CUresult cuUserObjectRelease(CUuserObject object, unsigned int count);
+/**
+ * @param graph SEND_ONLY
+ * @param object SEND_ONLY
+ * @param count SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+CUresult cuGraphRetainUserObject(CUgraph graph, CUuserObject object, unsigned int count, unsigned int flags);
+/**
+ * @param graph SEND_ONLY
+ * @param object SEND_ONLY
+ * @param count SEND_ONLY
+ */
+CUresult cuGraphReleaseUserObject(CUgraph graph, CUuserObject object, unsigned int count);
+/**
+ * @param numBlocks SEND_RECV
+ * @param func SEND_ONLY
+ * @param blockSize SEND_ONLY
+ * @param dynamicSMemSize SEND_ONLY
+ */
+CUresult cuOccupancyMaxActiveBlocksPerMultiprocessor(int *numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize);
+/**
+ * @param numBlocks SEND_RECV
+ * @param func SEND_ONLY
+ * @param blockSize SEND_ONLY
+ * @param dynamicSMemSize SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+CUresult cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(int *numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize, unsigned int flags);
+/**
+ * @param minGridSize SEND_RECV
+ * @param blockSize SEND_RECV
+ * @param func SEND_ONLY
+ * @param blockSizeToDynamicSMemSize SEND_ONLY
+ * @param dynamicSMemSize SEND_ONLY
+ * @param blockSizeLimit SEND_ONLY
+ */
+// CUresult cuOccupancyMaxPotentialBlockSize(int *minGridSize, int *blockSize, CUfunction func, CUoccupancyB2DSize blockSizeToDynamicSMemSize, size_t dynamicSMemSize, int blockSizeLimit);
+/**
+ * @param minGridSize SEND_RECV
+ * @param blockSize SEND_RECV
+ * @param func SEND_ONLY
+ * @param blockSizeToDynamicSMemSize SEND_ONLY
+ * @param dynamicSMemSize SEND_ONLY
+ * @param blockSizeLimit SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+// CUresult cuOccupancyMaxPotentialBlockSizeWithFlags(int *minGridSize, int *blockSize, CUfunction func, CUoccupancyB2DSize blockSizeToDynamicSMemSize, size_t dynamicSMemSize, int blockSizeLimit, unsigned int flags);
+/**
+ * @param dynamicSmemSize SEND_RECV
+ * @param func SEND_ONLY
+ * @param numBlocks SEND_ONLY
+ * @param blockSize SEND_ONLY
+ */
+CUresult cuOccupancyAvailableDynamicSMemPerBlock(size_t *dynamicSmemSize, CUfunction func, int numBlocks, int blockSize);
+/**
+ * @param clusterSize SEND_RECV
+ * @param func SEND_ONLY
+ * @param config SEND_RECV
+ */
+CUresult cuOccupancyMaxPotentialClusterSize(int *clusterSize, CUfunction func, const CUlaunchConfig *config);
+/**
+ * @param numClusters SEND_RECV
+ * @param func SEND_ONLY
+ * @param config SEND_RECV
+ */
+CUresult cuOccupancyMaxActiveClusters(int *numClusters, CUfunction func, const CUlaunchConfig *config);
+/**
+ * @param hTexRef SEND_ONLY
+ * @param hArray SEND_ONLY
+ * @param Flags SEND_ONLY
+ */
+CUresult cuTexRefSetArray(CUtexref hTexRef, CUarray hArray, unsigned int Flags);
+/**
+ * @param hTexRef SEND_ONLY
+ * @param hMipmappedArray SEND_ONLY
+ * @param Flags SEND_ONLY
+ */
+CUresult cuTexRefSetMipmappedArray(CUtexref hTexRef, CUmipmappedArray hMipmappedArray, unsigned int Flags);
+/**
+ * @param ByteOffset SEND_RECV
+ * @param hTexRef SEND_ONLY
+ * @param dptr SEND_ONLY
+ * @param bytes SEND_ONLY
+ */
+CUresult cuTexRefSetAddress_v2(size_t *ByteOffset, CUtexref hTexRef, CUdeviceptr dptr, size_t bytes);
+/**
+ * @param hTexRef SEND_ONLY
+ * @param desc SEND_RECV
+ * @param dptr SEND_ONLY
+ * @param Pitch SEND_ONLY
+ */
+CUresult cuTexRefSetAddress2D_v3(CUtexref hTexRef, const CUDA_ARRAY_DESCRIPTOR *desc, CUdeviceptr dptr, size_t Pitch);
+/**
+ * @param hTexRef SEND_ONLY
+ * @param fmt SEND_ONLY
+ * @param NumPackedComponents SEND_ONLY
+ */
+CUresult cuTexRefSetFormat(CUtexref hTexRef, CUarray_format fmt, int NumPackedComponents);
+/**
+ * @param hTexRef SEND_ONLY
+ * @param dim SEND_ONLY
+ * @param am SEND_ONLY
+ */
+CUresult cuTexRefSetAddressMode(CUtexref hTexRef, int dim, CUaddress_mode am);
+/**
+ * @param hTexRef SEND_ONLY
+ * @param fm SEND_ONLY
+ */
+CUresult cuTexRefSetFilterMode(CUtexref hTexRef, CUfilter_mode fm);
+/**
+ * @param hTexRef SEND_ONLY
+ * @param fm SEND_ONLY
+ */
+CUresult cuTexRefSetMipmapFilterMode(CUtexref hTexRef, CUfilter_mode fm);
+/**
+ * @param hTexRef SEND_ONLY
+ * @param bias SEND_ONLY
+ */
+CUresult cuTexRefSetMipmapLevelBias(CUtexref hTexRef, float bias);
+/**
+ * @param hTexRef SEND_ONLY
+ * @param minMipmapLevelClamp SEND_ONLY
+ * @param maxMipmapLevelClamp SEND_ONLY
+ */
+CUresult cuTexRefSetMipmapLevelClamp(CUtexref hTexRef, float minMipmapLevelClamp, float maxMipmapLevelClamp);
+/**
+ * @param hTexRef SEND_ONLY
+ * @param maxAniso SEND_ONLY
+ */
+CUresult cuTexRefSetMaxAnisotropy(CUtexref hTexRef, unsigned int maxAniso);
+/**
+ * @param hTexRef SEND_ONLY
+ * @param pBorderColor SEND_RECV
+ */
+CUresult cuTexRefSetBorderColor(CUtexref hTexRef, float *pBorderColor);
+/**
+ * @param hTexRef SEND_ONLY
+ * @param Flags SEND_ONLY
+ */
+CUresult cuTexRefSetFlags(CUtexref hTexRef, unsigned int Flags);
+/**
+ * @param pdptr SEND_RECV
+ * @param hTexRef SEND_ONLY
+ */
+CUresult cuTexRefGetAddress_v2(CUdeviceptr *pdptr, CUtexref hTexRef);
+/**
+ * @param phArray SEND_RECV
+ * @param hTexRef SEND_ONLY
+ */
+CUresult cuTexRefGetArray(CUarray *phArray, CUtexref hTexRef);
+/**
+ * @param phMipmappedArray SEND_RECV
+ * @param hTexRef SEND_ONLY
+ */
+CUresult cuTexRefGetMipmappedArray(CUmipmappedArray *phMipmappedArray, CUtexref hTexRef);
+/**
+ * @param pam SEND_RECV
+ * @param hTexRef SEND_ONLY
+ * @param dim SEND_ONLY
+ */
+CUresult cuTexRefGetAddressMode(CUaddress_mode *pam, CUtexref hTexRef, int dim);
+/**
+ * @param pfm SEND_RECV
+ * @param hTexRef SEND_ONLY
+ */
+CUresult cuTexRefGetFilterMode(CUfilter_mode *pfm, CUtexref hTexRef);
+/**
+ * @param pFormat SEND_RECV
+ * @param pNumChannels SEND_RECV
+ * @param hTexRef SEND_ONLY
+ */
+CUresult cuTexRefGetFormat(CUarray_format *pFormat, int *pNumChannels, CUtexref hTexRef);
+/**
+ * @param pfm SEND_RECV
+ * @param hTexRef SEND_ONLY
+ */
+CUresult cuTexRefGetMipmapFilterMode(CUfilter_mode *pfm, CUtexref hTexRef);
+/**
+ * @param pbias SEND_RECV
+ * @param hTexRef SEND_ONLY
+ */
+CUresult cuTexRefGetMipmapLevelBias(float *pbias, CUtexref hTexRef);
+/**
+ * @param pminMipmapLevelClamp SEND_RECV
+ * @param pmaxMipmapLevelClamp SEND_RECV
+ * @param hTexRef SEND_ONLY
+ */
+CUresult cuTexRefGetMipmapLevelClamp(float *pminMipmapLevelClamp, float *pmaxMipmapLevelClamp, CUtexref hTexRef);
+/**
+ * @param pmaxAniso SEND_RECV
+ * @param hTexRef SEND_ONLY
+ */
+CUresult cuTexRefGetMaxAnisotropy(int *pmaxAniso, CUtexref hTexRef);
+/**
+ * @param pBorderColor SEND_RECV
+ * @param hTexRef SEND_ONLY
+ */
+CUresult cuTexRefGetBorderColor(float *pBorderColor, CUtexref hTexRef);
+/**
+ * @param pFlags SEND_RECV
+ * @param hTexRef SEND_ONLY
+ */
+CUresult cuTexRefGetFlags(unsigned int *pFlags, CUtexref hTexRef);
+/**
+ * @param pTexRef SEND_RECV
+ */
+CUresult cuTexRefCreate(CUtexref *pTexRef);
+/**
+ * @param hTexRef SEND_ONLY
+ */
+CUresult cuTexRefDestroy(CUtexref hTexRef);
+/**
+ * @param hSurfRef SEND_ONLY
+ * @param hArray SEND_ONLY
+ * @param Flags SEND_ONLY
+ */
+CUresult cuSurfRefSetArray(CUsurfref hSurfRef, CUarray hArray, unsigned int Flags);
+/**
+ * @param phArray SEND_RECV
+ * @param hSurfRef SEND_ONLY
+ */
+CUresult cuSurfRefGetArray(CUarray *phArray, CUsurfref hSurfRef);
+/**
+ * @param pTexObject SEND_RECV
+ * @param pResDesc SEND_RECV
+ * @param pTexDesc SEND_RECV
+ * @param pResViewDesc SEND_RECV
+ */
+CUresult cuTexObjectCreate(CUtexObject *pTexObject, const CUDA_RESOURCE_DESC *pResDesc, const CUDA_TEXTURE_DESC *pTexDesc, const CUDA_RESOURCE_VIEW_DESC *pResViewDesc);
+/**
+ * @param texObject SEND_ONLY
+ */
+CUresult cuTexObjectDestroy(CUtexObject texObject);
+/**
+ * @param pResDesc SEND_RECV
+ * @param texObject SEND_ONLY
+ */
+CUresult cuTexObjectGetResourceDesc(CUDA_RESOURCE_DESC *pResDesc, CUtexObject texObject);
+/**
+ * @param pTexDesc SEND_RECV
+ * @param texObject SEND_ONLY
+ */
+CUresult cuTexObjectGetTextureDesc(CUDA_TEXTURE_DESC *pTexDesc, CUtexObject texObject);
+/**
+ * @param pResViewDesc SEND_RECV
+ * @param texObject SEND_ONLY
+ */
+CUresult cuTexObjectGetResourceViewDesc(CUDA_RESOURCE_VIEW_DESC *pResViewDesc, CUtexObject texObject);
+/**
+ * @param pSurfObject SEND_RECV
+ * @param pResDesc SEND_RECV
+ */
+CUresult cuSurfObjectCreate(CUsurfObject *pSurfObject, const CUDA_RESOURCE_DESC *pResDesc);
+/**
+ * @param surfObject SEND_ONLY
+ */
+CUresult cuSurfObjectDestroy(CUsurfObject surfObject);
+/**
+ * @param pResDesc SEND_RECV
+ * @param surfObject SEND_ONLY
+ */
+CUresult cuSurfObjectGetResourceDesc(CUDA_RESOURCE_DESC *pResDesc, CUsurfObject surfObject);
+/**
+ * @param tensorMap SEND_RECV
+ * @param tensorDataType SEND_ONLY
+ * @param tensorRank SEND_ONLY
+ * @param globalAddress SEND_RECV
+ * @param globalDim SEND_RECV
+ * @param globalStrides SEND_RECV
+ * @param boxDim SEND_RECV
+ * @param elementStrides SEND_RECV
+ * @param interleave SEND_ONLY
+ * @param swizzle SEND_ONLY
+ * @param l2Promotion SEND_ONLY
+ * @param oobFill SEND_ONLY
+ */
+CUresult cuTensorMapEncodeTiled(CUtensorMap *tensorMap, CUtensorMapDataType tensorDataType, cuuint32_t tensorRank, void *globalAddress, const cuuint64_t *globalDim, const cuuint64_t *globalStrides, const cuuint32_t *boxDim, const cuuint32_t *elementStrides, CUtensorMapInterleave interleave, CUtensorMapSwizzle swizzle, CUtensorMapL2promotion l2Promotion, CUtensorMapFloatOOBfill oobFill);
+/**
+ * @param tensorMap SEND_RECV
+ * @param tensorDataType SEND_ONLY
+ * @param tensorRank SEND_ONLY
+ * @param globalAddress SEND_RECV
+ * @param globalDim SEND_RECV
+ * @param globalStrides SEND_RECV
+ * @param pixelBoxLowerCorner SEND_RECV
+ * @param pixelBoxUpperCorner SEND_RECV
+ * @param channelsPerPixel SEND_ONLY
+ * @param pixelsPerColumn SEND_ONLY
+ * @param elementStrides SEND_RECV
+ * @param interleave SEND_ONLY
+ * @param swizzle SEND_ONLY
+ * @param l2Promotion SEND_ONLY
+ * @param oobFill SEND_ONLY
+ */
+CUresult cuTensorMapEncodeIm2col(CUtensorMap *tensorMap, CUtensorMapDataType tensorDataType, cuuint32_t tensorRank, void *globalAddress, const cuuint64_t *globalDim, const cuuint64_t *globalStrides, const int *pixelBoxLowerCorner, const int *pixelBoxUpperCorner, cuuint32_t channelsPerPixel, cuuint32_t pixelsPerColumn, const cuuint32_t *elementStrides, CUtensorMapInterleave interleave, CUtensorMapSwizzle swizzle, CUtensorMapL2promotion l2Promotion, CUtensorMapFloatOOBfill oobFill);
+/**
+ * @param tensorMap SEND_RECV
+ * @param globalAddress SEND_RECV
+ */
+CUresult cuTensorMapReplaceAddress(CUtensorMap *tensorMap, void *globalAddress);
+/**
+ * @param canAccessPeer SEND_RECV
+ * @param dev SEND_ONLY
+ * @param peerDev SEND_ONLY
+ */
+CUresult cuDeviceCanAccessPeer(int *canAccessPeer, CUdevice dev, CUdevice peerDev);
+/**
+ * @param peerContext SEND_ONLY
+ * @param Flags SEND_ONLY
+ */
+CUresult cuCtxEnablePeerAccess(CUcontext peerContext, unsigned int Flags);
+/**
+ * @param peerContext SEND_ONLY
+ */
+CUresult cuCtxDisablePeerAccess(CUcontext peerContext);
+/**
+ * @param value SEND_RECV
+ * @param attrib SEND_ONLY
+ * @param srcDevice SEND_ONLY
+ * @param dstDevice SEND_ONLY
+ */
+CUresult cuDeviceGetP2PAttribute(int *value, CUdevice_P2PAttribute attrib, CUdevice srcDevice, CUdevice dstDevice);
+/**
+ * @param resource SEND_ONLY
+ */
+CUresult cuGraphicsUnregisterResource(CUgraphicsResource resource);
+/**
+ * @param pArray SEND_RECV
+ * @param resource SEND_ONLY
+ * @param arrayIndex SEND_ONLY
+ * @param mipLevel SEND_ONLY
+ */
+CUresult cuGraphicsSubResourceGetMappedArray(CUarray *pArray, CUgraphicsResource resource, unsigned int arrayIndex, unsigned int mipLevel);
+/**
+ * @param pMipmappedArray SEND_RECV
+ * @param resource SEND_ONLY
+ */
+CUresult cuGraphicsResourceGetMappedMipmappedArray(CUmipmappedArray *pMipmappedArray, CUgraphicsResource resource);
+/**
+ * @param pDevPtr SEND_RECV
+ * @param pSize SEND_RECV
+ * @param resource SEND_ONLY
+ */
+CUresult cuGraphicsResourceGetMappedPointer_v2(CUdeviceptr *pDevPtr, size_t *pSize, CUgraphicsResource resource);
+/**
+ * @param resource SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+CUresult cuGraphicsResourceSetMapFlags_v2(CUgraphicsResource resource, unsigned int flags);
+/**
+ * @param count SEND_ONLY
+ * @param resources SEND_RECV
+ * @param hStream SEND_ONLY
+ */
+CUresult cuGraphicsMapResources(unsigned int count, CUgraphicsResource *resources, CUstream hStream);
+/**
+ * @param count SEND_ONLY
+ * @param resources SEND_RECV
+ * @param hStream SEND_ONLY
+ */
+CUresult cuGraphicsUnmapResources(unsigned int count, CUgraphicsResource *resources, CUstream hStream);
+/**
+ * @param symbol SEND_RECV
+ * @param pfn SEND_RECV
+ * @param cudaVersion SEND_ONLY
+ * @param flags SEND_ONLY
+ * @param symbolStatus SEND_RECV
+ */
+// CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion, cuuint64_t flags, CUdriverProcAddressQueryResult *symbolStatus);
+/**
+ * @param ppExportTable SEND_RECV
+ * @param pExportTableId SEND_RECV
+ */
 // CUresult cuGetExportTable(const void **ppExportTable, const CUuuid *pExportTableId);
-// /**
-//  */
-// cudaError_t cudaDeviceReset();
+/**
+ */
+cudaError_t cudaDeviceReset();
 // /**
 //  */
 // cudaError_t cudaDeviceSynchronize();
