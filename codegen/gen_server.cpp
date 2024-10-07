@@ -78,7 +78,7 @@ int handle_nvmlSystemGetDriverVersion(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, version, length * sizeof(version)) < 0)
+    if (rpc_write(conn, version, length * sizeof(char)) < 0)
         return -1;
 
     return result;
@@ -99,7 +99,7 @@ int handle_nvmlSystemGetNVMLVersion(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, version, length * sizeof(version)) < 0)
+    if (rpc_write(conn, version, length * sizeof(char)) < 0)
         return -1;
 
     return result;
@@ -159,7 +159,7 @@ int handle_nvmlSystemGetProcessName(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, name, length * sizeof(name)) < 0)
+    if (rpc_write(conn, name, length * sizeof(char)) < 0)
         return -1;
 
     return result;
@@ -332,7 +332,7 @@ int handle_nvmlUnitGetDevices(void *conn)
         return -1;
     if (rpc_write(conn, &deviceCount, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, devices, deviceCount * sizeof(devices)) < 0)
+    if (rpc_write(conn, devices, deviceCount * sizeof(nvmlDevice_t)) < 0)
         return -1;
 
     return result;
@@ -355,7 +355,7 @@ int handle_nvmlSystemGetHicVersion(void *conn)
         return -1;
     if (rpc_write(conn, &hwbcCount, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, hwbcEntries, hwbcCount * sizeof(hwbcEntries)) < 0)
+    if (rpc_write(conn, hwbcEntries, hwbcCount * sizeof(nvmlHwbcEntry_t)) < 0)
         return -1;
 
     return result;
@@ -511,7 +511,7 @@ int handle_nvmlDeviceGetName(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, name, length * sizeof(name)) < 0)
+    if (rpc_write(conn, name, length * sizeof(char)) < 0)
         return -1;
 
     return result;
@@ -609,7 +609,7 @@ int handle_nvmlDeviceGetMemoryAffinity(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, nodeSet, nodeSetSize * sizeof(nodeSet)) < 0)
+    if (rpc_write(conn, nodeSet, nodeSetSize * sizeof(unsigned long)) < 0)
         return -1;
 
     return result;
@@ -636,7 +636,7 @@ int handle_nvmlDeviceGetCpuAffinityWithinScope(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, cpuSet, cpuSetSize * sizeof(cpuSet)) < 0)
+    if (rpc_write(conn, cpuSet, cpuSetSize * sizeof(unsigned long)) < 0)
         return -1;
 
     return result;
@@ -660,7 +660,7 @@ int handle_nvmlDeviceGetCpuAffinity(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, cpuSet, cpuSetSize * sizeof(cpuSet)) < 0)
+    if (rpc_write(conn, cpuSet, cpuSetSize * sizeof(unsigned long)) < 0)
         return -1;
 
     return result;
@@ -749,7 +749,7 @@ int handle_nvmlDeviceGetTopologyNearestGpus(void *conn)
         return -1;
     if (rpc_write(conn, &count, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, deviceArray, count * sizeof(deviceArray)) < 0)
+    if (rpc_write(conn, deviceArray, count * sizeof(nvmlDevice_t)) < 0)
         return -1;
 
     return result;
@@ -775,7 +775,7 @@ int handle_nvmlSystemGetTopologyGpuSet(void *conn)
         return -1;
     if (rpc_write(conn, &count, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, deviceArray, count * sizeof(deviceArray)) < 0)
+    if (rpc_write(conn, deviceArray, count * sizeof(nvmlDevice_t)) < 0)
         return -1;
 
     return result;
@@ -905,7 +905,7 @@ int handle_nvmlDeviceGetBoardPartNumber(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, partNumber, length * sizeof(partNumber)) < 0)
+    if (rpc_write(conn, partNumber, length * sizeof(char)) < 0)
         return -1;
 
     return result;
@@ -932,7 +932,7 @@ int handle_nvmlDeviceGetInforomVersion(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, version, length * sizeof(version)) < 0)
+    if (rpc_write(conn, version, length * sizeof(char)) < 0)
         return -1;
 
     return result;
@@ -956,7 +956,7 @@ int handle_nvmlDeviceGetInforomImageVersion(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, version, length * sizeof(version)) < 0)
+    if (rpc_write(conn, version, length * sizeof(char)) < 0)
         return -1;
 
     return result;
@@ -1420,7 +1420,7 @@ int handle_nvmlDeviceGetSupportedMemoryClocks(void *conn)
         return -1;
     if (rpc_write(conn, &count, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, clocksMHz, count * sizeof(clocksMHz)) < 0)
+    if (rpc_write(conn, clocksMHz, count * sizeof(unsigned int)) < 0)
         return -1;
 
     return result;
@@ -1449,7 +1449,7 @@ int handle_nvmlDeviceGetSupportedGraphicsClocks(void *conn)
         return -1;
     if (rpc_write(conn, &count, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, clocksMHz, count * sizeof(clocksMHz)) < 0)
+    if (rpc_write(conn, clocksMHz, count * sizeof(unsigned int)) < 0)
         return -1;
 
     return result;
@@ -2437,7 +2437,7 @@ int handle_nvmlDeviceGetEncoderSessions(void *conn)
         return -1;
     if (rpc_write(conn, &sessionCount, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, sessionInfos, sessionCount * sizeof(sessionInfos)) < 0)
+    if (rpc_write(conn, sessionInfos, sessionCount * sizeof(nvmlEncoderSessionInfo_t)) < 0)
         return -1;
 
     return result;
@@ -2508,7 +2508,7 @@ int handle_nvmlDeviceGetFBCSessions(void *conn)
         return -1;
     if (rpc_write(conn, &sessionCount, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, sessionInfo, sessionCount * sizeof(sessionInfo)) < 0)
+    if (rpc_write(conn, sessionInfo, sessionCount * sizeof(nvmlFBCSessionInfo_t)) < 0)
         return -1;
 
     return result;
@@ -2608,7 +2608,7 @@ int handle_nvmlDeviceGetComputeRunningProcesses_v3(void *conn)
         return -1;
     if (rpc_write(conn, &infoCount, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, infos, infoCount * sizeof(infos)) < 0)
+    if (rpc_write(conn, infos, infoCount * sizeof(nvmlProcessInfo_t)) < 0)
         return -1;
 
     return result;
@@ -2634,7 +2634,7 @@ int handle_nvmlDeviceGetGraphicsRunningProcesses_v3(void *conn)
         return -1;
     if (rpc_write(conn, &infoCount, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, infos, infoCount * sizeof(infos)) < 0)
+    if (rpc_write(conn, infos, infoCount * sizeof(nvmlProcessInfo_t)) < 0)
         return -1;
 
     return result;
@@ -2660,7 +2660,7 @@ int handle_nvmlDeviceGetMPSComputeRunningProcesses_v3(void *conn)
         return -1;
     if (rpc_write(conn, &infoCount, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, infos, infoCount * sizeof(infos)) < 0)
+    if (rpc_write(conn, infos, infoCount * sizeof(nvmlProcessInfo_t)) < 0)
         return -1;
 
     return result;
@@ -2743,7 +2743,7 @@ int handle_nvmlDeviceGetSamples(void *conn)
         return -1;
     if (rpc_write(conn, &sampleCount, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, samples, sampleCount * sizeof(samples)) < 0)
+    if (rpc_write(conn, samples, sampleCount * sizeof(nvmlSample_t)) < 0)
         return -1;
 
     return result;
@@ -3006,7 +3006,7 @@ int handle_nvmlDeviceGetAccountingPids(void *conn)
         return -1;
     if (rpc_write(conn, &count, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, pids, count * sizeof(pids)) < 0)
+    if (rpc_write(conn, pids, count * sizeof(unsigned int)) < 0)
         return -1;
 
     return result;
@@ -3056,7 +3056,7 @@ int handle_nvmlDeviceGetRetiredPages(void *conn)
         return -1;
     if (rpc_write(conn, &pageCount, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, addresses, pageCount * sizeof(addresses)) < 0)
+    if (rpc_write(conn, addresses, pageCount * sizeof(unsigned long long)) < 0)
         return -1;
 
     return result;
@@ -3086,9 +3086,9 @@ int handle_nvmlDeviceGetRetiredPages_v2(void *conn)
         return -1;
     if (rpc_write(conn, &pageCount, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, addresses, pageCount * sizeof(addresses)) < 0)
+    if (rpc_write(conn, addresses, pageCount * sizeof(unsigned long long)) < 0)
         return -1;
-    if (rpc_write(conn, timestamps, pageCount * sizeof(timestamps)) < 0)
+    if (rpc_write(conn, timestamps, pageCount * sizeof(unsigned long long)) < 0)
         return -1;
 
     return result;
@@ -4066,7 +4066,7 @@ int handle_nvmlDeviceGetFieldValues(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, values, valuesCount * sizeof(values)) < 0)
+    if (rpc_write(conn, values, valuesCount * sizeof(nvmlFieldValue_t)) < 0)
         return -1;
 
     return result;
@@ -4090,7 +4090,7 @@ int handle_nvmlDeviceClearFieldValues(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, values, valuesCount * sizeof(values)) < 0)
+    if (rpc_write(conn, values, valuesCount * sizeof(nvmlFieldValue_t)) < 0)
         return -1;
 
     return result;
@@ -4203,7 +4203,7 @@ int handle_nvmlDeviceGetProcessUtilization(void *conn)
         return -1;
     if (rpc_write(conn, &processSamplesCount, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, utilization, processSamplesCount * sizeof(utilization)) < 0)
+    if (rpc_write(conn, utilization, processSamplesCount * sizeof(nvmlProcessUtilizationSample_t)) < 0)
         return -1;
 
     return result;
@@ -4319,7 +4319,7 @@ int handle_nvmlDeviceGetSupportedVgpus(void *conn)
         return -1;
     if (rpc_write(conn, &vgpuCount, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, vgpuTypeIds, vgpuCount * sizeof(vgpuTypeIds)) < 0)
+    if (rpc_write(conn, vgpuTypeIds, vgpuCount * sizeof(nvmlVgpuTypeId_t)) < 0)
         return -1;
 
     return result;
@@ -4345,7 +4345,7 @@ int handle_nvmlDeviceGetCreatableVgpus(void *conn)
         return -1;
     if (rpc_write(conn, &vgpuCount, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, vgpuTypeIds, vgpuCount * sizeof(vgpuTypeIds)) < 0)
+    if (rpc_write(conn, vgpuTypeIds, vgpuCount * sizeof(nvmlVgpuTypeId_t)) < 0)
         return -1;
 
     return result;
@@ -4369,7 +4369,7 @@ int handle_nvmlVgpuTypeGetClass(void *conn)
         return -1;
     if (rpc_write(conn, &size, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, vgpuTypeClass, size * sizeof(vgpuTypeClass)) < 0)
+    if (rpc_write(conn, vgpuTypeClass, size * sizeof(char)) < 0)
         return -1;
 
     return result;
@@ -4395,7 +4395,7 @@ int handle_nvmlVgpuTypeGetName(void *conn)
         return -1;
     if (rpc_write(conn, &size, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, vgpuTypeName, size * sizeof(vgpuTypeName)) < 0)
+    if (rpc_write(conn, vgpuTypeName, size * sizeof(char)) < 0)
         return -1;
 
     return result;
@@ -4533,7 +4533,7 @@ int handle_nvmlVgpuTypeGetLicense(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, vgpuTypeLicenseString, size * sizeof(vgpuTypeLicenseString)) < 0)
+    if (rpc_write(conn, vgpuTypeLicenseString, size * sizeof(char)) < 0)
         return -1;
 
     return result;
@@ -4625,7 +4625,7 @@ int handle_nvmlDeviceGetActiveVgpus(void *conn)
         return -1;
     if (rpc_write(conn, &vgpuCount, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, vgpuInstances, vgpuCount * sizeof(vgpuInstances)) < 0)
+    if (rpc_write(conn, vgpuInstances, vgpuCount * sizeof(nvmlVgpuInstance_t)) < 0)
         return -1;
 
     return result;
@@ -4650,7 +4650,7 @@ int handle_nvmlVgpuInstanceGetVmID(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, vmId, size * sizeof(vmId)) < 0)
+    if (rpc_write(conn, vmId, size * sizeof(char)) < 0)
         return -1;
     if (rpc_write(conn, &vmIdType, sizeof(nvmlVgpuVmIdType_t)) < 0)
         return -1;
@@ -4676,7 +4676,7 @@ int handle_nvmlVgpuInstanceGetUUID(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, uuid, size * sizeof(uuid)) < 0)
+    if (rpc_write(conn, uuid, size * sizeof(char)) < 0)
         return -1;
 
     return result;
@@ -4700,7 +4700,7 @@ int handle_nvmlVgpuInstanceGetVmDriverVersion(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, version, length * sizeof(version)) < 0)
+    if (rpc_write(conn, version, length * sizeof(char)) < 0)
         return -1;
 
     return result;
@@ -4900,7 +4900,7 @@ int handle_nvmlVgpuInstanceGetEncoderSessions(void *conn)
         return -1;
     if (rpc_write(conn, &sessionCount, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, sessionInfo, sessionCount * sizeof(sessionInfo)) < 0)
+    if (rpc_write(conn, sessionInfo, sessionCount * sizeof(nvmlEncoderSessionInfo_t)) < 0)
         return -1;
 
     return result;
@@ -4947,7 +4947,7 @@ int handle_nvmlVgpuInstanceGetFBCSessions(void *conn)
         return -1;
     if (rpc_write(conn, &sessionCount, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, sessionInfo, sessionCount * sizeof(sessionInfo)) < 0)
+    if (rpc_write(conn, sessionInfo, sessionCount * sizeof(nvmlFBCSessionInfo_t)) < 0)
         return -1;
 
     return result;
@@ -4994,7 +4994,7 @@ int handle_nvmlVgpuInstanceGetGpuPciId(void *conn)
         return -1;
     if (rpc_write(conn, &length, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, vgpuPciId, length * sizeof(vgpuPciId)) < 0)
+    if (rpc_write(conn, vgpuPciId, length * sizeof(char)) < 0)
         return -1;
 
     return result;
@@ -5044,7 +5044,7 @@ int handle_nvmlVgpuInstanceGetMetadata(void *conn)
         return -1;
     if (rpc_write(conn, &bufferSize, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, vgpuMetadata, bufferSize * sizeof(vgpuMetadata)) < 0)
+    if (rpc_write(conn, vgpuMetadata, bufferSize * sizeof(nvmlVgpuMetadata_t)) < 0)
         return -1;
 
     return result;
@@ -5070,7 +5070,7 @@ int handle_nvmlDeviceGetVgpuMetadata(void *conn)
         return -1;
     if (rpc_write(conn, &bufferSize, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, pgpuMetadata, bufferSize * sizeof(pgpuMetadata)) < 0)
+    if (rpc_write(conn, pgpuMetadata, bufferSize * sizeof(nvmlVgpuPgpuMetadata_t)) < 0)
         return -1;
 
     return result;
@@ -5122,7 +5122,7 @@ int handle_nvmlDeviceGetPgpuMetadataString(void *conn)
         return -1;
     if (rpc_write(conn, &bufferSize, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, pgpuMetadata, bufferSize * sizeof(pgpuMetadata)) < 0)
+    if (rpc_write(conn, pgpuMetadata, bufferSize * sizeof(char)) < 0)
         return -1;
 
     return result;
@@ -5258,7 +5258,7 @@ int handle_nvmlDeviceGetVgpuUtilization(void *conn)
         return -1;
     if (rpc_write(conn, &vgpuInstanceSamplesCount, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, utilizationSamples, vgpuInstanceSamplesCount * sizeof(utilizationSamples)) < 0)
+    if (rpc_write(conn, utilizationSamples, vgpuInstanceSamplesCount * sizeof(nvmlVgpuInstanceUtilizationSample_t)) < 0)
         return -1;
 
     return result;
@@ -5287,7 +5287,7 @@ int handle_nvmlDeviceGetVgpuProcessUtilization(void *conn)
         return -1;
     if (rpc_write(conn, &vgpuProcessSamplesCount, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, utilizationSamples, vgpuProcessSamplesCount * sizeof(utilizationSamples)) < 0)
+    if (rpc_write(conn, utilizationSamples, vgpuProcessSamplesCount * sizeof(nvmlVgpuProcessUtilizationSample_t)) < 0)
         return -1;
 
     return result;
@@ -5334,7 +5334,7 @@ int handle_nvmlVgpuInstanceGetAccountingPids(void *conn)
         return -1;
     if (rpc_write(conn, &count, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, pids, count * sizeof(pids)) < 0)
+    if (rpc_write(conn, pids, count * sizeof(unsigned int)) < 0)
         return -1;
 
     return result;
@@ -5561,7 +5561,7 @@ int handle_nvmlDeviceGetGpuInstancePossiblePlacements_v2(void *conn)
         return -1;
     if (rpc_write(conn, &count, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, placements, count * sizeof(placements)) < 0)
+    if (rpc_write(conn, placements, count * sizeof(nvmlGpuInstancePlacement_t)) < 0)
         return -1;
 
     return result;
@@ -5691,7 +5691,7 @@ int handle_nvmlDeviceGetGpuInstances(void *conn)
         return -1;
     if (rpc_write(conn, &count, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, gpuInstances, count * sizeof(gpuInstances)) < 0)
+    if (rpc_write(conn, gpuInstances, count * sizeof(nvmlGpuInstance_t)) < 0)
         return -1;
 
     return result;
@@ -5843,7 +5843,7 @@ int handle_nvmlGpuInstanceGetComputeInstancePossiblePlacements(void *conn)
         return -1;
     if (rpc_write(conn, &count, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, placements, count * sizeof(placements)) < 0)
+    if (rpc_write(conn, placements, count * sizeof(nvmlComputeInstancePlacement_t)) < 0)
         return -1;
 
     return result;
@@ -5949,7 +5949,7 @@ int handle_nvmlGpuInstanceGetComputeInstances(void *conn)
         return -1;
     if (rpc_write(conn, &count, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, computeInstances, count * sizeof(computeInstances)) < 0)
+    if (rpc_write(conn, computeInstances, count * sizeof(nvmlComputeInstance_t)) < 0)
         return -1;
 
     return result;
@@ -6327,7 +6327,7 @@ int handle_nvmlDeviceGetSupportedPerformanceStates(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, pstates, size * sizeof(pstates)) < 0)
+    if (rpc_write(conn, pstates, size * sizeof(nvmlPstates_t)) < 0)
         return -1;
 
     return result;

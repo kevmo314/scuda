@@ -145,7 +145,7 @@ def main():
 
     with open("gen_api.h", "w") as f:
         # visited = set()
-        for i, function in enumerate(functions):
+        for i, (function, _, _) in enumerate(functions_with_annotations):
             # value = hash(function.name.format()) % (2**32)
             # if value in visited:
             #     print(f"Hash collision for {function.name.format()}")
@@ -174,7 +174,7 @@ def main():
         )
         for function, annotation, operations in functions_with_annotations:
             f.write(
-                "{return_type} {name}({params}) {{\n".format(
+                "{return_type} {name}({params})\n".format(
                     return_type=function.return_type.format(),
                     name=function.name.format(),
                     params=", ".join(
@@ -190,6 +190,7 @@ def main():
                     ),
                 )
             )
+            f.write("{\n")
 
             f.write(
                 "    {return_type} return_value;\n\n".format(
@@ -264,15 +265,17 @@ def main():
                     elif length := operation.length_parameter:
                         if isinstance(length.type, Pointer):
                             f.write(
-                                "        rpc_read({param_name}, *{length} * sizeof({param_name})) < 0 ||\n".format(
+                                "        rpc_read({param_name}, *{length} * sizeof({param_type})) < 0 ||\n".format(
                                     param_name=operation.parameter.name,
+                                    param_type=operation.server_type.ptr_to.format(),
                                     length=length.name,
                                 )
                             )
                         else:
                             f.write(
-                                "        rpc_read({param_name}, {length} * sizeof({param_name})) < 0 ||\n".format(
+                                "        rpc_read({param_name}, {length} * sizeof({param_type})) < 0 ||\n".format(
                                     param_name=operation.parameter.name,
+                                    param_type=operation.server_type.ptr_to.format(),
                                     length=length.name,
                                 )
                             )
@@ -285,8 +288,9 @@ def main():
                         )
                     else:
                         f.write(
-                            "        rpc_read(&{param_name}, sizeof({param_name})) < 0 ||\n".format(
-                                param_name=operation.parameter.name
+                            "        rpc_read({param_name}, sizeof({param_type})) < 0 ||\n".format(
+                                param_name=operation.parameter.name,
+                                param_type=operation.server_type.format(),
                             )
                         )
             f.write("        rpc_end_request(&return_value, request_id) < 0)\n")
@@ -504,8 +508,9 @@ def main():
                         f.write("        return -1;\n")
                     elif length := operation.length_parameter:
                         f.write(
-                            "    if (rpc_write(conn, {param_name}, {length} * sizeof({param_name})) < 0)\n".format(
+                            "    if (rpc_write(conn, {param_name}, {length} * sizeof({param_type})) < 0)\n".format(
                                 param_name=operation.server_reference,
+                                param_type=operation.server_type.ptr_to.format(),
                                 length=length.name,
                             )
                         )
