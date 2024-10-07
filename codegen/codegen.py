@@ -1,24 +1,31 @@
 from cxxheaderparser.simple import parse_file, ParsedData, ParserOptions
 from cxxheaderparser.preprocessor import make_gcc_preprocessor
-from cxxheaderparser.types import Type, Pointer
+from cxxheaderparser.types import Type, Pointer, Parameter, Function
 from typing import Optional
+from dataclasses import dataclass
+import copy
 
 
+@dataclass
 class Operation:
-    param_name: str
     send: bool
     recv: bool
     args: list[str]
 
+    server_type: Type | Pointer
+    parameter: Parameter
+
+    length_parameter: Optional[Parameter]
+
+    @property
+    def nullable(self) -> bool:
+        return (
+            isinstance(self.server_type, Pointer) and self.parameter.type.ptr_to.const
+        )
+
     @property
     def null_terminated(self) -> bool:
         return len(self.args) > 0 and self.args[0] == "NULL_TERMINATED"
-
-    @property
-    def array_length(self) -> Optional[str]:
-        for arg in self.args:
-            if arg.startswith("LENGTH:"):
-                return arg.split(":")[1]
 
     @property
     def array_size(self) -> Optional[str]:
@@ -26,9 +33,25 @@ class Operation:
             if arg.startswith("SIZE:"):
                 return arg.split(":")[1]
 
+    @property
+    def is_opaque_pointer(self) -> bool:
+        return (
+            isinstance(self.server_type, Pointer)
+            and isinstance(self.server_type.ptr_to, Type)
+            and self.server_type.ptr_to.format() == "void"
+        )
 
-def parse_annotation(annotation: str) -> list[Operation]:
-    operations = []
+    @property
+    def server_reference(self) -> str:
+        if isinstance(self.server_type, Type) and isinstance(
+            self.parameter.type, Pointer
+        ):
+            return "&" + self.parameter.name
+        return self.parameter.name
+
+
+def parse_annotation(annotation: str, params: list[Parameter]) -> list[Operation]:
+    operations: list[Operation] = []
     if not annotation:
         return operations
     for line in annotation.split("\n"):
@@ -42,26 +65,42 @@ def parse_annotation(annotation: str) -> list[Operation]:
             parts = line.split()
             if len(parts) < 3:
                 continue
-            operation = Operation()
-            operation.param_name = parts[1]
-            if parts[2] == "SEND_ONLY":
-                operation.send = True
-                operation.recv = False
-            elif parts[2] == "SEND_RECV":
-                operation.send = True
-                operation.recv = True
-            elif parts[2] == "RECV_ONLY":
-                operation.send = False
-                operation.recv = True
-            operation.args = parts[3:]
-            if length := operation.array_length:
-                found = False
-                for op in operations:
-                    if op.param_name == length.removeprefix("*"):
-                        found = True
-                        break
-                if not found:
-                    print(f"Array length {length} not found on {annotation}")
+            param = next(p for p in params if p.name == parts[1])
+            args = parts[3:]
+            send = parts[2] == "SEND_ONLY" or parts[2] == "SEND_RECV"
+            length_parameter = None
+            if isinstance(param.type, Pointer):
+                # if there's a length or size arg, use the type, otherwise use the ptr_to type
+                if (
+                    any(
+                        arg.startswith("LENGTH:")
+                        or arg.startswith("SIZE:")
+                        or arg == "NULL_TERMINATED"
+                        for arg in args
+                    )
+                    or param.type.ptr_to.const
+                ):
+                    server_type = copy.deepcopy(param.type)
+                    server_type.ptr_to.const = False
+                    for arg in args:
+                        if arg.startswith("LENGTH:"):
+                            length_parameter = next(
+                                p for p in params if p.name == arg.split(":")[1]
+                            )
+                else:
+                    server_type = param.type.ptr_to
+            elif isinstance(param.type, Type):
+                server_type = param.type
+            else:
+                raise NotImplementedError("Unknown type")
+            operation = Operation(
+                send=send,
+                recv=parts[2] == "RECV_ONLY" or parts[2] == "SEND_RECV",
+                args=args,
+                server_type=server_type,
+                parameter=param,
+                length_parameter=length_parameter,
+            )
             operations.append(operation)
     return operations
 
@@ -92,7 +131,7 @@ def main():
         + cudart_ast.namespace.functions
     )
 
-    functions_with_annotations = []
+    functions_with_annotations: list[tuple[Function, Function, list[Operation]]] = []
     for function in functions:
         try:
             annotation = next(
@@ -101,20 +140,20 @@ def main():
         except StopIteration:
             print(f"Annotation for {function.name} not found")
             continue
-        operations = parse_annotation(annotation.doxygen)
+        operations = parse_annotation(annotation.doxygen, function.parameters)
         functions_with_annotations.append((function, annotation, operations))
 
     with open("gen_api.h", "w") as f:
-        visited = set()
-        for function in functions:
-            value = hash(function.name.format()) % (2**32)
-            if value in visited:
-                print(f"Hash collision for {function.name.format()}")
-                continue
+        # visited = set()
+        for i, function in enumerate(functions):
+            # value = hash(function.name.format()) % (2**32)
+            # if value in visited:
+            #     print(f"Hash collision for {function.name.format()}")
+            #     continue
             f.write(
                 "#define RPC_{name} {value}\n".format(
                     name=function.name.format(),
-                    value=value,
+                    value=i,
                 )
             )
 
@@ -168,7 +207,7 @@ def main():
                 if operation.null_terminated:
                     f.write(
                         "    std::size_t {param_name}_len = std::strlen({param_name}) + 1;\n".format(
-                            param_name=operation.param_name
+                            param_name=operation.parameter.name
                         )
                     )
 
@@ -178,19 +217,34 @@ def main():
                 if operation.send:
                     if operation.null_terminated:
                         f.write(
-                            "        rpc_write(&{param_name}_len, sizeof({param_name}_len)) < 0 ||\n".format(
-                                param_name=operation.param_name
+                            "        rpc_write(&{param_name}_len, sizeof(std::size_t)) < 0 ||\n".format(
+                                param_name=operation.parameter.name,
                             )
                         )
                         f.write(
                             "        rpc_write({param_name}, {param_name}_len) < 0 ||\n".format(
-                                param_name=operation.param_name
+                                param_name=operation.parameter.name,
+                            )
+                        )
+                    elif operation.nullable:
+                        # write the pointer since it is nonzero if not-null
+                        f.write(
+                            "        rpc_write(&{param_name}, sizeof({param_type})) < 0 ||\n".format(
+                                param_name=operation.parameter.name,
+                                param_type=operation.server_type.format(),
+                            )
+                        )
+                        f.write(
+                            "        ({param_name} != nullptr && rpc_write({param_name}, sizeof({base_type})) < 0) ||\n".format(
+                                param_name=operation.parameter.name,
+                                base_type=operation.server_type.ptr_to.format(),
                             )
                         )
                     else:
                         f.write(
-                            "        rpc_write(&{param_name}, sizeof({param_name})) < 0 ||\n".format(
-                                param_name=operation.param_name
+                            "        rpc_write(&{param_name}, sizeof({param_type})) < 0 ||\n".format(
+                                param_name=operation.parameter.name,
+                                param_type=operation.server_type.format(),
                             )
                         )
             f.write("        rpc_wait_for_response(request_id) < 0 ||\n")
@@ -199,32 +253,40 @@ def main():
                     if operation.null_terminated:
                         f.write(
                             "        rpc_read(&{param_name}_len, sizeof({param_name}_len)) < 0 ||\n".format(
-                                param_name=operation.param_name
+                                param_name=operation.parameter.name
                             )
                         )
                         f.write(
                             "        rpc_read({param_name}, {param_name}_len) < 0 ||\n".format(
-                                param_name=operation.param_name
+                                param_name=operation.parameter.name
                             )
                         )
-                    elif length := operation.array_length:
-                        f.write(
-                            "        rpc_read({param_name}, {length} * sizeof({param_name})) < 0 ||\n".format(
-                                param_name=operation.param_name,
-                                length=length,
+                    elif length := operation.length_parameter:
+                        if isinstance(length.type, Pointer):
+                            f.write(
+                                "        rpc_read({param_name}, *{length} * sizeof({param_name})) < 0 ||\n".format(
+                                    param_name=operation.parameter.name,
+                                    length=length.name,
+                                )
                             )
-                        )
+                        else:
+                            f.write(
+                                "        rpc_read({param_name}, {length} * sizeof({param_name})) < 0 ||\n".format(
+                                    param_name=operation.parameter.name,
+                                    length=length.name,
+                                )
+                            )
                     elif size := operation.array_size:
                         f.write(
                             "        rpc_read({param_name}, {size}) < 0 ||\n".format(
-                                param_name=operation.param_name,
+                                param_name=operation.parameter.name,
                                 size=size,
                             )
                         )
                     else:
                         f.write(
                             "        rpc_read(&{param_name}, sizeof({param_name})) < 0 ||\n".format(
-                                param_name=operation.param_name
+                                param_name=operation.parameter.name
                             )
                         )
             f.write("        rpc_end_request(&return_value, request_id) < 0)\n")
@@ -271,16 +333,6 @@ def main():
         )
         for function, annotation, operations in functions_with_annotations:
             # parse the annotation doxygen
-            operations = [
-                (
-                    operation,
-                    next(
-                        p for p in function.parameters if p.name == operation.param_name
-                    ),
-                )
-                for operation in operations
-            ]
-
             f.write(
                 "int handle_{name}(void *conn)\n".format(
                     name=function.name.format(),
@@ -288,44 +340,124 @@ def main():
             )
             f.write("{\n")
 
-            for operation, param in operations:
+            for operation in operations:
                 if operation.null_terminated:
+                    # write the length declaration and the parameter declaration
                     f.write(
                         "    std::size_t {param_name}_len;\n".format(
-                            param_name=operation.param_name
+                            param_name=operation.parameter.name
                         )
                     )
-                f.write(
-                    "    {param_type} {param_name};\n".format(
-                        param_type=param.type.format(),
-                        param_name=operation.param_name,
+                    f.write(
+                        "    if (rpc_read(conn, &{param_name}_len, sizeof({param_name}_len)) < 0)\n".format(
+                            param_name=operation.parameter.name
+                        )
                     )
-                )
-
-            f.write("\n")
-
-            for operation, param in operations:
-                if operation.send:
-                    if operation.null_terminated:
+                    f.write("        return -1;\n")
+                    if isinstance(operation.server_type, Pointer):
+                        # write the malloc declaration
                         f.write(
-                            "    if (rpc_read(conn, &{param_name}_len, sizeof({param_name}_len)) < 0)\n".format(
-                                param_name=operation.param_name
+                            "    {server_type} {param_name} = ({server_type})malloc({param_name}_len);\n".format(
+                                param_name=operation.parameter.name,
+                                server_type=operation.server_type.format(),
                             )
                         )
-                        f.write("        return -1;\n")
-                        f.write(
-                            "    if (rpc_read(conn, &{param_name}, {param_name}_len) < 0)\n".format(
-                                param_name=operation.param_name
-                            )
-                        )
-                        f.write("        return -1;\n")
                     else:
+                        # write just the parameter declaration
                         f.write(
-                            "    if (rpc_read(conn, &{param_name}, sizeof({param_name})) < 0)\n".format(
-                                param_name=operation.param_name
+                            "    {param_type} {param_name};\n".format(
+                                param_type=operation.server_type.format(),
+                                param_name=operation.parameter.name,
+                            )
+                        )
+                elif isinstance(operation.server_type, Pointer):
+                    # write the malloc declaration
+                    if length := operation.length_parameter:
+                        f.write(
+                            "    {param_name} = ({server_type})malloc({length} * sizeof({base_type}));\n".format(
+                                param_name=operation.parameter.format(),
+                                server_type=operation.server_type.format(),
+                                length=length.name,
+                                base_type=operation.server_type.ptr_to.format(),
+                            )
+                        )
+                    elif size := operation.array_size:
+                        f.write(
+                            "    {server_type} {param_name} = ({server_type})malloc({size});\n".format(
+                                param_name=operation.parameter.name,
+                                server_type=operation.server_type.format(),
+                                size=size,
+                            )
+                        )
+                    elif operation.is_opaque_pointer:
+                        # write just the parameter declaration
+                        f.write(
+                            "    {param_type} {param_name};\n".format(
+                                param_type=operation.server_type.format(),
+                                param_name=operation.parameter.name,
+                            )
+                        )
+                    elif operation.nullable:
+                        # write a parameter declaration and read the first byte to determine if it's null
+                        f.write(
+                            "    bool {param_name}_null_check;\n".format(
+                                param_name=operation.parameter.name
+                            )
+                        )
+                        f.write(
+                            "    if (rpc_read(conn, &{param_name}_null_check, 1) < 0)\n".format(
+                                param_name=operation.parameter.name
                             )
                         )
                         f.write("        return -1;\n")
+                        # write param declaration
+                        f.write(
+                            "    {param_type} {param_name} = nullptr;\n".format(
+                                param_type=operation.server_type.format(),
+                                param_name=operation.parameter.name,
+                            )
+                        )
+                        f.write(
+                            "    if ({param_name}_null_check) {{\n".format(
+                                param_name=operation.parameter.name
+                            )
+                        )
+                        f.write(
+                            "        {param_name} = ({server_type})malloc(sizeof({base_type}));\n".format(
+                                param_name=operation.parameter.name,
+                                server_type=operation.server_type.format(),
+                                base_type=operation.server_type.ptr_to.format(),
+                            )
+                        )
+                        f.write(
+                            "        if (rpc_read(conn, {param_name}, sizeof({base_type})) < 0)\n".format(
+                                param_name=operation.parameter.name,
+                                base_type=operation.server_type.ptr_to.format(),
+                            )
+                        )
+                        f.write("            return -1;\n")
+                        f.write("    }\n")
+                    else:
+                        print(function, operation)
+                        raise NotImplementedError(
+                            "Could not determine length, this parameter is a pointer but neither length nor size is specified"
+                        )
+                else:
+                    # write just the parameter declaration
+                    f.write(
+                        "    {param_type} {param_name};\n".format(
+                            param_type=operation.server_type.format(),
+                            param_name=operation.parameter.name,
+                        )
+                    )
+                if operation.send:
+                    f.write(
+                        "    if (rpc_read(conn, &{param_name}, sizeof({param_type})) < 0)\n".format(
+                            param_name=operation.parameter.name,
+                            param_type=operation.server_type.format(),
+                        )
+                    )
+                    f.write("        return -1;\n")
 
             f.write("\n")
             f.write(
@@ -336,56 +468,67 @@ def main():
             f.write("    if (request_id < 0)\n")
             f.write("        return -1;\n\n")
 
+            params: list[str] = []
+            # these need to be in function param order, not operation order.
+            for param in function.parameters:
+                operation = next(
+                    op for op in operations if op.parameter.name == param.name
+                )
+                params.append(operation.server_reference)
+
             f.write(
-                "    {return_type} return_value = {name}({params});\n\n".format(
+                "    {return_type} result = {name}({params});\n\n".format(
                     return_type=function.return_type.format(),
                     name=function.name.format(),
-                    params=", ".join(param.name for param in function.parameters),
+                    params=", ".join(params),
                 )
             )
 
             f.write("    if (rpc_start_response(conn, request_id) < 0)\n")
             f.write("        return -1;\n")
 
-            for operation, param in operations:
+            for operation in operations:
                 if operation.recv:
                     if operation.null_terminated:
                         f.write(
                             "    if (rpc_write(conn, &{param_name}_len, sizeof({param_name}_len)) < 0)\n".format(
-                                param_name=operation.param_name
+                                param_name=operation.server_reference
                             )
                         )
                         f.write("        return -1;\n")
                         f.write(
-                            "    if (rpc_write(conn, &{param_name}, {param_name}_len) < 0)\n".format(
-                                param_name=operation.param_name
+                            "    if (rpc_write(conn, {param_name}, {param_name}_len) < 0)\n".format(
+                                param_name=operation.parameter.name
                             )
                         )
                         f.write("        return -1;\n")
-                    elif length := operation.array_length:
+                    elif length := operation.length_parameter:
                         f.write(
                             "    if (rpc_write(conn, {param_name}, {length} * sizeof({param_name})) < 0)\n".format(
-                                param_name=operation.param_name,
-                                length=length,
+                                param_name=operation.server_reference,
+                                length=length.name,
                             )
                         )
                         f.write("        return -1;\n")
                     elif size := operation.array_size:
                         f.write(
                             "    if (rpc_write(conn, {param_name}, {size}) < 0)\n".format(
-                                param_name=operation.param_name,
+                                param_name=operation.server_reference,
                                 size=size,
                             )
                         )
                         f.write("        return -1;\n")
                     else:
                         f.write(
-                            "    if (rpc_write(conn, &{param_name}, sizeof({param_name})) < 0)\n".format(
-                                param_name=operation.param_name
+                            "    if (rpc_write(conn, {param_name}, sizeof({param_type})) < 0)\n".format(
+                                param_name=operation.server_reference,
+                                param_type=operation.server_type.format(),
                             )
                         )
                         f.write("        return -1;\n")
 
+            f.write("\n")
+            f.write("    return result;\n")
             f.write("}\n\n")
 
         f.write("static RequestHandler opHandlers[] = {\n")
