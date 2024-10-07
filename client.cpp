@@ -185,30 +185,43 @@ void close_rpc_client()
     sockfd = 0;
 }
 
-CUresult cuGetProcAddress(const char *symbol, void **pfn, int cudaVersion, cuuint64_t flags, CUdriverProcAddressQueryResult *symbolStatus) {
+CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion, cuuint64_t flags, CUdriverProcAddressQueryResult *symbolStatus)
+{
     std::cout << "cuGetProcAddress getting symbol: " << symbol << std::endl;
 
     auto it = get_function_pointer(symbol);
-    if (it != nullptr) {
+    if (it != nullptr)
+    {
         *pfn = (void *)(&it);
         std::cout << "cuGetProcAddress: Mapped symbol '" << symbol << "' to function: " << *pfn << std::endl;
         return CUDA_SUCCESS;
     }
 
+    if (strcmp(symbol, "cuGetProcAddress_v2") == 0 || strcmp(symbol, "cuGetProcAddress") == 0)
+    {
+        *pfn = (void *)&cuGetProcAddress_v2;
+        return CUDA_SUCCESS;
+    }
+
+    std::cout << "cuGetProcAddress: Symbol '" << symbol << "' not found in cudaFunctionMap." << std::endl;
+
     // fall back to dlsym
     static void *(*real_dlsym)(void *, const char *) = NULL;
-    if (real_dlsym == NULL) {
+    if (real_dlsym == NULL)
+    {
         real_dlsym = (void *(*)(void *, const char *))dlvsym(RTLD_NEXT, "dlsym", "GLIBC_2.2.5");
     }
 
     void *libCudaHandle = dlopen("libcuda.so", RTLD_NOW | RTLD_GLOBAL);
-    if (!libCudaHandle) {
+    if (!libCudaHandle)
+    {
         std::cerr << "Error: Failed to open libcuda.so" << std::endl;
         return CUDA_ERROR_UNKNOWN;
     }
 
     *pfn = real_dlsym(libCudaHandle, symbol);
-    if (!(*pfn)) {
+    if (!(*pfn))
+    {
         std::cerr << "Error: Could not resolve symbol '" << symbol << "' using dlsym." << std::endl;
         return CUDA_ERROR_UNKNOWN;
     }
@@ -225,7 +238,7 @@ void *dlsym(void *handle, const char *name) __THROW
     /** proc address function calls are basically dlsym; we should handle this differently at the top level. */
     if (strcmp(name, "cuGetProcAddress_v2") == 0 || strcmp(name, "cuGetProcAddress") == 0)
     {
-        return (void *)&cuGetProcAddress;
+        return (void *)&cuGetProcAddress_v2;
     }
 
     if (func != nullptr)
