@@ -5,6 +5,55 @@ from typing import Optional
 from dataclasses import dataclass
 import copy
 
+# this table is manually generated from the cuda.h headers
+MANUAL_REMAPPINGS = [
+    ("cuMemcpy_ptds", "cuMemcpy"),
+    ("cuMemcpyAsync_ptsz", "cuMemcpyAsync"),
+    ("cuMemcpyPeer_ptds", "cuMemcpyPeer"),
+    ("cuMemcpyPeerAsync_ptsz", "cuMemcpyPeerAsync"),
+    ("cuMemcpy3DPeer_ptds", "cuMemcpy3DPeer"),
+    ("cuMemcpy3DPeerAsync_ptsz", "cuMemcpy3DPeerAsync"),
+    ("cuMemPrefetchAsync_ptsz", "cuMemPrefetchAsync"),
+    ("cuMemsetD8Async_ptsz", "cuMemsetD8Async"),
+    ("cuMemsetD16Async_ptsz", "cuMemsetD16Async"),
+    ("cuMemsetD32Async_ptsz", "cuMemsetD32Async"),
+    ("cuMemsetD2D8Async_ptsz", "cuMemsetD2D8Async"),
+    ("cuMemsetD2D16Async_ptsz", "cuMemsetD2D16Async"),
+    ("cuMemsetD2D32Async_ptsz", "cuMemsetD2D32Async"),
+    ("cuStreamGetPriority_ptsz", "cuStreamGetPriority"),
+    ("cuStreamGetId_ptsz", "cuStreamGetId"),
+    ("cuStreamGetFlags_ptsz", "cuStreamGetFlags"),
+    ("cuStreamGetCtx_ptsz", "cuStreamGetCtx"),
+    ("cuStreamWaitEvent_ptsz", "cuStreamWaitEvent"),
+    ("cuStreamEndCapture_ptsz", "cuStreamEndCapture"),
+    ("cuStreamIsCapturing_ptsz", "cuStreamIsCapturing"),
+    ("cuStreamUpdateCaptureDependencies_ptsz", "cuStreamUpdateCaptureDependencies"),
+    ("cuStreamAddCallback_ptsz", "cuStreamAddCallback"),
+    ("cuStreamAttachMemAsync_ptsz", "cuStreamAttachMemAsync"),
+    ("cuStreamQuery_ptsz", "cuStreamQuery"),
+    ("cuStreamSynchronize_ptsz", "cuStreamSynchronize"),
+    ("cuEventRecord_ptsz", "cuEventRecord"),
+    ("cuEventRecordWithFlags_ptsz", "cuEventRecordWithFlags"),
+    ("cuLaunchKernel_ptsz", "cuLaunchKernel"),
+    ("cuLaunchKernelEx_ptsz", "cuLaunchKernelEx"),
+    ("cuLaunchHostFunc_ptsz", "cuLaunchHostFunc"),
+    ("cuGraphicsMapResources_ptsz", "cuGraphicsMapResources"),
+    ("cuGraphicsUnmapResources_ptsz", "cuGraphicsUnmapResources"),
+    ("cuLaunchCooperativeKernel_ptsz", "cuLaunchCooperativeKernel"),
+    ("cuSignalExternalSemaphoresAsync_ptsz", "cuSignalExternalSemaphoresAsync"),
+    ("cuWaitExternalSemaphoresAsync_ptsz", "cuWaitExternalSemaphoresAsync"),
+    ("cuGraphInstantiateWithParams_ptsz", "cuGraphInstantiateWithParams"),
+    ("cuGraphUpload_ptsz", "cuGraphUpload"),
+    ("cuGraphLaunch_ptsz", "cuGraphLaunch"),
+    ("cuStreamCopyAttributes_ptsz", "cuStreamCopyAttributes"),
+    ("cuStreamGetAttribute_ptsz", "cuStreamGetAttribute"),
+    ("cuStreamSetAttribute_ptsz", "cuStreamSetAttribute"),
+    ("cuMemMapArrayAsync_ptsz", "cuMemMapArrayAsync"),
+    ("cuMemFreeAsync_ptsz", "cuMemFreeAsync"),
+    ("cuMemAllocAsync_ptsz", "cuMemAllocAsync"),
+    ("cuMemAllocFromPoolAsync_ptsz", "cuMemAllocFromPoolAsync"),
+]
+
 
 @dataclass
 class Operation:
@@ -327,6 +376,19 @@ def main():
             f.write(
                 '    {{"{name}", (void *){name}}},\n'.format(
                     name=function.name.format()
+                )
+            )
+        # write manual overrides
+        function_names = set(f.name.format() for f, _, _ in functions_with_annotations)
+        for x, y in MANUAL_REMAPPINGS:
+            # ensure y exists in the function list
+            if y not in function_names:
+                print(f"Skipping manual remapping {x} -> {y}")
+                continue
+            f.write(
+                '    {{"{x}", (void *){y}}},\n'.format(
+                    x=x,
+                    y=y,
                 )
             )
         f.write("};\n\n")
