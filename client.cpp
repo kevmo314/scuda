@@ -29,12 +29,8 @@ int open_rpc_client()
     // if socket is already opened, return our socket.
     if (sockfd != -1)
     {
-        // << "socket already opened" << std::endl;
-
         return sockfd;
     }
-
-    // << "opening tcp socket..." << std::endl;
 
     char *server_ip = getenv("SCUDA_SERVER");
     if (server_ip == NULL)
