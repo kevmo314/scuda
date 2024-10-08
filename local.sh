@@ -118,7 +118,7 @@ done
 run() {
   build
 
-  LD_PRELOAD="$libscuda_path" python3 -c "import torch; print('Creating a tensor...'); tensor = torch.zeros(10, 10); print('Moving tensor to CUDA...'); tensor = tensor.to('cuda:0'); print('Tensor successfully moved to CUDA')"
+  LD_PRELOAD="$libscuda_path" python3 -c "import torch; print(torch.cuda.is_available())"
 }
 
 # Main script logic using a switch case
