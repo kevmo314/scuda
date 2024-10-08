@@ -1,0 +1,21 @@
+FROM ubuntu:24.04
+
+RUN apt-get update && apt-get install -y \
+    nvidia-utils-550 \
+    python3 \
+    python3-pip \
+    wget \
+    curl
+
+RUN pip3 install torch
+
+COPY libscuda.so /usr/local/lib/libscuda.so
+
+ENV SCUDA_SERVER=71.183.65.83
+ENV libscuda_path=/usr/local/lib/libscuda.so
+
+COPY start.sh /start.sh
+
+RUN chmod +x /start.sh
+
+CMD ["/bin/bash", "/start.sh"]
