@@ -8762,6 +8762,2793 @@ cudaError_t cudaDeviceReset()
     return return_value;
 }
 
+cudaError_t cudaDeviceSynchronize()
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaDeviceSynchronize);
+    if (request_id < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaDeviceSetLimit(enum cudaLimit limit, size_t value)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaDeviceSetLimit);
+    if (request_id < 0 ||
+        rpc_write(&limit, sizeof(enum cudaLimit)) < 0 ||
+        rpc_write(&value, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaDeviceGetLimit(size_t* pValue, enum cudaLimit limit)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaDeviceGetLimit);
+    if (request_id < 0 ||
+        rpc_write(&pValue, sizeof(size_t)) < 0 ||
+        rpc_write(&limit, sizeof(enum cudaLimit)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pValue, sizeof(size_t)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaDeviceGetCacheConfig(enum cudaFuncCache* pCacheConfig)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaDeviceGetCacheConfig);
+    if (request_id < 0 ||
+        rpc_write(&pCacheConfig, sizeof(enum cudaFuncCache)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pCacheConfig, sizeof(enum cudaFuncCache)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaDeviceGetStreamPriorityRange(int* leastPriority, int* greatestPriority)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaDeviceGetStreamPriorityRange);
+    if (request_id < 0 ||
+        rpc_write(&leastPriority, sizeof(int)) < 0 ||
+        rpc_write(&greatestPriority, sizeof(int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(leastPriority, sizeof(int)) < 0 ||
+        rpc_read(greatestPriority, sizeof(int)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaDeviceSetCacheConfig(enum cudaFuncCache cacheConfig)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaDeviceSetCacheConfig);
+    if (request_id < 0 ||
+        rpc_write(&cacheConfig, sizeof(enum cudaFuncCache)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaDeviceGetSharedMemConfig(enum cudaSharedMemConfig* pConfig)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaDeviceGetSharedMemConfig);
+    if (request_id < 0 ||
+        rpc_write(&pConfig, sizeof(enum cudaSharedMemConfig)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pConfig, sizeof(enum cudaSharedMemConfig)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaDeviceSetSharedMemConfig(enum cudaSharedMemConfig config)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaDeviceSetSharedMemConfig);
+    if (request_id < 0 ||
+        rpc_write(&config, sizeof(enum cudaSharedMemConfig)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaDeviceGetPCIBusId(char* pciBusId, int len, int device)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaDeviceGetPCIBusId);
+    if (request_id < 0 ||
+        rpc_write(&pciBusId, sizeof(char)) < 0 ||
+        rpc_write(&len, sizeof(int)) < 0 ||
+        rpc_write(&device, sizeof(int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pciBusId, sizeof(char)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaIpcGetEventHandle(cudaIpcEventHandle_t* handle, cudaEvent_t event)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaIpcGetEventHandle);
+    if (request_id < 0 ||
+        rpc_write(&handle, sizeof(cudaIpcEventHandle_t)) < 0 ||
+        rpc_write(&event, sizeof(cudaEvent_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(handle, sizeof(cudaIpcEventHandle_t)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaIpcOpenEventHandle(cudaEvent_t* event, cudaIpcEventHandle_t handle)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaIpcOpenEventHandle);
+    if (request_id < 0 ||
+        rpc_write(&event, sizeof(cudaEvent_t)) < 0 ||
+        rpc_write(&handle, sizeof(cudaIpcEventHandle_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(event, sizeof(cudaEvent_t)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaIpcGetMemHandle(cudaIpcMemHandle_t* handle, void* devPtr)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaIpcGetMemHandle);
+    if (request_id < 0 ||
+        rpc_write(&handle, sizeof(cudaIpcMemHandle_t)) < 0 ||
+        rpc_write(&devPtr, sizeof(void*)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(handle, sizeof(cudaIpcMemHandle_t)) < 0 ||
+        rpc_read(devPtr, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaIpcOpenMemHandle(void** devPtr, cudaIpcMemHandle_t handle, unsigned int flags)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaIpcOpenMemHandle);
+    if (request_id < 0 ||
+        rpc_write(&devPtr, sizeof(void*)) < 0 ||
+        rpc_write(&handle, sizeof(cudaIpcMemHandle_t)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(devPtr, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaIpcCloseMemHandle(void* devPtr)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaIpcCloseMemHandle);
+    if (request_id < 0 ||
+        rpc_write(&devPtr, sizeof(void*)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(devPtr, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaDeviceFlushGPUDirectRDMAWrites(enum cudaFlushGPUDirectRDMAWritesTarget target, enum cudaFlushGPUDirectRDMAWritesScope scope)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaDeviceFlushGPUDirectRDMAWrites);
+    if (request_id < 0 ||
+        rpc_write(&target, sizeof(enum cudaFlushGPUDirectRDMAWritesTarget)) < 0 ||
+        rpc_write(&scope, sizeof(enum cudaFlushGPUDirectRDMAWritesScope)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaThreadExit()
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaThreadExit);
+    if (request_id < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaThreadSynchronize()
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaThreadSynchronize);
+    if (request_id < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaThreadSetLimit(enum cudaLimit limit, size_t value)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaThreadSetLimit);
+    if (request_id < 0 ||
+        rpc_write(&limit, sizeof(enum cudaLimit)) < 0 ||
+        rpc_write(&value, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaThreadGetLimit(size_t* pValue, enum cudaLimit limit)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaThreadGetLimit);
+    if (request_id < 0 ||
+        rpc_write(&pValue, sizeof(size_t)) < 0 ||
+        rpc_write(&limit, sizeof(enum cudaLimit)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pValue, sizeof(size_t)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaThreadGetCacheConfig(enum cudaFuncCache* pCacheConfig)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaThreadGetCacheConfig);
+    if (request_id < 0 ||
+        rpc_write(&pCacheConfig, sizeof(enum cudaFuncCache)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pCacheConfig, sizeof(enum cudaFuncCache)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaThreadSetCacheConfig(enum cudaFuncCache cacheConfig)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaThreadSetCacheConfig);
+    if (request_id < 0 ||
+        rpc_write(&cacheConfig, sizeof(enum cudaFuncCache)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGetLastError()
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGetLastError);
+    if (request_id < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaPeekAtLastError()
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaPeekAtLastError);
+    if (request_id < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGetDeviceCount(int* count)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGetDeviceCount);
+    if (request_id < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(count, sizeof(int)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGetDeviceProperties_v2(struct cudaDeviceProp* prop, int device)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGetDeviceProperties_v2);
+    if (request_id < 0 ||
+        rpc_write(&device, sizeof(int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(prop, sizeof(struct cudaDeviceProp)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaDeviceGetAttribute(int* value, enum cudaDeviceAttr attr, int device)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaDeviceGetAttribute);
+    if (request_id < 0 ||
+        rpc_write(&value, sizeof(int)) < 0 ||
+        rpc_write(&attr, sizeof(enum cudaDeviceAttr)) < 0 ||
+        rpc_write(&device, sizeof(int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(value, sizeof(int)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaDeviceGetDefaultMemPool(cudaMemPool_t* memPool, int device)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaDeviceGetDefaultMemPool);
+    if (request_id < 0 ||
+        rpc_write(&memPool, sizeof(cudaMemPool_t)) < 0 ||
+        rpc_write(&device, sizeof(int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(memPool, sizeof(cudaMemPool_t)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaDeviceSetMemPool(int device, cudaMemPool_t memPool)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaDeviceSetMemPool);
+    if (request_id < 0 ||
+        rpc_write(&device, sizeof(int)) < 0 ||
+        rpc_write(&memPool, sizeof(cudaMemPool_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaDeviceGetMemPool(cudaMemPool_t* memPool, int device)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaDeviceGetMemPool);
+    if (request_id < 0 ||
+        rpc_write(&memPool, sizeof(cudaMemPool_t)) < 0 ||
+        rpc_write(&device, sizeof(int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(memPool, sizeof(cudaMemPool_t)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaDeviceGetNvSciSyncAttributes(void* nvSciSyncAttrList, int device, int flags)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaDeviceGetNvSciSyncAttributes);
+    if (request_id < 0 ||
+        rpc_write(&nvSciSyncAttrList, sizeof(void*)) < 0 ||
+        rpc_write(&device, sizeof(int)) < 0 ||
+        rpc_write(&flags, sizeof(int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(nvSciSyncAttrList, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaDeviceGetP2PAttribute(int* value, enum cudaDeviceP2PAttr attr, int srcDevice, int dstDevice)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaDeviceGetP2PAttribute);
+    if (request_id < 0 ||
+        rpc_write(&value, sizeof(int)) < 0 ||
+        rpc_write(&attr, sizeof(enum cudaDeviceP2PAttr)) < 0 ||
+        rpc_write(&srcDevice, sizeof(int)) < 0 ||
+        rpc_write(&dstDevice, sizeof(int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(value, sizeof(int)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaInitDevice(int device, unsigned int deviceFlags, unsigned int flags)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaInitDevice);
+    if (request_id < 0 ||
+        rpc_write(&device, sizeof(int)) < 0 ||
+        rpc_write(&deviceFlags, sizeof(unsigned int)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaSetDevice(int device)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaSetDevice);
+    if (request_id < 0 ||
+        rpc_write(&device, sizeof(int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGetDevice(int* device)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGetDevice);
+    if (request_id < 0 ||
+        rpc_write(&device, sizeof(int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(device, sizeof(int)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaSetValidDevices(int* device_arr, int len)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaSetValidDevices);
+    if (request_id < 0 ||
+        rpc_write(&device_arr, sizeof(int)) < 0 ||
+        rpc_write(&len, sizeof(int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(device_arr, sizeof(int)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaSetDeviceFlags(unsigned int flags)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaSetDeviceFlags);
+    if (request_id < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGetDeviceFlags(unsigned int* flags)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGetDeviceFlags);
+    if (request_id < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(flags, sizeof(unsigned int)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaStreamCreate(cudaStream_t* pStream)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaStreamCreate);
+    if (request_id < 0 ||
+        rpc_write(&pStream, sizeof(cudaStream_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pStream, sizeof(cudaStream_t)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaStreamCreateWithFlags(cudaStream_t* pStream, unsigned int flags)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaStreamCreateWithFlags);
+    if (request_id < 0 ||
+        rpc_write(&pStream, sizeof(cudaStream_t)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pStream, sizeof(cudaStream_t)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaStreamCreateWithPriority(cudaStream_t* pStream, unsigned int flags, int priority)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaStreamCreateWithPriority);
+    if (request_id < 0 ||
+        rpc_write(&pStream, sizeof(cudaStream_t)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_write(&priority, sizeof(int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pStream, sizeof(cudaStream_t)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaStreamGetPriority(cudaStream_t hStream, int* priority)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaStreamGetPriority);
+    if (request_id < 0 ||
+        rpc_write(&hStream, sizeof(cudaStream_t)) < 0 ||
+        rpc_write(&priority, sizeof(int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(priority, sizeof(int)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaStreamGetFlags(cudaStream_t hStream, unsigned int* flags)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaStreamGetFlags);
+    if (request_id < 0 ||
+        rpc_write(&hStream, sizeof(cudaStream_t)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(flags, sizeof(unsigned int)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaStreamGetId(cudaStream_t hStream, unsigned long long* streamId)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaStreamGetId);
+    if (request_id < 0 ||
+        rpc_write(&hStream, sizeof(cudaStream_t)) < 0 ||
+        rpc_write(&streamId, sizeof(unsigned long long)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(streamId, sizeof(unsigned long long)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaCtxResetPersistingL2Cache()
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaCtxResetPersistingL2Cache);
+    if (request_id < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaStreamCopyAttributes(cudaStream_t dst, cudaStream_t src)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaStreamCopyAttributes);
+    if (request_id < 0 ||
+        rpc_write(&dst, sizeof(cudaStream_t)) < 0 ||
+        rpc_write(&src, sizeof(cudaStream_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaStreamGetAttribute(cudaStream_t hStream, cudaLaunchAttributeID attr, cudaLaunchAttributeValue* value_out)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaStreamGetAttribute);
+    if (request_id < 0 ||
+        rpc_write(&hStream, sizeof(cudaStream_t)) < 0 ||
+        rpc_write(&attr, sizeof(cudaLaunchAttributeID)) < 0 ||
+        rpc_write(&value_out, sizeof(cudaLaunchAttributeValue)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(value_out, sizeof(cudaLaunchAttributeValue)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaStreamDestroy(cudaStream_t stream)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaStreamDestroy);
+    if (request_id < 0 ||
+        rpc_write(&stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaStreamWaitEvent(cudaStream_t stream, cudaEvent_t event, unsigned int flags)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaStreamWaitEvent);
+    if (request_id < 0 ||
+        rpc_write(&stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_write(&event, sizeof(cudaEvent_t)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaStreamAddCallback(cudaStream_t stream, cudaStreamCallback_t callback, void* userData, unsigned int flags)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaStreamAddCallback);
+    if (request_id < 0 ||
+        rpc_write(&stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_write(&callback, sizeof(cudaStreamCallback_t)) < 0 ||
+        rpc_write(&userData, sizeof(void*)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(userData, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaStreamSynchronize(cudaStream_t stream)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaStreamSynchronize);
+    if (request_id < 0 ||
+        rpc_write(&stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaStreamQuery(cudaStream_t stream)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaStreamQuery);
+    if (request_id < 0 ||
+        rpc_write(&stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaStreamAttachMemAsync(cudaStream_t stream, void* devPtr, size_t length, unsigned int flags)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaStreamAttachMemAsync);
+    if (request_id < 0 ||
+        rpc_write(&stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_write(&devPtr, sizeof(void*)) < 0 ||
+        rpc_write(&length, sizeof(size_t)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(devPtr, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaStreamBeginCapture(cudaStream_t stream, enum cudaStreamCaptureMode mode)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaStreamBeginCapture);
+    if (request_id < 0 ||
+        rpc_write(&stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_write(&mode, sizeof(enum cudaStreamCaptureMode)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaThreadExchangeStreamCaptureMode(enum cudaStreamCaptureMode* mode)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaThreadExchangeStreamCaptureMode);
+    if (request_id < 0 ||
+        rpc_write(&mode, sizeof(enum cudaStreamCaptureMode)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(mode, sizeof(enum cudaStreamCaptureMode)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaStreamEndCapture(cudaStream_t stream, cudaGraph_t* pGraph)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaStreamEndCapture);
+    if (request_id < 0 ||
+        rpc_write(&stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_write(&pGraph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pGraph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaStreamIsCapturing(cudaStream_t stream, enum cudaStreamCaptureStatus* pCaptureStatus)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaStreamIsCapturing);
+    if (request_id < 0 ||
+        rpc_write(&stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_write(&pCaptureStatus, sizeof(enum cudaStreamCaptureStatus)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pCaptureStatus, sizeof(enum cudaStreamCaptureStatus)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaStreamGetCaptureInfo_v2(cudaStream_t stream, enum cudaStreamCaptureStatus* captureStatus_out, unsigned long long* id_out, cudaGraph_t* graph_out, const cudaGraphNode_t** dependencies_out, size_t* numDependencies_out)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaStreamGetCaptureInfo_v2);
+    if (request_id < 0 ||
+        rpc_write(&stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(captureStatus_out, sizeof(enum cudaStreamCaptureStatus)) < 0 ||
+        rpc_read(id_out, sizeof(unsigned long long)) < 0 ||
+        rpc_read(graph_out, sizeof(cudaGraph_t)) < 0 ||
+        rpc_read(numDependencies_out, sizeof(size_t)) < 0 ||
+        rpc_read(dependencies_out, *numDependencies_out * sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaStreamUpdateCaptureDependencies(cudaStream_t stream, cudaGraphNode_t* dependencies, size_t numDependencies, unsigned int flags)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaStreamUpdateCaptureDependencies);
+    if (request_id < 0 ||
+        rpc_write(&stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_write(&numDependencies, sizeof(size_t)) < 0 ||
+        rpc_write(&dependencies, sizeof(cudaGraphNode_t*)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaEventCreate(cudaEvent_t* event)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaEventCreate);
+    if (request_id < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(event, sizeof(cudaEvent_t)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaEventCreateWithFlags(cudaEvent_t* event, unsigned int flags)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaEventCreateWithFlags);
+    if (request_id < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(event, sizeof(cudaEvent_t)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaEventRecord(cudaEvent_t event, cudaStream_t stream)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaEventRecord);
+    if (request_id < 0 ||
+        rpc_write(&event, sizeof(cudaEvent_t)) < 0 ||
+        rpc_write(&stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaEventRecordWithFlags(cudaEvent_t event, cudaStream_t stream, unsigned int flags)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaEventRecordWithFlags);
+    if (request_id < 0 ||
+        rpc_write(&event, sizeof(cudaEvent_t)) < 0 ||
+        rpc_write(&stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaEventQuery(cudaEvent_t event)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaEventQuery);
+    if (request_id < 0 ||
+        rpc_write(&event, sizeof(cudaEvent_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaEventSynchronize(cudaEvent_t event)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaEventSynchronize);
+    if (request_id < 0 ||
+        rpc_write(&event, sizeof(cudaEvent_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaEventDestroy(cudaEvent_t event)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaEventDestroy);
+    if (request_id < 0 ||
+        rpc_write(&event, sizeof(cudaEvent_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaEventElapsedTime(float* ms, cudaEvent_t start, cudaEvent_t end)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaEventElapsedTime);
+    if (request_id < 0 ||
+        rpc_write(&start, sizeof(cudaEvent_t)) < 0 ||
+        rpc_write(&end, sizeof(cudaEvent_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(ms, sizeof(float)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaDestroyExternalMemory(cudaExternalMemory_t extMem)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaDestroyExternalMemory);
+    if (request_id < 0 ||
+        rpc_write(&extMem, sizeof(cudaExternalMemory_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaDestroyExternalSemaphore(cudaExternalSemaphore_t extSem)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaDestroyExternalSemaphore);
+    if (request_id < 0 ||
+        rpc_write(&extSem, sizeof(cudaExternalSemaphore_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaLaunchCooperativeKernelMultiDevice(struct cudaLaunchParams* launchParamsList, unsigned int numDevices, unsigned int flags)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaLaunchCooperativeKernelMultiDevice);
+    if (request_id < 0 ||
+        rpc_write(&launchParamsList, sizeof(struct cudaLaunchParams)) < 0 ||
+        rpc_write(&numDevices, sizeof(unsigned int)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(launchParamsList, sizeof(struct cudaLaunchParams)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaSetDoubleForDevice(double* d)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaSetDoubleForDevice);
+    if (request_id < 0 ||
+        rpc_write(&d, sizeof(double)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(d, sizeof(double)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaSetDoubleForHost(double* d)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaSetDoubleForHost);
+    if (request_id < 0 ||
+        rpc_write(&d, sizeof(double)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(d, sizeof(double)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaLaunchHostFunc(cudaStream_t stream, cudaHostFn_t fn, void* userData)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaLaunchHostFunc);
+    if (request_id < 0 ||
+        rpc_write(&stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_write(&fn, sizeof(cudaHostFn_t)) < 0 ||
+        rpc_write(&userData, sizeof(void*)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(userData, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMallocManaged(void** devPtr, size_t size, unsigned int flags)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaMallocManaged);
+    if (request_id < 0 ||
+        rpc_write(&devPtr, sizeof(void*)) < 0 ||
+        rpc_write(&size, sizeof(size_t)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(devPtr, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMalloc(void** devPtr, size_t size)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaMalloc);
+    if (request_id < 0 ||
+        rpc_write(&devPtr, sizeof(void*)) < 0 ||
+        rpc_write(&size, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(devPtr, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMallocHost(void** ptr, size_t size)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaMallocHost);
+    if (request_id < 0 ||
+        rpc_write(&ptr, sizeof(void*)) < 0 ||
+        rpc_write(&size, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(ptr, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMallocPitch(void** devPtr, size_t* pitch, size_t width, size_t height)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaMallocPitch);
+    if (request_id < 0 ||
+        rpc_write(&devPtr, sizeof(void*)) < 0 ||
+        rpc_write(&pitch, sizeof(size_t)) < 0 ||
+        rpc_write(&width, sizeof(size_t)) < 0 ||
+        rpc_write(&height, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(devPtr, sizeof(void*)) < 0 ||
+        rpc_read(pitch, sizeof(size_t)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaFree(void* devPtr)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaFree);
+    if (request_id < 0 ||
+        rpc_write(&devPtr, sizeof(void*)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(devPtr, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaFreeHost(void* ptr)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaFreeHost);
+    if (request_id < 0 ||
+        rpc_write(&ptr, sizeof(void*)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(ptr, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaFreeArray(cudaArray_t array)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaFreeArray);
+    if (request_id < 0 ||
+        rpc_write(&array, sizeof(cudaArray_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaFreeMipmappedArray(cudaMipmappedArray_t mipmappedArray)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaFreeMipmappedArray);
+    if (request_id < 0 ||
+        rpc_write(&mipmappedArray, sizeof(cudaMipmappedArray_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaHostAlloc(void** pHost, size_t size, unsigned int flags)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaHostAlloc);
+    if (request_id < 0 ||
+        rpc_write(&pHost, sizeof(void*)) < 0 ||
+        rpc_write(&size, sizeof(size_t)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pHost, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaHostRegister(void* ptr, size_t size, unsigned int flags)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaHostRegister);
+    if (request_id < 0 ||
+        rpc_write(&ptr, sizeof(void*)) < 0 ||
+        rpc_write(&size, sizeof(size_t)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(ptr, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaHostUnregister(void* ptr)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaHostUnregister);
+    if (request_id < 0 ||
+        rpc_write(&ptr, sizeof(void*)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(ptr, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaHostGetDevicePointer(void** pDevice, void* pHost, unsigned int flags)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaHostGetDevicePointer);
+    if (request_id < 0 ||
+        rpc_write(&pDevice, sizeof(void*)) < 0 ||
+        rpc_write(&pHost, sizeof(void*)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pDevice, sizeof(void*)) < 0 ||
+        rpc_read(pHost, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaHostGetFlags(unsigned int* pFlags, void* pHost)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaHostGetFlags);
+    if (request_id < 0 ||
+        rpc_write(&pFlags, sizeof(unsigned int)) < 0 ||
+        rpc_write(&pHost, sizeof(void*)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pFlags, sizeof(unsigned int)) < 0 ||
+        rpc_read(pHost, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMalloc3D(struct cudaPitchedPtr* pitchedDevPtr, struct cudaExtent extent)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaMalloc3D);
+    if (request_id < 0 ||
+        rpc_write(&pitchedDevPtr, sizeof(struct cudaPitchedPtr)) < 0 ||
+        rpc_write(&extent, sizeof(struct cudaExtent)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pitchedDevPtr, sizeof(struct cudaPitchedPtr)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGetMipmappedArrayLevel(cudaArray_t* levelArray, cudaMipmappedArray_const_t mipmappedArray, unsigned int level)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGetMipmappedArrayLevel);
+    if (request_id < 0 ||
+        rpc_write(&levelArray, sizeof(cudaArray_t)) < 0 ||
+        rpc_write(&mipmappedArray, sizeof(cudaMipmappedArray_const_t)) < 0 ||
+        rpc_write(&level, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(levelArray, sizeof(cudaArray_t)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMemGetInfo(size_t* free, size_t* total)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaMemGetInfo);
+    if (request_id < 0 ||
+        rpc_write(&free, sizeof(size_t)) < 0 ||
+        rpc_write(&total, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(free, sizeof(size_t)) < 0 ||
+        rpc_read(total, sizeof(size_t)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaArrayGetInfo(struct cudaChannelFormatDesc* desc, struct cudaExtent* extent, unsigned int* flags, cudaArray_t array)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaArrayGetInfo);
+    if (request_id < 0 ||
+        rpc_write(&desc, sizeof(struct cudaChannelFormatDesc)) < 0 ||
+        rpc_write(&extent, sizeof(struct cudaExtent)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_write(&array, sizeof(cudaArray_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(desc, sizeof(struct cudaChannelFormatDesc)) < 0 ||
+        rpc_read(extent, sizeof(struct cudaExtent)) < 0 ||
+        rpc_read(flags, sizeof(unsigned int)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaArrayGetPlane(cudaArray_t* pPlaneArray, cudaArray_t hArray, unsigned int planeIdx)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaArrayGetPlane);
+    if (request_id < 0 ||
+        rpc_write(&pPlaneArray, sizeof(cudaArray_t)) < 0 ||
+        rpc_write(&hArray, sizeof(cudaArray_t)) < 0 ||
+        rpc_write(&planeIdx, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pPlaneArray, sizeof(cudaArray_t)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaArrayGetMemoryRequirements(struct cudaArrayMemoryRequirements* memoryRequirements, cudaArray_t array, int device)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaArrayGetMemoryRequirements);
+    if (request_id < 0 ||
+        rpc_write(&memoryRequirements, sizeof(struct cudaArrayMemoryRequirements)) < 0 ||
+        rpc_write(&array, sizeof(cudaArray_t)) < 0 ||
+        rpc_write(&device, sizeof(int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(memoryRequirements, sizeof(struct cudaArrayMemoryRequirements)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMipmappedArrayGetMemoryRequirements(struct cudaArrayMemoryRequirements* memoryRequirements, cudaMipmappedArray_t mipmap, int device)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaMipmappedArrayGetMemoryRequirements);
+    if (request_id < 0 ||
+        rpc_write(&memoryRequirements, sizeof(struct cudaArrayMemoryRequirements)) < 0 ||
+        rpc_write(&mipmap, sizeof(cudaMipmappedArray_t)) < 0 ||
+        rpc_write(&device, sizeof(int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(memoryRequirements, sizeof(struct cudaArrayMemoryRequirements)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaArrayGetSparseProperties(struct cudaArraySparseProperties* sparseProperties, cudaArray_t array)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaArrayGetSparseProperties);
+    if (request_id < 0 ||
+        rpc_write(&sparseProperties, sizeof(struct cudaArraySparseProperties)) < 0 ||
+        rpc_write(&array, sizeof(cudaArray_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(sparseProperties, sizeof(struct cudaArraySparseProperties)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMipmappedArrayGetSparseProperties(struct cudaArraySparseProperties* sparseProperties, cudaMipmappedArray_t mipmap)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaMipmappedArrayGetSparseProperties);
+    if (request_id < 0 ||
+        rpc_write(&sparseProperties, sizeof(struct cudaArraySparseProperties)) < 0 ||
+        rpc_write(&mipmap, sizeof(cudaMipmappedArray_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(sparseProperties, sizeof(struct cudaArraySparseProperties)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMemcpy2DFromArray(void* dst, size_t dpitch, cudaArray_const_t src, size_t wOffset, size_t hOffset, size_t width, size_t height, enum cudaMemcpyKind kind)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaMemcpy2DFromArray);
+    if (request_id < 0 ||
+        rpc_write(&dst, sizeof(void*)) < 0 ||
+        rpc_write(&dpitch, sizeof(size_t)) < 0 ||
+        rpc_write(&src, sizeof(cudaArray_const_t)) < 0 ||
+        rpc_write(&wOffset, sizeof(size_t)) < 0 ||
+        rpc_write(&hOffset, sizeof(size_t)) < 0 ||
+        rpc_write(&width, sizeof(size_t)) < 0 ||
+        rpc_write(&height, sizeof(size_t)) < 0 ||
+        rpc_write(&kind, sizeof(enum cudaMemcpyKind)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(dst, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMemcpy2DArrayToArray(cudaArray_t dst, size_t wOffsetDst, size_t hOffsetDst, cudaArray_const_t src, size_t wOffsetSrc, size_t hOffsetSrc, size_t width, size_t height, enum cudaMemcpyKind kind)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaMemcpy2DArrayToArray);
+    if (request_id < 0 ||
+        rpc_write(&dst, sizeof(cudaArray_t)) < 0 ||
+        rpc_write(&wOffsetDst, sizeof(size_t)) < 0 ||
+        rpc_write(&hOffsetDst, sizeof(size_t)) < 0 ||
+        rpc_write(&src, sizeof(cudaArray_const_t)) < 0 ||
+        rpc_write(&wOffsetSrc, sizeof(size_t)) < 0 ||
+        rpc_write(&hOffsetSrc, sizeof(size_t)) < 0 ||
+        rpc_write(&width, sizeof(size_t)) < 0 ||
+        rpc_write(&height, sizeof(size_t)) < 0 ||
+        rpc_write(&kind, sizeof(enum cudaMemcpyKind)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMemcpy2DFromArrayAsync(void* dst, size_t dpitch, cudaArray_const_t src, size_t wOffset, size_t hOffset, size_t width, size_t height, enum cudaMemcpyKind kind, cudaStream_t stream)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaMemcpy2DFromArrayAsync);
+    if (request_id < 0 ||
+        rpc_write(&dst, sizeof(void*)) < 0 ||
+        rpc_write(&dpitch, sizeof(size_t)) < 0 ||
+        rpc_write(&src, sizeof(cudaArray_const_t)) < 0 ||
+        rpc_write(&wOffset, sizeof(size_t)) < 0 ||
+        rpc_write(&hOffset, sizeof(size_t)) < 0 ||
+        rpc_write(&width, sizeof(size_t)) < 0 ||
+        rpc_write(&height, sizeof(size_t)) < 0 ||
+        rpc_write(&kind, sizeof(enum cudaMemcpyKind)) < 0 ||
+        rpc_write(&stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(dst, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMemset(void* devPtr, int value, size_t count)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaMemset);
+    if (request_id < 0 ||
+        rpc_write(&devPtr, sizeof(void*)) < 0 ||
+        rpc_write(&value, sizeof(int)) < 0 ||
+        rpc_write(&count, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(devPtr, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMemset2D(void* devPtr, size_t pitch, int value, size_t width, size_t height)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaMemset2D);
+    if (request_id < 0 ||
+        rpc_write(&devPtr, sizeof(void*)) < 0 ||
+        rpc_write(&pitch, sizeof(size_t)) < 0 ||
+        rpc_write(&value, sizeof(int)) < 0 ||
+        rpc_write(&width, sizeof(size_t)) < 0 ||
+        rpc_write(&height, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(devPtr, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMemset3D(struct cudaPitchedPtr pitchedDevPtr, int value, struct cudaExtent extent)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaMemset3D);
+    if (request_id < 0 ||
+        rpc_write(&pitchedDevPtr, sizeof(struct cudaPitchedPtr)) < 0 ||
+        rpc_write(&value, sizeof(int)) < 0 ||
+        rpc_write(&extent, sizeof(struct cudaExtent)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMemsetAsync(void* devPtr, int value, size_t count, cudaStream_t stream)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaMemsetAsync);
+    if (request_id < 0 ||
+        rpc_write(&devPtr, sizeof(void*)) < 0 ||
+        rpc_write(&value, sizeof(int)) < 0 ||
+        rpc_write(&count, sizeof(size_t)) < 0 ||
+        rpc_write(&stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(devPtr, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMemset2DAsync(void* devPtr, size_t pitch, int value, size_t width, size_t height, cudaStream_t stream)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaMemset2DAsync);
+    if (request_id < 0 ||
+        rpc_write(&devPtr, sizeof(void*)) < 0 ||
+        rpc_write(&pitch, sizeof(size_t)) < 0 ||
+        rpc_write(&value, sizeof(int)) < 0 ||
+        rpc_write(&width, sizeof(size_t)) < 0 ||
+        rpc_write(&height, sizeof(size_t)) < 0 ||
+        rpc_write(&stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(devPtr, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMemset3DAsync(struct cudaPitchedPtr pitchedDevPtr, int value, struct cudaExtent extent, cudaStream_t stream)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaMemset3DAsync);
+    if (request_id < 0 ||
+        rpc_write(&pitchedDevPtr, sizeof(struct cudaPitchedPtr)) < 0 ||
+        rpc_write(&value, sizeof(int)) < 0 ||
+        rpc_write(&extent, sizeof(struct cudaExtent)) < 0 ||
+        rpc_write(&stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMemcpyFromArray(void* dst, cudaArray_const_t src, size_t wOffset, size_t hOffset, size_t count, enum cudaMemcpyKind kind)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaMemcpyFromArray);
+    if (request_id < 0 ||
+        rpc_write(&dst, sizeof(void*)) < 0 ||
+        rpc_write(&src, sizeof(cudaArray_const_t)) < 0 ||
+        rpc_write(&wOffset, sizeof(size_t)) < 0 ||
+        rpc_write(&hOffset, sizeof(size_t)) < 0 ||
+        rpc_write(&count, sizeof(size_t)) < 0 ||
+        rpc_write(&kind, sizeof(enum cudaMemcpyKind)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(dst, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMemcpyArrayToArray(cudaArray_t dst, size_t wOffsetDst, size_t hOffsetDst, cudaArray_const_t src, size_t wOffsetSrc, size_t hOffsetSrc, size_t count, enum cudaMemcpyKind kind)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaMemcpyArrayToArray);
+    if (request_id < 0 ||
+        rpc_write(&dst, sizeof(cudaArray_t)) < 0 ||
+        rpc_write(&wOffsetDst, sizeof(size_t)) < 0 ||
+        rpc_write(&hOffsetDst, sizeof(size_t)) < 0 ||
+        rpc_write(&src, sizeof(cudaArray_const_t)) < 0 ||
+        rpc_write(&wOffsetSrc, sizeof(size_t)) < 0 ||
+        rpc_write(&hOffsetSrc, sizeof(size_t)) < 0 ||
+        rpc_write(&count, sizeof(size_t)) < 0 ||
+        rpc_write(&kind, sizeof(enum cudaMemcpyKind)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMemcpyFromArrayAsync(void* dst, cudaArray_const_t src, size_t wOffset, size_t hOffset, size_t count, enum cudaMemcpyKind kind, cudaStream_t stream)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaMemcpyFromArrayAsync);
+    if (request_id < 0 ||
+        rpc_write(&dst, sizeof(void*)) < 0 ||
+        rpc_write(&src, sizeof(cudaArray_const_t)) < 0 ||
+        rpc_write(&wOffset, sizeof(size_t)) < 0 ||
+        rpc_write(&hOffset, sizeof(size_t)) < 0 ||
+        rpc_write(&count, sizeof(size_t)) < 0 ||
+        rpc_write(&kind, sizeof(enum cudaMemcpyKind)) < 0 ||
+        rpc_write(&stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(dst, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMallocAsync(void** devPtr, size_t size, cudaStream_t hStream)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaMallocAsync);
+    if (request_id < 0 ||
+        rpc_write(&devPtr, sizeof(void*)) < 0 ||
+        rpc_write(&size, sizeof(size_t)) < 0 ||
+        rpc_write(&hStream, sizeof(cudaStream_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(devPtr, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaFreeAsync(void* devPtr, cudaStream_t hStream)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaFreeAsync);
+    if (request_id < 0 ||
+        rpc_write(&devPtr, sizeof(void*)) < 0 ||
+        rpc_write(&hStream, sizeof(cudaStream_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(devPtr, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMemPoolTrimTo(cudaMemPool_t memPool, size_t minBytesToKeep)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaMemPoolTrimTo);
+    if (request_id < 0 ||
+        rpc_write(&memPool, sizeof(cudaMemPool_t)) < 0 ||
+        rpc_write(&minBytesToKeep, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMemPoolSetAttribute(cudaMemPool_t memPool, enum cudaMemPoolAttr attr, void* value)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaMemPoolSetAttribute);
+    if (request_id < 0 ||
+        rpc_write(&memPool, sizeof(cudaMemPool_t)) < 0 ||
+        rpc_write(&attr, sizeof(enum cudaMemPoolAttr)) < 0 ||
+        rpc_write(&value, sizeof(void*)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(value, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMemPoolGetAttribute(cudaMemPool_t memPool, enum cudaMemPoolAttr attr, void* value)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaMemPoolGetAttribute);
+    if (request_id < 0 ||
+        rpc_write(&memPool, sizeof(cudaMemPool_t)) < 0 ||
+        rpc_write(&attr, sizeof(enum cudaMemPoolAttr)) < 0 ||
+        rpc_write(&value, sizeof(void*)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(value, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMemPoolGetAccess(enum cudaMemAccessFlags* flags, cudaMemPool_t memPool, struct cudaMemLocation* location)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaMemPoolGetAccess);
+    if (request_id < 0 ||
+        rpc_write(&flags, sizeof(enum cudaMemAccessFlags)) < 0 ||
+        rpc_write(&memPool, sizeof(cudaMemPool_t)) < 0 ||
+        rpc_write(&location, sizeof(struct cudaMemLocation)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(flags, sizeof(enum cudaMemAccessFlags)) < 0 ||
+        rpc_read(location, sizeof(struct cudaMemLocation)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMemPoolDestroy(cudaMemPool_t memPool)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaMemPoolDestroy);
+    if (request_id < 0 ||
+        rpc_write(&memPool, sizeof(cudaMemPool_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMallocFromPoolAsync(void** ptr, size_t size, cudaMemPool_t memPool, cudaStream_t stream)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaMallocFromPoolAsync);
+    if (request_id < 0 ||
+        rpc_write(&ptr, sizeof(void*)) < 0 ||
+        rpc_write(&size, sizeof(size_t)) < 0 ||
+        rpc_write(&memPool, sizeof(cudaMemPool_t)) < 0 ||
+        rpc_write(&stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(ptr, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMemPoolExportToShareableHandle(void* shareableHandle, cudaMemPool_t memPool, enum cudaMemAllocationHandleType handleType, unsigned int flags)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaMemPoolExportToShareableHandle);
+    if (request_id < 0 ||
+        rpc_write(&shareableHandle, sizeof(void*)) < 0 ||
+        rpc_write(&memPool, sizeof(cudaMemPool_t)) < 0 ||
+        rpc_write(&handleType, sizeof(enum cudaMemAllocationHandleType)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(shareableHandle, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMemPoolImportFromShareableHandle(cudaMemPool_t* memPool, void* shareableHandle, enum cudaMemAllocationHandleType handleType, unsigned int flags)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaMemPoolImportFromShareableHandle);
+    if (request_id < 0 ||
+        rpc_write(&memPool, sizeof(cudaMemPool_t)) < 0 ||
+        rpc_write(&shareableHandle, sizeof(void*)) < 0 ||
+        rpc_write(&handleType, sizeof(enum cudaMemAllocationHandleType)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(memPool, sizeof(cudaMemPool_t)) < 0 ||
+        rpc_read(shareableHandle, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMemPoolExportPointer(struct cudaMemPoolPtrExportData* exportData, void* ptr)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaMemPoolExportPointer);
+    if (request_id < 0 ||
+        rpc_write(&exportData, sizeof(struct cudaMemPoolPtrExportData)) < 0 ||
+        rpc_write(&ptr, sizeof(void*)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(exportData, sizeof(struct cudaMemPoolPtrExportData)) < 0 ||
+        rpc_read(ptr, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMemPoolImportPointer(void** ptr, cudaMemPool_t memPool, struct cudaMemPoolPtrExportData* exportData)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaMemPoolImportPointer);
+    if (request_id < 0 ||
+        rpc_write(&ptr, sizeof(void*)) < 0 ||
+        rpc_write(&memPool, sizeof(cudaMemPool_t)) < 0 ||
+        rpc_write(&exportData, sizeof(struct cudaMemPoolPtrExportData)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(ptr, sizeof(void*)) < 0 ||
+        rpc_read(exportData, sizeof(struct cudaMemPoolPtrExportData)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaDeviceCanAccessPeer(int* canAccessPeer, int device, int peerDevice)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaDeviceCanAccessPeer);
+    if (request_id < 0 ||
+        rpc_write(&canAccessPeer, sizeof(int)) < 0 ||
+        rpc_write(&device, sizeof(int)) < 0 ||
+        rpc_write(&peerDevice, sizeof(int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(canAccessPeer, sizeof(int)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaDeviceEnablePeerAccess(int peerDevice, unsigned int flags)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaDeviceEnablePeerAccess);
+    if (request_id < 0 ||
+        rpc_write(&peerDevice, sizeof(int)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaDeviceDisablePeerAccess(int peerDevice)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaDeviceDisablePeerAccess);
+    if (request_id < 0 ||
+        rpc_write(&peerDevice, sizeof(int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphicsUnregisterResource(cudaGraphicsResource_t resource)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphicsUnregisterResource);
+    if (request_id < 0 ||
+        rpc_write(&resource, sizeof(cudaGraphicsResource_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphicsResourceSetMapFlags(cudaGraphicsResource_t resource, unsigned int flags)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphicsResourceSetMapFlags);
+    if (request_id < 0 ||
+        rpc_write(&resource, sizeof(cudaGraphicsResource_t)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphicsMapResources(int count, cudaGraphicsResource_t* resources, cudaStream_t stream)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphicsMapResources);
+    if (request_id < 0 ||
+        rpc_write(&count, sizeof(int)) < 0 ||
+        rpc_write(&resources, sizeof(cudaGraphicsResource_t)) < 0 ||
+        rpc_write(&stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(resources, sizeof(cudaGraphicsResource_t)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphicsUnmapResources(int count, cudaGraphicsResource_t* resources, cudaStream_t stream)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphicsUnmapResources);
+    if (request_id < 0 ||
+        rpc_write(&count, sizeof(int)) < 0 ||
+        rpc_write(&resources, sizeof(cudaGraphicsResource_t)) < 0 ||
+        rpc_write(&stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(resources, sizeof(cudaGraphicsResource_t)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphicsResourceGetMappedPointer(void** devPtr, size_t* size, cudaGraphicsResource_t resource)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphicsResourceGetMappedPointer);
+    if (request_id < 0 ||
+        rpc_write(&devPtr, sizeof(void*)) < 0 ||
+        rpc_write(&size, sizeof(size_t)) < 0 ||
+        rpc_write(&resource, sizeof(cudaGraphicsResource_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(devPtr, sizeof(void*)) < 0 ||
+        rpc_read(size, sizeof(size_t)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphicsSubResourceGetMappedArray(cudaArray_t* array, cudaGraphicsResource_t resource, unsigned int arrayIndex, unsigned int mipLevel)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphicsSubResourceGetMappedArray);
+    if (request_id < 0 ||
+        rpc_write(&array, sizeof(cudaArray_t)) < 0 ||
+        rpc_write(&resource, sizeof(cudaGraphicsResource_t)) < 0 ||
+        rpc_write(&arrayIndex, sizeof(unsigned int)) < 0 ||
+        rpc_write(&mipLevel, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(array, sizeof(cudaArray_t)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphicsResourceGetMappedMipmappedArray(cudaMipmappedArray_t* mipmappedArray, cudaGraphicsResource_t resource)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphicsResourceGetMappedMipmappedArray);
+    if (request_id < 0 ||
+        rpc_write(&mipmappedArray, sizeof(cudaMipmappedArray_t)) < 0 ||
+        rpc_write(&resource, sizeof(cudaGraphicsResource_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(mipmappedArray, sizeof(cudaMipmappedArray_t)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGetChannelDesc(struct cudaChannelFormatDesc* desc, cudaArray_const_t array)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGetChannelDesc);
+    if (request_id < 0 ||
+        rpc_write(&desc, sizeof(struct cudaChannelFormatDesc)) < 0 ||
+        rpc_write(&array, sizeof(cudaArray_const_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(desc, sizeof(struct cudaChannelFormatDesc)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaDestroyTextureObject(cudaTextureObject_t texObject)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaDestroyTextureObject);
+    if (request_id < 0 ||
+        rpc_write(&texObject, sizeof(cudaTextureObject_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGetTextureObjectResourceDesc(struct cudaResourceDesc* pResDesc, cudaTextureObject_t texObject)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGetTextureObjectResourceDesc);
+    if (request_id < 0 ||
+        rpc_write(&pResDesc, sizeof(struct cudaResourceDesc)) < 0 ||
+        rpc_write(&texObject, sizeof(cudaTextureObject_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pResDesc, sizeof(struct cudaResourceDesc)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGetTextureObjectTextureDesc(struct cudaTextureDesc* pTexDesc, cudaTextureObject_t texObject)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGetTextureObjectTextureDesc);
+    if (request_id < 0 ||
+        rpc_write(&pTexDesc, sizeof(struct cudaTextureDesc)) < 0 ||
+        rpc_write(&texObject, sizeof(cudaTextureObject_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pTexDesc, sizeof(struct cudaTextureDesc)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGetTextureObjectResourceViewDesc(struct cudaResourceViewDesc* pResViewDesc, cudaTextureObject_t texObject)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGetTextureObjectResourceViewDesc);
+    if (request_id < 0 ||
+        rpc_write(&pResViewDesc, sizeof(struct cudaResourceViewDesc)) < 0 ||
+        rpc_write(&texObject, sizeof(cudaTextureObject_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pResViewDesc, sizeof(struct cudaResourceViewDesc)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaDestroySurfaceObject(cudaSurfaceObject_t surfObject)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaDestroySurfaceObject);
+    if (request_id < 0 ||
+        rpc_write(&surfObject, sizeof(cudaSurfaceObject_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGetSurfaceObjectResourceDesc(struct cudaResourceDesc* pResDesc, cudaSurfaceObject_t surfObject)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGetSurfaceObjectResourceDesc);
+    if (request_id < 0 ||
+        rpc_write(&pResDesc, sizeof(struct cudaResourceDesc)) < 0 ||
+        rpc_write(&surfObject, sizeof(cudaSurfaceObject_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pResDesc, sizeof(struct cudaResourceDesc)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaDriverGetVersion(int* driverVersion)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaDriverGetVersion);
+    if (request_id < 0 ||
+        rpc_write(&driverVersion, sizeof(int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(driverVersion, sizeof(int)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaRuntimeGetVersion(int* runtimeVersion)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaRuntimeGetVersion);
+    if (request_id < 0 ||
+        rpc_write(&runtimeVersion, sizeof(int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(runtimeVersion, sizeof(int)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphCreate(cudaGraph_t* pGraph, unsigned int flags)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphCreate);
+    if (request_id < 0 ||
+        rpc_write(&pGraph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pGraph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphKernelNodeGetParams(cudaGraphNode_t node, struct cudaKernelNodeParams* pNodeParams)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphKernelNodeGetParams);
+    if (request_id < 0 ||
+        rpc_write(&node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(&pNodeParams, sizeof(struct cudaKernelNodeParams)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pNodeParams, sizeof(struct cudaKernelNodeParams)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphKernelNodeCopyAttributes(cudaGraphNode_t hSrc, cudaGraphNode_t hDst)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphKernelNodeCopyAttributes);
+    if (request_id < 0 ||
+        rpc_write(&hSrc, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(&hDst, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphKernelNodeGetAttribute(cudaGraphNode_t hNode, cudaLaunchAttributeID attr, cudaLaunchAttributeValue* value_out)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphKernelNodeGetAttribute);
+    if (request_id < 0 ||
+        rpc_write(&hNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(&attr, sizeof(cudaLaunchAttributeID)) < 0 ||
+        rpc_write(&value_out, sizeof(cudaLaunchAttributeValue)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(value_out, sizeof(cudaLaunchAttributeValue)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphMemcpyNodeGetParams(cudaGraphNode_t node, struct cudaMemcpy3DParms* pNodeParams)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphMemcpyNodeGetParams);
+    if (request_id < 0 ||
+        rpc_write(&node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(&pNodeParams, sizeof(struct cudaMemcpy3DParms)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pNodeParams, sizeof(struct cudaMemcpy3DParms)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphMemsetNodeGetParams(cudaGraphNode_t node, struct cudaMemsetParams* pNodeParams)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphMemsetNodeGetParams);
+    if (request_id < 0 ||
+        rpc_write(&node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(&pNodeParams, sizeof(struct cudaMemsetParams)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pNodeParams, sizeof(struct cudaMemsetParams)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphHostNodeGetParams(cudaGraphNode_t node, struct cudaHostNodeParams* pNodeParams)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphHostNodeGetParams);
+    if (request_id < 0 ||
+        rpc_write(&node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(&pNodeParams, sizeof(struct cudaHostNodeParams)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pNodeParams, sizeof(struct cudaHostNodeParams)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphChildGraphNodeGetGraph(cudaGraphNode_t node, cudaGraph_t* pGraph)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphChildGraphNodeGetGraph);
+    if (request_id < 0 ||
+        rpc_write(&node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(&pGraph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pGraph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphEventRecordNodeGetEvent(cudaGraphNode_t node, cudaEvent_t* event_out)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphEventRecordNodeGetEvent);
+    if (request_id < 0 ||
+        rpc_write(&node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(&event_out, sizeof(cudaEvent_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(event_out, sizeof(cudaEvent_t)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphEventRecordNodeSetEvent(cudaGraphNode_t node, cudaEvent_t event)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphEventRecordNodeSetEvent);
+    if (request_id < 0 ||
+        rpc_write(&node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(&event, sizeof(cudaEvent_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphEventWaitNodeGetEvent(cudaGraphNode_t node, cudaEvent_t* event_out)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphEventWaitNodeGetEvent);
+    if (request_id < 0 ||
+        rpc_write(&node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(&event_out, sizeof(cudaEvent_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(event_out, sizeof(cudaEvent_t)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphEventWaitNodeSetEvent(cudaGraphNode_t node, cudaEvent_t event)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphEventWaitNodeSetEvent);
+    if (request_id < 0 ||
+        rpc_write(&node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(&event, sizeof(cudaEvent_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphExternalSemaphoresSignalNodeGetParams(cudaGraphNode_t hNode, struct cudaExternalSemaphoreSignalNodeParams* params_out)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphExternalSemaphoresSignalNodeGetParams);
+    if (request_id < 0 ||
+        rpc_write(&hNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(&params_out, sizeof(struct cudaExternalSemaphoreSignalNodeParams)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(params_out, sizeof(struct cudaExternalSemaphoreSignalNodeParams)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphExternalSemaphoresWaitNodeGetParams(cudaGraphNode_t hNode, struct cudaExternalSemaphoreWaitNodeParams* params_out)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphExternalSemaphoresWaitNodeGetParams);
+    if (request_id < 0 ||
+        rpc_write(&hNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(&params_out, sizeof(struct cudaExternalSemaphoreWaitNodeParams)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(params_out, sizeof(struct cudaExternalSemaphoreWaitNodeParams)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphMemAllocNodeGetParams(cudaGraphNode_t node, struct cudaMemAllocNodeParams* params_out)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphMemAllocNodeGetParams);
+    if (request_id < 0 ||
+        rpc_write(&node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(&params_out, sizeof(struct cudaMemAllocNodeParams)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(params_out, sizeof(struct cudaMemAllocNodeParams)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphMemFreeNodeGetParams(cudaGraphNode_t node, void* dptr_out)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphMemFreeNodeGetParams);
+    if (request_id < 0 ||
+        rpc_write(&node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(&dptr_out, sizeof(void*)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(dptr_out, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaDeviceGraphMemTrim(int device)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaDeviceGraphMemTrim);
+    if (request_id < 0 ||
+        rpc_write(&device, sizeof(int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaDeviceGetGraphMemAttribute(int device, enum cudaGraphMemAttributeType attr, void* value)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaDeviceGetGraphMemAttribute);
+    if (request_id < 0 ||
+        rpc_write(&device, sizeof(int)) < 0 ||
+        rpc_write(&attr, sizeof(enum cudaGraphMemAttributeType)) < 0 ||
+        rpc_write(&value, sizeof(void*)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(value, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaDeviceSetGraphMemAttribute(int device, enum cudaGraphMemAttributeType attr, void* value)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaDeviceSetGraphMemAttribute);
+    if (request_id < 0 ||
+        rpc_write(&device, sizeof(int)) < 0 ||
+        rpc_write(&attr, sizeof(enum cudaGraphMemAttributeType)) < 0 ||
+        rpc_write(&value, sizeof(void*)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(value, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphClone(cudaGraph_t* pGraphClone, cudaGraph_t originalGraph)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphClone);
+    if (request_id < 0 ||
+        rpc_write(&pGraphClone, sizeof(cudaGraph_t)) < 0 ||
+        rpc_write(&originalGraph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pGraphClone, sizeof(cudaGraph_t)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphNodeFindInClone(cudaGraphNode_t* pNode, cudaGraphNode_t originalNode, cudaGraph_t clonedGraph)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphNodeFindInClone);
+    if (request_id < 0 ||
+        rpc_write(&pNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(&originalNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(&clonedGraph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphNodeGetType(cudaGraphNode_t node, enum cudaGraphNodeType* pType)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphNodeGetType);
+    if (request_id < 0 ||
+        rpc_write(&node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(&pType, sizeof(enum cudaGraphNodeType)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pType, sizeof(enum cudaGraphNodeType)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphGetNodes(cudaGraph_t graph, cudaGraphNode_t* nodes, size_t* numNodes)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphGetNodes);
+    if (request_id < 0 ||
+        rpc_write(&graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_write(&nodes, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(&numNodes, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(nodes, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(numNodes, sizeof(size_t)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphGetRootNodes(cudaGraph_t graph, cudaGraphNode_t* pRootNodes, size_t* pNumRootNodes)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphGetRootNodes);
+    if (request_id < 0 ||
+        rpc_write(&graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_write(&pRootNodes, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(&pNumRootNodes, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pRootNodes, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(pNumRootNodes, sizeof(size_t)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphGetEdges(cudaGraph_t graph, cudaGraphNode_t* from, cudaGraphNode_t* to, size_t* numEdges)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphGetEdges);
+    if (request_id < 0 ||
+        rpc_write(&graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_write(&from, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(&to, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(&numEdges, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(from, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(to, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(numEdges, sizeof(size_t)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphNodeGetDependencies(cudaGraphNode_t node, cudaGraphNode_t* pDependencies, size_t* pNumDependencies)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphNodeGetDependencies);
+    if (request_id < 0 ||
+        rpc_write(&node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(&pDependencies, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(&pNumDependencies, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pDependencies, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(pNumDependencies, sizeof(size_t)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphNodeGetDependentNodes(cudaGraphNode_t node, cudaGraphNode_t* pDependentNodes, size_t* pNumDependentNodes)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphNodeGetDependentNodes);
+    if (request_id < 0 ||
+        rpc_write(&node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(&pDependentNodes, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(&pNumDependentNodes, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pDependentNodes, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(pNumDependentNodes, sizeof(size_t)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphDestroyNode(cudaGraphNode_t node)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphDestroyNode);
+    if (request_id < 0 ||
+        rpc_write(&node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphInstantiate(cudaGraphExec_t* pGraphExec, cudaGraph_t graph, unsigned long long flags)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphInstantiate);
+    if (request_id < 0 ||
+        rpc_write(&pGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_write(&graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned long long)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphInstantiateWithFlags(cudaGraphExec_t* pGraphExec, cudaGraph_t graph, unsigned long long flags)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphInstantiateWithFlags);
+    if (request_id < 0 ||
+        rpc_write(&pGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_write(&graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned long long)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphInstantiateWithParams(cudaGraphExec_t* pGraphExec, cudaGraph_t graph, cudaGraphInstantiateParams* instantiateParams)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphInstantiateWithParams);
+    if (request_id < 0 ||
+        rpc_write(&pGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_write(&graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_write(&instantiateParams, sizeof(cudaGraphInstantiateParams)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(pGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_read(instantiateParams, sizeof(cudaGraphInstantiateParams)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphExecGetFlags(cudaGraphExec_t graphExec, unsigned long long* flags)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphExecGetFlags);
+    if (request_id < 0 ||
+        rpc_write(&graphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned long long)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(flags, sizeof(unsigned long long)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphExecChildGraphNodeSetParams(cudaGraphExec_t hGraphExec, cudaGraphNode_t node, cudaGraph_t childGraph)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphExecChildGraphNodeSetParams);
+    if (request_id < 0 ||
+        rpc_write(&hGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_write(&node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(&childGraph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphExecEventRecordNodeSetEvent(cudaGraphExec_t hGraphExec, cudaGraphNode_t hNode, cudaEvent_t event)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphExecEventRecordNodeSetEvent);
+    if (request_id < 0 ||
+        rpc_write(&hGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_write(&hNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(&event, sizeof(cudaEvent_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphExecEventWaitNodeSetEvent(cudaGraphExec_t hGraphExec, cudaGraphNode_t hNode, cudaEvent_t event)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphExecEventWaitNodeSetEvent);
+    if (request_id < 0 ||
+        rpc_write(&hGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_write(&hNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(&event, sizeof(cudaEvent_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphNodeSetEnabled(cudaGraphExec_t hGraphExec, cudaGraphNode_t hNode, unsigned int isEnabled)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphNodeSetEnabled);
+    if (request_id < 0 ||
+        rpc_write(&hGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_write(&hNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(&isEnabled, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphNodeGetEnabled(cudaGraphExec_t hGraphExec, cudaGraphNode_t hNode, unsigned int* isEnabled)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphNodeGetEnabled);
+    if (request_id < 0 ||
+        rpc_write(&hGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_write(&hNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(&isEnabled, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(isEnabled, sizeof(unsigned int)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphExecUpdate(cudaGraphExec_t hGraphExec, cudaGraph_t hGraph, cudaGraphExecUpdateResultInfo* resultInfo)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphExecUpdate);
+    if (request_id < 0 ||
+        rpc_write(&hGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_write(&hGraph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_write(&resultInfo, sizeof(cudaGraphExecUpdateResultInfo)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(resultInfo, sizeof(cudaGraphExecUpdateResultInfo)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphUpload(cudaGraphExec_t graphExec, cudaStream_t stream)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphUpload);
+    if (request_id < 0 ||
+        rpc_write(&graphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_write(&stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphLaunch(cudaGraphExec_t graphExec, cudaStream_t stream)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphLaunch);
+    if (request_id < 0 ||
+        rpc_write(&graphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_write(&stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphExecDestroy(cudaGraphExec_t graphExec)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphExecDestroy);
+    if (request_id < 0 ||
+        rpc_write(&graphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphDestroy(cudaGraph_t graph)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphDestroy);
+    if (request_id < 0 ||
+        rpc_write(&graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaUserObjectCreate(cudaUserObject_t* object_out, void* ptr, cudaHostFn_t destroy, unsigned int initialRefcount, unsigned int flags)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaUserObjectCreate);
+    if (request_id < 0 ||
+        rpc_write(&object_out, sizeof(cudaUserObject_t)) < 0 ||
+        rpc_write(&ptr, sizeof(void*)) < 0 ||
+        rpc_write(&destroy, sizeof(cudaHostFn_t)) < 0 ||
+        rpc_write(&initialRefcount, sizeof(unsigned int)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_read(object_out, sizeof(cudaUserObject_t)) < 0 ||
+        rpc_read(ptr, sizeof(void*)) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaUserObjectRetain(cudaUserObject_t object, unsigned int count)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaUserObjectRetain);
+    if (request_id < 0 ||
+        rpc_write(&object, sizeof(cudaUserObject_t)) < 0 ||
+        rpc_write(&count, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaUserObjectRelease(cudaUserObject_t object, unsigned int count)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaUserObjectRelease);
+    if (request_id < 0 ||
+        rpc_write(&object, sizeof(cudaUserObject_t)) < 0 ||
+        rpc_write(&count, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphRetainUserObject(cudaGraph_t graph, cudaUserObject_t object, unsigned int count, unsigned int flags)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphRetainUserObject);
+    if (request_id < 0 ||
+        rpc_write(&graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_write(&object, sizeof(cudaUserObject_t)) < 0 ||
+        rpc_write(&count, sizeof(unsigned int)) < 0 ||
+        rpc_write(&flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphReleaseUserObject(cudaGraph_t graph, cudaUserObject_t object, unsigned int count)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaGraphReleaseUserObject);
+    if (request_id < 0 ||
+        rpc_write(&graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_write(&object, sizeof(cudaUserObject_t)) < 0 ||
+        rpc_write(&count, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
 std::unordered_map<std::string, void *> functionMap = {
     {"nvmlInit_v2", (void *)nvmlInit_v2},
     {"nvmlInitWithFlags", (void *)nvmlInitWithFlags},
@@ -9346,6 +12133,190 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cuGraphicsMapResources", (void *)cuGraphicsMapResources},
     {"cuGraphicsUnmapResources", (void *)cuGraphicsUnmapResources},
     {"cudaDeviceReset", (void *)cudaDeviceReset},
+    {"cudaDeviceSynchronize", (void *)cudaDeviceSynchronize},
+    {"cudaDeviceSetLimit", (void *)cudaDeviceSetLimit},
+    {"cudaDeviceGetLimit", (void *)cudaDeviceGetLimit},
+    {"cudaDeviceGetCacheConfig", (void *)cudaDeviceGetCacheConfig},
+    {"cudaDeviceGetStreamPriorityRange", (void *)cudaDeviceGetStreamPriorityRange},
+    {"cudaDeviceSetCacheConfig", (void *)cudaDeviceSetCacheConfig},
+    {"cudaDeviceGetSharedMemConfig", (void *)cudaDeviceGetSharedMemConfig},
+    {"cudaDeviceSetSharedMemConfig", (void *)cudaDeviceSetSharedMemConfig},
+    {"cudaDeviceGetPCIBusId", (void *)cudaDeviceGetPCIBusId},
+    {"cudaIpcGetEventHandle", (void *)cudaIpcGetEventHandle},
+    {"cudaIpcOpenEventHandle", (void *)cudaIpcOpenEventHandle},
+    {"cudaIpcGetMemHandle", (void *)cudaIpcGetMemHandle},
+    {"cudaIpcOpenMemHandle", (void *)cudaIpcOpenMemHandle},
+    {"cudaIpcCloseMemHandle", (void *)cudaIpcCloseMemHandle},
+    {"cudaDeviceFlushGPUDirectRDMAWrites", (void *)cudaDeviceFlushGPUDirectRDMAWrites},
+    {"cudaThreadExit", (void *)cudaThreadExit},
+    {"cudaThreadSynchronize", (void *)cudaThreadSynchronize},
+    {"cudaThreadSetLimit", (void *)cudaThreadSetLimit},
+    {"cudaThreadGetLimit", (void *)cudaThreadGetLimit},
+    {"cudaThreadGetCacheConfig", (void *)cudaThreadGetCacheConfig},
+    {"cudaThreadSetCacheConfig", (void *)cudaThreadSetCacheConfig},
+    {"cudaGetLastError", (void *)cudaGetLastError},
+    {"cudaPeekAtLastError", (void *)cudaPeekAtLastError},
+    {"cudaGetDeviceCount", (void *)cudaGetDeviceCount},
+    {"cudaGetDeviceProperties_v2", (void *)cudaGetDeviceProperties_v2},
+    {"cudaDeviceGetAttribute", (void *)cudaDeviceGetAttribute},
+    {"cudaDeviceGetDefaultMemPool", (void *)cudaDeviceGetDefaultMemPool},
+    {"cudaDeviceSetMemPool", (void *)cudaDeviceSetMemPool},
+    {"cudaDeviceGetMemPool", (void *)cudaDeviceGetMemPool},
+    {"cudaDeviceGetNvSciSyncAttributes", (void *)cudaDeviceGetNvSciSyncAttributes},
+    {"cudaDeviceGetP2PAttribute", (void *)cudaDeviceGetP2PAttribute},
+    {"cudaInitDevice", (void *)cudaInitDevice},
+    {"cudaSetDevice", (void *)cudaSetDevice},
+    {"cudaGetDevice", (void *)cudaGetDevice},
+    {"cudaSetValidDevices", (void *)cudaSetValidDevices},
+    {"cudaSetDeviceFlags", (void *)cudaSetDeviceFlags},
+    {"cudaGetDeviceFlags", (void *)cudaGetDeviceFlags},
+    {"cudaStreamCreate", (void *)cudaStreamCreate},
+    {"cudaStreamCreateWithFlags", (void *)cudaStreamCreateWithFlags},
+    {"cudaStreamCreateWithPriority", (void *)cudaStreamCreateWithPriority},
+    {"cudaStreamGetPriority", (void *)cudaStreamGetPriority},
+    {"cudaStreamGetFlags", (void *)cudaStreamGetFlags},
+    {"cudaStreamGetId", (void *)cudaStreamGetId},
+    {"cudaCtxResetPersistingL2Cache", (void *)cudaCtxResetPersistingL2Cache},
+    {"cudaStreamCopyAttributes", (void *)cudaStreamCopyAttributes},
+    {"cudaStreamGetAttribute", (void *)cudaStreamGetAttribute},
+    {"cudaStreamDestroy", (void *)cudaStreamDestroy},
+    {"cudaStreamWaitEvent", (void *)cudaStreamWaitEvent},
+    {"cudaStreamAddCallback", (void *)cudaStreamAddCallback},
+    {"cudaStreamSynchronize", (void *)cudaStreamSynchronize},
+    {"cudaStreamQuery", (void *)cudaStreamQuery},
+    {"cudaStreamAttachMemAsync", (void *)cudaStreamAttachMemAsync},
+    {"cudaStreamBeginCapture", (void *)cudaStreamBeginCapture},
+    {"cudaThreadExchangeStreamCaptureMode", (void *)cudaThreadExchangeStreamCaptureMode},
+    {"cudaStreamEndCapture", (void *)cudaStreamEndCapture},
+    {"cudaStreamIsCapturing", (void *)cudaStreamIsCapturing},
+    {"cudaStreamGetCaptureInfo_v2", (void *)cudaStreamGetCaptureInfo_v2},
+    {"cudaStreamUpdateCaptureDependencies", (void *)cudaStreamUpdateCaptureDependencies},
+    {"cudaEventCreate", (void *)cudaEventCreate},
+    {"cudaEventCreateWithFlags", (void *)cudaEventCreateWithFlags},
+    {"cudaEventRecord", (void *)cudaEventRecord},
+    {"cudaEventRecordWithFlags", (void *)cudaEventRecordWithFlags},
+    {"cudaEventQuery", (void *)cudaEventQuery},
+    {"cudaEventSynchronize", (void *)cudaEventSynchronize},
+    {"cudaEventDestroy", (void *)cudaEventDestroy},
+    {"cudaEventElapsedTime", (void *)cudaEventElapsedTime},
+    {"cudaDestroyExternalMemory", (void *)cudaDestroyExternalMemory},
+    {"cudaDestroyExternalSemaphore", (void *)cudaDestroyExternalSemaphore},
+    {"cudaLaunchCooperativeKernelMultiDevice", (void *)cudaLaunchCooperativeKernelMultiDevice},
+    {"cudaSetDoubleForDevice", (void *)cudaSetDoubleForDevice},
+    {"cudaSetDoubleForHost", (void *)cudaSetDoubleForHost},
+    {"cudaLaunchHostFunc", (void *)cudaLaunchHostFunc},
+    {"cudaMallocManaged", (void *)cudaMallocManaged},
+    {"cudaMalloc", (void *)cudaMalloc},
+    {"cudaMallocHost", (void *)cudaMallocHost},
+    {"cudaMallocPitch", (void *)cudaMallocPitch},
+    {"cudaFree", (void *)cudaFree},
+    {"cudaFreeHost", (void *)cudaFreeHost},
+    {"cudaFreeArray", (void *)cudaFreeArray},
+    {"cudaFreeMipmappedArray", (void *)cudaFreeMipmappedArray},
+    {"cudaHostAlloc", (void *)cudaHostAlloc},
+    {"cudaHostRegister", (void *)cudaHostRegister},
+    {"cudaHostUnregister", (void *)cudaHostUnregister},
+    {"cudaHostGetDevicePointer", (void *)cudaHostGetDevicePointer},
+    {"cudaHostGetFlags", (void *)cudaHostGetFlags},
+    {"cudaMalloc3D", (void *)cudaMalloc3D},
+    {"cudaGetMipmappedArrayLevel", (void *)cudaGetMipmappedArrayLevel},
+    {"cudaMemGetInfo", (void *)cudaMemGetInfo},
+    {"cudaArrayGetInfo", (void *)cudaArrayGetInfo},
+    {"cudaArrayGetPlane", (void *)cudaArrayGetPlane},
+    {"cudaArrayGetMemoryRequirements", (void *)cudaArrayGetMemoryRequirements},
+    {"cudaMipmappedArrayGetMemoryRequirements", (void *)cudaMipmappedArrayGetMemoryRequirements},
+    {"cudaArrayGetSparseProperties", (void *)cudaArrayGetSparseProperties},
+    {"cudaMipmappedArrayGetSparseProperties", (void *)cudaMipmappedArrayGetSparseProperties},
+    {"cudaMemcpy2DFromArray", (void *)cudaMemcpy2DFromArray},
+    {"cudaMemcpy2DArrayToArray", (void *)cudaMemcpy2DArrayToArray},
+    {"cudaMemcpy2DFromArrayAsync", (void *)cudaMemcpy2DFromArrayAsync},
+    {"cudaMemset", (void *)cudaMemset},
+    {"cudaMemset2D", (void *)cudaMemset2D},
+    {"cudaMemset3D", (void *)cudaMemset3D},
+    {"cudaMemsetAsync", (void *)cudaMemsetAsync},
+    {"cudaMemset2DAsync", (void *)cudaMemset2DAsync},
+    {"cudaMemset3DAsync", (void *)cudaMemset3DAsync},
+    {"cudaMemcpyFromArray", (void *)cudaMemcpyFromArray},
+    {"cudaMemcpyArrayToArray", (void *)cudaMemcpyArrayToArray},
+    {"cudaMemcpyFromArrayAsync", (void *)cudaMemcpyFromArrayAsync},
+    {"cudaMallocAsync", (void *)cudaMallocAsync},
+    {"cudaFreeAsync", (void *)cudaFreeAsync},
+    {"cudaMemPoolTrimTo", (void *)cudaMemPoolTrimTo},
+    {"cudaMemPoolSetAttribute", (void *)cudaMemPoolSetAttribute},
+    {"cudaMemPoolGetAttribute", (void *)cudaMemPoolGetAttribute},
+    {"cudaMemPoolGetAccess", (void *)cudaMemPoolGetAccess},
+    {"cudaMemPoolDestroy", (void *)cudaMemPoolDestroy},
+    {"cudaMallocFromPoolAsync", (void *)cudaMallocFromPoolAsync},
+    {"cudaMemPoolExportToShareableHandle", (void *)cudaMemPoolExportToShareableHandle},
+    {"cudaMemPoolImportFromShareableHandle", (void *)cudaMemPoolImportFromShareableHandle},
+    {"cudaMemPoolExportPointer", (void *)cudaMemPoolExportPointer},
+    {"cudaMemPoolImportPointer", (void *)cudaMemPoolImportPointer},
+    {"cudaDeviceCanAccessPeer", (void *)cudaDeviceCanAccessPeer},
+    {"cudaDeviceEnablePeerAccess", (void *)cudaDeviceEnablePeerAccess},
+    {"cudaDeviceDisablePeerAccess", (void *)cudaDeviceDisablePeerAccess},
+    {"cudaGraphicsUnregisterResource", (void *)cudaGraphicsUnregisterResource},
+    {"cudaGraphicsResourceSetMapFlags", (void *)cudaGraphicsResourceSetMapFlags},
+    {"cudaGraphicsMapResources", (void *)cudaGraphicsMapResources},
+    {"cudaGraphicsUnmapResources", (void *)cudaGraphicsUnmapResources},
+    {"cudaGraphicsResourceGetMappedPointer", (void *)cudaGraphicsResourceGetMappedPointer},
+    {"cudaGraphicsSubResourceGetMappedArray", (void *)cudaGraphicsSubResourceGetMappedArray},
+    {"cudaGraphicsResourceGetMappedMipmappedArray", (void *)cudaGraphicsResourceGetMappedMipmappedArray},
+    {"cudaGetChannelDesc", (void *)cudaGetChannelDesc},
+    {"cudaDestroyTextureObject", (void *)cudaDestroyTextureObject},
+    {"cudaGetTextureObjectResourceDesc", (void *)cudaGetTextureObjectResourceDesc},
+    {"cudaGetTextureObjectTextureDesc", (void *)cudaGetTextureObjectTextureDesc},
+    {"cudaGetTextureObjectResourceViewDesc", (void *)cudaGetTextureObjectResourceViewDesc},
+    {"cudaDestroySurfaceObject", (void *)cudaDestroySurfaceObject},
+    {"cudaGetSurfaceObjectResourceDesc", (void *)cudaGetSurfaceObjectResourceDesc},
+    {"cudaDriverGetVersion", (void *)cudaDriverGetVersion},
+    {"cudaRuntimeGetVersion", (void *)cudaRuntimeGetVersion},
+    {"cudaGraphCreate", (void *)cudaGraphCreate},
+    {"cudaGraphKernelNodeGetParams", (void *)cudaGraphKernelNodeGetParams},
+    {"cudaGraphKernelNodeCopyAttributes", (void *)cudaGraphKernelNodeCopyAttributes},
+    {"cudaGraphKernelNodeGetAttribute", (void *)cudaGraphKernelNodeGetAttribute},
+    {"cudaGraphMemcpyNodeGetParams", (void *)cudaGraphMemcpyNodeGetParams},
+    {"cudaGraphMemsetNodeGetParams", (void *)cudaGraphMemsetNodeGetParams},
+    {"cudaGraphHostNodeGetParams", (void *)cudaGraphHostNodeGetParams},
+    {"cudaGraphChildGraphNodeGetGraph", (void *)cudaGraphChildGraphNodeGetGraph},
+    {"cudaGraphEventRecordNodeGetEvent", (void *)cudaGraphEventRecordNodeGetEvent},
+    {"cudaGraphEventRecordNodeSetEvent", (void *)cudaGraphEventRecordNodeSetEvent},
+    {"cudaGraphEventWaitNodeGetEvent", (void *)cudaGraphEventWaitNodeGetEvent},
+    {"cudaGraphEventWaitNodeSetEvent", (void *)cudaGraphEventWaitNodeSetEvent},
+    {"cudaGraphExternalSemaphoresSignalNodeGetParams", (void *)cudaGraphExternalSemaphoresSignalNodeGetParams},
+    {"cudaGraphExternalSemaphoresWaitNodeGetParams", (void *)cudaGraphExternalSemaphoresWaitNodeGetParams},
+    {"cudaGraphMemAllocNodeGetParams", (void *)cudaGraphMemAllocNodeGetParams},
+    {"cudaGraphMemFreeNodeGetParams", (void *)cudaGraphMemFreeNodeGetParams},
+    {"cudaDeviceGraphMemTrim", (void *)cudaDeviceGraphMemTrim},
+    {"cudaDeviceGetGraphMemAttribute", (void *)cudaDeviceGetGraphMemAttribute},
+    {"cudaDeviceSetGraphMemAttribute", (void *)cudaDeviceSetGraphMemAttribute},
+    {"cudaGraphClone", (void *)cudaGraphClone},
+    {"cudaGraphNodeFindInClone", (void *)cudaGraphNodeFindInClone},
+    {"cudaGraphNodeGetType", (void *)cudaGraphNodeGetType},
+    {"cudaGraphGetNodes", (void *)cudaGraphGetNodes},
+    {"cudaGraphGetRootNodes", (void *)cudaGraphGetRootNodes},
+    {"cudaGraphGetEdges", (void *)cudaGraphGetEdges},
+    {"cudaGraphNodeGetDependencies", (void *)cudaGraphNodeGetDependencies},
+    {"cudaGraphNodeGetDependentNodes", (void *)cudaGraphNodeGetDependentNodes},
+    {"cudaGraphDestroyNode", (void *)cudaGraphDestroyNode},
+    {"cudaGraphInstantiate", (void *)cudaGraphInstantiate},
+    {"cudaGraphInstantiateWithFlags", (void *)cudaGraphInstantiateWithFlags},
+    {"cudaGraphInstantiateWithParams", (void *)cudaGraphInstantiateWithParams},
+    {"cudaGraphExecGetFlags", (void *)cudaGraphExecGetFlags},
+    {"cudaGraphExecChildGraphNodeSetParams", (void *)cudaGraphExecChildGraphNodeSetParams},
+    {"cudaGraphExecEventRecordNodeSetEvent", (void *)cudaGraphExecEventRecordNodeSetEvent},
+    {"cudaGraphExecEventWaitNodeSetEvent", (void *)cudaGraphExecEventWaitNodeSetEvent},
+    {"cudaGraphNodeSetEnabled", (void *)cudaGraphNodeSetEnabled},
+    {"cudaGraphNodeGetEnabled", (void *)cudaGraphNodeGetEnabled},
+    {"cudaGraphExecUpdate", (void *)cudaGraphExecUpdate},
+    {"cudaGraphUpload", (void *)cudaGraphUpload},
+    {"cudaGraphLaunch", (void *)cudaGraphLaunch},
+    {"cudaGraphExecDestroy", (void *)cudaGraphExecDestroy},
+    {"cudaGraphDestroy", (void *)cudaGraphDestroy},
+    {"cudaUserObjectCreate", (void *)cudaUserObjectCreate},
+    {"cudaUserObjectRetain", (void *)cudaUserObjectRetain},
+    {"cudaUserObjectRelease", (void *)cudaUserObjectRelease},
+    {"cudaGraphRetainUserObject", (void *)cudaGraphRetainUserObject},
+    {"cudaGraphReleaseUserObject", (void *)cudaGraphReleaseUserObject},
     {"cuMemcpy_ptds", (void *)cuMemcpy},
     {"cuMemcpyAsync_ptsz", (void *)cuMemcpyAsync},
     {"cuMemcpyPeer_ptds", (void *)cuMemcpyPeer},

@@ -3830,1682 +3830,1682 @@ CUresult cuGraphicsUnmapResources(unsigned int count, CUgraphicsResource *resour
 /**
  */
 cudaError_t cudaDeviceReset();
-// /**
-//  */
-// cudaError_t cudaDeviceSynchronize();
-// /**
-//  * @param limit SEND_ONLY
-//  * @param value SEND_ONLY
-//  */
-// cudaError_t cudaDeviceSetLimit(enum cudaLimit limit, size_t value);
-// /**
-//  * @param pValue SEND_RECV
-//  * @param limit SEND_ONLY
-//  */
-// cudaError_t cudaDeviceGetLimit(size_t *pValue, enum cudaLimit limit);
-// /**
-//  * @param maxWidthInElements SEND_RECV
-//  * @param fmtDesc SEND_RECV
-//  * @param device SEND_ONLY
-//  */
-// cudaError_t cudaDeviceGetTexture1DLinearMaxWidth(size_t *maxWidthInElements, const struct cudaChannelFormatDesc *fmtDesc, int device);
-// /**
-//  * @param pCacheConfig SEND_RECV
-//  */
-// cudaError_t cudaDeviceGetCacheConfig(enum cudaFuncCache *pCacheConfig);
-// /**
-//  * @param leastPriority SEND_RECV
-//  * @param greatestPriority SEND_RECV
-//  */
-// cudaError_t cudaDeviceGetStreamPriorityRange(int *leastPriority, int *greatestPriority);
-// /**
-//  * @param cacheConfig SEND_ONLY
-//  */
-// cudaError_t cudaDeviceSetCacheConfig(enum cudaFuncCache cacheConfig);
-// /**
-//  * @param pConfig SEND_RECV
-//  */
-// cudaError_t cudaDeviceGetSharedMemConfig(enum cudaSharedMemConfig *pConfig);
-// /**
-//  * @param config SEND_ONLY
-//  */
-// cudaError_t cudaDeviceSetSharedMemConfig(enum cudaSharedMemConfig config);
-// /**
-//  * @param device SEND_RECV
-//  * @param pciBusId SEND_RECV
-//  */
-// cudaError_t cudaDeviceGetByPCIBusId(int *device, const char *pciBusId);
-// /**
-//  * @param pciBusId SEND_RECV
-//  * @param len SEND_ONLY
-//  * @param device SEND_ONLY
-//  */
-// cudaError_t cudaDeviceGetPCIBusId(char *pciBusId, int len, int device);
-// /**
-//  * @param handle SEND_RECV
-//  * @param event SEND_ONLY
-//  */
-// cudaError_t cudaIpcGetEventHandle(cudaIpcEventHandle_t *handle, cudaEvent_t event);
-// /**
-//  * @param event SEND_RECV
-//  * @param handle SEND_ONLY
-//  */
-// cudaError_t cudaIpcOpenEventHandle(cudaEvent_t *event, cudaIpcEventHandle_t handle);
-// /**
-//  * @param handle SEND_RECV
-//  * @param devPtr SEND_RECV
-//  */
-// cudaError_t cudaIpcGetMemHandle(cudaIpcMemHandle_t *handle, void *devPtr);
-// /**
-//  * @param devPtr SEND_RECV
-//  * @param handle SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// cudaError_t cudaIpcOpenMemHandle(void **devPtr, cudaIpcMemHandle_t handle, unsigned int flags);
-// /**
-//  * @param devPtr SEND_RECV
-//  */
-// cudaError_t cudaIpcCloseMemHandle(void *devPtr);
-// /**
-//  * @param target SEND_ONLY
-//  * @param scope SEND_ONLY
-//  */
-// cudaError_t cudaDeviceFlushGPUDirectRDMAWrites(enum cudaFlushGPUDirectRDMAWritesTarget target, enum cudaFlushGPUDirectRDMAWritesScope scope);
-// /**
-//  */
-// cudaError_t cudaThreadExit();
-// /**
-//  */
-// cudaError_t cudaThreadSynchronize();
-// /**
-//  * @param limit SEND_ONLY
-//  * @param value SEND_ONLY
-//  */
-// cudaError_t cudaThreadSetLimit(enum cudaLimit limit, size_t value);
-// /**
-//  * @param pValue SEND_RECV
-//  * @param limit SEND_ONLY
-//  */
-// cudaError_t cudaThreadGetLimit(size_t *pValue, enum cudaLimit limit);
-// /**
-//  * @param pCacheConfig SEND_RECV
-//  */
-// cudaError_t cudaThreadGetCacheConfig(enum cudaFuncCache *pCacheConfig);
-// /**
-//  * @param cacheConfig SEND_ONLY
-//  */
-// cudaError_t cudaThreadSetCacheConfig(enum cudaFuncCache cacheConfig);
-// /**
-//  */
-// cudaError_t cudaGetLastError();
-// /**
-//  */
-// cudaError_t cudaPeekAtLastError();
-// /**
-//  * @param error SEND_ONLY
-//  */
-// // const char *cudaGetErrorName(cudaError_t error);
-// /**
-//  * @param error SEND_ONLY
-//  */
-// // const char *cudaGetErrorString(cudaError_t error);
-// /**
-//  * @param count SEND_RECV
-//  */
-// cudaError_t cudaGetDeviceCount(int *count);
-// /**
-//  * @param prop SEND_RECV
-//  * @param device SEND_ONLY
-//  */
-// cudaError_t cudaGetDeviceProperties_v2(struct cudaDeviceProp *prop, int device);
-// /**
-//  * @param value SEND_RECV
-//  * @param attr SEND_ONLY
-//  * @param device SEND_ONLY
-//  */
-// cudaError_t cudaDeviceGetAttribute(int *value, enum cudaDeviceAttr attr, int device);
-// /**
-//  * @param memPool SEND_RECV
-//  * @param device SEND_ONLY
-//  */
-// cudaError_t cudaDeviceGetDefaultMemPool(cudaMemPool_t *memPool, int device);
-// /**
-//  * @param device SEND_ONLY
-//  * @param memPool SEND_ONLY
-//  */
-// cudaError_t cudaDeviceSetMemPool(int device, cudaMemPool_t memPool);
-// /**
-//  * @param memPool SEND_RECV
-//  * @param device SEND_ONLY
-//  */
-// cudaError_t cudaDeviceGetMemPool(cudaMemPool_t *memPool, int device);
-// /**
-//  * @param nvSciSyncAttrList SEND_RECV
-//  * @param device SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// cudaError_t cudaDeviceGetNvSciSyncAttributes(void *nvSciSyncAttrList, int device, int flags);
-// /**
-//  * @param value SEND_RECV
-//  * @param attr SEND_ONLY
-//  * @param srcDevice SEND_ONLY
-//  * @param dstDevice SEND_ONLY
-//  */
-// cudaError_t cudaDeviceGetP2PAttribute(int *value, enum cudaDeviceP2PAttr attr, int srcDevice, int dstDevice);
-// /**
-//  * @param device SEND_RECV
-//  * @param prop SEND_RECV
-//  */
-// cudaError_t cudaChooseDevice(int *device, const struct cudaDeviceProp *prop);
-// /**
-//  * @param device SEND_ONLY
-//  * @param deviceFlags SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// cudaError_t cudaInitDevice(int device, unsigned int deviceFlags, unsigned int flags);
-// /**
-//  * @param device SEND_ONLY
-//  */
-// cudaError_t cudaSetDevice(int device);
-// /**
-//  * @param device SEND_RECV
-//  */
-// cudaError_t cudaGetDevice(int *device);
-// /**
-//  * @param device_arr SEND_RECV
-//  * @param len SEND_ONLY
-//  */
-// cudaError_t cudaSetValidDevices(int *device_arr, int len);
-// /**
-//  * @param flags SEND_ONLY
-//  */
-// cudaError_t cudaSetDeviceFlags(unsigned int flags);
-// /**
-//  * @param flags SEND_RECV
-//  */
-// cudaError_t cudaGetDeviceFlags(unsigned int *flags);
-// /**
-//  * @param pStream SEND_RECV
-//  */
-// cudaError_t cudaStreamCreate(cudaStream_t *pStream);
-// /**
-//  * @param pStream SEND_RECV
-//  * @param flags SEND_ONLY
-//  */
-// cudaError_t cudaStreamCreateWithFlags(cudaStream_t *pStream, unsigned int flags);
-// /**
-//  * @param pStream SEND_RECV
-//  * @param flags SEND_ONLY
-//  * @param priority SEND_ONLY
-//  */
-// cudaError_t cudaStreamCreateWithPriority(cudaStream_t *pStream, unsigned int flags, int priority);
-// /**
-//  * @param hStream SEND_ONLY
-//  * @param priority SEND_RECV
-//  */
-// cudaError_t cudaStreamGetPriority(cudaStream_t hStream, int *priority);
-// /**
-//  * @param hStream SEND_ONLY
-//  * @param flags SEND_RECV
-//  */
-// cudaError_t cudaStreamGetFlags(cudaStream_t hStream, unsigned int *flags);
-// /**
-//  * @param hStream SEND_ONLY
-//  * @param streamId SEND_RECV
-//  */
-// cudaError_t cudaStreamGetId(cudaStream_t hStream, unsigned long long *streamId);
-// /**
-//  */
-// cudaError_t cudaCtxResetPersistingL2Cache();
-// /**
-//  * @param dst SEND_ONLY
-//  * @param src SEND_ONLY
-//  */
-// cudaError_t cudaStreamCopyAttributes(cudaStream_t dst, cudaStream_t src);
-// /**
-//  * @param hStream SEND_ONLY
-//  * @param attr SEND_ONLY
-//  * @param value_out SEND_RECV
-//  */
-// cudaError_t cudaStreamGetAttribute(cudaStream_t hStream, cudaLaunchAttributeID attr, cudaLaunchAttributeValue *value_out);
-// /**
-//  * @param hStream SEND_ONLY
-//  * @param attr SEND_ONLY
-//  * @param value SEND_RECV
-//  */
-// cudaError_t cudaStreamSetAttribute(cudaStream_t hStream, cudaLaunchAttributeID attr, const cudaLaunchAttributeValue *value);
-// /**
-//  * @param stream SEND_ONLY
-//  */
-// cudaError_t cudaStreamDestroy(cudaStream_t stream);
-// /**
-//  * @param stream SEND_ONLY
-//  * @param event SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// cudaError_t cudaStreamWaitEvent(cudaStream_t stream, cudaEvent_t event, unsigned int flags);
-// /**
-//  * @param stream SEND_ONLY
-//  * @param callback SEND_ONLY
-//  * @param userData SEND_RECV
-//  * @param flags SEND_ONLY
-//  */
-// cudaError_t cudaStreamAddCallback(cudaStream_t stream, cudaStreamCallback_t callback, void *userData, unsigned int flags);
-// /**
-//  * @param stream SEND_ONLY
-//  */
-// cudaError_t cudaStreamSynchronize(cudaStream_t stream);
-// /**
-//  * @param stream SEND_ONLY
-//  */
-// cudaError_t cudaStreamQuery(cudaStream_t stream);
-// /**
-//  * @param stream SEND_ONLY
-//  * @param devPtr SEND_RECV
-//  * @param length SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// cudaError_t cudaStreamAttachMemAsync(cudaStream_t stream, void *devPtr, size_t length, unsigned int flags);
-// /**
-//  * @param stream SEND_ONLY
-//  * @param mode SEND_ONLY
-//  */
-// cudaError_t cudaStreamBeginCapture(cudaStream_t stream, enum cudaStreamCaptureMode mode);
-// /**
-//  * @param mode SEND_RECV
-//  */
-// cudaError_t cudaThreadExchangeStreamCaptureMode(enum cudaStreamCaptureMode *mode);
-// /**
-//  * @param stream SEND_ONLY
-//  * @param pGraph SEND_RECV
-//  */
-// cudaError_t cudaStreamEndCapture(cudaStream_t stream, cudaGraph_t *pGraph);
-// /**
-//  * @param stream SEND_ONLY
-//  * @param pCaptureStatus SEND_RECV
-//  */
-// cudaError_t cudaStreamIsCapturing(cudaStream_t stream, enum cudaStreamCaptureStatus *pCaptureStatus);
-// /**
-//  * @param stream SEND_ONLY
-//  * @param captureStatus_out SEND_RECV
-//  * @param id_out SEND_RECV
-//  * @param graph_out SEND_RECV
-//  * @param dependencies_out SEND_RECV
-//  * @param numDependencies_out SEND_RECV
-//  */
-// cudaError_t cudaStreamGetCaptureInfo_v2(cudaStream_t stream, enum cudaStreamCaptureStatus *captureStatus_out, unsigned long long *id_out, cudaGraph_t *graph_out, const cudaGraphNode_t **dependencies_out, size_t *numDependencies_out);
-// /**
-//  * @param stream SEND_ONLY
-//  * @param dependencies SEND_RECV
-//  * @param numDependencies SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// cudaError_t cudaStreamUpdateCaptureDependencies(cudaStream_t stream, cudaGraphNode_t *dependencies, size_t numDependencies, unsigned int flags);
-// /**
-//  * @param event SEND_RECV
-//  */
-// cudaError_t cudaEventCreate(cudaEvent_t *event);
-// /**
-//  * @param event SEND_RECV
-//  * @param flags SEND_ONLY
-//  */
-// cudaError_t cudaEventCreateWithFlags(cudaEvent_t *event, unsigned int flags);
-// /**
-//  * @param event SEND_ONLY
-//  * @param stream SEND_ONLY
-//  */
-// cudaError_t cudaEventRecord(cudaEvent_t event, cudaStream_t stream);
-// /**
-//  * @param event SEND_ONLY
-//  * @param stream SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// cudaError_t cudaEventRecordWithFlags(cudaEvent_t event, cudaStream_t stream, unsigned int flags);
-// /**
-//  * @param event SEND_ONLY
-//  */
-// cudaError_t cudaEventQuery(cudaEvent_t event);
-// /**
-//  * @param event SEND_ONLY
-//  */
-// cudaError_t cudaEventSynchronize(cudaEvent_t event);
-// /**
-//  * @param event SEND_ONLY
-//  */
-// cudaError_t cudaEventDestroy(cudaEvent_t event);
-// /**
-//  * @param ms SEND_RECV
-//  * @param start SEND_ONLY
-//  * @param end SEND_ONLY
-//  */
-// cudaError_t cudaEventElapsedTime(float *ms, cudaEvent_t start, cudaEvent_t end);
-// /**
-//  * @param extMem_out SEND_RECV
-//  * @param memHandleDesc SEND_RECV
-//  */
+/**
+ */
+cudaError_t cudaDeviceSynchronize();
+/**
+ * @param limit SEND_ONLY
+ * @param value SEND_ONLY
+ */
+cudaError_t cudaDeviceSetLimit(enum cudaLimit limit, size_t value);
+/**
+ * @param pValue SEND_RECV
+ * @param limit SEND_ONLY
+ */
+cudaError_t cudaDeviceGetLimit(size_t *pValue, enum cudaLimit limit);
+/**
+ * @param maxWidthInElements SEND_RECV
+ * @param fmtDesc SEND_RECV
+ * @param device SEND_ONLY
+ */
+cudaError_t cudaDeviceGetTexture1DLinearMaxWidth(size_t *maxWidthInElements, const struct cudaChannelFormatDesc *fmtDesc, int device);
+/**
+ * @param pCacheConfig SEND_RECV
+ */
+cudaError_t cudaDeviceGetCacheConfig(enum cudaFuncCache *pCacheConfig);
+/**
+ * @param leastPriority SEND_RECV
+ * @param greatestPriority SEND_RECV
+ */
+cudaError_t cudaDeviceGetStreamPriorityRange(int *leastPriority, int *greatestPriority);
+/**
+ * @param cacheConfig SEND_ONLY
+ */
+cudaError_t cudaDeviceSetCacheConfig(enum cudaFuncCache cacheConfig);
+/**
+ * @param pConfig SEND_RECV
+ */
+cudaError_t cudaDeviceGetSharedMemConfig(enum cudaSharedMemConfig *pConfig);
+/**
+ * @param config SEND_ONLY
+ */
+cudaError_t cudaDeviceSetSharedMemConfig(enum cudaSharedMemConfig config);
+/**
+ * @param device SEND_RECV
+ * @param pciBusId SEND_RECV
+ */
+cudaError_t cudaDeviceGetByPCIBusId(int *device, const char *pciBusId);
+/**
+ * @param pciBusId SEND_RECV
+ * @param len SEND_ONLY
+ * @param device SEND_ONLY
+ */
+cudaError_t cudaDeviceGetPCIBusId(char *pciBusId, int len, int device);
+/**
+ * @param handle SEND_RECV
+ * @param event SEND_ONLY
+ */
+cudaError_t cudaIpcGetEventHandle(cudaIpcEventHandle_t *handle, cudaEvent_t event);
+/**
+ * @param event SEND_RECV
+ * @param handle SEND_ONLY
+ */
+cudaError_t cudaIpcOpenEventHandle(cudaEvent_t *event, cudaIpcEventHandle_t handle);
+/**
+ * @param handle SEND_RECV
+ * @param devPtr SEND_RECV
+ */
+cudaError_t cudaIpcGetMemHandle(cudaIpcMemHandle_t *handle, void *devPtr);
+/**
+ * @param devPtr SEND_RECV
+ * @param handle SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+cudaError_t cudaIpcOpenMemHandle(void **devPtr, cudaIpcMemHandle_t handle, unsigned int flags);
+/**
+ * @param devPtr SEND_RECV
+ */
+cudaError_t cudaIpcCloseMemHandle(void *devPtr);
+/**
+ * @param target SEND_ONLY
+ * @param scope SEND_ONLY
+ */
+cudaError_t cudaDeviceFlushGPUDirectRDMAWrites(enum cudaFlushGPUDirectRDMAWritesTarget target, enum cudaFlushGPUDirectRDMAWritesScope scope);
+/**
+ */
+cudaError_t cudaThreadExit();
+/**
+ */
+cudaError_t cudaThreadSynchronize();
+/**
+ * @param limit SEND_ONLY
+ * @param value SEND_ONLY
+ */
+cudaError_t cudaThreadSetLimit(enum cudaLimit limit, size_t value);
+/**
+ * @param pValue SEND_RECV
+ * @param limit SEND_ONLY
+ */
+cudaError_t cudaThreadGetLimit(size_t *pValue, enum cudaLimit limit);
+/**
+ * @param pCacheConfig SEND_RECV
+ */
+cudaError_t cudaThreadGetCacheConfig(enum cudaFuncCache *pCacheConfig);
+/**
+ * @param cacheConfig SEND_ONLY
+ */
+cudaError_t cudaThreadSetCacheConfig(enum cudaFuncCache cacheConfig);
+/**
+ */
+cudaError_t cudaGetLastError();
+/**
+ */
+cudaError_t cudaPeekAtLastError();
+/**
+ * @param error SEND_ONLY
+ */
+// const char *cudaGetErrorName(cudaError_t error);
+/**
+ * @param error SEND_ONLY
+ */
+// const char *cudaGetErrorString(cudaError_t error);
+/**
+ * @param count RECV_ONLY
+ */
+cudaError_t cudaGetDeviceCount(int *count);
+/**
+ * @param prop RECV_ONLY
+ * @param device SEND_ONLY
+ */
+cudaError_t cudaGetDeviceProperties_v2(struct cudaDeviceProp *prop, int device);
+/**
+ * @param value SEND_RECV
+ * @param attr SEND_ONLY
+ * @param device SEND_ONLY
+ */
+cudaError_t cudaDeviceGetAttribute(int *value, enum cudaDeviceAttr attr, int device);
+/**
+ * @param memPool SEND_RECV
+ * @param device SEND_ONLY
+ */
+cudaError_t cudaDeviceGetDefaultMemPool(cudaMemPool_t *memPool, int device);
+/**
+ * @param device SEND_ONLY
+ * @param memPool SEND_ONLY
+ */
+cudaError_t cudaDeviceSetMemPool(int device, cudaMemPool_t memPool);
+/**
+ * @param memPool SEND_RECV
+ * @param device SEND_ONLY
+ */
+cudaError_t cudaDeviceGetMemPool(cudaMemPool_t *memPool, int device);
+/**
+ * @param nvSciSyncAttrList SEND_RECV
+ * @param device SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+cudaError_t cudaDeviceGetNvSciSyncAttributes(void *nvSciSyncAttrList, int device, int flags);
+/**
+ * @param value SEND_RECV
+ * @param attr SEND_ONLY
+ * @param srcDevice SEND_ONLY
+ * @param dstDevice SEND_ONLY
+ */
+cudaError_t cudaDeviceGetP2PAttribute(int *value, enum cudaDeviceP2PAttr attr, int srcDevice, int dstDevice);
+/**
+ * @param device SEND_RECV
+ * @param prop SEND_RECV
+ */
+cudaError_t cudaChooseDevice(int *device, const struct cudaDeviceProp *prop);
+/**
+ * @param device SEND_ONLY
+ * @param deviceFlags SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+cudaError_t cudaInitDevice(int device, unsigned int deviceFlags, unsigned int flags);
+/**
+ * @param device SEND_ONLY
+ */
+cudaError_t cudaSetDevice(int device);
+/**
+ * @param device SEND_RECV
+ */
+cudaError_t cudaGetDevice(int *device);
+/**
+ * @param device_arr SEND_RECV
+ * @param len SEND_ONLY
+ */
+cudaError_t cudaSetValidDevices(int *device_arr, int len);
+/**
+ * @param flags SEND_ONLY
+ */
+cudaError_t cudaSetDeviceFlags(unsigned int flags);
+/**
+ * @param flags SEND_RECV
+ */
+cudaError_t cudaGetDeviceFlags(unsigned int *flags);
+/**
+ * @param pStream SEND_RECV
+ */
+cudaError_t cudaStreamCreate(cudaStream_t *pStream);
+/**
+ * @param pStream SEND_RECV
+ * @param flags SEND_ONLY
+ */
+cudaError_t cudaStreamCreateWithFlags(cudaStream_t *pStream, unsigned int flags);
+/**
+ * @param pStream SEND_RECV
+ * @param flags SEND_ONLY
+ * @param priority SEND_ONLY
+ */
+cudaError_t cudaStreamCreateWithPriority(cudaStream_t *pStream, unsigned int flags, int priority);
+/**
+ * @param hStream SEND_ONLY
+ * @param priority SEND_RECV
+ */
+cudaError_t cudaStreamGetPriority(cudaStream_t hStream, int *priority);
+/**
+ * @param hStream SEND_ONLY
+ * @param flags SEND_RECV
+ */
+cudaError_t cudaStreamGetFlags(cudaStream_t hStream, unsigned int *flags);
+/**
+ * @param hStream SEND_ONLY
+ * @param streamId SEND_RECV
+ */
+cudaError_t cudaStreamGetId(cudaStream_t hStream, unsigned long long *streamId);
+/**
+ */
+cudaError_t cudaCtxResetPersistingL2Cache();
+/**
+ * @param dst SEND_ONLY
+ * @param src SEND_ONLY
+ */
+cudaError_t cudaStreamCopyAttributes(cudaStream_t dst, cudaStream_t src);
+/**
+ * @param hStream SEND_ONLY
+ * @param attr SEND_ONLY
+ * @param value_out SEND_RECV
+ */
+cudaError_t cudaStreamGetAttribute(cudaStream_t hStream, cudaLaunchAttributeID attr, cudaLaunchAttributeValue *value_out);
+/**
+ * @param hStream SEND_ONLY
+ * @param attr SEND_ONLY
+ * @param value SEND_RECV
+ */
+cudaError_t cudaStreamSetAttribute(cudaStream_t hStream, cudaLaunchAttributeID attr, const cudaLaunchAttributeValue *value);
+/**
+ * @param stream SEND_ONLY
+ */
+cudaError_t cudaStreamDestroy(cudaStream_t stream);
+/**
+ * @param stream SEND_ONLY
+ * @param event SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+cudaError_t cudaStreamWaitEvent(cudaStream_t stream, cudaEvent_t event, unsigned int flags);
+/**
+ * @param stream SEND_ONLY
+ * @param callback SEND_ONLY
+ * @param userData SEND_RECV
+ * @param flags SEND_ONLY
+ */
+cudaError_t cudaStreamAddCallback(cudaStream_t stream, cudaStreamCallback_t callback, void *userData, unsigned int flags);
+/**
+ * @param stream SEND_ONLY
+ */
+cudaError_t cudaStreamSynchronize(cudaStream_t stream);
+/**
+ * @param stream SEND_ONLY
+ */
+cudaError_t cudaStreamQuery(cudaStream_t stream);
+/**
+ * @param stream SEND_ONLY
+ * @param devPtr SEND_RECV
+ * @param length SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+cudaError_t cudaStreamAttachMemAsync(cudaStream_t stream, void *devPtr, size_t length, unsigned int flags);
+/**
+ * @param stream SEND_ONLY
+ * @param mode SEND_ONLY
+ */
+cudaError_t cudaStreamBeginCapture(cudaStream_t stream, enum cudaStreamCaptureMode mode);
+/**
+ * @param mode SEND_RECV
+ */
+cudaError_t cudaThreadExchangeStreamCaptureMode(enum cudaStreamCaptureMode *mode);
+/**
+ * @param stream SEND_ONLY
+ * @param pGraph SEND_RECV
+ */
+cudaError_t cudaStreamEndCapture(cudaStream_t stream, cudaGraph_t *pGraph);
+/**
+ * @param stream SEND_ONLY
+ * @param pCaptureStatus SEND_RECV
+ */
+cudaError_t cudaStreamIsCapturing(cudaStream_t stream, enum cudaStreamCaptureStatus *pCaptureStatus);
+/**
+ * @param stream SEND_ONLY
+ * @param captureStatus_out RECV_ONLY
+ * @param id_out RECV_ONLY
+ * @param graph_out RECV_ONLY
+ * @param numDependencies_out RECV_ONLY
+ * @param dependencies_out RECV_ONLY LENGTH:numDependencies_out
+ */
+cudaError_t cudaStreamGetCaptureInfo_v2(cudaStream_t stream, enum cudaStreamCaptureStatus *captureStatus_out, unsigned long long *id_out, cudaGraph_t *graph_out, const cudaGraphNode_t **dependencies_out, size_t *numDependencies_out);
+/**
+ * @param stream SEND_ONLY
+ * @param numDependencies SEND_ONLY
+ * @param dependencies SEND_ONLY LENGTH:numDependencies
+ * @param flags SEND_ONLY
+ */
+cudaError_t cudaStreamUpdateCaptureDependencies(cudaStream_t stream, cudaGraphNode_t *dependencies, size_t numDependencies, unsigned int flags);
+/**
+ * @param event RECV_ONLY
+ */
+cudaError_t cudaEventCreate(cudaEvent_t *event);
+/**
+ * @param event RECV_ONLY
+ * @param flags SEND_ONLY
+ */
+cudaError_t cudaEventCreateWithFlags(cudaEvent_t *event, unsigned int flags);
+/**
+ * @param event SEND_ONLY
+ * @param stream SEND_ONLY
+ */
+cudaError_t cudaEventRecord(cudaEvent_t event, cudaStream_t stream);
+/**
+ * @param event SEND_ONLY
+ * @param stream SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+cudaError_t cudaEventRecordWithFlags(cudaEvent_t event, cudaStream_t stream, unsigned int flags);
+/**
+ * @param event SEND_ONLY
+ */
+cudaError_t cudaEventQuery(cudaEvent_t event);
+/**
+ * @param event SEND_ONLY
+ */
+cudaError_t cudaEventSynchronize(cudaEvent_t event);
+/**
+ * @param event SEND_ONLY
+ */
+cudaError_t cudaEventDestroy(cudaEvent_t event);
+/**
+ * @param ms RECV_ONLY
+ * @param start SEND_ONLY
+ * @param end SEND_ONLY
+ */
+cudaError_t cudaEventElapsedTime(float *ms, cudaEvent_t start, cudaEvent_t end);
+/**
+ * @param extMem_out RECV_ONLY
+ * @param memHandleDesc SEND_ONLY
+ */
 // cudaError_t cudaImportExternalMemory(cudaExternalMemory_t *extMem_out, const struct cudaExternalMemoryHandleDesc *memHandleDesc);
-// /**
-//  * @param devPtr SEND_RECV
-//  * @param extMem SEND_ONLY
-//  * @param bufferDesc SEND_RECV
-//  */
-// cudaError_t cudaExternalMemoryGetMappedBuffer(void **devPtr, cudaExternalMemory_t extMem, const struct cudaExternalMemoryBufferDesc *bufferDesc);
-// /**
-//  * @param mipmap SEND_RECV
-//  * @param extMem SEND_ONLY
-//  * @param mipmapDesc SEND_RECV
-//  */
-// cudaError_t cudaExternalMemoryGetMappedMipmappedArray(cudaMipmappedArray_t *mipmap, cudaExternalMemory_t extMem, const struct cudaExternalMemoryMipmappedArrayDesc *mipmapDesc);
-// /**
-//  * @param extMem SEND_ONLY
-//  */
-// cudaError_t cudaDestroyExternalMemory(cudaExternalMemory_t extMem);
-// /**
-//  * @param extSem_out SEND_RECV
-//  * @param semHandleDesc SEND_RECV
-//  */
-// cudaError_t cudaImportExternalSemaphore(cudaExternalSemaphore_t *extSem_out, const struct cudaExternalSemaphoreHandleDesc *semHandleDesc);
-// /**
-//  * @param extSemArray SEND_RECV
-//  * @param paramsArray SEND_RECV
-//  * @param numExtSems SEND_ONLY
-//  * @param stream SEND_ONLY
-//  */
-// cudaError_t cudaSignalExternalSemaphoresAsync_v2(const cudaExternalSemaphore_t *extSemArray, const struct cudaExternalSemaphoreSignalParams *paramsArray, unsigned int numExtSems, cudaStream_t stream);
-// /**
-//  * @param extSemArray SEND_RECV
-//  * @param paramsArray SEND_RECV
-//  * @param numExtSems SEND_ONLY
-//  * @param stream SEND_ONLY
-//  */
-// cudaError_t cudaWaitExternalSemaphoresAsync_v2(const cudaExternalSemaphore_t *extSemArray, const struct cudaExternalSemaphoreWaitParams *paramsArray, unsigned int numExtSems, cudaStream_t stream);
-// /**
-//  * @param extSem SEND_ONLY
-//  */
-// cudaError_t cudaDestroyExternalSemaphore(cudaExternalSemaphore_t extSem);
-// /**
-//  * @param func SEND_RECV
-//  * @param gridDim SEND_ONLY
-//  * @param blockDim SEND_ONLY
-//  * @param args SEND_RECV
-//  * @param sharedMem SEND_ONLY
-//  * @param stream SEND_ONLY
-//  */
-// cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim, void **args, size_t sharedMem, cudaStream_t stream);
-// /**
-//  * @param config SEND_RECV
-//  * @param func SEND_RECV
-//  * @param args SEND_RECV
-//  */
-// cudaError_t cudaLaunchKernelExC(const cudaLaunchConfig_t *config, const void *func, void **args);
-// /**
-//  * @param func SEND_RECV
-//  * @param gridDim SEND_ONLY
-//  * @param blockDim SEND_ONLY
-//  * @param args SEND_RECV
-//  * @param sharedMem SEND_ONLY
-//  * @param stream SEND_ONLY
-//  */
-// cudaError_t cudaLaunchCooperativeKernel(const void *func, dim3 gridDim, dim3 blockDim, void **args, size_t sharedMem, cudaStream_t stream);
-// /**
-//  * @param launchParamsList SEND_RECV
-//  * @param numDevices SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// cudaError_t cudaLaunchCooperativeKernelMultiDevice(struct cudaLaunchParams *launchParamsList, unsigned int numDevices, unsigned int flags);
-// /**
-//  * @param func SEND_RECV
-//  * @param cacheConfig SEND_ONLY
-//  */
-// cudaError_t cudaFuncSetCacheConfig(const void *func, enum cudaFuncCache cacheConfig);
-// /**
-//  * @param func SEND_RECV
-//  * @param config SEND_ONLY
-//  */
-// cudaError_t cudaFuncSetSharedMemConfig(const void *func, enum cudaSharedMemConfig config);
-// /**
-//  * @param attr SEND_RECV
-//  * @param func SEND_RECV
-//  */
-// cudaError_t cudaFuncGetAttributes(struct cudaFuncAttributes *attr, const void *func);
-// /**
-//  * @param func SEND_RECV
-//  * @param attr SEND_ONLY
-//  * @param value SEND_ONLY
-//  */
-// cudaError_t cudaFuncSetAttribute(const void *func, enum cudaFuncAttribute attr, int value);
-// /**
-//  * @param d SEND_RECV
-//  */
-// cudaError_t cudaSetDoubleForDevice(double *d);
-// /**
-//  * @param d SEND_RECV
-//  */
-// cudaError_t cudaSetDoubleForHost(double *d);
-// /**
-//  * @param stream SEND_ONLY
-//  * @param fn SEND_ONLY
-//  * @param userData SEND_RECV
-//  */
-// cudaError_t cudaLaunchHostFunc(cudaStream_t stream, cudaHostFn_t fn, void *userData);
-// /**
-//  * @param numBlocks SEND_RECV
-//  * @param func SEND_RECV
-//  * @param blockSize SEND_ONLY
-//  * @param dynamicSMemSize SEND_ONLY
-//  */
-// cudaError_t cudaOccupancyMaxActiveBlocksPerMultiprocessor(int *numBlocks, const void *func, int blockSize, size_t dynamicSMemSize);
-// /**
-//  * @param dynamicSmemSize SEND_RECV
-//  * @param func SEND_RECV
-//  * @param numBlocks SEND_ONLY
-//  * @param blockSize SEND_ONLY
-//  */
-// cudaError_t cudaOccupancyAvailableDynamicSMemPerBlock(size_t *dynamicSmemSize, const void *func, int numBlocks, int blockSize);
-// /**
-//  * @param numBlocks SEND_RECV
-//  * @param func SEND_RECV
-//  * @param blockSize SEND_ONLY
-//  * @param dynamicSMemSize SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// cudaError_t cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(int *numBlocks, const void *func, int blockSize, size_t dynamicSMemSize, unsigned int flags);
-// /**
-//  * @param clusterSize SEND_RECV
-//  * @param func SEND_RECV
-//  * @param launchConfig SEND_RECV
-//  */
-// cudaError_t cudaOccupancyMaxPotentialClusterSize(int *clusterSize, const void *func, const cudaLaunchConfig_t *launchConfig);
-// /**
-//  * @param numClusters SEND_RECV
-//  * @param func SEND_RECV
-//  * @param launchConfig SEND_RECV
-//  */
-// cudaError_t cudaOccupancyMaxActiveClusters(int *numClusters, const void *func, const cudaLaunchConfig_t *launchConfig);
-// /**
-//  * @param devPtr SEND_RECV
-//  * @param size SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// cudaError_t cudaMallocManaged(void **devPtr, size_t size, unsigned int flags);
-// /**
-//  * @param devPtr SEND_RECV
-//  * @param size SEND_ONLY
-//  */
-// cudaError_t cudaMalloc(void **devPtr, size_t size);
-// /**
-//  * @param ptr SEND_RECV
-//  * @param size SEND_ONLY
-//  */
-// cudaError_t cudaMallocHost(void **ptr, size_t size);
-// /**
-//  * @param devPtr SEND_RECV
-//  * @param pitch SEND_RECV
-//  * @param width SEND_ONLY
-//  * @param height SEND_ONLY
-//  */
-// cudaError_t cudaMallocPitch(void **devPtr, size_t *pitch, size_t width, size_t height);
-// /**
-//  * @param array SEND_RECV
-//  * @param desc SEND_RECV
-//  * @param width SEND_ONLY
-//  * @param height SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// cudaError_t cudaMallocArray(cudaArray_t *array, const struct cudaChannelFormatDesc *desc, size_t width, size_t height, unsigned int flags);
-// /**
-//  * @param devPtr SEND_RECV
-//  */
-// cudaError_t cudaFree(void *devPtr);
-// /**
-//  * @param ptr SEND_RECV
-//  */
-// cudaError_t cudaFreeHost(void *ptr);
-// /**
-//  * @param array SEND_ONLY
-//  */
-// cudaError_t cudaFreeArray(cudaArray_t array);
-// /**
-//  * @param mipmappedArray SEND_ONLY
-//  */
-// cudaError_t cudaFreeMipmappedArray(cudaMipmappedArray_t mipmappedArray);
-// /**
-//  * @param pHost SEND_RECV
-//  * @param size SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// cudaError_t cudaHostAlloc(void **pHost, size_t size, unsigned int flags);
-// /**
-//  * @param ptr SEND_RECV
-//  * @param size SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// cudaError_t cudaHostRegister(void *ptr, size_t size, unsigned int flags);
-// /**
-//  * @param ptr SEND_RECV
-//  */
-// cudaError_t cudaHostUnregister(void *ptr);
-// /**
-//  * @param pDevice SEND_RECV
-//  * @param pHost SEND_RECV
-//  * @param flags SEND_ONLY
-//  */
-// cudaError_t cudaHostGetDevicePointer(void **pDevice, void *pHost, unsigned int flags);
-// /**
-//  * @param pFlags SEND_RECV
-//  * @param pHost SEND_RECV
-//  */
-// cudaError_t cudaHostGetFlags(unsigned int *pFlags, void *pHost);
-// /**
-//  * @param pitchedDevPtr SEND_RECV
-//  * @param extent SEND_ONLY
-//  */
-// cudaError_t cudaMalloc3D(struct cudaPitchedPtr *pitchedDevPtr, struct cudaExtent extent);
-// /**
-//  * @param array SEND_RECV
-//  * @param desc SEND_RECV
-//  * @param extent SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// cudaError_t cudaMalloc3DArray(cudaArray_t *array, const struct cudaChannelFormatDesc *desc, struct cudaExtent extent, unsigned int flags);
-// /**
-//  * @param mipmappedArray SEND_RECV
-//  * @param desc SEND_RECV
-//  * @param extent SEND_ONLY
-//  * @param numLevels SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// cudaError_t cudaMallocMipmappedArray(cudaMipmappedArray_t *mipmappedArray, const struct cudaChannelFormatDesc *desc, struct cudaExtent extent, unsigned int numLevels, unsigned int flags);
-// /**
-//  * @param levelArray SEND_RECV
-//  * @param mipmappedArray SEND_ONLY
-//  * @param level SEND_ONLY
-//  */
-// cudaError_t cudaGetMipmappedArrayLevel(cudaArray_t *levelArray, cudaMipmappedArray_const_t mipmappedArray, unsigned int level);
-// /**
-//  * @param p SEND_RECV
-//  */
-// cudaError_t cudaMemcpy3D(const struct cudaMemcpy3DParms *p);
-// /**
-//  * @param p SEND_RECV
-//  */
-// cudaError_t cudaMemcpy3DPeer(const struct cudaMemcpy3DPeerParms *p);
-// /**
-//  * @param p SEND_RECV
-//  * @param stream SEND_ONLY
-//  */
-// cudaError_t cudaMemcpy3DAsync(const struct cudaMemcpy3DParms *p, cudaStream_t stream);
-// /**
-//  * @param p SEND_RECV
-//  * @param stream SEND_ONLY
-//  */
-// cudaError_t cudaMemcpy3DPeerAsync(const struct cudaMemcpy3DPeerParms *p, cudaStream_t stream);
-// /**
-//  * @param free SEND_RECV
-//  * @param total SEND_RECV
-//  */
-// cudaError_t cudaMemGetInfo(size_t *free, size_t *total);
-// /**
-//  * @param desc SEND_RECV
-//  * @param extent SEND_RECV
-//  * @param flags SEND_RECV
-//  * @param array SEND_ONLY
-//  */
-// cudaError_t cudaArrayGetInfo(struct cudaChannelFormatDesc *desc, struct cudaExtent *extent, unsigned int *flags, cudaArray_t array);
-// /**
-//  * @param pPlaneArray SEND_RECV
-//  * @param hArray SEND_ONLY
-//  * @param planeIdx SEND_ONLY
-//  */
-// cudaError_t cudaArrayGetPlane(cudaArray_t *pPlaneArray, cudaArray_t hArray, unsigned int planeIdx);
-// /**
-//  * @param memoryRequirements SEND_RECV
-//  * @param array SEND_ONLY
-//  * @param device SEND_ONLY
-//  */
-// cudaError_t cudaArrayGetMemoryRequirements(struct cudaArrayMemoryRequirements *memoryRequirements, cudaArray_t array, int device);
-// /**
-//  * @param memoryRequirements SEND_RECV
-//  * @param mipmap SEND_ONLY
-//  * @param device SEND_ONLY
-//  */
-// cudaError_t cudaMipmappedArrayGetMemoryRequirements(struct cudaArrayMemoryRequirements *memoryRequirements, cudaMipmappedArray_t mipmap, int device);
-// /**
-//  * @param sparseProperties SEND_RECV
-//  * @param array SEND_ONLY
-//  */
-// cudaError_t cudaArrayGetSparseProperties(struct cudaArraySparseProperties *sparseProperties, cudaArray_t array);
-// /**
-//  * @param sparseProperties SEND_RECV
-//  * @param mipmap SEND_ONLY
-//  */
-// cudaError_t cudaMipmappedArrayGetSparseProperties(struct cudaArraySparseProperties *sparseProperties, cudaMipmappedArray_t mipmap);
-// /**
-//  * @param dst SEND_RECV
-//  * @param src SEND_RECV
-//  * @param count SEND_ONLY
-//  * @param kind SEND_ONLY
-//  */
-// cudaError_t cudaMemcpy(void *dst, const void *src, size_t count, enum cudaMemcpyKind kind);
-// /**
-//  * @param dst SEND_RECV
-//  * @param dstDevice SEND_ONLY
-//  * @param src SEND_RECV
-//  * @param srcDevice SEND_ONLY
-//  * @param count SEND_ONLY
-//  */
-// cudaError_t cudaMemcpyPeer(void *dst, int dstDevice, const void *src, int srcDevice, size_t count);
-// /**
-//  * @param dst SEND_RECV
-//  * @param dpitch SEND_ONLY
-//  * @param src SEND_RECV
-//  * @param spitch SEND_ONLY
-//  * @param width SEND_ONLY
-//  * @param height SEND_ONLY
-//  * @param kind SEND_ONLY
-//  */
-// cudaError_t cudaMemcpy2D(void *dst, size_t dpitch, const void *src, size_t spitch, size_t width, size_t height, enum cudaMemcpyKind kind);
-// /**
-//  * @param dst SEND_ONLY
-//  * @param wOffset SEND_ONLY
-//  * @param hOffset SEND_ONLY
-//  * @param src SEND_RECV
-//  * @param spitch SEND_ONLY
-//  * @param width SEND_ONLY
-//  * @param height SEND_ONLY
-//  * @param kind SEND_ONLY
-//  */
-// cudaError_t cudaMemcpy2DToArray(cudaArray_t dst, size_t wOffset, size_t hOffset, const void *src, size_t spitch, size_t width, size_t height, enum cudaMemcpyKind kind);
-// /**
-//  * @param dst SEND_RECV
-//  * @param dpitch SEND_ONLY
-//  * @param src SEND_ONLY
-//  * @param wOffset SEND_ONLY
-//  * @param hOffset SEND_ONLY
-//  * @param width SEND_ONLY
-//  * @param height SEND_ONLY
-//  * @param kind SEND_ONLY
-//  */
-// cudaError_t cudaMemcpy2DFromArray(void *dst, size_t dpitch, cudaArray_const_t src, size_t wOffset, size_t hOffset, size_t width, size_t height, enum cudaMemcpyKind kind);
-// /**
-//  * @param dst SEND_ONLY
-//  * @param wOffsetDst SEND_ONLY
-//  * @param hOffsetDst SEND_ONLY
-//  * @param src SEND_ONLY
-//  * @param wOffsetSrc SEND_ONLY
-//  * @param hOffsetSrc SEND_ONLY
-//  * @param width SEND_ONLY
-//  * @param height SEND_ONLY
-//  * @param kind SEND_ONLY
-//  */
-// cudaError_t cudaMemcpy2DArrayToArray(cudaArray_t dst, size_t wOffsetDst, size_t hOffsetDst, cudaArray_const_t src, size_t wOffsetSrc, size_t hOffsetSrc, size_t width, size_t height, enum cudaMemcpyKind kind);
-// /**
-//  * @param symbol SEND_RECV
-//  * @param src SEND_RECV
-//  * @param count SEND_ONLY
-//  * @param offset SEND_ONLY
-//  * @param kind SEND_ONLY
-//  */
-// cudaError_t cudaMemcpyToSymbol(const void *symbol, const void *src, size_t count, size_t offset, enum cudaMemcpyKind kind);
-// /**
-//  * @param dst SEND_RECV
-//  * @param symbol SEND_RECV
-//  * @param count SEND_ONLY
-//  * @param offset SEND_ONLY
-//  * @param kind SEND_ONLY
-//  */
-// cudaError_t cudaMemcpyFromSymbol(void *dst, const void *symbol, size_t count, size_t offset, enum cudaMemcpyKind kind);
-// /**
-//  * @param dst SEND_RECV
-//  * @param src SEND_RECV
-//  * @param count SEND_ONLY
-//  * @param kind SEND_ONLY
-//  * @param stream SEND_ONLY
-//  */
-// cudaError_t cudaMemcpyAsync(void *dst, const void *src, size_t count, enum cudaMemcpyKind kind, cudaStream_t stream);
-// /**
-//  * @param dst SEND_RECV
-//  * @param dstDevice SEND_ONLY
-//  * @param src SEND_RECV
-//  * @param srcDevice SEND_ONLY
-//  * @param count SEND_ONLY
-//  * @param stream SEND_ONLY
-//  */
-// cudaError_t cudaMemcpyPeerAsync(void *dst, int dstDevice, const void *src, int srcDevice, size_t count, cudaStream_t stream);
-// /**
-//  * @param dst SEND_RECV
-//  * @param dpitch SEND_ONLY
-//  * @param src SEND_RECV
-//  * @param spitch SEND_ONLY
-//  * @param width SEND_ONLY
-//  * @param height SEND_ONLY
-//  * @param kind SEND_ONLY
-//  * @param stream SEND_ONLY
-//  */
-// cudaError_t cudaMemcpy2DAsync(void *dst, size_t dpitch, const void *src, size_t spitch, size_t width, size_t height, enum cudaMemcpyKind kind, cudaStream_t stream);
-// /**
-//  * @param dst SEND_ONLY
-//  * @param wOffset SEND_ONLY
-//  * @param hOffset SEND_ONLY
-//  * @param src SEND_RECV
-//  * @param spitch SEND_ONLY
-//  * @param width SEND_ONLY
-//  * @param height SEND_ONLY
-//  * @param kind SEND_ONLY
-//  * @param stream SEND_ONLY
-//  */
-// cudaError_t cudaMemcpy2DToArrayAsync(cudaArray_t dst, size_t wOffset, size_t hOffset, const void *src, size_t spitch, size_t width, size_t height, enum cudaMemcpyKind kind, cudaStream_t stream);
-// /**
-//  * @param dst SEND_RECV
-//  * @param dpitch SEND_ONLY
-//  * @param src SEND_ONLY
-//  * @param wOffset SEND_ONLY
-//  * @param hOffset SEND_ONLY
-//  * @param width SEND_ONLY
-//  * @param height SEND_ONLY
-//  * @param kind SEND_ONLY
-//  * @param stream SEND_ONLY
-//  */
-// cudaError_t cudaMemcpy2DFromArrayAsync(void *dst, size_t dpitch, cudaArray_const_t src, size_t wOffset, size_t hOffset, size_t width, size_t height, enum cudaMemcpyKind kind, cudaStream_t stream);
-// /**
-//  * @param symbol SEND_RECV
-//  * @param src SEND_RECV
-//  * @param count SEND_ONLY
-//  * @param offset SEND_ONLY
-//  * @param kind SEND_ONLY
-//  * @param stream SEND_ONLY
-//  */
-// cudaError_t cudaMemcpyToSymbolAsync(const void *symbol, const void *src, size_t count, size_t offset, enum cudaMemcpyKind kind, cudaStream_t stream);
-// /**
-//  * @param dst SEND_RECV
-//  * @param symbol SEND_RECV
-//  * @param count SEND_ONLY
-//  * @param offset SEND_ONLY
-//  * @param kind SEND_ONLY
-//  * @param stream SEND_ONLY
-//  */
-// cudaError_t cudaMemcpyFromSymbolAsync(void *dst, const void *symbol, size_t count, size_t offset, enum cudaMemcpyKind kind, cudaStream_t stream);
-// /**
-//  * @param devPtr SEND_RECV
-//  * @param value SEND_ONLY
-//  * @param count SEND_ONLY
-//  */
-// cudaError_t cudaMemset(void *devPtr, int value, size_t count);
-// /**
-//  * @param devPtr SEND_RECV
-//  * @param pitch SEND_ONLY
-//  * @param value SEND_ONLY
-//  * @param width SEND_ONLY
-//  * @param height SEND_ONLY
-//  */
-// cudaError_t cudaMemset2D(void *devPtr, size_t pitch, int value, size_t width, size_t height);
-// /**
-//  * @param pitchedDevPtr SEND_ONLY
-//  * @param value SEND_ONLY
-//  * @param extent SEND_ONLY
-//  */
-// cudaError_t cudaMemset3D(struct cudaPitchedPtr pitchedDevPtr, int value, struct cudaExtent extent);
-// /**
-//  * @param devPtr SEND_RECV
-//  * @param value SEND_ONLY
-//  * @param count SEND_ONLY
-//  * @param stream SEND_ONLY
-//  */
-// cudaError_t cudaMemsetAsync(void *devPtr, int value, size_t count, cudaStream_t stream);
-// /**
-//  * @param devPtr SEND_RECV
-//  * @param pitch SEND_ONLY
-//  * @param value SEND_ONLY
-//  * @param width SEND_ONLY
-//  * @param height SEND_ONLY
-//  * @param stream SEND_ONLY
-//  */
-// cudaError_t cudaMemset2DAsync(void *devPtr, size_t pitch, int value, size_t width, size_t height, cudaStream_t stream);
-// /**
-//  * @param pitchedDevPtr SEND_ONLY
-//  * @param value SEND_ONLY
-//  * @param extent SEND_ONLY
-//  * @param stream SEND_ONLY
-//  */
-// cudaError_t cudaMemset3DAsync(struct cudaPitchedPtr pitchedDevPtr, int value, struct cudaExtent extent, cudaStream_t stream);
-// /**
-//  * @param devPtr SEND_RECV
-//  * @param symbol SEND_RECV
-//  */
-// cudaError_t cudaGetSymbolAddress(void **devPtr, const void *symbol);
-// /**
-//  * @param size SEND_RECV
-//  * @param symbol SEND_RECV
-//  */
-// cudaError_t cudaGetSymbolSize(size_t *size, const void *symbol);
-// /**
-//  * @param devPtr SEND_RECV
-//  * @param count SEND_ONLY
-//  * @param dstDevice SEND_ONLY
-//  * @param stream SEND_ONLY
-//  */
-// cudaError_t cudaMemPrefetchAsync(const void *devPtr, size_t count, int dstDevice, cudaStream_t stream);
-// /**
-//  * @param devPtr SEND_RECV
-//  * @param count SEND_ONLY
-//  * @param advice SEND_ONLY
-//  * @param device SEND_ONLY
-//  */
-// cudaError_t cudaMemAdvise(const void *devPtr, size_t count, enum cudaMemoryAdvise advice, int device);
-// /**
-//  * @param data SEND_RECV
-//  * @param dataSize SEND_ONLY
-//  * @param attribute SEND_ONLY
-//  * @param devPtr SEND_RECV
-//  * @param count SEND_ONLY
-//  */
-// cudaError_t cudaMemRangeGetAttribute(void *data, size_t dataSize, enum cudaMemRangeAttribute attribute, const void *devPtr, size_t count);
-// /**
-//  * @param data SEND_RECV
-//  * @param dataSizes SEND_RECV
-//  * @param attributes SEND_RECV
-//  * @param numAttributes SEND_ONLY
-//  * @param devPtr SEND_RECV
-//  * @param count SEND_ONLY
-//  */
-// cudaError_t cudaMemRangeGetAttributes(void **data, size_t *dataSizes, enum cudaMemRangeAttribute *attributes, size_t numAttributes, const void *devPtr, size_t count);
-// /**
-//  * @param dst SEND_ONLY
-//  * @param wOffset SEND_ONLY
-//  * @param hOffset SEND_ONLY
-//  * @param src SEND_RECV
-//  * @param count SEND_ONLY
-//  * @param kind SEND_ONLY
-//  */
-// cudaError_t cudaMemcpyToArray(cudaArray_t dst, size_t wOffset, size_t hOffset, const void *src, size_t count, enum cudaMemcpyKind kind);
-// /**
-//  * @param dst SEND_RECV
-//  * @param src SEND_ONLY
-//  * @param wOffset SEND_ONLY
-//  * @param hOffset SEND_ONLY
-//  * @param count SEND_ONLY
-//  * @param kind SEND_ONLY
-//  */
-// cudaError_t cudaMemcpyFromArray(void *dst, cudaArray_const_t src, size_t wOffset, size_t hOffset, size_t count, enum cudaMemcpyKind kind);
-// /**
-//  * @param dst SEND_ONLY
-//  * @param wOffsetDst SEND_ONLY
-//  * @param hOffsetDst SEND_ONLY
-//  * @param src SEND_ONLY
-//  * @param wOffsetSrc SEND_ONLY
-//  * @param hOffsetSrc SEND_ONLY
-//  * @param count SEND_ONLY
-//  * @param kind SEND_ONLY
-//  */
-// cudaError_t cudaMemcpyArrayToArray(cudaArray_t dst, size_t wOffsetDst, size_t hOffsetDst, cudaArray_const_t src, size_t wOffsetSrc, size_t hOffsetSrc, size_t count, enum cudaMemcpyKind kind);
-// /**
-//  * @param dst SEND_ONLY
-//  * @param wOffset SEND_ONLY
-//  * @param hOffset SEND_ONLY
-//  * @param src SEND_RECV
-//  * @param count SEND_ONLY
-//  * @param kind SEND_ONLY
-//  * @param stream SEND_ONLY
-//  */
-// cudaError_t cudaMemcpyToArrayAsync(cudaArray_t dst, size_t wOffset, size_t hOffset, const void *src, size_t count, enum cudaMemcpyKind kind, cudaStream_t stream);
-// /**
-//  * @param dst SEND_RECV
-//  * @param src SEND_ONLY
-//  * @param wOffset SEND_ONLY
-//  * @param hOffset SEND_ONLY
-//  * @param count SEND_ONLY
-//  * @param kind SEND_ONLY
-//  * @param stream SEND_ONLY
-//  */
-// cudaError_t cudaMemcpyFromArrayAsync(void *dst, cudaArray_const_t src, size_t wOffset, size_t hOffset, size_t count, enum cudaMemcpyKind kind, cudaStream_t stream);
-// /**
-//  * @param devPtr SEND_RECV
-//  * @param size SEND_ONLY
-//  * @param hStream SEND_ONLY
-//  */
-// cudaError_t cudaMallocAsync(void **devPtr, size_t size, cudaStream_t hStream);
-// /**
-//  * @param devPtr SEND_RECV
-//  * @param hStream SEND_ONLY
-//  */
-// cudaError_t cudaFreeAsync(void *devPtr, cudaStream_t hStream);
-// /**
-//  * @param memPool SEND_ONLY
-//  * @param minBytesToKeep SEND_ONLY
-//  */
-// cudaError_t cudaMemPoolTrimTo(cudaMemPool_t memPool, size_t minBytesToKeep);
-// /**
-//  * @param memPool SEND_ONLY
-//  * @param attr SEND_ONLY
-//  * @param value SEND_RECV
-//  */
-// cudaError_t cudaMemPoolSetAttribute(cudaMemPool_t memPool, enum cudaMemPoolAttr attr, void *value);
-// /**
-//  * @param memPool SEND_ONLY
-//  * @param attr SEND_ONLY
-//  * @param value SEND_RECV
-//  */
-// cudaError_t cudaMemPoolGetAttribute(cudaMemPool_t memPool, enum cudaMemPoolAttr attr, void *value);
-// /**
-//  * @param memPool SEND_ONLY
-//  * @param descList SEND_RECV
-//  * @param count SEND_ONLY
-//  */
-// cudaError_t cudaMemPoolSetAccess(cudaMemPool_t memPool, const struct cudaMemAccessDesc *descList, size_t count);
-// /**
-//  * @param flags SEND_RECV
-//  * @param memPool SEND_ONLY
-//  * @param location SEND_RECV
-//  */
-// cudaError_t cudaMemPoolGetAccess(enum cudaMemAccessFlags *flags, cudaMemPool_t memPool, struct cudaMemLocation *location);
-// /**
-//  * @param memPool SEND_RECV
-//  * @param poolProps SEND_RECV
-//  */
-// cudaError_t cudaMemPoolCreate(cudaMemPool_t *memPool, const struct cudaMemPoolProps *poolProps);
-// /**
-//  * @param memPool SEND_ONLY
-//  */
-// cudaError_t cudaMemPoolDestroy(cudaMemPool_t memPool);
-// /**
-//  * @param ptr SEND_RECV
-//  * @param size SEND_ONLY
-//  * @param memPool SEND_ONLY
-//  * @param stream SEND_ONLY
-//  */
-// cudaError_t cudaMallocFromPoolAsync(void **ptr, size_t size, cudaMemPool_t memPool, cudaStream_t stream);
-// /**
-//  * @param shareableHandle SEND_RECV
-//  * @param memPool SEND_ONLY
-//  * @param handleType SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// cudaError_t cudaMemPoolExportToShareableHandle(void *shareableHandle, cudaMemPool_t memPool, enum cudaMemAllocationHandleType handleType, unsigned int flags);
-// /**
-//  * @param memPool SEND_RECV
-//  * @param shareableHandle SEND_RECV
-//  * @param handleType SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// cudaError_t cudaMemPoolImportFromShareableHandle(cudaMemPool_t *memPool, void *shareableHandle, enum cudaMemAllocationHandleType handleType, unsigned int flags);
-// /**
-//  * @param exportData SEND_RECV
-//  * @param ptr SEND_RECV
-//  */
-// cudaError_t cudaMemPoolExportPointer(struct cudaMemPoolPtrExportData *exportData, void *ptr);
-// /**
-//  * @param ptr SEND_RECV
-//  * @param memPool SEND_ONLY
-//  * @param exportData SEND_RECV
-//  */
-// cudaError_t cudaMemPoolImportPointer(void **ptr, cudaMemPool_t memPool, struct cudaMemPoolPtrExportData *exportData);
-// /**
-//  * @param attributes SEND_RECV
-//  * @param ptr SEND_RECV
-//  */
-// cudaError_t cudaPointerGetAttributes(struct cudaPointerAttributes *attributes, const void *ptr);
-// /**
-//  * @param canAccessPeer SEND_RECV
-//  * @param device SEND_ONLY
-//  * @param peerDevice SEND_ONLY
-//  */
-// cudaError_t cudaDeviceCanAccessPeer(int *canAccessPeer, int device, int peerDevice);
-// /**
-//  * @param peerDevice SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// cudaError_t cudaDeviceEnablePeerAccess(int peerDevice, unsigned int flags);
-// /**
-//  * @param peerDevice SEND_ONLY
-//  */
-// cudaError_t cudaDeviceDisablePeerAccess(int peerDevice);
-// /**
-//  * @param resource SEND_ONLY
-//  */
-// cudaError_t cudaGraphicsUnregisterResource(cudaGraphicsResource_t resource);
-// /**
-//  * @param resource SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// cudaError_t cudaGraphicsResourceSetMapFlags(cudaGraphicsResource_t resource, unsigned int flags);
-// /**
-//  * @param count SEND_ONLY
-//  * @param resources SEND_RECV
-//  * @param stream SEND_ONLY
-//  */
-// cudaError_t cudaGraphicsMapResources(int count, cudaGraphicsResource_t *resources, cudaStream_t stream);
-// /**
-//  * @param count SEND_ONLY
-//  * @param resources SEND_RECV
-//  * @param stream SEND_ONLY
-//  */
-// cudaError_t cudaGraphicsUnmapResources(int count, cudaGraphicsResource_t *resources, cudaStream_t stream);
-// /**
-//  * @param devPtr SEND_RECV
-//  * @param size SEND_RECV
-//  * @param resource SEND_ONLY
-//  */
-// cudaError_t cudaGraphicsResourceGetMappedPointer(void **devPtr, size_t *size, cudaGraphicsResource_t resource);
-// /**
-//  * @param array SEND_RECV
-//  * @param resource SEND_ONLY
-//  * @param arrayIndex SEND_ONLY
-//  * @param mipLevel SEND_ONLY
-//  */
-// cudaError_t cudaGraphicsSubResourceGetMappedArray(cudaArray_t *array, cudaGraphicsResource_t resource, unsigned int arrayIndex, unsigned int mipLevel);
-// /**
-//  * @param mipmappedArray SEND_RECV
-//  * @param resource SEND_ONLY
-//  */
-// cudaError_t cudaGraphicsResourceGetMappedMipmappedArray(cudaMipmappedArray_t *mipmappedArray, cudaGraphicsResource_t resource);
-// /**
-//  * @param desc SEND_RECV
-//  * @param array SEND_ONLY
-//  */
-// cudaError_t cudaGetChannelDesc(struct cudaChannelFormatDesc *desc, cudaArray_const_t array);
-// /**
-//  * @param x SEND_ONLY
-//  * @param y SEND_ONLY
-//  * @param z SEND_ONLY
-//  * @param w SEND_ONLY
-//  * @param f SEND_ONLY
-//  */
-// // struct cudaChannelFormatDesc cudaCreateChannelDesc(int x, int y, int z, int w, enum cudaChannelFormatKind f);
-// /**
-//  * @param pTexObject SEND_RECV
-//  * @param pResDesc SEND_RECV
-//  * @param pTexDesc SEND_RECV
-//  * @param pResViewDesc SEND_RECV
-//  */
-// cudaError_t cudaCreateTextureObject(cudaTextureObject_t *pTexObject, const struct cudaResourceDesc *pResDesc, const struct cudaTextureDesc *pTexDesc, const struct cudaResourceViewDesc *pResViewDesc);
-// /**
-//  * @param texObject SEND_ONLY
-//  */
-// cudaError_t cudaDestroyTextureObject(cudaTextureObject_t texObject);
-// /**
-//  * @param pResDesc SEND_RECV
-//  * @param texObject SEND_ONLY
-//  */
-// cudaError_t cudaGetTextureObjectResourceDesc(struct cudaResourceDesc *pResDesc, cudaTextureObject_t texObject);
-// /**
-//  * @param pTexDesc SEND_RECV
-//  * @param texObject SEND_ONLY
-//  */
-// cudaError_t cudaGetTextureObjectTextureDesc(struct cudaTextureDesc *pTexDesc, cudaTextureObject_t texObject);
-// /**
-//  * @param pResViewDesc SEND_RECV
-//  * @param texObject SEND_ONLY
-//  */
-// cudaError_t cudaGetTextureObjectResourceViewDesc(struct cudaResourceViewDesc *pResViewDesc, cudaTextureObject_t texObject);
-// /**
-//  * @param pSurfObject SEND_RECV
-//  * @param pResDesc SEND_RECV
-//  */
-// cudaError_t cudaCreateSurfaceObject(cudaSurfaceObject_t *pSurfObject, const struct cudaResourceDesc *pResDesc);
-// /**
-//  * @param surfObject SEND_ONLY
-//  */
-// cudaError_t cudaDestroySurfaceObject(cudaSurfaceObject_t surfObject);
-// /**
-//  * @param pResDesc SEND_RECV
-//  * @param surfObject SEND_ONLY
-//  */
-// cudaError_t cudaGetSurfaceObjectResourceDesc(struct cudaResourceDesc *pResDesc, cudaSurfaceObject_t surfObject);
-// /**
-//  * @param driverVersion SEND_RECV
-//  */
-// cudaError_t cudaDriverGetVersion(int *driverVersion);
-// /**
-//  * @param runtimeVersion SEND_RECV
-//  */
-// cudaError_t cudaRuntimeGetVersion(int *runtimeVersion);
-// /**
-//  * @param pGraph SEND_RECV
-//  * @param flags SEND_ONLY
-//  */
-// cudaError_t cudaGraphCreate(cudaGraph_t *pGraph, unsigned int flags);
-// /**
-//  * @param pGraphNode SEND_RECV
-//  * @param graph SEND_ONLY
-//  * @param pDependencies SEND_RECV
-//  * @param numDependencies SEND_ONLY
-//  * @param pNodeParams SEND_RECV
-//  */
-// cudaError_t cudaGraphAddKernelNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies, const struct cudaKernelNodeParams *pNodeParams);
-// /**
-//  * @param node SEND_ONLY
-//  * @param pNodeParams SEND_RECV
-//  */
-// cudaError_t cudaGraphKernelNodeGetParams(cudaGraphNode_t node, struct cudaKernelNodeParams *pNodeParams);
-// /**
-//  * @param node SEND_ONLY
-//  * @param pNodeParams SEND_RECV
-//  */
-// cudaError_t cudaGraphKernelNodeSetParams(cudaGraphNode_t node, const struct cudaKernelNodeParams *pNodeParams);
-// /**
-//  * @param hSrc SEND_ONLY
-//  * @param hDst SEND_ONLY
-//  */
-// cudaError_t cudaGraphKernelNodeCopyAttributes(cudaGraphNode_t hSrc, cudaGraphNode_t hDst);
-// /**
-//  * @param hNode SEND_ONLY
-//  * @param attr SEND_ONLY
-//  * @param value_out SEND_RECV
-//  */
-// cudaError_t cudaGraphKernelNodeGetAttribute(cudaGraphNode_t hNode, cudaLaunchAttributeID attr, cudaLaunchAttributeValue *value_out);
-// /**
-//  * @param hNode SEND_ONLY
-//  * @param attr SEND_ONLY
-//  * @param value SEND_RECV
-//  */
-// cudaError_t cudaGraphKernelNodeSetAttribute(cudaGraphNode_t hNode, cudaLaunchAttributeID attr, const cudaLaunchAttributeValue *value);
-// /**
-//  * @param pGraphNode SEND_RECV
-//  * @param graph SEND_ONLY
-//  * @param pDependencies SEND_RECV
-//  * @param numDependencies SEND_ONLY
-//  * @param pCopyParams SEND_RECV
-//  */
-// cudaError_t cudaGraphAddMemcpyNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies, const struct cudaMemcpy3DParms *pCopyParams);
-// /**
-//  * @param pGraphNode SEND_RECV
-//  * @param graph SEND_ONLY
-//  * @param pDependencies SEND_RECV
-//  * @param numDependencies SEND_ONLY
-//  * @param symbol SEND_RECV
-//  * @param src SEND_RECV
-//  * @param count SEND_ONLY
-//  * @param offset SEND_ONLY
-//  * @param kind SEND_ONLY
-//  */
-// cudaError_t cudaGraphAddMemcpyNodeToSymbol(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies, const void *symbol, const void *src, size_t count, size_t offset, enum cudaMemcpyKind kind);
-// /**
-//  * @param pGraphNode SEND_RECV
-//  * @param graph SEND_ONLY
-//  * @param pDependencies SEND_RECV
-//  * @param numDependencies SEND_ONLY
-//  * @param dst SEND_RECV
-//  * @param symbol SEND_RECV
-//  * @param count SEND_ONLY
-//  * @param offset SEND_ONLY
-//  * @param kind SEND_ONLY
-//  */
-// cudaError_t cudaGraphAddMemcpyNodeFromSymbol(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies, void *dst, const void *symbol, size_t count, size_t offset, enum cudaMemcpyKind kind);
-// /**
-//  * @param pGraphNode SEND_RECV
-//  * @param graph SEND_ONLY
-//  * @param pDependencies SEND_RECV
-//  * @param numDependencies SEND_ONLY
-//  * @param dst SEND_RECV
-//  * @param src SEND_RECV
-//  * @param count SEND_ONLY
-//  * @param kind SEND_ONLY
-//  */
-// cudaError_t cudaGraphAddMemcpyNode1D(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies, void *dst, const void *src, size_t count, enum cudaMemcpyKind kind);
-// /**
-//  * @param node SEND_ONLY
-//  * @param pNodeParams SEND_RECV
-//  */
-// cudaError_t cudaGraphMemcpyNodeGetParams(cudaGraphNode_t node, struct cudaMemcpy3DParms *pNodeParams);
-// /**
-//  * @param node SEND_ONLY
-//  * @param pNodeParams SEND_RECV
-//  */
-// cudaError_t cudaGraphMemcpyNodeSetParams(cudaGraphNode_t node, const struct cudaMemcpy3DParms *pNodeParams);
-// /**
-//  * @param node SEND_ONLY
-//  * @param symbol SEND_RECV
-//  * @param src SEND_RECV
-//  * @param count SEND_ONLY
-//  * @param offset SEND_ONLY
-//  * @param kind SEND_ONLY
-//  */
-// cudaError_t cudaGraphMemcpyNodeSetParamsToSymbol(cudaGraphNode_t node, const void *symbol, const void *src, size_t count, size_t offset, enum cudaMemcpyKind kind);
-// /**
-//  * @param node SEND_ONLY
-//  * @param dst SEND_RECV
-//  * @param symbol SEND_RECV
-//  * @param count SEND_ONLY
-//  * @param offset SEND_ONLY
-//  * @param kind SEND_ONLY
-//  */
-// cudaError_t cudaGraphMemcpyNodeSetParamsFromSymbol(cudaGraphNode_t node, void *dst, const void *symbol, size_t count, size_t offset, enum cudaMemcpyKind kind);
-// /**
-//  * @param node SEND_ONLY
-//  * @param dst SEND_RECV
-//  * @param src SEND_RECV
-//  * @param count SEND_ONLY
-//  * @param kind SEND_ONLY
-//  */
-// cudaError_t cudaGraphMemcpyNodeSetParams1D(cudaGraphNode_t node, void *dst, const void *src, size_t count, enum cudaMemcpyKind kind);
-// /**
-//  * @param pGraphNode SEND_RECV
-//  * @param graph SEND_ONLY
-//  * @param pDependencies SEND_RECV
-//  * @param numDependencies SEND_ONLY
-//  * @param pMemsetParams SEND_RECV
-//  */
-// cudaError_t cudaGraphAddMemsetNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies, const struct cudaMemsetParams *pMemsetParams);
-// /**
-//  * @param node SEND_ONLY
-//  * @param pNodeParams SEND_RECV
-//  */
-// cudaError_t cudaGraphMemsetNodeGetParams(cudaGraphNode_t node, struct cudaMemsetParams *pNodeParams);
-// /**
-//  * @param node SEND_ONLY
-//  * @param pNodeParams SEND_RECV
-//  */
-// cudaError_t cudaGraphMemsetNodeSetParams(cudaGraphNode_t node, const struct cudaMemsetParams *pNodeParams);
-// /**
-//  * @param pGraphNode SEND_RECV
-//  * @param graph SEND_ONLY
-//  * @param pDependencies SEND_RECV
-//  * @param numDependencies SEND_ONLY
-//  * @param pNodeParams SEND_RECV
-//  */
-// cudaError_t cudaGraphAddHostNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies, const struct cudaHostNodeParams *pNodeParams);
-// /**
-//  * @param node SEND_ONLY
-//  * @param pNodeParams SEND_RECV
-//  */
-// cudaError_t cudaGraphHostNodeGetParams(cudaGraphNode_t node, struct cudaHostNodeParams *pNodeParams);
-// /**
-//  * @param node SEND_ONLY
-//  * @param pNodeParams SEND_RECV
-//  */
-// cudaError_t cudaGraphHostNodeSetParams(cudaGraphNode_t node, const struct cudaHostNodeParams *pNodeParams);
-// /**
-//  * @param pGraphNode SEND_RECV
-//  * @param graph SEND_ONLY
-//  * @param pDependencies SEND_RECV
-//  * @param numDependencies SEND_ONLY
-//  * @param childGraph SEND_ONLY
-//  */
-// cudaError_t cudaGraphAddChildGraphNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies, cudaGraph_t childGraph);
-// /**
-//  * @param node SEND_ONLY
-//  * @param pGraph SEND_RECV
-//  */
-// cudaError_t cudaGraphChildGraphNodeGetGraph(cudaGraphNode_t node, cudaGraph_t *pGraph);
-// /**
-//  * @param pGraphNode SEND_RECV
-//  * @param graph SEND_ONLY
-//  * @param pDependencies SEND_RECV
-//  * @param numDependencies SEND_ONLY
-//  */
-// cudaError_t cudaGraphAddEmptyNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies);
-// /**
-//  * @param pGraphNode SEND_RECV
-//  * @param graph SEND_ONLY
-//  * @param pDependencies SEND_RECV
-//  * @param numDependencies SEND_ONLY
-//  * @param event SEND_ONLY
-//  */
-// cudaError_t cudaGraphAddEventRecordNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies, cudaEvent_t event);
-// /**
-//  * @param node SEND_ONLY
-//  * @param event_out SEND_RECV
-//  */
-// cudaError_t cudaGraphEventRecordNodeGetEvent(cudaGraphNode_t node, cudaEvent_t *event_out);
-// /**
-//  * @param node SEND_ONLY
-//  * @param event SEND_ONLY
-//  */
-// cudaError_t cudaGraphEventRecordNodeSetEvent(cudaGraphNode_t node, cudaEvent_t event);
-// /**
-//  * @param pGraphNode SEND_RECV
-//  * @param graph SEND_ONLY
-//  * @param pDependencies SEND_RECV
-//  * @param numDependencies SEND_ONLY
-//  * @param event SEND_ONLY
-//  */
-// cudaError_t cudaGraphAddEventWaitNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies, cudaEvent_t event);
-// /**
-//  * @param node SEND_ONLY
-//  * @param event_out SEND_RECV
-//  */
-// cudaError_t cudaGraphEventWaitNodeGetEvent(cudaGraphNode_t node, cudaEvent_t *event_out);
-// /**
-//  * @param node SEND_ONLY
-//  * @param event SEND_ONLY
-//  */
-// cudaError_t cudaGraphEventWaitNodeSetEvent(cudaGraphNode_t node, cudaEvent_t event);
-// /**
-//  * @param pGraphNode SEND_RECV
-//  * @param graph SEND_ONLY
-//  * @param pDependencies SEND_RECV
-//  * @param numDependencies SEND_ONLY
-//  * @param nodeParams SEND_RECV
-//  */
-// cudaError_t cudaGraphAddExternalSemaphoresSignalNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies, const struct cudaExternalSemaphoreSignalNodeParams *nodeParams);
-// /**
-//  * @param hNode SEND_ONLY
-//  * @param params_out SEND_RECV
-//  */
-// cudaError_t cudaGraphExternalSemaphoresSignalNodeGetParams(cudaGraphNode_t hNode, struct cudaExternalSemaphoreSignalNodeParams *params_out);
-// /**
-//  * @param hNode SEND_ONLY
-//  * @param nodeParams SEND_RECV
-//  */
-// cudaError_t cudaGraphExternalSemaphoresSignalNodeSetParams(cudaGraphNode_t hNode, const struct cudaExternalSemaphoreSignalNodeParams *nodeParams);
-// /**
-//  * @param pGraphNode SEND_RECV
-//  * @param graph SEND_ONLY
-//  * @param pDependencies SEND_RECV
-//  * @param numDependencies SEND_ONLY
-//  * @param nodeParams SEND_RECV
-//  */
-// cudaError_t cudaGraphAddExternalSemaphoresWaitNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies, const struct cudaExternalSemaphoreWaitNodeParams *nodeParams);
-// /**
-//  * @param hNode SEND_ONLY
-//  * @param params_out SEND_RECV
-//  */
-// cudaError_t cudaGraphExternalSemaphoresWaitNodeGetParams(cudaGraphNode_t hNode, struct cudaExternalSemaphoreWaitNodeParams *params_out);
-// /**
-//  * @param hNode SEND_ONLY
-//  * @param nodeParams SEND_RECV
-//  */
-// cudaError_t cudaGraphExternalSemaphoresWaitNodeSetParams(cudaGraphNode_t hNode, const struct cudaExternalSemaphoreWaitNodeParams *nodeParams);
-// /**
-//  * @param pGraphNode SEND_RECV
-//  * @param graph SEND_ONLY
-//  * @param pDependencies SEND_RECV
-//  * @param numDependencies SEND_ONLY
-//  * @param nodeParams SEND_RECV
-//  */
-// cudaError_t cudaGraphAddMemAllocNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies, struct cudaMemAllocNodeParams *nodeParams);
-// /**
-//  * @param node SEND_ONLY
-//  * @param params_out SEND_RECV
-//  */
-// cudaError_t cudaGraphMemAllocNodeGetParams(cudaGraphNode_t node, struct cudaMemAllocNodeParams *params_out);
-// /**
-//  * @param pGraphNode SEND_RECV
-//  * @param graph SEND_ONLY
-//  * @param pDependencies SEND_RECV
-//  * @param numDependencies SEND_ONLY
-//  * @param dptr SEND_RECV
-//  */
-// cudaError_t cudaGraphAddMemFreeNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies, void *dptr);
-// /**
-//  * @param node SEND_ONLY
-//  * @param dptr_out SEND_RECV
-//  */
-// cudaError_t cudaGraphMemFreeNodeGetParams(cudaGraphNode_t node, void *dptr_out);
-// /**
-//  * @param device SEND_ONLY
-//  */
-// cudaError_t cudaDeviceGraphMemTrim(int device);
-// /**
-//  * @param device SEND_ONLY
-//  * @param attr SEND_ONLY
-//  * @param value SEND_RECV
-//  */
-// cudaError_t cudaDeviceGetGraphMemAttribute(int device, enum cudaGraphMemAttributeType attr, void *value);
-// /**
-//  * @param device SEND_ONLY
-//  * @param attr SEND_ONLY
-//  * @param value SEND_RECV
-//  */
-// cudaError_t cudaDeviceSetGraphMemAttribute(int device, enum cudaGraphMemAttributeType attr, void *value);
-// /**
-//  * @param pGraphClone SEND_RECV
-//  * @param originalGraph SEND_ONLY
-//  */
-// cudaError_t cudaGraphClone(cudaGraph_t *pGraphClone, cudaGraph_t originalGraph);
-// /**
-//  * @param pNode SEND_RECV
-//  * @param originalNode SEND_ONLY
-//  * @param clonedGraph SEND_ONLY
-//  */
-// cudaError_t cudaGraphNodeFindInClone(cudaGraphNode_t *pNode, cudaGraphNode_t originalNode, cudaGraph_t clonedGraph);
-// /**
-//  * @param node SEND_ONLY
-//  * @param pType SEND_RECV
-//  */
-// cudaError_t cudaGraphNodeGetType(cudaGraphNode_t node, enum cudaGraphNodeType *pType);
-// /**
-//  * @param graph SEND_ONLY
-//  * @param nodes SEND_RECV
-//  * @param numNodes SEND_RECV
-//  */
-// cudaError_t cudaGraphGetNodes(cudaGraph_t graph, cudaGraphNode_t *nodes, size_t *numNodes);
-// /**
-//  * @param graph SEND_ONLY
-//  * @param pRootNodes SEND_RECV
-//  * @param pNumRootNodes SEND_RECV
-//  */
-// cudaError_t cudaGraphGetRootNodes(cudaGraph_t graph, cudaGraphNode_t *pRootNodes, size_t *pNumRootNodes);
-// /**
-//  * @param graph SEND_ONLY
-//  * @param from SEND_RECV
-//  * @param to SEND_RECV
-//  * @param numEdges SEND_RECV
-//  */
-// cudaError_t cudaGraphGetEdges(cudaGraph_t graph, cudaGraphNode_t *from, cudaGraphNode_t *to, size_t *numEdges);
-// /**
-//  * @param node SEND_ONLY
-//  * @param pDependencies SEND_RECV
-//  * @param pNumDependencies SEND_RECV
-//  */
-// cudaError_t cudaGraphNodeGetDependencies(cudaGraphNode_t node, cudaGraphNode_t *pDependencies, size_t *pNumDependencies);
-// /**
-//  * @param node SEND_ONLY
-//  * @param pDependentNodes SEND_RECV
-//  * @param pNumDependentNodes SEND_RECV
-//  */
-// cudaError_t cudaGraphNodeGetDependentNodes(cudaGraphNode_t node, cudaGraphNode_t *pDependentNodes, size_t *pNumDependentNodes);
-// /**
-//  * @param graph SEND_ONLY
-//  * @param from SEND_RECV
-//  * @param to SEND_RECV
-//  * @param numDependencies SEND_ONLY
-//  */
-// cudaError_t cudaGraphAddDependencies(cudaGraph_t graph, const cudaGraphNode_t *from, const cudaGraphNode_t *to, size_t numDependencies);
-// /**
-//  * @param graph SEND_ONLY
-//  * @param from SEND_RECV
-//  * @param to SEND_RECV
-//  * @param numDependencies SEND_ONLY
-//  */
-// cudaError_t cudaGraphRemoveDependencies(cudaGraph_t graph, const cudaGraphNode_t *from, const cudaGraphNode_t *to, size_t numDependencies);
-// /**
-//  * @param node SEND_ONLY
-//  */
-// cudaError_t cudaGraphDestroyNode(cudaGraphNode_t node);
-// /**
-//  * @param pGraphExec SEND_RECV
-//  * @param graph SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// cudaError_t cudaGraphInstantiate(cudaGraphExec_t *pGraphExec, cudaGraph_t graph, unsigned long long flags);
-// /**
-//  * @param pGraphExec SEND_RECV
-//  * @param graph SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// cudaError_t cudaGraphInstantiateWithFlags(cudaGraphExec_t *pGraphExec, cudaGraph_t graph, unsigned long long flags);
-// /**
-//  * @param pGraphExec SEND_RECV
-//  * @param graph SEND_ONLY
-//  * @param instantiateParams SEND_RECV
-//  */
-// cudaError_t cudaGraphInstantiateWithParams(cudaGraphExec_t *pGraphExec, cudaGraph_t graph, cudaGraphInstantiateParams *instantiateParams);
-// /**
-//  * @param graphExec SEND_ONLY
-//  * @param flags SEND_RECV
-//  */
-// cudaError_t cudaGraphExecGetFlags(cudaGraphExec_t graphExec, unsigned long long *flags);
-// /**
-//  * @param hGraphExec SEND_ONLY
-//  * @param node SEND_ONLY
-//  * @param pNodeParams SEND_RECV
-//  */
-// cudaError_t cudaGraphExecKernelNodeSetParams(cudaGraphExec_t hGraphExec, cudaGraphNode_t node, const struct cudaKernelNodeParams *pNodeParams);
-// /**
-//  * @param hGraphExec SEND_ONLY
-//  * @param node SEND_ONLY
-//  * @param pNodeParams SEND_RECV
-//  */
-// cudaError_t cudaGraphExecMemcpyNodeSetParams(cudaGraphExec_t hGraphExec, cudaGraphNode_t node, const struct cudaMemcpy3DParms *pNodeParams);
-// /**
-//  * @param hGraphExec SEND_ONLY
-//  * @param node SEND_ONLY
-//  * @param symbol SEND_RECV
-//  * @param src SEND_RECV
-//  * @param count SEND_ONLY
-//  * @param offset SEND_ONLY
-//  * @param kind SEND_ONLY
-//  */
-// cudaError_t cudaGraphExecMemcpyNodeSetParamsToSymbol(cudaGraphExec_t hGraphExec, cudaGraphNode_t node, const void *symbol, const void *src, size_t count, size_t offset, enum cudaMemcpyKind kind);
-// /**
-//  * @param hGraphExec SEND_ONLY
-//  * @param node SEND_ONLY
-//  * @param dst SEND_RECV
-//  * @param symbol SEND_RECV
-//  * @param count SEND_ONLY
-//  * @param offset SEND_ONLY
-//  * @param kind SEND_ONLY
-//  */
-// cudaError_t cudaGraphExecMemcpyNodeSetParamsFromSymbol(cudaGraphExec_t hGraphExec, cudaGraphNode_t node, void *dst, const void *symbol, size_t count, size_t offset, enum cudaMemcpyKind kind);
-// /**
-//  * @param hGraphExec SEND_ONLY
-//  * @param node SEND_ONLY
-//  * @param dst SEND_RECV
-//  * @param src SEND_RECV
-//  * @param count SEND_ONLY
-//  * @param kind SEND_ONLY
-//  */
-// cudaError_t cudaGraphExecMemcpyNodeSetParams1D(cudaGraphExec_t hGraphExec, cudaGraphNode_t node, void *dst, const void *src, size_t count, enum cudaMemcpyKind kind);
-// /**
-//  * @param hGraphExec SEND_ONLY
-//  * @param node SEND_ONLY
-//  * @param pNodeParams SEND_RECV
-//  */
-// cudaError_t cudaGraphExecMemsetNodeSetParams(cudaGraphExec_t hGraphExec, cudaGraphNode_t node, const struct cudaMemsetParams *pNodeParams);
-// /**
-//  * @param hGraphExec SEND_ONLY
-//  * @param node SEND_ONLY
-//  * @param pNodeParams SEND_RECV
-//  */
-// cudaError_t cudaGraphExecHostNodeSetParams(cudaGraphExec_t hGraphExec, cudaGraphNode_t node, const struct cudaHostNodeParams *pNodeParams);
-// /**
-//  * @param hGraphExec SEND_ONLY
-//  * @param node SEND_ONLY
-//  * @param childGraph SEND_ONLY
-//  */
-// cudaError_t cudaGraphExecChildGraphNodeSetParams(cudaGraphExec_t hGraphExec, cudaGraphNode_t node, cudaGraph_t childGraph);
-// /**
-//  * @param hGraphExec SEND_ONLY
-//  * @param hNode SEND_ONLY
-//  * @param event SEND_ONLY
-//  */
-// cudaError_t cudaGraphExecEventRecordNodeSetEvent(cudaGraphExec_t hGraphExec, cudaGraphNode_t hNode, cudaEvent_t event);
-// /**
-//  * @param hGraphExec SEND_ONLY
-//  * @param hNode SEND_ONLY
-//  * @param event SEND_ONLY
-//  */
-// cudaError_t cudaGraphExecEventWaitNodeSetEvent(cudaGraphExec_t hGraphExec, cudaGraphNode_t hNode, cudaEvent_t event);
-// /**
-//  * @param hGraphExec SEND_ONLY
-//  * @param hNode SEND_ONLY
-//  * @param nodeParams SEND_RECV
-//  */
-// cudaError_t cudaGraphExecExternalSemaphoresSignalNodeSetParams(cudaGraphExec_t hGraphExec, cudaGraphNode_t hNode, const struct cudaExternalSemaphoreSignalNodeParams *nodeParams);
-// /**
-//  * @param hGraphExec SEND_ONLY
-//  * @param hNode SEND_ONLY
-//  * @param nodeParams SEND_RECV
-//  */
-// cudaError_t cudaGraphExecExternalSemaphoresWaitNodeSetParams(cudaGraphExec_t hGraphExec, cudaGraphNode_t hNode, const struct cudaExternalSemaphoreWaitNodeParams *nodeParams);
-// /**
-//  * @param hGraphExec SEND_ONLY
-//  * @param hNode SEND_ONLY
-//  * @param isEnabled SEND_ONLY
-//  */
-// cudaError_t cudaGraphNodeSetEnabled(cudaGraphExec_t hGraphExec, cudaGraphNode_t hNode, unsigned int isEnabled);
-// /**
-//  * @param hGraphExec SEND_ONLY
-//  * @param hNode SEND_ONLY
-//  * @param isEnabled SEND_RECV
-//  */
-// cudaError_t cudaGraphNodeGetEnabled(cudaGraphExec_t hGraphExec, cudaGraphNode_t hNode, unsigned int *isEnabled);
-// /**
-//  * @param hGraphExec SEND_ONLY
-//  * @param hGraph SEND_ONLY
-//  * @param resultInfo SEND_RECV
-//  */
-// cudaError_t cudaGraphExecUpdate(cudaGraphExec_t hGraphExec, cudaGraph_t hGraph, cudaGraphExecUpdateResultInfo *resultInfo);
-// /**
-//  * @param graphExec SEND_ONLY
-//  * @param stream SEND_ONLY
-//  */
-// cudaError_t cudaGraphUpload(cudaGraphExec_t graphExec, cudaStream_t stream);
-// /**
-//  * @param graphExec SEND_ONLY
-//  * @param stream SEND_ONLY
-//  */
-// cudaError_t cudaGraphLaunch(cudaGraphExec_t graphExec, cudaStream_t stream);
-// /**
-//  * @param graphExec SEND_ONLY
-//  */
-// cudaError_t cudaGraphExecDestroy(cudaGraphExec_t graphExec);
-// /**
-//  * @param graph SEND_ONLY
-//  */
-// cudaError_t cudaGraphDestroy(cudaGraph_t graph);
-// /**
-//  * @param graph SEND_ONLY
-//  * @param path SEND_RECV
-//  * @param flags SEND_ONLY
-//  */
-// cudaError_t cudaGraphDebugDotPrint(cudaGraph_t graph, const char *path, unsigned int flags);
-// /**
-//  * @param object_out SEND_RECV
-//  * @param ptr SEND_RECV
-//  * @param destroy SEND_ONLY
-//  * @param initialRefcount SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// cudaError_t cudaUserObjectCreate(cudaUserObject_t *object_out, void *ptr, cudaHostFn_t destroy, unsigned int initialRefcount, unsigned int flags);
-// /**
-//  * @param object SEND_ONLY
-//  * @param count SEND_ONLY
-//  */
-// cudaError_t cudaUserObjectRetain(cudaUserObject_t object, unsigned int count);
-// /**
-//  * @param object SEND_ONLY
-//  * @param count SEND_ONLY
-//  */
-// cudaError_t cudaUserObjectRelease(cudaUserObject_t object, unsigned int count);
-// /**
-//  * @param graph SEND_ONLY
-//  * @param object SEND_ONLY
-//  * @param count SEND_ONLY
-//  * @param flags SEND_ONLY
-//  */
-// cudaError_t cudaGraphRetainUserObject(cudaGraph_t graph, cudaUserObject_t object, unsigned int count, unsigned int flags);
-// /**
-//  * @param graph SEND_ONLY
-//  * @param object SEND_ONLY
-//  * @param count SEND_ONLY
-//  */
-// cudaError_t cudaGraphReleaseUserObject(cudaGraph_t graph, cudaUserObject_t object, unsigned int count);
-// /**
-//  * @param symbol SEND_RECV
-//  * @param funcPtr SEND_RECV
-//  * @param flags SEND_ONLY
-//  * @param driverStatus SEND_RECV
-//  */
-// cudaError_t cudaGetDriverEntryPoint(const char *symbol, void **funcPtr, unsigned long long flags, enum cudaDriverEntryPointQueryResult *driverStatus);
-// /**
-//  * @param ppExportTable SEND_RECV
-//  * @param pExportTableId SEND_RECV
-//  */
-// cudaError_t cudaGetExportTable(const void **ppExportTable, const cudaUUID_t *pExportTableId);
-// /**
-//  * @param functionPtr SEND_RECV
-//  * @param symbolPtr SEND_RECV
-//  */
-// cudaError_t cudaGetFuncBySymbol(cudaFunction_t *functionPtr, const void *symbolPtr);
+/**
+ * @param devPtr SEND_RECV
+ * @param extMem SEND_ONLY
+ * @param bufferDesc SEND_RECV
+ */
+cudaError_t cudaExternalMemoryGetMappedBuffer(void **devPtr, cudaExternalMemory_t extMem, const struct cudaExternalMemoryBufferDesc *bufferDesc);
+/**
+ * @param mipmap SEND_RECV
+ * @param extMem SEND_ONLY
+ * @param mipmapDesc SEND_RECV
+ */
+cudaError_t cudaExternalMemoryGetMappedMipmappedArray(cudaMipmappedArray_t *mipmap, cudaExternalMemory_t extMem, const struct cudaExternalMemoryMipmappedArrayDesc *mipmapDesc);
+/**
+ * @param extMem SEND_ONLY
+ */
+cudaError_t cudaDestroyExternalMemory(cudaExternalMemory_t extMem);
+/**
+ * @param extSem_out SEND_RECV
+ * @param semHandleDesc SEND_RECV
+ */
+cudaError_t cudaImportExternalSemaphore(cudaExternalSemaphore_t *extSem_out, const struct cudaExternalSemaphoreHandleDesc *semHandleDesc);
+/**
+ * @param extSemArray SEND_RECV
+ * @param paramsArray SEND_RECV
+ * @param numExtSems SEND_ONLY
+ * @param stream SEND_ONLY
+ */
+cudaError_t cudaSignalExternalSemaphoresAsync_v2(const cudaExternalSemaphore_t *extSemArray, const struct cudaExternalSemaphoreSignalParams *paramsArray, unsigned int numExtSems, cudaStream_t stream);
+/**
+ * @param extSemArray SEND_RECV
+ * @param paramsArray SEND_RECV
+ * @param numExtSems SEND_ONLY
+ * @param stream SEND_ONLY
+ */
+cudaError_t cudaWaitExternalSemaphoresAsync_v2(const cudaExternalSemaphore_t *extSemArray, const struct cudaExternalSemaphoreWaitParams *paramsArray, unsigned int numExtSems, cudaStream_t stream);
+/**
+ * @param extSem SEND_ONLY
+ */
+cudaError_t cudaDestroyExternalSemaphore(cudaExternalSemaphore_t extSem);
+/**
+ * @param func SEND_RECV
+ * @param gridDim SEND_ONLY
+ * @param blockDim SEND_ONLY
+ * @param args SEND_RECV
+ * @param sharedMem SEND_ONLY
+ * @param stream SEND_ONLY
+ */
+cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim, void **args, size_t sharedMem, cudaStream_t stream);
+/**
+ * @param config SEND_RECV
+ * @param func SEND_RECV
+ * @param args SEND_RECV
+ */
+cudaError_t cudaLaunchKernelExC(const cudaLaunchConfig_t *config, const void *func, void **args);
+/**
+ * @param func SEND_RECV
+ * @param gridDim SEND_ONLY
+ * @param blockDim SEND_ONLY
+ * @param args SEND_RECV
+ * @param sharedMem SEND_ONLY
+ * @param stream SEND_ONLY
+ */
+cudaError_t cudaLaunchCooperativeKernel(const void *func, dim3 gridDim, dim3 blockDim, void **args, size_t sharedMem, cudaStream_t stream);
+/**
+ * @param launchParamsList SEND_RECV
+ * @param numDevices SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+cudaError_t cudaLaunchCooperativeKernelMultiDevice(struct cudaLaunchParams *launchParamsList, unsigned int numDevices, unsigned int flags);
+/**
+ * @param func SEND_RECV
+ * @param cacheConfig SEND_ONLY
+ */
+cudaError_t cudaFuncSetCacheConfig(const void *func, enum cudaFuncCache cacheConfig);
+/**
+ * @param func SEND_RECV
+ * @param config SEND_ONLY
+ */
+cudaError_t cudaFuncSetSharedMemConfig(const void *func, enum cudaSharedMemConfig config);
+/**
+ * @param attr SEND_RECV
+ * @param func SEND_RECV
+ */
+cudaError_t cudaFuncGetAttributes(struct cudaFuncAttributes *attr, const void *func);
+/**
+ * @param func SEND_RECV
+ * @param attr SEND_ONLY
+ * @param value SEND_ONLY
+ */
+cudaError_t cudaFuncSetAttribute(const void *func, enum cudaFuncAttribute attr, int value);
+/**
+ * @param d SEND_RECV
+ */
+cudaError_t cudaSetDoubleForDevice(double *d);
+/**
+ * @param d SEND_RECV
+ */
+cudaError_t cudaSetDoubleForHost(double *d);
+/**
+ * @param stream SEND_ONLY
+ * @param fn SEND_ONLY
+ * @param userData SEND_RECV
+ */
+cudaError_t cudaLaunchHostFunc(cudaStream_t stream, cudaHostFn_t fn, void *userData);
+/**
+ * @param numBlocks SEND_RECV
+ * @param func SEND_RECV
+ * @param blockSize SEND_ONLY
+ * @param dynamicSMemSize SEND_ONLY
+ */
+cudaError_t cudaOccupancyMaxActiveBlocksPerMultiprocessor(int *numBlocks, const void *func, int blockSize, size_t dynamicSMemSize);
+/**
+ * @param dynamicSmemSize SEND_RECV
+ * @param func SEND_RECV
+ * @param numBlocks SEND_ONLY
+ * @param blockSize SEND_ONLY
+ */
+cudaError_t cudaOccupancyAvailableDynamicSMemPerBlock(size_t *dynamicSmemSize, const void *func, int numBlocks, int blockSize);
+/**
+ * @param numBlocks SEND_RECV
+ * @param func SEND_RECV
+ * @param blockSize SEND_ONLY
+ * @param dynamicSMemSize SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+cudaError_t cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(int *numBlocks, const void *func, int blockSize, size_t dynamicSMemSize, unsigned int flags);
+/**
+ * @param clusterSize SEND_RECV
+ * @param func SEND_RECV
+ * @param launchConfig SEND_RECV
+ */
+cudaError_t cudaOccupancyMaxPotentialClusterSize(int *clusterSize, const void *func, const cudaLaunchConfig_t *launchConfig);
+/**
+ * @param numClusters SEND_RECV
+ * @param func SEND_RECV
+ * @param launchConfig SEND_RECV
+ */
+cudaError_t cudaOccupancyMaxActiveClusters(int *numClusters, const void *func, const cudaLaunchConfig_t *launchConfig);
+/**
+ * @param devPtr SEND_RECV
+ * @param size SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+cudaError_t cudaMallocManaged(void **devPtr, size_t size, unsigned int flags);
+/**
+ * @param devPtr SEND_RECV
+ * @param size SEND_ONLY
+ */
+cudaError_t cudaMalloc(void **devPtr, size_t size);
+/**
+ * @param ptr SEND_RECV
+ * @param size SEND_ONLY
+ */
+cudaError_t cudaMallocHost(void **ptr, size_t size);
+/**
+ * @param devPtr SEND_RECV
+ * @param pitch SEND_RECV
+ * @param width SEND_ONLY
+ * @param height SEND_ONLY
+ */
+cudaError_t cudaMallocPitch(void **devPtr, size_t *pitch, size_t width, size_t height);
+/**
+ * @param array SEND_RECV
+ * @param desc SEND_RECV
+ * @param width SEND_ONLY
+ * @param height SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+cudaError_t cudaMallocArray(cudaArray_t *array, const struct cudaChannelFormatDesc *desc, size_t width, size_t height, unsigned int flags);
+/**
+ * @param devPtr SEND_RECV
+ */
+cudaError_t cudaFree(void *devPtr);
+/**
+ * @param ptr SEND_RECV
+ */
+cudaError_t cudaFreeHost(void *ptr);
+/**
+ * @param array SEND_ONLY
+ */
+cudaError_t cudaFreeArray(cudaArray_t array);
+/**
+ * @param mipmappedArray SEND_ONLY
+ */
+cudaError_t cudaFreeMipmappedArray(cudaMipmappedArray_t mipmappedArray);
+/**
+ * @param pHost SEND_RECV
+ * @param size SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+cudaError_t cudaHostAlloc(void **pHost, size_t size, unsigned int flags);
+/**
+ * @param ptr SEND_RECV
+ * @param size SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+cudaError_t cudaHostRegister(void *ptr, size_t size, unsigned int flags);
+/**
+ * @param ptr SEND_RECV
+ */
+cudaError_t cudaHostUnregister(void *ptr);
+/**
+ * @param pDevice SEND_RECV
+ * @param pHost SEND_RECV
+ * @param flags SEND_ONLY
+ */
+cudaError_t cudaHostGetDevicePointer(void **pDevice, void *pHost, unsigned int flags);
+/**
+ * @param pFlags SEND_RECV
+ * @param pHost SEND_RECV
+ */
+cudaError_t cudaHostGetFlags(unsigned int *pFlags, void *pHost);
+/**
+ * @param pitchedDevPtr SEND_RECV
+ * @param extent SEND_ONLY
+ */
+cudaError_t cudaMalloc3D(struct cudaPitchedPtr *pitchedDevPtr, struct cudaExtent extent);
+/**
+ * @param array SEND_RECV
+ * @param desc SEND_RECV
+ * @param extent SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+cudaError_t cudaMalloc3DArray(cudaArray_t *array, const struct cudaChannelFormatDesc *desc, struct cudaExtent extent, unsigned int flags);
+/**
+ * @param mipmappedArray SEND_RECV
+ * @param desc SEND_RECV
+ * @param extent SEND_ONLY
+ * @param numLevels SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+cudaError_t cudaMallocMipmappedArray(cudaMipmappedArray_t *mipmappedArray, const struct cudaChannelFormatDesc *desc, struct cudaExtent extent, unsigned int numLevels, unsigned int flags);
+/**
+ * @param levelArray SEND_RECV
+ * @param mipmappedArray SEND_ONLY
+ * @param level SEND_ONLY
+ */
+cudaError_t cudaGetMipmappedArrayLevel(cudaArray_t *levelArray, cudaMipmappedArray_const_t mipmappedArray, unsigned int level);
+/**
+ * @param p SEND_RECV
+ */
+cudaError_t cudaMemcpy3D(const struct cudaMemcpy3DParms *p);
+/**
+ * @param p SEND_RECV
+ */
+cudaError_t cudaMemcpy3DPeer(const struct cudaMemcpy3DPeerParms *p);
+/**
+ * @param p SEND_RECV
+ * @param stream SEND_ONLY
+ */
+cudaError_t cudaMemcpy3DAsync(const struct cudaMemcpy3DParms *p, cudaStream_t stream);
+/**
+ * @param p SEND_RECV
+ * @param stream SEND_ONLY
+ */
+cudaError_t cudaMemcpy3DPeerAsync(const struct cudaMemcpy3DPeerParms *p, cudaStream_t stream);
+/**
+ * @param free SEND_RECV
+ * @param total SEND_RECV
+ */
+cudaError_t cudaMemGetInfo(size_t *free, size_t *total);
+/**
+ * @param desc SEND_RECV
+ * @param extent SEND_RECV
+ * @param flags SEND_RECV
+ * @param array SEND_ONLY
+ */
+cudaError_t cudaArrayGetInfo(struct cudaChannelFormatDesc *desc, struct cudaExtent *extent, unsigned int *flags, cudaArray_t array);
+/**
+ * @param pPlaneArray SEND_RECV
+ * @param hArray SEND_ONLY
+ * @param planeIdx SEND_ONLY
+ */
+cudaError_t cudaArrayGetPlane(cudaArray_t *pPlaneArray, cudaArray_t hArray, unsigned int planeIdx);
+/**
+ * @param memoryRequirements SEND_RECV
+ * @param array SEND_ONLY
+ * @param device SEND_ONLY
+ */
+cudaError_t cudaArrayGetMemoryRequirements(struct cudaArrayMemoryRequirements *memoryRequirements, cudaArray_t array, int device);
+/**
+ * @param memoryRequirements SEND_RECV
+ * @param mipmap SEND_ONLY
+ * @param device SEND_ONLY
+ */
+cudaError_t cudaMipmappedArrayGetMemoryRequirements(struct cudaArrayMemoryRequirements *memoryRequirements, cudaMipmappedArray_t mipmap, int device);
+/**
+ * @param sparseProperties SEND_RECV
+ * @param array SEND_ONLY
+ */
+cudaError_t cudaArrayGetSparseProperties(struct cudaArraySparseProperties *sparseProperties, cudaArray_t array);
+/**
+ * @param sparseProperties SEND_RECV
+ * @param mipmap SEND_ONLY
+ */
+cudaError_t cudaMipmappedArrayGetSparseProperties(struct cudaArraySparseProperties *sparseProperties, cudaMipmappedArray_t mipmap);
+/**
+ * @param dst SEND_RECV
+ * @param src SEND_RECV
+ * @param count SEND_ONLY
+ * @param kind SEND_ONLY
+ */
+cudaError_t cudaMemcpy(void *dst, const void *src, size_t count, enum cudaMemcpyKind kind);
+/**
+ * @param dst SEND_RECV
+ * @param dstDevice SEND_ONLY
+ * @param src SEND_RECV
+ * @param srcDevice SEND_ONLY
+ * @param count SEND_ONLY
+ */
+cudaError_t cudaMemcpyPeer(void *dst, int dstDevice, const void *src, int srcDevice, size_t count);
+/**
+ * @param dst SEND_RECV
+ * @param dpitch SEND_ONLY
+ * @param src SEND_RECV
+ * @param spitch SEND_ONLY
+ * @param width SEND_ONLY
+ * @param height SEND_ONLY
+ * @param kind SEND_ONLY
+ */
+cudaError_t cudaMemcpy2D(void *dst, size_t dpitch, const void *src, size_t spitch, size_t width, size_t height, enum cudaMemcpyKind kind);
+/**
+ * @param dst SEND_ONLY
+ * @param wOffset SEND_ONLY
+ * @param hOffset SEND_ONLY
+ * @param src SEND_RECV
+ * @param spitch SEND_ONLY
+ * @param width SEND_ONLY
+ * @param height SEND_ONLY
+ * @param kind SEND_ONLY
+ */
+cudaError_t cudaMemcpy2DToArray(cudaArray_t dst, size_t wOffset, size_t hOffset, const void *src, size_t spitch, size_t width, size_t height, enum cudaMemcpyKind kind);
+/**
+ * @param dst SEND_RECV
+ * @param dpitch SEND_ONLY
+ * @param src SEND_ONLY
+ * @param wOffset SEND_ONLY
+ * @param hOffset SEND_ONLY
+ * @param width SEND_ONLY
+ * @param height SEND_ONLY
+ * @param kind SEND_ONLY
+ */
+cudaError_t cudaMemcpy2DFromArray(void *dst, size_t dpitch, cudaArray_const_t src, size_t wOffset, size_t hOffset, size_t width, size_t height, enum cudaMemcpyKind kind);
+/**
+ * @param dst SEND_ONLY
+ * @param wOffsetDst SEND_ONLY
+ * @param hOffsetDst SEND_ONLY
+ * @param src SEND_ONLY
+ * @param wOffsetSrc SEND_ONLY
+ * @param hOffsetSrc SEND_ONLY
+ * @param width SEND_ONLY
+ * @param height SEND_ONLY
+ * @param kind SEND_ONLY
+ */
+cudaError_t cudaMemcpy2DArrayToArray(cudaArray_t dst, size_t wOffsetDst, size_t hOffsetDst, cudaArray_const_t src, size_t wOffsetSrc, size_t hOffsetSrc, size_t width, size_t height, enum cudaMemcpyKind kind);
+/**
+ * @param symbol SEND_RECV
+ * @param src SEND_RECV
+ * @param count SEND_ONLY
+ * @param offset SEND_ONLY
+ * @param kind SEND_ONLY
+ */
+cudaError_t cudaMemcpyToSymbol(const void *symbol, const void *src, size_t count, size_t offset, enum cudaMemcpyKind kind);
+/**
+ * @param dst SEND_RECV
+ * @param symbol SEND_RECV
+ * @param count SEND_ONLY
+ * @param offset SEND_ONLY
+ * @param kind SEND_ONLY
+ */
+cudaError_t cudaMemcpyFromSymbol(void *dst, const void *symbol, size_t count, size_t offset, enum cudaMemcpyKind kind);
+/**
+ * @param dst SEND_RECV
+ * @param src SEND_RECV
+ * @param count SEND_ONLY
+ * @param kind SEND_ONLY
+ * @param stream SEND_ONLY
+ */
+cudaError_t cudaMemcpyAsync(void *dst, const void *src, size_t count, enum cudaMemcpyKind kind, cudaStream_t stream);
+/**
+ * @param dst SEND_RECV
+ * @param dstDevice SEND_ONLY
+ * @param src SEND_RECV
+ * @param srcDevice SEND_ONLY
+ * @param count SEND_ONLY
+ * @param stream SEND_ONLY
+ */
+cudaError_t cudaMemcpyPeerAsync(void *dst, int dstDevice, const void *src, int srcDevice, size_t count, cudaStream_t stream);
+/**
+ * @param dst SEND_RECV
+ * @param dpitch SEND_ONLY
+ * @param src SEND_RECV
+ * @param spitch SEND_ONLY
+ * @param width SEND_ONLY
+ * @param height SEND_ONLY
+ * @param kind SEND_ONLY
+ * @param stream SEND_ONLY
+ */
+cudaError_t cudaMemcpy2DAsync(void *dst, size_t dpitch, const void *src, size_t spitch, size_t width, size_t height, enum cudaMemcpyKind kind, cudaStream_t stream);
+/**
+ * @param dst SEND_ONLY
+ * @param wOffset SEND_ONLY
+ * @param hOffset SEND_ONLY
+ * @param src SEND_RECV
+ * @param spitch SEND_ONLY
+ * @param width SEND_ONLY
+ * @param height SEND_ONLY
+ * @param kind SEND_ONLY
+ * @param stream SEND_ONLY
+ */
+cudaError_t cudaMemcpy2DToArrayAsync(cudaArray_t dst, size_t wOffset, size_t hOffset, const void *src, size_t spitch, size_t width, size_t height, enum cudaMemcpyKind kind, cudaStream_t stream);
+/**
+ * @param dst SEND_RECV
+ * @param dpitch SEND_ONLY
+ * @param src SEND_ONLY
+ * @param wOffset SEND_ONLY
+ * @param hOffset SEND_ONLY
+ * @param width SEND_ONLY
+ * @param height SEND_ONLY
+ * @param kind SEND_ONLY
+ * @param stream SEND_ONLY
+ */
+cudaError_t cudaMemcpy2DFromArrayAsync(void *dst, size_t dpitch, cudaArray_const_t src, size_t wOffset, size_t hOffset, size_t width, size_t height, enum cudaMemcpyKind kind, cudaStream_t stream);
+/**
+ * @param symbol SEND_RECV
+ * @param src SEND_RECV
+ * @param count SEND_ONLY
+ * @param offset SEND_ONLY
+ * @param kind SEND_ONLY
+ * @param stream SEND_ONLY
+ */
+cudaError_t cudaMemcpyToSymbolAsync(const void *symbol, const void *src, size_t count, size_t offset, enum cudaMemcpyKind kind, cudaStream_t stream);
+/**
+ * @param dst SEND_RECV
+ * @param symbol SEND_RECV
+ * @param count SEND_ONLY
+ * @param offset SEND_ONLY
+ * @param kind SEND_ONLY
+ * @param stream SEND_ONLY
+ */
+cudaError_t cudaMemcpyFromSymbolAsync(void *dst, const void *symbol, size_t count, size_t offset, enum cudaMemcpyKind kind, cudaStream_t stream);
+/**
+ * @param devPtr SEND_RECV
+ * @param value SEND_ONLY
+ * @param count SEND_ONLY
+ */
+cudaError_t cudaMemset(void *devPtr, int value, size_t count);
+/**
+ * @param devPtr SEND_RECV
+ * @param pitch SEND_ONLY
+ * @param value SEND_ONLY
+ * @param width SEND_ONLY
+ * @param height SEND_ONLY
+ */
+cudaError_t cudaMemset2D(void *devPtr, size_t pitch, int value, size_t width, size_t height);
+/**
+ * @param pitchedDevPtr SEND_ONLY
+ * @param value SEND_ONLY
+ * @param extent SEND_ONLY
+ */
+cudaError_t cudaMemset3D(struct cudaPitchedPtr pitchedDevPtr, int value, struct cudaExtent extent);
+/**
+ * @param devPtr SEND_RECV
+ * @param value SEND_ONLY
+ * @param count SEND_ONLY
+ * @param stream SEND_ONLY
+ */
+cudaError_t cudaMemsetAsync(void *devPtr, int value, size_t count, cudaStream_t stream);
+/**
+ * @param devPtr SEND_RECV
+ * @param pitch SEND_ONLY
+ * @param value SEND_ONLY
+ * @param width SEND_ONLY
+ * @param height SEND_ONLY
+ * @param stream SEND_ONLY
+ */
+cudaError_t cudaMemset2DAsync(void *devPtr, size_t pitch, int value, size_t width, size_t height, cudaStream_t stream);
+/**
+ * @param pitchedDevPtr SEND_ONLY
+ * @param value SEND_ONLY
+ * @param extent SEND_ONLY
+ * @param stream SEND_ONLY
+ */
+cudaError_t cudaMemset3DAsync(struct cudaPitchedPtr pitchedDevPtr, int value, struct cudaExtent extent, cudaStream_t stream);
+/**
+ * @param devPtr SEND_RECV
+ * @param symbol SEND_RECV
+ */
+cudaError_t cudaGetSymbolAddress(void **devPtr, const void *symbol);
+/**
+ * @param size SEND_RECV
+ * @param symbol SEND_RECV
+ */
+cudaError_t cudaGetSymbolSize(size_t *size, const void *symbol);
+/**
+ * @param devPtr SEND_RECV
+ * @param count SEND_ONLY
+ * @param dstDevice SEND_ONLY
+ * @param stream SEND_ONLY
+ */
+cudaError_t cudaMemPrefetchAsync(const void *devPtr, size_t count, int dstDevice, cudaStream_t stream);
+/**
+ * @param devPtr SEND_RECV
+ * @param count SEND_ONLY
+ * @param advice SEND_ONLY
+ * @param device SEND_ONLY
+ */
+cudaError_t cudaMemAdvise(const void *devPtr, size_t count, enum cudaMemoryAdvise advice, int device);
+/**
+ * @param data SEND_RECV
+ * @param dataSize SEND_ONLY
+ * @param attribute SEND_ONLY
+ * @param devPtr SEND_RECV
+ * @param count SEND_ONLY
+ */
+cudaError_t cudaMemRangeGetAttribute(void *data, size_t dataSize, enum cudaMemRangeAttribute attribute, const void *devPtr, size_t count);
+/**
+ * @param data SEND_RECV
+ * @param dataSizes SEND_RECV
+ * @param attributes SEND_RECV
+ * @param numAttributes SEND_ONLY
+ * @param devPtr SEND_RECV
+ * @param count SEND_ONLY
+ */
+cudaError_t cudaMemRangeGetAttributes(void **data, size_t *dataSizes, enum cudaMemRangeAttribute *attributes, size_t numAttributes, const void *devPtr, size_t count);
+/**
+ * @param dst SEND_ONLY
+ * @param wOffset SEND_ONLY
+ * @param hOffset SEND_ONLY
+ * @param src SEND_RECV
+ * @param count SEND_ONLY
+ * @param kind SEND_ONLY
+ */
+cudaError_t cudaMemcpyToArray(cudaArray_t dst, size_t wOffset, size_t hOffset, const void *src, size_t count, enum cudaMemcpyKind kind);
+/**
+ * @param dst SEND_RECV
+ * @param src SEND_ONLY
+ * @param wOffset SEND_ONLY
+ * @param hOffset SEND_ONLY
+ * @param count SEND_ONLY
+ * @param kind SEND_ONLY
+ */
+cudaError_t cudaMemcpyFromArray(void *dst, cudaArray_const_t src, size_t wOffset, size_t hOffset, size_t count, enum cudaMemcpyKind kind);
+/**
+ * @param dst SEND_ONLY
+ * @param wOffsetDst SEND_ONLY
+ * @param hOffsetDst SEND_ONLY
+ * @param src SEND_ONLY
+ * @param wOffsetSrc SEND_ONLY
+ * @param hOffsetSrc SEND_ONLY
+ * @param count SEND_ONLY
+ * @param kind SEND_ONLY
+ */
+cudaError_t cudaMemcpyArrayToArray(cudaArray_t dst, size_t wOffsetDst, size_t hOffsetDst, cudaArray_const_t src, size_t wOffsetSrc, size_t hOffsetSrc, size_t count, enum cudaMemcpyKind kind);
+/**
+ * @param dst SEND_ONLY
+ * @param wOffset SEND_ONLY
+ * @param hOffset SEND_ONLY
+ * @param src SEND_RECV
+ * @param count SEND_ONLY
+ * @param kind SEND_ONLY
+ * @param stream SEND_ONLY
+ */
+cudaError_t cudaMemcpyToArrayAsync(cudaArray_t dst, size_t wOffset, size_t hOffset, const void *src, size_t count, enum cudaMemcpyKind kind, cudaStream_t stream);
+/**
+ * @param dst SEND_RECV
+ * @param src SEND_ONLY
+ * @param wOffset SEND_ONLY
+ * @param hOffset SEND_ONLY
+ * @param count SEND_ONLY
+ * @param kind SEND_ONLY
+ * @param stream SEND_ONLY
+ */
+cudaError_t cudaMemcpyFromArrayAsync(void *dst, cudaArray_const_t src, size_t wOffset, size_t hOffset, size_t count, enum cudaMemcpyKind kind, cudaStream_t stream);
+/**
+ * @param devPtr SEND_RECV
+ * @param size SEND_ONLY
+ * @param hStream SEND_ONLY
+ */
+cudaError_t cudaMallocAsync(void **devPtr, size_t size, cudaStream_t hStream);
+/**
+ * @param devPtr SEND_RECV
+ * @param hStream SEND_ONLY
+ */
+cudaError_t cudaFreeAsync(void *devPtr, cudaStream_t hStream);
+/**
+ * @param memPool SEND_ONLY
+ * @param minBytesToKeep SEND_ONLY
+ */
+cudaError_t cudaMemPoolTrimTo(cudaMemPool_t memPool, size_t minBytesToKeep);
+/**
+ * @param memPool SEND_ONLY
+ * @param attr SEND_ONLY
+ * @param value SEND_RECV
+ */
+cudaError_t cudaMemPoolSetAttribute(cudaMemPool_t memPool, enum cudaMemPoolAttr attr, void *value);
+/**
+ * @param memPool SEND_ONLY
+ * @param attr SEND_ONLY
+ * @param value SEND_RECV
+ */
+cudaError_t cudaMemPoolGetAttribute(cudaMemPool_t memPool, enum cudaMemPoolAttr attr, void *value);
+/**
+ * @param memPool SEND_ONLY
+ * @param descList SEND_RECV
+ * @param count SEND_ONLY
+ */
+cudaError_t cudaMemPoolSetAccess(cudaMemPool_t memPool, const struct cudaMemAccessDesc *descList, size_t count);
+/**
+ * @param flags SEND_RECV
+ * @param memPool SEND_ONLY
+ * @param location SEND_RECV
+ */
+cudaError_t cudaMemPoolGetAccess(enum cudaMemAccessFlags *flags, cudaMemPool_t memPool, struct cudaMemLocation *location);
+/**
+ * @param memPool SEND_RECV
+ * @param poolProps SEND_RECV
+ */
+cudaError_t cudaMemPoolCreate(cudaMemPool_t *memPool, const struct cudaMemPoolProps *poolProps);
+/**
+ * @param memPool SEND_ONLY
+ */
+cudaError_t cudaMemPoolDestroy(cudaMemPool_t memPool);
+/**
+ * @param ptr SEND_RECV
+ * @param size SEND_ONLY
+ * @param memPool SEND_ONLY
+ * @param stream SEND_ONLY
+ */
+cudaError_t cudaMallocFromPoolAsync(void **ptr, size_t size, cudaMemPool_t memPool, cudaStream_t stream);
+/**
+ * @param shareableHandle SEND_RECV
+ * @param memPool SEND_ONLY
+ * @param handleType SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+cudaError_t cudaMemPoolExportToShareableHandle(void *shareableHandle, cudaMemPool_t memPool, enum cudaMemAllocationHandleType handleType, unsigned int flags);
+/**
+ * @param memPool SEND_RECV
+ * @param shareableHandle SEND_RECV
+ * @param handleType SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+cudaError_t cudaMemPoolImportFromShareableHandle(cudaMemPool_t *memPool, void *shareableHandle, enum cudaMemAllocationHandleType handleType, unsigned int flags);
+/**
+ * @param exportData SEND_RECV
+ * @param ptr SEND_RECV
+ */
+cudaError_t cudaMemPoolExportPointer(struct cudaMemPoolPtrExportData *exportData, void *ptr);
+/**
+ * @param ptr SEND_RECV
+ * @param memPool SEND_ONLY
+ * @param exportData SEND_RECV
+ */
+cudaError_t cudaMemPoolImportPointer(void **ptr, cudaMemPool_t memPool, struct cudaMemPoolPtrExportData *exportData);
+/**
+ * @param attributes SEND_RECV
+ * @param ptr SEND_RECV
+ */
+cudaError_t cudaPointerGetAttributes(struct cudaPointerAttributes *attributes, const void *ptr);
+/**
+ * @param canAccessPeer SEND_RECV
+ * @param device SEND_ONLY
+ * @param peerDevice SEND_ONLY
+ */
+cudaError_t cudaDeviceCanAccessPeer(int *canAccessPeer, int device, int peerDevice);
+/**
+ * @param peerDevice SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+cudaError_t cudaDeviceEnablePeerAccess(int peerDevice, unsigned int flags);
+/**
+ * @param peerDevice SEND_ONLY
+ */
+cudaError_t cudaDeviceDisablePeerAccess(int peerDevice);
+/**
+ * @param resource SEND_ONLY
+ */
+cudaError_t cudaGraphicsUnregisterResource(cudaGraphicsResource_t resource);
+/**
+ * @param resource SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+cudaError_t cudaGraphicsResourceSetMapFlags(cudaGraphicsResource_t resource, unsigned int flags);
+/**
+ * @param count SEND_ONLY
+ * @param resources SEND_RECV
+ * @param stream SEND_ONLY
+ */
+cudaError_t cudaGraphicsMapResources(int count, cudaGraphicsResource_t *resources, cudaStream_t stream);
+/**
+ * @param count SEND_ONLY
+ * @param resources SEND_RECV
+ * @param stream SEND_ONLY
+ */
+cudaError_t cudaGraphicsUnmapResources(int count, cudaGraphicsResource_t *resources, cudaStream_t stream);
+/**
+ * @param devPtr SEND_RECV
+ * @param size SEND_RECV
+ * @param resource SEND_ONLY
+ */
+cudaError_t cudaGraphicsResourceGetMappedPointer(void **devPtr, size_t *size, cudaGraphicsResource_t resource);
+/**
+ * @param array SEND_RECV
+ * @param resource SEND_ONLY
+ * @param arrayIndex SEND_ONLY
+ * @param mipLevel SEND_ONLY
+ */
+cudaError_t cudaGraphicsSubResourceGetMappedArray(cudaArray_t *array, cudaGraphicsResource_t resource, unsigned int arrayIndex, unsigned int mipLevel);
+/**
+ * @param mipmappedArray SEND_RECV
+ * @param resource SEND_ONLY
+ */
+cudaError_t cudaGraphicsResourceGetMappedMipmappedArray(cudaMipmappedArray_t *mipmappedArray, cudaGraphicsResource_t resource);
+/**
+ * @param desc SEND_RECV
+ * @param array SEND_ONLY
+ */
+cudaError_t cudaGetChannelDesc(struct cudaChannelFormatDesc *desc, cudaArray_const_t array);
+/**
+ * @param x SEND_ONLY
+ * @param y SEND_ONLY
+ * @param z SEND_ONLY
+ * @param w SEND_ONLY
+ * @param f SEND_ONLY
+ */
+// struct cudaChannelFormatDesc cudaCreateChannelDesc(int x, int y, int z, int w, enum cudaChannelFormatKind f);
+/**
+ * @param pTexObject SEND_RECV
+ * @param pResDesc SEND_RECV
+ * @param pTexDesc SEND_RECV
+ * @param pResViewDesc SEND_RECV
+ */
+cudaError_t cudaCreateTextureObject(cudaTextureObject_t *pTexObject, const struct cudaResourceDesc *pResDesc, const struct cudaTextureDesc *pTexDesc, const struct cudaResourceViewDesc *pResViewDesc);
+/**
+ * @param texObject SEND_ONLY
+ */
+cudaError_t cudaDestroyTextureObject(cudaTextureObject_t texObject);
+/**
+ * @param pResDesc SEND_RECV
+ * @param texObject SEND_ONLY
+ */
+cudaError_t cudaGetTextureObjectResourceDesc(struct cudaResourceDesc *pResDesc, cudaTextureObject_t texObject);
+/**
+ * @param pTexDesc SEND_RECV
+ * @param texObject SEND_ONLY
+ */
+cudaError_t cudaGetTextureObjectTextureDesc(struct cudaTextureDesc *pTexDesc, cudaTextureObject_t texObject);
+/**
+ * @param pResViewDesc SEND_RECV
+ * @param texObject SEND_ONLY
+ */
+cudaError_t cudaGetTextureObjectResourceViewDesc(struct cudaResourceViewDesc *pResViewDesc, cudaTextureObject_t texObject);
+/**
+ * @param pSurfObject SEND_RECV
+ * @param pResDesc SEND_RECV
+ */
+cudaError_t cudaCreateSurfaceObject(cudaSurfaceObject_t *pSurfObject, const struct cudaResourceDesc *pResDesc);
+/**
+ * @param surfObject SEND_ONLY
+ */
+cudaError_t cudaDestroySurfaceObject(cudaSurfaceObject_t surfObject);
+/**
+ * @param pResDesc SEND_RECV
+ * @param surfObject SEND_ONLY
+ */
+cudaError_t cudaGetSurfaceObjectResourceDesc(struct cudaResourceDesc *pResDesc, cudaSurfaceObject_t surfObject);
+/**
+ * @param driverVersion SEND_RECV
+ */
+cudaError_t cudaDriverGetVersion(int *driverVersion);
+/**
+ * @param runtimeVersion SEND_RECV
+ */
+cudaError_t cudaRuntimeGetVersion(int *runtimeVersion);
+/**
+ * @param pGraph SEND_RECV
+ * @param flags SEND_ONLY
+ */
+cudaError_t cudaGraphCreate(cudaGraph_t *pGraph, unsigned int flags);
+/**
+ * @param pGraphNode SEND_RECV
+ * @param graph SEND_ONLY
+ * @param pDependencies SEND_RECV
+ * @param numDependencies SEND_ONLY
+ * @param pNodeParams SEND_RECV
+ */
+cudaError_t cudaGraphAddKernelNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies, const struct cudaKernelNodeParams *pNodeParams);
+/**
+ * @param node SEND_ONLY
+ * @param pNodeParams SEND_RECV
+ */
+cudaError_t cudaGraphKernelNodeGetParams(cudaGraphNode_t node, struct cudaKernelNodeParams *pNodeParams);
+/**
+ * @param node SEND_ONLY
+ * @param pNodeParams SEND_RECV
+ */
+cudaError_t cudaGraphKernelNodeSetParams(cudaGraphNode_t node, const struct cudaKernelNodeParams *pNodeParams);
+/**
+ * @param hSrc SEND_ONLY
+ * @param hDst SEND_ONLY
+ */
+cudaError_t cudaGraphKernelNodeCopyAttributes(cudaGraphNode_t hSrc, cudaGraphNode_t hDst);
+/**
+ * @param hNode SEND_ONLY
+ * @param attr SEND_ONLY
+ * @param value_out SEND_RECV
+ */
+cudaError_t cudaGraphKernelNodeGetAttribute(cudaGraphNode_t hNode, cudaLaunchAttributeID attr, cudaLaunchAttributeValue *value_out);
+/**
+ * @param hNode SEND_ONLY
+ * @param attr SEND_ONLY
+ * @param value SEND_RECV
+ */
+cudaError_t cudaGraphKernelNodeSetAttribute(cudaGraphNode_t hNode, cudaLaunchAttributeID attr, const cudaLaunchAttributeValue *value);
+/**
+ * @param pGraphNode SEND_RECV
+ * @param graph SEND_ONLY
+ * @param pDependencies SEND_RECV
+ * @param numDependencies SEND_ONLY
+ * @param pCopyParams SEND_RECV
+ */
+cudaError_t cudaGraphAddMemcpyNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies, const struct cudaMemcpy3DParms *pCopyParams);
+/**
+ * @param pGraphNode SEND_RECV
+ * @param graph SEND_ONLY
+ * @param pDependencies SEND_RECV
+ * @param numDependencies SEND_ONLY
+ * @param symbol SEND_RECV
+ * @param src SEND_RECV
+ * @param count SEND_ONLY
+ * @param offset SEND_ONLY
+ * @param kind SEND_ONLY
+ */
+cudaError_t cudaGraphAddMemcpyNodeToSymbol(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies, const void *symbol, const void *src, size_t count, size_t offset, enum cudaMemcpyKind kind);
+/**
+ * @param pGraphNode SEND_RECV
+ * @param graph SEND_ONLY
+ * @param pDependencies SEND_RECV
+ * @param numDependencies SEND_ONLY
+ * @param dst SEND_RECV
+ * @param symbol SEND_RECV
+ * @param count SEND_ONLY
+ * @param offset SEND_ONLY
+ * @param kind SEND_ONLY
+ */
+cudaError_t cudaGraphAddMemcpyNodeFromSymbol(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies, void *dst, const void *symbol, size_t count, size_t offset, enum cudaMemcpyKind kind);
+/**
+ * @param pGraphNode SEND_RECV
+ * @param graph SEND_ONLY
+ * @param pDependencies SEND_RECV
+ * @param numDependencies SEND_ONLY
+ * @param dst SEND_RECV
+ * @param src SEND_RECV
+ * @param count SEND_ONLY
+ * @param kind SEND_ONLY
+ */
+cudaError_t cudaGraphAddMemcpyNode1D(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies, void *dst, const void *src, size_t count, enum cudaMemcpyKind kind);
+/**
+ * @param node SEND_ONLY
+ * @param pNodeParams SEND_RECV
+ */
+cudaError_t cudaGraphMemcpyNodeGetParams(cudaGraphNode_t node, struct cudaMemcpy3DParms *pNodeParams);
+/**
+ * @param node SEND_ONLY
+ * @param pNodeParams SEND_RECV
+ */
+cudaError_t cudaGraphMemcpyNodeSetParams(cudaGraphNode_t node, const struct cudaMemcpy3DParms *pNodeParams);
+/**
+ * @param node SEND_ONLY
+ * @param symbol SEND_RECV
+ * @param src SEND_RECV
+ * @param count SEND_ONLY
+ * @param offset SEND_ONLY
+ * @param kind SEND_ONLY
+ */
+cudaError_t cudaGraphMemcpyNodeSetParamsToSymbol(cudaGraphNode_t node, const void *symbol, const void *src, size_t count, size_t offset, enum cudaMemcpyKind kind);
+/**
+ * @param node SEND_ONLY
+ * @param dst SEND_RECV
+ * @param symbol SEND_RECV
+ * @param count SEND_ONLY
+ * @param offset SEND_ONLY
+ * @param kind SEND_ONLY
+ */
+cudaError_t cudaGraphMemcpyNodeSetParamsFromSymbol(cudaGraphNode_t node, void *dst, const void *symbol, size_t count, size_t offset, enum cudaMemcpyKind kind);
+/**
+ * @param node SEND_ONLY
+ * @param dst SEND_RECV
+ * @param src SEND_RECV
+ * @param count SEND_ONLY
+ * @param kind SEND_ONLY
+ */
+cudaError_t cudaGraphMemcpyNodeSetParams1D(cudaGraphNode_t node, void *dst, const void *src, size_t count, enum cudaMemcpyKind kind);
+/**
+ * @param pGraphNode SEND_RECV
+ * @param graph SEND_ONLY
+ * @param pDependencies SEND_RECV
+ * @param numDependencies SEND_ONLY
+ * @param pMemsetParams SEND_RECV
+ */
+cudaError_t cudaGraphAddMemsetNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies, const struct cudaMemsetParams *pMemsetParams);
+/**
+ * @param node SEND_ONLY
+ * @param pNodeParams SEND_RECV
+ */
+cudaError_t cudaGraphMemsetNodeGetParams(cudaGraphNode_t node, struct cudaMemsetParams *pNodeParams);
+/**
+ * @param node SEND_ONLY
+ * @param pNodeParams SEND_RECV
+ */
+cudaError_t cudaGraphMemsetNodeSetParams(cudaGraphNode_t node, const struct cudaMemsetParams *pNodeParams);
+/**
+ * @param pGraphNode SEND_RECV
+ * @param graph SEND_ONLY
+ * @param pDependencies SEND_RECV
+ * @param numDependencies SEND_ONLY
+ * @param pNodeParams SEND_RECV
+ */
+cudaError_t cudaGraphAddHostNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies, const struct cudaHostNodeParams *pNodeParams);
+/**
+ * @param node SEND_ONLY
+ * @param pNodeParams SEND_RECV
+ */
+cudaError_t cudaGraphHostNodeGetParams(cudaGraphNode_t node, struct cudaHostNodeParams *pNodeParams);
+/**
+ * @param node SEND_ONLY
+ * @param pNodeParams SEND_RECV
+ */
+cudaError_t cudaGraphHostNodeSetParams(cudaGraphNode_t node, const struct cudaHostNodeParams *pNodeParams);
+/**
+ * @param pGraphNode SEND_RECV
+ * @param graph SEND_ONLY
+ * @param pDependencies SEND_RECV
+ * @param numDependencies SEND_ONLY
+ * @param childGraph SEND_ONLY
+ */
+cudaError_t cudaGraphAddChildGraphNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies, cudaGraph_t childGraph);
+/**
+ * @param node SEND_ONLY
+ * @param pGraph SEND_RECV
+ */
+cudaError_t cudaGraphChildGraphNodeGetGraph(cudaGraphNode_t node, cudaGraph_t *pGraph);
+/**
+ * @param pGraphNode SEND_RECV
+ * @param graph SEND_ONLY
+ * @param pDependencies SEND_RECV
+ * @param numDependencies SEND_ONLY
+ */
+cudaError_t cudaGraphAddEmptyNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies);
+/**
+ * @param pGraphNode SEND_RECV
+ * @param graph SEND_ONLY
+ * @param pDependencies SEND_RECV
+ * @param numDependencies SEND_ONLY
+ * @param event SEND_ONLY
+ */
+cudaError_t cudaGraphAddEventRecordNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies, cudaEvent_t event);
+/**
+ * @param node SEND_ONLY
+ * @param event_out SEND_RECV
+ */
+cudaError_t cudaGraphEventRecordNodeGetEvent(cudaGraphNode_t node, cudaEvent_t *event_out);
+/**
+ * @param node SEND_ONLY
+ * @param event SEND_ONLY
+ */
+cudaError_t cudaGraphEventRecordNodeSetEvent(cudaGraphNode_t node, cudaEvent_t event);
+/**
+ * @param pGraphNode SEND_RECV
+ * @param graph SEND_ONLY
+ * @param pDependencies SEND_RECV
+ * @param numDependencies SEND_ONLY
+ * @param event SEND_ONLY
+ */
+cudaError_t cudaGraphAddEventWaitNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies, cudaEvent_t event);
+/**
+ * @param node SEND_ONLY
+ * @param event_out SEND_RECV
+ */
+cudaError_t cudaGraphEventWaitNodeGetEvent(cudaGraphNode_t node, cudaEvent_t *event_out);
+/**
+ * @param node SEND_ONLY
+ * @param event SEND_ONLY
+ */
+cudaError_t cudaGraphEventWaitNodeSetEvent(cudaGraphNode_t node, cudaEvent_t event);
+/**
+ * @param pGraphNode SEND_RECV
+ * @param graph SEND_ONLY
+ * @param pDependencies SEND_RECV
+ * @param numDependencies SEND_ONLY
+ * @param nodeParams SEND_RECV
+ */
+cudaError_t cudaGraphAddExternalSemaphoresSignalNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies, const struct cudaExternalSemaphoreSignalNodeParams *nodeParams);
+/**
+ * @param hNode SEND_ONLY
+ * @param params_out SEND_RECV
+ */
+cudaError_t cudaGraphExternalSemaphoresSignalNodeGetParams(cudaGraphNode_t hNode, struct cudaExternalSemaphoreSignalNodeParams *params_out);
+/**
+ * @param hNode SEND_ONLY
+ * @param nodeParams SEND_RECV
+ */
+cudaError_t cudaGraphExternalSemaphoresSignalNodeSetParams(cudaGraphNode_t hNode, const struct cudaExternalSemaphoreSignalNodeParams *nodeParams);
+/**
+ * @param pGraphNode SEND_RECV
+ * @param graph SEND_ONLY
+ * @param pDependencies SEND_RECV
+ * @param numDependencies SEND_ONLY
+ * @param nodeParams SEND_RECV
+ */
+cudaError_t cudaGraphAddExternalSemaphoresWaitNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies, const struct cudaExternalSemaphoreWaitNodeParams *nodeParams);
+/**
+ * @param hNode SEND_ONLY
+ * @param params_out SEND_RECV
+ */
+cudaError_t cudaGraphExternalSemaphoresWaitNodeGetParams(cudaGraphNode_t hNode, struct cudaExternalSemaphoreWaitNodeParams *params_out);
+/**
+ * @param hNode SEND_ONLY
+ * @param nodeParams SEND_RECV
+ */
+cudaError_t cudaGraphExternalSemaphoresWaitNodeSetParams(cudaGraphNode_t hNode, const struct cudaExternalSemaphoreWaitNodeParams *nodeParams);
+/**
+ * @param pGraphNode SEND_RECV
+ * @param graph SEND_ONLY
+ * @param pDependencies SEND_RECV
+ * @param numDependencies SEND_ONLY
+ * @param nodeParams SEND_RECV
+ */
+cudaError_t cudaGraphAddMemAllocNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies, struct cudaMemAllocNodeParams *nodeParams);
+/**
+ * @param node SEND_ONLY
+ * @param params_out SEND_RECV
+ */
+cudaError_t cudaGraphMemAllocNodeGetParams(cudaGraphNode_t node, struct cudaMemAllocNodeParams *params_out);
+/**
+ * @param pGraphNode SEND_RECV
+ * @param graph SEND_ONLY
+ * @param pDependencies SEND_RECV
+ * @param numDependencies SEND_ONLY
+ * @param dptr SEND_RECV
+ */
+cudaError_t cudaGraphAddMemFreeNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies, void *dptr);
+/**
+ * @param node SEND_ONLY
+ * @param dptr_out SEND_RECV
+ */
+cudaError_t cudaGraphMemFreeNodeGetParams(cudaGraphNode_t node, void *dptr_out);
+/**
+ * @param device SEND_ONLY
+ */
+cudaError_t cudaDeviceGraphMemTrim(int device);
+/**
+ * @param device SEND_ONLY
+ * @param attr SEND_ONLY
+ * @param value SEND_RECV
+ */
+cudaError_t cudaDeviceGetGraphMemAttribute(int device, enum cudaGraphMemAttributeType attr, void *value);
+/**
+ * @param device SEND_ONLY
+ * @param attr SEND_ONLY
+ * @param value SEND_RECV
+ */
+cudaError_t cudaDeviceSetGraphMemAttribute(int device, enum cudaGraphMemAttributeType attr, void *value);
+/**
+ * @param pGraphClone SEND_RECV
+ * @param originalGraph SEND_ONLY
+ */
+cudaError_t cudaGraphClone(cudaGraph_t *pGraphClone, cudaGraph_t originalGraph);
+/**
+ * @param pNode SEND_RECV
+ * @param originalNode SEND_ONLY
+ * @param clonedGraph SEND_ONLY
+ */
+cudaError_t cudaGraphNodeFindInClone(cudaGraphNode_t *pNode, cudaGraphNode_t originalNode, cudaGraph_t clonedGraph);
+/**
+ * @param node SEND_ONLY
+ * @param pType SEND_RECV
+ */
+cudaError_t cudaGraphNodeGetType(cudaGraphNode_t node, enum cudaGraphNodeType *pType);
+/**
+ * @param graph SEND_ONLY
+ * @param nodes SEND_RECV
+ * @param numNodes SEND_RECV
+ */
+cudaError_t cudaGraphGetNodes(cudaGraph_t graph, cudaGraphNode_t *nodes, size_t *numNodes);
+/**
+ * @param graph SEND_ONLY
+ * @param pRootNodes SEND_RECV
+ * @param pNumRootNodes SEND_RECV
+ */
+cudaError_t cudaGraphGetRootNodes(cudaGraph_t graph, cudaGraphNode_t *pRootNodes, size_t *pNumRootNodes);
+/**
+ * @param graph SEND_ONLY
+ * @param from SEND_RECV
+ * @param to SEND_RECV
+ * @param numEdges SEND_RECV
+ */
+cudaError_t cudaGraphGetEdges(cudaGraph_t graph, cudaGraphNode_t *from, cudaGraphNode_t *to, size_t *numEdges);
+/**
+ * @param node SEND_ONLY
+ * @param pDependencies SEND_RECV
+ * @param pNumDependencies SEND_RECV
+ */
+cudaError_t cudaGraphNodeGetDependencies(cudaGraphNode_t node, cudaGraphNode_t *pDependencies, size_t *pNumDependencies);
+/**
+ * @param node SEND_ONLY
+ * @param pDependentNodes SEND_RECV
+ * @param pNumDependentNodes SEND_RECV
+ */
+cudaError_t cudaGraphNodeGetDependentNodes(cudaGraphNode_t node, cudaGraphNode_t *pDependentNodes, size_t *pNumDependentNodes);
+/**
+ * @param graph SEND_ONLY
+ * @param from SEND_RECV
+ * @param to SEND_RECV
+ * @param numDependencies SEND_ONLY
+ */
+cudaError_t cudaGraphAddDependencies(cudaGraph_t graph, const cudaGraphNode_t *from, const cudaGraphNode_t *to, size_t numDependencies);
+/**
+ * @param graph SEND_ONLY
+ * @param from SEND_RECV
+ * @param to SEND_RECV
+ * @param numDependencies SEND_ONLY
+ */
+cudaError_t cudaGraphRemoveDependencies(cudaGraph_t graph, const cudaGraphNode_t *from, const cudaGraphNode_t *to, size_t numDependencies);
+/**
+ * @param node SEND_ONLY
+ */
+cudaError_t cudaGraphDestroyNode(cudaGraphNode_t node);
+/**
+ * @param pGraphExec SEND_RECV
+ * @param graph SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+cudaError_t cudaGraphInstantiate(cudaGraphExec_t *pGraphExec, cudaGraph_t graph, unsigned long long flags);
+/**
+ * @param pGraphExec SEND_RECV
+ * @param graph SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+cudaError_t cudaGraphInstantiateWithFlags(cudaGraphExec_t *pGraphExec, cudaGraph_t graph, unsigned long long flags);
+/**
+ * @param pGraphExec SEND_RECV
+ * @param graph SEND_ONLY
+ * @param instantiateParams SEND_RECV
+ */
+cudaError_t cudaGraphInstantiateWithParams(cudaGraphExec_t *pGraphExec, cudaGraph_t graph, cudaGraphInstantiateParams *instantiateParams);
+/**
+ * @param graphExec SEND_ONLY
+ * @param flags SEND_RECV
+ */
+cudaError_t cudaGraphExecGetFlags(cudaGraphExec_t graphExec, unsigned long long *flags);
+/**
+ * @param hGraphExec SEND_ONLY
+ * @param node SEND_ONLY
+ * @param pNodeParams SEND_RECV
+ */
+cudaError_t cudaGraphExecKernelNodeSetParams(cudaGraphExec_t hGraphExec, cudaGraphNode_t node, const struct cudaKernelNodeParams *pNodeParams);
+/**
+ * @param hGraphExec SEND_ONLY
+ * @param node SEND_ONLY
+ * @param pNodeParams SEND_RECV
+ */
+cudaError_t cudaGraphExecMemcpyNodeSetParams(cudaGraphExec_t hGraphExec, cudaGraphNode_t node, const struct cudaMemcpy3DParms *pNodeParams);
+/**
+ * @param hGraphExec SEND_ONLY
+ * @param node SEND_ONLY
+ * @param symbol SEND_RECV
+ * @param src SEND_RECV
+ * @param count SEND_ONLY
+ * @param offset SEND_ONLY
+ * @param kind SEND_ONLY
+ */
+cudaError_t cudaGraphExecMemcpyNodeSetParamsToSymbol(cudaGraphExec_t hGraphExec, cudaGraphNode_t node, const void *symbol, const void *src, size_t count, size_t offset, enum cudaMemcpyKind kind);
+/**
+ * @param hGraphExec SEND_ONLY
+ * @param node SEND_ONLY
+ * @param dst SEND_RECV
+ * @param symbol SEND_RECV
+ * @param count SEND_ONLY
+ * @param offset SEND_ONLY
+ * @param kind SEND_ONLY
+ */
+cudaError_t cudaGraphExecMemcpyNodeSetParamsFromSymbol(cudaGraphExec_t hGraphExec, cudaGraphNode_t node, void *dst, const void *symbol, size_t count, size_t offset, enum cudaMemcpyKind kind);
+/**
+ * @param hGraphExec SEND_ONLY
+ * @param node SEND_ONLY
+ * @param dst SEND_RECV
+ * @param src SEND_RECV
+ * @param count SEND_ONLY
+ * @param kind SEND_ONLY
+ */
+cudaError_t cudaGraphExecMemcpyNodeSetParams1D(cudaGraphExec_t hGraphExec, cudaGraphNode_t node, void *dst, const void *src, size_t count, enum cudaMemcpyKind kind);
+/**
+ * @param hGraphExec SEND_ONLY
+ * @param node SEND_ONLY
+ * @param pNodeParams SEND_RECV
+ */
+cudaError_t cudaGraphExecMemsetNodeSetParams(cudaGraphExec_t hGraphExec, cudaGraphNode_t node, const struct cudaMemsetParams *pNodeParams);
+/**
+ * @param hGraphExec SEND_ONLY
+ * @param node SEND_ONLY
+ * @param pNodeParams SEND_RECV
+ */
+cudaError_t cudaGraphExecHostNodeSetParams(cudaGraphExec_t hGraphExec, cudaGraphNode_t node, const struct cudaHostNodeParams *pNodeParams);
+/**
+ * @param hGraphExec SEND_ONLY
+ * @param node SEND_ONLY
+ * @param childGraph SEND_ONLY
+ */
+cudaError_t cudaGraphExecChildGraphNodeSetParams(cudaGraphExec_t hGraphExec, cudaGraphNode_t node, cudaGraph_t childGraph);
+/**
+ * @param hGraphExec SEND_ONLY
+ * @param hNode SEND_ONLY
+ * @param event SEND_ONLY
+ */
+cudaError_t cudaGraphExecEventRecordNodeSetEvent(cudaGraphExec_t hGraphExec, cudaGraphNode_t hNode, cudaEvent_t event);
+/**
+ * @param hGraphExec SEND_ONLY
+ * @param hNode SEND_ONLY
+ * @param event SEND_ONLY
+ */
+cudaError_t cudaGraphExecEventWaitNodeSetEvent(cudaGraphExec_t hGraphExec, cudaGraphNode_t hNode, cudaEvent_t event);
+/**
+ * @param hGraphExec SEND_ONLY
+ * @param hNode SEND_ONLY
+ * @param nodeParams SEND_RECV
+ */
+cudaError_t cudaGraphExecExternalSemaphoresSignalNodeSetParams(cudaGraphExec_t hGraphExec, cudaGraphNode_t hNode, const struct cudaExternalSemaphoreSignalNodeParams *nodeParams);
+/**
+ * @param hGraphExec SEND_ONLY
+ * @param hNode SEND_ONLY
+ * @param nodeParams SEND_RECV
+ */
+cudaError_t cudaGraphExecExternalSemaphoresWaitNodeSetParams(cudaGraphExec_t hGraphExec, cudaGraphNode_t hNode, const struct cudaExternalSemaphoreWaitNodeParams *nodeParams);
+/**
+ * @param hGraphExec SEND_ONLY
+ * @param hNode SEND_ONLY
+ * @param isEnabled SEND_ONLY
+ */
+cudaError_t cudaGraphNodeSetEnabled(cudaGraphExec_t hGraphExec, cudaGraphNode_t hNode, unsigned int isEnabled);
+/**
+ * @param hGraphExec SEND_ONLY
+ * @param hNode SEND_ONLY
+ * @param isEnabled SEND_RECV
+ */
+cudaError_t cudaGraphNodeGetEnabled(cudaGraphExec_t hGraphExec, cudaGraphNode_t hNode, unsigned int *isEnabled);
+/**
+ * @param hGraphExec SEND_ONLY
+ * @param hGraph SEND_ONLY
+ * @param resultInfo SEND_RECV
+ */
+cudaError_t cudaGraphExecUpdate(cudaGraphExec_t hGraphExec, cudaGraph_t hGraph, cudaGraphExecUpdateResultInfo *resultInfo);
+/**
+ * @param graphExec SEND_ONLY
+ * @param stream SEND_ONLY
+ */
+cudaError_t cudaGraphUpload(cudaGraphExec_t graphExec, cudaStream_t stream);
+/**
+ * @param graphExec SEND_ONLY
+ * @param stream SEND_ONLY
+ */
+cudaError_t cudaGraphLaunch(cudaGraphExec_t graphExec, cudaStream_t stream);
+/**
+ * @param graphExec SEND_ONLY
+ */
+cudaError_t cudaGraphExecDestroy(cudaGraphExec_t graphExec);
+/**
+ * @param graph SEND_ONLY
+ */
+cudaError_t cudaGraphDestroy(cudaGraph_t graph);
+/**
+ * @param graph SEND_ONLY
+ * @param path SEND_RECV
+ * @param flags SEND_ONLY
+ */
+cudaError_t cudaGraphDebugDotPrint(cudaGraph_t graph, const char *path, unsigned int flags);
+/**
+ * @param object_out SEND_RECV
+ * @param ptr SEND_RECV
+ * @param destroy SEND_ONLY
+ * @param initialRefcount SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+cudaError_t cudaUserObjectCreate(cudaUserObject_t *object_out, void *ptr, cudaHostFn_t destroy, unsigned int initialRefcount, unsigned int flags);
+/**
+ * @param object SEND_ONLY
+ * @param count SEND_ONLY
+ */
+cudaError_t cudaUserObjectRetain(cudaUserObject_t object, unsigned int count);
+/**
+ * @param object SEND_ONLY
+ * @param count SEND_ONLY
+ */
+cudaError_t cudaUserObjectRelease(cudaUserObject_t object, unsigned int count);
+/**
+ * @param graph SEND_ONLY
+ * @param object SEND_ONLY
+ * @param count SEND_ONLY
+ * @param flags SEND_ONLY
+ */
+cudaError_t cudaGraphRetainUserObject(cudaGraph_t graph, cudaUserObject_t object, unsigned int count, unsigned int flags);
+/**
+ * @param graph SEND_ONLY
+ * @param object SEND_ONLY
+ * @param count SEND_ONLY
+ */
+cudaError_t cudaGraphReleaseUserObject(cudaGraph_t graph, cudaUserObject_t object, unsigned int count);
+/**
+ * @param symbol SEND_RECV
+ * @param funcPtr SEND_RECV
+ * @param flags SEND_ONLY
+ * @param driverStatus SEND_RECV
+ */
+cudaError_t cudaGetDriverEntryPoint(const char *symbol, void **funcPtr, unsigned long long flags, enum cudaDriverEntryPointQueryResult *driverStatus);
+/**
+ * @param ppExportTable SEND_RECV
+ * @param pExportTableId SEND_RECV
+ */
+cudaError_t cudaGetExportTable(const void **ppExportTable, const cudaUUID_t *pExportTableId);
+/**
+ * @param functionPtr SEND_RECV
+ * @param symbolPtr SEND_RECV
+ */
+cudaError_t cudaGetFuncBySymbol(cudaFunction_t *functionPtr, const void *symbolPtr);

@@ -179,6 +179,12 @@ def error_const(return_type: str) -> str:
     raise NotImplementedError("Unknown return type: %s" % return_type)
 
 
+def prefix_std(type: str) -> str:
+    if type in ["size_t", "std::size_t"]:
+        return "std::size_t"
+    return type
+
+
 def main():
     options = ParserOptions(preprocessor=make_gcc_preprocessor())
 
@@ -444,14 +450,14 @@ def main():
                         f.write(
                             "    {server_type} {param_name} = ({server_type})malloc({param_name}_len);\n".format(
                                 param_name=operation.parameter.name,
-                                server_type=operation.server_type.format(),
+                                server_type=prefix_std(operation.server_type.format()),
                             )
                         )
                     else:
                         # write just the parameter declaration
                         f.write(
-                            "    {param_type} {param_name};\n".format(
-                                param_type=operation.server_type.format(),
+                            "    {server_type} {param_name};\n".format(
+                                server_type=prefix_std(operation.server_type.format()),
                                 param_name=operation.parameter.name,
                             )
                         )
@@ -459,9 +465,9 @@ def main():
                     # write the malloc declaration
                     if length := operation.length_parameter:
                         f.write(
-                            "    {param_name} = ({server_type})malloc({length} * sizeof({base_type}));\n".format(
-                                param_name=operation.parameter.format(),
-                                server_type=operation.server_type.format(),
+                            "    {server_type} {param_name} = ({server_type})malloc({length} * sizeof({base_type}));\n".format(
+                                param_name=operation.parameter.name,
+                                server_type=prefix_std(operation.server_type.format()),
                                 length=length.name,
                                 base_type=operation.server_type.ptr_to.format(),
                             )
@@ -470,15 +476,15 @@ def main():
                         f.write(
                             "    {server_type} {param_name} = ({server_type})malloc({size});\n".format(
                                 param_name=operation.parameter.name,
-                                server_type=operation.server_type.format(),
+                                server_type=prefix_std(operation.server_type.format()),
                                 size=size,
                             )
                         )
                     elif operation.is_opaque_pointer:
                         # write just the parameter declaration
                         f.write(
-                            "    {param_type} {param_name};\n".format(
-                                param_type=operation.server_type.format(),
+                            "    {server_type} {param_name};\n".format(
+                                server_type=prefix_std(operation.server_type.format()),
                                 param_name=operation.parameter.name,
                             )
                         )
@@ -497,8 +503,8 @@ def main():
                         f.write("        return -1;\n")
                         # write param declaration
                         f.write(
-                            "    {param_type} {param_name} = nullptr;\n".format(
-                                param_type=operation.server_type.format(),
+                            "    {server_type} {param_name} = nullptr;\n".format(
+                                server_type=prefix_std(operation.server_type.format()),
                                 param_name=operation.parameter.name,
                             )
                         )
@@ -530,8 +536,8 @@ def main():
                 else:
                     # write just the parameter declaration
                     f.write(
-                        "    {param_type} {param_name};\n".format(
-                            param_type=operation.server_type.format(),
+                        "    {server_type} {param_name};\n".format(
+                            server_type=prefix_std(operation.server_type.format()),
                             param_name=operation.parameter.name,
                         )
                     )
