@@ -87,13 +87,7 @@ The goal of SCUDA is to enable developers to easily interact with GPUs over a ne
 
 ## Future goals:
 
-1. Shared storage allocation - Users likely won't want to sync data over the network every time they connect to a remote GPU. To get around this, a user might upload data to SCUDA once and trigger the dataset(s) to be synced to the remote GPU automatically.
-
-2. GPU management plane - SCUDA will eventually track pools of GPUs so that a user can easily swap between devices, run jobs on multiple devices within the same network, prioritize tasks on more equitable hardware, etc.
-
-3. Future network optimizations - Multiplexing and research into various RDMA technologies will help optimize scuda.
-
-4. etc
+See our [TODO](./TODO.md).
 
 ## Prior Art
 

@@ -1,10 +1,11 @@
 Features:
-- Add moar APIs
+- Add more APIs
 - Multithread the server [done]
 - Make port configurable [done]
 - Add proper debug logging
 - Add TLS for the socket
 - Explore how hard it would be to expose this as a kernel module in addition to a shared object.
+- Explore multiplexing, wip branch brodey/multiplex
 
 Bugs:
 - Server exits when the client disconnects [done]
