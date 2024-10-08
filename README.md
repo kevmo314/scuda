@@ -85,7 +85,6 @@ The goal of SCUDA is to enable developers to easily interact with GPUs over a ne
 
 6. **Remote fine-tuning** - Developers can download a pre-trained model (ex: resnet) and fine-tune it. With SCUDA, training is done remotely using the library to route PyTorch CUDA calls over TCP to a remote GPU, allowing the developer to run the fine-tuning process from their local machine or Jupyter Notebook environment.
 
-
 ## Future goals:
 
 1. Shared storage allocation - Users likely won't want to sync data over the network every time they connect to a remote GPU. To get around this, a user might upload data to SCUDA once and trigger the dataset(s) to be synced to the remote GPU automatically.
