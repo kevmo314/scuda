@@ -54,7 +54,6 @@ MANUAL_REMAPPINGS = [
     ("cuMemAllocFromPoolAsync_ptsz", "cuMemAllocFromPoolAsync"),
 ]
 
-
 @dataclass
 class Operation:
     send: bool
@@ -143,6 +142,10 @@ def parse_annotation(annotation: str, params: list[Parameter]) -> list[Operation
                         )
                     server_type = copy.deepcopy(param.type)
                     server_type.ptr_to.const = False
+                elif param.type.ptr_to.format() == "const void":
+                    # treat void pointers as opaque
+                    server_type = copy.deepcopy(param.type.ptr_to)
+                    server_type.const = False
                 elif param.type.ptr_to.format() == "void":
                     # treat void pointers as opaque
                     server_type = param.type
