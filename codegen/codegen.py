@@ -301,6 +301,30 @@ def main():
                                 param_name=operation.parameter.name,
                             )
                         )
+                    elif length := operation.length_parameter:
+                        if isinstance(length.type, Pointer):
+                            f.write(
+                                "        rpc_write({param_name}, *{length} * sizeof({param_type})) < 0 ||\n".format(
+                                    param_name=operation.parameter.name,
+                                    param_type=operation.server_type.ptr_to.format(),
+                                    length=length.name,
+                                )
+                            )
+                        else:
+                            f.write(
+                                "        rpc_write({param_name}, {length} * sizeof({param_type})) < 0 ||\n".format(
+                                    param_name=operation.parameter.name,
+                                    param_type=operation.server_type.ptr_to.format(),
+                                    length=length.name,
+                                )
+                            )
+                    elif size := operation.array_size:
+                        f.write(
+                            "        rpc_write({param_name}, {size}) < 0 ||\n".format(
+                                param_name=operation.parameter.name,
+                                size=size,
+                            )
+                        )
                     elif operation.nullable:
                         # write the pointer since it is nonzero if not-null
                         f.write(

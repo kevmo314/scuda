@@ -4889,8 +4889,8 @@ CUresult cuLinkAddData_v2(CUlinkState state, CUjitInputType type, void* data, si
         rpc_write(&name_len, sizeof(std::size_t)) < 0 ||
         rpc_write(name, name_len) < 0 ||
         rpc_write(&numOptions, sizeof(unsigned int)) < 0 ||
-        rpc_write(&options, sizeof(CUjit_option*)) < 0 ||
-        rpc_write(&optionValues, sizeof(void**)) < 0 ||
+        rpc_write(options, numOptions * sizeof(CUjit_option)) < 0 ||
+        rpc_write(optionValues, numOptions * sizeof(void*)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(data, sizeof(void*)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
@@ -4910,8 +4910,8 @@ CUresult cuLinkAddFile_v2(CUlinkState state, CUjitInputType type, const char* pa
         rpc_write(&path_len, sizeof(std::size_t)) < 0 ||
         rpc_write(path, path_len) < 0 ||
         rpc_write(&numOptions, sizeof(unsigned int)) < 0 ||
-        rpc_write(&options, sizeof(CUjit_option*)) < 0 ||
-        rpc_write(&optionValues, sizeof(void**)) < 0 ||
+        rpc_write(options, numOptions * sizeof(CUjit_option)) < 0 ||
+        rpc_write(optionValues, numOptions * sizeof(void*)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
@@ -4990,11 +4990,11 @@ CUresult cuLibraryLoadFromFile(CUlibrary* library, const char* fileName, CUjit_o
         rpc_write(&fileName_len, sizeof(std::size_t)) < 0 ||
         rpc_write(fileName, fileName_len) < 0 ||
         rpc_write(&numJitOptions, sizeof(unsigned int)) < 0 ||
-        rpc_write(&jitOptions, sizeof(CUjit_option*)) < 0 ||
-        rpc_write(&jitOptionsValues, sizeof(void**)) < 0 ||
+        rpc_write(jitOptions, numJitOptions * sizeof(CUjit_option)) < 0 ||
+        rpc_write(jitOptionsValues, numJitOptions * sizeof(void*)) < 0 ||
         rpc_write(&numLibraryOptions, sizeof(unsigned int)) < 0 ||
-        rpc_write(&libraryOptions, sizeof(CUlibraryOption*)) < 0 ||
-        rpc_write(&libraryOptionValues, sizeof(void**)) < 0 ||
+        rpc_write(libraryOptions, numLibraryOptions * sizeof(CUlibraryOption)) < 0 ||
+        rpc_write(libraryOptionValues, numLibraryOptions * sizeof(void*)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(library, sizeof(CUlibrary)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
@@ -9591,7 +9591,7 @@ cudaError_t cudaStreamUpdateCaptureDependencies(cudaStream_t stream, cudaGraphNo
     if (request_id < 0 ||
         rpc_write(&stream, sizeof(cudaStream_t)) < 0 ||
         rpc_write(&numDependencies, sizeof(size_t)) < 0 ||
-        rpc_write(&dependencies, sizeof(cudaGraphNode_t*)) < 0 ||
+        rpc_write(dependencies, numDependencies * sizeof(cudaGraphNode_t)) < 0 ||
         rpc_write(&flags, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
@@ -10172,6 +10172,23 @@ cudaError_t cudaMemcpy2DArrayToArray(cudaArray_t dst, size_t wOffsetDst, size_t 
         rpc_write(&width, sizeof(size_t)) < 0 ||
         rpc_write(&height, sizeof(size_t)) < 0 ||
         rpc_write(&kind, sizeof(enum cudaMemcpyKind)) < 0 ||
+        rpc_wait_for_response(request_id) < 0 ||
+        rpc_end_request(&return_value, request_id) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMemcpyAsync(void* dst, const void* src, size_t count, enum cudaMemcpyKind kind, cudaStream_t stream)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(RPC_cudaMemcpyAsync);
+    if (request_id < 0 ||
+        rpc_write(&dst, sizeof(void*)) < 0 ||
+        rpc_write(&count, sizeof(size_t)) < 0 ||
+        rpc_write(src, count) < 0 ||
+        rpc_write(&kind, sizeof(enum cudaMemcpyKind)) < 0 ||
+        rpc_write(&stream, sizeof(cudaStream_t)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
         return cudaErrorDevicesUnavailable;
@@ -12229,6 +12246,7 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cudaMipmappedArrayGetSparseProperties", (void *)cudaMipmappedArrayGetSparseProperties},
     {"cudaMemcpy2DFromArray", (void *)cudaMemcpy2DFromArray},
     {"cudaMemcpy2DArrayToArray", (void *)cudaMemcpy2DArrayToArray},
+    {"cudaMemcpyAsync", (void *)cudaMemcpyAsync},
     {"cudaMemcpy2DFromArrayAsync", (void *)cudaMemcpy2DFromArrayAsync},
     {"cudaMemset", (void *)cudaMemset},
     {"cudaMemset2D", (void *)cudaMemset2D},
