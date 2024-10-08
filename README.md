@@ -85,7 +85,6 @@ The goal of SCUDA is to enable developers to easily interact with GPUs over a ne
 
 6. **Remote fine-tuning** - Developers can download a pre-trained model (ex: resnet) and fine-tune it. With SCUDA, training is done remotely using the library to route PyTorch CUDA calls over TCP to a remote GPU, allowing the developer to run the fine-tuning process from their local machine or Jupyter Notebook environment.
 
-7. **GPU on CPU acceleration** - Via SCUDA SDK / CLI's, users can instrument their CPU applications to 'shell out' to remote GPUs in order to accelerate their CPU-native applications.
 
 ## Future goals:
 
