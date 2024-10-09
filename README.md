@@ -3,6 +3,18 @@
 SCUDA is a GPU over IP bridge allowing GPUs on remote machines to be attached
 to CPU-only machines.
 
+## Demo
+
+The below demo displays a NVIDIA GeForce RTX 4090 running on a remote machine (right pane).
+Left pane is a Mac running a docker container with nvidia utils installed.
+
+The docker container runs `python3 -c "import torch; print(torch.cuda.is_available())"` to check if cuda is available.
+
+You can view the docker image used [here](./Dockerfile.test).
+
+https://github.com/user-attachments/assets/035950bb-3cc1-4c73-9ad5-b00871a159ec
+
+
 ## Local development
 
 Make the local dev script executable
