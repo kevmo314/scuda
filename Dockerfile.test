@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y \
     wget \
     curl
 
-RUN pip3 install torch
+RUN pip3 install torch numpy --break-system-packages
 
 COPY libscuda.so /usr/local/lib/libscuda.so
 

@@ -143,7 +143,6 @@ int main()
     else
     {
         port = atoi(p);
-        // << "Using SCUDA_PORT: " << port << std::endl;
     }
 
     // Bind the socket
@@ -184,8 +183,6 @@ int main()
             std::cerr << "Server accept failed." << std::endl;
             continue;
         }
-
-        // << "Client connected, spawning thread." << std::endl;
 
         std::thread client_thread(client_handler, connfd);
 
