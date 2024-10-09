@@ -3,6 +3,12 @@
 SCUDA is a GPU over IP bridge allowing GPUs on remote machines to be attached
 to CPU-only machines.
 
+## Demo
+
+
+https://github.com/user-attachments/assets/035950bb-3cc1-4c73-9ad5-b00871a159ec
+
+
 ## Local development
 
 Make the local dev script executable
