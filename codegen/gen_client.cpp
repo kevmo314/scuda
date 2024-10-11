@@ -8,6 +8,8 @@
 
 #include "gen_api.h"
 
+#include "manual_client.h"
+
 extern int rpc_start_request(const unsigned int request);
 extern int rpc_write(const void *data, const std::size_t size);
 extern int rpc_read(void *data, const std::size_t size);
@@ -10178,23 +10180,6 @@ cudaError_t cudaMemcpy2DArrayToArray(cudaArray_t dst, size_t wOffsetDst, size_t 
     return return_value;
 }
 
-cudaError_t cudaMemcpyAsync(void* dst, const void* src, size_t count, enum cudaMemcpyKind kind, cudaStream_t stream)
-{
-    cudaError_t return_value;
-
-    int request_id = rpc_start_request(RPC_cudaMemcpyAsync);
-    if (request_id < 0 ||
-        rpc_write(&dst, sizeof(void*)) < 0 ||
-        rpc_write(&count, sizeof(size_t)) < 0 ||
-        rpc_write(src, count) < 0 ||
-        rpc_write(&kind, sizeof(enum cudaMemcpyKind)) < 0 ||
-        rpc_write(&stream, sizeof(cudaStream_t)) < 0 ||
-        rpc_wait_for_response(request_id) < 0 ||
-        rpc_end_request(&return_value, request_id) < 0)
-        return cudaErrorDevicesUnavailable;
-    return return_value;
-}
-
 cudaError_t cudaMemcpy2DFromArrayAsync(void* dst, size_t dpitch, cudaArray_const_t src, size_t wOffset, size_t hOffset, size_t width, size_t height, enum cudaMemcpyKind kind, cudaStream_t stream)
 {
     cudaError_t return_value;
@@ -11567,6 +11552,7 @@ cudaError_t cudaGraphReleaseUserObject(cudaGraph_t graph, cudaUserObject_t objec
 }
 
 std::unordered_map<std::string, void *> functionMap = {
+    {"nvmlInit", (void *)nvmlInit_v2},
     {"nvmlInit_v2", (void *)nvmlInit_v2},
     {"nvmlInitWithFlags", (void *)nvmlInitWithFlags},
     {"nvmlShutdown", (void *)nvmlShutdown},
@@ -12246,7 +12232,6 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cudaMipmappedArrayGetSparseProperties", (void *)cudaMipmappedArrayGetSparseProperties},
     {"cudaMemcpy2DFromArray", (void *)cudaMemcpy2DFromArray},
     {"cudaMemcpy2DArrayToArray", (void *)cudaMemcpy2DArrayToArray},
-    {"cudaMemcpyAsync", (void *)cudaMemcpyAsync},
     {"cudaMemcpy2DFromArrayAsync", (void *)cudaMemcpy2DFromArrayAsync},
     {"cudaMemset", (void *)cudaMemset},
     {"cudaMemset2D", (void *)cudaMemset2D},
@@ -12374,6 +12359,7 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cuMemFreeAsync_ptsz", (void *)cuMemFreeAsync},
     {"cuMemAllocAsync_ptsz", (void *)cuMemAllocAsync},
     {"cuMemAllocFromPoolAsync_ptsz", (void *)cuMemAllocFromPoolAsync},
+    {"cudaMemcpyAsync", (void *)cudaMemcpyAsync},
 };
 
 void *get_function_pointer(const char *name)
