@@ -24,24 +24,44 @@ cudaError_t cudaMemcpyAsync(void* dst, const void* src, size_t count, enum cudaM
         return cudaErrorDevicesUnavailable;
     }
 
-    if (rpc_write(&dst, sizeof(void*)) < 0) {
-        return cudaErrorDevicesUnavailable;
-    }
-
-    if (rpc_write(&count, sizeof(size_t)) < 0) {
-        return cudaErrorDevicesUnavailable;
-    }
-
-    if (rpc_write(src, count) < 0) {
-        return cudaErrorDevicesUnavailable;
-    }
-
     if (rpc_write(&kind, sizeof(enum cudaMemcpyKind)) < 0) {
         return cudaErrorDevicesUnavailable;
     }
 
-    if (rpc_write(&stream, sizeof(cudaStream_t)) < 0) {
-        return cudaErrorDevicesUnavailable;
+    // we need to swap device directions in this case
+    if (kind == cudaMemcpyDeviceToHost) {
+        if (rpc_write(&src, sizeof(void*)) < 0) {
+            return cudaErrorDevicesUnavailable;
+        }
+
+        if (rpc_write(&count, sizeof(size_t)) < 0) {
+            return cudaErrorDevicesUnavailable;
+        }
+
+        if (rpc_write(&stream, sizeof(cudaStream_t)) < 0) {
+            return cudaErrorDevicesUnavailable;
+        }
+
+        if (rpc_read(dst, count) < 0) {  // Read data into the destination buffer on the host
+            return cudaErrorDevicesUnavailable;
+        }
+
+    } else {
+        if (rpc_write(&dst, sizeof(void*)) < 0) {
+            return cudaErrorDevicesUnavailable;
+        }
+
+        if (rpc_write(&count, sizeof(size_t)) < 0) {
+            return cudaErrorDevicesUnavailable;
+        }
+
+        if (rpc_write(src, count) < 0) {
+            return cudaErrorDevicesUnavailable;
+        }
+
+        if (rpc_write(&stream, sizeof(cudaStream_t)) < 0) {
+            return cudaErrorDevicesUnavailable;
+        }
     }
 
     if (rpc_wait_for_response(request_id) < 0) {
