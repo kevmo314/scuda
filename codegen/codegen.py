@@ -181,8 +181,6 @@ def error_const(return_type: str) -> str:
         return "CUDA_ERROR_DEVICE_UNAVAILABLE"
     if return_type == "cudaError_t":
         return "cudaErrorDevicesUnavailable"
-    if return_type == "const char*":
-        return "const char*"
     raise NotImplementedError("Unknown return type: %s" % return_type)
 
 
