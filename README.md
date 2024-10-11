@@ -107,6 +107,7 @@ This project is inspired by some existing proprietary solutions:
 
 - https://www.thundercompute.com/
 - https://www.juicelabs.co/
+- https://en.wikipedia.org/wiki/RCUDA (That's where SCUDA's name comes from, S is the next letter after R!)
 
 ## Benchmarks
 
