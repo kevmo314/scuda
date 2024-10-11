@@ -1,23 +1,24 @@
 #!/bin/bash
 
 libscuda_path="$(pwd)/libscuda.so"
-client_path="$(pwd)/client.cpp $(pwd)/codegen/gen_client.cpp"
-server_path="$(pwd)/server.cu $(pwd)/codegen/gen_server.cpp"
+client_path="$(pwd)/client.cpp $(pwd)/codegen/gen_client.cpp $(pwd)/codegen/manual_client.cpp"
+server_path="$(pwd)/server.cu $(pwd)/codegen/gen_server.cpp $(pwd)/codegen/manual_server.cpp"
 server_out_path="$(pwd)/server.so"
 
 build() {
   echo "building client..."
 
   if [[ "$(uname)" == "Linux" ]]; then
-    gcc -c -fPIC "$(pwd)/client.cpp" -o "$(pwd)/client.o" -I/usr/local/cuda/include
-    gcc -c -fPIC "$(pwd)/codegen/gen_client.cpp" -o "$(pwd)/codegen/gen_client.o" -I/usr/local/cuda/include
+    g++ -c -fPIC "$(pwd)/client.cpp" -o "$(pwd)/client.o" -I/usr/local/cuda/include
+    g++ -c -fPIC "$(pwd)/codegen/gen_client.cpp" -o "$(pwd)/codegen/gen_client.o" -I/usr/local/cuda/include
+    g++ -c -fPIC "$(pwd)/codegen/manual_client.cpp" -o "$(pwd)/codegen/manual_client.o" -I/usr/local/cuda/include
 
     echo "linking client files..."
 
-    gcc -shared -o libscuda.so "$(pwd)/client.o" "$(pwd)/codegen/gen_client.o" -L/usr/local/cuda/lib64 -lcudart -lstdc++
+    g++ -shared -o libscuda.so "$(pwd)/client.o" "$(pwd)/codegen/gen_client.o" "$(pwd)/codegen/manual_client.o" -L/usr/local/cuda/lib64 -lcudart -lstdc++
 
   else
-    echo "No compiler options set for os "$(uname)""
+    echo "No compiler options set for os $(uname)"
   fi
 
   if [ ! -f "$libscuda_path" ]; then
@@ -118,7 +119,16 @@ done
 run() {
   build
 
-  LD_PRELOAD="$libscuda_path" python3 -c "import torch; print(torch.cuda.is_available())"
+  export SCUDA_SERVER=0.0.0.0
+
+  LD_PRELOAD="$libscuda_path" python3 -c "
+import torch
+print('Creating a tensor...')
+tensor = torch.full((10, 10), 5)
+print('Moving tensor to CUDA...')
+tensor = tensor.to('cuda:0')
+print('Tensor successfully moved to CUDA')
+"
 }
 
 # Main script logic using a switch case
@@ -129,7 +139,7 @@ case "$1" in
   run)
     run
     ;;
-server)
+  server)
     server
     ;;
   test)

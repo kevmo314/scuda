@@ -54,6 +54,11 @@ MANUAL_REMAPPINGS = [
     ("cuMemAllocFromPoolAsync_ptsz", "cuMemAllocFromPoolAsync"),
 ]
 
+# a list of manually implemented cuda/nvml functions.
+# these are automatically appended to each file; operation order is maintained as well.
+MANUAL_IMPLEMENTATIONS = [
+    "cudaMemcpyAsync"
+]
 
 @dataclass
 class Operation:
@@ -218,6 +223,7 @@ def main():
         functions_with_annotations.append((function, annotation, operations))
 
     with open("gen_api.h", "w") as f:
+        lastIndex = 0
         # visited = set()
         for i, (function, _, _) in enumerate(functions_with_annotations):
             # value = hash(function.name.format()) % (2**32)
@@ -230,6 +236,16 @@ def main():
                     value=i,
                 )
             )
+            lastIndex += 1
+
+        # Append any manually written implementations to our rpc list so that we maintain proper operation order
+        for j, (handler) in enumerate(MANUAL_IMPLEMENTATIONS):
+            f.write(
+            "#define RPC_{name} {value}\n".format(
+                name=handler.format(),
+                value=j + lastIndex,
+            )
+        )
 
     with open("gen_client.cpp", "w") as f:
         f.write(
@@ -240,6 +256,7 @@ def main():
             "#include <string>\n"
             "#include <unordered_map>\n\n"
             '#include "gen_api.h"\n\n'
+            '#include "manual_client.h"\n\n'
             "extern int rpc_start_request(const unsigned int request);\n"
             "extern int rpc_write(const void *data, const std::size_t size);\n"
             "extern int rpc_read(void *data, const std::size_t size);\n"
@@ -402,6 +419,9 @@ def main():
             f.write("}\n\n")
 
         f.write("std::unordered_map<std::string, void *> functionMap = {\n")
+
+        # we need the base nvmlInit, this is important and should be kept here in the codegen.
+        f.write("    {\"nvmlInit\", (void *)nvmlInit_v2},\n")
         for function, _, _ in functions_with_annotations:
             f.write(
                 '    {{"{name}", (void *){name}}},\n'.format(
@@ -419,6 +439,12 @@ def main():
                 '    {{"{x}", (void *){y}}},\n'.format(
                     x=x,
                     y=y,
+                )
+            )
+        for x in MANUAL_IMPLEMENTATIONS:
+            f.write(
+                '    {{"{x}", (void *){x}}},\n'.format(
+                    x=x,
                 )
             )
         f.write("};\n\n")
@@ -441,6 +467,7 @@ def main():
             "#include <unordered_map>\n\n"
             '#include "gen_api.h"\n\n'
             '#include "gen_server.h"\n\n'
+            '#include "manual_server.h"\n\n'
             "extern int rpc_read(const void *conn, void *data, const std::size_t size);\n"
             "extern int rpc_write(const void *conn, const void *data, const std::size_t size);\n"
             "extern int rpc_end_request(const void *conn);\n"
@@ -650,6 +677,8 @@ def main():
         f.write("static RequestHandler opHandlers[] = {\n")
         for function, _, _ in functions_with_annotations:
             f.write("    handle_{name},\n".format(name=function.name.format()))
+        for handler in MANUAL_IMPLEMENTATIONS:
+            f.write("    handle_{name},\n".format(name=handler.format()))
         f.write("};\n\n")
 
         f.write("RequestHandler get_handler(const int op)\n")

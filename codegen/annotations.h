@@ -4555,14 +4555,14 @@ cudaError_t cudaMemcpyToSymbol(const void *symbol, const void *src, size_t count
  * @param kind SEND_ONLY
  */
 cudaError_t cudaMemcpyFromSymbol(void *dst, const void *symbol, size_t count, size_t offset, enum cudaMemcpyKind kind);
-/**
- * @param dst SEND_ONLY
- * @param count SEND_ONLY
- * @param src SEND_ONLY SIZE:count
- * @param kind SEND_ONLY
- * @param stream SEND_ONLY
- */
-cudaError_t cudaMemcpyAsync(void *dst, const void *src, size_t count, enum cudaMemcpyKind kind, cudaStream_t stream);
+// /**
+//  * @param dst SEND_ONLY
+//  * @param count SEND_ONLY
+//  * @param src SEND_ONLY SIZE:count
+//  * @param kind SEND_ONLY
+//  * @param stream SEND_ONLY
+//  */
+// cudaError_t cudaMemcpyAsync(void *dst, const void *src, size_t count, enum cudaMemcpyKind kind, cudaStream_t stream);
 /**
  * @param dst SEND_RECV
  * @param dstDevice SEND_ONLY

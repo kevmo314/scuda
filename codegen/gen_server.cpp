@@ -10,6 +10,8 @@
 
 #include "gen_server.h"
 
+#include "manual_server.h"
+
 extern int rpc_read(const void *conn, void *data, const std::size_t size);
 extern int rpc_write(const void *conn, const void *data, const std::size_t size);
 extern int rpc_end_request(const void *conn);
@@ -15940,36 +15942,6 @@ int handle_cudaMemcpy2DArrayToArray(void *conn)
     return result;
 }
 
-int handle_cudaMemcpyAsync(void *conn)
-{
-    void* dst;
-    if (rpc_read(conn, &dst, sizeof(void*)) < 0)
-        return -1;
-    std::size_t count;
-    if (rpc_read(conn, &count, sizeof(size_t)) < 0)
-        return -1;
-    void* src = (void*)malloc(count);
-    if (rpc_read(conn, &src, sizeof(void*)) < 0)
-        return -1;
-    enum cudaMemcpyKind kind;
-    if (rpc_read(conn, &kind, sizeof(enum cudaMemcpyKind)) < 0)
-        return -1;
-    cudaStream_t stream;
-    if (rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0)
-        return -1;
-
-    int request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        return -1;
-
-    cudaError_t result = cudaMemcpyAsync(&dst, &src, count, kind, stream);
-
-    if (rpc_start_response(conn, request_id) < 0)
-        return -1;
-
-    return result;
-}
-
 int handle_cudaMemcpy2DFromArrayAsync(void *conn)
 {
     void* dst;
@@ -18842,7 +18814,6 @@ static RequestHandler opHandlers[] = {
     handle_cudaMipmappedArrayGetSparseProperties,
     handle_cudaMemcpy2DFromArray,
     handle_cudaMemcpy2DArrayToArray,
-    handle_cudaMemcpyAsync,
     handle_cudaMemcpy2DFromArrayAsync,
     handle_cudaMemset,
     handle_cudaMemset2D,
@@ -18931,6 +18902,7 @@ static RequestHandler opHandlers[] = {
     handle_cudaUserObjectRelease,
     handle_cudaGraphRetainUserObject,
     handle_cudaGraphReleaseUserObject,
+    handle_cudaMemcpyAsync,
 };
 
 RequestHandler get_handler(const int op)
