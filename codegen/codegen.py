@@ -445,7 +445,6 @@ def main():
             f.write(
                 '    {{"{x}", (void *){x}}},\n'.format(
                     x=x,
-                    y=y,
                 )
             )
         f.write("};\n\n")
