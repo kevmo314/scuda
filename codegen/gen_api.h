@@ -765,4 +765,5 @@
 #define RPC_cudaUserObjectRelease 764
 #define RPC_cudaGraphRetainUserObject 765
 #define RPC_cudaGraphReleaseUserObject 766
-#define RPC_cudaMemcpyAsync 767
+#define RPC_cudaMemcpy 767
+#define RPC_cudaMemcpyAsync 768

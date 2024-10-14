@@ -9819,7 +9819,6 @@ cudaError_t cudaMalloc(void** devPtr, size_t size)
 
     int request_id = rpc_start_request(RPC_cudaMalloc);
     if (request_id < 0 ||
-        rpc_write(&devPtr, sizeof(void*)) < 0 ||
         rpc_write(&size, sizeof(size_t)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(devPtr, sizeof(void*)) < 0 ||
@@ -12359,6 +12358,7 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cuMemFreeAsync_ptsz", (void *)cuMemFreeAsync},
     {"cuMemAllocAsync_ptsz", (void *)cuMemAllocAsync},
     {"cuMemAllocFromPoolAsync_ptsz", (void *)cuMemAllocFromPoolAsync},
+    {"cudaMemcpy", (void *)cudaMemcpy},
     {"cudaMemcpyAsync", (void *)cudaMemcpyAsync},
 };
 

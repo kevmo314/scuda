@@ -6627,7 +6627,7 @@ int handle_cuDeviceGetLuid(void *conn)
 
 int handle_cuDeviceTotalMem_v2(void *conn)
 {
-    std::size_t bytes;
+    size_t bytes;
     CUdevice dev;
     if (rpc_read(conn, &dev, sizeof(CUdevice)) < 0)
         return -1;
@@ -6648,7 +6648,7 @@ int handle_cuDeviceTotalMem_v2(void *conn)
 
 int handle_cuDeviceGetTexture1DLinearMaxWidth(void *conn)
 {
-    std::size_t maxWidthInElements;
+    size_t maxWidthInElements;
     CUarray_format format;
     if (rpc_read(conn, &format, sizeof(CUarray_format)) < 0)
         return -1;
@@ -7173,7 +7173,7 @@ int handle_cuCtxSetLimit(void *conn)
     CUlimit limit;
     if (rpc_read(conn, &limit, sizeof(CUlimit)) < 0)
         return -1;
-    std::size_t value;
+    size_t value;
     if (rpc_read(conn, &value, sizeof(size_t)) < 0)
         return -1;
 
@@ -7191,7 +7191,7 @@ int handle_cuCtxSetLimit(void *conn)
 
 int handle_cuCtxGetLimit(void *conn)
 {
-    std::size_t pvalue;
+    size_t pvalue;
     CUlimit limit;
     if (rpc_read(conn, &limit, sizeof(CUlimit)) < 0)
         return -1;
@@ -7491,7 +7491,7 @@ int handle_cuModuleGetFunction(void *conn)
 int handle_cuModuleGetGlobal_v2(void *conn)
 {
     CUdeviceptr dptr;
-    std::size_t bytes;
+    size_t bytes;
     CUmodule hmod;
     if (rpc_read(conn, &hmod, sizeof(CUmodule)) < 0)
         return -1;
@@ -7562,7 +7562,7 @@ int handle_cuLinkAddData_v2(void *conn)
     void* data;
     if (rpc_read(conn, &data, sizeof(void*)) < 0)
         return -1;
-    std::size_t size;
+    size_t size;
     if (rpc_read(conn, &size, sizeof(size_t)) < 0)
         return -1;
     std::size_t name_len;
@@ -7637,7 +7637,7 @@ int handle_cuLinkComplete(void *conn)
     if (rpc_read(conn, &state, sizeof(CUlinkState)) < 0)
         return -1;
     void* cubinOut;
-    std::size_t sizeOut;
+    size_t sizeOut;
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -7859,7 +7859,7 @@ int handle_cuKernelGetFunction(void *conn)
 int handle_cuLibraryGetGlobal(void *conn)
 {
     CUdeviceptr dptr;
-    std::size_t bytes;
+    size_t bytes;
     CUlibrary library;
     if (rpc_read(conn, &library, sizeof(CUlibrary)) < 0)
         return -1;
@@ -7889,7 +7889,7 @@ int handle_cuLibraryGetGlobal(void *conn)
 int handle_cuLibraryGetManaged(void *conn)
 {
     CUdeviceptr dptr;
-    std::size_t bytes;
+    size_t bytes;
     CUlibrary library;
     if (rpc_read(conn, &library, sizeof(CUlibrary)) < 0)
         return -1;
@@ -8025,10 +8025,10 @@ int handle_cuKernelSetCacheConfig(void *conn)
 
 int handle_cuMemGetInfo_v2(void *conn)
 {
-    std::size_t free;
+    size_t free;
     if (rpc_read(conn, &free, sizeof(size_t)) < 0)
         return -1;
-    std::size_t total;
+    size_t total;
     if (rpc_read(conn, &total, sizeof(size_t)) < 0)
         return -1;
 
@@ -8053,7 +8053,7 @@ int handle_cuMemAlloc_v2(void *conn)
     CUdeviceptr dptr;
     if (rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0)
         return -1;
-    std::size_t bytesize;
+    size_t bytesize;
     if (rpc_read(conn, &bytesize, sizeof(size_t)) < 0)
         return -1;
 
@@ -8076,13 +8076,13 @@ int handle_cuMemAllocPitch_v2(void *conn)
     CUdeviceptr dptr;
     if (rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0)
         return -1;
-    std::size_t pPitch;
+    size_t pPitch;
     if (rpc_read(conn, &pPitch, sizeof(size_t)) < 0)
         return -1;
-    std::size_t WidthInBytes;
+    size_t WidthInBytes;
     if (rpc_read(conn, &WidthInBytes, sizeof(size_t)) < 0)
         return -1;
-    std::size_t Height;
+    size_t Height;
     if (rpc_read(conn, &Height, sizeof(size_t)) < 0)
         return -1;
     unsigned int ElementSizeBytes;
@@ -8128,7 +8128,7 @@ int handle_cuMemGetAddressRange_v2(void *conn)
     CUdeviceptr pbase;
     if (rpc_read(conn, &pbase, sizeof(CUdeviceptr)) < 0)
         return -1;
-    std::size_t psize;
+    size_t psize;
     if (rpc_read(conn, &psize, sizeof(size_t)) < 0)
         return -1;
     CUdeviceptr dptr;
@@ -8156,7 +8156,7 @@ int handle_cuMemAllocHost_v2(void *conn)
     void* pp;
     if (rpc_read(conn, &pp, sizeof(void*)) < 0)
         return -1;
-    std::size_t bytesize;
+    size_t bytesize;
     if (rpc_read(conn, &bytesize, sizeof(size_t)) < 0)
         return -1;
 
@@ -8199,7 +8199,7 @@ int handle_cuMemHostAlloc(void *conn)
     void* pp;
     if (rpc_read(conn, &pp, sizeof(void*)) < 0)
         return -1;
-    std::size_t bytesize;
+    size_t bytesize;
     if (rpc_read(conn, &bytesize, sizeof(size_t)) < 0)
         return -1;
     unsigned int Flags;
@@ -8278,7 +8278,7 @@ int handle_cuMemAllocManaged(void *conn)
     CUdeviceptr dptr;
     if (rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0)
         return -1;
-    std::size_t bytesize;
+    size_t bytesize;
     if (rpc_read(conn, &bytesize, sizeof(size_t)) < 0)
         return -1;
     unsigned int flags;
@@ -8467,7 +8467,7 @@ int handle_cuMemHostRegister_v2(void *conn)
     void* p;
     if (rpc_read(conn, &p, sizeof(void*)) < 0)
         return -1;
-    std::size_t bytesize;
+    size_t bytesize;
     if (rpc_read(conn, &bytesize, sizeof(size_t)) < 0)
         return -1;
     unsigned int Flags;
@@ -8516,7 +8516,7 @@ int handle_cuMemcpy(void *conn)
     CUdeviceptr src;
     if (rpc_read(conn, &src, sizeof(CUdeviceptr)) < 0)
         return -1;
-    std::size_t ByteCount;
+    size_t ByteCount;
     if (rpc_read(conn, &ByteCount, sizeof(size_t)) < 0)
         return -1;
 
@@ -8546,7 +8546,7 @@ int handle_cuMemcpyPeer(void *conn)
     CUcontext srcContext;
     if (rpc_read(conn, &srcContext, sizeof(CUcontext)) < 0)
         return -1;
-    std::size_t ByteCount;
+    size_t ByteCount;
     if (rpc_read(conn, &ByteCount, sizeof(size_t)) < 0)
         return -1;
 
@@ -8570,7 +8570,7 @@ int handle_cuMemcpyDtoH_v2(void *conn)
     CUdeviceptr srcDevice;
     if (rpc_read(conn, &srcDevice, sizeof(CUdeviceptr)) < 0)
         return -1;
-    std::size_t ByteCount;
+    size_t ByteCount;
     if (rpc_read(conn, &ByteCount, sizeof(size_t)) < 0)
         return -1;
 
@@ -8596,7 +8596,7 @@ int handle_cuMemcpyDtoD_v2(void *conn)
     CUdeviceptr srcDevice;
     if (rpc_read(conn, &srcDevice, sizeof(CUdeviceptr)) < 0)
         return -1;
-    std::size_t ByteCount;
+    size_t ByteCount;
     if (rpc_read(conn, &ByteCount, sizeof(size_t)) < 0)
         return -1;
 
@@ -8617,13 +8617,13 @@ int handle_cuMemcpyDtoA_v2(void *conn)
     CUarray dstArray;
     if (rpc_read(conn, &dstArray, sizeof(CUarray)) < 0)
         return -1;
-    std::size_t dstOffset;
+    size_t dstOffset;
     if (rpc_read(conn, &dstOffset, sizeof(size_t)) < 0)
         return -1;
     CUdeviceptr srcDevice;
     if (rpc_read(conn, &srcDevice, sizeof(CUdeviceptr)) < 0)
         return -1;
-    std::size_t ByteCount;
+    size_t ByteCount;
     if (rpc_read(conn, &ByteCount, sizeof(size_t)) < 0)
         return -1;
 
@@ -8647,10 +8647,10 @@ int handle_cuMemcpyAtoD_v2(void *conn)
     CUarray srcArray;
     if (rpc_read(conn, &srcArray, sizeof(CUarray)) < 0)
         return -1;
-    std::size_t srcOffset;
+    size_t srcOffset;
     if (rpc_read(conn, &srcOffset, sizeof(size_t)) < 0)
         return -1;
-    std::size_t ByteCount;
+    size_t ByteCount;
     if (rpc_read(conn, &ByteCount, sizeof(size_t)) < 0)
         return -1;
 
@@ -8674,10 +8674,10 @@ int handle_cuMemcpyAtoH_v2(void *conn)
     CUarray srcArray;
     if (rpc_read(conn, &srcArray, sizeof(CUarray)) < 0)
         return -1;
-    std::size_t srcOffset;
+    size_t srcOffset;
     if (rpc_read(conn, &srcOffset, sizeof(size_t)) < 0)
         return -1;
-    std::size_t ByteCount;
+    size_t ByteCount;
     if (rpc_read(conn, &ByteCount, sizeof(size_t)) < 0)
         return -1;
 
@@ -8698,16 +8698,16 @@ int handle_cuMemcpyAtoA_v2(void *conn)
     CUarray dstArray;
     if (rpc_read(conn, &dstArray, sizeof(CUarray)) < 0)
         return -1;
-    std::size_t dstOffset;
+    size_t dstOffset;
     if (rpc_read(conn, &dstOffset, sizeof(size_t)) < 0)
         return -1;
     CUarray srcArray;
     if (rpc_read(conn, &srcArray, sizeof(CUarray)) < 0)
         return -1;
-    std::size_t srcOffset;
+    size_t srcOffset;
     if (rpc_read(conn, &srcOffset, sizeof(size_t)) < 0)
         return -1;
-    std::size_t ByteCount;
+    size_t ByteCount;
     if (rpc_read(conn, &ByteCount, sizeof(size_t)) < 0)
         return -1;
 
@@ -8731,7 +8731,7 @@ int handle_cuMemcpyAsync(void *conn)
     CUdeviceptr src;
     if (rpc_read(conn, &src, sizeof(CUdeviceptr)) < 0)
         return -1;
-    std::size_t ByteCount;
+    size_t ByteCount;
     if (rpc_read(conn, &ByteCount, sizeof(size_t)) < 0)
         return -1;
     CUstream hStream;
@@ -8764,7 +8764,7 @@ int handle_cuMemcpyPeerAsync(void *conn)
     CUcontext srcContext;
     if (rpc_read(conn, &srcContext, sizeof(CUcontext)) < 0)
         return -1;
-    std::size_t ByteCount;
+    size_t ByteCount;
     if (rpc_read(conn, &ByteCount, sizeof(size_t)) < 0)
         return -1;
     CUstream hStream;
@@ -8791,7 +8791,7 @@ int handle_cuMemcpyDtoHAsync_v2(void *conn)
     CUdeviceptr srcDevice;
     if (rpc_read(conn, &srcDevice, sizeof(CUdeviceptr)) < 0)
         return -1;
-    std::size_t ByteCount;
+    size_t ByteCount;
     if (rpc_read(conn, &ByteCount, sizeof(size_t)) < 0)
         return -1;
     CUstream hStream;
@@ -8820,7 +8820,7 @@ int handle_cuMemcpyDtoDAsync_v2(void *conn)
     CUdeviceptr srcDevice;
     if (rpc_read(conn, &srcDevice, sizeof(CUdeviceptr)) < 0)
         return -1;
-    std::size_t ByteCount;
+    size_t ByteCount;
     if (rpc_read(conn, &ByteCount, sizeof(size_t)) < 0)
         return -1;
     CUstream hStream;
@@ -8847,10 +8847,10 @@ int handle_cuMemcpyAtoHAsync_v2(void *conn)
     CUarray srcArray;
     if (rpc_read(conn, &srcArray, sizeof(CUarray)) < 0)
         return -1;
-    std::size_t srcOffset;
+    size_t srcOffset;
     if (rpc_read(conn, &srcOffset, sizeof(size_t)) < 0)
         return -1;
-    std::size_t ByteCount;
+    size_t ByteCount;
     if (rpc_read(conn, &ByteCount, sizeof(size_t)) < 0)
         return -1;
     CUstream hStream;
@@ -8879,7 +8879,7 @@ int handle_cuMemsetD8_v2(void *conn)
     unsigned char uc;
     if (rpc_read(conn, &uc, sizeof(unsigned char)) < 0)
         return -1;
-    std::size_t N;
+    size_t N;
     if (rpc_read(conn, &N, sizeof(size_t)) < 0)
         return -1;
 
@@ -8903,7 +8903,7 @@ int handle_cuMemsetD16_v2(void *conn)
     unsigned short us;
     if (rpc_read(conn, &us, sizeof(unsigned short)) < 0)
         return -1;
-    std::size_t N;
+    size_t N;
     if (rpc_read(conn, &N, sizeof(size_t)) < 0)
         return -1;
 
@@ -8927,7 +8927,7 @@ int handle_cuMemsetD32_v2(void *conn)
     unsigned int ui;
     if (rpc_read(conn, &ui, sizeof(unsigned int)) < 0)
         return -1;
-    std::size_t N;
+    size_t N;
     if (rpc_read(conn, &N, sizeof(size_t)) < 0)
         return -1;
 
@@ -8948,16 +8948,16 @@ int handle_cuMemsetD2D8_v2(void *conn)
     CUdeviceptr dstDevice;
     if (rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0)
         return -1;
-    std::size_t dstPitch;
+    size_t dstPitch;
     if (rpc_read(conn, &dstPitch, sizeof(size_t)) < 0)
         return -1;
     unsigned char uc;
     if (rpc_read(conn, &uc, sizeof(unsigned char)) < 0)
         return -1;
-    std::size_t Width;
+    size_t Width;
     if (rpc_read(conn, &Width, sizeof(size_t)) < 0)
         return -1;
-    std::size_t Height;
+    size_t Height;
     if (rpc_read(conn, &Height, sizeof(size_t)) < 0)
         return -1;
 
@@ -8978,16 +8978,16 @@ int handle_cuMemsetD2D16_v2(void *conn)
     CUdeviceptr dstDevice;
     if (rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0)
         return -1;
-    std::size_t dstPitch;
+    size_t dstPitch;
     if (rpc_read(conn, &dstPitch, sizeof(size_t)) < 0)
         return -1;
     unsigned short us;
     if (rpc_read(conn, &us, sizeof(unsigned short)) < 0)
         return -1;
-    std::size_t Width;
+    size_t Width;
     if (rpc_read(conn, &Width, sizeof(size_t)) < 0)
         return -1;
-    std::size_t Height;
+    size_t Height;
     if (rpc_read(conn, &Height, sizeof(size_t)) < 0)
         return -1;
 
@@ -9008,16 +9008,16 @@ int handle_cuMemsetD2D32_v2(void *conn)
     CUdeviceptr dstDevice;
     if (rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0)
         return -1;
-    std::size_t dstPitch;
+    size_t dstPitch;
     if (rpc_read(conn, &dstPitch, sizeof(size_t)) < 0)
         return -1;
     unsigned int ui;
     if (rpc_read(conn, &ui, sizeof(unsigned int)) < 0)
         return -1;
-    std::size_t Width;
+    size_t Width;
     if (rpc_read(conn, &Width, sizeof(size_t)) < 0)
         return -1;
-    std::size_t Height;
+    size_t Height;
     if (rpc_read(conn, &Height, sizeof(size_t)) < 0)
         return -1;
 
@@ -9041,7 +9041,7 @@ int handle_cuMemsetD8Async(void *conn)
     unsigned char uc;
     if (rpc_read(conn, &uc, sizeof(unsigned char)) < 0)
         return -1;
-    std::size_t N;
+    size_t N;
     if (rpc_read(conn, &N, sizeof(size_t)) < 0)
         return -1;
     CUstream hStream;
@@ -9068,7 +9068,7 @@ int handle_cuMemsetD16Async(void *conn)
     unsigned short us;
     if (rpc_read(conn, &us, sizeof(unsigned short)) < 0)
         return -1;
-    std::size_t N;
+    size_t N;
     if (rpc_read(conn, &N, sizeof(size_t)) < 0)
         return -1;
     CUstream hStream;
@@ -9095,7 +9095,7 @@ int handle_cuMemsetD32Async(void *conn)
     unsigned int ui;
     if (rpc_read(conn, &ui, sizeof(unsigned int)) < 0)
         return -1;
-    std::size_t N;
+    size_t N;
     if (rpc_read(conn, &N, sizeof(size_t)) < 0)
         return -1;
     CUstream hStream;
@@ -9119,16 +9119,16 @@ int handle_cuMemsetD2D8Async(void *conn)
     CUdeviceptr dstDevice;
     if (rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0)
         return -1;
-    std::size_t dstPitch;
+    size_t dstPitch;
     if (rpc_read(conn, &dstPitch, sizeof(size_t)) < 0)
         return -1;
     unsigned char uc;
     if (rpc_read(conn, &uc, sizeof(unsigned char)) < 0)
         return -1;
-    std::size_t Width;
+    size_t Width;
     if (rpc_read(conn, &Width, sizeof(size_t)) < 0)
         return -1;
-    std::size_t Height;
+    size_t Height;
     if (rpc_read(conn, &Height, sizeof(size_t)) < 0)
         return -1;
     CUstream hStream;
@@ -9152,16 +9152,16 @@ int handle_cuMemsetD2D16Async(void *conn)
     CUdeviceptr dstDevice;
     if (rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0)
         return -1;
-    std::size_t dstPitch;
+    size_t dstPitch;
     if (rpc_read(conn, &dstPitch, sizeof(size_t)) < 0)
         return -1;
     unsigned short us;
     if (rpc_read(conn, &us, sizeof(unsigned short)) < 0)
         return -1;
-    std::size_t Width;
+    size_t Width;
     if (rpc_read(conn, &Width, sizeof(size_t)) < 0)
         return -1;
-    std::size_t Height;
+    size_t Height;
     if (rpc_read(conn, &Height, sizeof(size_t)) < 0)
         return -1;
     CUstream hStream;
@@ -9185,16 +9185,16 @@ int handle_cuMemsetD2D32Async(void *conn)
     CUdeviceptr dstDevice;
     if (rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0)
         return -1;
-    std::size_t dstPitch;
+    size_t dstPitch;
     if (rpc_read(conn, &dstPitch, sizeof(size_t)) < 0)
         return -1;
     unsigned int ui;
     if (rpc_read(conn, &ui, sizeof(unsigned int)) < 0)
         return -1;
-    std::size_t Width;
+    size_t Width;
     if (rpc_read(conn, &Width, sizeof(size_t)) < 0)
         return -1;
-    std::size_t Height;
+    size_t Height;
     if (rpc_read(conn, &Height, sizeof(size_t)) < 0)
         return -1;
     CUstream hStream;
@@ -9453,7 +9453,7 @@ int handle_cuMemGetHandleForAddressRange(void *conn)
     CUdeviceptr dptr;
     if (rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0)
         return -1;
-    std::size_t size;
+    size_t size;
     if (rpc_read(conn, &size, sizeof(size_t)) < 0)
         return -1;
     CUmemRangeHandleType handleType;
@@ -9482,10 +9482,10 @@ int handle_cuMemAddressReserve(void *conn)
     CUdeviceptr ptr;
     if (rpc_read(conn, &ptr, sizeof(CUdeviceptr)) < 0)
         return -1;
-    std::size_t size;
+    size_t size;
     if (rpc_read(conn, &size, sizeof(size_t)) < 0)
         return -1;
-    std::size_t alignment;
+    size_t alignment;
     if (rpc_read(conn, &alignment, sizeof(size_t)) < 0)
         return -1;
     CUdeviceptr addr;
@@ -9514,7 +9514,7 @@ int handle_cuMemAddressFree(void *conn)
     CUdeviceptr ptr;
     if (rpc_read(conn, &ptr, sizeof(CUdeviceptr)) < 0)
         return -1;
-    std::size_t size;
+    size_t size;
     if (rpc_read(conn, &size, sizeof(size_t)) < 0)
         return -1;
 
@@ -9553,10 +9553,10 @@ int handle_cuMemMap(void *conn)
     CUdeviceptr ptr;
     if (rpc_read(conn, &ptr, sizeof(CUdeviceptr)) < 0)
         return -1;
-    std::size_t size;
+    size_t size;
     if (rpc_read(conn, &size, sizeof(size_t)) < 0)
         return -1;
-    std::size_t offset;
+    size_t offset;
     if (rpc_read(conn, &offset, sizeof(size_t)) < 0)
         return -1;
     CUmemGenericAllocationHandle handle;
@@ -9609,7 +9609,7 @@ int handle_cuMemUnmap(void *conn)
     CUdeviceptr ptr;
     if (rpc_read(conn, &ptr, sizeof(CUdeviceptr)) < 0)
         return -1;
-    std::size_t size;
+    size_t size;
     if (rpc_read(conn, &size, sizeof(size_t)) < 0)
         return -1;
 
@@ -9756,7 +9756,7 @@ int handle_cuMemAllocAsync(void *conn)
     CUdeviceptr dptr;
     if (rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0)
         return -1;
-    std::size_t bytesize;
+    size_t bytesize;
     if (rpc_read(conn, &bytesize, sizeof(size_t)) < 0)
         return -1;
     CUstream hStream;
@@ -9782,7 +9782,7 @@ int handle_cuMemPoolTrimTo(void *conn)
     CUmemoryPool pool;
     if (rpc_read(conn, &pool, sizeof(CUmemoryPool)) < 0)
         return -1;
-    std::size_t minBytesToKeep;
+    size_t minBytesToKeep;
     if (rpc_read(conn, &minBytesToKeep, sizeof(size_t)) < 0)
         return -1;
 
@@ -9901,7 +9901,7 @@ int handle_cuMemAllocFromPoolAsync(void *conn)
     CUdeviceptr dptr;
     if (rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0)
         return -1;
-    std::size_t bytesize;
+    size_t bytesize;
     if (rpc_read(conn, &bytesize, sizeof(size_t)) < 0)
         return -1;
     CUmemoryPool pool;
@@ -10067,7 +10067,7 @@ int handle_cuMemPrefetchAsync(void *conn)
     CUdeviceptr devPtr;
     if (rpc_read(conn, &devPtr, sizeof(CUdeviceptr)) < 0)
         return -1;
-    std::size_t count;
+    size_t count;
     if (rpc_read(conn, &count, sizeof(size_t)) < 0)
         return -1;
     CUdevice dstDevice;
@@ -10094,7 +10094,7 @@ int handle_cuMemAdvise(void *conn)
     CUdeviceptr devPtr;
     if (rpc_read(conn, &devPtr, sizeof(CUdeviceptr)) < 0)
         return -1;
-    std::size_t count;
+    size_t count;
     if (rpc_read(conn, &count, sizeof(size_t)) < 0)
         return -1;
     CUmem_advise advice;
@@ -10121,7 +10121,7 @@ int handle_cuMemRangeGetAttribute(void *conn)
     void* data;
     if (rpc_read(conn, &data, sizeof(void*)) < 0)
         return -1;
-    std::size_t dataSize;
+    size_t dataSize;
     if (rpc_read(conn, &dataSize, sizeof(size_t)) < 0)
         return -1;
     CUmem_range_attribute attribute;
@@ -10130,7 +10130,7 @@ int handle_cuMemRangeGetAttribute(void *conn)
     CUdeviceptr devPtr;
     if (rpc_read(conn, &devPtr, sizeof(CUdeviceptr)) < 0)
         return -1;
-    std::size_t count;
+    size_t count;
     if (rpc_read(conn, &count, sizeof(size_t)) < 0)
         return -1;
 
@@ -10153,19 +10153,19 @@ int handle_cuMemRangeGetAttributes(void *conn)
     void* data;
     if (rpc_read(conn, &data, sizeof(void*)) < 0)
         return -1;
-    std::size_t dataSizes;
+    size_t dataSizes;
     if (rpc_read(conn, &dataSizes, sizeof(size_t)) < 0)
         return -1;
     CUmem_range_attribute attributes;
     if (rpc_read(conn, &attributes, sizeof(CUmem_range_attribute)) < 0)
         return -1;
-    std::size_t numAttributes;
+    size_t numAttributes;
     if (rpc_read(conn, &numAttributes, sizeof(size_t)) < 0)
         return -1;
     CUdeviceptr devPtr;
     if (rpc_read(conn, &devPtr, sizeof(CUdeviceptr)) < 0)
         return -1;
-    std::size_t count;
+    size_t count;
     if (rpc_read(conn, &count, sizeof(size_t)) < 0)
         return -1;
 
@@ -10507,7 +10507,7 @@ int handle_cuStreamUpdateCaptureDependencies(void *conn)
     CUgraphNode dependencies;
     if (rpc_read(conn, &dependencies, sizeof(CUgraphNode)) < 0)
         return -1;
-    std::size_t numDependencies;
+    size_t numDependencies;
     if (rpc_read(conn, &numDependencies, sizeof(size_t)) < 0)
         return -1;
     unsigned int flags;
@@ -10536,7 +10536,7 @@ int handle_cuStreamAttachMemAsync(void *conn)
     CUdeviceptr dptr;
     if (rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0)
         return -1;
-    std::size_t length;
+    size_t length;
     if (rpc_read(conn, &length, sizeof(size_t)) < 0)
         return -1;
     unsigned int flags;
@@ -11969,7 +11969,7 @@ int handle_cuGraphGetNodes(void *conn)
     CUgraphNode nodes;
     if (rpc_read(conn, &nodes, sizeof(CUgraphNode)) < 0)
         return -1;
-    std::size_t numNodes;
+    size_t numNodes;
     if (rpc_read(conn, &numNodes, sizeof(size_t)) < 0)
         return -1;
 
@@ -11997,7 +11997,7 @@ int handle_cuGraphGetRootNodes(void *conn)
     CUgraphNode rootNodes;
     if (rpc_read(conn, &rootNodes, sizeof(CUgraphNode)) < 0)
         return -1;
-    std::size_t numRootNodes;
+    size_t numRootNodes;
     if (rpc_read(conn, &numRootNodes, sizeof(size_t)) < 0)
         return -1;
 
@@ -12028,7 +12028,7 @@ int handle_cuGraphGetEdges(void *conn)
     CUgraphNode to;
     if (rpc_read(conn, &to, sizeof(CUgraphNode)) < 0)
         return -1;
-    std::size_t numEdges;
+    size_t numEdges;
     if (rpc_read(conn, &numEdges, sizeof(size_t)) < 0)
         return -1;
 
@@ -12058,7 +12058,7 @@ int handle_cuGraphNodeGetDependencies(void *conn)
     CUgraphNode dependencies;
     if (rpc_read(conn, &dependencies, sizeof(CUgraphNode)) < 0)
         return -1;
-    std::size_t numDependencies;
+    size_t numDependencies;
     if (rpc_read(conn, &numDependencies, sizeof(size_t)) < 0)
         return -1;
 
@@ -12086,7 +12086,7 @@ int handle_cuGraphNodeGetDependentNodes(void *conn)
     CUgraphNode dependentNodes;
     if (rpc_read(conn, &dependentNodes, sizeof(CUgraphNode)) < 0)
         return -1;
-    std::size_t numDependentNodes;
+    size_t numDependentNodes;
     if (rpc_read(conn, &numDependentNodes, sizeof(size_t)) < 0)
         return -1;
 
@@ -12612,7 +12612,7 @@ int handle_cuOccupancyMaxActiveBlocksPerMultiprocessor(void *conn)
     int blockSize;
     if (rpc_read(conn, &blockSize, sizeof(int)) < 0)
         return -1;
-    std::size_t dynamicSMemSize;
+    size_t dynamicSMemSize;
     if (rpc_read(conn, &dynamicSMemSize, sizeof(size_t)) < 0)
         return -1;
 
@@ -12641,7 +12641,7 @@ int handle_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(void *conn)
     int blockSize;
     if (rpc_read(conn, &blockSize, sizeof(int)) < 0)
         return -1;
-    std::size_t dynamicSMemSize;
+    size_t dynamicSMemSize;
     if (rpc_read(conn, &dynamicSMemSize, sizeof(size_t)) < 0)
         return -1;
     unsigned int flags;
@@ -12664,7 +12664,7 @@ int handle_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(void *conn)
 
 int handle_cuOccupancyAvailableDynamicSMemPerBlock(void *conn)
 {
-    std::size_t dynamicSmemSize;
+    size_t dynamicSmemSize;
     if (rpc_read(conn, &dynamicSmemSize, sizeof(size_t)) < 0)
         return -1;
     CUfunction func;
@@ -12741,7 +12741,7 @@ int handle_cuTexRefSetMipmappedArray(void *conn)
 
 int handle_cuTexRefSetAddress_v2(void *conn)
 {
-    std::size_t ByteOffset;
+    size_t ByteOffset;
     if (rpc_read(conn, &ByteOffset, sizeof(size_t)) < 0)
         return -1;
     CUtexref hTexRef;
@@ -12750,7 +12750,7 @@ int handle_cuTexRefSetAddress_v2(void *conn)
     CUdeviceptr dptr;
     if (rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0)
         return -1;
-    std::size_t bytes;
+    size_t bytes;
     if (rpc_read(conn, &bytes, sizeof(size_t)) < 0)
         return -1;
 
@@ -13664,7 +13664,7 @@ int handle_cuGraphicsResourceGetMappedPointer_v2(void *conn)
     CUdeviceptr pDevPtr;
     if (rpc_read(conn, &pDevPtr, sizeof(CUdeviceptr)) < 0)
         return -1;
-    std::size_t pSize;
+    size_t pSize;
     if (rpc_read(conn, &pSize, sizeof(size_t)) < 0)
         return -1;
     CUgraphicsResource resource;
@@ -13795,7 +13795,7 @@ int handle_cudaDeviceSetLimit(void *conn)
     enum cudaLimit limit;
     if (rpc_read(conn, &limit, sizeof(enum cudaLimit)) < 0)
         return -1;
-    std::size_t value;
+    size_t value;
     if (rpc_read(conn, &value, sizeof(size_t)) < 0)
         return -1;
 
@@ -13813,7 +13813,7 @@ int handle_cudaDeviceSetLimit(void *conn)
 
 int handle_cudaDeviceGetLimit(void *conn)
 {
-    std::size_t pValue;
+    size_t pValue;
     if (rpc_read(conn, &pValue, sizeof(size_t)) < 0)
         return -1;
     enum cudaLimit limit;
@@ -14134,7 +14134,7 @@ int handle_cudaThreadSetLimit(void *conn)
     enum cudaLimit limit;
     if (rpc_read(conn, &limit, sizeof(enum cudaLimit)) < 0)
         return -1;
-    std::size_t value;
+    size_t value;
     if (rpc_read(conn, &value, sizeof(size_t)) < 0)
         return -1;
 
@@ -14152,7 +14152,7 @@ int handle_cudaThreadSetLimit(void *conn)
 
 int handle_cudaThreadGetLimit(void *conn)
 {
-    std::size_t pValue;
+    size_t pValue;
     if (rpc_read(conn, &pValue, sizeof(size_t)) < 0)
         return -1;
     enum cudaLimit limit;
@@ -14866,7 +14866,7 @@ int handle_cudaStreamAttachMemAsync(void *conn)
     void* devPtr;
     if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
         return -1;
-    std::size_t length;
+    size_t length;
     if (rpc_read(conn, &length, sizeof(size_t)) < 0)
         return -1;
     unsigned int flags;
@@ -14982,7 +14982,7 @@ int handle_cudaStreamGetCaptureInfo_v2(void *conn)
     enum cudaStreamCaptureStatus captureStatus_out;
     unsigned long long id_out;
     cudaGraph_t graph_out;
-    std::size_t numDependencies_out;
+    size_t numDependencies_out;
     const cudaGraphNode_t** dependencies_out = (const cudaGraphNode_t**)malloc(numDependencies_out * sizeof(const cudaGraphNode_t*));
 
     int request_id = rpc_end_request(conn);
@@ -15012,7 +15012,7 @@ int handle_cudaStreamUpdateCaptureDependencies(void *conn)
     cudaStream_t stream;
     if (rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0)
         return -1;
-    std::size_t numDependencies;
+    size_t numDependencies;
     if (rpc_read(conn, &numDependencies, sizeof(size_t)) < 0)
         return -1;
     cudaGraphNode_t* dependencies = (cudaGraphNode_t*)malloc(numDependencies * sizeof(cudaGraphNode_t));
@@ -15329,7 +15329,7 @@ int handle_cudaMallocManaged(void *conn)
     void* devPtr;
     if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
         return -1;
-    std::size_t size;
+    size_t size;
     if (rpc_read(conn, &size, sizeof(size_t)) < 0)
         return -1;
     unsigned int flags;
@@ -15353,9 +15353,7 @@ int handle_cudaMallocManaged(void *conn)
 int handle_cudaMalloc(void *conn)
 {
     void* devPtr;
-    if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
-        return -1;
-    std::size_t size;
+    size_t size;
     if (rpc_read(conn, &size, sizeof(size_t)) < 0)
         return -1;
 
@@ -15378,7 +15376,7 @@ int handle_cudaMallocHost(void *conn)
     void* ptr;
     if (rpc_read(conn, &ptr, sizeof(void*)) < 0)
         return -1;
-    std::size_t size;
+    size_t size;
     if (rpc_read(conn, &size, sizeof(size_t)) < 0)
         return -1;
 
@@ -15401,13 +15399,13 @@ int handle_cudaMallocPitch(void *conn)
     void* devPtr;
     if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
         return -1;
-    std::size_t pitch;
+    size_t pitch;
     if (rpc_read(conn, &pitch, sizeof(size_t)) < 0)
         return -1;
-    std::size_t width;
+    size_t width;
     if (rpc_read(conn, &width, sizeof(size_t)) < 0)
         return -1;
-    std::size_t height;
+    size_t height;
     if (rpc_read(conn, &height, sizeof(size_t)) < 0)
         return -1;
 
@@ -15508,7 +15506,7 @@ int handle_cudaHostAlloc(void *conn)
     void* pHost;
     if (rpc_read(conn, &pHost, sizeof(void*)) < 0)
         return -1;
-    std::size_t size;
+    size_t size;
     if (rpc_read(conn, &size, sizeof(size_t)) < 0)
         return -1;
     unsigned int flags;
@@ -15534,7 +15532,7 @@ int handle_cudaHostRegister(void *conn)
     void* ptr;
     if (rpc_read(conn, &ptr, sizeof(void*)) < 0)
         return -1;
-    std::size_t size;
+    size_t size;
     if (rpc_read(conn, &size, sizeof(size_t)) < 0)
         return -1;
     unsigned int flags;
@@ -15679,10 +15677,10 @@ int handle_cudaGetMipmappedArrayLevel(void *conn)
 
 int handle_cudaMemGetInfo(void *conn)
 {
-    std::size_t free;
+    size_t free;
     if (rpc_read(conn, &free, sizeof(size_t)) < 0)
         return -1;
-    std::size_t total;
+    size_t total;
     if (rpc_read(conn, &total, sizeof(size_t)) < 0)
         return -1;
 
@@ -15864,22 +15862,22 @@ int handle_cudaMemcpy2DFromArray(void *conn)
     void* dst;
     if (rpc_read(conn, &dst, sizeof(void*)) < 0)
         return -1;
-    std::size_t dpitch;
+    size_t dpitch;
     if (rpc_read(conn, &dpitch, sizeof(size_t)) < 0)
         return -1;
     cudaArray_const_t src;
     if (rpc_read(conn, &src, sizeof(cudaArray_const_t)) < 0)
         return -1;
-    std::size_t wOffset;
+    size_t wOffset;
     if (rpc_read(conn, &wOffset, sizeof(size_t)) < 0)
         return -1;
-    std::size_t hOffset;
+    size_t hOffset;
     if (rpc_read(conn, &hOffset, sizeof(size_t)) < 0)
         return -1;
-    std::size_t width;
+    size_t width;
     if (rpc_read(conn, &width, sizeof(size_t)) < 0)
         return -1;
-    std::size_t height;
+    size_t height;
     if (rpc_read(conn, &height, sizeof(size_t)) < 0)
         return -1;
     enum cudaMemcpyKind kind;
@@ -15905,25 +15903,25 @@ int handle_cudaMemcpy2DArrayToArray(void *conn)
     cudaArray_t dst;
     if (rpc_read(conn, &dst, sizeof(cudaArray_t)) < 0)
         return -1;
-    std::size_t wOffsetDst;
+    size_t wOffsetDst;
     if (rpc_read(conn, &wOffsetDst, sizeof(size_t)) < 0)
         return -1;
-    std::size_t hOffsetDst;
+    size_t hOffsetDst;
     if (rpc_read(conn, &hOffsetDst, sizeof(size_t)) < 0)
         return -1;
     cudaArray_const_t src;
     if (rpc_read(conn, &src, sizeof(cudaArray_const_t)) < 0)
         return -1;
-    std::size_t wOffsetSrc;
+    size_t wOffsetSrc;
     if (rpc_read(conn, &wOffsetSrc, sizeof(size_t)) < 0)
         return -1;
-    std::size_t hOffsetSrc;
+    size_t hOffsetSrc;
     if (rpc_read(conn, &hOffsetSrc, sizeof(size_t)) < 0)
         return -1;
-    std::size_t width;
+    size_t width;
     if (rpc_read(conn, &width, sizeof(size_t)) < 0)
         return -1;
-    std::size_t height;
+    size_t height;
     if (rpc_read(conn, &height, sizeof(size_t)) < 0)
         return -1;
     enum cudaMemcpyKind kind;
@@ -15947,22 +15945,22 @@ int handle_cudaMemcpy2DFromArrayAsync(void *conn)
     void* dst;
     if (rpc_read(conn, &dst, sizeof(void*)) < 0)
         return -1;
-    std::size_t dpitch;
+    size_t dpitch;
     if (rpc_read(conn, &dpitch, sizeof(size_t)) < 0)
         return -1;
     cudaArray_const_t src;
     if (rpc_read(conn, &src, sizeof(cudaArray_const_t)) < 0)
         return -1;
-    std::size_t wOffset;
+    size_t wOffset;
     if (rpc_read(conn, &wOffset, sizeof(size_t)) < 0)
         return -1;
-    std::size_t hOffset;
+    size_t hOffset;
     if (rpc_read(conn, &hOffset, sizeof(size_t)) < 0)
         return -1;
-    std::size_t width;
+    size_t width;
     if (rpc_read(conn, &width, sizeof(size_t)) < 0)
         return -1;
-    std::size_t height;
+    size_t height;
     if (rpc_read(conn, &height, sizeof(size_t)) < 0)
         return -1;
     enum cudaMemcpyKind kind;
@@ -15994,7 +15992,7 @@ int handle_cudaMemset(void *conn)
     int value;
     if (rpc_read(conn, &value, sizeof(int)) < 0)
         return -1;
-    std::size_t count;
+    size_t count;
     if (rpc_read(conn, &count, sizeof(size_t)) < 0)
         return -1;
 
@@ -16017,16 +16015,16 @@ int handle_cudaMemset2D(void *conn)
     void* devPtr;
     if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
         return -1;
-    std::size_t pitch;
+    size_t pitch;
     if (rpc_read(conn, &pitch, sizeof(size_t)) < 0)
         return -1;
     int value;
     if (rpc_read(conn, &value, sizeof(int)) < 0)
         return -1;
-    std::size_t width;
+    size_t width;
     if (rpc_read(conn, &width, sizeof(size_t)) < 0)
         return -1;
-    std::size_t height;
+    size_t height;
     if (rpc_read(conn, &height, sizeof(size_t)) < 0)
         return -1;
 
@@ -16076,7 +16074,7 @@ int handle_cudaMemsetAsync(void *conn)
     int value;
     if (rpc_read(conn, &value, sizeof(int)) < 0)
         return -1;
-    std::size_t count;
+    size_t count;
     if (rpc_read(conn, &count, sizeof(size_t)) < 0)
         return -1;
     cudaStream_t stream;
@@ -16102,16 +16100,16 @@ int handle_cudaMemset2DAsync(void *conn)
     void* devPtr;
     if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
         return -1;
-    std::size_t pitch;
+    size_t pitch;
     if (rpc_read(conn, &pitch, sizeof(size_t)) < 0)
         return -1;
     int value;
     if (rpc_read(conn, &value, sizeof(int)) < 0)
         return -1;
-    std::size_t width;
+    size_t width;
     if (rpc_read(conn, &width, sizeof(size_t)) < 0)
         return -1;
-    std::size_t height;
+    size_t height;
     if (rpc_read(conn, &height, sizeof(size_t)) < 0)
         return -1;
     cudaStream_t stream;
@@ -16167,13 +16165,13 @@ int handle_cudaMemcpyFromArray(void *conn)
     cudaArray_const_t src;
     if (rpc_read(conn, &src, sizeof(cudaArray_const_t)) < 0)
         return -1;
-    std::size_t wOffset;
+    size_t wOffset;
     if (rpc_read(conn, &wOffset, sizeof(size_t)) < 0)
         return -1;
-    std::size_t hOffset;
+    size_t hOffset;
     if (rpc_read(conn, &hOffset, sizeof(size_t)) < 0)
         return -1;
-    std::size_t count;
+    size_t count;
     if (rpc_read(conn, &count, sizeof(size_t)) < 0)
         return -1;
     enum cudaMemcpyKind kind;
@@ -16199,22 +16197,22 @@ int handle_cudaMemcpyArrayToArray(void *conn)
     cudaArray_t dst;
     if (rpc_read(conn, &dst, sizeof(cudaArray_t)) < 0)
         return -1;
-    std::size_t wOffsetDst;
+    size_t wOffsetDst;
     if (rpc_read(conn, &wOffsetDst, sizeof(size_t)) < 0)
         return -1;
-    std::size_t hOffsetDst;
+    size_t hOffsetDst;
     if (rpc_read(conn, &hOffsetDst, sizeof(size_t)) < 0)
         return -1;
     cudaArray_const_t src;
     if (rpc_read(conn, &src, sizeof(cudaArray_const_t)) < 0)
         return -1;
-    std::size_t wOffsetSrc;
+    size_t wOffsetSrc;
     if (rpc_read(conn, &wOffsetSrc, sizeof(size_t)) < 0)
         return -1;
-    std::size_t hOffsetSrc;
+    size_t hOffsetSrc;
     if (rpc_read(conn, &hOffsetSrc, sizeof(size_t)) < 0)
         return -1;
-    std::size_t count;
+    size_t count;
     if (rpc_read(conn, &count, sizeof(size_t)) < 0)
         return -1;
     enum cudaMemcpyKind kind;
@@ -16241,13 +16239,13 @@ int handle_cudaMemcpyFromArrayAsync(void *conn)
     cudaArray_const_t src;
     if (rpc_read(conn, &src, sizeof(cudaArray_const_t)) < 0)
         return -1;
-    std::size_t wOffset;
+    size_t wOffset;
     if (rpc_read(conn, &wOffset, sizeof(size_t)) < 0)
         return -1;
-    std::size_t hOffset;
+    size_t hOffset;
     if (rpc_read(conn, &hOffset, sizeof(size_t)) < 0)
         return -1;
-    std::size_t count;
+    size_t count;
     if (rpc_read(conn, &count, sizeof(size_t)) < 0)
         return -1;
     enum cudaMemcpyKind kind;
@@ -16276,7 +16274,7 @@ int handle_cudaMallocAsync(void *conn)
     void* devPtr;
     if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
         return -1;
-    std::size_t size;
+    size_t size;
     if (rpc_read(conn, &size, sizeof(size_t)) < 0)
         return -1;
     cudaStream_t hStream;
@@ -16325,7 +16323,7 @@ int handle_cudaMemPoolTrimTo(void *conn)
     cudaMemPool_t memPool;
     if (rpc_read(conn, &memPool, sizeof(cudaMemPool_t)) < 0)
         return -1;
-    std::size_t minBytesToKeep;
+    size_t minBytesToKeep;
     if (rpc_read(conn, &minBytesToKeep, sizeof(size_t)) < 0)
         return -1;
 
@@ -16444,7 +16442,7 @@ int handle_cudaMallocFromPoolAsync(void *conn)
     void* ptr;
     if (rpc_read(conn, &ptr, sizeof(void*)) < 0)
         return -1;
-    std::size_t size;
+    size_t size;
     if (rpc_read(conn, &size, sizeof(size_t)) < 0)
         return -1;
     cudaMemPool_t memPool;
@@ -16742,7 +16740,7 @@ int handle_cudaGraphicsResourceGetMappedPointer(void *conn)
     void* devPtr;
     if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
         return -1;
-    std::size_t size;
+    size_t size;
     if (rpc_read(conn, &size, sizeof(size_t)) < 0)
         return -1;
     cudaGraphicsResource_t resource;
@@ -17523,7 +17521,7 @@ int handle_cudaGraphGetNodes(void *conn)
     cudaGraphNode_t nodes;
     if (rpc_read(conn, &nodes, sizeof(cudaGraphNode_t)) < 0)
         return -1;
-    std::size_t numNodes;
+    size_t numNodes;
     if (rpc_read(conn, &numNodes, sizeof(size_t)) < 0)
         return -1;
 
@@ -17551,7 +17549,7 @@ int handle_cudaGraphGetRootNodes(void *conn)
     cudaGraphNode_t pRootNodes;
     if (rpc_read(conn, &pRootNodes, sizeof(cudaGraphNode_t)) < 0)
         return -1;
-    std::size_t pNumRootNodes;
+    size_t pNumRootNodes;
     if (rpc_read(conn, &pNumRootNodes, sizeof(size_t)) < 0)
         return -1;
 
@@ -17582,7 +17580,7 @@ int handle_cudaGraphGetEdges(void *conn)
     cudaGraphNode_t to;
     if (rpc_read(conn, &to, sizeof(cudaGraphNode_t)) < 0)
         return -1;
-    std::size_t numEdges;
+    size_t numEdges;
     if (rpc_read(conn, &numEdges, sizeof(size_t)) < 0)
         return -1;
 
@@ -17612,7 +17610,7 @@ int handle_cudaGraphNodeGetDependencies(void *conn)
     cudaGraphNode_t pDependencies;
     if (rpc_read(conn, &pDependencies, sizeof(cudaGraphNode_t)) < 0)
         return -1;
-    std::size_t pNumDependencies;
+    size_t pNumDependencies;
     if (rpc_read(conn, &pNumDependencies, sizeof(size_t)) < 0)
         return -1;
 
@@ -17640,7 +17638,7 @@ int handle_cudaGraphNodeGetDependentNodes(void *conn)
     cudaGraphNode_t pDependentNodes;
     if (rpc_read(conn, &pDependentNodes, sizeof(cudaGraphNode_t)) < 0)
         return -1;
-    std::size_t pNumDependentNodes;
+    size_t pNumDependentNodes;
     if (rpc_read(conn, &pNumDependentNodes, sizeof(size_t)) < 0)
         return -1;
 
@@ -18902,6 +18900,7 @@ static RequestHandler opHandlers[] = {
     handle_cudaUserObjectRelease,
     handle_cudaGraphRetainUserObject,
     handle_cudaGraphReleaseUserObject,
+    handle_cudaMemcpy,
     handle_cudaMemcpyAsync,
 };
 
