@@ -152,3 +152,93 @@ cudaError_t cudaMemcpyAsync(void *dst, const void *src, size_t count, enum cudaM
 
     return return_value;
 }
+
+cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim, void **args, size_t sharedMem, cudaStream_t stream)
+{
+    cudaError_t return_value;
+
+    // Start the RPC request
+    int request_id = rpc_start_request(RPC_cudaLaunchKernel);
+    if (request_id < 0)
+    {
+        return cudaErrorDevicesUnavailable;
+    }
+
+    std::cout << "device func... " << func << std::endl;
+
+    // Write the function pointer (kernel) to be launched
+    if (rpc_write(&func, sizeof(const void *)) < 0)
+    {
+        return cudaErrorDevicesUnavailable;
+    }
+
+    // Write the grid dimensions (for launching the kernel)
+    if (rpc_write(&gridDim, sizeof(dim3)) < 0)
+    {
+        return cudaErrorDevicesUnavailable;
+    }
+
+    // Write the block dimensions
+    if (rpc_write(&blockDim, sizeof(dim3)) < 0)
+    {
+        return cudaErrorDevicesUnavailable;
+    }
+
+    // Write the shared memory size
+    if (rpc_write(&sharedMem, sizeof(size_t)) < 0)
+    {
+        return cudaErrorDevicesUnavailable;
+    }
+
+    // Write the stream to use for kernel execution
+    if (rpc_write(&stream, sizeof(cudaStream_t)) < 0)
+    {
+        return cudaErrorDevicesUnavailable;
+    }
+
+    // Write the kernel arguments one by one (assuming args is an array of void pointers)
+    int num_args = 0; // Get the number of arguments
+    while (args[num_args] != nullptr)
+        num_args++;
+
+    if (rpc_write(&num_args, sizeof(int)) < 0)
+    {
+        return cudaErrorDevicesUnavailable;
+    }
+
+    std::cout << "num arg... " << num_args << std::endl;
+
+    // Send each argument to the remote server
+    size_t total_size = num_args * sizeof(void *);
+
+    void *arg_buffer = malloc(total_size);
+    if (arg_buffer == NULL)
+    {
+        std::cerr << "Failed to allocate memory for arguments buffer." << std::endl;
+        return cudaErrorDevicesUnavailable;
+    }
+
+    memcpy(arg_buffer, args, total_size);
+
+    if (rpc_write(arg_buffer, total_size) < 0)
+    {
+        free(arg_buffer);  // Free buffer if rpc_write fails
+        return cudaErrorDevicesUnavailable;
+    }
+
+    free(arg_buffer);
+
+    // Wait for a response after the kernel execution request is completed
+    if (rpc_wait_for_response(request_id) < 0)
+    {
+        return cudaErrorDevicesUnavailable;
+    }
+
+    // End the request and get the return value
+    if (rpc_end_request(&return_value, request_id) < 0)
+    {
+        return cudaErrorDevicesUnavailable;
+    }
+
+    return return_value;
+}
