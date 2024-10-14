@@ -4329,7 +4329,7 @@ cudaError_t cudaOccupancyMaxActiveClusters(int *numClusters, const void *func, c
  */
 cudaError_t cudaMallocManaged(void **devPtr, size_t size, unsigned int flags);
 /**
- * @param devPtr SEND_RECV
+ * @param devPtr RECV_ONLY
  * @param size SEND_ONLY
  */
 cudaError_t cudaMalloc(void **devPtr, size_t size);
