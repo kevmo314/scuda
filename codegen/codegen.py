@@ -56,9 +56,8 @@ MANUAL_REMAPPINGS = [
 
 # a list of manually implemented cuda/nvml functions.
 # these are automatically appended to each file; operation order is maintained as well.
-MANUAL_IMPLEMENTATIONS = [
-    "cudaMemcpyAsync"
-]
+MANUAL_IMPLEMENTATIONS = ["cudaMemcpy", "cudaMemcpyAsync"]
+
 
 @dataclass
 class Operation:
@@ -185,8 +184,8 @@ def error_const(return_type: str) -> str:
 
 
 def prefix_std(type: str) -> str:
-    if type in ["size_t", "std::size_t"]:
-        return "std::size_t"
+    # if type in ["size_t", "std::size_t"]:
+    #     return "std::size_t"
     return type
 
 
@@ -241,11 +240,11 @@ def main():
         # Append any manually written implementations to our rpc list so that we maintain proper operation order
         for j, (handler) in enumerate(MANUAL_IMPLEMENTATIONS):
             f.write(
-            "#define RPC_{name} {value}\n".format(
-                name=handler.format(),
-                value=j + lastIndex,
+                "#define RPC_{name} {value}\n".format(
+                    name=handler.format(),
+                    value=j + lastIndex,
+                )
             )
-        )
 
     with open("gen_client.cpp", "w") as f:
         f.write(
@@ -421,7 +420,7 @@ def main():
         f.write("std::unordered_map<std::string, void *> functionMap = {\n")
 
         # we need the base nvmlInit, this is important and should be kept here in the codegen.
-        f.write("    {\"nvmlInit\", (void *)nvmlInit_v2},\n")
+        f.write('    {"nvmlInit", (void *)nvmlInit_v2},\n')
         for function, _, _ in functions_with_annotations:
             f.write(
                 '    {{"{name}", (void *){name}}},\n'.format(
