@@ -89,6 +89,30 @@ print('Tensor successfully moved to CUDA')
   fi
 }
 
+test_tensor_to_cuda_to_cpu() {
+  output=$(LD_PRELOAD="$libscuda_path" python3 -c "
+import torch
+print('Creating a tensor...')
+tensor = torch.full((10, 10), 5)
+print('Tensor created on CPU:')
+print(tensor)
+
+print('Moving tensor to CUDA...')
+tensor_cuda = tensor.to('cuda:0')
+print('Tensor successfully moved to CUDA')
+
+print('Moving tensor back to CPU...')
+tensor_cpu = tensor_cuda.to('cpu')
+print('Tensor successfully moved back to CPU:')
+" | tail -n 1)
+
+  if [[ "$output" == "Tensor successfully moved back to CPU:" ]]; then
+    ansi_format "pass" "$pass_message"
+  else
+    ansi_format "fail" "Tensor failed. Got [$output]."
+  fi
+}
+
 #---- declare test cases ----#
 declare -A test_cuda_avail=(
   ["function"]="test_cuda_available"
@@ -100,8 +124,13 @@ declare -A test_tensor_to_cuda=(
   ["pass"]="Tensor moved to CUDA successfully."
 )
 
+declare -A test_tensor_to_cuda_to_cpu=(
+  ["function"]="test_tensor_to_cuda_to_cpu"
+  ["pass"]="Tensor successfully moved to CUDA and back to CPU."
+)
+
 #---- assign them to our associative array ----#
-tests=("test_cuda_avail" "test_tensor_to_cuda")
+tests=("test_cuda_avail" "test_tensor_to_cuda" "test_tensor_to_cuda_to_cpu")
 
 test() {
   build
@@ -125,9 +154,16 @@ run() {
 import torch
 print('Creating a tensor...')
 tensor = torch.full((10, 10), 5)
+print('Tensor created on CPU:')
+print(tensor)
+
 print('Moving tensor to CUDA...')
-tensor = tensor.to('cuda:0')
+tensor_cuda = tensor.to('cuda:0')
 print('Tensor successfully moved to CUDA')
+
+print('Moving tensor back to CPU...')
+tensor_cpu = tensor_cuda.to('cpu')
+print('Tensor successfully moved back to CPU:')
 "
 }
 
