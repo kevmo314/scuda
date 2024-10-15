@@ -15439,8 +15439,6 @@ int handle_cudaFree(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &devPtr, sizeof(void*)) < 0)
-        return -1;
 
     return result;
 }
@@ -15458,8 +15456,6 @@ int handle_cudaFreeHost(void *conn)
     cudaError_t result = cudaFreeHost(&ptr);
 
     if (rpc_start_response(conn, request_id) < 0)
-        return -1;
-    if (rpc_write(conn, &ptr, sizeof(void*)) < 0)
         return -1;
 
     return result;

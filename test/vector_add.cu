@@ -5,7 +5,7 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 
-#define N 10000000
+#define N 10
 #define MAX_ERR 1e-6
 
 __global__ void vector_add(float *out, float *a, float *b, int n)
