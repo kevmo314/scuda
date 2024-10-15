@@ -222,7 +222,7 @@ cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim, void
 
     if (rpc_write(arg_buffer, total_size) < 0)
     {
-        free(arg_buffer);  // Free buffer if rpc_write fails
+        free(arg_buffer); // Free buffer if rpc_write fails
         return cudaErrorDevicesUnavailable;
     }
 
@@ -243,47 +243,50 @@ cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim, void
     return return_value;
 }
 
-cudaError_t __cudaRegisterFunction(void **fatCubinHandle,
-                                   const char *hostFun,
-                                   char *deviceFun,
-                                   const char *deviceName,
-                                   int thread_limit,
-                                   uint3 *tid, uint3 *bid, dim3 *bDim, dim3 *gDim, int *wSize)
+extern "C"
 {
-    cudaError_t return_value;
-
-    std::cout << "calling __cudaRegisterFunction" << std::endl;
-
-    // Start the RPC request for __cudaRegisterFunction
-    int request_id = rpc_start_request(RPC___cudaRegisterFunction);
-    if (request_id < 0)
+    void __cudaRegisterFunction(void **fatCubinHandle,
+                                const char *hostFun,
+                                char *deviceFun,
+                                const char *deviceName,
+                                int thread_limit,
+                                uint3 *tid, uint3 *bid, dim3 *bDim, dim3 *gDim, int *wSize)
     {
-        return cudaErrorDevicesUnavailable;
-    }
+        cudaError_t return_value;
 
-    if (rpc_write(fatCubinHandle, sizeof(void *)) < 0 ||
-        rpc_write(&hostFun, sizeof(const char *)) < 0 ||
-        rpc_write(&deviceFun, sizeof(char *)) < 0 ||
-        rpc_write(&deviceName, sizeof(const char *)) < 0 ||
-        rpc_write(&thread_limit, sizeof(int)) < 0 ||
-        rpc_write(tid, sizeof(uint3)) < 0 ||
-        rpc_write(bid, sizeof(uint3)) < 0 ||
-        rpc_write(bDim, sizeof(dim3)) < 0 ||
-        rpc_write(gDim, sizeof(dim3)) < 0 ||
-        rpc_write(wSize, sizeof(int)) < 0)
-    {
-        return cudaErrorDevicesUnavailable;
-    }
+        std::cout << "calling __cudaRegisterFunction" << std::endl;
 
-    if (rpc_wait_for_response(request_id) < 0)
-    {
-        return cudaErrorDevicesUnavailable;
-    }
+        // Start the RPC request for __cudaRegisterFunction
+        int request_id = rpc_start_request(RPC___cudaRegisterFunction);
+        if (request_id < 0)
+        {
+            return;
+        }
 
-    if (rpc_end_request(&return_value, request_id) < 0)
-    {
-        return cudaErrorDevicesUnavailable;
-    }
+        if (rpc_write(fatCubinHandle, sizeof(void *)) < 0 ||
+            rpc_write(&hostFun, sizeof(const char *)) < 0 ||
+            rpc_write(&deviceFun, sizeof(char *)) < 0 ||
+            rpc_write(&deviceName, sizeof(const char *)) < 0 ||
+            rpc_write(&thread_limit, sizeof(int)) < 0 ||
+            rpc_write(tid, sizeof(uint3)) < 0 ||
+            rpc_write(bid, sizeof(uint3)) < 0 ||
+            rpc_write(bDim, sizeof(dim3)) < 0 ||
+            rpc_write(gDim, sizeof(dim3)) < 0 ||
+            rpc_write(wSize, sizeof(int)) < 0)
+        {
+            return;
+        }
 
-    return return_value;
+        if (rpc_wait_for_response(request_id) < 0)
+        {
+            return;
+        }
+
+        if (rpc_end_request(&return_value, request_id) < 0)
+        {
+            return;
+        }
+
+        return;
+    }
 }
