@@ -332,3 +332,50 @@ int handle_cudaLaunchKernel(void *conn)
 
     return result;
 }
+
+int handle___cudaRegisterFunction(void *conn)
+{
+    void *fatCubinHandle;
+    const char *hostFun;
+    char *deviceFun;
+    const char *deviceName;
+    int thread_limit;
+    uint3 tid, bid;
+    dim3 bDim, gDim;
+    int wSize;
+
+    if (rpc_read(conn, &fatCubinHandle, sizeof(void *)) < 0 ||
+        rpc_read(conn, &hostFun, sizeof(const char *)) < 0 ||
+        rpc_read(conn, &deviceFun, sizeof(char *)) < 0 ||
+        rpc_read(conn, &deviceName, sizeof(const char *)) < 0 ||
+        rpc_read(conn, &thread_limit, sizeof(int)) < 0 ||
+        rpc_read(conn, &tid, sizeof(uint3)) < 0 ||
+        rpc_read(conn, &bid, sizeof(uint3)) < 0 ||
+        rpc_read(conn, &bDim, sizeof(dim3)) < 0 ||
+        rpc_read(conn, &gDim, sizeof(dim3)) < 0 ||
+        rpc_read(conn, &wSize, sizeof(int)) < 0)
+    {
+        return -1;
+    }
+
+    // cudaError_t result = __cudaRegisterFunction(fatCubinHandle, hostFun, deviceFun, deviceName, thread_limit, &tid, &bid, &bDim, &gDim, &wSize);
+    // if (result != cudaSuccess)
+    // {
+    //     std::cerr << "__cudaRegisterFunction failed: " << cudaGetErrorString(result) << std::endl;
+    //     return -1;
+    // }
+
+    int request_id = rpc_end_request(conn);
+    if (request_id < 0)
+    {
+        return -1;
+    }
+
+    if (rpc_start_response(conn, request_id) < 0)
+    {
+        return -1;
+    }
+
+    // return result;
+}
+

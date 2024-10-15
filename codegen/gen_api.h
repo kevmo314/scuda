@@ -768,3 +768,4 @@
 #define RPC_cudaMemcpy 767
 #define RPC_cudaMemcpyAsync 768
 #define RPC_cudaLaunchKernel 769
+#define RPC___cudaRegisterFunction 770
