@@ -9819,7 +9819,6 @@ cudaError_t cudaMalloc(void** devPtr, size_t size)
 
     int request_id = rpc_start_request(RPC_cudaMalloc);
     if (request_id < 0 ||
-        rpc_write(&devPtr, sizeof(void*)) < 0 ||
         rpc_write(&size, sizeof(size_t)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
         rpc_read(devPtr, sizeof(void*)) < 0 ||
@@ -9869,7 +9868,6 @@ cudaError_t cudaFree(void* devPtr)
     if (request_id < 0 ||
         rpc_write(&devPtr, sizeof(void*)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(devPtr, sizeof(void*)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
         return cudaErrorDevicesUnavailable;
     return return_value;
@@ -9883,7 +9881,6 @@ cudaError_t cudaFreeHost(void* ptr)
     if (request_id < 0 ||
         rpc_write(&ptr, sizeof(void*)) < 0 ||
         rpc_wait_for_response(request_id) < 0 ||
-        rpc_read(ptr, sizeof(void*)) < 0 ||
         rpc_end_request(&return_value, request_id) < 0)
         return cudaErrorDevicesUnavailable;
     return return_value;

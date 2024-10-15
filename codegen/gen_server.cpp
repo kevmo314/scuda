@@ -70,7 +70,7 @@ int handle_nvmlSystemGetDriverVersion(void *conn)
     unsigned int length;
     if (rpc_read(conn, &length, sizeof(unsigned int)) < 0)
         return -1;
-    char* version = (char*)malloc(length * sizeof(char));
+    char *version = (char *)malloc(length * sizeof(char));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -91,7 +91,7 @@ int handle_nvmlSystemGetNVMLVersion(void *conn)
     unsigned int length;
     if (rpc_read(conn, &length, sizeof(unsigned int)) < 0)
         return -1;
-    char* version = (char*)malloc(length * sizeof(char));
+    char *version = (char *)malloc(length * sizeof(char));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -151,7 +151,7 @@ int handle_nvmlSystemGetProcessName(void *conn)
     unsigned int length;
     if (rpc_read(conn, &length, sizeof(unsigned int)) < 0)
         return -1;
-    char* name = (char*)malloc(length * sizeof(char));
+    char *name = (char *)malloc(length * sizeof(char));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -322,7 +322,7 @@ int handle_nvmlUnitGetDevices(void *conn)
     unsigned int deviceCount;
     if (rpc_read(conn, &deviceCount, sizeof(unsigned int)) < 0)
         return -1;
-    nvmlDevice_t* devices = (nvmlDevice_t*)malloc(deviceCount * sizeof(nvmlDevice_t));
+    nvmlDevice_t *devices = (nvmlDevice_t *)malloc(deviceCount * sizeof(nvmlDevice_t));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -345,7 +345,7 @@ int handle_nvmlSystemGetHicVersion(void *conn)
     unsigned int hwbcCount;
     if (rpc_read(conn, &hwbcCount, sizeof(unsigned int)) < 0)
         return -1;
-    nvmlHwbcEntry_t* hwbcEntries = (nvmlHwbcEntry_t*)malloc(hwbcCount * sizeof(nvmlHwbcEntry_t));
+    nvmlHwbcEntry_t *hwbcEntries = (nvmlHwbcEntry_t *)malloc(hwbcCount * sizeof(nvmlHwbcEntry_t));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -428,8 +428,8 @@ int handle_nvmlDeviceGetHandleBySerial(void *conn)
     std::size_t serial_len;
     if (rpc_read(conn, &serial_len, sizeof(serial_len)) < 0)
         return -1;
-    const char* serial = (const char*)malloc(serial_len);
-    if (rpc_read(conn, &serial, sizeof(const char*)) < 0)
+    const char *serial = (const char *)malloc(serial_len);
+    if (rpc_read(conn, &serial, sizeof(const char *)) < 0)
         return -1;
     nvmlDevice_t device;
 
@@ -452,8 +452,8 @@ int handle_nvmlDeviceGetHandleByUUID(void *conn)
     std::size_t uuid_len;
     if (rpc_read(conn, &uuid_len, sizeof(uuid_len)) < 0)
         return -1;
-    const char* uuid = (const char*)malloc(uuid_len);
-    if (rpc_read(conn, &uuid, sizeof(const char*)) < 0)
+    const char *uuid = (const char *)malloc(uuid_len);
+    if (rpc_read(conn, &uuid, sizeof(const char *)) < 0)
         return -1;
     nvmlDevice_t device;
 
@@ -476,8 +476,8 @@ int handle_nvmlDeviceGetHandleByPciBusId_v2(void *conn)
     std::size_t pciBusId_len;
     if (rpc_read(conn, &pciBusId_len, sizeof(pciBusId_len)) < 0)
         return -1;
-    const char* pciBusId = (const char*)malloc(pciBusId_len);
-    if (rpc_read(conn, &pciBusId, sizeof(const char*)) < 0)
+    const char *pciBusId = (const char *)malloc(pciBusId_len);
+    if (rpc_read(conn, &pciBusId, sizeof(const char *)) < 0)
         return -1;
     nvmlDevice_t device;
 
@@ -503,7 +503,7 @@ int handle_nvmlDeviceGetName(void *conn)
     unsigned int length;
     if (rpc_read(conn, &length, sizeof(unsigned int)) < 0)
         return -1;
-    char* name = (char*)malloc(length * sizeof(char));
+    char *name = (char *)malloc(length * sizeof(char));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -569,7 +569,7 @@ int handle_nvmlDeviceGetSerial(void *conn)
     unsigned int length;
     if (rpc_read(conn, &length, sizeof(unsigned int)) < 0)
         return -1;
-    char* serial = (char*)malloc(length * sizeof(char));
+    char *serial = (char *)malloc(length * sizeof(char));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -593,7 +593,7 @@ int handle_nvmlDeviceGetMemoryAffinity(void *conn)
     unsigned int nodeSetSize;
     if (rpc_read(conn, &nodeSetSize, sizeof(unsigned int)) < 0)
         return -1;
-    unsigned long* nodeSet = (unsigned long*)malloc(nodeSetSize * sizeof(unsigned long));
+    unsigned long *nodeSet = (unsigned long *)malloc(nodeSetSize * sizeof(unsigned long));
     nvmlAffinityScope_t scope;
     if (rpc_read(conn, &scope, sizeof(nvmlAffinityScope_t)) < 0)
         return -1;
@@ -620,7 +620,7 @@ int handle_nvmlDeviceGetCpuAffinityWithinScope(void *conn)
     unsigned int cpuSetSize;
     if (rpc_read(conn, &cpuSetSize, sizeof(unsigned int)) < 0)
         return -1;
-    unsigned long* cpuSet = (unsigned long*)malloc(cpuSetSize * sizeof(unsigned long));
+    unsigned long *cpuSet = (unsigned long *)malloc(cpuSetSize * sizeof(unsigned long));
     nvmlAffinityScope_t scope;
     if (rpc_read(conn, &scope, sizeof(nvmlAffinityScope_t)) < 0)
         return -1;
@@ -647,7 +647,7 @@ int handle_nvmlDeviceGetCpuAffinity(void *conn)
     unsigned int cpuSetSize;
     if (rpc_read(conn, &cpuSetSize, sizeof(unsigned int)) < 0)
         return -1;
-    unsigned long* cpuSet = (unsigned long*)malloc(cpuSetSize * sizeof(unsigned long));
+    unsigned long *cpuSet = (unsigned long *)malloc(cpuSetSize * sizeof(unsigned long));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -734,7 +734,7 @@ int handle_nvmlDeviceGetTopologyNearestGpus(void *conn)
     unsigned int count;
     if (rpc_read(conn, &count, sizeof(unsigned int)) < 0)
         return -1;
-    nvmlDevice_t* deviceArray = (nvmlDevice_t*)malloc(count * sizeof(nvmlDevice_t));
+    nvmlDevice_t *deviceArray = (nvmlDevice_t *)malloc(count * sizeof(nvmlDevice_t));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -760,7 +760,7 @@ int handle_nvmlSystemGetTopologyGpuSet(void *conn)
     unsigned int count;
     if (rpc_read(conn, &count, sizeof(unsigned int)) < 0)
         return -1;
-    nvmlDevice_t* deviceArray = (nvmlDevice_t*)malloc(count * sizeof(nvmlDevice_t));
+    nvmlDevice_t *deviceArray = (nvmlDevice_t *)malloc(count * sizeof(nvmlDevice_t));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -813,7 +813,7 @@ int handle_nvmlDeviceGetUUID(void *conn)
     unsigned int length;
     if (rpc_read(conn, &length, sizeof(unsigned int)) < 0)
         return -1;
-    char* uuid = (char*)malloc(length * sizeof(char));
+    char *uuid = (char *)malloc(length * sizeof(char));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -837,7 +837,7 @@ int handle_nvmlVgpuInstanceGetMdevUUID(void *conn)
     unsigned int size;
     if (rpc_read(conn, &size, sizeof(unsigned int)) < 0)
         return -1;
-    char* mdevUuid = (char*)malloc(size * sizeof(char));
+    char *mdevUuid = (char *)malloc(size * sizeof(char));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -882,7 +882,7 @@ int handle_nvmlDeviceGetBoardPartNumber(void *conn)
     unsigned int length;
     if (rpc_read(conn, &length, sizeof(unsigned int)) < 0)
         return -1;
-    char* partNumber = (char*)malloc(length * sizeof(char));
+    char *partNumber = (char *)malloc(length * sizeof(char));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -909,7 +909,7 @@ int handle_nvmlDeviceGetInforomVersion(void *conn)
     unsigned int length;
     if (rpc_read(conn, &length, sizeof(unsigned int)) < 0)
         return -1;
-    char* version = (char*)malloc(length * sizeof(char));
+    char *version = (char *)malloc(length * sizeof(char));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -933,7 +933,7 @@ int handle_nvmlDeviceGetInforomImageVersion(void *conn)
     unsigned int length;
     if (rpc_read(conn, &length, sizeof(unsigned int)) < 0)
         return -1;
-    char* version = (char*)malloc(length * sizeof(char));
+    char *version = (char *)malloc(length * sizeof(char));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -1395,7 +1395,7 @@ int handle_nvmlDeviceGetSupportedMemoryClocks(void *conn)
     unsigned int count;
     if (rpc_read(conn, &count, sizeof(unsigned int)) < 0)
         return -1;
-    unsigned int* clocksMHz = (unsigned int*)malloc(count * sizeof(unsigned int));
+    unsigned int *clocksMHz = (unsigned int *)malloc(count * sizeof(unsigned int));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -1424,7 +1424,7 @@ int handle_nvmlDeviceGetSupportedGraphicsClocks(void *conn)
     unsigned int count;
     if (rpc_read(conn, &count, sizeof(unsigned int)) < 0)
         return -1;
-    unsigned int* clocksMHz = (unsigned int*)malloc(count * sizeof(unsigned int));
+    unsigned int *clocksMHz = (unsigned int *)malloc(count * sizeof(unsigned int));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -2412,7 +2412,7 @@ int handle_nvmlDeviceGetEncoderSessions(void *conn)
     unsigned int sessionCount;
     if (rpc_read(conn, &sessionCount, sizeof(unsigned int)) < 0)
         return -1;
-    nvmlEncoderSessionInfo_t* sessionInfos = (nvmlEncoderSessionInfo_t*)malloc(sessionCount * sizeof(nvmlEncoderSessionInfo_t));
+    nvmlEncoderSessionInfo_t *sessionInfos = (nvmlEncoderSessionInfo_t *)malloc(sessionCount * sizeof(nvmlEncoderSessionInfo_t));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -2483,7 +2483,7 @@ int handle_nvmlDeviceGetFBCSessions(void *conn)
     unsigned int sessionCount;
     if (rpc_read(conn, &sessionCount, sizeof(unsigned int)) < 0)
         return -1;
-    nvmlFBCSessionInfo_t* sessionInfo = (nvmlFBCSessionInfo_t*)malloc(sessionCount * sizeof(nvmlFBCSessionInfo_t));
+    nvmlFBCSessionInfo_t *sessionInfo = (nvmlFBCSessionInfo_t *)malloc(sessionCount * sizeof(nvmlFBCSessionInfo_t));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -2533,7 +2533,7 @@ int handle_nvmlDeviceGetVbiosVersion(void *conn)
     unsigned int length;
     if (rpc_read(conn, &length, sizeof(unsigned int)) < 0)
         return -1;
-    char* version = (char*)malloc(length * sizeof(char));
+    char *version = (char *)malloc(length * sizeof(char));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -2578,7 +2578,7 @@ int handle_nvmlDeviceGetComputeRunningProcesses_v3(void *conn)
     unsigned int infoCount;
     if (rpc_read(conn, &infoCount, sizeof(unsigned int)) < 0)
         return -1;
-    nvmlProcessInfo_t* infos = (nvmlProcessInfo_t*)malloc(infoCount * sizeof(nvmlProcessInfo_t));
+    nvmlProcessInfo_t *infos = (nvmlProcessInfo_t *)malloc(infoCount * sizeof(nvmlProcessInfo_t));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -2604,7 +2604,7 @@ int handle_nvmlDeviceGetGraphicsRunningProcesses_v3(void *conn)
     unsigned int infoCount;
     if (rpc_read(conn, &infoCount, sizeof(unsigned int)) < 0)
         return -1;
-    nvmlProcessInfo_t* infos = (nvmlProcessInfo_t*)malloc(infoCount * sizeof(nvmlProcessInfo_t));
+    nvmlProcessInfo_t *infos = (nvmlProcessInfo_t *)malloc(infoCount * sizeof(nvmlProcessInfo_t));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -2630,7 +2630,7 @@ int handle_nvmlDeviceGetMPSComputeRunningProcesses_v3(void *conn)
     unsigned int infoCount;
     if (rpc_read(conn, &infoCount, sizeof(unsigned int)) < 0)
         return -1;
-    nvmlProcessInfo_t* infos = (nvmlProcessInfo_t*)malloc(infoCount * sizeof(nvmlProcessInfo_t));
+    nvmlProcessInfo_t *infos = (nvmlProcessInfo_t *)malloc(infoCount * sizeof(nvmlProcessInfo_t));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -2711,7 +2711,7 @@ int handle_nvmlDeviceGetSamples(void *conn)
     unsigned int sampleCount;
     if (rpc_read(conn, &sampleCount, sizeof(unsigned int)) < 0)
         return -1;
-    nvmlSample_t* samples = (nvmlSample_t*)malloc(sampleCount * sizeof(nvmlSample_t));
+    nvmlSample_t *samples = (nvmlSample_t *)malloc(sampleCount * sizeof(nvmlSample_t));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -2976,7 +2976,7 @@ int handle_nvmlDeviceGetAccountingPids(void *conn)
     unsigned int count;
     if (rpc_read(conn, &count, sizeof(unsigned int)) < 0)
         return -1;
-    unsigned int* pids = (unsigned int*)malloc(count * sizeof(unsigned int));
+    unsigned int *pids = (unsigned int *)malloc(count * sizeof(unsigned int));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -3026,7 +3026,7 @@ int handle_nvmlDeviceGetRetiredPages(void *conn)
     unsigned int pageCount;
     if (rpc_read(conn, &pageCount, sizeof(unsigned int)) < 0)
         return -1;
-    unsigned long long* addresses = (unsigned long long*)malloc(pageCount * sizeof(unsigned long long));
+    unsigned long long *addresses = (unsigned long long *)malloc(pageCount * sizeof(unsigned long long));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -3055,8 +3055,8 @@ int handle_nvmlDeviceGetRetiredPages_v2(void *conn)
     unsigned int pageCount;
     if (rpc_read(conn, &pageCount, sizeof(unsigned int)) < 0)
         return -1;
-    unsigned long long* addresses = (unsigned long long*)malloc(pageCount * sizeof(unsigned long long));
-    unsigned long long* timestamps = (unsigned long long*)malloc(pageCount * sizeof(unsigned long long));
+    unsigned long long *addresses = (unsigned long long *)malloc(pageCount * sizeof(unsigned long long));
+    unsigned long long *timestamps = (unsigned long long *)malloc(pageCount * sizeof(unsigned long long));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -4038,7 +4038,7 @@ int handle_nvmlDeviceGetFieldValues(void *conn)
     int valuesCount;
     if (rpc_read(conn, &valuesCount, sizeof(int)) < 0)
         return -1;
-    nvmlFieldValue_t* values = (nvmlFieldValue_t*)malloc(valuesCount * sizeof(nvmlFieldValue_t));
+    nvmlFieldValue_t *values = (nvmlFieldValue_t *)malloc(valuesCount * sizeof(nvmlFieldValue_t));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -4062,7 +4062,7 @@ int handle_nvmlDeviceClearFieldValues(void *conn)
     int valuesCount;
     if (rpc_read(conn, &valuesCount, sizeof(int)) < 0)
         return -1;
-    nvmlFieldValue_t* values = (nvmlFieldValue_t*)malloc(valuesCount * sizeof(nvmlFieldValue_t));
+    nvmlFieldValue_t *values = (nvmlFieldValue_t *)malloc(valuesCount * sizeof(nvmlFieldValue_t));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -4170,7 +4170,7 @@ int handle_nvmlDeviceGetProcessUtilization(void *conn)
     unsigned int processSamplesCount;
     if (rpc_read(conn, &processSamplesCount, sizeof(unsigned int)) < 0)
         return -1;
-    nvmlProcessUtilizationSample_t* utilization = (nvmlProcessUtilizationSample_t*)malloc(processSamplesCount * sizeof(nvmlProcessUtilizationSample_t));
+    nvmlProcessUtilizationSample_t *utilization = (nvmlProcessUtilizationSample_t *)malloc(processSamplesCount * sizeof(nvmlProcessUtilizationSample_t));
     unsigned long long lastSeenTimeStamp;
     if (rpc_read(conn, &lastSeenTimeStamp, sizeof(unsigned long long)) < 0)
         return -1;
@@ -4289,7 +4289,7 @@ int handle_nvmlDeviceGetSupportedVgpus(void *conn)
     unsigned int vgpuCount;
     if (rpc_read(conn, &vgpuCount, sizeof(unsigned int)) < 0)
         return -1;
-    nvmlVgpuTypeId_t* vgpuTypeIds = (nvmlVgpuTypeId_t*)malloc(vgpuCount * sizeof(nvmlVgpuTypeId_t));
+    nvmlVgpuTypeId_t *vgpuTypeIds = (nvmlVgpuTypeId_t *)malloc(vgpuCount * sizeof(nvmlVgpuTypeId_t));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -4315,7 +4315,7 @@ int handle_nvmlDeviceGetCreatableVgpus(void *conn)
     unsigned int vgpuCount;
     if (rpc_read(conn, &vgpuCount, sizeof(unsigned int)) < 0)
         return -1;
-    nvmlVgpuTypeId_t* vgpuTypeIds = (nvmlVgpuTypeId_t*)malloc(vgpuCount * sizeof(nvmlVgpuTypeId_t));
+    nvmlVgpuTypeId_t *vgpuTypeIds = (nvmlVgpuTypeId_t *)malloc(vgpuCount * sizeof(nvmlVgpuTypeId_t));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -4339,7 +4339,7 @@ int handle_nvmlVgpuTypeGetClass(void *conn)
     if (rpc_read(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0)
         return -1;
     unsigned int size;
-    char* vgpuTypeClass = (char*)malloc(size * sizeof(char));
+    char *vgpuTypeClass = (char *)malloc(size * sizeof(char));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -4365,7 +4365,7 @@ int handle_nvmlVgpuTypeGetName(void *conn)
     unsigned int size;
     if (rpc_read(conn, &size, sizeof(unsigned int)) < 0)
         return -1;
-    char* vgpuTypeName = (char*)malloc(size * sizeof(char));
+    char *vgpuTypeName = (char *)malloc(size * sizeof(char));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -4505,7 +4505,7 @@ int handle_nvmlVgpuTypeGetLicense(void *conn)
     unsigned int size;
     if (rpc_read(conn, &size, sizeof(unsigned int)) < 0)
         return -1;
-    char* vgpuTypeLicenseString = (char*)malloc(size * sizeof(char));
+    char *vgpuTypeLicenseString = (char *)malloc(size * sizeof(char));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -4595,7 +4595,7 @@ int handle_nvmlDeviceGetActiveVgpus(void *conn)
     unsigned int vgpuCount;
     if (rpc_read(conn, &vgpuCount, sizeof(unsigned int)) < 0)
         return -1;
-    nvmlVgpuInstance_t* vgpuInstances = (nvmlVgpuInstance_t*)malloc(vgpuCount * sizeof(nvmlVgpuInstance_t));
+    nvmlVgpuInstance_t *vgpuInstances = (nvmlVgpuInstance_t *)malloc(vgpuCount * sizeof(nvmlVgpuInstance_t));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -4621,7 +4621,7 @@ int handle_nvmlVgpuInstanceGetVmID(void *conn)
     unsigned int size;
     if (rpc_read(conn, &size, sizeof(unsigned int)) < 0)
         return -1;
-    char* vmId = (char*)malloc(size * sizeof(char));
+    char *vmId = (char *)malloc(size * sizeof(char));
     nvmlVgpuVmIdType_t vmIdType;
 
     int request_id = rpc_end_request(conn);
@@ -4648,7 +4648,7 @@ int handle_nvmlVgpuInstanceGetUUID(void *conn)
     unsigned int size;
     if (rpc_read(conn, &size, sizeof(unsigned int)) < 0)
         return -1;
-    char* uuid = (char*)malloc(size * sizeof(char));
+    char *uuid = (char *)malloc(size * sizeof(char));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -4672,7 +4672,7 @@ int handle_nvmlVgpuInstanceGetVmDriverVersion(void *conn)
     unsigned int length;
     if (rpc_read(conn, &length, sizeof(unsigned int)) < 0)
         return -1;
-    char* version = (char*)malloc(length * sizeof(char));
+    char *version = (char *)malloc(length * sizeof(char));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -4870,7 +4870,7 @@ int handle_nvmlVgpuInstanceGetEncoderSessions(void *conn)
     unsigned int sessionCount;
     if (rpc_read(conn, &sessionCount, sizeof(unsigned int)) < 0)
         return -1;
-    nvmlEncoderSessionInfo_t* sessionInfo = (nvmlEncoderSessionInfo_t*)malloc(sessionCount * sizeof(nvmlEncoderSessionInfo_t));
+    nvmlEncoderSessionInfo_t *sessionInfo = (nvmlEncoderSessionInfo_t *)malloc(sessionCount * sizeof(nvmlEncoderSessionInfo_t));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -4917,7 +4917,7 @@ int handle_nvmlVgpuInstanceGetFBCSessions(void *conn)
     unsigned int sessionCount;
     if (rpc_read(conn, &sessionCount, sizeof(unsigned int)) < 0)
         return -1;
-    nvmlFBCSessionInfo_t* sessionInfo = (nvmlFBCSessionInfo_t*)malloc(sessionCount * sizeof(nvmlFBCSessionInfo_t));
+    nvmlFBCSessionInfo_t *sessionInfo = (nvmlFBCSessionInfo_t *)malloc(sessionCount * sizeof(nvmlFBCSessionInfo_t));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -4964,7 +4964,7 @@ int handle_nvmlVgpuInstanceGetGpuPciId(void *conn)
     unsigned int length;
     if (rpc_read(conn, &length, sizeof(unsigned int)) < 0)
         return -1;
-    char* vgpuPciId = (char*)malloc(length * sizeof(char));
+    char *vgpuPciId = (char *)malloc(length * sizeof(char));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -5014,7 +5014,7 @@ int handle_nvmlVgpuInstanceGetMetadata(void *conn)
     unsigned int bufferSize;
     if (rpc_read(conn, &bufferSize, sizeof(unsigned int)) < 0)
         return -1;
-    nvmlVgpuMetadata_t* vgpuMetadata = (nvmlVgpuMetadata_t*)malloc(bufferSize * sizeof(nvmlVgpuMetadata_t));
+    nvmlVgpuMetadata_t *vgpuMetadata = (nvmlVgpuMetadata_t *)malloc(bufferSize * sizeof(nvmlVgpuMetadata_t));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -5040,7 +5040,7 @@ int handle_nvmlDeviceGetVgpuMetadata(void *conn)
     unsigned int bufferSize;
     if (rpc_read(conn, &bufferSize, sizeof(unsigned int)) < 0)
         return -1;
-    nvmlVgpuPgpuMetadata_t* pgpuMetadata = (nvmlVgpuPgpuMetadata_t*)malloc(bufferSize * sizeof(nvmlVgpuPgpuMetadata_t));
+    nvmlVgpuPgpuMetadata_t *pgpuMetadata = (nvmlVgpuPgpuMetadata_t *)malloc(bufferSize * sizeof(nvmlVgpuPgpuMetadata_t));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -5092,7 +5092,7 @@ int handle_nvmlDeviceGetPgpuMetadataString(void *conn)
     unsigned int bufferSize;
     if (rpc_read(conn, &bufferSize, sizeof(unsigned int)) < 0)
         return -1;
-    char* pgpuMetadata = (char*)malloc(bufferSize * sizeof(char));
+    char *pgpuMetadata = (char *)malloc(bufferSize * sizeof(char));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -5226,7 +5226,7 @@ int handle_nvmlDeviceGetVgpuUtilization(void *conn)
     unsigned int vgpuInstanceSamplesCount;
     if (rpc_read(conn, &vgpuInstanceSamplesCount, sizeof(unsigned int)) < 0)
         return -1;
-    nvmlVgpuInstanceUtilizationSample_t* utilizationSamples = (nvmlVgpuInstanceUtilizationSample_t*)malloc(vgpuInstanceSamplesCount * sizeof(nvmlVgpuInstanceUtilizationSample_t));
+    nvmlVgpuInstanceUtilizationSample_t *utilizationSamples = (nvmlVgpuInstanceUtilizationSample_t *)malloc(vgpuInstanceSamplesCount * sizeof(nvmlVgpuInstanceUtilizationSample_t));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -5257,7 +5257,7 @@ int handle_nvmlDeviceGetVgpuProcessUtilization(void *conn)
     unsigned int vgpuProcessSamplesCount;
     if (rpc_read(conn, &vgpuProcessSamplesCount, sizeof(unsigned int)) < 0)
         return -1;
-    nvmlVgpuProcessUtilizationSample_t* utilizationSamples = (nvmlVgpuProcessUtilizationSample_t*)malloc(vgpuProcessSamplesCount * sizeof(nvmlVgpuProcessUtilizationSample_t));
+    nvmlVgpuProcessUtilizationSample_t *utilizationSamples = (nvmlVgpuProcessUtilizationSample_t *)malloc(vgpuProcessSamplesCount * sizeof(nvmlVgpuProcessUtilizationSample_t));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -5304,7 +5304,7 @@ int handle_nvmlVgpuInstanceGetAccountingPids(void *conn)
     unsigned int count;
     if (rpc_read(conn, &count, sizeof(unsigned int)) < 0)
         return -1;
-    unsigned int* pids = (unsigned int*)malloc(count * sizeof(unsigned int));
+    unsigned int *pids = (unsigned int *)malloc(count * sizeof(unsigned int));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -5531,7 +5531,7 @@ int handle_nvmlDeviceGetGpuInstancePossiblePlacements_v2(void *conn)
     unsigned int count;
     if (rpc_read(conn, &count, sizeof(unsigned int)) < 0)
         return -1;
-    nvmlGpuInstancePlacement_t* placements = (nvmlGpuInstancePlacement_t*)malloc(count * sizeof(nvmlGpuInstancePlacement_t));
+    nvmlGpuInstancePlacement_t *placements = (nvmlGpuInstancePlacement_t *)malloc(count * sizeof(nvmlGpuInstancePlacement_t));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -5626,7 +5626,7 @@ int handle_nvmlDeviceGetGpuInstances(void *conn)
     unsigned int count;
     if (rpc_read(conn, &count, sizeof(unsigned int)) < 0)
         return -1;
-    nvmlGpuInstance_t* gpuInstances = (nvmlGpuInstance_t*)malloc(count * sizeof(nvmlGpuInstance_t));
+    nvmlGpuInstance_t *gpuInstances = (nvmlGpuInstance_t *)malloc(count * sizeof(nvmlGpuInstance_t));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -5778,7 +5778,7 @@ int handle_nvmlGpuInstanceGetComputeInstancePossiblePlacements(void *conn)
     unsigned int count;
     if (rpc_read(conn, &count, sizeof(unsigned int)) < 0)
         return -1;
-    nvmlComputeInstancePlacement_t* placements = (nvmlComputeInstancePlacement_t*)malloc(count * sizeof(nvmlComputeInstancePlacement_t));
+    nvmlComputeInstancePlacement_t *placements = (nvmlComputeInstancePlacement_t *)malloc(count * sizeof(nvmlComputeInstancePlacement_t));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -5849,7 +5849,7 @@ int handle_nvmlGpuInstanceGetComputeInstances(void *conn)
     unsigned int count;
     if (rpc_read(conn, &count, sizeof(unsigned int)) < 0)
         return -1;
-    nvmlComputeInstance_t* computeInstances = (nvmlComputeInstance_t*)malloc(count * sizeof(nvmlComputeInstance_t));
+    nvmlComputeInstance_t *computeInstances = (nvmlComputeInstance_t *)malloc(count * sizeof(nvmlComputeInstance_t));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -6229,7 +6229,7 @@ int handle_nvmlDeviceGetSupportedPerformanceStates(void *conn)
     unsigned int size;
     if (rpc_read(conn, &size, sizeof(unsigned int)) < 0)
         return -1;
-    nvmlPstates_t* pstates = (nvmlPstates_t*)malloc(size * sizeof(nvmlPstates_t));
+    nvmlPstates_t *pstates = (nvmlPstates_t *)malloc(size * sizeof(nvmlPstates_t));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -6535,7 +6535,7 @@ int handle_cuDeviceGetName(void *conn)
     int len;
     if (rpc_read(conn, &len, sizeof(int)) < 0)
         return -1;
-    char* name = (char*)malloc(len * sizeof(char));
+    char *name = (char *)malloc(len * sizeof(char));
     CUdevice dev;
     if (rpc_read(conn, &dev, sizeof(CUdevice)) < 0)
         return -1;
@@ -6556,7 +6556,7 @@ int handle_cuDeviceGetName(void *conn)
 
 int handle_cuDeviceGetUuid(void *conn)
 {
-    CUuuid* uuid = (CUuuid*)malloc(16);
+    CUuuid *uuid = (CUuuid *)malloc(16);
     CUdevice dev;
     if (rpc_read(conn, &dev, sizeof(CUdevice)) < 0)
         return -1;
@@ -6577,7 +6577,7 @@ int handle_cuDeviceGetUuid(void *conn)
 
 int handle_cuDeviceGetUuid_v2(void *conn)
 {
-    CUuuid* uuid = (CUuuid*)malloc(16);
+    CUuuid *uuid = (CUuuid *)malloc(16);
     CUdevice dev;
     if (rpc_read(conn, &dev, sizeof(CUdevice)) < 0)
         return -1;
@@ -6601,7 +6601,7 @@ int handle_cuDeviceGetLuid(void *conn)
     std::size_t luid_len;
     if (rpc_read(conn, &luid_len, sizeof(luid_len)) < 0)
         return -1;
-    char* luid = (char*)malloc(luid_len);
+    char *luid = (char *)malloc(luid_len);
     unsigned int deviceNodeMask;
     CUdevice dev;
     if (rpc_read(conn, &dev, sizeof(CUdevice)) < 0)
@@ -6982,7 +6982,7 @@ int handle_cuCtxCreate_v3(void *conn)
     int numParams;
     if (rpc_read(conn, &numParams, sizeof(int)) < 0)
         return -1;
-    CUexecAffinityParam* paramsArray = (CUexecAffinityParam*)malloc(numParams * sizeof(CUexecAffinityParam));
+    CUexecAffinityParam *paramsArray = (CUexecAffinityParam *)malloc(numParams * sizeof(CUexecAffinityParam));
     unsigned int flags;
     if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
         return -1;
@@ -7405,8 +7405,8 @@ int handle_cuModuleLoad(void *conn)
     std::size_t fname_len;
     if (rpc_read(conn, &fname_len, sizeof(fname_len)) < 0)
         return -1;
-    const char* fname = (const char*)malloc(fname_len);
-    if (rpc_read(conn, &fname, sizeof(const char*)) < 0)
+    const char *fname = (const char *)malloc(fname_len);
+    if (rpc_read(conn, &fname, sizeof(const char *)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -7470,8 +7470,8 @@ int handle_cuModuleGetFunction(void *conn)
     std::size_t name_len;
     if (rpc_read(conn, &name_len, sizeof(name_len)) < 0)
         return -1;
-    const char* name = (const char*)malloc(name_len);
-    if (rpc_read(conn, &name, sizeof(const char*)) < 0)
+    const char *name = (const char *)malloc(name_len);
+    if (rpc_read(conn, &name, sizeof(const char *)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -7498,8 +7498,8 @@ int handle_cuModuleGetGlobal_v2(void *conn)
     std::size_t name_len;
     if (rpc_read(conn, &name_len, sizeof(name_len)) < 0)
         return -1;
-    const char* name = (const char*)malloc(name_len);
-    if (rpc_read(conn, &name, sizeof(const char*)) < 0)
+    const char *name = (const char *)malloc(name_len);
+    if (rpc_read(conn, &name, sizeof(const char *)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -7526,8 +7526,8 @@ int handle_cuLinkCreate_v2(void *conn)
     CUjit_option options;
     if (rpc_read(conn, &options, sizeof(CUjit_option)) < 0)
         return -1;
-    void* optionValues;
-    if (rpc_read(conn, &optionValues, sizeof(void*)) < 0)
+    void *optionValues;
+    if (rpc_read(conn, &optionValues, sizeof(void *)) < 0)
         return -1;
     CUlinkState stateOut;
     if (rpc_read(conn, &stateOut, sizeof(CUlinkState)) < 0)
@@ -7543,7 +7543,7 @@ int handle_cuLinkCreate_v2(void *conn)
         return -1;
     if (rpc_write(conn, &options, sizeof(CUjit_option)) < 0)
         return -1;
-    if (rpc_write(conn, &optionValues, sizeof(void*)) < 0)
+    if (rpc_write(conn, &optionValues, sizeof(void *)) < 0)
         return -1;
     if (rpc_write(conn, &stateOut, sizeof(CUlinkState)) < 0)
         return -1;
@@ -7559,8 +7559,8 @@ int handle_cuLinkAddData_v2(void *conn)
     CUjitInputType type;
     if (rpc_read(conn, &type, sizeof(CUjitInputType)) < 0)
         return -1;
-    void* data;
-    if (rpc_read(conn, &data, sizeof(void*)) < 0)
+    void *data;
+    if (rpc_read(conn, &data, sizeof(void *)) < 0)
         return -1;
     size_t size;
     if (rpc_read(conn, &size, sizeof(size_t)) < 0)
@@ -7568,17 +7568,17 @@ int handle_cuLinkAddData_v2(void *conn)
     std::size_t name_len;
     if (rpc_read(conn, &name_len, sizeof(name_len)) < 0)
         return -1;
-    const char* name = (const char*)malloc(name_len);
-    if (rpc_read(conn, &name, sizeof(const char*)) < 0)
+    const char *name = (const char *)malloc(name_len);
+    if (rpc_read(conn, &name, sizeof(const char *)) < 0)
         return -1;
     unsigned int numOptions;
     if (rpc_read(conn, &numOptions, sizeof(unsigned int)) < 0)
         return -1;
-    CUjit_option* options = (CUjit_option*)malloc(numOptions * sizeof(CUjit_option));
-    if (rpc_read(conn, &options, sizeof(CUjit_option*)) < 0)
+    CUjit_option *options = (CUjit_option *)malloc(numOptions * sizeof(CUjit_option));
+    if (rpc_read(conn, &options, sizeof(CUjit_option *)) < 0)
         return -1;
-    void** optionValues = (void**)malloc(numOptions * sizeof(void*));
-    if (rpc_read(conn, &optionValues, sizeof(void**)) < 0)
+    void **optionValues = (void **)malloc(numOptions * sizeof(void *));
+    if (rpc_read(conn, &optionValues, sizeof(void **)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -7589,7 +7589,7 @@ int handle_cuLinkAddData_v2(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &data, sizeof(void*)) < 0)
+    if (rpc_write(conn, &data, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -7606,17 +7606,17 @@ int handle_cuLinkAddFile_v2(void *conn)
     std::size_t path_len;
     if (rpc_read(conn, &path_len, sizeof(path_len)) < 0)
         return -1;
-    const char* path = (const char*)malloc(path_len);
-    if (rpc_read(conn, &path, sizeof(const char*)) < 0)
+    const char *path = (const char *)malloc(path_len);
+    if (rpc_read(conn, &path, sizeof(const char *)) < 0)
         return -1;
     unsigned int numOptions;
     if (rpc_read(conn, &numOptions, sizeof(unsigned int)) < 0)
         return -1;
-    CUjit_option* options = (CUjit_option*)malloc(numOptions * sizeof(CUjit_option));
-    if (rpc_read(conn, &options, sizeof(CUjit_option*)) < 0)
+    CUjit_option *options = (CUjit_option *)malloc(numOptions * sizeof(CUjit_option));
+    if (rpc_read(conn, &options, sizeof(CUjit_option *)) < 0)
         return -1;
-    void** optionValues = (void**)malloc(numOptions * sizeof(void*));
-    if (rpc_read(conn, &optionValues, sizeof(void**)) < 0)
+    void **optionValues = (void **)malloc(numOptions * sizeof(void *));
+    if (rpc_read(conn, &optionValues, sizeof(void **)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -7636,7 +7636,7 @@ int handle_cuLinkComplete(void *conn)
     CUlinkState state;
     if (rpc_read(conn, &state, sizeof(CUlinkState)) < 0)
         return -1;
-    void* cubinOut;
+    void *cubinOut;
     size_t sizeOut;
 
     int request_id = rpc_end_request(conn);
@@ -7647,7 +7647,7 @@ int handle_cuLinkComplete(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &cubinOut, sizeof(void*)) < 0)
+    if (rpc_write(conn, &cubinOut, sizeof(void *)) < 0)
         return -1;
     if (rpc_write(conn, &sizeOut, sizeof(size_t)) < 0)
         return -1;
@@ -7682,8 +7682,8 @@ int handle_cuModuleGetTexRef(void *conn)
     std::size_t name_len;
     if (rpc_read(conn, &name_len, sizeof(name_len)) < 0)
         return -1;
-    const char* name = (const char*)malloc(name_len);
-    if (rpc_read(conn, &name, sizeof(const char*)) < 0)
+    const char *name = (const char *)malloc(name_len);
+    if (rpc_read(conn, &name, sizeof(const char *)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -7709,8 +7709,8 @@ int handle_cuModuleGetSurfRef(void *conn)
     std::size_t name_len;
     if (rpc_read(conn, &name_len, sizeof(name_len)) < 0)
         return -1;
-    const char* name = (const char*)malloc(name_len);
-    if (rpc_read(conn, &name, sizeof(const char*)) < 0)
+    const char *name = (const char *)malloc(name_len);
+    if (rpc_read(conn, &name, sizeof(const char *)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -7733,26 +7733,26 @@ int handle_cuLibraryLoadFromFile(void *conn)
     std::size_t fileName_len;
     if (rpc_read(conn, &fileName_len, sizeof(fileName_len)) < 0)
         return -1;
-    const char* fileName = (const char*)malloc(fileName_len);
-    if (rpc_read(conn, &fileName, sizeof(const char*)) < 0)
+    const char *fileName = (const char *)malloc(fileName_len);
+    if (rpc_read(conn, &fileName, sizeof(const char *)) < 0)
         return -1;
     unsigned int numJitOptions;
     if (rpc_read(conn, &numJitOptions, sizeof(unsigned int)) < 0)
         return -1;
-    CUjit_option* jitOptions = (CUjit_option*)malloc(numJitOptions * sizeof(CUjit_option));
-    if (rpc_read(conn, &jitOptions, sizeof(CUjit_option*)) < 0)
+    CUjit_option *jitOptions = (CUjit_option *)malloc(numJitOptions * sizeof(CUjit_option));
+    if (rpc_read(conn, &jitOptions, sizeof(CUjit_option *)) < 0)
         return -1;
-    void** jitOptionsValues = (void**)malloc(numJitOptions * sizeof(void*));
-    if (rpc_read(conn, &jitOptionsValues, sizeof(void**)) < 0)
+    void **jitOptionsValues = (void **)malloc(numJitOptions * sizeof(void *));
+    if (rpc_read(conn, &jitOptionsValues, sizeof(void **)) < 0)
         return -1;
     unsigned int numLibraryOptions;
     if (rpc_read(conn, &numLibraryOptions, sizeof(unsigned int)) < 0)
         return -1;
-    CUlibraryOption* libraryOptions = (CUlibraryOption*)malloc(numLibraryOptions * sizeof(CUlibraryOption));
-    if (rpc_read(conn, &libraryOptions, sizeof(CUlibraryOption*)) < 0)
+    CUlibraryOption *libraryOptions = (CUlibraryOption *)malloc(numLibraryOptions * sizeof(CUlibraryOption));
+    if (rpc_read(conn, &libraryOptions, sizeof(CUlibraryOption *)) < 0)
         return -1;
-    void** libraryOptionValues = (void**)malloc(numLibraryOptions * sizeof(void*));
-    if (rpc_read(conn, &libraryOptionValues, sizeof(void**)) < 0)
+    void **libraryOptionValues = (void **)malloc(numLibraryOptions * sizeof(void *));
+    if (rpc_read(conn, &libraryOptionValues, sizeof(void **)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -7796,8 +7796,8 @@ int handle_cuLibraryGetKernel(void *conn)
     std::size_t name_len;
     if (rpc_read(conn, &name_len, sizeof(name_len)) < 0)
         return -1;
-    const char* name = (const char*)malloc(name_len);
-    if (rpc_read(conn, &name, sizeof(const char*)) < 0)
+    const char *name = (const char *)malloc(name_len);
+    if (rpc_read(conn, &name, sizeof(const char *)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -7866,8 +7866,8 @@ int handle_cuLibraryGetGlobal(void *conn)
     std::size_t name_len;
     if (rpc_read(conn, &name_len, sizeof(name_len)) < 0)
         return -1;
-    const char* name = (const char*)malloc(name_len);
-    if (rpc_read(conn, &name, sizeof(const char*)) < 0)
+    const char *name = (const char *)malloc(name_len);
+    if (rpc_read(conn, &name, sizeof(const char *)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -7896,8 +7896,8 @@ int handle_cuLibraryGetManaged(void *conn)
     std::size_t name_len;
     if (rpc_read(conn, &name_len, sizeof(name_len)) < 0)
         return -1;
-    const char* name = (const char*)malloc(name_len);
-    if (rpc_read(conn, &name, sizeof(const char*)) < 0)
+    const char *name = (const char *)malloc(name_len);
+    if (rpc_read(conn, &name, sizeof(const char *)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -7918,15 +7918,15 @@ int handle_cuLibraryGetManaged(void *conn)
 
 int handle_cuLibraryGetUnifiedFunction(void *conn)
 {
-    void* fptr;
+    void *fptr;
     CUlibrary library;
     if (rpc_read(conn, &library, sizeof(CUlibrary)) < 0)
         return -1;
     std::size_t symbol_len;
     if (rpc_read(conn, &symbol_len, sizeof(symbol_len)) < 0)
         return -1;
-    const char* symbol = (const char*)malloc(symbol_len);
-    if (rpc_read(conn, &symbol, sizeof(const char*)) < 0)
+    const char *symbol = (const char *)malloc(symbol_len);
+    if (rpc_read(conn, &symbol, sizeof(const char *)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -7937,7 +7937,7 @@ int handle_cuLibraryGetUnifiedFunction(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &fptr, sizeof(void*)) < 0)
+    if (rpc_write(conn, &fptr, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -8153,8 +8153,8 @@ int handle_cuMemGetAddressRange_v2(void *conn)
 
 int handle_cuMemAllocHost_v2(void *conn)
 {
-    void* pp;
-    if (rpc_read(conn, &pp, sizeof(void*)) < 0)
+    void *pp;
+    if (rpc_read(conn, &pp, sizeof(void *)) < 0)
         return -1;
     size_t bytesize;
     if (rpc_read(conn, &bytesize, sizeof(size_t)) < 0)
@@ -8168,7 +8168,7 @@ int handle_cuMemAllocHost_v2(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &pp, sizeof(void*)) < 0)
+    if (rpc_write(conn, &pp, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -8176,8 +8176,8 @@ int handle_cuMemAllocHost_v2(void *conn)
 
 int handle_cuMemFreeHost(void *conn)
 {
-    void* p;
-    if (rpc_read(conn, &p, sizeof(void*)) < 0)
+    void *p;
+    if (rpc_read(conn, &p, sizeof(void *)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -8188,7 +8188,7 @@ int handle_cuMemFreeHost(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &p, sizeof(void*)) < 0)
+    if (rpc_write(conn, &p, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -8196,8 +8196,8 @@ int handle_cuMemFreeHost(void *conn)
 
 int handle_cuMemHostAlloc(void *conn)
 {
-    void* pp;
-    if (rpc_read(conn, &pp, sizeof(void*)) < 0)
+    void *pp;
+    if (rpc_read(conn, &pp, sizeof(void *)) < 0)
         return -1;
     size_t bytesize;
     if (rpc_read(conn, &bytesize, sizeof(size_t)) < 0)
@@ -8214,7 +8214,7 @@ int handle_cuMemHostAlloc(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &pp, sizeof(void*)) < 0)
+    if (rpc_write(conn, &pp, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -8225,8 +8225,8 @@ int handle_cuMemHostGetDevicePointer_v2(void *conn)
     CUdeviceptr pdptr;
     if (rpc_read(conn, &pdptr, sizeof(CUdeviceptr)) < 0)
         return -1;
-    void* p;
-    if (rpc_read(conn, &p, sizeof(void*)) < 0)
+    void *p;
+    if (rpc_read(conn, &p, sizeof(void *)) < 0)
         return -1;
     unsigned int Flags;
     if (rpc_read(conn, &Flags, sizeof(unsigned int)) < 0)
@@ -8242,7 +8242,7 @@ int handle_cuMemHostGetDevicePointer_v2(void *conn)
         return -1;
     if (rpc_write(conn, &pdptr, sizeof(CUdeviceptr)) < 0)
         return -1;
-    if (rpc_write(conn, &p, sizeof(void*)) < 0)
+    if (rpc_write(conn, &p, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -8253,8 +8253,8 @@ int handle_cuMemHostGetFlags(void *conn)
     unsigned int pFlags;
     if (rpc_read(conn, &pFlags, sizeof(unsigned int)) < 0)
         return -1;
-    void* p;
-    if (rpc_read(conn, &p, sizeof(void*)) < 0)
+    void *p;
+    if (rpc_read(conn, &p, sizeof(void *)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -8267,7 +8267,7 @@ int handle_cuMemHostGetFlags(void *conn)
         return -1;
     if (rpc_write(conn, &pFlags, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, &p, sizeof(void*)) < 0)
+    if (rpc_write(conn, &p, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -8307,8 +8307,8 @@ int handle_cuDeviceGetByPCIBusId(void *conn)
     std::size_t pciBusId_len;
     if (rpc_read(conn, &pciBusId_len, sizeof(pciBusId_len)) < 0)
         return -1;
-    const char* pciBusId = (const char*)malloc(pciBusId_len);
-    if (rpc_read(conn, &pciBusId, sizeof(const char*)) < 0)
+    const char *pciBusId = (const char *)malloc(pciBusId_len);
+    if (rpc_read(conn, &pciBusId, sizeof(const char *)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -8330,7 +8330,7 @@ int handle_cuDeviceGetPCIBusId(void *conn)
     int len;
     if (rpc_read(conn, &len, sizeof(int)) < 0)
         return -1;
-    char* pciBusId = (char*)malloc(len * sizeof(char));
+    char *pciBusId = (char *)malloc(len * sizeof(char));
     CUdevice dev;
     if (rpc_read(conn, &dev, sizeof(CUdevice)) < 0)
         return -1;
@@ -8464,8 +8464,8 @@ int handle_cuIpcCloseMemHandle(void *conn)
 
 int handle_cuMemHostRegister_v2(void *conn)
 {
-    void* p;
-    if (rpc_read(conn, &p, sizeof(void*)) < 0)
+    void *p;
+    if (rpc_read(conn, &p, sizeof(void *)) < 0)
         return -1;
     size_t bytesize;
     if (rpc_read(conn, &bytesize, sizeof(size_t)) < 0)
@@ -8482,7 +8482,7 @@ int handle_cuMemHostRegister_v2(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &p, sizeof(void*)) < 0)
+    if (rpc_write(conn, &p, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -8490,8 +8490,8 @@ int handle_cuMemHostRegister_v2(void *conn)
 
 int handle_cuMemHostUnregister(void *conn)
 {
-    void* p;
-    if (rpc_read(conn, &p, sizeof(void*)) < 0)
+    void *p;
+    if (rpc_read(conn, &p, sizeof(void *)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -8502,7 +8502,7 @@ int handle_cuMemHostUnregister(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &p, sizeof(void*)) < 0)
+    if (rpc_write(conn, &p, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -8564,8 +8564,8 @@ int handle_cuMemcpyPeer(void *conn)
 
 int handle_cuMemcpyDtoH_v2(void *conn)
 {
-    void* dstHost;
-    if (rpc_read(conn, &dstHost, sizeof(void*)) < 0)
+    void *dstHost;
+    if (rpc_read(conn, &dstHost, sizeof(void *)) < 0)
         return -1;
     CUdeviceptr srcDevice;
     if (rpc_read(conn, &srcDevice, sizeof(CUdeviceptr)) < 0)
@@ -8582,7 +8582,7 @@ int handle_cuMemcpyDtoH_v2(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &dstHost, sizeof(void*)) < 0)
+    if (rpc_write(conn, &dstHost, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -8668,8 +8668,8 @@ int handle_cuMemcpyAtoD_v2(void *conn)
 
 int handle_cuMemcpyAtoH_v2(void *conn)
 {
-    void* dstHost;
-    if (rpc_read(conn, &dstHost, sizeof(void*)) < 0)
+    void *dstHost;
+    if (rpc_read(conn, &dstHost, sizeof(void *)) < 0)
         return -1;
     CUarray srcArray;
     if (rpc_read(conn, &srcArray, sizeof(CUarray)) < 0)
@@ -8785,8 +8785,8 @@ int handle_cuMemcpyPeerAsync(void *conn)
 
 int handle_cuMemcpyDtoHAsync_v2(void *conn)
 {
-    void* dstHost;
-    if (rpc_read(conn, &dstHost, sizeof(void*)) < 0)
+    void *dstHost;
+    if (rpc_read(conn, &dstHost, sizeof(void *)) < 0)
         return -1;
     CUdeviceptr srcDevice;
     if (rpc_read(conn, &srcDevice, sizeof(CUdeviceptr)) < 0)
@@ -8806,7 +8806,7 @@ int handle_cuMemcpyDtoHAsync_v2(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &dstHost, sizeof(void*)) < 0)
+    if (rpc_write(conn, &dstHost, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -8841,8 +8841,8 @@ int handle_cuMemcpyDtoDAsync_v2(void *conn)
 
 int handle_cuMemcpyAtoHAsync_v2(void *conn)
 {
-    void* dstHost;
-    if (rpc_read(conn, &dstHost, sizeof(void*)) < 0)
+    void *dstHost;
+    if (rpc_read(conn, &dstHost, sizeof(void *)) < 0)
         return -1;
     CUarray srcArray;
     if (rpc_read(conn, &srcArray, sizeof(CUarray)) < 0)
@@ -8865,7 +8865,7 @@ int handle_cuMemcpyAtoHAsync_v2(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &dstHost, sizeof(void*)) < 0)
+    if (rpc_write(conn, &dstHost, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -9447,8 +9447,8 @@ int handle_cuMipmappedArrayDestroy(void *conn)
 
 int handle_cuMemGetHandleForAddressRange(void *conn)
 {
-    void* handle;
-    if (rpc_read(conn, &handle, sizeof(void*)) < 0)
+    void *handle;
+    if (rpc_read(conn, &handle, sizeof(void *)) < 0)
         return -1;
     CUdeviceptr dptr;
     if (rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0)
@@ -9471,7 +9471,7 @@ int handle_cuMemGetHandleForAddressRange(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &handle, sizeof(void*)) < 0)
+    if (rpc_write(conn, &handle, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -9627,8 +9627,8 @@ int handle_cuMemUnmap(void *conn)
 
 int handle_cuMemExportToShareableHandle(void *conn)
 {
-    void* shareableHandle;
-    if (rpc_read(conn, &shareableHandle, sizeof(void*)) < 0)
+    void *shareableHandle;
+    if (rpc_read(conn, &shareableHandle, sizeof(void *)) < 0)
         return -1;
     CUmemGenericAllocationHandle handle;
     if (rpc_read(conn, &handle, sizeof(CUmemGenericAllocationHandle)) < 0)
@@ -9648,7 +9648,7 @@ int handle_cuMemExportToShareableHandle(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &shareableHandle, sizeof(void*)) < 0)
+    if (rpc_write(conn, &shareableHandle, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -9659,8 +9659,8 @@ int handle_cuMemImportFromShareableHandle(void *conn)
     CUmemGenericAllocationHandle handle;
     if (rpc_read(conn, &handle, sizeof(CUmemGenericAllocationHandle)) < 0)
         return -1;
-    void* osHandle;
-    if (rpc_read(conn, &osHandle, sizeof(void*)) < 0)
+    void *osHandle;
+    if (rpc_read(conn, &osHandle, sizeof(void *)) < 0)
         return -1;
     CUmemAllocationHandleType shHandleType;
     if (rpc_read(conn, &shHandleType, sizeof(CUmemAllocationHandleType)) < 0)
@@ -9676,7 +9676,7 @@ int handle_cuMemImportFromShareableHandle(void *conn)
         return -1;
     if (rpc_write(conn, &handle, sizeof(CUmemGenericAllocationHandle)) < 0)
         return -1;
-    if (rpc_write(conn, &osHandle, sizeof(void*)) < 0)
+    if (rpc_write(conn, &osHandle, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -9710,8 +9710,8 @@ int handle_cuMemRetainAllocationHandle(void *conn)
     CUmemGenericAllocationHandle handle;
     if (rpc_read(conn, &handle, sizeof(CUmemGenericAllocationHandle)) < 0)
         return -1;
-    void* addr;
-    if (rpc_read(conn, &addr, sizeof(void*)) < 0)
+    void *addr;
+    if (rpc_read(conn, &addr, sizeof(void *)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -9724,7 +9724,7 @@ int handle_cuMemRetainAllocationHandle(void *conn)
         return -1;
     if (rpc_write(conn, &handle, sizeof(CUmemGenericAllocationHandle)) < 0)
         return -1;
-    if (rpc_write(conn, &addr, sizeof(void*)) < 0)
+    if (rpc_write(conn, &addr, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -9806,8 +9806,8 @@ int handle_cuMemPoolSetAttribute(void *conn)
     CUmemPool_attribute attr;
     if (rpc_read(conn, &attr, sizeof(CUmemPool_attribute)) < 0)
         return -1;
-    void* value;
-    if (rpc_read(conn, &value, sizeof(void*)) < 0)
+    void *value;
+    if (rpc_read(conn, &value, sizeof(void *)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -9818,7 +9818,7 @@ int handle_cuMemPoolSetAttribute(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &value, sizeof(void*)) < 0)
+    if (rpc_write(conn, &value, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -9832,8 +9832,8 @@ int handle_cuMemPoolGetAttribute(void *conn)
     CUmemPool_attribute attr;
     if (rpc_read(conn, &attr, sizeof(CUmemPool_attribute)) < 0)
         return -1;
-    void* value;
-    if (rpc_read(conn, &value, sizeof(void*)) < 0)
+    void *value;
+    if (rpc_read(conn, &value, sizeof(void *)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -9844,7 +9844,7 @@ int handle_cuMemPoolGetAttribute(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &value, sizeof(void*)) < 0)
+    if (rpc_write(conn, &value, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -9927,8 +9927,8 @@ int handle_cuMemAllocFromPoolAsync(void *conn)
 
 int handle_cuMemPoolExportToShareableHandle(void *conn)
 {
-    void* handle_out;
-    if (rpc_read(conn, &handle_out, sizeof(void*)) < 0)
+    void *handle_out;
+    if (rpc_read(conn, &handle_out, sizeof(void *)) < 0)
         return -1;
     CUmemoryPool pool;
     if (rpc_read(conn, &pool, sizeof(CUmemoryPool)) < 0)
@@ -9948,7 +9948,7 @@ int handle_cuMemPoolExportToShareableHandle(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &handle_out, sizeof(void*)) < 0)
+    if (rpc_write(conn, &handle_out, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -9959,8 +9959,8 @@ int handle_cuMemPoolImportFromShareableHandle(void *conn)
     CUmemoryPool pool_out;
     if (rpc_read(conn, &pool_out, sizeof(CUmemoryPool)) < 0)
         return -1;
-    void* handle;
-    if (rpc_read(conn, &handle, sizeof(void*)) < 0)
+    void *handle;
+    if (rpc_read(conn, &handle, sizeof(void *)) < 0)
         return -1;
     CUmemAllocationHandleType handleType;
     if (rpc_read(conn, &handleType, sizeof(CUmemAllocationHandleType)) < 0)
@@ -9979,7 +9979,7 @@ int handle_cuMemPoolImportFromShareableHandle(void *conn)
         return -1;
     if (rpc_write(conn, &pool_out, sizeof(CUmemoryPool)) < 0)
         return -1;
-    if (rpc_write(conn, &handle, sizeof(void*)) < 0)
+    if (rpc_write(conn, &handle, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -10038,8 +10038,8 @@ int handle_cuMemPoolImportPointer(void *conn)
 
 int handle_cuPointerGetAttribute(void *conn)
 {
-    void* data;
-    if (rpc_read(conn, &data, sizeof(void*)) < 0)
+    void *data;
+    if (rpc_read(conn, &data, sizeof(void *)) < 0)
         return -1;
     CUpointer_attribute attribute;
     if (rpc_read(conn, &attribute, sizeof(CUpointer_attribute)) < 0)
@@ -10056,7 +10056,7 @@ int handle_cuPointerGetAttribute(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &data, sizeof(void*)) < 0)
+    if (rpc_write(conn, &data, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -10118,8 +10118,8 @@ int handle_cuMemAdvise(void *conn)
 
 int handle_cuMemRangeGetAttribute(void *conn)
 {
-    void* data;
-    if (rpc_read(conn, &data, sizeof(void*)) < 0)
+    void *data;
+    if (rpc_read(conn, &data, sizeof(void *)) < 0)
         return -1;
     size_t dataSize;
     if (rpc_read(conn, &dataSize, sizeof(size_t)) < 0)
@@ -10142,7 +10142,7 @@ int handle_cuMemRangeGetAttribute(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &data, sizeof(void*)) < 0)
+    if (rpc_write(conn, &data, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -10150,8 +10150,8 @@ int handle_cuMemRangeGetAttribute(void *conn)
 
 int handle_cuMemRangeGetAttributes(void *conn)
 {
-    void* data;
-    if (rpc_read(conn, &data, sizeof(void*)) < 0)
+    void *data;
+    if (rpc_read(conn, &data, sizeof(void *)) < 0)
         return -1;
     size_t dataSizes;
     if (rpc_read(conn, &dataSizes, sizeof(size_t)) < 0)
@@ -10177,7 +10177,7 @@ int handle_cuMemRangeGetAttributes(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &data, sizeof(void*)) < 0)
+    if (rpc_write(conn, &data, sizeof(void *)) < 0)
         return -1;
     if (rpc_write(conn, &dataSizes, sizeof(size_t)) < 0)
         return -1;
@@ -10195,8 +10195,8 @@ int handle_cuPointerGetAttributes(void *conn)
     CUpointer_attribute attributes;
     if (rpc_read(conn, &attributes, sizeof(CUpointer_attribute)) < 0)
         return -1;
-    void* data;
-    if (rpc_read(conn, &data, sizeof(void*)) < 0)
+    void *data;
+    if (rpc_read(conn, &data, sizeof(void *)) < 0)
         return -1;
     CUdeviceptr ptr;
     if (rpc_read(conn, &ptr, sizeof(CUdeviceptr)) < 0)
@@ -10212,7 +10212,7 @@ int handle_cuPointerGetAttributes(void *conn)
         return -1;
     if (rpc_write(conn, &attributes, sizeof(CUpointer_attribute)) < 0)
         return -1;
-    if (rpc_write(conn, &data, sizeof(void*)) < 0)
+    if (rpc_write(conn, &data, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -10391,8 +10391,8 @@ int handle_cuStreamAddCallback(void *conn)
     CUstreamCallback callback;
     if (rpc_read(conn, &callback, sizeof(CUstreamCallback)) < 0)
         return -1;
-    void* userData;
-    if (rpc_read(conn, &userData, sizeof(void*)) < 0)
+    void *userData;
+    if (rpc_read(conn, &userData, sizeof(void *)) < 0)
         return -1;
     unsigned int flags;
     if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
@@ -10406,7 +10406,7 @@ int handle_cuStreamAddCallback(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &userData, sizeof(void*)) < 0)
+    if (rpc_write(conn, &userData, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -11121,11 +11121,11 @@ int handle_cuLaunchKernel(void *conn)
     CUstream hStream;
     if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
         return -1;
-    void* kernelParams;
-    if (rpc_read(conn, &kernelParams, sizeof(void*)) < 0)
+    void *kernelParams;
+    if (rpc_read(conn, &kernelParams, sizeof(void *)) < 0)
         return -1;
-    void* extra;
-    if (rpc_read(conn, &extra, sizeof(void*)) < 0)
+    void *extra;
+    if (rpc_read(conn, &extra, sizeof(void *)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -11169,8 +11169,8 @@ int handle_cuLaunchCooperativeKernel(void *conn)
     CUstream hStream;
     if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
         return -1;
-    void* kernelParams;
-    if (rpc_read(conn, &kernelParams, sizeof(void*)) < 0)
+    void *kernelParams;
+    if (rpc_read(conn, &kernelParams, sizeof(void *)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -11181,7 +11181,7 @@ int handle_cuLaunchCooperativeKernel(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &kernelParams, sizeof(void*)) < 0)
+    if (rpc_write(conn, &kernelParams, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -11221,8 +11221,8 @@ int handle_cuLaunchHostFunc(void *conn)
     CUhostFn fn;
     if (rpc_read(conn, &fn, sizeof(CUhostFn)) < 0)
         return -1;
-    void* userData;
-    if (rpc_read(conn, &userData, sizeof(void*)) < 0)
+    void *userData;
+    if (rpc_read(conn, &userData, sizeof(void *)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -11233,7 +11233,7 @@ int handle_cuLaunchHostFunc(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &userData, sizeof(void*)) < 0)
+    if (rpc_write(conn, &userData, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -11364,8 +11364,8 @@ int handle_cuParamSetv(void *conn)
     int offset;
     if (rpc_read(conn, &offset, sizeof(int)) < 0)
         return -1;
-    void* ptr;
-    if (rpc_read(conn, &ptr, sizeof(void*)) < 0)
+    void *ptr;
+    if (rpc_read(conn, &ptr, sizeof(void *)) < 0)
         return -1;
     unsigned int numbytes;
     if (rpc_read(conn, &numbytes, sizeof(unsigned int)) < 0)
@@ -11379,7 +11379,7 @@ int handle_cuParamSetv(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &ptr, sizeof(void*)) < 0)
+    if (rpc_write(conn, &ptr, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -11845,8 +11845,8 @@ int handle_cuDeviceGetGraphMemAttribute(void *conn)
     CUgraphMem_attribute attr;
     if (rpc_read(conn, &attr, sizeof(CUgraphMem_attribute)) < 0)
         return -1;
-    void* value;
-    if (rpc_read(conn, &value, sizeof(void*)) < 0)
+    void *value;
+    if (rpc_read(conn, &value, sizeof(void *)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -11857,7 +11857,7 @@ int handle_cuDeviceGetGraphMemAttribute(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &value, sizeof(void*)) < 0)
+    if (rpc_write(conn, &value, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -11871,8 +11871,8 @@ int handle_cuDeviceSetGraphMemAttribute(void *conn)
     CUgraphMem_attribute attr;
     if (rpc_read(conn, &attr, sizeof(CUgraphMem_attribute)) < 0)
         return -1;
-    void* value;
-    if (rpc_read(conn, &value, sizeof(void*)) < 0)
+    void *value;
+    if (rpc_read(conn, &value, sizeof(void *)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -11883,7 +11883,7 @@ int handle_cuDeviceSetGraphMemAttribute(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &value, sizeof(void*)) < 0)
+    if (rpc_write(conn, &value, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -12479,8 +12479,8 @@ int handle_cuUserObjectCreate(void *conn)
     CUuserObject object_out;
     if (rpc_read(conn, &object_out, sizeof(CUuserObject)) < 0)
         return -1;
-    void* ptr;
-    if (rpc_read(conn, &ptr, sizeof(void*)) < 0)
+    void *ptr;
+    if (rpc_read(conn, &ptr, sizeof(void *)) < 0)
         return -1;
     CUhostFn destroy;
     if (rpc_read(conn, &destroy, sizeof(CUhostFn)) < 0)
@@ -12502,7 +12502,7 @@ int handle_cuUserObjectCreate(void *conn)
         return -1;
     if (rpc_write(conn, &object_out, sizeof(CUuserObject)) < 0)
         return -1;
-    if (rpc_write(conn, &ptr, sizeof(void*)) < 0)
+    if (rpc_write(conn, &ptr, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -13475,8 +13475,8 @@ int handle_cuTensorMapReplaceAddress(void *conn)
     CUtensorMap tensorMap;
     if (rpc_read(conn, &tensorMap, sizeof(CUtensorMap)) < 0)
         return -1;
-    void* globalAddress;
-    if (rpc_read(conn, &globalAddress, sizeof(void*)) < 0)
+    void *globalAddress;
+    if (rpc_read(conn, &globalAddress, sizeof(void *)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -13489,7 +13489,7 @@ int handle_cuTensorMapReplaceAddress(void *conn)
         return -1;
     if (rpc_write(conn, &tensorMap, sizeof(CUtensorMap)) < 0)
         return -1;
-    if (rpc_write(conn, &globalAddress, sizeof(void*)) < 0)
+    if (rpc_write(conn, &globalAddress, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -14012,8 +14012,8 @@ int handle_cudaIpcGetMemHandle(void *conn)
     cudaIpcMemHandle_t handle;
     if (rpc_read(conn, &handle, sizeof(cudaIpcMemHandle_t)) < 0)
         return -1;
-    void* devPtr;
-    if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
+    void *devPtr;
+    if (rpc_read(conn, &devPtr, sizeof(void *)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -14026,7 +14026,7 @@ int handle_cudaIpcGetMemHandle(void *conn)
         return -1;
     if (rpc_write(conn, &handle, sizeof(cudaIpcMemHandle_t)) < 0)
         return -1;
-    if (rpc_write(conn, &devPtr, sizeof(void*)) < 0)
+    if (rpc_write(conn, &devPtr, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -14034,8 +14034,8 @@ int handle_cudaIpcGetMemHandle(void *conn)
 
 int handle_cudaIpcOpenMemHandle(void *conn)
 {
-    void* devPtr;
-    if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
+    void *devPtr;
+    if (rpc_read(conn, &devPtr, sizeof(void *)) < 0)
         return -1;
     cudaIpcMemHandle_t handle;
     if (rpc_read(conn, &handle, sizeof(cudaIpcMemHandle_t)) < 0)
@@ -14052,7 +14052,7 @@ int handle_cudaIpcOpenMemHandle(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &devPtr, sizeof(void*)) < 0)
+    if (rpc_write(conn, &devPtr, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -14060,8 +14060,8 @@ int handle_cudaIpcOpenMemHandle(void *conn)
 
 int handle_cudaIpcCloseMemHandle(void *conn)
 {
-    void* devPtr;
-    if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
+    void *devPtr;
+    if (rpc_read(conn, &devPtr, sizeof(void *)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -14072,7 +14072,7 @@ int handle_cudaIpcCloseMemHandle(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &devPtr, sizeof(void*)) < 0)
+    if (rpc_write(conn, &devPtr, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -14375,8 +14375,8 @@ int handle_cudaDeviceGetMemPool(void *conn)
 
 int handle_cudaDeviceGetNvSciSyncAttributes(void *conn)
 {
-    void* nvSciSyncAttrList;
-    if (rpc_read(conn, &nvSciSyncAttrList, sizeof(void*)) < 0)
+    void *nvSciSyncAttrList;
+    if (rpc_read(conn, &nvSciSyncAttrList, sizeof(void *)) < 0)
         return -1;
     int device;
     if (rpc_read(conn, &device, sizeof(int)) < 0)
@@ -14393,7 +14393,7 @@ int handle_cudaDeviceGetNvSciSyncAttributes(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &nvSciSyncAttrList, sizeof(void*)) < 0)
+    if (rpc_write(conn, &nvSciSyncAttrList, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -14801,8 +14801,8 @@ int handle_cudaStreamAddCallback(void *conn)
     cudaStreamCallback_t callback;
     if (rpc_read(conn, &callback, sizeof(cudaStreamCallback_t)) < 0)
         return -1;
-    void* userData;
-    if (rpc_read(conn, &userData, sizeof(void*)) < 0)
+    void *userData;
+    if (rpc_read(conn, &userData, sizeof(void *)) < 0)
         return -1;
     unsigned int flags;
     if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
@@ -14816,7 +14816,7 @@ int handle_cudaStreamAddCallback(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &userData, sizeof(void*)) < 0)
+    if (rpc_write(conn, &userData, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -14863,8 +14863,8 @@ int handle_cudaStreamAttachMemAsync(void *conn)
     cudaStream_t stream;
     if (rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0)
         return -1;
-    void* devPtr;
-    if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
+    void *devPtr;
+    if (rpc_read(conn, &devPtr, sizeof(void *)) < 0)
         return -1;
     size_t length;
     if (rpc_read(conn, &length, sizeof(size_t)) < 0)
@@ -14881,7 +14881,7 @@ int handle_cudaStreamAttachMemAsync(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &devPtr, sizeof(void*)) < 0)
+    if (rpc_write(conn, &devPtr, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -14983,7 +14983,7 @@ int handle_cudaStreamGetCaptureInfo_v2(void *conn)
     unsigned long long id_out;
     cudaGraph_t graph_out;
     size_t numDependencies_out;
-    const cudaGraphNode_t** dependencies_out = (const cudaGraphNode_t**)malloc(numDependencies_out * sizeof(const cudaGraphNode_t*));
+    const cudaGraphNode_t **dependencies_out = (const cudaGraphNode_t **)malloc(numDependencies_out * sizeof(const cudaGraphNode_t *));
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -15001,7 +15001,7 @@ int handle_cudaStreamGetCaptureInfo_v2(void *conn)
         return -1;
     if (rpc_write(conn, &numDependencies_out, sizeof(size_t)) < 0)
         return -1;
-    if (rpc_write(conn, dependencies_out, numDependencies_out * sizeof(const cudaGraphNode_t*)) < 0)
+    if (rpc_write(conn, dependencies_out, numDependencies_out * sizeof(const cudaGraphNode_t *)) < 0)
         return -1;
 
     return result;
@@ -15015,8 +15015,8 @@ int handle_cudaStreamUpdateCaptureDependencies(void *conn)
     size_t numDependencies;
     if (rpc_read(conn, &numDependencies, sizeof(size_t)) < 0)
         return -1;
-    cudaGraphNode_t* dependencies = (cudaGraphNode_t*)malloc(numDependencies * sizeof(cudaGraphNode_t));
-    if (rpc_read(conn, &dependencies, sizeof(cudaGraphNode_t*)) < 0)
+    cudaGraphNode_t *dependencies = (cudaGraphNode_t *)malloc(numDependencies * sizeof(cudaGraphNode_t));
+    if (rpc_read(conn, &dependencies, sizeof(cudaGraphNode_t *)) < 0)
         return -1;
     unsigned int flags;
     if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
@@ -15306,8 +15306,8 @@ int handle_cudaLaunchHostFunc(void *conn)
     cudaHostFn_t fn;
     if (rpc_read(conn, &fn, sizeof(cudaHostFn_t)) < 0)
         return -1;
-    void* userData;
-    if (rpc_read(conn, &userData, sizeof(void*)) < 0)
+    void *userData;
+    if (rpc_read(conn, &userData, sizeof(void *)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -15318,7 +15318,7 @@ int handle_cudaLaunchHostFunc(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &userData, sizeof(void*)) < 0)
+    if (rpc_write(conn, &userData, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -15326,8 +15326,8 @@ int handle_cudaLaunchHostFunc(void *conn)
 
 int handle_cudaMallocManaged(void *conn)
 {
-    void* devPtr;
-    if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
+    void *devPtr;
+    if (rpc_read(conn, &devPtr, sizeof(void *)) < 0)
         return -1;
     size_t size;
     if (rpc_read(conn, &size, sizeof(size_t)) < 0)
@@ -15344,7 +15344,7 @@ int handle_cudaMallocManaged(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &devPtr, sizeof(void*)) < 0)
+    if (rpc_write(conn, &devPtr, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -15352,9 +15352,7 @@ int handle_cudaMallocManaged(void *conn)
 
 int handle_cudaMalloc(void *conn)
 {
-    void* devPtr;
-    if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
-        return -1;
+    void *devPtr;
     size_t size;
     if (rpc_read(conn, &size, sizeof(size_t)) < 0)
         return -1;
@@ -15367,7 +15365,7 @@ int handle_cudaMalloc(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &devPtr, sizeof(void*)) < 0)
+    if (rpc_write(conn, &devPtr, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -15375,8 +15373,8 @@ int handle_cudaMalloc(void *conn)
 
 int handle_cudaMallocHost(void *conn)
 {
-    void* ptr;
-    if (rpc_read(conn, &ptr, sizeof(void*)) < 0)
+    void *ptr;
+    if (rpc_read(conn, &ptr, sizeof(void *)) < 0)
         return -1;
     size_t size;
     if (rpc_read(conn, &size, sizeof(size_t)) < 0)
@@ -15390,7 +15388,7 @@ int handle_cudaMallocHost(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &ptr, sizeof(void*)) < 0)
+    if (rpc_write(conn, &ptr, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -15398,8 +15396,8 @@ int handle_cudaMallocHost(void *conn)
 
 int handle_cudaMallocPitch(void *conn)
 {
-    void* devPtr;
-    if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
+    void *devPtr;
+    if (rpc_read(conn, &devPtr, sizeof(void *)) < 0)
         return -1;
     size_t pitch;
     if (rpc_read(conn, &pitch, sizeof(size_t)) < 0)
@@ -15419,7 +15417,7 @@ int handle_cudaMallocPitch(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &devPtr, sizeof(void*)) < 0)
+    if (rpc_write(conn, &devPtr, sizeof(void *)) < 0)
         return -1;
     if (rpc_write(conn, &pitch, sizeof(size_t)) < 0)
         return -1;
@@ -15429,8 +15427,8 @@ int handle_cudaMallocPitch(void *conn)
 
 int handle_cudaFree(void *conn)
 {
-    void* devPtr;
-    if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
+    void *devPtr;
+    if (rpc_read(conn, &devPtr, sizeof(void *)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -15441,16 +15439,14 @@ int handle_cudaFree(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &devPtr, sizeof(void*)) < 0)
-        return -1;
 
     return result;
 }
 
 int handle_cudaFreeHost(void *conn)
 {
-    void* ptr;
-    if (rpc_read(conn, &ptr, sizeof(void*)) < 0)
+    void *ptr;
+    if (rpc_read(conn, &ptr, sizeof(void *)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -15460,8 +15456,6 @@ int handle_cudaFreeHost(void *conn)
     cudaError_t result = cudaFreeHost(&ptr);
 
     if (rpc_start_response(conn, request_id) < 0)
-        return -1;
-    if (rpc_write(conn, &ptr, sizeof(void*)) < 0)
         return -1;
 
     return result;
@@ -15505,8 +15499,8 @@ int handle_cudaFreeMipmappedArray(void *conn)
 
 int handle_cudaHostAlloc(void *conn)
 {
-    void* pHost;
-    if (rpc_read(conn, &pHost, sizeof(void*)) < 0)
+    void *pHost;
+    if (rpc_read(conn, &pHost, sizeof(void *)) < 0)
         return -1;
     size_t size;
     if (rpc_read(conn, &size, sizeof(size_t)) < 0)
@@ -15523,7 +15517,7 @@ int handle_cudaHostAlloc(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &pHost, sizeof(void*)) < 0)
+    if (rpc_write(conn, &pHost, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -15531,8 +15525,8 @@ int handle_cudaHostAlloc(void *conn)
 
 int handle_cudaHostRegister(void *conn)
 {
-    void* ptr;
-    if (rpc_read(conn, &ptr, sizeof(void*)) < 0)
+    void *ptr;
+    if (rpc_read(conn, &ptr, sizeof(void *)) < 0)
         return -1;
     size_t size;
     if (rpc_read(conn, &size, sizeof(size_t)) < 0)
@@ -15549,7 +15543,7 @@ int handle_cudaHostRegister(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &ptr, sizeof(void*)) < 0)
+    if (rpc_write(conn, &ptr, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -15557,8 +15551,8 @@ int handle_cudaHostRegister(void *conn)
 
 int handle_cudaHostUnregister(void *conn)
 {
-    void* ptr;
-    if (rpc_read(conn, &ptr, sizeof(void*)) < 0)
+    void *ptr;
+    if (rpc_read(conn, &ptr, sizeof(void *)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -15569,7 +15563,7 @@ int handle_cudaHostUnregister(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &ptr, sizeof(void*)) < 0)
+    if (rpc_write(conn, &ptr, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -15577,11 +15571,11 @@ int handle_cudaHostUnregister(void *conn)
 
 int handle_cudaHostGetDevicePointer(void *conn)
 {
-    void* pDevice;
-    if (rpc_read(conn, &pDevice, sizeof(void*)) < 0)
+    void *pDevice;
+    if (rpc_read(conn, &pDevice, sizeof(void *)) < 0)
         return -1;
-    void* pHost;
-    if (rpc_read(conn, &pHost, sizeof(void*)) < 0)
+    void *pHost;
+    if (rpc_read(conn, &pHost, sizeof(void *)) < 0)
         return -1;
     unsigned int flags;
     if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
@@ -15595,9 +15589,9 @@ int handle_cudaHostGetDevicePointer(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &pDevice, sizeof(void*)) < 0)
+    if (rpc_write(conn, &pDevice, sizeof(void *)) < 0)
         return -1;
-    if (rpc_write(conn, &pHost, sizeof(void*)) < 0)
+    if (rpc_write(conn, &pHost, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -15608,8 +15602,8 @@ int handle_cudaHostGetFlags(void *conn)
     unsigned int pFlags;
     if (rpc_read(conn, &pFlags, sizeof(unsigned int)) < 0)
         return -1;
-    void* pHost;
-    if (rpc_read(conn, &pHost, sizeof(void*)) < 0)
+    void *pHost;
+    if (rpc_read(conn, &pHost, sizeof(void *)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -15622,7 +15616,7 @@ int handle_cudaHostGetFlags(void *conn)
         return -1;
     if (rpc_write(conn, &pFlags, sizeof(unsigned int)) < 0)
         return -1;
-    if (rpc_write(conn, &pHost, sizeof(void*)) < 0)
+    if (rpc_write(conn, &pHost, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -15861,8 +15855,8 @@ int handle_cudaMipmappedArrayGetSparseProperties(void *conn)
 
 int handle_cudaMemcpy2DFromArray(void *conn)
 {
-    void* dst;
-    if (rpc_read(conn, &dst, sizeof(void*)) < 0)
+    void *dst;
+    if (rpc_read(conn, &dst, sizeof(void *)) < 0)
         return -1;
     size_t dpitch;
     if (rpc_read(conn, &dpitch, sizeof(size_t)) < 0)
@@ -15894,7 +15888,7 @@ int handle_cudaMemcpy2DFromArray(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &dst, sizeof(void*)) < 0)
+    if (rpc_write(conn, &dst, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -15944,8 +15938,8 @@ int handle_cudaMemcpy2DArrayToArray(void *conn)
 
 int handle_cudaMemcpy2DFromArrayAsync(void *conn)
 {
-    void* dst;
-    if (rpc_read(conn, &dst, sizeof(void*)) < 0)
+    void *dst;
+    if (rpc_read(conn, &dst, sizeof(void *)) < 0)
         return -1;
     size_t dpitch;
     if (rpc_read(conn, &dpitch, sizeof(size_t)) < 0)
@@ -15980,7 +15974,7 @@ int handle_cudaMemcpy2DFromArrayAsync(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &dst, sizeof(void*)) < 0)
+    if (rpc_write(conn, &dst, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -15988,8 +15982,8 @@ int handle_cudaMemcpy2DFromArrayAsync(void *conn)
 
 int handle_cudaMemset(void *conn)
 {
-    void* devPtr;
-    if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
+    void *devPtr;
+    if (rpc_read(conn, &devPtr, sizeof(void *)) < 0)
         return -1;
     int value;
     if (rpc_read(conn, &value, sizeof(int)) < 0)
@@ -16006,7 +16000,7 @@ int handle_cudaMemset(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &devPtr, sizeof(void*)) < 0)
+    if (rpc_write(conn, &devPtr, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -16014,8 +16008,8 @@ int handle_cudaMemset(void *conn)
 
 int handle_cudaMemset2D(void *conn)
 {
-    void* devPtr;
-    if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
+    void *devPtr;
+    if (rpc_read(conn, &devPtr, sizeof(void *)) < 0)
         return -1;
     size_t pitch;
     if (rpc_read(conn, &pitch, sizeof(size_t)) < 0)
@@ -16038,7 +16032,7 @@ int handle_cudaMemset2D(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &devPtr, sizeof(void*)) < 0)
+    if (rpc_write(conn, &devPtr, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -16070,8 +16064,8 @@ int handle_cudaMemset3D(void *conn)
 
 int handle_cudaMemsetAsync(void *conn)
 {
-    void* devPtr;
-    if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
+    void *devPtr;
+    if (rpc_read(conn, &devPtr, sizeof(void *)) < 0)
         return -1;
     int value;
     if (rpc_read(conn, &value, sizeof(int)) < 0)
@@ -16091,7 +16085,7 @@ int handle_cudaMemsetAsync(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &devPtr, sizeof(void*)) < 0)
+    if (rpc_write(conn, &devPtr, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -16099,8 +16093,8 @@ int handle_cudaMemsetAsync(void *conn)
 
 int handle_cudaMemset2DAsync(void *conn)
 {
-    void* devPtr;
-    if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
+    void *devPtr;
+    if (rpc_read(conn, &devPtr, sizeof(void *)) < 0)
         return -1;
     size_t pitch;
     if (rpc_read(conn, &pitch, sizeof(size_t)) < 0)
@@ -16126,7 +16120,7 @@ int handle_cudaMemset2DAsync(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &devPtr, sizeof(void*)) < 0)
+    if (rpc_write(conn, &devPtr, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -16161,8 +16155,8 @@ int handle_cudaMemset3DAsync(void *conn)
 
 int handle_cudaMemcpyFromArray(void *conn)
 {
-    void* dst;
-    if (rpc_read(conn, &dst, sizeof(void*)) < 0)
+    void *dst;
+    if (rpc_read(conn, &dst, sizeof(void *)) < 0)
         return -1;
     cudaArray_const_t src;
     if (rpc_read(conn, &src, sizeof(cudaArray_const_t)) < 0)
@@ -16188,7 +16182,7 @@ int handle_cudaMemcpyFromArray(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &dst, sizeof(void*)) < 0)
+    if (rpc_write(conn, &dst, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -16235,8 +16229,8 @@ int handle_cudaMemcpyArrayToArray(void *conn)
 
 int handle_cudaMemcpyFromArrayAsync(void *conn)
 {
-    void* dst;
-    if (rpc_read(conn, &dst, sizeof(void*)) < 0)
+    void *dst;
+    if (rpc_read(conn, &dst, sizeof(void *)) < 0)
         return -1;
     cudaArray_const_t src;
     if (rpc_read(conn, &src, sizeof(cudaArray_const_t)) < 0)
@@ -16265,7 +16259,7 @@ int handle_cudaMemcpyFromArrayAsync(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &dst, sizeof(void*)) < 0)
+    if (rpc_write(conn, &dst, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -16273,8 +16267,8 @@ int handle_cudaMemcpyFromArrayAsync(void *conn)
 
 int handle_cudaMallocAsync(void *conn)
 {
-    void* devPtr;
-    if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
+    void *devPtr;
+    if (rpc_read(conn, &devPtr, sizeof(void *)) < 0)
         return -1;
     size_t size;
     if (rpc_read(conn, &size, sizeof(size_t)) < 0)
@@ -16291,7 +16285,7 @@ int handle_cudaMallocAsync(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &devPtr, sizeof(void*)) < 0)
+    if (rpc_write(conn, &devPtr, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -16299,8 +16293,8 @@ int handle_cudaMallocAsync(void *conn)
 
 int handle_cudaFreeAsync(void *conn)
 {
-    void* devPtr;
-    if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
+    void *devPtr;
+    if (rpc_read(conn, &devPtr, sizeof(void *)) < 0)
         return -1;
     cudaStream_t hStream;
     if (rpc_read(conn, &hStream, sizeof(cudaStream_t)) < 0)
@@ -16314,7 +16308,7 @@ int handle_cudaFreeAsync(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &devPtr, sizeof(void*)) < 0)
+    if (rpc_write(conn, &devPtr, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -16349,8 +16343,8 @@ int handle_cudaMemPoolSetAttribute(void *conn)
     enum cudaMemPoolAttr attr;
     if (rpc_read(conn, &attr, sizeof(enum cudaMemPoolAttr)) < 0)
         return -1;
-    void* value;
-    if (rpc_read(conn, &value, sizeof(void*)) < 0)
+    void *value;
+    if (rpc_read(conn, &value, sizeof(void *)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -16361,7 +16355,7 @@ int handle_cudaMemPoolSetAttribute(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &value, sizeof(void*)) < 0)
+    if (rpc_write(conn, &value, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -16375,8 +16369,8 @@ int handle_cudaMemPoolGetAttribute(void *conn)
     enum cudaMemPoolAttr attr;
     if (rpc_read(conn, &attr, sizeof(enum cudaMemPoolAttr)) < 0)
         return -1;
-    void* value;
-    if (rpc_read(conn, &value, sizeof(void*)) < 0)
+    void *value;
+    if (rpc_read(conn, &value, sizeof(void *)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -16387,7 +16381,7 @@ int handle_cudaMemPoolGetAttribute(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &value, sizeof(void*)) < 0)
+    if (rpc_write(conn, &value, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -16441,8 +16435,8 @@ int handle_cudaMemPoolDestroy(void *conn)
 
 int handle_cudaMallocFromPoolAsync(void *conn)
 {
-    void* ptr;
-    if (rpc_read(conn, &ptr, sizeof(void*)) < 0)
+    void *ptr;
+    if (rpc_read(conn, &ptr, sizeof(void *)) < 0)
         return -1;
     size_t size;
     if (rpc_read(conn, &size, sizeof(size_t)) < 0)
@@ -16462,7 +16456,7 @@ int handle_cudaMallocFromPoolAsync(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &ptr, sizeof(void*)) < 0)
+    if (rpc_write(conn, &ptr, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -16470,8 +16464,8 @@ int handle_cudaMallocFromPoolAsync(void *conn)
 
 int handle_cudaMemPoolExportToShareableHandle(void *conn)
 {
-    void* shareableHandle;
-    if (rpc_read(conn, &shareableHandle, sizeof(void*)) < 0)
+    void *shareableHandle;
+    if (rpc_read(conn, &shareableHandle, sizeof(void *)) < 0)
         return -1;
     cudaMemPool_t memPool;
     if (rpc_read(conn, &memPool, sizeof(cudaMemPool_t)) < 0)
@@ -16491,7 +16485,7 @@ int handle_cudaMemPoolExportToShareableHandle(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &shareableHandle, sizeof(void*)) < 0)
+    if (rpc_write(conn, &shareableHandle, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -16502,8 +16496,8 @@ int handle_cudaMemPoolImportFromShareableHandle(void *conn)
     cudaMemPool_t memPool;
     if (rpc_read(conn, &memPool, sizeof(cudaMemPool_t)) < 0)
         return -1;
-    void* shareableHandle;
-    if (rpc_read(conn, &shareableHandle, sizeof(void*)) < 0)
+    void *shareableHandle;
+    if (rpc_read(conn, &shareableHandle, sizeof(void *)) < 0)
         return -1;
     enum cudaMemAllocationHandleType handleType;
     if (rpc_read(conn, &handleType, sizeof(enum cudaMemAllocationHandleType)) < 0)
@@ -16522,7 +16516,7 @@ int handle_cudaMemPoolImportFromShareableHandle(void *conn)
         return -1;
     if (rpc_write(conn, &memPool, sizeof(cudaMemPool_t)) < 0)
         return -1;
-    if (rpc_write(conn, &shareableHandle, sizeof(void*)) < 0)
+    if (rpc_write(conn, &shareableHandle, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -16533,8 +16527,8 @@ int handle_cudaMemPoolExportPointer(void *conn)
     struct cudaMemPoolPtrExportData exportData;
     if (rpc_read(conn, &exportData, sizeof(struct cudaMemPoolPtrExportData)) < 0)
         return -1;
-    void* ptr;
-    if (rpc_read(conn, &ptr, sizeof(void*)) < 0)
+    void *ptr;
+    if (rpc_read(conn, &ptr, sizeof(void *)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -16547,7 +16541,7 @@ int handle_cudaMemPoolExportPointer(void *conn)
         return -1;
     if (rpc_write(conn, &exportData, sizeof(struct cudaMemPoolPtrExportData)) < 0)
         return -1;
-    if (rpc_write(conn, &ptr, sizeof(void*)) < 0)
+    if (rpc_write(conn, &ptr, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -16555,8 +16549,8 @@ int handle_cudaMemPoolExportPointer(void *conn)
 
 int handle_cudaMemPoolImportPointer(void *conn)
 {
-    void* ptr;
-    if (rpc_read(conn, &ptr, sizeof(void*)) < 0)
+    void *ptr;
+    if (rpc_read(conn, &ptr, sizeof(void *)) < 0)
         return -1;
     cudaMemPool_t memPool;
     if (rpc_read(conn, &memPool, sizeof(cudaMemPool_t)) < 0)
@@ -16573,7 +16567,7 @@ int handle_cudaMemPoolImportPointer(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &ptr, sizeof(void*)) < 0)
+    if (rpc_write(conn, &ptr, sizeof(void *)) < 0)
         return -1;
     if (rpc_write(conn, &exportData, sizeof(struct cudaMemPoolPtrExportData)) < 0)
         return -1;
@@ -16739,8 +16733,8 @@ int handle_cudaGraphicsUnmapResources(void *conn)
 
 int handle_cudaGraphicsResourceGetMappedPointer(void *conn)
 {
-    void* devPtr;
-    if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
+    void *devPtr;
+    if (rpc_read(conn, &devPtr, sizeof(void *)) < 0)
         return -1;
     size_t size;
     if (rpc_read(conn, &size, sizeof(size_t)) < 0)
@@ -16757,7 +16751,7 @@ int handle_cudaGraphicsResourceGetMappedPointer(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &devPtr, sizeof(void*)) < 0)
+    if (rpc_write(conn, &devPtr, sizeof(void *)) < 0)
         return -1;
     if (rpc_write(conn, &size, sizeof(size_t)) < 0)
         return -1;
@@ -17355,8 +17349,8 @@ int handle_cudaGraphMemFreeNodeGetParams(void *conn)
     cudaGraphNode_t node;
     if (rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0)
         return -1;
-    void* dptr_out;
-    if (rpc_read(conn, &dptr_out, sizeof(void*)) < 0)
+    void *dptr_out;
+    if (rpc_read(conn, &dptr_out, sizeof(void *)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -17367,7 +17361,7 @@ int handle_cudaGraphMemFreeNodeGetParams(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &dptr_out, sizeof(void*)) < 0)
+    if (rpc_write(conn, &dptr_out, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -17399,8 +17393,8 @@ int handle_cudaDeviceGetGraphMemAttribute(void *conn)
     enum cudaGraphMemAttributeType attr;
     if (rpc_read(conn, &attr, sizeof(enum cudaGraphMemAttributeType)) < 0)
         return -1;
-    void* value;
-    if (rpc_read(conn, &value, sizeof(void*)) < 0)
+    void *value;
+    if (rpc_read(conn, &value, sizeof(void *)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -17411,7 +17405,7 @@ int handle_cudaDeviceGetGraphMemAttribute(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &value, sizeof(void*)) < 0)
+    if (rpc_write(conn, &value, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -17425,8 +17419,8 @@ int handle_cudaDeviceSetGraphMemAttribute(void *conn)
     enum cudaGraphMemAttributeType attr;
     if (rpc_read(conn, &attr, sizeof(enum cudaGraphMemAttributeType)) < 0)
         return -1;
-    void* value;
-    if (rpc_read(conn, &value, sizeof(void*)) < 0)
+    void *value;
+    if (rpc_read(conn, &value, sizeof(void *)) < 0)
         return -1;
 
     int request_id = rpc_end_request(conn);
@@ -17437,7 +17431,7 @@ int handle_cudaDeviceSetGraphMemAttribute(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
-    if (rpc_write(conn, &value, sizeof(void*)) < 0)
+    if (rpc_write(conn, &value, sizeof(void *)) < 0)
         return -1;
 
     return result;
@@ -18012,8 +18006,8 @@ int handle_cudaUserObjectCreate(void *conn)
     cudaUserObject_t object_out;
     if (rpc_read(conn, &object_out, sizeof(cudaUserObject_t)) < 0)
         return -1;
-    void* ptr;
-    if (rpc_read(conn, &ptr, sizeof(void*)) < 0)
+    void *ptr;
+    if (rpc_read(conn, &ptr, sizeof(void *)) < 0)
         return -1;
     cudaHostFn_t destroy;
     if (rpc_read(conn, &destroy, sizeof(cudaHostFn_t)) < 0)
@@ -18035,7 +18029,7 @@ int handle_cudaUserObjectCreate(void *conn)
         return -1;
     if (rpc_write(conn, &object_out, sizeof(cudaUserObject_t)) < 0)
         return -1;
-    if (rpc_write(conn, &ptr, sizeof(void*)) < 0)
+    if (rpc_write(conn, &ptr, sizeof(void *)) < 0)
         return -1;
 
     return result;
