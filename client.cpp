@@ -16,6 +16,7 @@
 #include <unordered_map>
 #include <vector>
 #include <cuda.h>
+#include <sys/uio.h>
 
 #include <unordered_map>
 
@@ -79,6 +80,9 @@ int open_rpc_client()
 pthread_mutex_t mutex;
 pthread_cond_t cond;
 
+struct iovec write_iov[128];
+int write_iov_count = 0;
+
 int rpc_start_request(const unsigned int op)
 {
     static int next_request_id = 1;
@@ -90,23 +94,15 @@ int rpc_start_request(const unsigned int op)
 
     int request_id = next_request_id++;
 
-    if (write(sockfd, &request_id, sizeof(int)) < 0 ||
-        write(sockfd, &op, sizeof(unsigned int)) < 0)
-    {
-        pthread_mutex_unlock(&mutex);
-        return -1;
-    }
-
+    write_iov_count = 0;
+    write_iov[write_iov_count++] = {&request_id, sizeof(int)};
+    write_iov[write_iov_count++] = {&op, sizeof(unsigned int)};
     return request_id;
 }
 
 int rpc_write(const void *data, const size_t size)
 {
-    if (write(sockfd, data, size) < 0)
-    {
-        pthread_mutex_unlock(&mutex);
-        return -1;
-    }
+    write_iov[write_iov_count++] = {const_cast<void *>(data), size};
     return 0;
 }
 
@@ -147,6 +143,13 @@ int rpc_read(void *data, size_t size)
 int rpc_wait_for_response(const unsigned int request_id)
 {
     static int active_response_id = -1;
+
+    // write the request to the server
+    if (writev(sockfd, write_iov, write_iov_count) < 0)
+    {
+        pthread_mutex_unlock(&mutex);
+        return -1;
+    }
 
     // wait for the response
     while (true)
