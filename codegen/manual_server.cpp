@@ -333,6 +333,49 @@ int handle_cudaLaunchKernel(void *conn)
     return result;
 }
 
+extern "C" void** __cudaRegisterFatBinary(void *fatCubin);
+
+int handle___cudaRegisterFatBinary(void *conn)
+{
+    void **fatCubin;
+    
+    if (rpc_read(conn, &fatCubin, sizeof(void *)) < 0)
+    {
+        std::cerr << "Failed to read fatCubin from client" << std::endl;
+        return -1;
+    }
+
+    std::cout << "Server received __cudaRegisterFatBinary data:: " << fatCubin << std::endl;
+
+    void **registeredCubin = __cudaRegisterFatBinary(fatCubin);
+    if (registeredCubin == nullptr)
+    {
+        std::cerr << "Failed to register fat binary on the server" << std::endl;
+        return -1;
+    }
+
+    std::cout << "registeredCubin: " << registeredCubin << std::endl;
+
+    if (rpc_write(conn, &registeredCubin, sizeof(void **)) < 0)
+    {
+        std::cerr << "Failed to write fatCubin back to the client" << std::endl;
+        return -1;
+    }
+
+    int request_id = rpc_end_request(conn);
+    if (request_id < 0)
+    {
+        return -1;
+    }
+
+    if (rpc_start_response(conn, request_id) < 0)
+    {
+        return -1;
+    }
+
+    return 0;
+}
+
 int handle___cudaRegisterFunction(void *conn)
 {
     void *fatCubinHandle;
@@ -355,8 +398,11 @@ int handle___cudaRegisterFunction(void *conn)
         rpc_read(conn, &gDim, sizeof(dim3)) < 0 ||
         rpc_read(conn, &wSize, sizeof(int)) < 0)
     {
+        std::cout << "FAILED " << std::endl;
         return -1;
     }
+
+    std::cout << "hello " << std::endl;
 
     // cudaError_t result = __cudaRegisterFunction(fatCubinHandle, hostFun, deviceFun, deviceName, thread_limit, &tid, &bid, &bDim, &gDim, &wSize);
     // if (result != cudaSuccess)

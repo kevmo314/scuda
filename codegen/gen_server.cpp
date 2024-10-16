@@ -18900,6 +18900,7 @@ static RequestHandler opHandlers[] = {
     handle_cudaMemcpyAsync,
     handle_cudaLaunchKernel,
     handle___cudaRegisterFunction,
+    handle___cudaRegisterFatBinary,
 };
 
 RequestHandler get_handler(const int op)

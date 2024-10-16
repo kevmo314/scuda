@@ -243,6 +243,66 @@ cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim, void
     return return_value;
 }
 
+extern "C" void **__cudaRegisterFatBinary(void **fatCubin)
+{
+    cudaError_t return_value;
+    std::cout << "Intercepted __cudaRegisterFatBinary data:: " << fatCubin << std::endl;
+
+    // Start the RPC request
+    int request_id = rpc_start_request(RPC___cudaRegisterFatBinary);
+    if (request_id < 0)
+    {
+        std::cerr << "Failed to start RPC request for __cudaRegisterFatBinary" << std::endl;
+        return nullptr;
+    }
+
+    // Send the fatCubin to the server
+    if (rpc_write(&fatCubin, sizeof(void *)) < 0)
+    {
+        std::cerr << "Failed to send fatCubin to server" << std::endl;
+        return nullptr;
+    }
+
+    // Wait for a response from the server
+    void **response = nullptr;
+
+    // Read the response from the server (the server should send back the fatCubin)
+    if (rpc_read(&response, sizeof(void **)) < 0)
+    {
+        std::cerr << "Failed to read the fatCubin from the server" << std::endl;
+        return nullptr;
+    }
+
+    if (rpc_wait_for_response(request_id) < 0)
+    {
+        std::cerr << "Failed to get response from server for __cudaRegisterFatBinary" << std::endl;
+        return nullptr;
+    }
+
+    std::cout << "response __cudaRegisterFatBinary data:: " << response << std::endl;
+
+    // End the request
+    if (rpc_end_request(&return_value, request_id) < 0)
+    {
+        std::cerr << "Failed to end RPC request for __cudaRegisterFatBinary" << std::endl;
+        return nullptr;
+    }
+
+    return response;
+}
+
+extern "C" void __cudaRegisterFatBinaryEnd(void **fatCubinHandle) {
+  std::cout << "__cudaRegisterFatBinaryEnd writing data..." << std::endl;
+}
+
+extern "C" void __cudaInitModule(void **fatCubinHandle) {
+  std::cout << "__cudaInitModule writing data..." << std::endl;
+}
+
+extern "C" void __cudaUnregisterFatBinary(void **fatCubinHandle) {
+  std::cout << "__cudaUnregisterFatBinary writing data..." << std::endl;
+}
+
 extern "C"
 {
     void __cudaRegisterFunction(void **fatCubinHandle,
@@ -254,7 +314,7 @@ extern "C"
     {
         cudaError_t return_value;
 
-        std::cout << "calling __cudaRegisterFunction" << std::endl;
+        std::cout << "calling __cudaRegisterFunction:: " << fatCubinHandle << " " << hostFun << " " << deviceFun << " " << deviceName << " " << thread_limit << " " << std::endl;
 
         // Start the RPC request for __cudaRegisterFunction
         int request_id = rpc_start_request(RPC___cudaRegisterFunction);
@@ -262,6 +322,8 @@ extern "C"
         {
             return;
         }
+
+        std::cout << "__cudaRegisterFunction writing data..." << std::endl;
 
         if (rpc_write(fatCubinHandle, sizeof(void *)) < 0 ||
             rpc_write(&hostFun, sizeof(const char *)) < 0 ||
@@ -274,8 +336,11 @@ extern "C"
             rpc_write(gDim, sizeof(dim3)) < 0 ||
             rpc_write(wSize, sizeof(int)) < 0)
         {
+            std::cout << "__cudaRegisterFunction failed writing data..." << std::endl;
             return;
         }
+
+        std::cout << "__cudaRegisterFunction done writing data..." << std::endl;
 
         if (rpc_wait_for_response(request_id) < 0)
         {

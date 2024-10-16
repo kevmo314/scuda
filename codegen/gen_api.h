@@ -769,3 +769,4 @@
 #define RPC_cudaMemcpyAsync 768
 #define RPC_cudaLaunchKernel 769
 #define RPC___cudaRegisterFunction 770
+#define RPC___cudaRegisterFatBinary 771

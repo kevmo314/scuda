@@ -12360,6 +12360,7 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cudaMemcpyAsync", (void *)cudaMemcpyAsync},
     {"cudaLaunchKernel", (void *)cudaLaunchKernel},
     {"__cudaRegisterFunction", (void *)__cudaRegisterFunction},
+    {"__cudaRegisterFatBinary", (void *)__cudaRegisterFatBinary},
 };
 
 void *get_function_pointer(const char *name)
