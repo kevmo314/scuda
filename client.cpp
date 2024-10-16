@@ -96,7 +96,7 @@ int rpc_start_request(const unsigned int op)
 
     write_iov_count = 0;
     write_iov[write_iov_count++] = {&request_id, sizeof(int)};
-    write_iov[write_iov_count++] = {&op, sizeof(unsigned int)};
+    write_iov[write_iov_count++] = {(void *)(&op), sizeof(unsigned int)};
     return request_id;
 }
 
