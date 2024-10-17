@@ -17,6 +17,7 @@
 #include <vector>
 #include <cuda.h>
 #include <sys/uio.h>
+#include <netinet/tcp.h>
 
 #include <unordered_map>
 
@@ -66,6 +67,14 @@ int open_rpc_client()
     if (sockfd == -1)
     {
         printf("socket creation failed...\n");
+        return -1;
+    }
+
+    // set TCP_NODELAY
+    int flag = 1;
+    if (setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, (char *)&flag, sizeof(int)) < 0)
+    {
+        printf("setsockopt failed...\n");
         return -1;
     }
 
@@ -245,7 +254,7 @@ void *dlsym(void *handle, const char *name) __THROW
 
     if (func != nullptr)
     {
-        std::cout << "[dlsym] Function address from cudaFunctionMap: " << func << " " << name << std::endl;
+        // std::cout << "[dlsym] Function address from cudaFunctionMap: " << func << " " << name << std::endl;
         return func;
     }
 
@@ -256,6 +265,6 @@ void *dlsym(void *handle, const char *name) __THROW
         real_dlsym = (void *(*)(void *, const char *))dlvsym(RTLD_NEXT, "dlsym", "GLIBC_2.2.5");
     }
 
-    std::cout << "[dlsym] Falling back to real_dlsym for name: " << name << std::endl;
+    // std::cout << "[dlsym] Falling back to real_dlsym for name: " << name << std::endl;
     return real_dlsym(handle, name);
 }
