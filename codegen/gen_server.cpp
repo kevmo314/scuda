@@ -15232,6 +15232,39 @@ int handle_cudaDestroyExternalSemaphore(void *conn)
     return result;
 }
 
+int handle_cudaLaunchKernel(void *conn)
+{
+    void func;
+    if (rpc_read(conn, &func, sizeof(void)) < 0)
+        return -1;
+    dim3 gridDim;
+    if (rpc_read(conn, &gridDim, sizeof(dim3)) < 0)
+        return -1;
+    dim3 blockDim;
+    if (rpc_read(conn, &blockDim, sizeof(dim3)) < 0)
+        return -1;
+    void* args;
+    if (rpc_read(conn, &args, sizeof(void*)) < 0)
+        return -1;
+    size_t sharedMem;
+    if (rpc_read(conn, &sharedMem, sizeof(size_t)) < 0)
+        return -1;
+    cudaStream_t stream;
+    if (rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0)
+        return -1;
+
+    int request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        return -1;
+
+    cudaError_t result = cudaLaunchKernel(&func, gridDim, blockDim, &args, sharedMem, stream);
+
+    if (rpc_start_response(conn, request_id) < 0)
+        return -1;
+
+    return result;
+}
+
 int handle_cudaLaunchCooperativeKernelMultiDevice(void *conn)
 {
     struct cudaLaunchParams launchParamsList;
@@ -18780,6 +18813,7 @@ static RequestHandler opHandlers[] = {
     handle_cudaEventElapsedTime,
     handle_cudaDestroyExternalMemory,
     handle_cudaDestroyExternalSemaphore,
+    handle_cudaLaunchKernel,
     handle_cudaLaunchCooperativeKernelMultiDevice,
     handle_cudaSetDoubleForDevice,
     handle_cudaSetDoubleForHost,
