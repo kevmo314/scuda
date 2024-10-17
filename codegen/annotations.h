@@ -4228,7 +4228,7 @@ cudaError_t cudaDestroyExternalSemaphore(cudaExternalSemaphore_t extSem);
  * @param sharedMem SEND_ONLY
  * @param stream SEND_ONLY
  */
-cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim, void **args, size_t sharedMem, cudaStream_t stream);
+// cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim, void **args, size_t sharedMem, cudaStream_t stream);
 /**
  * @param config SEND_RECV
  * @param func SEND_RECV
