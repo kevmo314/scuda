@@ -259,8 +259,8 @@ def main():
             "extern int rpc_start_request(const unsigned int request);\n"
             "extern int rpc_write(const void *data, const std::size_t size);\n"
             "extern int rpc_read(void *data, const std::size_t size);\n"
-            "extern int rpc_wait_for_response(const unsigned int request_id);\n"
-            "extern int rpc_end_request(void *return_value, const unsigned int request_id);\n"
+            "extern int rpc_wait_for_response();\n"
+            "extern int rpc_end_request(void *return_value);\n"
         )
         for function, annotation, operations in functions_with_annotations:
             f.write(
@@ -288,12 +288,6 @@ def main():
                 )
             )
 
-            f.write(
-                "    int request_id = rpc_start_request(RPC_{name});\n".format(
-                    name=function.name.format()
-                )
-            )
-
             for operation in operations:
                 if operation.null_terminated:
                     f.write(
@@ -302,7 +296,11 @@ def main():
                         )
                     )
 
-            f.write("    if (request_id < 0 ||\n")
+            f.write(
+                "    if (rpc_start_request(RPC_{name}) < 0 ||\n".format(
+                    name=function.name.format()
+                )
+            )
 
             for operation in operations:
                 if operation.send:
@@ -362,7 +360,7 @@ def main():
                                 param_type=operation.server_type.format(),
                             )
                         )
-            f.write("        rpc_wait_for_response(request_id) < 0 ||\n")
+            f.write("        rpc_wait_for_response() < 0 ||\n")
             for operation in operations:
                 if operation.recv:
                     if operation.null_terminated:
@@ -407,7 +405,7 @@ def main():
                                 param_type=operation.server_type.format(),
                             )
                         )
-            f.write("        rpc_end_request(&return_value, request_id) < 0)\n")
+            f.write("        rpc_end_request(&return_value) < 0)\n")
             f.write(
                 "        return {error_return};\n".format(
                     error_return=error_const(function.return_type.format())

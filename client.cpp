@@ -16,6 +16,8 @@
 #include <unordered_map>
 #include <vector>
 #include <cuda.h>
+#include <sys/uio.h>
+#include <netinet/tcp.h>
 
 #include <unordered_map>
 
@@ -68,6 +70,14 @@ int open_rpc_client()
         return -1;
     }
 
+    // set TCP_NODELAY
+    int flag = 1;
+    if (setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, (char *)&flag, sizeof(int)) < 0)
+    {
+        printf("setsockopt failed...\n");
+        return -1;
+    }
+
     if (connect(sockfd, res->ai_addr, res->ai_addrlen) != 0)
     {
         printf("connection with the server failed...\n");
@@ -79,38 +89,31 @@ int open_rpc_client()
 pthread_mutex_t mutex;
 pthread_cond_t cond;
 
+struct iovec write_iov[128];
+int write_iov_count = 0;
+int request_id = 1;
+unsigned int request_operation_id = 0;
+
 int rpc_start_request(const unsigned int op)
 {
-    static int next_request_id = 1;
-
-    open_rpc_client();
+    if (open_rpc_client() < 0)
+        return -1;
 
     // write the request atomically
     pthread_mutex_lock(&mutex);
 
-    int request_id = next_request_id++;
-
-    if (write(sockfd, &request_id, sizeof(int)) < 0 ||
-        write(sockfd, &op, sizeof(unsigned int)) < 0)
-    {
-        pthread_mutex_unlock(&mutex);
-        return -1;
-    }
-
-    return request_id;
+    write_iov_count = 2;
+    request_operation_id = op;
+    return 0;
 }
 
 int rpc_write(const void *data, const size_t size)
 {
-    if (write(sockfd, data, size) < 0)
-    {
-        pthread_mutex_unlock(&mutex);
-        return -1;
-    }
+    write_iov[write_iov_count++] = {const_cast<void *>(data), size};
     return 0;
 }
 
-int rpc_end_request(void *result, const unsigned int request_id)
+int rpc_end_request(void *result)
 {
     if (read(sockfd, result, sizeof(nvmlReturn_t)) < 0)
         return -1;
@@ -144,14 +147,26 @@ int rpc_read(void *data, size_t size)
     return 0;
 }
 
-int rpc_wait_for_response(const unsigned int request_id)
+int rpc_wait_for_response()
 {
     static int active_response_id = -1;
+
+    write_iov[0] = {&request_id, sizeof(int)};
+    write_iov[1] = {&request_operation_id, sizeof(unsigned int)};
+
+    // write the request to the server
+    if (writev(sockfd, write_iov, write_iov_count) < 0)
+    {
+        pthread_mutex_unlock(&mutex);
+        return -1;
+    }
+
+    int wait_for_request_id = request_id++;
 
     // wait for the response
     while (true)
     {
-        while (active_response_id != request_id && active_response_id != -1)
+        while (active_response_id != wait_for_request_id && active_response_id != -1)
             pthread_cond_wait(&cond, &mutex);
 
         // we currently own mutex. if active response id is -1, read the response id
@@ -163,7 +178,7 @@ int rpc_wait_for_response(const unsigned int request_id)
                 return -1;
             }
 
-            if (active_response_id != request_id)
+            if (active_response_id != wait_for_request_id)
             {
                 pthread_cond_broadcast(&cond);
                 continue;
@@ -239,7 +254,7 @@ void *dlsym(void *handle, const char *name) __THROW
 
     if (func != nullptr)
     {
-        std::cout << "[dlsym] Function address from cudaFunctionMap: " << func << " " << name << std::endl;
+        // std::cout << "[dlsym] Function address from cudaFunctionMap: " << func << " " << name << std::endl;
         return func;
     }
 
@@ -250,6 +265,6 @@ void *dlsym(void *handle, const char *name) __THROW
         real_dlsym = (void *(*)(void *, const char *))dlvsym(RTLD_NEXT, "dlsym", "GLIBC_2.2.5");
     }
 
-    std::cout << "[dlsym] Falling back to real_dlsym for name: " << name << std::endl;
+    // std::cout << "[dlsym] Falling back to real_dlsym for name: " << name << std::endl;
     return real_dlsym(handle, name);
 }

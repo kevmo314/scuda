@@ -13,6 +13,7 @@
 #include <unistd.h>
 #include <unordered_map>
 #include <pthread.h>
+#include <sys/uio.h>
 
 #include "codegen/gen_server.h"
 
@@ -23,7 +24,10 @@ typedef struct
 {
     int connfd;
     int read_request_id;
+    int write_request_id;
     pthread_mutex_t read_mutex, write_mutex;
+    struct iovec write_iov[128];
+    int write_iov_count = 0;
 } conn_t;
 
 int request_handler(const conn_t *conn)
@@ -80,7 +84,9 @@ void client_handler(int connfd)
             [&conn]()
             {
                 int result = request_handler(&conn);
-                if (write(conn.connfd, &result, sizeof(int)) < 0)
+                conn.write_iov[0] = (struct iovec){&conn.write_request_id, sizeof(int)};
+                conn.write_iov[conn.write_iov_count++] = (struct iovec){&result, sizeof(int)};
+                if (writev(conn.connfd, conn.write_iov, conn.write_iov_count) < 0)
                     std::cerr << "error writing to client." << std::endl;
 
                 if (pthread_mutex_unlock(&conn.write_mutex) < 0)
@@ -106,7 +112,8 @@ int rpc_read(const void *conn, void *data, const size_t size)
 
 int rpc_write(const void *conn, const void *data, const size_t size)
 {
-    return write(((conn_t *)conn)->connfd, data, size);
+    ((conn_t *)conn)->write_iov[((conn_t *)conn)->write_iov_count++] = (struct iovec){(void *)data, size};
+    return 0;
 }
 
 // signal from the handler that the request read is complete.
@@ -120,7 +127,11 @@ int rpc_end_request(const void *conn)
 
 int rpc_start_response(const void *conn, const int request_id)
 {
-    return pthread_mutex_lock(&((conn_t *)conn)->write_mutex) || write(((conn_t *)conn)->connfd, &request_id, sizeof(unsigned int));
+    if (pthread_mutex_lock(&((conn_t *)conn)->write_mutex) < 0)
+        return -1;
+    ((conn_t *)conn)->write_request_id = request_id;
+    ((conn_t *)conn)->write_iov_count = 1;
+    return 0;
 }
 
 int main()
