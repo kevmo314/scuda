@@ -12,15 +12,14 @@
 extern int rpc_start_request(const unsigned int request);
 extern int rpc_write(const void *data, const std::size_t size);
 extern int rpc_read(void *data, const std::size_t size);
-extern int rpc_wait_for_response(const unsigned int request_id);
-extern int rpc_end_request(void *return_value, const unsigned int request_id);
+extern int rpc_wait_for_response();
+extern int rpc_end_request(void *return_value);
 
 cudaError_t cudaMemcpy(void *dst, const void *src, size_t count, enum cudaMemcpyKind kind)
 {
     cudaError_t return_value;
 
-    int request_id = rpc_start_request(RPC_cudaMemcpy);
-    if (request_id < 0)
+    if (rpc_start_request(RPC_cudaMemcpy) < 0)
     {
         return cudaErrorDevicesUnavailable;
     }
@@ -39,6 +38,11 @@ cudaError_t cudaMemcpy(void *dst, const void *src, size_t count, enum cudaMemcpy
         }
 
         if (rpc_write(&count, sizeof(size_t)) < 0)
+        {
+            return cudaErrorDevicesUnavailable;
+        }
+
+        if (rpc_wait_for_response() < 0)
         {
             return cudaErrorDevicesUnavailable;
         }
@@ -64,14 +68,14 @@ cudaError_t cudaMemcpy(void *dst, const void *src, size_t count, enum cudaMemcpy
         {
             return cudaErrorDevicesUnavailable;
         }
+
+        if (rpc_wait_for_response() < 0)
+        {
+            return cudaErrorDevicesUnavailable;
+        }
     }
 
-    if (rpc_wait_for_response(request_id) < 0)
-    {
-        return cudaErrorDevicesUnavailable;
-    }
-
-    if (rpc_end_request(&return_value, request_id) < 0)
+    if (rpc_end_request(&return_value) < 0)
     {
         return cudaErrorDevicesUnavailable;
     }
@@ -83,8 +87,7 @@ cudaError_t cudaMemcpyAsync(void *dst, const void *src, size_t count, enum cudaM
 {
     cudaError_t return_value;
 
-    int request_id = rpc_start_request(RPC_cudaMemcpyAsync);
-    if (request_id < 0)
+    if (rpc_start_request(RPC_cudaMemcpyAsync) < 0)
     {
         return cudaErrorDevicesUnavailable;
     }
@@ -108,6 +111,11 @@ cudaError_t cudaMemcpyAsync(void *dst, const void *src, size_t count, enum cudaM
         }
 
         if (rpc_write(&stream, sizeof(cudaStream_t)) < 0)
+        {
+            return cudaErrorDevicesUnavailable;
+        }
+
+        if (rpc_wait_for_response() < 0)
         {
             return cudaErrorDevicesUnavailable;
         }
@@ -138,14 +146,14 @@ cudaError_t cudaMemcpyAsync(void *dst, const void *src, size_t count, enum cudaM
         {
             return cudaErrorDevicesUnavailable;
         }
+
+        if (rpc_wait_for_response() < 0)
+        {
+            return cudaErrorDevicesUnavailable;
+        }
     }
 
-    if (rpc_wait_for_response(request_id) < 0)
-    {
-        return cudaErrorDevicesUnavailable;
-    }
-
-    if (rpc_end_request(&return_value, request_id) < 0)
+    if (rpc_end_request(&return_value) < 0)
     {
         return cudaErrorDevicesUnavailable;
     }

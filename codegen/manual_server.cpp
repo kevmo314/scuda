@@ -43,10 +43,21 @@ int handle_cudaMemcpy(void *conn)
             return -1;
         }
 
+        int request_id = rpc_end_request(conn);
+        if (request_id < 0)
+        {
+            return -1;
+        }
+
         result = cudaMemcpy(host_data, dst, count, cudaMemcpyDeviceToHost);
         if (result != cudaSuccess)
         {
             free(host_data);
+            return -1;
+        }
+
+        if (rpc_start_response(conn, request_id) < 0)
+        {
             return -1;
         }
 
@@ -58,17 +69,6 @@ int handle_cudaMemcpy(void *conn)
 
         // free temp memory after writing host data back
         free(host_data);
-
-        int request_id = rpc_end_request(conn);
-        if (request_id < 0)
-        {
-            return -1;
-        }
-
-        if (rpc_start_response(conn, request_id) < 0)
-        {
-            return -1;
-        }
     }
     else
     {
@@ -144,10 +144,21 @@ int handle_cudaMemcpyAsync(void *conn)
             return -1;
         }
 
+        int request_id = rpc_end_request(conn);
+        if (request_id < 0)
+        {
+            return -1;
+        }
+
         result = cudaMemcpyAsync(host_data, dst, count, cudaMemcpyDeviceToHost, stream);
         if (result != cudaSuccess)
         {
             free(host_data);
+            return -1;
+        }
+
+        if (rpc_start_response(conn, request_id) < 0)
+        {
             return -1;
         }
 
@@ -159,17 +170,6 @@ int handle_cudaMemcpyAsync(void *conn)
 
         // free temp memory after writing host data back
         free(host_data);
-
-        int request_id = rpc_end_request(conn);
-        if (request_id < 0)
-        {
-            return -1;
-        }
-
-        if (rpc_start_response(conn, request_id) < 0)
-        {
-            return -1;
-        }
     }
     else
     {
