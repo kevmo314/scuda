@@ -1847,9 +1847,6 @@ CUresult cuModuleLoad(CUmodule *module, const char *fname);
  * @param hmod SEND_ONLY
  */
 CUresult cuModuleUnload(CUmodule hmod);
-
-// TODO: continue from here
-
 /**
  * @param mode SEND_RECV
  */
@@ -4224,14 +4221,14 @@ cudaError_t cudaWaitExternalSemaphoresAsync_v2(const cudaExternalSemaphore_t *ex
  */
 cudaError_t cudaDestroyExternalSemaphore(cudaExternalSemaphore_t extSem);
 /**
- * @param func SEND_RECV
+ * @param func SEND_ONLY
  * @param gridDim SEND_ONLY
  * @param blockDim SEND_ONLY
- * @param args SEND_RECV
+ * @param args SEND_ONLY
  * @param sharedMem SEND_ONLY
  * @param stream SEND_ONLY
  */
-cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim, void **args, size_t sharedMem, cudaStream_t stream);
+// cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim, void **args, size_t sharedMem, cudaStream_t stream);
 /**
  * @param config SEND_RECV
  * @param func SEND_RECV
@@ -4329,7 +4326,7 @@ cudaError_t cudaOccupancyMaxActiveClusters(int *numClusters, const void *func, c
  */
 cudaError_t cudaMallocManaged(void **devPtr, size_t size, unsigned int flags);
 /**
- * @param devPtr SEND_RECV
+ * @param devPtr RECV_ONLY
  * @param size SEND_ONLY
  */
 cudaError_t cudaMalloc(void **devPtr, size_t size);
@@ -4354,11 +4351,11 @@ cudaError_t cudaMallocPitch(void **devPtr, size_t *pitch, size_t width, size_t h
  */
 cudaError_t cudaMallocArray(cudaArray_t *array, const struct cudaChannelFormatDesc *desc, size_t width, size_t height, unsigned int flags);
 /**
- * @param devPtr SEND_RECV
+ * @param devPtr SEND_ONLY
  */
 cudaError_t cudaFree(void *devPtr);
 /**
- * @param ptr SEND_RECV
+ * @param ptr SEND_ONLY
  */
 cudaError_t cudaFreeHost(void *ptr);
 /**
