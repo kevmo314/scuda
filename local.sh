@@ -21,6 +21,10 @@ build() {
     echo "No compiler options set for os $(uname)"
   fi
 
+  echo "building vector file..."
+
+  nvcc --cudart=shared ./test/vector_add.cu -o vector.o
+
   if [ ! -f "$libscuda_path" ]; then
     echo "libscuda.so not found. build may have failed."
     exit 1
