@@ -43,10 +43,21 @@ int handle_cudaMemcpy(void *conn)
             return -1;
         }
 
+        int request_id = rpc_end_request(conn);
+        if (request_id < 0)
+        {
+            return -1;
+        }
+
         result = cudaMemcpy(host_data, dst, count, cudaMemcpyDeviceToHost);
         if (result != cudaSuccess)
         {
             free(host_data);
+            return -1;
+        }
+
+        if (rpc_start_response(conn, request_id) < 0)
+        {
             return -1;
         }
 
@@ -58,17 +69,6 @@ int handle_cudaMemcpy(void *conn)
 
         // free temp memory after writing host data back
         free(host_data);
-
-        int request_id = rpc_end_request(conn);
-        if (request_id < 0)
-        {
-            return -1;
-        }
-
-        if (rpc_start_response(conn, request_id) < 0)
-        {
-            return -1;
-        }
     }
     else
     {
@@ -144,10 +144,21 @@ int handle_cudaMemcpyAsync(void *conn)
             return -1;
         }
 
+        int request_id = rpc_end_request(conn);
+        if (request_id < 0)
+        {
+            return -1;
+        }
+
         result = cudaMemcpyAsync(host_data, dst, count, cudaMemcpyDeviceToHost, stream);
         if (result != cudaSuccess)
         {
             free(host_data);
+            return -1;
+        }
+
+        if (rpc_start_response(conn, request_id) < 0)
+        {
             return -1;
         }
 
@@ -159,17 +170,6 @@ int handle_cudaMemcpyAsync(void *conn)
 
         // free temp memory after writing host data back
         free(host_data);
-
-        int request_id = rpc_end_request(conn);
-        if (request_id < 0)
-        {
-            return -1;
-        }
-
-        if (rpc_start_response(conn, request_id) < 0)
-        {
-            return -1;
-        }
     }
     else
     {
@@ -345,12 +345,21 @@ int handle___cudaRegisterFatBinary(void *conn)
         return -1;
     }
 
-    std::cout << "Server received __cudaRegisterFatBinary data:: " << fatCubin << std::endl;
+    int request_id = rpc_end_request(conn);
+    if (request_id < 0)
+    {
+        return -1;
+    }
 
     void **registeredCubin = __cudaRegisterFatBinary(fatCubin);
     if (registeredCubin == nullptr)
     {
         std::cerr << "Failed to register fat binary on the server" << std::endl;
+        return -1;
+    }
+
+    if (rpc_start_response(conn, request_id) < 0)
+    {
         return -1;
     }
 
@@ -361,67 +370,204 @@ int handle___cudaRegisterFatBinary(void *conn)
         std::cerr << "Failed to write fatCubin back to the client" << std::endl;
         return -1;
     }
+    return 0;
+}
 
-    int request_id = rpc_end_request(conn);
-    if (request_id < 0)
+extern "C" void __cudaRegisterFunction(void **fatCubinHandle, const char *hostFun,
+                            char *deviceFun, const char *deviceName,
+                            int thread_limit, uint3 *tid, uint3 *bid,
+                            dim3 *bDim, dim3 *gDim, int *wSize);
+
+int handle___cudaRegisterFunction(void *conn)
+{
+    void **fatCubinHandle;
+    const char *hostFun;
+    char *deviceFun;
+    const char *deviceName;
+    int thread_limit;
+    uint3 *tid, *bid;
+    dim3 *bDim, *gDim;
+    int *wSize;
+
+    // Reading the input parameters from the client
+    if (rpc_read(conn, &fatCubinHandle, sizeof(void *)) < 0)
     {
         return -1;
     }
 
+    if (rpc_read(conn, &hostFun, sizeof(const char *)) < 0)
+    {
+        return -1;
+    }
+
+    if (rpc_read(conn, &deviceFun, sizeof(char *)) < 0)
+    {
+        return -1;
+    }
+
+    if (rpc_read(conn, &deviceName, sizeof(const char *)) < 0)
+    {
+        return -1;
+    }
+
+    if (rpc_read(conn, &thread_limit, sizeof(int)) < 0)
+    {
+        return -1;
+    }
+
+    if (rpc_read(conn, &tid, sizeof(uint3)) < 0)
+    {
+        return -1;
+    }
+
+    if (rpc_read(conn, &bid, sizeof(uint3)) < 0)
+    {
+        return -1;
+    }
+
+    if (rpc_read(conn, &bDim, sizeof(dim3)) < 0)
+    {
+        return -1;
+    }
+
+    if (rpc_read(conn, &gDim, sizeof(dim3)) < 0)
+    {
+        return -1;
+    }
+
+    if (rpc_read(conn, &wSize, sizeof(int)) < 0)
+    {
+        return -1;
+    }
+
+    // End request phase
+    int request_id = rpc_end_request(conn);
+    if (request_id < 0)
+    {
+        std::cerr << "rpc_end_request failed" << std::endl;
+        return -1;
+    }
+
+    // Log the parameters before the call
+    std::cout << "Before __cudaRegisterFunction call:" << std::endl;
+    std::cout << "fatCubinHandle: " << fatCubinHandle << std::endl;
+
+    // Call the CUDA register function
+    __cudaRegisterFunction(fatCubinHandle, hostFun, deviceFun, deviceName, thread_limit, tid, bid, bDim, gDim, wSize);
+
+    // Log the parameters after the call
+    std::cout << "After __cudaRegisterFunction call:" << std::endl;
+    std::cout << "fatCubinHandle: " << fatCubinHandle << std::endl;
+  
+    // Start the response phase
     if (rpc_start_response(conn, request_id) < 0)
     {
+        std::cerr << "rpc_start_response failed" << std::endl;
+        return -1;
+    }
+
+    // Write the updated data back to the client
+    if (rpc_write(conn, fatCubinHandle, sizeof(void *)) < 0)
+    {
+        std::cerr << "Failed writing fatCubinHandle" << std::endl;
+        return -1;
+    }
+
+    if (rpc_write(conn, &hostFun, sizeof(const char *)) < 0)
+    {
+        std::cerr << "Failed writing hostFun" << std::endl;
+        return -1;
+    }
+
+    if (rpc_write(conn, &deviceFun, sizeof(char *)) < 0)
+    {
+        std::cerr << "Failed writing deviceFun" << std::endl;
+        return -1;
+    }
+
+    if (rpc_write(conn, &deviceName, sizeof(const char *)) < 0)
+    {
+        std::cerr << "Failed writing deviceName" << std::endl;
+        return -1;
+    }
+
+    if (rpc_write(conn, &thread_limit, sizeof(int)) < 0)
+    {
+        std::cerr << "Failed writing thread_limit" << std::endl;
+        return -1;
+    }
+
+    if (rpc_write(conn, &tid, sizeof(uint3)) < 0)
+    {
+        std::cerr << "Failed writing tid" << std::endl;
+        return -1;
+    }
+
+    if (rpc_write(conn, &bid, sizeof(uint3)) < 0)
+    {
+        std::cerr << "Failed writing bid" << std::endl;
+        return -1;
+    }
+
+    if (rpc_write(conn, &bDim, sizeof(dim3)) < 0)
+    {
+        std::cerr << "Failed writing bDim" << std::endl;
+        return -1;
+    }
+
+    if (rpc_write(conn, &gDim, sizeof(dim3)) < 0)
+    {
+        std::cerr << "Failed writing gDim" << std::endl;
+        return -1;
+    }
+
+    if (rpc_write(conn, &wSize, sizeof(int)) < 0)
+    {
+        std::cerr << "Failed writing wSize" << std::endl;
         return -1;
     }
 
     return 0;
 }
 
-int handle___cudaRegisterFunction(void *conn)
-{
-    void *fatCubinHandle;
-    const char *hostFun;
-    char *deviceFun;
-    const char *deviceName;
-    int thread_limit;
-    uint3 tid, bid;
-    dim3 bDim, gDim;
-    int wSize;
+extern "C" void __cudaRegisterFatBinaryEnd(void **fatCubinHandle);
 
-    if (rpc_read(conn, &fatCubinHandle, sizeof(void *)) < 0 ||
-        rpc_read(conn, &hostFun, sizeof(const char *)) < 0 ||
-        rpc_read(conn, &deviceFun, sizeof(char *)) < 0 ||
-        rpc_read(conn, &deviceName, sizeof(const char *)) < 0 ||
-        rpc_read(conn, &thread_limit, sizeof(int)) < 0 ||
-        rpc_read(conn, &tid, sizeof(uint3)) < 0 ||
-        rpc_read(conn, &bid, sizeof(uint3)) < 0 ||
-        rpc_read(conn, &bDim, sizeof(dim3)) < 0 ||
-        rpc_read(conn, &gDim, sizeof(dim3)) < 0 ||
-        rpc_read(conn, &wSize, sizeof(int)) < 0)
+int handle___cudaRegisterFatBinaryEnd(void *conn)
+{
+    void **fatCubinHandle;
+
+    // Read the fatCubinHandle from the client
+    if (rpc_read(conn, &fatCubinHandle, sizeof(void *)) < 0)
     {
-        std::cout << "FAILED " << std::endl;
+        std::cerr << "Failed reading fatCubinHandle" << std::endl;
         return -1;
     }
 
-    std::cout << "hello " << std::endl;
-
-    // cudaError_t result = __cudaRegisterFunction(fatCubinHandle, hostFun, deviceFun, deviceName, thread_limit, &tid, &bid, &bDim, &gDim, &wSize);
-    // if (result != cudaSuccess)
-    // {
-    //     std::cerr << "__cudaRegisterFunction failed: " << cudaGetErrorString(result) << std::endl;
-    //     return -1;
-    // }
-
+    // End the request phase
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
     {
+        std::cerr << "rpc_end_request failed" << std::endl;
         return -1;
     }
 
+    std::cout << "Calling __cudaRegisterFatBinaryEnd with fatCubinHandle: " << fatCubinHandle << std::endl;
+    __cudaRegisterFatBinaryEnd(fatCubinHandle);
+
+    // Start the response phase
     if (rpc_start_response(conn, request_id) < 0)
     {
+        std::cerr << "rpc_start_response failed" << std::endl;
         return -1;
     }
 
-    // return result;
+    // Write the fatCubinHandle back to the client
+    if (rpc_write(conn, &fatCubinHandle, sizeof(void *)) < 0)
+    {
+        std::cerr << "Failed writing fatCubinHandle back" << std::endl;
+        return -1;
+    }
+
+    return 0;
 }
 

@@ -12,3 +12,4 @@ extern "C" void __cudaRegisterFunction(void **fatCubinHandle,
                                    const char *deviceName,
                                    int thread_limit,
                                    uint3 *tid, uint3 *bid, dim3 *bDim, dim3 *gDim, int *wSize);
+extern "C" void __cudaRegisterFatBinaryEnd(void **fatCubinHandle);

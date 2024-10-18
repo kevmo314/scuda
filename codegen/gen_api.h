@@ -770,3 +770,4 @@
 #define RPC_cudaLaunchKernel 769
 #define RPC___cudaRegisterFunction 770
 #define RPC___cudaRegisterFatBinary 771
+#define RPC___cudaRegisterFatBinaryEnd 772

@@ -11594,6 +11594,7 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cudaLaunchKernel", (void *)cudaLaunchKernel},
     {"__cudaRegisterFunction", (void *)__cudaRegisterFunction},
     {"__cudaRegisterFatBinary", (void *)__cudaRegisterFatBinary},
+    {"__cudaRegisterFatBinaryEnd", (void *)__cudaRegisterFatBinaryEnd},
 };
 
 void *get_function_pointer(const char *name)
