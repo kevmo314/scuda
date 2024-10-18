@@ -347,23 +347,13 @@ extern "C" void **__cudaRegisterFatBinary(void **fatCubin)
         return nullptr;
     }
 
-    // Send the fatCubin to the server
-    if (rpc_write(&fatCubin, sizeof(void *)) < 0)
-    {
-        std::cerr << "Failed to send fatCubin to server" << std::endl;
-        return nullptr;
-    }
-
     if (rpc_wait_for_response() < 0)
     {
         std::cerr << "Failed to get response from server for __cudaRegisterFatBinary" << std::endl;
         return nullptr;
     }
 
-    // Wait for a response from the server
-    void **response = nullptr;
-
-    if (rpc_read(&response, sizeof(void **)) < 0)
+    if (rpc_read(&fatCubin, sizeof(void **)) < 0)
     {
         std::cerr << "Failed to read the fatCubin from the server" << std::endl;
         return nullptr;
@@ -376,7 +366,9 @@ extern "C" void **__cudaRegisterFatBinary(void **fatCubin)
         return nullptr;
     }
 
-    return response;
+    std::cout << "finalized __cudaRegisterFatBinary data:: " << fatCubin << std::endl;
+
+    return fatCubin;
 }
 
 extern "C"
@@ -390,13 +382,6 @@ extern "C"
         if (request_id < 0)
         {
             std::cerr << "Failed to start RPC request" << std::endl;
-            return;
-        }
-
-        // Write the fatCubinHandle to the server
-        if (rpc_write(&fatCubinHandle, sizeof(void *)) < 0)
-        {
-            std::cerr << "Failed writing fatCubinHandle" << std::endl;
             return;
         }
 
@@ -425,7 +410,6 @@ extern "C"
     }
 }
 
-
 extern "C" void __cudaInitModule(void **fatCubinHandle) {
   std::cout << "__cudaInitModule writing data..." << std::endl;
 }
@@ -445,6 +429,8 @@ extern "C"
     {
         cudaError_t return_value;
 
+        std::cout << "Intercepted __cudaRegisterFunction data:: " << fatCubinHandle << std::endl;
+
         int request_id = rpc_start_request(RPC___cudaRegisterFunction);
         if (request_id < 0)
         {
@@ -452,65 +438,65 @@ extern "C"
             return;
         }
 
-        if (rpc_write(&fatCubinHandle, sizeof(void *)) < 0)
-        {
-            std::cerr << "Failed writing fatCubinHandle" << std::endl;
-            return;
-        }
+        // if (rpc_write(&fatCubinHandle, sizeof(void *)) < 0)
+        // {
+        //     std::cerr << "Failed writing fatCubinHandle" << std::endl;
+        //     return;
+        // }
 
-        if (rpc_write(&hostFun, sizeof(const char *)) < 0)
-        {
-            std::cerr << "Failed writing hostFun" << std::endl;
-            return;
-        }
+        // if (rpc_write(&hostFun, sizeof(const char *)) < 0)
+        // {
+        //     std::cerr << "Failed writing hostFun" << std::endl;
+        //     return;
+        // }
 
-        if (rpc_write(&deviceFun, sizeof(char *)) < 0)
-        {
-            std::cerr << "Failed writing deviceFun" << std::endl;
-            return;
-        }
+        // if (rpc_write(&deviceFun, sizeof(char *)) < 0)
+        // {
+        //     std::cerr << "Failed writing deviceFun" << std::endl;
+        //     return;
+        // }
 
-        if (rpc_write(&deviceName, sizeof(const char *)) < 0)
-        {
-            std::cerr << "Failed writing deviceName" << std::endl;
-            return;
-        }
+        // if (rpc_write(&deviceName, sizeof(const char *)) < 0)
+        // {
+        //     std::cerr << "Failed writing deviceName" << std::endl;
+        //     return;
+        // }
 
-        if (rpc_write(&thread_limit, sizeof(int)) < 0)
-        {
-            std::cerr << "Failed writing thread_limit" << std::endl;
-            return;
-        }
+        // if (rpc_write(&thread_limit, sizeof(int)) < 0)
+        // {
+        //     std::cerr << "Failed writing thread_limit" << std::endl;
+        //     return;
+        // }
 
-        if (rpc_write(&tid, sizeof(uint3)) < 0)
-        {
-            std::cerr << "Failed writing tid" << std::endl;
-            return;
-        }
+        // if (rpc_write(&tid, sizeof(uint3)) < 0)
+        // {
+        //     std::cerr << "Failed writing tid" << std::endl;
+        //     return;
+        // }
 
-        if (rpc_write(&bid, sizeof(uint3)) < 0)
-        {
-            std::cerr << "Failed writing bid" << std::endl;
-            return;
-        }
+        // if (rpc_write(&bid, sizeof(uint3)) < 0)
+        // {
+        //     std::cerr << "Failed writing bid" << std::endl;
+        //     return;
+        // }
 
-        if (rpc_write(&bDim, sizeof(dim3)) < 0)
-        {
-            std::cerr << "Failed writing bDim" << std::endl;
-            return;
-        }
+        // if (rpc_write(&bDim, sizeof(dim3)) < 0)
+        // {
+        //     std::cerr << "Failed writing bDim" << std::endl;
+        //     return;
+        // }
 
-        if (rpc_write(&gDim, sizeof(dim3)) < 0)
-        {
-            std::cerr << "Failed writing gDim" << std::endl;
-            return;
-        }
+        // if (rpc_write(&gDim, sizeof(dim3)) < 0)
+        // {
+        //     std::cerr << "Failed writing gDim" << std::endl;
+        //     return;
+        // }
 
-        if (rpc_write(&wSize, sizeof(int)) < 0)
-        {
-            std::cerr << "Failed writing wSize" << std::endl;
-            return;
-        }
+        // if (rpc_write(&wSize, sizeof(int)) < 0)
+        // {
+        //     std::cerr << "Failed writing wSize" << std::endl;
+        //     return;
+        // }
 
         if (rpc_wait_for_response() < 0)
         {

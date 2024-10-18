@@ -1,7 +1,9 @@
 #include <nvml.h>
 #include <cuda.h>
 #include <iostream>
+#include <dlfcn.h>
 #include <cuda_runtime_api.h>
+#include <cuda_runtime.h>
 
 #include <cstring>
 #include <string>
@@ -333,39 +335,31 @@ int handle_cudaLaunchKernel(void *conn)
     return result;
 }
 
-extern "C" void** __cudaRegisterFatBinary(void *fatCubin);
+typedef void **(*__cudaRegisterFatBinary_type)(void **fatCubin);
 
 int handle___cudaRegisterFatBinary(void *conn)
 {
-    void **fatCubin;
-    
-    if (rpc_read(conn, &fatCubin, sizeof(void *)) < 0)
-    {
-        std::cerr << "Failed to read fatCubin from client" << std::endl;
-        return -1;
-    }
-
+    void *fatCubin;
+        
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
     {
         return -1;
     }
 
-    void **registeredCubin = __cudaRegisterFatBinary(fatCubin);
-    if (registeredCubin == nullptr)
-    {
-        std::cerr << "Failed to register fat binary on the server" << std::endl;
-        return -1;
-    }
+    __cudaRegisterFatBinary_type orig;
+    orig =
+        (__cudaRegisterFatBinary_type)dlsym(RTLD_NEXT, "__cudaRegisterFatBinary");
+    auto ret = orig(&fatCubin);
 
     if (rpc_start_response(conn, request_id) < 0)
     {
         return -1;
     }
 
-    std::cout << "registeredCubin: " << registeredCubin << std::endl;
+    std::cout << "registeredCubin after: " << ret << std::endl;
 
-    if (rpc_write(conn, &registeredCubin, sizeof(void **)) < 0)
+    if (rpc_write(conn, &ret, sizeof(void **)) < 0)
     {
         std::cerr << "Failed to write fatCubin back to the client" << std::endl;
         return -1;
@@ -373,10 +367,10 @@ int handle___cudaRegisterFatBinary(void *conn)
     return 0;
 }
 
-extern "C" void __cudaRegisterFunction(void **fatCubinHandle, const char *hostFun,
-                            char *deviceFun, const char *deviceName,
-                            int thread_limit, uint3 *tid, uint3 *bid,
-                            dim3 *bDim, dim3 *gDim, int *wSize);
+typedef void (*__cudaRegisterFunction_type)(
+    void **fatCubinHandle, const char *hostFun, char *deviceFun,
+    const char *deviceName, int thread_limit, uint3 *tid, uint3 *bid,
+    dim3 *bDim, dim3 *gDim, int *wSize);
 
 int handle___cudaRegisterFunction(void *conn)
 {
@@ -389,56 +383,56 @@ int handle___cudaRegisterFunction(void *conn)
     dim3 *bDim, *gDim;
     int *wSize;
 
-    // Reading the input parameters from the client
-    if (rpc_read(conn, &fatCubinHandle, sizeof(void *)) < 0)
-    {
-        return -1;
-    }
+    // // Reading the input parameters from the client
+    // if (rpc_read(conn, &fatCubinHandle, sizeof(void *)) < 0)
+    // {
+    //     return -1;
+    // }
 
-    if (rpc_read(conn, &hostFun, sizeof(const char *)) < 0)
-    {
-        return -1;
-    }
+    // if (rpc_read(conn, &hostFun, sizeof(const char *)) < 0)
+    // {
+    //     return -1;
+    // }
 
-    if (rpc_read(conn, &deviceFun, sizeof(char *)) < 0)
-    {
-        return -1;
-    }
+    // if (rpc_read(conn, &deviceFun, sizeof(char *)) < 0)
+    // {
+    //     return -1;
+    // }
 
-    if (rpc_read(conn, &deviceName, sizeof(const char *)) < 0)
-    {
-        return -1;
-    }
+    // if (rpc_read(conn, &deviceName, sizeof(const char *)) < 0)
+    // {
+    //     return -1;
+    // }
 
-    if (rpc_read(conn, &thread_limit, sizeof(int)) < 0)
-    {
-        return -1;
-    }
+    // if (rpc_read(conn, &thread_limit, sizeof(int)) < 0)
+    // {
+    //     return -1;
+    // }
 
-    if (rpc_read(conn, &tid, sizeof(uint3)) < 0)
-    {
-        return -1;
-    }
+    // if (rpc_read(conn, &tid, sizeof(uint3)) < 0)
+    // {
+    //     return -1;
+    // }
 
-    if (rpc_read(conn, &bid, sizeof(uint3)) < 0)
-    {
-        return -1;
-    }
+    // if (rpc_read(conn, &bid, sizeof(uint3)) < 0)
+    // {
+    //     return -1;
+    // }
 
-    if (rpc_read(conn, &bDim, sizeof(dim3)) < 0)
-    {
-        return -1;
-    }
+    // if (rpc_read(conn, &bDim, sizeof(dim3)) < 0)
+    // {
+    //     return -1;
+    // }
 
-    if (rpc_read(conn, &gDim, sizeof(dim3)) < 0)
-    {
-        return -1;
-    }
+    // if (rpc_read(conn, &gDim, sizeof(dim3)) < 0)
+    // {
+    //     return -1;
+    // }
 
-    if (rpc_read(conn, &wSize, sizeof(int)) < 0)
-    {
-        return -1;
-    }
+    // if (rpc_read(conn, &wSize, sizeof(int)) < 0)
+    // {
+    //     return -1;
+    // }
 
     // End request phase
     int request_id = rpc_end_request(conn);
@@ -452,12 +446,20 @@ int handle___cudaRegisterFunction(void *conn)
     std::cout << "Before __cudaRegisterFunction call:" << std::endl;
     std::cout << "fatCubinHandle: " << fatCubinHandle << std::endl;
 
-    // Call the CUDA register function
-    __cudaRegisterFunction(fatCubinHandle, hostFun, deviceFun, deviceName, thread_limit, tid, bid, bDim, gDim, wSize);
+    __cudaRegisterFunction_type orig;
+    orig =
+        (__cudaRegisterFunction_type)dlsym(RTLD_NEXT, "__cudaRegisterFunction");
+
+    orig(fatCubinHandle, hostFun, deviceFun, deviceName, thread_limit, tid,
+              bid, bDim, gDim, wSize);
 
     // Log the parameters after the call
     std::cout << "After __cudaRegisterFunction call:" << std::endl;
     std::cout << "fatCubinHandle: " << fatCubinHandle << std::endl;
+    std::cout << "hostFun: " << hostFun << std::endl;
+    std::cout << "deviceFun: " << deviceFun << std::endl;
+    std::cout << "deviceName: " << deviceName << std::endl;
+    std::cout << "thread_limit: " << thread_limit << std::endl;
   
     // Start the response phase
     if (rpc_start_response(conn, request_id) < 0)
@@ -530,7 +532,7 @@ int handle___cudaRegisterFunction(void *conn)
     return 0;
 }
 
-extern "C" void __cudaRegisterFatBinaryEnd(void **fatCubinHandle);
+typedef void (*__cudaRegisterFatBinaryEnd_type)(void **fatCubinHandle);
 
 int handle___cudaRegisterFatBinaryEnd(void *conn)
 {
@@ -552,7 +554,11 @@ int handle___cudaRegisterFatBinaryEnd(void *conn)
     }
 
     std::cout << "Calling __cudaRegisterFatBinaryEnd with fatCubinHandle: " << fatCubinHandle << std::endl;
-    __cudaRegisterFatBinaryEnd(fatCubinHandle);
+    __cudaRegisterFatBinaryEnd_type orig;
+    orig = (__cudaRegisterFatBinaryEnd_type)dlsym(RTLD_NEXT,
+                                                    "__cudaRegisterFatBinaryEnd");
+
+    orig(fatCubinHandle);
 
     // Start the response phase
     if (rpc_start_response(conn, request_id) < 0)
