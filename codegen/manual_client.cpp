@@ -338,7 +338,8 @@ cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim, void
 extern "C" void **__cudaRegisterFatBinary(void **fatCubin)
 {
     cudaError_t return_value;
-    std::cout << "Intercepted __cudaRegisterFatBinary data:: " << std::endl;
+    void **result;
+    std::cout << "Intercepted __cudaRegisterFatBinary" << std::endl;
 
     // Start the RPC request
     if (rpc_start_request(RPC___cudaRegisterFatBinary) < 0)
@@ -353,7 +354,7 @@ extern "C" void **__cudaRegisterFatBinary(void **fatCubin)
         return nullptr;
     }
 
-    if (rpc_read(&fatCubin, sizeof(void **)) < 0)
+    if (rpc_read(&result, sizeof(void **)) < 0)
     {
         std::cerr << "Failed to read the fatCubin from the server" << std::endl;
         return nullptr;
@@ -366,9 +367,7 @@ extern "C" void **__cudaRegisterFatBinary(void **fatCubin)
         return nullptr;
     }
 
-    std::cout << "finalized __cudaRegisterFatBinary data:: " << fatCubin << std::endl;
-
-    return fatCubin;
+    return result;
 }
 
 extern "C"
@@ -377,11 +376,18 @@ extern "C"
     {
         cudaError_t return_value;
 
+        std::cout << "Intercepted __cudaRegisterFatBinaryEnd " << fatCubinHandle << std::endl;
+
         // Start the RPC request for __cudaRegisterFatBinaryEnd
         int request_id = rpc_start_request(RPC___cudaRegisterFatBinaryEnd);
         if (request_id < 0)
         {
             std::cerr << "Failed to start RPC request" << std::endl;
+            return;
+        }
+
+        if (rpc_write(&fatCubinHandle, sizeof(const void *)) < 0)
+        {
             return;
         }
 
@@ -429,7 +435,7 @@ extern "C"
     {
         cudaError_t return_value;
 
-        std::cout << "Intercepted __cudaRegisterFunction data:: " << fatCubinHandle << std::endl;
+        std::cout << "Intercepted __cudaRegisterFunction" << fatCubinHandle << std::endl;
 
         int request_id = rpc_start_request(RPC___cudaRegisterFunction);
         if (request_id < 0)
@@ -438,65 +444,65 @@ extern "C"
             return;
         }
 
-        // if (rpc_write(&fatCubinHandle, sizeof(void *)) < 0)
-        // {
-        //     std::cerr << "Failed writing fatCubinHandle" << std::endl;
-        //     return;
-        // }
+        if (rpc_write(&fatCubinHandle, sizeof(void *)) < 0)
+        {
+            std::cerr << "Failed writing fatCubinHandle" << std::endl;
+            return;
+        }
 
-        // if (rpc_write(&hostFun, sizeof(const char *)) < 0)
-        // {
-        //     std::cerr << "Failed writing hostFun" << std::endl;
-        //     return;
-        // }
+        if (rpc_write(&hostFun, sizeof(const char *)) < 0)
+        {
+            std::cerr << "Failed writing hostFun" << std::endl;
+            return;
+        }
 
-        // if (rpc_write(&deviceFun, sizeof(char *)) < 0)
-        // {
-        //     std::cerr << "Failed writing deviceFun" << std::endl;
-        //     return;
-        // }
+        if (rpc_write(&deviceFun, sizeof(char *)) < 0)
+        {
+            std::cerr << "Failed writing deviceFun" << std::endl;
+            return;
+        }
 
-        // if (rpc_write(&deviceName, sizeof(const char *)) < 0)
-        // {
-        //     std::cerr << "Failed writing deviceName" << std::endl;
-        //     return;
-        // }
+        if (rpc_write(&deviceName, sizeof(const char *)) < 0)
+        {
+            std::cerr << "Failed writing deviceName" << std::endl;
+            return;
+        }
 
-        // if (rpc_write(&thread_limit, sizeof(int)) < 0)
-        // {
-        //     std::cerr << "Failed writing thread_limit" << std::endl;
-        //     return;
-        // }
+        if (rpc_write(&thread_limit, sizeof(int)) < 0)
+        {
+            std::cerr << "Failed writing thread_limit" << std::endl;
+            return;
+        }
 
-        // if (rpc_write(&tid, sizeof(uint3)) < 0)
-        // {
-        //     std::cerr << "Failed writing tid" << std::endl;
-        //     return;
-        // }
+        if (rpc_write(&tid, sizeof(uint3)) < 0)
+        {
+            std::cerr << "Failed writing tid" << std::endl;
+            return;
+        }
 
-        // if (rpc_write(&bid, sizeof(uint3)) < 0)
-        // {
-        //     std::cerr << "Failed writing bid" << std::endl;
-        //     return;
-        // }
+        if (rpc_write(&bid, sizeof(uint3)) < 0)
+        {
+            std::cerr << "Failed writing bid" << std::endl;
+            return;
+        }
 
-        // if (rpc_write(&bDim, sizeof(dim3)) < 0)
-        // {
-        //     std::cerr << "Failed writing bDim" << std::endl;
-        //     return;
-        // }
+        if (rpc_write(&bDim, sizeof(dim3)) < 0)
+        {
+            std::cerr << "Failed writing bDim" << std::endl;
+            return;
+        }
 
-        // if (rpc_write(&gDim, sizeof(dim3)) < 0)
-        // {
-        //     std::cerr << "Failed writing gDim" << std::endl;
-        //     return;
-        // }
+        if (rpc_write(&gDim, sizeof(dim3)) < 0)
+        {
+            std::cerr << "Failed writing gDim" << std::endl;
+            return;
+        }
 
-        // if (rpc_write(&wSize, sizeof(int)) < 0)
-        // {
-        //     std::cerr << "Failed writing wSize" << std::endl;
-        //     return;
-        // }
+        if (rpc_write(&wSize, sizeof(int)) < 0)
+        {
+            std::cerr << "Failed writing wSize" << std::endl;
+            return;
+        }
 
         if (rpc_wait_for_response() < 0)
         {
@@ -534,31 +540,31 @@ extern "C"
             return;
         }
 
-        if (rpc_read(&tid, sizeof(uint3)) < 0)
+        if (rpc_read(tid, sizeof(uint3)) < 0)
         {
             std::cerr << "Failed reading tid" << std::endl;
             return;
         }
 
-        if (rpc_read(&bid, sizeof(uint3)) < 0)
+        if (rpc_read(bid, sizeof(uint3)) < 0)
         {
             std::cerr << "Failed reading bid" << std::endl;
             return;
         }
 
-        if (rpc_read(&bDim, sizeof(dim3)) < 0)
+        if (rpc_read(bDim, sizeof(dim3)) < 0)
         {
             std::cerr << "Failed reading bDim" << std::endl;
             return;
         }
 
-        if (rpc_read(&gDim, sizeof(dim3)) < 0)
+        if (rpc_read(gDim, sizeof(dim3)) < 0)
         {
             std::cerr << "Failed reading gDim" << std::endl;
             return;
         }
 
-        if (rpc_read(&wSize, sizeof(int)) < 0)
+        if (rpc_read(wSize, sizeof(int)) < 0)
         {
             std::cerr << "Failed reading wSize" << std::endl;
             return;

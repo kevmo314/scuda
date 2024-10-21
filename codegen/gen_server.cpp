@@ -1,6 +1,5 @@
 #include <nvml.h>
 #include <cuda.h>
-#include <iostream>
 #include <cuda_runtime_api.h>
 
 #include <cstring>
@@ -15361,12 +15360,7 @@ int handle_cudaMalloc(void *conn)
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
         return -1;
-
-    std::cout << "BEFORE MALLOC " << size << std::endl;
-
     cudaError_t result = cudaMalloc(&devPtr, size);
-
-    std::cout << "after MALLOC" << std::endl;
 
     if (rpc_start_response(conn, request_id) < 0)
         return -1;
