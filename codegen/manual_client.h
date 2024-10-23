@@ -13,3 +13,9 @@ extern "C" void __cudaRegisterFunction(void **fatCubinHandle,
                                    int thread_limit,
                                    uint3 *tid, uint3 *bid, dim3 *bDim, dim3 *gDim, int *wSize);
 extern "C" void __cudaRegisterFatBinaryEnd(void **fatCubinHandle);
+extern "C" unsigned __cudaPushCallConfiguration(dim3 gridDim, dim3 blockDim,
+                                     size_t sharedMem,
+                                     struct CUstream_st *stream);
+extern "C" unsigned __cudaPopCallConfiguration(dim3 *gridDim, dim3 *blockDim,
+                                               size_t *sharedMem, void *stream);
+extern "C" void __cudaInitModule(void **fatCubinHandle);

@@ -18,6 +18,8 @@ extern int rpc_write(const void *conn, const void *data, const std::size_t size)
 extern int rpc_end_request(const void *conn);
 extern int rpc_start_response(const void *conn, const int request_id);
 
+FILE *__cudart_trace_output_stream = stdout;
+
 int handle_cudaMemcpy(void *conn)
 {
     cudaError_t result;
@@ -225,9 +227,11 @@ int handle_cudaLaunchKernel(void *conn)
 {
     cudaError_t result;
     const void *func;
+    void **args;
     dim3 gridDim, blockDim;
     size_t sharedMem;
     cudaStream_t stream;
+    int num_args;
 
     // Read the function pointer (kernel) from the client
     if (rpc_read(conn, &func, sizeof(const void *)) < 0)
@@ -260,57 +264,70 @@ int handle_cudaLaunchKernel(void *conn)
     }
 
     // Read the number of kernel arguments
-    int num_args;
     if (rpc_read(conn, &num_args, sizeof(int)) < 0)
     {
         return -1;
     }
 
-    // Allocate memory to hold kernel arguments
-    void **args = (void **)malloc(num_args * sizeof(void *));  // Correct the allocation
+    // Allocate memory for the arguments
+    args = (void **)malloc(num_args * sizeof(void *));
     if (args == NULL)
     {
         std::cerr << "Failed to allocate memory for kernel arguments." << std::endl;
         return -1;
     }
 
-    // Calculate the total size of all arguments (as pointers)
-    size_t total_size = num_args * sizeof(void *);
-
-    // Allocate a buffer to hold the serialized arguments from the client
-    void *arg_buffer = malloc(total_size);
-    if (arg_buffer == NULL)
+    for (int i = 0; i < num_args; ++i)
     {
-        std::cerr << "Failed to allocate memory for arguments buffer." << std::endl;
-        free(args);
-        return -1;
+        size_t arg_size;
+        
+        if (rpc_read(conn, &arg_size, sizeof(size_t)) < 0)
+        {
+            std::cerr << "Failed to read size of argument " << i << " from client." << std::endl;
+            free(args);
+            return -1;
+        }
+
+        // Allocate memory for the argument
+        args[i] = malloc(arg_size);
+        if (args[i] == NULL)
+        {
+            std::cerr << "Failed to allocate memory for argument " << i << "." << std::endl;
+            free(args);
+            return -1;
+        }
+
+        // Read the actual argument data from the client
+        if (rpc_read(conn, args[i], arg_size) < 0)
+        {
+            std::cerr << "Failed to read argument " << i << " from client." << std::endl;
+            free(args[i]);
+            free(args);
+            return -1;
+        }
     }
 
-    if (rpc_read(conn, args, num_args * sizeof(void *)) < 0)
-    {
-        std::cerr << "Failed to read arguments from client." << std::endl;
-        free(args);
-        return -1;
-    }
+    std::cout << "Calling cudaLaunchKernel with func: " << func << std::endl;
 
-    // Deserialize the arguments from the buffer into the args array
-    memcpy(args, arg_buffer, total_size);
-
-    // Free the temporary buffer after deserialization
-    free(arg_buffer);
-
-    // Launch the kernel on the GPU using the provided parameters
-    result = cudaLaunchKernel(&func, gridDim, blockDim, args, sharedMem, stream);
+    result = cudaLaunchKernel(func, gridDim, blockDim, args, sharedMem, stream);
     if (result != cudaSuccess)
     {
         std::cerr << "cudaLaunchKernel failed: " << cudaGetErrorString(result) << std::endl;
+        for (int i = 0; i < num_args; ++i)
+        {
+            free(args[i]);
+        }
         free(args);
         return -1;
     }
 
-    std::cout << "launched kernel!" << std::endl;
+    std::cout << "Kernel launched successfully!" << std::endl;
 
-    // Free the memory allocated for the kernel arguments
+    // Free argument memory after use
+    for (int i = 0; i < num_args; ++i)
+    {
+        free(args[i]);
+    }
     free(args);
 
     // Finalize the request
@@ -329,34 +346,57 @@ int handle_cudaLaunchKernel(void *conn)
     return result;
 }
 
+
 typedef void **(*__cudaRegisterFatBinary_type)(void **fatCubin);
 
 int handle___cudaRegisterFatBinary(void *conn)
 {
     void **fatCubin;
-        
-    int request_id = rpc_end_request(conn);
-    if (request_id < 0)
+    
+    // Read the fatCubin data from the client
+    if (rpc_read(conn, &fatCubin, sizeof(void **)) < 0)
     {
+        std::cerr << "Failed to read fatCubin from client" << std::endl;
         return -1;
     }
 
+    std::cout << "Server received fatCubin: " << fatCubin << std::endl;
+
+    // Call the original __cudaRegisterFatBinary function
     __cudaRegisterFatBinary_type orig;
-    orig =
-        (__cudaRegisterFatBinary_type)dlsym(RTLD_NEXT, "__cudaRegisterFatBinary");
+    orig = (__cudaRegisterFatBinary_type)dlsym(RTLD_NEXT, "__cudaRegisterFatBinary");
+    if (!orig)
+    {
+        std::cerr << "Failed to find original __cudaRegisterFatBinary" << std::endl;
+        return -1;
+    }
 
     auto ret = orig(fatCubin);
 
-    if (rpc_start_response(conn, request_id) < 0)
+    // End the request phase
+    int request_id = rpc_end_request(conn);
+    if (request_id < 0)
     {
+        std::cerr << "rpc_end_request failed" << std::endl;
         return -1;
     }
 
-    if (rpc_write(conn, &fatCubin, sizeof(void **)) < 0)
+    // Start the response phase
+    if (rpc_start_response(conn, request_id) < 0)
     {
-        std::cerr << "Failed to write fatCubin back to the client" << std::endl;
+        std::cerr << "rpc_start_response failed" << std::endl;
         return -1;
     }
+
+    fprintf(__cudart_trace_output_stream,
+          "> __cudaRegisterFatBinary(fatCubin=%p) = %p\n", fatCubin, ret);
+
+    if (rpc_write(conn, &ret, sizeof(void **)) < 0)
+    {
+        std::cerr << "Failed to write fatCubin result back to the client" << std::endl;
+        return -1;
+    }
+
     return 0;
 }
 
@@ -435,12 +475,21 @@ int handle___cudaRegisterFunction(void *conn)
         return -1;
     }
 
-    __cudaRegisterFunction_type orig;
-    orig =
-        (__cudaRegisterFunction_type)dlsym(RTLD_NEXT, "__cudaRegisterFunction");
+    std::cout << "calling original __cudaRegisterFunction_type" << std::endl;
 
+    __cudaRegisterFunction_type orig;
+    orig = (__cudaRegisterFunction_type)dlsym(RTLD_NEXT, "__cudaRegisterFunction");
+    if (!orig)
+    {
+        std::cerr << "Failed to find original __cudaRegisterFunction" << std::endl;
+        return -1;
+    }
+
+    // Call the original __cudaRegisterFunction
     orig(fatCubinHandle, hostFun, deviceFun, deviceName, thread_limit, tid,
               bid, bDim, gDim, wSize);
+
+    std::cout << "finished original __cudaRegisterFunction_type" << std::endl;
 
     // Start the response phase
     if (rpc_start_response(conn, request_id) < 0)
@@ -449,69 +498,9 @@ int handle___cudaRegisterFunction(void *conn)
         return -1;
     }
 
-    // Write the updated data back to the client
-    if (rpc_write(conn, &fatCubinHandle, sizeof(void *)) < 0)
-    {
-        std::cerr << "Failed writing fatCubinHandle" << std::endl;
-        return -1;
-    }
-
-    if (rpc_write(conn, &hostFun, sizeof(const char *)) < 0)
-    {
-        std::cerr << "Failed writing hostFun" << std::endl;
-        return -1;
-    }
-
-    if (rpc_write(conn, &deviceFun, sizeof(char *)) < 0)
-    {
-        std::cerr << "Failed writing deviceFun" << std::endl;
-        return -1;
-    }
-
-    if (rpc_write(conn, &deviceName, sizeof(const char *)) < 0)
-    {
-        std::cerr << "Failed writing deviceName" << std::endl;
-        return -1;
-    }
-
-    if (rpc_write(conn, &thread_limit, sizeof(int)) < 0)
-    {
-        std::cerr << "Failed writing thread_limit" << std::endl;
-        return -1;
-    }
-
-    if (rpc_write(conn, &tid, sizeof(uint3)) < 0)
-    {
-        std::cerr << "Failed writing tid" << std::endl;
-        return -1;
-    }
-
-    if (rpc_write(conn, &bid, sizeof(uint3)) < 0)
-    {
-        std::cerr << "Failed writing bid" << std::endl;
-        return -1;
-    }
-
-    if (rpc_write(conn, &bDim, sizeof(dim3)) < 0)
-    {
-        std::cerr << "Failed writing bDim" << std::endl;
-        return -1;
-    }
-
-    if (rpc_write(conn, &gDim, sizeof(dim3)) < 0)
-    {
-        std::cerr << "Failed writing gDim" << std::endl;
-        return -1;
-    }
-
-    if (rpc_write(conn, &wSize, sizeof(int)) < 0)
-    {
-        std::cerr << "Failed writing wSize" << std::endl;
-        return -1;
-    }
-
     return 0;
 }
+
 
 typedef void (*__cudaRegisterFatBinaryEnd_type)(void **fatCubinHandle);
 
@@ -546,13 +535,196 @@ int handle___cudaRegisterFatBinaryEnd(void *conn)
         return -1;
     }
 
-    // Write the fatCubinHandle back to the client
-    if (rpc_write(conn, &fatCubinHandle, sizeof(void *)) < 0)
+    return 0;
+}
+
+typedef unsigned (*__cudaPopCallConfiguration_type)(dim3 *gridDim, dim3 *blockDim,
+                                                    size_t *sharedMem, void *stream);
+
+int handle___cudaPopCallConfiguration(void *conn)
+{
+    dim3 *gridDim, *blockDim;
+    size_t *sharedMem;
+    void *stream;
+
+    std::cout << "received handle___cudaPopCallConfiguration" << std::endl;
+
+    // Read the pointers for gridDim, blockDim, sharedMem, and stream from the client
+    if (rpc_read(conn, &gridDim, sizeof(dim3 *)) < 0)
     {
-        std::cerr << "Failed writing fatCubinHandle back" << std::endl;
+        std::cerr << "Failed to read gridDim pointer from client" << std::endl;
         return -1;
     }
 
+    if (rpc_read(conn, &blockDim, sizeof(dim3 *)) < 0)
+    {
+        std::cerr << "Failed to read blockDim pointer from client" << std::endl;
+        return -1;
+    }
+
+    if (rpc_read(conn, &sharedMem, sizeof(size_t *)) < 0)
+    {
+        std::cerr << "Failed to read sharedMem pointer from client" << std::endl;
+        return -1;
+    }
+
+    if (rpc_read(conn, &stream, sizeof(void *)) < 0)
+    {
+        std::cerr << "Failed to read stream pointer from client" << std::endl;
+        return -1;
+    }
+
+    // End the request phase
+    int request_id = rpc_end_request(conn);
+    if (request_id < 0)
+    {
+        std::cerr << "rpc_end_request failed" << std::endl;
+        return -1;
+    }
+
+    // Get the original function via dlsym
+    __cudaPopCallConfiguration_type orig;
+    orig = (__cudaPopCallConfiguration_type)dlsym(RTLD_NEXT, "__cudaPopCallConfiguration");
+    if (!orig)
+    {
+        std::cerr << "Failed to find original __cudaPopCallConfiguration: " << dlerror() << std::endl;
+        return -1;
+    }
+
+    // Call the original function to populate the data
+    unsigned result = orig(gridDim, blockDim, sharedMem, stream);
+
+    // Start the response phase
+    if (rpc_start_response(conn, request_id) < 0)
+    {
+        std::cerr << "rpc_start_response failed" << std::endl;
+        return -1;
+    }
+
+    std::cout << "!!!" << std::endl;
+
+    // Send the updated data back to the client
+    if (rpc_write(conn, &gridDim, sizeof(dim3)) < 0)
+    {
+        std::cerr << "Failed to send gridDim to client" << std::endl;
+        return -1;
+    }
+
+    std::cout << "???" << std::endl;
+
+    if (rpc_write(conn, &blockDim, sizeof(dim3)) < 0)
+    {
+        std::cerr << "Failed to send blockDim to client" << std::endl;
+        return -1;
+    }
+
+    if (rpc_write(conn, &sharedMem, sizeof(size_t)) < 0)
+    {
+        std::cerr << "Failed to send sharedMem to client" << std::endl;
+        return -1;
+    }
+
+    if (rpc_write(conn, &stream, sizeof(void *)) < 0)
+    {
+        std::cerr << "Failed to send stream to client" << std::endl;
+        return -1;
+    }
+
+     // Write the result back to the client
+    // if (rpc_write(conn, &result, sizeof(unsigned)) < 0)
+    // {
+    //     std::cerr << "Failed to write result back to client" << std::endl;
+    //     return -1;
+    // }
+
+    std::cout << "done invoking handle___cudaPopCallConfiguration" << std::endl;
+
     return 0;
+}
+
+// Function pointer type for __cudaPushCallConfiguration
+typedef unsigned (*__cudaPushCallConfiguration_type)(dim3 gridDim, dim3 blockDim,
+                                                     size_t sharedMem, cudaStream_t stream);
+
+int handle___cudaPushCallConfiguration(void *conn)
+{
+    dim3 gridDim, blockDim;
+    size_t sharedMem;
+    cudaStream_t stream;
+
+    std::cout << "received handle___cudaPushCallConfiguration" << std::endl;
+
+    // Read the grid dimensions from the client
+    if (rpc_read(conn, &gridDim, sizeof(dim3)) < 0)
+    {
+        std::cerr << "Failed to read grid dimensions" << std::endl;
+        return -1;
+    }
+
+    // Read the block dimensions from the client
+    if (rpc_read(conn, &blockDim, sizeof(dim3)) < 0)
+    {
+        std::cerr << "Failed to read block dimensions" << std::endl;
+        return -1;
+    }
+
+    // Read the shared memory size from the client
+    if (rpc_read(conn, &sharedMem, sizeof(size_t)) < 0)
+    {
+        std::cerr << "Failed to read shared memory size" << std::endl;
+        return -1;
+    }
+
+    // Read the CUDA stream from the client
+    if (rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0)
+    {
+        std::cerr << "Failed to read CUDA stream" << std::endl;
+        return -1;
+    }
+
+    // End the request phase
+    int request_id = rpc_end_request(conn);
+    if (request_id < 0)
+    {
+        std::cerr << "rpc_end_request failed" << std::endl;
+        return -1;
+    }
+
+    // Find the original __cudaPushCallConfiguration function using dlsym
+    __cudaPushCallConfiguration_type orig;
+    orig = (__cudaPushCallConfiguration_type)dlsym(RTLD_NEXT, "__cudaPushCallConfiguration");
+    if (!orig)
+    {
+        std::cerr << "Failed to find original __cudaPushCallConfiguration: " << dlerror() << std::endl;
+        return -1;
+    }
+
+    // Call the original function
+    unsigned result = orig(gridDim, blockDim, sharedMem, stream);
+
+    // Start the response phase
+    if (rpc_start_response(conn, request_id) < 0)
+    {
+        std::cerr << "rpc_start_response failed" << std::endl;
+        return -1;
+    }
+
+    // Write the result back to the client
+    // if (rpc_write(conn, &result, sizeof(unsigned)) < 0)
+    // {
+    //     std::cerr << "Failed to write result back to client" << std::endl;
+    //     return -1;
+    // }
+
+    std::cout << "finalized handle___cudaPushCallConfiguration" << std::endl;
+
+    return 0;
+}
+
+
+typedef void (*__cudaInitModule_type)(void **fatCubinHandle);
+
+void __cudaInitModule(void **fatCubinHandle) {
+    std::cerr << "calling __cudaInitModule" << std::endl;
 }
 

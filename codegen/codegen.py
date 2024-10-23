@@ -62,8 +62,11 @@ MANUAL_IMPLEMENTATIONS = [
     "cudaLaunchKernel",
     "__cudaRegisterFunction",
     "__cudaRegisterFatBinary",
-    "__cudaRegisterFatBinaryEnd"
+    "__cudaRegisterFatBinaryEnd",
+    "__cudaPushCallConfiguration",
+    "__cudaPopCallConfiguration"
 ]
+
 
 @dataclass
 class Operation:

@@ -8,3 +8,5 @@ int handle_cudaLaunchKernel(void *conn);
 int handle___cudaRegisterFunction(void *conn);
 int handle___cudaRegisterFatBinary(void *conn);
 int handle___cudaRegisterFatBinaryEnd(void *conn);
+int handle___cudaPushCallConfiguration(void *conn);
+int handle___cudaPopCallConfiguration(void *conn);

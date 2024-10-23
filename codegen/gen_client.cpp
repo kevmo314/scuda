@@ -1,5 +1,4 @@
 #include <nvml.h>
-#include <iostream>
 #include <cuda.h>
 #include <cuda_runtime_api.h>
 
@@ -11596,6 +11595,8 @@ std::unordered_map<std::string, void *> functionMap = {
     {"__cudaRegisterFunction", (void *)__cudaRegisterFunction},
     {"__cudaRegisterFatBinary", (void *)__cudaRegisterFatBinary},
     {"__cudaRegisterFatBinaryEnd", (void *)__cudaRegisterFatBinaryEnd},
+    {"__cudaPushCallConfiguration", (void *)__cudaPushCallConfiguration},
+    {"__cudaPopCallConfiguration", (void *)__cudaPopCallConfiguration},
 };
 
 void *get_function_pointer(const char *name)

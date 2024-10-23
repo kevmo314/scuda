@@ -15360,6 +15360,7 @@ int handle_cudaMalloc(void *conn)
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
         return -1;
+
     cudaError_t result = cudaMalloc(&devPtr, size);
 
     if (rpc_start_response(conn, request_id) < 0)
@@ -18901,6 +18902,8 @@ static RequestHandler opHandlers[] = {
     handle___cudaRegisterFunction,
     handle___cudaRegisterFatBinary,
     handle___cudaRegisterFatBinaryEnd,
+    handle___cudaPushCallConfiguration,
+    handle___cudaPopCallConfiguration,
 };
 
 RequestHandler get_handler(const int op)
