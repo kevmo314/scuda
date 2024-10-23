@@ -12,9 +12,10 @@
 #include "gen_server.h"
 
 extern int rpc_read(const void *conn, void *data, const std::size_t size);
-extern int rpc_write(const void *conn, const void *data, const std::size_t size);
 extern int rpc_end_request(const void *conn);
 extern int rpc_start_response(const void *conn, const int request_id);
+extern int rpc_write(const void *conn, const void *data, const std::size_t size);
+extern int rpc_end_response(const void *conn, void *return_value);
 
 int handle_cudaMemcpy(void *conn)
 {
@@ -43,10 +44,21 @@ int handle_cudaMemcpy(void *conn)
             return -1;
         }
 
+        int request_id = rpc_end_request(conn);
+        if (request_id < 0)
+        {
+            return -1;
+        }
+
         result = cudaMemcpy(host_data, dst, count, cudaMemcpyDeviceToHost);
         if (result != cudaSuccess)
         {
             free(host_data);
+            return -1;
+        }
+
+        if (rpc_start_response(conn, request_id) < 0)
+        {
             return -1;
         }
 
@@ -58,17 +70,6 @@ int handle_cudaMemcpy(void *conn)
 
         // free temp memory after writing host data back
         free(host_data);
-
-        int request_id = rpc_end_request(conn);
-        if (request_id < 0)
-        {
-            return -1;
-        }
-
-        if (rpc_start_response(conn, request_id) < 0)
-        {
-            return -1;
-        }
     }
     else
     {
@@ -108,7 +109,9 @@ int handle_cudaMemcpy(void *conn)
         }
     }
 
-    return result;
+    if (rpc_end_response(conn, &result) < 0)
+        return -1;
+    return 0;
 }
 
 int handle_cudaMemcpyAsync(void *conn)
@@ -144,10 +147,21 @@ int handle_cudaMemcpyAsync(void *conn)
             return -1;
         }
 
+        int request_id = rpc_end_request(conn);
+        if (request_id < 0)
+        {
+            return -1;
+        }
+
         result = cudaMemcpyAsync(host_data, dst, count, cudaMemcpyDeviceToHost, stream);
         if (result != cudaSuccess)
         {
             free(host_data);
+            return -1;
+        }
+
+        if (rpc_start_response(conn, request_id) < 0)
+        {
             return -1;
         }
 
@@ -159,17 +173,6 @@ int handle_cudaMemcpyAsync(void *conn)
 
         // free temp memory after writing host data back
         free(host_data);
-
-        int request_id = rpc_end_request(conn);
-        if (request_id < 0)
-        {
-            return -1;
-        }
-
-        if (rpc_start_response(conn, request_id) < 0)
-        {
-            return -1;
-        }
     }
     else
     {
@@ -216,5 +219,7 @@ int handle_cudaMemcpyAsync(void *conn)
         }
     }
 
-    return result;
+    if (rpc_end_response(conn, &result) < 0)
+        return -1;
+    return 0;
 }
