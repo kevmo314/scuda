@@ -14,9 +14,10 @@
 #include "gen_server.h"
 
 extern int rpc_read(const void *conn, void *data, const std::size_t size);
-extern int rpc_write(const void *conn, const void *data, const std::size_t size);
 extern int rpc_end_request(const void *conn);
 extern int rpc_start_response(const void *conn, const int request_id);
+extern int rpc_write(const void *conn, const void *data, const std::size_t size);
+extern int rpc_end_response(const void *conn, void *return_value);
 
 FILE *__cudart_trace_output_stream = stdout;
 
@@ -25,14 +26,19 @@ int handle_cudaMemcpy(void *conn)
     cudaError_t result;
     void *dst;
 
+    std::cout << "calling cudaMemcpy" << std::endl;
+
     enum cudaMemcpyKind kind;
     if (rpc_read(conn, &kind, sizeof(enum cudaMemcpyKind)) < 0)
     {
         return -1;
     }
 
+    std::cout << "hmmm " << kind << std::endl;
+
     if (kind == cudaMemcpyDeviceToHost)
     {
+        std::cout << "IN HERE cudaMemcpy" << std::endl;
         if (rpc_read(conn, &dst, sizeof(void *)) < 0)
             return -1;
 
@@ -52,6 +58,8 @@ int handle_cudaMemcpy(void *conn)
         {
             return -1;
         }
+
+        std::cout << "call... cudaMemcpy" << std::endl;
 
         result = cudaMemcpy(host_data, dst, count, cudaMemcpyDeviceToHost);
         if (result != cudaSuccess)
@@ -73,9 +81,12 @@ int handle_cudaMemcpy(void *conn)
 
         // free temp memory after writing host data back
         free(host_data);
+
+        std::cout << "about to end... cudaMemcpy" << std::endl;
     }
     else
     {
+        std::cout << "host to device ... cudaMemcpy" << std::endl;
         if (rpc_read(conn, &dst, sizeof(void *)) < 0)
             return -1;
 
@@ -102,6 +113,7 @@ int handle_cudaMemcpy(void *conn)
             return -1;
         }
 
+        std::cout << "calling to device ... cudaMemcpy: " << dst << " " << src << " " << count << " " << kind << std::endl;
         result = cudaMemcpy(dst, src, count, kind);
 
         free(src);
@@ -110,15 +122,23 @@ int handle_cudaMemcpy(void *conn)
         {
             return -1;
         }
+
+        std::cout << "finishing" << std::endl;
     }
 
-    return result;
+    if (rpc_end_response(conn, &result) < 0)
+        return -1;
+
+    std::cout << "end cudaMemcpy" << std::endl;
+    return 0;
 }
 
 int handle_cudaMemcpyAsync(void *conn)
 {
     cudaError_t result;
     void *dst;
+
+    std::cout << "calling cudaMemcpyAsync" << std::endl;
 
     enum cudaMemcpyKind kind;
     if (rpc_read(conn, &kind, sizeof(enum cudaMemcpyKind)) < 0)
@@ -220,7 +240,12 @@ int handle_cudaMemcpyAsync(void *conn)
         }
     }
 
-    return result;
+    if (rpc_end_response(conn, &result) < 0)
+        return -1;
+
+    std::cout << "end cudaMemcpyAsync" << std::endl;    
+
+    return 0;
 }
 
 int handle_cudaLaunchKernel(void *conn)
@@ -232,6 +257,8 @@ int handle_cudaLaunchKernel(void *conn)
     size_t sharedMem;
     cudaStream_t stream;
     int num_args;
+
+    std::cout << "cudaLaunchKernel request incoming!" << std::endl;
 
     // Read the function pointer (kernel) from the client
     if (rpc_read(conn, &func, sizeof(const void *)) < 0)
@@ -351,6 +378,7 @@ typedef void **(*__cudaRegisterFatBinary_type)(void **fatCubin);
 
 int handle___cudaRegisterFatBinary(void *conn)
 {
+    void *res;
     void **fatCubin;
     
     // Read the fatCubin data from the client
@@ -397,6 +425,9 @@ int handle___cudaRegisterFatBinary(void *conn)
         return -1;
     }
 
+    if (rpc_end_response(conn, &res) < 0)
+        return -1;
+
     return 0;
 }
 
@@ -407,10 +438,11 @@ typedef void (*__cudaRegisterFunction_type)(
 
 int handle___cudaRegisterFunction(void *conn)
 {
+    void *res;
     void **fatCubinHandle;
-    const char *hostFun;
+    char *hostFun;
     char *deviceFun;
-    const char *deviceName;
+    char *deviceName;
     int thread_limit;
     uint3 *tid, *bid;
     dim3 *bDim, *gDim;
@@ -422,18 +454,65 @@ int handle___cudaRegisterFunction(void *conn)
         return -1;
     }
 
-    if (rpc_read(conn, &hostFun, sizeof(const char *)) < 0)
+    size_t hostFunLen;
+    if (rpc_read(conn, &hostFunLen, sizeof(size_t)) < 0)
     {
         return -1;
     }
 
-    if (rpc_read(conn, &deviceFun, sizeof(char *)) < 0)
+    // Allocate memory for the hostFun string
+    hostFun = (char *)malloc(hostFunLen);
+    if (!hostFun)
+    {
+        std::cerr << "Failed to allocate memory for hostFun" << std::endl;
+        return -1;
+    }
+
+    // Read the actual string data into the allocated memory
+    if (rpc_read(conn, hostFun, hostFunLen) < 0)
+    {
+        free(hostFun);
+        return -1;
+    }
+
+    size_t deviceFunLen;
+    if (rpc_read(conn, &deviceFunLen, sizeof(size_t)) < 0)
     {
         return -1;
     }
 
-    if (rpc_read(conn, &deviceName, sizeof(const char *)) < 0)
+    // Allocate memory for the hostFun string
+    deviceFun = (char *)malloc(deviceFunLen);
+    if (!deviceFun)
     {
+        std::cerr << "Failed to allocate memory for hostFun" << std::endl;
+        return -1;
+    }
+
+    // Read the actual string data into the allocated memory
+    if (rpc_read(conn, deviceFun, deviceFunLen) < 0)
+    {
+        free(deviceFun);
+        return -1;
+    }
+
+    size_t deviceNameLen;
+    if (rpc_read(conn, &deviceNameLen, sizeof(size_t)) < 0)
+    {
+        return -1;
+    }
+
+    deviceName = (char *)malloc(deviceNameLen);
+    if (!deviceName)
+    {
+        std::cerr << "Failed to allocate memory for hostFun" << std::endl;
+        return -1;
+    }
+
+    // Read the actual string data into the allocated memory
+    if (rpc_read(conn, deviceName, deviceNameLen) < 0)
+    {
+        free(deviceName);
         return -1;
     }
 
@@ -467,6 +546,8 @@ int handle___cudaRegisterFunction(void *conn)
         return -1;
     }
 
+    std::cout << "hostFunhostFunhostFunhostFunhostFun thread_limit" << thread_limit << std::endl;
+
     // End request phase
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -474,8 +555,6 @@ int handle___cudaRegisterFunction(void *conn)
         std::cerr << "rpc_end_request failed" << std::endl;
         return -1;
     }
-
-    std::cout << "calling original __cudaRegisterFunction_type" << std::endl;
 
     __cudaRegisterFunction_type orig;
     orig = (__cudaRegisterFunction_type)dlsym(RTLD_NEXT, "__cudaRegisterFunction");
@@ -485,11 +564,21 @@ int handle___cudaRegisterFunction(void *conn)
         return -1;
     }
 
+    std::cout << "Calling original __cudaRegisterFunction with parameters:" << std::endl;
+    std::cout << "  fatCubinHandle: " << fatCubinHandle << std::endl;
+    std::cout << "  hostFun: " << (hostFun ? hostFun : "null") << std::endl;
+    std::cout << "  deviceFun: " << (deviceFun ? deviceFun : "null") << std::endl;
+    std::cout << "  deviceName: " << (deviceName ? deviceName : "null") << std::endl;
+    std::cout << "  thread_limit: " << thread_limit << std::endl;
+    std::cout << "  tid: " << tid << std::endl;
+    std::cout << "  bid: " << bid << std::endl;
+    std::cout << "  bDim: " << bDim << std::endl;
+    std::cout << "  gDim: " << gDim << std::endl;
+    std::cout << "  wSize: " << wSize << std::endl;
+
     // Call the original __cudaRegisterFunction
     orig(fatCubinHandle, hostFun, deviceFun, deviceName, thread_limit, tid,
               bid, bDim, gDim, wSize);
-
-    std::cout << "finished original __cudaRegisterFunction_type" << std::endl;
 
     // Start the response phase
     if (rpc_start_response(conn, request_id) < 0)
@@ -497,6 +586,9 @@ int handle___cudaRegisterFunction(void *conn)
         std::cerr << "rpc_start_response failed" << std::endl;
         return -1;
     }
+
+    if (rpc_end_response(conn, &res) < 0)
+        return -1;
 
     return 0;
 }
@@ -506,7 +598,10 @@ typedef void (*__cudaRegisterFatBinaryEnd_type)(void **fatCubinHandle);
 
 int handle___cudaRegisterFatBinaryEnd(void *conn)
 {
+    void *res;
     void **fatCubinHandle;
+
+    std::cout << "received cudaRegisterFatBinaryEnd" << std::endl;
 
     // Read the fatCubinHandle from the client
     if (rpc_read(conn, &fatCubinHandle, sizeof(void *)) < 0)
@@ -535,6 +630,9 @@ int handle___cudaRegisterFatBinaryEnd(void *conn)
         return -1;
     }
 
+    if (rpc_end_response(conn, &res) < 0)
+        return -1;
+
     return 0;
 }
 
@@ -543,6 +641,7 @@ typedef unsigned (*__cudaPopCallConfiguration_type)(dim3 *gridDim, dim3 *blockDi
 
 int handle___cudaPopCallConfiguration(void *conn)
 {
+    void *res;
     dim3 *gridDim, *blockDim;
     size_t *sharedMem;
     void *stream;
@@ -601,16 +700,12 @@ int handle___cudaPopCallConfiguration(void *conn)
         return -1;
     }
 
-    std::cout << "!!!" << std::endl;
-
     // Send the updated data back to the client
     if (rpc_write(conn, &gridDim, sizeof(dim3)) < 0)
     {
         std::cerr << "Failed to send gridDim to client" << std::endl;
         return -1;
     }
-
-    std::cout << "???" << std::endl;
 
     if (rpc_write(conn, &blockDim, sizeof(dim3)) < 0)
     {
@@ -630,14 +725,8 @@ int handle___cudaPopCallConfiguration(void *conn)
         return -1;
     }
 
-     // Write the result back to the client
-    // if (rpc_write(conn, &result, sizeof(unsigned)) < 0)
-    // {
-    //     std::cerr << "Failed to write result back to client" << std::endl;
-    //     return -1;
-    // }
-
-    std::cout << "done invoking handle___cudaPopCallConfiguration" << std::endl;
+    if (rpc_end_response(conn, &res) < 0)
+        return -1;
 
     return 0;
 }
@@ -648,6 +737,7 @@ typedef unsigned (*__cudaPushCallConfiguration_type)(dim3 gridDim, dim3 blockDim
 
 int handle___cudaPushCallConfiguration(void *conn)
 {
+    void *res;
     dim3 gridDim, blockDim;
     size_t sharedMem;
     cudaStream_t stream;
@@ -709,14 +799,8 @@ int handle___cudaPushCallConfiguration(void *conn)
         return -1;
     }
 
-    // Write the result back to the client
-    // if (rpc_write(conn, &result, sizeof(unsigned)) < 0)
-    // {
-    //     std::cerr << "Failed to write result back to client" << std::endl;
-    //     return -1;
-    // }
-
-    std::cout << "finalized handle___cudaPushCallConfiguration" << std::endl;
+    if (rpc_end_response(conn, &res) < 0)
+        return -1;
 
     return 0;
 }
@@ -726,5 +810,137 @@ typedef void (*__cudaInitModule_type)(void **fatCubinHandle);
 
 void __cudaInitModule(void **fatCubinHandle) {
     std::cerr << "calling __cudaInitModule" << std::endl;
+}
+
+typedef void (*__cudaRegisterVar_type)(
+    void **fatCubinHandle,
+    char *hostVar,
+    char *deviceAddress,
+    const char *deviceName,
+    int ext,
+    size_t size,
+    int constant,
+    int global
+);
+
+int handle___cudaRegisterVar(void *conn)
+{
+    void *res;
+    void **fatCubinHandle;
+    char *hostVar;
+    char *deviceAddress;
+    char *deviceName;
+    int ext;
+    size_t size;
+    int constant;
+    int global;
+
+    // Read the fatCubinHandle
+    if (rpc_read(conn, &fatCubinHandle, sizeof(void *)) < 0)
+    {
+        std::cerr << "Failed reading fatCubinHandle" << std::endl;
+        return -1;
+    }
+
+    // Read hostVar
+    size_t hostVarLen;
+    if (rpc_read(conn, &hostVarLen, sizeof(size_t)) < 0)
+    {
+        std::cerr << "Failed to read hostVar length" << std::endl;
+        return -1;
+    }
+    hostVar = (char *)malloc(hostVarLen);
+    if (rpc_read(conn, hostVar, hostVarLen) < 0)
+    {
+        std::cerr << "Failed to read hostVar" << std::endl;
+        return -1;
+    }
+
+    // Read deviceAddress
+    size_t deviceAddressLen;
+    if (rpc_read(conn, &deviceAddressLen, sizeof(size_t)) < 0)
+    {
+        std::cerr << "Failed to read deviceAddress length" << std::endl;
+        return -1;
+    }
+    deviceAddress = (char *)malloc(deviceAddressLen);
+    if (rpc_read(conn, deviceAddress, deviceAddressLen) < 0)
+    {
+        std::cerr << "Failed to read deviceAddress" << std::endl;
+        return -1;
+    }
+
+    // Read deviceName
+    size_t deviceNameLen;
+    if (rpc_read(conn, &deviceNameLen, sizeof(size_t)) < 0)
+    {
+        std::cerr << "Failed to read deviceName length" << std::endl;
+        return -1;
+    }
+    deviceName = (char *)malloc(deviceNameLen);
+    if (rpc_read(conn, deviceName, deviceNameLen) < 0)
+    {
+        std::cerr << "Failed to read deviceName" << std::endl;
+        return -1;
+    }
+
+    // Read ext, size, constant, global
+    if (rpc_read(conn, &ext, sizeof(int)) < 0)
+    {
+        std::cerr << "Failed reading ext" << std::endl;
+        return -1;
+    }
+
+    if (rpc_read(conn, &size, sizeof(size_t)) < 0)
+    {
+        std::cerr << "Failed reading size" << std::endl;
+        return -1;
+    }
+
+    if (rpc_read(conn, &constant, sizeof(int)) < 0)
+    {
+        std::cerr << "Failed reading constant" << std::endl;
+        return -1;
+    }
+
+    if (rpc_read(conn, &global, sizeof(int)) < 0)
+    {
+        std::cerr << "Failed reading global" << std::endl;
+        return -1;
+    }
+
+    std::cout << "Received __cudaRegisterVar with deviceName: " << deviceName << std::endl;
+
+    // Call the original __cudaRegisterVar function
+    __cudaRegisterVar_type orig;
+    orig = (__cudaRegisterVar_type)dlsym(RTLD_NEXT, "__cudaRegisterVar");
+    if (!orig)
+    {
+        std::cerr << "Failed to find original __cudaRegisterVar" << std::endl;
+        return -1;
+    }
+
+    orig(fatCubinHandle, hostVar, deviceAddress, deviceName, ext, size, constant, global);
+
+    // End request phase
+    int request_id = rpc_end_request(conn);
+    if (request_id < 0)
+    {
+        std::cerr << "rpc_end_request failed" << std::endl;
+        return -1;
+    }
+
+    // Start response phase
+    if (rpc_start_response(conn, request_id) < 0)
+    {
+        std::cerr << "rpc_start_response failed" << std::endl;
+        return -1;
+    }
+
+    // No need to send anything back here; just end the response
+    if (rpc_end_response(conn, &res) < 0)
+        return -1;
+
+    return 0;
 }
 
