@@ -23,106 +23,158 @@
 
 #include "codegen/gen_client.h"
 
-int sockfd = -1;
-char *port;
-
-int open_rpc_client()
+typedef struct
 {
-    // if socket is already opened, return our socket.
-    if (sockfd != -1)
+    int connfd;
+    int read_request_id;
+    int active_response_id;
+    int write_request_id;
+    unsigned int write_request_op;
+    pthread_mutex_t read_mutex, write_mutex;
+    pthread_cond_t read_cond;
+    struct iovec write_iov[128];
+    int write_iov_count = 0;
+} conn_t;
+
+pthread_mutex_t conn_mutex;
+conn_t conns[16];
+int nconns = 0;
+
+const char *DEFAULT_PORT = "14833";
+
+int rpc_open()
+{
+    if (pthread_mutex_lock(&conn_mutex) < 0)
+        return -1;
+
+    if (nconns > 0)
     {
-        return sockfd;
+        if (pthread_mutex_unlock(&conn_mutex) < 0)
+            return -1;
+        return 0;
     }
 
-    char *server_ip = getenv("SCUDA_SERVER");
-    if (server_ip == NULL)
+    char *server_ips = getenv("SCUDA_SERVER");
+    if (server_ips == NULL)
     {
         printf("SCUDA_SERVER environment variable not set\n");
         std::exit(1);
     }
 
-    char *p = getenv("SCUDA_PORT");
+    char *server_ip = strdup(server_ips);
+    char *token;
+    while ((token = strsep(&server_ip, ",")))
+    {
+        char *host;
+        char *port;
 
-    if (p == NULL)
-    {
-        port = (char *)"14833";
-    }
-    else
-    {
-        port = p;
-        // << "using SCUDA_PORT: " << port << std::endl;
-    }
+        // Split the string into IP address and port
+        char *colon = strchr(token, ':');
+        if (colon == NULL)
+        {
+            host = token;
+            port = const_cast<char *>(DEFAULT_PORT);
+        }
+        else
+        {
+            *colon = '\0';
+            host = token;
+            port = colon + 1;
+        }
 
-    addrinfo hints, *res;
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_INET;
-    hints.ai_socktype = SOCK_STREAM;
-    if (getaddrinfo(server_ip, port, &hints, &res) != 0)
-    {
-        printf("getaddrinfo failed\n");
+        addrinfo hints, *res;
+        memset(&hints, 0, sizeof(hints));
+        hints.ai_family = AF_INET;
+        hints.ai_socktype = SOCK_STREAM;
+        if (getaddrinfo(server_ip, port, &hints, &res) != 0)
+            return -1;
+
+        int flag = 1;
+        int sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+        if (sockfd == -1 ||
+            setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, (char *)&flag, sizeof(int)) < 0 ||
+            connect(sockfd, res->ai_addr, res->ai_addrlen) < 0)
+            return -1;
+
+        conns[nconns++] = {sockfd, 0, 0, 0, 0, PTHREAD_MUTEX_INITIALIZER, PTHREAD_MUTEX_INITIALIZER, PTHREAD_COND_INITIALIZER};
+    }
+    if (pthread_mutex_unlock(&conn_mutex) < 0)
         return -1;
-    }
-
-    sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
-    if (sockfd == -1)
-    {
-        printf("socket creation failed...\n");
+    if (nconns == 0)
         return -1;
-    }
-
-    // set TCP_NODELAY
-    int flag = 1;
-    if (setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, (char *)&flag, sizeof(int)) < 0)
-    {
-        printf("setsockopt failed...\n");
-        return -1;
-    }
-
-    if (connect(sockfd, res->ai_addr, res->ai_addrlen) != 0)
-    {
-        printf("connection with the server failed...\n");
-        return -1;
-    }
-    return sockfd;
-}
-
-pthread_mutex_t mutex;
-pthread_cond_t cond;
-
-struct iovec write_iov[128];
-int write_iov_count = 0;
-int request_id = 1;
-unsigned int request_operation_id = 0;
-
-int rpc_start_request(const unsigned int op)
-{
-    if (open_rpc_client() < 0)
-        return -1;
-
-    // write the request atomically
-    pthread_mutex_lock(&mutex);
-
-    write_iov_count = 2;
-    request_operation_id = op;
     return 0;
 }
 
-int rpc_write(const void *data, const size_t size)
+int rpc_size()
 {
-    write_iov[write_iov_count++] = {const_cast<void *>(data), size};
-    return 0;
+    return nconns;
 }
 
-int rpc_end_request(void *result)
+int rpc_start_request(const int index, const unsigned int op)
 {
-    if (read(sockfd, result, sizeof(nvmlReturn_t)) < 0)
+    if (rpc_open() < 0 ||
+        pthread_mutex_lock(&conns[index].write_mutex) < 0)
         return -1;
 
-    pthread_mutex_unlock(&mutex);
+    conns[index].write_iov_count = 2;
+    conns[index].write_request_op = op;
     return 0;
 }
 
-int rpc_read(void *data, size_t size)
+int rpc_write(const int index, const void *data, const size_t size)
+{
+    conns[index].write_iov[conns[index].write_iov_count++] = {const_cast<void *>(data), size};
+    return 0;
+}
+
+int rpc_wait_for_response(const int index)
+{
+    conns[index].write_request_id++;
+
+    conns[index].write_iov[0] = {&conns[index].write_request_id, sizeof(int)};
+    conns[index].write_iov[1] = {&conns[index].write_request_op, sizeof(unsigned int)};
+
+    // write the request to the server
+    if (writev(conns[index].connfd, conns[index].write_iov, conns[index].write_iov_count) < 0)
+    {
+        pthread_mutex_unlock(&conns[index].write_mutex);
+        return -1;
+    }
+
+    int wait_for_request_id = conns[index].write_request_id;
+
+    if (pthread_mutex_unlock(&conns[index].write_mutex) < 0 ||
+        pthread_mutex_lock(&conns[index].read_mutex) < 0)
+        return -1;
+
+    // wait for the response
+    while (true)
+    {
+        while (conns[index].active_response_id != wait_for_request_id && conns[index].active_response_id != 0)
+            pthread_cond_wait(&conns[index].read_cond, &conns[index].read_mutex);
+
+        // we currently own mutex. if active response id is 0, read the response id
+        if (conns[index].active_response_id == 0)
+        {
+            if (read(conns[index].connfd, &conns[index].active_response_id, sizeof(int)) < 0)
+            {
+                pthread_mutex_unlock(&conns[index].read_mutex);
+                return -1;
+            }
+
+            if (conns[index].active_response_id != wait_for_request_id)
+            {
+                pthread_cond_broadcast(&conns[index].read_cond);
+                continue;
+            }
+        }
+
+        conns[index].active_response_id = 0;
+        return 0;
+    }
+}
+
+int rpc_read(const int index, void *data, size_t size)
 {
     if (data == nullptr)
     {
@@ -130,70 +182,38 @@ int rpc_read(void *data, size_t size)
         char tempBuffer[256];
         while (size > 0)
         {
-            ssize_t bytesRead = read(sockfd, tempBuffer, std::min(size, sizeof(tempBuffer)));
+            ssize_t bytesRead = read(conns[index].connfd, tempBuffer, std::min(size, sizeof(tempBuffer)));
             if (bytesRead < 0)
             {
-                pthread_mutex_unlock(&mutex);
+                pthread_mutex_unlock(&conns[index].read_mutex);
                 return -1; // error if reading fails
             }
             size -= bytesRead;
         }
     }
-    else if (read(sockfd, data, size) < 0)
+    else if (read(conns[index].connfd, data, size) < 0)
     {
-        pthread_mutex_unlock(&mutex);
+        pthread_mutex_unlock(&conns[index].read_mutex);
         return -1;
     }
     return 0;
 }
 
-int rpc_wait_for_response()
+int rpc_end_request(const int index, void *result)
 {
-    static int active_response_id = -1;
-
-    write_iov[0] = {&request_id, sizeof(int)};
-    write_iov[1] = {&request_operation_id, sizeof(unsigned int)};
-
-    // write the request to the server
-    if (writev(sockfd, write_iov, write_iov_count) < 0)
-    {
-        pthread_mutex_unlock(&mutex);
+    if (read(conns[index].connfd, result, sizeof(int)) < 0 ||
+        pthread_mutex_unlock(&conns[index].read_mutex) < 0)
         return -1;
-    }
-
-    int wait_for_request_id = request_id++;
-
-    // wait for the response
-    while (true)
-    {
-        while (active_response_id != wait_for_request_id && active_response_id != -1)
-            pthread_cond_wait(&cond, &mutex);
-
-        // we currently own mutex. if active response id is -1, read the response id
-        if (active_response_id == -1)
-        {
-            if (read(sockfd, &active_response_id, sizeof(int)) < 0)
-            {
-                pthread_mutex_unlock(&mutex);
-                return -1;
-            }
-
-            if (active_response_id != wait_for_request_id)
-            {
-                pthread_cond_broadcast(&cond);
-                continue;
-            }
-        }
-
-        active_response_id = -1;
-        return 0;
-    }
+    return 0;
 }
 
-void close_rpc_client()
+void rpc_close()
 {
-    close(sockfd);
-    sockfd = 0;
+    if (pthread_mutex_lock(&conn_mutex) < 0)
+        return;
+    while (--nconns >= 0)
+        close(conns[nconns].connfd);
+    pthread_mutex_unlock(&conn_mutex);
 }
 
 CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion, cuuint64_t flags, CUdriverProcAddressQueryResult *symbolStatus)
@@ -242,8 +262,6 @@ CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion, cu
 
 void *dlsym(void *handle, const char *name) __THROW
 {
-    open_rpc_client();
-
     void *func = get_function_pointer(name);
 
     /** proc address function calls are basically dlsym; we should handle this differently at the top level. */

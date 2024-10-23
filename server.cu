@@ -83,14 +83,8 @@ void client_handler(int connfd)
             std::launch::async,
             [&conn]()
             {
-                int result = request_handler(&conn);
-                conn.write_iov[0] = (struct iovec){&conn.write_request_id, sizeof(int)};
-                conn.write_iov[conn.write_iov_count++] = (struct iovec){&result, sizeof(int)};
-                if (writev(conn.connfd, conn.write_iov, conn.write_iov_count) < 0)
-                    std::cerr << "error writing to client." << std::endl;
-
-                if (pthread_mutex_unlock(&conn.write_mutex) < 0)
-                    std::cerr << "Error unlocking mutex." << std::endl;
+                if (request_handler(&conn) < 0)
+                    std::cerr << "Error handling request." << std::endl;
             });
 
         futures.push_back(std::move(future));
@@ -131,6 +125,16 @@ int rpc_start_response(const void *conn, const int request_id)
         return -1;
     ((conn_t *)conn)->write_request_id = request_id;
     ((conn_t *)conn)->write_iov_count = 1;
+    return 0;
+}
+
+int rpc_end_response(const void *conn, void *result)
+{
+    ((conn_t *)conn)->write_iov[0] = (struct iovec){&((conn_t *)conn)->write_request_id, sizeof(int)};
+    ((conn_t *)conn)->write_iov[((conn_t *)conn)->write_iov_count++] = (struct iovec){result, sizeof(int)};
+    if (writev(((conn_t *)conn)->connfd, ((conn_t *)conn)->write_iov, ((conn_t *)conn)->write_iov_count) < 0 ||
+        pthread_mutex_unlock(&((conn_t *)conn)->write_mutex) < 0)
+        return -1;
     return 0;
 }
 
