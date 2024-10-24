@@ -1,5 +1,6 @@
 #include <nvml.h>
 #include <cuda.h>
+#include <iostream>
 #include <cuda_runtime_api.h>
 
 #include <cstring>
@@ -15444,6 +15445,7 @@ int handle_cudaMalloc(void *conn)
 {
     void* devPtr;
     size_t size;
+    
     if (rpc_read(conn, &size, sizeof(size_t)) < 0)
         return -1;
 
@@ -19002,6 +19004,13 @@ static RequestHandler opHandlers[] = {
     handle_cudaGraphReleaseUserObject,
     handle_cudaMemcpy,
     handle_cudaMemcpyAsync,
+    handle_cudaLaunchKernel,
+    handle___cudaRegisterVar,
+    handle___cudaRegisterFunction,
+    handle___cudaRegisterFatBinary,
+    handle___cudaRegisterFatBinaryEnd,
+    handle___cudaPushCallConfiguration,
+    handle___cudaPopCallConfiguration,
 };
 
 RequestHandler get_handler(const int op)

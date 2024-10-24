@@ -11596,6 +11596,13 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cuMemAllocFromPoolAsync_ptsz", (void *)cuMemAllocFromPoolAsync},
     {"cudaMemcpy", (void *)cudaMemcpy},
     {"cudaMemcpyAsync", (void *)cudaMemcpyAsync},
+    {"cudaLaunchKernel", (void *)cudaLaunchKernel},
+    {"__cudaRegisterVar", (void *)__cudaRegisterVar},
+    {"__cudaRegisterFunction", (void *)__cudaRegisterFunction},
+    {"__cudaRegisterFatBinary", (void *)__cudaRegisterFatBinary},
+    {"__cudaRegisterFatBinaryEnd", (void *)__cudaRegisterFatBinaryEnd},
+    {"__cudaPushCallConfiguration", (void *)__cudaPushCallConfiguration},
+    {"__cudaPopCallConfiguration", (void *)__cudaPopCallConfiguration},
 };
 
 void *get_function_pointer(const char *name)

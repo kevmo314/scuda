@@ -767,3 +767,10 @@
 #define RPC_cudaGraphReleaseUserObject 766
 #define RPC_cudaMemcpy 767
 #define RPC_cudaMemcpyAsync 768
+#define RPC_cudaLaunchKernel 769
+#define RPC___cudaRegisterVar 770
+#define RPC___cudaRegisterFunction 771
+#define RPC___cudaRegisterFatBinary 772
+#define RPC___cudaRegisterFatBinaryEnd 773
+#define RPC___cudaPushCallConfiguration 774
+#define RPC___cudaPopCallConfiguration 775

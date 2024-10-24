@@ -56,8 +56,17 @@ MANUAL_REMAPPINGS = [
 
 # a list of manually implemented cuda/nvml functions.
 # these are automatically appended to each file; operation order is maintained as well.
-MANUAL_IMPLEMENTATIONS = ["cudaMemcpy", "cudaMemcpyAsync"]
-
+MANUAL_IMPLEMENTATIONS = [
+    "cudaMemcpy",
+    "cudaMemcpyAsync",
+    "cudaLaunchKernel",
+    "__cudaRegisterVar",
+    "__cudaRegisterFunction",
+    "__cudaRegisterFatBinary",
+    "__cudaRegisterFatBinaryEnd",
+    "__cudaPushCallConfiguration",
+    "__cudaPopCallConfiguration"
+]
 
 @dataclass
 class Operation:
