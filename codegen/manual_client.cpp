@@ -1,5 +1,6 @@
 #include <nvml.h>
 #include <cuda.h>
+#include <cassert>
 #include <iostream>
 #include <dlfcn.h>
 #include <cuda_runtime_api.h>
@@ -9,6 +10,7 @@
 #include <unordered_map>
 
 #include "gen_api.h"
+#include "ptx_fatbin.hpp"
 
 extern int rpc_size();
 extern int rpc_start_request(const int index, const unsigned int request);
@@ -326,10 +328,99 @@ cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim, void
     return return_value;
 }
 
+// void ptx_from_fatbin(const void *cubin_ptr)
+// {
+//     assert(cubin_ptr != 0);
+//     if(*(int*)cubin_ptr == __cudaFatMAGIC) 
+//     {
+//       __cudaFatCudaBinary *binary = (__cudaFatCudaBinary *)cubin_ptr;
+//       assert(binary->ident != 0);
+//       std::cout << binary->ident << std::endl;
+//       assert(binary->ptx != 0);
+//       assert(binary->ptx->ptx != 0);
+//       int i=0;
+//       while(binary->ptx[i].ptx != 0){
+//         assert(binary->ptx[i].gpuProfileName != 0);
+//         std::cout << binary->ptx[i].gpuProfileName << std::endl;
+//         assert(binary->ptx[i].ptx != 0);
+//         std::cout << binary->ptx[i].ptx << std::endl;
+//         i++;
+//       }
+//     }
+//     else if(*(unsigned*)cubin_ptr == __cudaFatMAGIC2)
+//     {
+// 	__cudaFatCudaBinary2* binary = (__cudaFatCudaBinary2*) cubin_ptr;
+
+//         printf("%x ", binary->magic);
+//         printf("%x ", binary->version);
+//         printf("%p ", binary->fatbinData);
+//         printf("%p ", binary->f);
+//         printf("\n");
+
+// 	__cudaFatCudaBinary2Header* header = (__cudaFatCudaBinary2Header*) binary->fatbinData;
+// 	char* base = (char*)(header + 1);
+// 	long long unsigned int offset = 0;
+// 	__cudaFatCudaBinary2EntryRec* entry = (__cudaFatCudaBinary2EntryRec*)(base);
+
+//         printf("%x ", header->magic);
+//         printf("%x ", header->version);
+//         printf("%llx ", header->length);
+//         printf("\n");
+
+
+// 	while (!(entry->type & FATBIN_2_PTX) && offset < header->length) 
+//         {
+// 	  entry = (__cudaFatCudaBinary2EntryRec*)(base + offset);
+// 	  printf("%x ", entry->type);
+// 	  printf("%x ", entry->binary);
+// 	  printf("%llx ", entry->binarySize);
+// 	  printf("%x ", entry->unknown2);
+// 	  printf("%x ", entry->kindOffset);
+// 	  printf("%x ", entry->unknown3);
+// 	  printf("%x ", entry->unknown4);
+// 	  printf("%x ", entry->name);
+// 	  printf("%x ", entry->nameSize);
+// 	  printf("%llx ", entry->flags);
+// 	  printf("%llx ", entry->unknown7);
+// 	  printf("%llx ", entry->uncompressedBinarySize);
+// 	  printf("\n");
+
+// 	  printf("%s\n", (char *)((char*)entry + entry->name));
+// 	  printf("%lld %lld bytes\n", entry->binary, entry->binarySize);
+
+// 	  offset += entry->binary + entry->binarySize;
+// 	}
+//         printf("Found PTX\n");
+//         assert(entry->type & FATBIN_2_PTX);
+// 	printf("%x ", entry->type);
+// 	printf("%x ", entry->binary);
+// 	printf("%llx ", entry->binarySize);
+// 	printf("%x ", entry->unknown2);
+// 	printf("%x ", entry->kindOffset);
+// 	printf("%x ", entry->unknown3);
+// 	printf("%x ", entry->unknown4);
+// 	printf("%x ", entry->name);
+// 	printf("%x ", entry->nameSize);
+// 	printf("%llx ", entry->flags);
+// 	printf("%llx ", entry->unknown7);
+// 	printf("%llx ", entry->uncompressedBinarySize);
+// 	printf("\n");
+
+// 	printf("%s\n", (char *)((char*)entry + entry->name));
+// 	printf("%ld (C)%lld B (U)%lld B\n", entry->binary, entry->binarySize, entry->uncompressedBinarySize);
+//     }
+//     else
+//     {
+//         printf("Unrecognized CUDA FAT MAGIC 0x%x\n", *(int*)cubin_ptr);
+//     }
+// }
+
 extern "C" void **__cudaRegisterFatBinary(void **fatCubin)
 {
     void* return_value;
     void **result;
+
+    std::cout << "starting __cudaRegisterFatBinary" << std::endl;
 
     if (rpc_start_request(0, RPC___cudaRegisterFatBinary) < 0)
     {
@@ -337,17 +428,91 @@ extern "C" void **__cudaRegisterFatBinary(void **fatCubin)
         return nullptr;
     }
 
-    if (rpc_write(0, fatCubin, sizeof(void **)) < 0)
+    // if (*(int*)fatCubin == __cudaFatMAGIC) 
+    // {
+    //     // Handling the first type of fat binary (__cudaFatMAGIC)
+    //     __cudaFatCudaBinary *binary = (__cudaFatCudaBinary *)fatCubin;
+
+    //     // Send the header information (magic, version)
+    //     if (rpc_write(0, &binary->magic, sizeof(unsigned long)) < 0) return nullptr;
+    //     if (rpc_write(0, &binary->version, sizeof(unsigned long)) < 0) return nullptr;
+
+    //     // Iterate over the PTX entries and send the details
+    //     int i = 0;
+    //     while (binary->ptx[i].ptx != 0)
+    //     {
+    //         const char* gpuProfileName = binary->ptx[i].gpuProfileName;
+    //         const char* ptx = binary->ptx[i].ptx;
+
+    //         // Send the GPU profile name and PTX code (strings)
+    //         int gpuProfileNameLength = strlen(gpuProfileName);
+    //         if (rpc_write(0, &gpuProfileNameLength, sizeof(int)) < 0) return nullptr;
+    //         if (rpc_write(0, gpuProfileName, gpuProfileNameLength) < 0) return nullptr;
+
+    //         int ptxLength = strlen(ptx);
+    //         if (rpc_write(0, &ptxLength, sizeof(int)) < 0) return nullptr;
+    //         if (rpc_write(0, ptx, ptxLength) < 0) return nullptr;
+
+    //         i++;
+    //     }
+    // }
+    // else
+    
+    if (*(unsigned*)fatCubin == __cudaFatMAGIC2) 
     {
-        std::cerr << "Failed to write fatCubin to server" << std::endl;
-        return nullptr;
+        std::cout << "MAGIC 2" << std::endl;
+
+        __cudaFatCudaBinary2* binary = (__cudaFatCudaBinary2*)fatCubin;
+
+        // Send the main header (magic, version, etc.)
+        if (rpc_write(0, &binary->magic, sizeof(int)) < 0) return nullptr;
+        if (rpc_write(0, &binary->version, sizeof(int)) < 0) return nullptr;
+
+        std::cout << "done writing magic and version: " << binary->magic << ": " << binary->version << std::endl;
+
+        __cudaFatCudaBinary2Header* header = (__cudaFatCudaBinary2Header*)binary->fatbinData;
+
+        if (rpc_write(0, &header->magic, sizeof(unsigned int)) < 0) return nullptr;
+        if (rpc_write(0, &header->version, sizeof(unsigned int)) < 0) return nullptr;
+
+        std::cout << "done writing header magic and version: " << header->magic << ": " << header->version << std::endl;
+
+        if (rpc_write(0, &header->length, sizeof(unsigned long long int)) < 0) return nullptr;
+
+        char* base = (char*)(header + 1);
+        long long unsigned int offset = 0;
+        __cudaFatCudaBinary2EntryRec* entry = (__cudaFatCudaBinary2EntryRec*)(base);
+
+        while (offset < header->length)
+        {
+            std::cout << "Processing entry on client" << std::endl;
+
+            if (rpc_write(0, &entry->type, sizeof(unsigned int)) < 0) return nullptr;
+            if (rpc_write(0, &entry->binary, sizeof(unsigned int)) < 0) return nullptr;
+            if (rpc_write(0, &entry->binarySize, sizeof(unsigned long long int)) < 0) return nullptr;
+
+            std::cout << "shipping entry data: " << entry->type << " " << entry->binary << " " << entry->binarySize << std::endl;
+
+            // idk what to do with these
+            //
+            // if (rpc_write(0, &entry->nameSize, sizeof(unsigned int)) < 0) return nullptr;
+            // if (entry->nameSize > 0 && rpc_write(0, (char*)entry + entry->name, entry->nameSize) < 0) return nullptr;
+
+            // Move to the next entry
+            offset += entry->binary + entry->binarySize;
+            entry = (__cudaFatCudaBinary2EntryRec*)(base + offset);
+        }
     }
 
-    if (rpc_wait_for_response(0) < 0)
+    std::cout << "done processing entry on client" << std::endl;
+
+    if (rpc_wait_for_response(0) < 0) 
     {
         std::cerr << "Failed to get response from server for __cudaRegisterFatBinary" << std::endl;
         return nullptr;
     }
+
+    std::cout << "waiting for end complete" << std::endl;
 
     if (rpc_read(0, &result, sizeof(void *)) < 0)
     {
@@ -357,12 +522,15 @@ extern "C" void **__cudaRegisterFatBinary(void **fatCubin)
 
     if (rpc_end_request(0, &return_value) < 0)
     {
-        std::cerr << "Failed to end RPC request for __cudaRegisterFatBinary" << std::endl;
-        return nullptr;
+        std::cerr << "Failed to retrieve return value from server" << std::endl;
+        return 0;
     }
+
+    std::cout << "end complete" << std::endl;
 
     return result;
 }
+
 
 extern "C"
 {

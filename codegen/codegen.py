@@ -68,7 +68,6 @@ MANUAL_IMPLEMENTATIONS = [
     "__cudaPopCallConfiguration"
 ]
 
-
 @dataclass
 class Operation:
     send: bool

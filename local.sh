@@ -23,7 +23,7 @@ build() {
 
   echo "building vector file..."
 
-  nvcc --cudart=shared -lnvidia-ml -lcuda ./test/vector_add.cu -o vector.o
+  nvcc --cudart=shared -lnvidia-ml -lcuda --no-compress --keep ./test/vector_add.cu -o vector.o
 
   if [ ! -f "$libscuda_path" ]; then
     echo "libscuda.so not found. build may have failed."
