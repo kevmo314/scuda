@@ -589,7 +589,7 @@ int handle___cudaRegisterFatBinary(void *conn)
         return -1;
     }
 
-    if (rpc_write(conn, ret, sizeof(void **)) < 0)
+    if (rpc_write(conn, &ret, sizeof(void **)) < 0)
     {
         std::cerr << "Failed to write fatCubin result back to the client" << std::endl;
         return -1;
