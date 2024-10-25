@@ -381,189 +381,145 @@ int handle___cudaRegisterFatBinary(void *conn)
 {
     int request_id;
     void *res;
-    std::cout << "incoming..." << std::endl;
-    // Read magic number to distinguish between formats
+    unsigned long long hlen;
+    unsigned long long int blen;
     int magic;
     int version;
-    char* fatbinData;
-    unsigned long long int blen;
-    unsigned int hmagic;
-    unsigned int hversion;
-    __cudaFatCudaBinary2EntryRec* entry;
 
-    if (rpc_read(conn, &magic, sizeof(int)) < 0)
+    if (rpc_read(conn, &magic, sizeof(int)) < 0) 
     {
-        std::cerr << "Failed to read magic from client" << std::endl;
+        std::cerr << "Failed to read magic" << std::endl;
         return -1;
     }
-
-    // if (magic == __cudaFatMAGIC)
-    // {
-    //     // Handle the __cudaFatMAGIC format
-    //     std::cout << "Received __cudaFatMAGIC format" << std::endl;
-
-    //     unsigned long version;
-    //     if (rpc_read(conn, &version, sizeof(unsigned long)) < 0) 
-    //     {
-    //         std::cerr << "Failed to read version for __cudaFatMAGIC" << std::endl;
-    //         return -1;
-    //     }
-
-    //     // Read the PTX information
-    //     while (true)
-    //     {
-    //         int gpuProfileNameLength;
-    //         if (rpc_read(conn, &gpuProfileNameLength, sizeof(int)) < 0) return -1;
-
-    //         if (gpuProfileNameLength == 0) break; // End of entries
-
-    //         char* gpuProfileName = (char*)malloc(gpuProfileNameLength + 1);
-    //         if (rpc_read(conn, gpuProfileName, gpuProfileNameLength) < 0) return -1;
-    //         gpuProfileName[gpuProfileNameLength] = '\0';  // Null-terminate
-
-    //         int ptxLength;
-    //         if (rpc_read(conn, &ptxLength, sizeof(int)) < 0) return -1;
-
-    //         char* ptx = (char*)malloc(ptxLength + 1);
-    //         if (rpc_read(conn, ptx, ptxLength) < 0) return -1;
-    //         ptx[ptxLength] = '\0';  // Null-terminate
-
-    //         // Process the GPU profile name and PTX code
-    //         std::cout << "GPU Profile: " << gpuProfileName << ", PTX: " << ptx << std::endl;
-
-    //         free(gpuProfileName);
-    //         free(ptx);
-    //     }
-    // }
-    // else
     
-     if (magic == __cudaFatMAGIC2)
+    if (rpc_read(conn, &version, sizeof(int)) < 0) 
     {
-        // Handle the __cudaFatMAGIC2 format
-        std::cout << "Received __cudaFatMAGIC2 format" << std::endl;
-
-        // Read version and length of the fat binary
-        if (rpc_read(conn, &version, sizeof(int)) < 0) 
-        {
-            std::cerr << "Failed to read version for __cudaFatMAGIC2" << std::endl;
-            return -1;
-        }
-
-        if (rpc_read(conn, &hmagic, sizeof(unsigned int)) < 0) 
-        {
-            std::cerr << "unsigned magic read" << std::endl;
-            return -1;
-        }
-
-        std::cout << "hmagic: " << hmagic << std::endl;
-
-        if (rpc_read(conn, &hversion, sizeof(unsigned int)) < 0) 
-        {
-            std::cerr << "Failed to read length for __cudaFatMAGIC2" << std::endl;
-            return -1;
-        }
-
-        std::cout << "hversion: " << hversion << std::endl;
-
-        if (rpc_read(conn, &blen, sizeof(unsigned long long int)) < 0) 
-        {
-            std::cerr << "Failed to read length for __cudaFatMAGIC2" << std::endl;
-            return -1;
-        }
-
-        std::cout << "blen: " << blen << std::endl;
-
-        // Allocate memory to store the fat binary data
-        fatbinData = (char*)malloc(blen);
-        if (!fatbinData)
-        {
-            std::cerr << "Failed to allocate memory for fatbin data" << std::endl;
-            return -1;
-        }
-
-        // Now process the fat binary entries
-        char* base = fatbinData + sizeof(__cudaFatCudaBinary2Header);
-        uint64_t offset = 0;
-        entry = (__cudaFatCudaBinary2EntryRec*)(base);
-
-        while (offset < blen)
-        {
-            std::cout << "Processing entry" << std::endl;
-
-            if (rpc_read(conn, &entry->type, sizeof(unsigned int)) < 0) return -1;
-            std::cout << "read type " << entry->type << std::endl;
-            if (rpc_read(conn, &entry->binary, sizeof(unsigned int)) < 0) return -1;
-            std::cout << "read binary " << entry->binary << std::endl;
-            if (rpc_read(conn, &entry->binarySize, sizeof(unsigned long long int)) < 0) return -1;
-
-            std::cout << "read binary size " << entry->binarySize << std::endl;
-
-            // if (rpc_read(conn, &entry->nameSize, sizeof(unsigned int)) < 0) return -1;
-
-            if (entry->nameSize > 0) 
-            {
-                std::cout << "Processing name size" << std::endl;
-                char* name = (char*)malloc(entry->nameSize + 1);
-                if (rpc_read(conn, name, entry->nameSize) < 0) 
-                {
-                    std::cerr << "Failed to read entry name" << std::endl;
-                    free(name);
-                    free(fatbinData);
-                    return -1;
-                }
-                name[entry->nameSize] = '\0';
-                std::cout << "Entry name: " << name << std::endl;
-                free(name);
-            }
-
-            // // Process the actual binary data here...
-            // if (entry->binarySize > 0) 
-            // {
-            //     char* binaryData = (char*)malloc(entry->binarySize);
-            //     if (!binaryData) 
-            //     {
-            //         std::cerr << "Failed to allocate memory for binary data" << std::endl;
-            //         free(fatbinData);
-            //         return -1;
-            //     }
-
-            //     // Read the binary data
-            //     if (rpc_read(conn, binaryData, entry->binarySize) < 0) 
-            //     {
-            //         std::cerr << "Failed to read binary data" << std::endl;
-            //         free(binaryData);
-            //         free(fatbinData);
-            //         return -1;
-            //     }
-
-            //     std::cout << "Binary data processed, size: " << entry->binarySize << " bytes" << std::endl;
-
-            //     free(binaryData);
-            // }
-
-            // Move to the next entry
-            offset += entry->binary + entry->binarySize;
-            entry = (__cudaFatCudaBinary2EntryRec*)(base + offset);
-        }
-
-        free(fatbinData);
-    }
-    else
-    {
-        std::cerr << "Unknown magic number: " << magic << std::endl;
+        std::cerr << "Failed to read magic" << std::endl;
         return -1;
     }
 
-     // Rebuild the fat binary structure to pass it to __cudaRegisterFatBinary
+    printf("MAGIC: %x ", magic);
+    printf("BINARY VERSION: %x ", version);
+    printf("\n");
+
+    __cudaFatCudaBinary2Header* header;
+
+    // Read version and length of the fat binary
+    if (rpc_read(conn, &hlen, sizeof(unsigned long long int)) < 0) 
+    {
+        std::cerr << "Failed to read version for __cudaFatMAGIC2" << std::endl;
+        return -1;
+    }
+
+    std::cout << "done reading hlen: " << hlen << std::endl;
+
+    header = (__cudaFatCudaBinary2Header*)malloc(hlen);
+    if (rpc_read(conn, header, hlen) < 0) {
+        std::cerr << "Failed to read fat binary header" << std::endl;
+        return -1;
+    }
+
+    unsigned long long int length = header->length;
+
+    // Allocate memory to store the entries
+    char* fatbinData = (char*)malloc(length);
+    if (!fatbinData) {
+        std::cerr << "Failed to allocate memory for fatbin data" << std::endl;
+        return -1;
+    }
+
+    char* base = fatbinData;
+    uint64_t offset = 0;
+    __cudaFatCudaBinary2EntryRec* entry = (__cudaFatCudaBinary2EntryRec*)(base);
+
+    std::cout << "starting read entries... " << std::endl;
+
+    while (offset < length) {
+        std::cout << "reading entry... " << std::endl;
+
+        unsigned long long esize;
+        // Read the entire entry from the client
+        if (rpc_read(conn, &esize, sizeof(unsigned long long)) < 0) {
+            std::cerr << "Failed to read entry size from client" << std::endl;
+            free(fatbinData);
+            return -1;
+        }
+
+        printf("ENTRY BINARY SIZE: %llx ", esize);
+
+        char* readEntry = (char*)malloc(esize);
+        if (!readEntry) {
+            std::cerr << "Failed to allocate memory for binary data" << std::endl;
+            return -1;
+        }
+
+        // // Allocate and read the binary data for the entry
+        if (rpc_read(conn, readEntry, esize) < 0) {
+            std::cerr << "Failed to read binary data" << std::endl;
+            return -1;
+        }
+
+        entry = (__cudaFatCudaBinary2EntryRec*)(base + offset);  // Position in allocated fatbinData
+        memcpy(entry, readEntry, esize);// copy the data into the allocated space at the correct offset
+
+        // Optionally log and verify the data
+        printf("ENTRY BINARY AND SIZE: %lld %lld bytes\n", entry->binary, entry->binarySize);
+
+        // Move to the next entry
+        offset += entry->binary + entry->binarySize;
+
+        // Free the temporary read entry buffer
+        free(readEntry);
+    }
+
+    // Now we rebuild the __cudaFatCudaBinary2 structure
     __cudaFatCudaBinary2* rebuiltBinary = (__cudaFatCudaBinary2*)malloc(sizeof(__cudaFatCudaBinary2));
-    rebuiltBinary->magic = hmagic;
-    rebuiltBinary->version = hversion;
-    rebuiltBinary->fatbinData = (unsigned long long*)entry;
-    rebuiltBinary->f = nullptr;
+    if (!rebuiltBinary) {
+        std::cerr << "Failed to allocate memory for rebuiltBinary" << std::endl;
+        free(fatbinData);
+        free(header);
+        return -1;
+    }
+
+    rebuiltBinary->magic = magic;
+    rebuiltBinary->version = version;
+    rebuiltBinary->fatbinData = (const unsigned long long*)header;
+    rebuiltBinary->f = nullptr;  // set to null unless needed
+
+    // Validate the header
+    __cudaFatCudaBinary2Header* vheader = (__cudaFatCudaBinary2Header*)rebuiltBinary->fatbinData;
+
+    std::cout << "Validating rebuilt binary..." << std::endl;
+    std::cout << "Header Magic: " << std::hex << vheader->magic << std::endl;
+    std::cout << "Header Version: " << vheader->version << std::endl;
+    std::cout << "Header Length: " << vheader->length << std::endl;
+
+    // Iterate through the entries in the fatbin data
+    char* vbase = (char*)(vheader + 1);  // Pointer to the entries following the header
+    uint64_t voffset = 0;
+
+    while (voffset < vheader->length) {
+        __cudaFatCudaBinary2EntryRec* entry = (__cudaFatCudaBinary2EntryRec*)(vbase + voffset);
+
+        // Print out details about the entry
+        std::cout << "Entry Type: " << entry->type << std::endl;
+        std::cout << "Entry Binary: " << entry->binary << std::endl;
+        std::cout << "Entry Binary Size: " << entry->binarySize << " bytes" << std::endl;
+
+        if (entry->nameSize > 0) {
+            char* name = (char*)entry + entry->name;  // Pointer to the entry name
+            std::cout << "Entry Name: " << std::string(name, entry->nameSize) << std::endl;
+        }
+
+        // Move to the next entry in the fatbin
+        voffset += entry->binary + entry->binarySize;
+    }
+
+    std::cout << "Validation complete." << std::endl;
 
     // Find the original __cudaRegisterFatBinary function using dlsym
-    __cudaRegisterFatBinary_type orig;
-    orig = (__cudaRegisterFatBinary_type)dlsym(RTLD_NEXT, "__cudaRegisterFatBinary");
+    void** (*orig)(void *);
+    orig = (void** (*)(void *))dlsym(RTLD_NEXT, "__cudaRegisterFatBinary");
     if (!orig)
     {
         std::cerr << "Failed to find original __cudaRegisterFatBinary" << std::endl;
@@ -579,7 +535,7 @@ int handle___cudaRegisterFatBinary(void *conn)
     }
 
     // Call the original __cudaRegisterFatBinary with the rebuilt binary
-    void** ret = orig((void**)rebuiltBinary);
+    void** ret = (*orig)(rebuiltBinary);
 
     std::cout << "Original __cudaRegisterFatBinary returned: " << ret << std::endl;
 

@@ -428,79 +428,34 @@ extern "C" void **__cudaRegisterFatBinary(void **fatCubin)
         return nullptr;
     }
 
-    // if (*(int*)fatCubin == __cudaFatMAGIC) 
-    // {
-    //     // Handling the first type of fat binary (__cudaFatMAGIC)
-    //     __cudaFatCudaBinary *binary = (__cudaFatCudaBinary *)fatCubin;
-
-    //     // Send the header information (magic, version)
-    //     if (rpc_write(0, &binary->magic, sizeof(unsigned long)) < 0) return nullptr;
-    //     if (rpc_write(0, &binary->version, sizeof(unsigned long)) < 0) return nullptr;
-
-    //     // Iterate over the PTX entries and send the details
-    //     int i = 0;
-    //     while (binary->ptx[i].ptx != 0)
-    //     {
-    //         const char* gpuProfileName = binary->ptx[i].gpuProfileName;
-    //         const char* ptx = binary->ptx[i].ptx;
-
-    //         // Send the GPU profile name and PTX code (strings)
-    //         int gpuProfileNameLength = strlen(gpuProfileName);
-    //         if (rpc_write(0, &gpuProfileNameLength, sizeof(int)) < 0) return nullptr;
-    //         if (rpc_write(0, gpuProfileName, gpuProfileNameLength) < 0) return nullptr;
-
-    //         int ptxLength = strlen(ptx);
-    //         if (rpc_write(0, &ptxLength, sizeof(int)) < 0) return nullptr;
-    //         if (rpc_write(0, ptx, ptxLength) < 0) return nullptr;
-
-    //         i++;
-    //     }
-    // }
-    // else
-    
-    if (*(unsigned*)fatCubin == __cudaFatMAGIC2) 
-    {
-        std::cout << "MAGIC 2" << std::endl;
-
+    if (*(unsigned*)fatCubin == __cudaFatMAGIC2) {
         __cudaFatCudaBinary2* binary = (__cudaFatCudaBinary2*)fatCubin;
+        __cudaFatCudaBinary2Header* header = (__cudaFatCudaBinary2Header*)binary->fatbinData;
 
-        // Send the main header (magic, version, etc.)
         if (rpc_write(0, &binary->magic, sizeof(int)) < 0) return nullptr;
         if (rpc_write(0, &binary->version, sizeof(int)) < 0) return nullptr;
 
-        std::cout << "done writing magic and version: " << binary->magic << ": " << binary->version << std::endl;
+        printf("MAGIC: %x ", binary->magic);
+        printf("BINARY VERSION: %x ", binary->version);
 
-        __cudaFatCudaBinary2Header* header = (__cudaFatCudaBinary2Header*)binary->fatbinData;
-
-        if (rpc_write(0, &header->magic, sizeof(unsigned int)) < 0) return nullptr;
-        if (rpc_write(0, &header->version, sizeof(unsigned int)) < 0) return nullptr;
-
-        std::cout << "done writing header magic and version: " << header->magic << ": " << header->version << std::endl;
-
-        if (rpc_write(0, &header->length, sizeof(unsigned long long int)) < 0) return nullptr;
+        if (rpc_write(0, &header->length, sizeof(unsigned long long)) < 0) return nullptr;
+        if (rpc_write(0, header, header->length) < 0) return nullptr;
 
         char* base = (char*)(header + 1);
         long long unsigned int offset = 0;
         __cudaFatCudaBinary2EntryRec* entry = (__cudaFatCudaBinary2EntryRec*)(base);
 
-        while (offset < header->length)
-        {
-            std::cout << "Processing entry on client" << std::endl;
+        while (offset < header->length) {
+            entry = (__cudaFatCudaBinary2EntryRec*)(base + offset);
+            std::cout << "writing entry..." << std::endl;
+            printf("ENTRY BINARY SIZE: %llx ", entry->binarySize);
 
-            if (rpc_write(0, &entry->type, sizeof(unsigned int)) < 0) return nullptr;
-            if (rpc_write(0, &entry->binary, sizeof(unsigned int)) < 0) return nullptr;
-            if (rpc_write(0, &entry->binarySize, sizeof(unsigned long long int)) < 0) return nullptr;
-
-            std::cout << "shipping entry data: " << entry->type << " " << entry->binary << " " << entry->binarySize << std::endl;
-
-            // idk what to do with these
-            //
-            // if (rpc_write(0, &entry->nameSize, sizeof(unsigned int)) < 0) return nullptr;
-            // if (entry->nameSize > 0 && rpc_write(0, (char*)entry + entry->name, entry->nameSize) < 0) return nullptr;
+            // Send the entire entry
+            if (rpc_write(0, &entry->binarySize, sizeof(unsigned long long)) < 0) return nullptr;
+            if (rpc_write(0, entry, entry->binarySize) < 0) return nullptr;
 
             // Move to the next entry
             offset += entry->binary + entry->binarySize;
-            entry = (__cudaFatCudaBinary2EntryRec*)(base + offset);
         }
     }
 
