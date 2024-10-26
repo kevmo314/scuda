@@ -419,10 +419,6 @@ extern "C" void **__cudaRegisterFatBinary(void *fatCubin)
     void **p;
     int return_value;
 
-    printf("got fatCubin %p\n", fatCubin);
-
-    std::cout << "starting __cudaRegisterFatBinary" << std::endl;
-
     if (rpc_start_request(0, RPC___cudaRegisterFatBinary) < 0)
         return nullptr;
 
@@ -447,10 +443,6 @@ extern "C" void **__cudaRegisterFatBinary(void *fatCubin)
         rpc_read(0, &p, sizeof(void **)) < 0 ||
         rpc_end_request(0, &return_value) < 0)
         return nullptr;
-
-    printf("p: %p\n", p);
-
-    std::cout << "end complete!! " << return_value << std::endl;
 
     return p;
 }
@@ -502,147 +494,47 @@ extern "C" void __cudaUnregisterFatBinary(void **fatCubinHandle)
     //   std::cout << "__cudaUnregisterFatBinary writing data..." << std::endl;
 }
 
-extern "C" unsigned __cudaPopCallConfiguration(dim3 *gridDim, dim3 *blockDim,
-                                               size_t *sharedMem, void *stream)
+extern "C" cudaError_t __cudaPushCallConfiguration(dim3 gridDim, dim3 blockDim,
+                                                   size_t sharedMem, cudaStream_t stream)
 {
-    unsigned return_value;
+    cudaError_t res;
+
+    std::cout << "Calling original __cudaPushCallConfiguration with parameters:" << std::endl;
+    std::cout << "gridDim: " << gridDim.x << " " << gridDim.y << " " << gridDim.z << std::endl;
+    std::cout << "blockDim: " << blockDim.x << " " << blockDim.y << " " << blockDim.z << std::endl;
+    std::cout << "sharedMem: " << sharedMem << std::endl;
+    std::cout << "stream: " << stream << std::endl;
+
+    // Start the RPC request
+    if (rpc_start_request(0, RPC___cudaPushCallConfiguration) < 0 ||
+        rpc_write(0, &gridDim, sizeof(dim3)) < 0 ||
+        rpc_write(0, &blockDim, sizeof(dim3)) < 0 ||
+        rpc_write(0, &sharedMem, sizeof(size_t)) < 0 ||
+        rpc_write(0, &stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_request(0, &res) < 0)
+        return cudaErrorDevicesUnavailable;
+
+    return res;
+}
+
+extern "C" cudaError_t __cudaPopCallConfiguration(dim3 *gridDim, dim3 *blockDim,
+                                                  size_t *sharedMem, cudaStream_t *stream)
+{
     cudaError_t res;
 
     std::cout << "received __cudaPopCallConfiguration." << std::endl;
 
-    int request_id = rpc_start_request(0, RPC___cudaPopCallConfiguration);
-    if (request_id < 0)
-    {
-        std::cerr << "Failed to start RPC request" << std::endl;
-        return 0;
-    }
-
-    if (rpc_write(0, &gridDim, sizeof(dim3 *)) < 0)
-    {
-        std::cerr << "Failed to send gridDim pointer to server" << std::endl;
-        return 0;
-    }
-
-    if (rpc_write(0, &blockDim, sizeof(dim3 *)) < 0)
-    {
-        std::cerr << "Failed to send blockDim pointer to server" << std::endl;
-        return 0;
-    }
-
-    if (rpc_write(0, &sharedMem, sizeof(size_t *)) < 0)
-    {
-        std::cerr << "Failed to send sharedMem pointer to server" << std::endl;
-        return 0;
-    }
-
-    if (rpc_write(0, &stream, sizeof(void *)) < 0)
-    {
-        std::cerr << "Failed to send stream pointer to server" << std::endl;
-        return 0;
-    }
-
-    std::cout << "Calling original __cudaPopCallConfiguration with parameters:" << std::endl;
-    std::cout << "  gridDim: " << gridDim << std::endl;
-    std::cout << "  blockDim: " << blockDim << std::endl;
-    std::cout << "  sharedMem: " << sharedMem << std::endl;
-    std::cout << "  stream: " << stream << std::endl;
-
-    if (rpc_wait_for_response(0) < 0)
-    {
-        std::cerr << "Failed to wait for response from server" << std::endl;
-        return 0;
-    }
-
-    if (rpc_read(0, &return_value, sizeof(unsigned)) < 0)
-    {
-        std::cerr << "Failed to read stream from server" << std::endl;
-        return 0;
-    }
-
-    if (rpc_end_request(0, &res) < 0)
-    {
-        std::cerr << "Failed to retrieve return value from server" << std::endl;
-        return 0;
-    }
-
-    printf("The value of num is: %u\n", return_value);
-
-    return return_value;
-}
-
-extern "C" unsigned __cudaPushCallConfiguration(dim3 gridDim, dim3 blockDim,
-                                                size_t sharedMem,
-                                                struct CUstream_st *stream)
-{
-    cudaError_t res;
-    unsigned return_value;
-    std::cerr << "received __cudaPushCallConfiguration" << std::endl;
-
-    // Start the RPC request
-    int request_id = rpc_start_request(0, RPC___cudaPushCallConfiguration);
-    if (request_id < 0)
-    {
-        std::cerr << "Failed to start RPC request" << std::endl;
-        return 0;
-    }
-
-    // Write the grid dimensions
-    if (rpc_write(0, &gridDim, sizeof(dim3)) < 0)
-    {
-        std::cerr << "Failed to write grid dimensions" << std::endl;
-        return 0;
-    }
-
-    // Write the block dimensions
-    if (rpc_write(0, &blockDim, sizeof(dim3)) < 0)
-    {
-        std::cerr << "Failed to write block dimensions" << std::endl;
-        return 0;
-    }
-
-    // Write the shared memory size
-    if (rpc_write(0, &sharedMem, sizeof(size_t)) < 0)
-    {
-        std::cerr << "Failed to write shared memory size" << std::endl;
-        return 0;
-    }
-
-    // Write the stream
-    if (rpc_write(0, &stream, sizeof(cudaStream_t)) < 0)
-    {
-        std::cerr << "Failed to write CUDA stream" << std::endl;
-        return 0;
-    }
-
-    std::cout << "Calling original __cudaPushCallConfiguration with parameters:" << std::endl;
-    std::cout << "  gridDim: " << &gridDim << std::endl;
-    std::cout << "  blockDim: " << &blockDim << std::endl;
-    std::cout << "  sharedMem: " << &sharedMem << std::endl;
-    std::cout << "  stream: " << &stream << std::endl;
-
-    // Wait for a response from the server
-    if (rpc_wait_for_response(0) < 0)
-    {
-        std::cerr << "Failed to wait for server response" << std::endl;
-        return 0;
-    }
-
-    if (rpc_read(0, &return_value, sizeof(unsigned)) < 0)
-    {
-        std::cerr << "Failed to read stream from server" << std::endl;
-        return 0;
-    }
-
-    // Get the return value from the server
-    if (rpc_end_request(0, &res) < 0)
-    {
-        std::cerr << "Failed to retrieve return value" << std::endl;
-        return 0;
-    }
-
-    std::cerr << "done with __cudaPushCallConfiguration " << return_value << std::endl;
-
-    return return_value;
+    if (rpc_start_request(0, RPC___cudaPopCallConfiguration) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, gridDim, sizeof(dim3)) < 0 ||
+        rpc_read(0, blockDim, sizeof(dim3)) < 0 ||
+        rpc_read(0, sharedMem, sizeof(size_t)) < 0 ||
+        rpc_read(0, stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_end_request(0, &res) < 0)
+        return cudaErrorDevicesUnavailable;
+    std::cout << "got result" << res << std::endl;
+    return res;
 }
 
 extern "C" void __cudaRegisterFunction(void **fatCubinHandle,
