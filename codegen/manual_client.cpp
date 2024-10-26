@@ -255,7 +255,7 @@ cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim, void
 {
     cudaError_t return_value;
 
-    std::cout << "starting function: " << func << std::endl;
+    std::cout << "starting function: " << &func << std::endl;
 
     // Start the RPC request
     int request_id = rpc_start_request(0, RPC_cudaLaunchKernel);
@@ -428,36 +428,38 @@ extern "C" void **__cudaRegisterFatBinary(void **fatCubin)
         return nullptr;
     }
 
-    if (*(unsigned*)fatCubin == __cudaFatMAGIC2) {
-        __cudaFatCudaBinary2* binary = (__cudaFatCudaBinary2*)fatCubin;
-        __cudaFatCudaBinary2Header* header = (__cudaFatCudaBinary2Header*)binary->fatbinData;
+    // if (*(unsigned*)fatCubin == __cudaFatMAGIC2) {
+    //     __cudaFatCudaBinary2* binary = (__cudaFatCudaBinary2*)fatCubin;
+    //     __cudaFatCudaBinary2Header* header = (__cudaFatCudaBinary2Header*)binary->fatbinData;
 
-        if (rpc_write(0, &binary->magic, sizeof(int)) < 0) return nullptr;
-        if (rpc_write(0, &binary->version, sizeof(int)) < 0) return nullptr;
+    //     if (rpc_write(0, &binary->magic, sizeof(int)) < 0) return nullptr;
+    //     if (rpc_write(0, &binary->version, sizeof(int)) < 0) return nullptr;
 
-        printf("MAGIC: %x ", binary->magic);
-        printf("BINARY VERSION: %x ", binary->version);
+    //     printf("MAGIC: %x ", binary->magic);
+    //     printf("BINARY VERSION: %x ", binary->version);
 
-        if (rpc_write(0, &header->length, sizeof(unsigned long long)) < 0) return nullptr;
-        if (rpc_write(0, header, header->length) < 0) return nullptr;
+    //     if (rpc_write(0, &header->length, sizeof(unsigned long long)) < 0) return nullptr;
+    //     if (rpc_write(0, header, header->length) < 0) return nullptr;
 
-        char* base = (char*)(header + 1);
-        long long unsigned int offset = 0;
-        __cudaFatCudaBinary2EntryRec* entry = (__cudaFatCudaBinary2EntryRec*)(base);
+    //     char* base = (char*)(header + 1);
+    //     long long unsigned int offset = 0;
+    //     __cudaFatCudaBinary2EntryRec* entry = (__cudaFatCudaBinary2EntryRec*)(base);
 
-        while (offset < header->length) {
-            entry = (__cudaFatCudaBinary2EntryRec*)(base + offset);
-            std::cout << "writing entry..." << std::endl;
-            printf("ENTRY BINARY SIZE: %llx ", entry->binarySize);
+    //     while (offset < header->length) {
+    //         entry = (__cudaFatCudaBinary2EntryRec*)(base + offset);
+    //         std::cout << "writing entry..." << std::endl;
+    //         printf("ENTRY BINARY SIZE: %llx ", entry->binarySize);
 
-            // Send the entire entry
-            if (rpc_write(0, &entry->binarySize, sizeof(unsigned long long)) < 0) return nullptr;
-            if (rpc_write(0, entry, entry->binarySize) < 0) return nullptr;
+    //         // Send the entire entry
+    //         if (rpc_write(0, &entry->binarySize, sizeof((unsigned long long)__cudaFatCudaBinary2EntryRec::binarySize)) < 0) return nullptr;
+    //         if (rpc_write(0, entry, entry->binarySize) < 0) return nullptr;
 
-            // Move to the next entry
-            offset += entry->binary + entry->binarySize;
-        }
-    }
+    //         // Move to the next entry
+    //         offset += entry->binary + entry->binarySize;
+    //     }
+    // }
+
+    rpc_write(0, fatCubin, sizeof(void **));
 
     std::cout << "done processing entry on client" << std::endl;
 
@@ -481,17 +483,18 @@ extern "C" void **__cudaRegisterFatBinary(void **fatCubin)
         return 0;
     }
 
-    std::cout << "end complete" << std::endl;
+    std::cout << "end complete!! " << result << std::endl;
 
     return result;
 }
-
 
 extern "C"
 {
     void __cudaRegisterFatBinaryEnd(void **fatCubinHandle)
     {
         void* return_value;
+
+        std::cout << "!!!! " << fatCubinHandle << std::endl;
 
         int request_id = rpc_start_request(0, RPC___cudaRegisterFatBinaryEnd);
         if (request_id < 0)
@@ -533,6 +536,7 @@ extern "C" void __cudaUnregisterFatBinary(void **fatCubinHandle) {
 extern "C" unsigned __cudaPopCallConfiguration(dim3 *gridDim, dim3 *blockDim,
                                                size_t *sharedMem, void *stream)
 {
+    unsigned return_value;
     cudaError_t res;
 
     std::cout << "received __cudaPopCallConfiguration." << std::endl;
@@ -568,7 +572,11 @@ extern "C" unsigned __cudaPopCallConfiguration(dim3 *gridDim, dim3 *blockDim,
         return 0;
     }
 
-    std::cout << "finished writing" << std::endl;
+    std::cout << "Calling original __cudaPopCallConfiguration with parameters:" << std::endl;
+    std::cout << "  gridDim: " << gridDim << std::endl;
+    std::cout << "  blockDim: " << blockDim << std::endl;
+    std::cout << "  sharedMem: " << sharedMem << std::endl;
+    std::cout << "  stream: " << stream << std::endl;
 
     if (rpc_wait_for_response(0) < 0)
     {
@@ -576,35 +584,11 @@ extern "C" unsigned __cudaPopCallConfiguration(dim3 *gridDim, dim3 *blockDim,
         return 0;
     }
 
-    if (rpc_read(0, &gridDim, sizeof(dim3)) < 0)
-    {
-        std::cerr << "Failed to read gridDim from server" << std::endl;
-        return 0;
-    }
-
-    if (rpc_read(0, &blockDim, sizeof(dim3)) < 0)
-    {
-        std::cerr << "Failed to read blockDim from server" << std::endl;
-        return 0;
-    }
-
-    if (rpc_read(0, &sharedMem, sizeof(size_t)) < 0)
-    {
-        std::cerr << "Failed to read sharedMem from server" << std::endl;
-        return 0;
-    }
-
-    if (rpc_read(0, &stream, sizeof(void *)) < 0)
+    if (rpc_read(0, &return_value, sizeof(unsigned)) < 0)
     {
         std::cerr << "Failed to read stream from server" << std::endl;
         return 0;
     }
-
-    // if (rpc_read(&return_value, sizeof(unsigned)) < 0)
-    // {
-    //     std::cerr << "Failed to read stream from server" << std::endl;
-    //     return 0;
-    // }
 
     if (rpc_end_request(0, &res) < 0)
     {
@@ -612,15 +596,16 @@ extern "C" unsigned __cudaPopCallConfiguration(dim3 *gridDim, dim3 *blockDim,
         return 0;
     }
 
-    std::cout << "done with __cudaPopCallConfiguration." << std::endl;
+    printf("The value of num is: %u\n", return_value);
 
-    return 0;
+    return return_value;
 }
 
 extern "C" unsigned __cudaPushCallConfiguration(dim3 gridDim, dim3 blockDim,
                                      size_t sharedMem,
                                      struct CUstream_st *stream) {
   cudaError_t res;
+  unsigned return_value;
     std::cerr << "received __cudaPushCallConfiguration" << std::endl;
 
     // Start the RPC request
@@ -659,6 +644,12 @@ extern "C" unsigned __cudaPushCallConfiguration(dim3 gridDim, dim3 blockDim,
         return 0;
     }
 
+    std::cout << "Calling original __cudaPushCallConfiguration with parameters:" << std::endl;
+    std::cout << "  gridDim: " << &gridDim << std::endl;
+    std::cout << "  blockDim: " << &blockDim << std::endl;
+    std::cout << "  sharedMem: " << &sharedMem << std::endl;
+    std::cout << "  stream: " << &stream << std::endl;
+
     // Wait for a response from the server
     if (rpc_wait_for_response(0) < 0)
     {
@@ -666,11 +657,11 @@ extern "C" unsigned __cudaPushCallConfiguration(dim3 gridDim, dim3 blockDim,
         return 0;
     }
 
-    // if (rpc_read(&return_value, sizeof(unsigned)) < 0)
-    // {
-    //     std::cerr << "Failed to read stream from server" << std::endl;
-    //     return 0;
-    // }
+    if (rpc_read(0, &return_value, sizeof(unsigned)) < 0)
+    {
+        std::cerr << "Failed to read stream from server" << std::endl;
+        return 0;
+    }
 
     // Get the return value from the server
     if (rpc_end_request(0, &res) < 0)
@@ -679,9 +670,9 @@ extern "C" unsigned __cudaPushCallConfiguration(dim3 gridDim, dim3 blockDim,
         return 0;
     }
 
-    std::cerr << "done with __cudaPushCallConfiguration" << std::endl;
+    std::cerr << "done with __cudaPushCallConfiguration " << return_value << std::endl;
 
-    return 0;
+    return return_value;
 }
 
 extern "C"
@@ -721,7 +712,7 @@ extern "C"
             return;
         }
 
-        std::cout << "hostFunhostFunhostFunhostFunhostFun" << hostFun << std::endl;
+        std::cout << "hostFunhostFunhostFunhostFunhostFun: " << hostFun << " " << deviceFun << std::endl;
 
         // Send deviceFun length and data
         size_t deviceFunLen = strlen(deviceFun) + 1;
