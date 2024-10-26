@@ -9,9 +9,9 @@ build() {
   echo "building client..."
 
   if [[ "$(uname)" == "Linux" ]]; then
-    g++ -c -fPIC "$(pwd)/client.cpp" -o "$(pwd)/client.o" -I/usr/local/cuda/include
-    g++ -c -fPIC "$(pwd)/codegen/gen_client.cpp" -o "$(pwd)/codegen/gen_client.o" -I/usr/local/cuda/include
-    g++ -c -fPIC "$(pwd)/codegen/manual_client.cpp" -o "$(pwd)/codegen/manual_client.o" -I/usr/local/cuda/include
+    g++ -Wno-deprecated-declarations -c -fPIC "$(pwd)/client.cpp" -o "$(pwd)/client.o" -I/usr/local/cuda/include
+    g++ -Wno-deprecated-declarations -c -fPIC "$(pwd)/codegen/gen_client.cpp" -o "$(pwd)/codegen/gen_client.o" -I/usr/local/cuda/include
+    g++ -Wno-deprecated-declarations -c -fPIC "$(pwd)/codegen/manual_client.cpp" -o "$(pwd)/codegen/manual_client.o" -I/usr/local/cuda/include
 
     echo "linking client files..."
 
@@ -35,7 +35,7 @@ server() {
   echo "building server..." 
 
   if [[ "$(uname)" == "Linux" ]]; then
-    nvcc -o $server_out_path $server_path -lnvidia-ml -lcuda --cudart=shared
+    nvcc --compiler-options -g,-Wno-deprecated-declarations -o $server_out_path $server_path -lnvidia-ml -lcuda --cudart=shared
   else
     echo "No compiler options set for os "$(uname)""
   fi

@@ -1,0 +1,596 @@
+typedef char __nv_bool;
+# 2785 "/usr/include/driver_types.h" 3
+struct CUstream_st;
+# 535 "/usr/include/c++/12/bits/cpp_type_traits.h" 3
+struct _ZSt24__is_memcmp_ordered_withISt4byteS0_Lb1EE;
+# 196 "/usr/include/c++/12/bits/utility.h" 3
+struct _ZSt10in_place_t;
+# 80 "/usr/include/c++/12/bits/stl_pair.h" 3
+struct _ZSt21piecewise_construct_t;
+# 167 "/usr/include/c++/12/limits" 3
+enum _ZSt17float_round_style {
+# 169 "/usr/include/c++/12/limits" 3
+_ZSt19round_indeterminate = (-1),
+# 170 "/usr/include/c++/12/limits" 3
+_ZSt17round_toward_zero,
+# 171 "/usr/include/c++/12/limits" 3
+_ZSt16round_to_nearest,
+# 172 "/usr/include/c++/12/limits" 3
+_ZSt21round_toward_infinity,
+# 173 "/usr/include/c++/12/limits" 3
+_ZSt25round_toward_neg_infinity};
+# 182 "/usr/include/c++/12/limits" 3
+enum _ZSt18float_denorm_style {
+# 185 "/usr/include/c++/12/limits" 3
+_ZSt20denorm_indeterminate = (-1),
+# 187 "/usr/include/c++/12/limits" 3
+_ZSt13denorm_absent,
+# 189 "/usr/include/c++/12/limits" 3
+_ZSt14denorm_present};
+# 202 "/usr/include/c++/12/limits" 3
+struct _ZSt21__numeric_limits_base;
+# 384 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsIbE;
+# 453 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsIcE;
+# 520 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsIaE;
+# 590 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsIhE;
+# 663 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsIwE;
+# 797 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsIDsE;
+# 858 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsIDiE;
+# 920 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsIsE;
+# 987 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsItE;
+# 1060 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsIiE;
+# 1127 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsIjE;
+# 1199 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsIlE;
+# 1266 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsImE;
+# 1339 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsIxE;
+# 1409 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsIyE;
+# 1637 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsInE;
+# 1637 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsIoE;
+# 1670 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsIfE;
+# 1745 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsIdE;
+# 1820 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsIeE;
+# 214 "/usr/lib/gcc/x86_64-linux-gnu/12/include/stddef.h" 3
+typedef unsigned long size_t;
+#include "crt/device_runtime.h"
+# 298 "/usr/include/x86_64-linux-gnu/c++/12/bits/c++config.h" 3
+typedef unsigned long _ZSt6size_t;
+# 535 "/usr/include/c++/12/bits/cpp_type_traits.h" 3
+struct _ZSt24__is_memcmp_ordered_withISt4byteS0_Lb1EE {};
+# 196 "/usr/include/c++/12/bits/utility.h" 3
+struct _ZSt10in_place_t {};
+# 80 "/usr/include/c++/12/bits/stl_pair.h" 3
+struct _ZSt21piecewise_construct_t {};
+# 202 "/usr/include/c++/12/limits" 3
+struct _ZSt21__numeric_limits_base {};
+# 384 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsIbE {};
+# 453 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsIcE {};
+# 520 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsIaE {};
+# 590 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsIhE {};
+# 663 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsIwE {};
+# 797 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsIDsE {};
+# 858 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsIDiE {};
+# 920 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsIsE {};
+# 987 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsItE {};
+# 1060 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsIiE {};
+# 1127 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsIjE {};
+# 1199 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsIlE {};
+# 1266 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsImE {};
+# 1339 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsIxE {};
+# 1409 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsIyE {};
+# 1637 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsInE {};
+# 1637 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsIoE {};
+# 1670 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsIfE {};
+# 1745 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsIdE {};
+# 1820 "/usr/include/c++/12/limits" 3
+struct _ZSt14numeric_limitsIeE {};
+# 157 "/usr/include/crt/common_functions.h" 3
+___device__(extern  __no_sc__) __attribute__((__alloc_size__(1))) __attribute__((__malloc__)) __attribute__((__nothrow__)) void *malloc(size_t);
+# 158 "/usr/include/crt/common_functions.h" 3
+___device__(extern  __no_sc__) __attribute__((__nothrow__)) void free(void *);
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+# 109 "/usr/include/cuda_device_runtime_api.h" 3
+___device__(static  __no_sc__) __inline__ enum cudaError __cudaCDP2Malloc(void **, size_t);
+# 256 "/usr/include/cuda_device_runtime_api.h" 3
+___device__(extern  __no_sc__) enum cudaError __cudaCDP2Free(void *);
+# 463 "/usr/include/cuda_device_runtime_api.h" 3
+___device__(static  __no_sc__) __inline__ enum cudaError _ZN44_INTERNAL_be7cd6be_13_vector_add_cu_964b22218cudaFreeEPv(void *);
+# 468 "/usr/include/cuda_device_runtime_api.h" 3
+___device__(static  __no_sc__) __inline__ enum cudaError _ZN44_INTERNAL_be7cd6be_13_vector_add_cu_964b222110cudaMallocEPPvm(void **, size_t);
+#if !defined(__CUDABE__)
+# 153 "/usr/include/crt/common_functions.h" 3
+ __device_builtin__ ___device__(extern  __no_sc__) int printf(const char *__restrict__, ...);
+#endif
+# 205 "/usr/include/crt/common_functions.h" 3
+___device__(extern  __no_sc__) __attribute__((__nothrow__)) __attribute__((__noreturn__)) void __assert_fail(const char *, const char *, unsigned, const char *);
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+# 3634 "/usr/include/crt/device_functions.h" 3
+___device__(extern  __no_sc__) unsigned __cudaPushCallConfiguration(struct dim3, struct dim3, size_t, struct CUstream_st *);
+# 11 "vector_add.cu"
+__global__ __var_used__ extern void _Z10vector_addPfS_S_i(float *, float *, float *, int);
+# 241 "/usr/include/c++/12/cmath" 3
+___device__(static  __no_sc__) __inline__ __attribute__((visibility("default"))) float _ZSt4fabsf(float);
+#include "common_functions.h"
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+# 109 "/usr/include/cuda_device_runtime_api.h" 3
+___device__(static  __no_sc__) __inline__ enum cudaError __cudaCDP2Malloc(
+# 109 "/usr/include/cuda_device_runtime_api.h" 3
+void **p, 
+# 109 "/usr/include/cuda_device_runtime_api.h" 3
+size_t s){
+# 110 "/usr/include/cuda_device_runtime_api.h" 3
+{
+# 111 "/usr/include/cuda_device_runtime_api.h" 3
+return cudaErrorUnknown;
+# 112 "/usr/include/cuda_device_runtime_api.h" 3
+}}
+# 463 "/usr/include/cuda_device_runtime_api.h" 3
+___device__(static  __no_sc__) __inline__ enum cudaError _ZN44_INTERNAL_be7cd6be_13_vector_add_cu_964b22218cudaFreeEPv(
+# 463 "/usr/include/cuda_device_runtime_api.h" 3
+void *devPtr){
+# 464 "/usr/include/cuda_device_runtime_api.h" 3
+{
+# 465 "/usr/include/cuda_device_runtime_api.h" 3
+return __cudaCDP2Free(devPtr);
+# 466 "/usr/include/cuda_device_runtime_api.h" 3
+}}
+# 468 "/usr/include/cuda_device_runtime_api.h" 3
+___device__(static  __no_sc__) __inline__ enum cudaError _ZN44_INTERNAL_be7cd6be_13_vector_add_cu_964b222110cudaMallocEPPvm(
+# 468 "/usr/include/cuda_device_runtime_api.h" 3
+void **devPtr, 
+# 468 "/usr/include/cuda_device_runtime_api.h" 3
+size_t size){
+# 469 "/usr/include/cuda_device_runtime_api.h" 3
+{  void **__T1;
+ size_t __T2;
+# 470 "/usr/include/cuda_device_runtime_api.h" 3
+return ((__T1 = devPtr) , (void)(__T2 = size)) , (__cudaCDP2Malloc(__T1, __T2));
+# 471 "/usr/include/cuda_device_runtime_api.h" 3
+}}
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+# 11 "vector_add.cu"
+__global__ __var_used__ void _Z10vector_addPfS_S_i(
+# 11 "vector_add.cu"
+float *out, 
+# 11 "vector_add.cu"
+float *a, 
+# 11 "vector_add.cu"
+float *b, 
+# 11 "vector_add.cu"
+int n){
+# 12 "vector_add.cu"
+{
+# 13 "vector_add.cu"
+{
+# 13 "vector_add.cu"
+ int i;
+# 13 "vector_add.cu"
+i = 0;
+# 13 "vector_add.cu"
+for (; (i < n); i++)
+# 14 "vector_add.cu"
+{
+# 15 "vector_add.cu"
+(out[i]) = ((a[i]) + (b[i]));
+# 16 "vector_add.cu"
+} } 
+# 17 "vector_add.cu"
+}}
+# 241 "/usr/include/c++/12/cmath" 3
+___device__(static  __no_sc__) __inline__ __attribute__((visibility("default"))) float _ZSt4fabsf(
+# 241 "/usr/include/c++/12/cmath" 3
+float __x){
+# 242 "/usr/include/c++/12/cmath" 3
+{
+# 242 "/usr/include/c++/12/cmath" 3
+return fabsf(__x);
+# 242 "/usr/include/c++/12/cmath" 3
+}}
