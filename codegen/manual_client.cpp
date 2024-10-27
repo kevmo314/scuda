@@ -499,13 +499,6 @@ extern "C" cudaError_t __cudaPushCallConfiguration(dim3 gridDim, dim3 blockDim,
 {
     cudaError_t res;
 
-    std::cout << "Calling original __cudaPushCallConfiguration with parameters:" << std::endl;
-    std::cout << "gridDim: " << gridDim.x << " " << gridDim.y << " " << gridDim.z << std::endl;
-    std::cout << "blockDim: " << blockDim.x << " " << blockDim.y << " " << blockDim.z << std::endl;
-    std::cout << "sharedMem: " << sharedMem << std::endl;
-    std::cout << "stream: " << stream << std::endl;
-
-    // Start the RPC request
     if (rpc_start_request(0, RPC___cudaPushCallConfiguration) < 0 ||
         rpc_write(0, &gridDim, sizeof(dim3)) < 0 ||
         rpc_write(0, &blockDim, sizeof(dim3)) < 0 ||
@@ -523,8 +516,6 @@ extern "C" cudaError_t __cudaPopCallConfiguration(dim3 *gridDim, dim3 *blockDim,
 {
     cudaError_t res;
 
-    std::cout << "received __cudaPopCallConfiguration." << std::endl;
-
     if (rpc_start_request(0, RPC___cudaPopCallConfiguration) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, gridDim, sizeof(dim3)) < 0 ||
@@ -533,7 +524,7 @@ extern "C" cudaError_t __cudaPopCallConfiguration(dim3 *gridDim, dim3 *blockDim,
         rpc_read(0, stream, sizeof(cudaStream_t)) < 0 ||
         rpc_end_request(0, &res) < 0)
         return cudaErrorDevicesUnavailable;
-    std::cout << "got result" << res << std::endl;
+
     return res;
 }
 

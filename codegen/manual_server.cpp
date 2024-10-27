@@ -551,25 +551,15 @@ int handle___cudaPopCallConfiguration(void *conn)
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
         return -1;
-    __cudaPushCallConfiguration(1, 1, 0, 0);
 
-    cudaError_t cr = __cudaPopCallConfiguration(&gridDim, &blockDim, &sharedMem, &stream);
-    if (cr != cudaSuccess)
-    {
-        std::cerr << "got cr" << cr << std::endl;
-        std::cerr << "Failed to call __cudaPopCallConfiguration" << std::endl;
-        return -1;
-    }
-
-    std::cout << "gridDim: " << gridDim.x << " " << gridDim.y << " " << gridDim.z << std::endl;
-    std::cout << "got cr" << cr << std::endl;
+    cudaError_t result = __cudaPopCallConfiguration(&gridDim, &blockDim, &sharedMem, &stream);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &gridDim, sizeof(dim3)) < 0 ||
         rpc_write(conn, &blockDim, sizeof(dim3)) < 0 ||
         rpc_write(conn, &sharedMem, sizeof(size_t)) < 0 ||
         rpc_write(conn, &stream, sizeof(cudaStream_t)) < 0 ||
-        rpc_end_response(conn, &cr) < 0)
+        rpc_end_response(conn, &result) < 0)
         return -1;
 
     return 0;
