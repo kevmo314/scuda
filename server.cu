@@ -59,6 +59,11 @@ void client_handler(int connfd)
         std::cerr << "Error initializing mutex." << std::endl;
         return;
     }
+
+#ifdef VERBOSE
+    printf("Client connected.\n");
+#endif
+
     while (1)
     {
         if (pthread_mutex_lock(&conn.read_mutex) < 0)
