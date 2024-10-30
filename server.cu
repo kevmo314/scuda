@@ -37,7 +37,7 @@ int request_handler(const conn_t *conn)
     // Attempt to read the operation code from the client
     if (read(conn->connfd, &op, sizeof(unsigned int)) < 0)
         return -1;
-
+    
     auto opHandler = get_handler(op);
 
     if (opHandler == NULL)
@@ -83,20 +83,10 @@ void client_handler(int connfd)
             break;
         }
 
-        // run our request handler in a separate thread
-        auto future = std::async(
-            std::launch::async,
-            [&conn]()
-            {
-                if (request_handler(&conn) < 0)
-                    std::cerr << "Error handling request." << std::endl;
-            });
-
-        futures.push_back(std::move(future));
+        if (request_handler(&conn) < 0)
+            std::cerr << "Error handling request." << std::endl;
     }
 
-    for (auto &future : futures)
-        future.wait();
 
     if (pthread_mutex_destroy(&conn.read_mutex) < 0 ||
         pthread_mutex_destroy(&conn.write_mutex) < 0)

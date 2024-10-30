@@ -62,7 +62,7 @@ int handle_cudaMemcpy(void *conn)
             return -1;
         }
 
-        if (rpc_write(conn, host_data, count) < 0)
+        if (rpc_write(conn, host_data, sizeof(count)) < 0)
         {
             free(host_data);
             return -1;
@@ -86,7 +86,7 @@ int handle_cudaMemcpy(void *conn)
             return -1;
         }
 
-        if (rpc_read(conn, src, count) < 0)
+        if (rpc_read(conn, src, sizeof(count)) < 0)
         {
             free(src);
             return -1;
@@ -100,6 +100,11 @@ int handle_cudaMemcpy(void *conn)
         }
 
         result = cudaMemcpy(dst, src, count, kind);
+        if (result != cudaSuccess)
+        {
+            free(src);
+            return -1;
+        }
 
         free(src);
 
@@ -165,7 +170,7 @@ int handle_cudaMemcpyAsync(void *conn)
             return -1;
         }
 
-        if (rpc_write(conn, host_data, count) < 0)
+        if (rpc_write(conn, host_data, sizeof(count)) < 0)
         {
             free(host_data);
             return -1;
@@ -189,7 +194,7 @@ int handle_cudaMemcpyAsync(void *conn)
             return -1;
         }
 
-        if (rpc_read(conn, src, count) < 0)
+        if (rpc_read(conn, src, sizeof(count)) < 0)
         {
             free(src);
             return -1;

@@ -19002,9 +19002,13 @@ static RequestHandler opHandlers[] = {
     handle_cudaGraphReleaseUserObject,
     handle_cudaMemcpy,
     handle_cudaMemcpyAsync,
+    handle_cublasCreate_v2,
 };
 
 RequestHandler get_handler(const int op)
 {
-    return opHandlers[op];
+   if (op > sizeof(opHandlers)) {
+       return NULL;
+   }
+   return opHandlers[op];
 }

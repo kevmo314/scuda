@@ -9,13 +9,14 @@ build() {
   echo "building client..."
 
   if [[ "$(uname)" == "Linux" ]]; then
-    g++ -c -fPIC "$(pwd)/client.cpp" -o "$(pwd)/client.o" -I/usr/local/cuda/include
-    g++ -c -fPIC "$(pwd)/codegen/gen_client.cpp" -o "$(pwd)/codegen/gen_client.o" -I/usr/local/cuda/include
-    g++ -c -fPIC "$(pwd)/codegen/manual_client.cpp" -o "$(pwd)/codegen/manual_client.o" -I/usr/local/cuda/include
+    nvcc --cudart=shared -Xcompiler -fPIC -I/usr/local/cuda/include -o "$(pwd)/client.o" -c "$(pwd)/client.cpp"
+    nvcc --cudart=shared -Xcompiler -fPIC -I/usr/local/cuda/include -o "$(pwd)/codegen/gen_client.o" -c "$(pwd)/codegen/gen_client.cpp"
+    nvcc --cudart=shared -Xcompiler -fPIC -I/usr/local/cuda/include -o "$(pwd)/codegen/manual_client.o" -c "$(pwd)/codegen/manual_client.cpp"
 
     echo "linking client files..."
 
-    g++ -shared -o libscuda.so "$(pwd)/client.o" "$(pwd)/codegen/gen_client.o" "$(pwd)/codegen/manual_client.o" -L/usr/local/cuda/lib64 -lcudart -lstdc++
+    g++ -shared -fPIC -o libscuda.so "$(pwd)/client.o" "$(pwd)/codegen/gen_client.o" "$(pwd)/codegen/manual_client.o" \
+        -L/usr/local/cuda/lib64 -lcudart -lcuda -lstdc++
 
   else
     echo "No compiler options set for os $(uname)"

@@ -1,6 +1,7 @@
 #include <nvml.h>
 #include <cuda.h>
 #include <iostream>
+#include <cublas_v2.h>
 #include <cuda_runtime_api.h>
 
 #include <cstring>
@@ -50,8 +51,8 @@ cudaError_t cudaMemcpy(void *dst, const void *src, size_t count, enum cudaMemcpy
             return cudaErrorDevicesUnavailable;
         }
 
-        if (rpc_read(0, dst, count) < 0)
-        { // Read data into the destination buffer on the host
+        if (rpc_read(0, dst, sizeof(count)) < 0)
+        {
             return cudaErrorDevicesUnavailable;
         }
     }
@@ -67,7 +68,7 @@ cudaError_t cudaMemcpy(void *dst, const void *src, size_t count, enum cudaMemcpy
             return cudaErrorDevicesUnavailable;
         }
 
-        if (rpc_write(0, src, count) < 0)
+        if (rpc_write(0, src, sizeof(count)) < 0)
         {
             return cudaErrorDevicesUnavailable;
         }
@@ -124,7 +125,7 @@ cudaError_t cudaMemcpyAsync(void *dst, const void *src, size_t count, enum cudaM
             return cudaErrorDevicesUnavailable;
         }
 
-        if (rpc_read(0, dst, count) < 0)
+        if (rpc_read(0, dst, sizeof(count)) < 0)
         { // Read data into the destination buffer on the host
             return cudaErrorDevicesUnavailable;
         }
@@ -141,7 +142,7 @@ cudaError_t cudaMemcpyAsync(void *dst, const void *src, size_t count, enum cudaM
             return cudaErrorDevicesUnavailable;
         }
 
-        if (rpc_write(0, src, count) < 0)
+        if (rpc_write(0, src, sizeof(count)) < 0)
         {
             return cudaErrorDevicesUnavailable;
         }
@@ -163,4 +164,9 @@ cudaError_t cudaMemcpyAsync(void *dst, const void *src, size_t count, enum cudaM
     }
 
     return return_value;
+}
+
+cublasStatus_t cublasCreate_v2(cublasHandle_t* handle)
+{
+    std::cout << "calling cublasCreate_v2" << std::endl;
 }

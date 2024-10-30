@@ -767,3 +767,4 @@
 #define RPC_cudaGraphReleaseUserObject 766
 #define RPC_cudaMemcpy 767
 #define RPC_cudaMemcpyAsync 768
+#define RPC_cublasCreate_v2 769

@@ -56,7 +56,7 @@ MANUAL_REMAPPINGS = [
 
 # a list of manually implemented cuda/nvml functions.
 # these are automatically appended to each file; operation order is maintained as well.
-MANUAL_IMPLEMENTATIONS = ["cudaMemcpy", "cudaMemcpyAsync"]
+MANUAL_IMPLEMENTATIONS = ["cudaMemcpy", "cudaMemcpyAsync", "cublasCreate_v2"]
 
 
 @dataclass
@@ -683,7 +683,10 @@ def main():
 
         f.write("RequestHandler get_handler(const int op)\n")
         f.write("{\n")
-        f.write("    return opHandlers[op];\n")
+        f.write("   if (op > sizeof(opHandlers)) {\n")
+        f.write("       return NULL;\n")
+        f.write("   }\n")
+        f.write("   return opHandlers[op];\n")
         f.write("}\n")
 
 
