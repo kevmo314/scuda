@@ -683,7 +683,7 @@ def main():
 
         f.write("RequestHandler get_handler(const int op)\n")
         f.write("{\n")
-        f.write("   if (op > sizeof(opHandlers)) {\n")
+        f.write("   if (op > (sizeof(opHandlers) / sizeof(opHandlers[0]))) {\n")
         f.write("       return NULL;\n")
         f.write("   }\n")
         f.write("   return opHandlers[op];\n")

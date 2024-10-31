@@ -19008,7 +19008,7 @@ static RequestHandler opHandlers[] = {
 
 RequestHandler get_handler(const int op)
 {
-   if (op > sizeof(opHandlers)) {
+   if (op > (sizeof(opHandlers) / sizeof(opHandlers[0]))) {
        return NULL;
    }
    return opHandlers[op];
