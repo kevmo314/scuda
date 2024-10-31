@@ -19003,6 +19003,7 @@ static RequestHandler opHandlers[] = {
     handle_cudaMemcpy,
     handle_cudaMemcpyAsync,
     handle_cublasCreate_v2,
+    handle_cublasSgemm_v2,
 };
 
 RequestHandler get_handler(const int op)

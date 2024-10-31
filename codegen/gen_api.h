@@ -768,3 +768,4 @@
 #define RPC_cudaMemcpy 767
 #define RPC_cudaMemcpyAsync 768
 #define RPC_cublasCreate_v2 769
+#define RPC_cublasSgemm_v2 770

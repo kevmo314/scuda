@@ -11597,6 +11597,7 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cudaMemcpy", (void *)cudaMemcpy},
     {"cudaMemcpyAsync", (void *)cudaMemcpyAsync},
     {"cublasCreate_v2", (void *)cublasCreate_v2},
+    {"cublasSgemm_v2", (void *)cublasSgemm_v2},
 };
 
 void *get_function_pointer(const char *name)
