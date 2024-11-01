@@ -232,28 +232,7 @@ def main():
 
     with open("gen_api.h", "w") as f:
         lastIndex = 0
-        # visited = set()
         for i, (function, _, _, _) in enumerate(functions_with_annotations):
-            # value = hash(function.name.format()) % (2**32)
-            # if value in visited:
-            #     print(f"Hash collision for {function.name.format()}")
-            #     continue
-            f.write(
-                "#define RPC_{name} {value}\n".format(
-                    name=function.name.format(),
-                    value=i,
-                )
-            )
-            lastIndex += 1
-
-    with open("gen_api.h", "w") as f:
-        lastIndex = 0
-        # visited = set()
-        for i, (function, _, _, _) in enumerate(functions_with_annotations):
-            # value = hash(function.name.format()) % (2**32)
-            # if value in visited:
-            #     print(f"Hash collision for {function.name.format()}")
-            #     continue
             f.write(
                 "#define RPC_{name} {value}\n".format(
                     name=function.name.format(),

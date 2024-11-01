@@ -4590,7 +4590,7 @@ cudaError_t cudaMemcpyToSymbol(const void *symbol, const void *src, size_t count
  */
 cudaError_t cudaMemcpyFromSymbol(void *dst, const void *symbol, size_t count, size_t offset, enum cudaMemcpyKind kind);
 /**
- * @disabled
+ * @disabled - manually implemented
  * @param dst SEND_ONLY
  * @param count SEND_ONLY
  * @param src SEND_ONLY SIZE:count
