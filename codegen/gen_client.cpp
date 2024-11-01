@@ -18,17 +18,6 @@ extern int rpc_read(const int index, void *data, const std::size_t size);
 extern int rpc_end_request(const int index, void *return_value);
 extern int rpc_close();
 
-nvmlReturn_t nvmlInit_v2()
-{
-    nvmlReturn_t return_value;
-
-    if (rpc_start_request(0, RPC_nvmlInit_v2) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_end_request(0, &return_value) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
 nvmlReturn_t nvmlInitWithFlags(unsigned int flags)
 {
     nvmlReturn_t return_value;
@@ -37,19 +26,6 @@ nvmlReturn_t nvmlInitWithFlags(unsigned int flags)
         rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_end_request(0, &return_value) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    return return_value;
-}
-
-nvmlReturn_t nvmlShutdown()
-{
-    nvmlReturn_t return_value;
-
-    if (rpc_start_request(0, RPC_nvmlShutdown) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_end_request(0, &return_value) < 0)
-        return NVML_ERROR_GPU_IS_LOST;
-    if (rpc_close() < 0)
         return NVML_ERROR_GPU_IS_LOST;
     return return_value;
 }
@@ -10788,9 +10764,7 @@ cudaError_t cudaGraphReleaseUserObject(cudaGraph_t graph, cudaUserObject_t objec
 
 std::unordered_map<std::string, void *> functionMap = {
     {"nvmlInit", (void *)nvmlInit_v2},
-    {"nvmlInit_v2", (void *)nvmlInit_v2},
     {"nvmlInitWithFlags", (void *)nvmlInitWithFlags},
-    {"nvmlShutdown", (void *)nvmlShutdown},
     {"nvmlSystemGetDriverVersion", (void *)nvmlSystemGetDriverVersion},
     {"nvmlSystemGetNVMLVersion", (void *)nvmlSystemGetNVMLVersion},
     {"nvmlSystemGetCudaDriverVersion", (void *)nvmlSystemGetCudaDriverVersion},
@@ -11596,6 +11570,8 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cuMemAllocFromPoolAsync_ptsz", (void *)cuMemAllocFromPoolAsync},
     {"cudaMemcpy", (void *)cudaMemcpy},
     {"cudaMemcpyAsync", (void *)cudaMemcpyAsync},
+    {"nvmlShutdown", (void *)nvmlShutdown},
+    {"nvmlInit_v2", (void *)nvmlInit_v2},
 };
 
 void *get_function_pointer(const char *name)

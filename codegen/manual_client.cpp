@@ -17,6 +17,30 @@ extern int rpc_read(const int index, void *data, const std::size_t size);
 extern int rpc_end_request(const int index, void *return_value);
 extern int rpc_close();
 
+nvmlReturn_t nvmlShutdown()
+{
+    nvmlReturn_t return_value;
+
+    if (rpc_start_request(0, RPC_nvmlShutdown) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_request(0, &return_value) < 0)
+        return NVML_ERROR_GPU_IS_LOST;
+    if (rpc_close() < 0)
+        return NVML_ERROR_GPU_IS_LOST;
+    return return_value;
+}
+
+nvmlReturn_t nvmlInit_v2()
+{
+    nvmlReturn_t return_value;
+
+    if (rpc_start_request(0, RPC_nvmlInit_v2) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_request(0, &return_value) < 0)
+        return NVML_ERROR_GPU_IS_LOST;
+    return return_value;
+}
+
 cudaError_t cudaMemcpy(void *dst, const void *src, size_t count, enum cudaMemcpyKind kind)
 {
     cudaError_t return_value;

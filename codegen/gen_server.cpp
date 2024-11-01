@@ -18,22 +18,6 @@ extern int rpc_start_response(const void *conn, const int request_id);
 extern int rpc_write(const void *conn, const void *data, const std::size_t size);
 extern int rpc_end_response(const void *conn, void *return_value);
 
-int handle_nvmlInit_v2(void *conn)
-{
-
-    int request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        return -1;
-
-    nvmlReturn_t result = nvmlInit_v2();
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        return -1;
-
-    return 0;
-}
-
 int handle_nvmlInitWithFlags(void *conn)
 {
     unsigned int flags;
@@ -53,20 +37,10 @@ int handle_nvmlInitWithFlags(void *conn)
     return 0;
 }
 
-int handle_nvmlShutdown(void *conn)
+int handle_nvmlErrorString(void *conn)
 {
-
-    int request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        return -1;
-
-    nvmlReturn_t result = nvmlShutdown();
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        return -1;
-
-    return 0;
+   // not implemented; disabled function
+   return -1;
 }
 
 int handle_nvmlSystemGetDriverVersion(void *conn)
@@ -5578,6 +5552,12 @@ int handle_nvmlDeviceCreateGpuInstance(void *conn)
     return 0;
 }
 
+int handle_nvmlDeviceCreateGpuInstanceWithPlacement(void *conn)
+{
+   // not implemented; disabled function
+   return -1;
+}
+
 int handle_nvmlGpuInstanceDestroy(void *conn)
 {
     nvmlGpuInstance_t gpuInstance;
@@ -5798,6 +5778,12 @@ int handle_nvmlGpuInstanceCreateComputeInstance(void *conn)
         return -1;
 
     return 0;
+}
+
+int handle_nvmlGpuInstanceCreateComputeInstanceWithPlacement(void *conn)
+{
+   // not implemented; disabled function
+   return -1;
 }
 
 int handle_nvmlComputeInstanceDestroy(void *conn)
@@ -6414,6 +6400,18 @@ int handle_nvmlGpmQueryDeviceSupport(void *conn)
     return 0;
 }
 
+int handle_nvmlDeviceCcuGetStreamState(void *conn)
+{
+   // not implemented; disabled function
+   return -1;
+}
+
+int handle_nvmlDeviceCcuSetStreamState(void *conn)
+{
+   // not implemented; disabled function
+   return -1;
+}
+
 int handle_nvmlDeviceSetNvLinkDeviceLowPowerThreshold(void *conn)
 {
     nvmlDevice_t device;
@@ -6433,6 +6431,18 @@ int handle_nvmlDeviceSetNvLinkDeviceLowPowerThreshold(void *conn)
         return -1;
 
     return 0;
+}
+
+int handle_cuGetErrorString(void *conn)
+{
+   // not implemented; disabled function
+   return -1;
+}
+
+int handle_cuGetErrorName(void *conn)
+{
+   // not implemented; disabled function
+   return -1;
 }
 
 int handle_cuInit(void *conn)
@@ -6674,6 +6684,12 @@ int handle_cuDeviceGetAttribute(void *conn)
         return -1;
 
     return 0;
+}
+
+int handle_cuDeviceGetNvSciSyncAttributes(void *conn)
+{
+   // not implemented; disabled function
+   return -1;
 }
 
 int handle_cuDeviceSetMemPool(void *conn)
@@ -7412,6 +7428,24 @@ int handle_cuModuleLoad(void *conn)
     return 0;
 }
 
+int handle_cuModuleLoadData(void *conn)
+{
+   // not implemented; disabled function
+   return -1;
+}
+
+int handle_cuModuleLoadDataEx(void *conn)
+{
+   // not implemented; disabled function
+   return -1;
+}
+
+int handle_cuModuleLoadFatBinary(void *conn)
+{
+   // not implemented; disabled function
+   return -1;
+}
+
 int handle_cuModuleUnload(void *conn)
 {
     CUmodule hmod;
@@ -7713,6 +7747,12 @@ int handle_cuModuleGetSurfRef(void *conn)
         return -1;
 
     return 0;
+}
+
+int handle_cuLibraryLoadData(void *conn)
+{
+   // not implemented; disabled function
+   return -1;
 }
 
 int handle_cuLibraryLoadFromFile(void *conn)
@@ -8657,6 +8697,12 @@ int handle_cuMemcpyAtoD_v2(void *conn)
     return 0;
 }
 
+int handle_cuMemcpyHtoA_v2(void *conn)
+{
+   // not implemented; disabled function
+   return -1;
+}
+
 int handle_cuMemcpyAtoH_v2(void *conn)
 {
     void* dstHost;
@@ -8714,6 +8760,30 @@ int handle_cuMemcpyAtoA_v2(void *conn)
         return -1;
 
     return 0;
+}
+
+int handle_cuMemcpy2D_v2(void *conn)
+{
+   // not implemented; disabled function
+   return -1;
+}
+
+int handle_cuMemcpy2DUnaligned_v2(void *conn)
+{
+   // not implemented; disabled function
+   return -1;
+}
+
+int handle_cuMemcpy3D_v2(void *conn)
+{
+   // not implemented; disabled function
+   return -1;
+}
+
+int handle_cuMemcpy3DPeer(void *conn)
+{
+   // not implemented; disabled function
+   return -1;
 }
 
 int handle_cuMemcpyAsync(void *conn)
@@ -8835,6 +8905,12 @@ int handle_cuMemcpyDtoDAsync_v2(void *conn)
     return 0;
 }
 
+int handle_cuMemcpyHtoAAsync_v2(void *conn)
+{
+   // not implemented; disabled function
+   return -1;
+}
+
 int handle_cuMemcpyAtoHAsync_v2(void *conn)
 {
     void* dstHost;
@@ -8865,6 +8941,24 @@ int handle_cuMemcpyAtoHAsync_v2(void *conn)
         return -1;
 
     return 0;
+}
+
+int handle_cuMemcpy2DAsync_v2(void *conn)
+{
+   // not implemented; disabled function
+   return -1;
+}
+
+int handle_cuMemcpy3DAsync_v2(void *conn)
+{
+   // not implemented; disabled function
+   return -1;
+}
+
+int handle_cuMemcpy3DPeerAsync(void *conn)
+{
+   // not implemented; disabled function
+   return -1;
 }
 
 int handle_cuMemsetD8_v2(void *conn)
@@ -10512,6 +10606,12 @@ int handle_cuStreamIsCapturing(void *conn)
     return 0;
 }
 
+int handle_cuStreamGetCaptureInfo_v2(void *conn)
+{
+   // not implemented; disabled function
+   return -1;
+}
+
 int handle_cuStreamUpdateCaptureDependencies(void *conn)
 {
     CUstream hStream;
@@ -11171,6 +11271,12 @@ int handle_cuLaunchKernel(void *conn)
         return -1;
 
     return 0;
+}
+
+int handle_cuLaunchKernelEx(void *conn)
+{
+   // not implemented; disabled function
+   return -1;
 }
 
 int handle_cuLaunchCooperativeKernel(void *conn)
@@ -12713,6 +12819,18 @@ int handle_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(void *conn)
     return 0;
 }
 
+int handle_cuOccupancyMaxPotentialBlockSize(void *conn)
+{
+   // not implemented; disabled function
+   return -1;
+}
+
+int handle_cuOccupancyMaxPotentialBlockSizeWithFlags(void *conn)
+{
+   // not implemented; disabled function
+   return -1;
+}
+
 int handle_cuOccupancyAvailableDynamicSMemPerBlock(void *conn)
 {
     size_t dynamicSmemSize;
@@ -13825,6 +13943,18 @@ int handle_cuGraphicsUnmapResources(void *conn)
     return 0;
 }
 
+int handle_cuGetProcAddress_v2(void *conn)
+{
+   // not implemented; disabled function
+   return -1;
+}
+
+int handle_cuGetExportTable(void *conn)
+{
+   // not implemented; disabled function
+   return -1;
+}
+
 int handle_cudaDeviceReset(void *conn)
 {
 
@@ -14314,6 +14444,18 @@ int handle_cudaPeekAtLastError(void *conn)
         return -1;
 
     return 0;
+}
+
+int handle_cudaGetErrorName(void *conn)
+{
+   // not implemented; disabled function
+   return -1;
+}
+
+int handle_cudaGetErrorString(void *conn)
+{
+   // not implemented; disabled function
+   return -1;
 }
 
 int handle_cudaGetDeviceCount(void *conn)
@@ -15284,6 +15426,12 @@ int handle_cudaEventElapsedTime(void *conn)
     return 0;
 }
 
+int handle_cudaImportExternalMemory(void *conn)
+{
+   // not implemented; disabled function
+   return -1;
+}
+
 int handle_cudaDestroyExternalMemory(void *conn)
 {
     cudaExternalMemory_t extMem;
@@ -15320,6 +15468,12 @@ int handle_cudaDestroyExternalSemaphore(void *conn)
         return -1;
 
     return 0;
+}
+
+int handle_cudaLaunchKernel(void *conn)
+{
+   // not implemented; disabled function
+   return -1;
 }
 
 int handle_cudaLaunchCooperativeKernelMultiDevice(void *conn)
@@ -16927,6 +17081,12 @@ int handle_cudaGetChannelDesc(void *conn)
     return 0;
 }
 
+int handle_cudaCreateChannelDesc(void *conn)
+{
+   // not implemented; disabled function
+   return -1;
+}
+
 int handle_cudaDestroyTextureObject(void *conn)
 {
     cudaTextureObject_t texObject;
@@ -18236,6 +18396,7 @@ static RequestHandler opHandlers[] = {
     handle_nvmlInit_v2,
     handle_nvmlInitWithFlags,
     handle_nvmlShutdown,
+    handle_nvmlErrorString,
     handle_nvmlSystemGetDriverVersion,
     handle_nvmlSystemGetNVMLVersion,
     handle_nvmlSystemGetCudaDriverVersion,
@@ -18476,6 +18637,7 @@ static RequestHandler opHandlers[] = {
     handle_nvmlDeviceGetGpuInstancePossiblePlacements_v2,
     handle_nvmlDeviceGetGpuInstanceRemainingCapacity,
     handle_nvmlDeviceCreateGpuInstance,
+    handle_nvmlDeviceCreateGpuInstanceWithPlacement,
     handle_nvmlGpuInstanceDestroy,
     handle_nvmlDeviceGetGpuInstances,
     handle_nvmlDeviceGetGpuInstanceById,
@@ -18485,6 +18647,7 @@ static RequestHandler opHandlers[] = {
     handle_nvmlGpuInstanceGetComputeInstanceRemainingCapacity,
     handle_nvmlGpuInstanceGetComputeInstancePossiblePlacements,
     handle_nvmlGpuInstanceCreateComputeInstance,
+    handle_nvmlGpuInstanceCreateComputeInstanceWithPlacement,
     handle_nvmlComputeInstanceDestroy,
     handle_nvmlGpuInstanceGetComputeInstances,
     handle_nvmlGpuInstanceGetComputeInstanceById,
@@ -18513,7 +18676,11 @@ static RequestHandler opHandlers[] = {
     handle_nvmlGpmSampleGet,
     handle_nvmlGpmMigSampleGet,
     handle_nvmlGpmQueryDeviceSupport,
+    handle_nvmlDeviceCcuGetStreamState,
+    handle_nvmlDeviceCcuSetStreamState,
     handle_nvmlDeviceSetNvLinkDeviceLowPowerThreshold,
+    handle_cuGetErrorString,
+    handle_cuGetErrorName,
     handle_cuInit,
     handle_cuDriverGetVersion,
     handle_cuDeviceGet,
@@ -18525,6 +18692,7 @@ static RequestHandler opHandlers[] = {
     handle_cuDeviceTotalMem_v2,
     handle_cuDeviceGetTexture1DLinearMaxWidth,
     handle_cuDeviceGetAttribute,
+    handle_cuDeviceGetNvSciSyncAttributes,
     handle_cuDeviceSetMemPool,
     handle_cuDeviceGetMemPool,
     handle_cuDeviceGetDefaultMemPool,
@@ -18561,6 +18729,9 @@ static RequestHandler opHandlers[] = {
     handle_cuCtxAttach,
     handle_cuCtxDetach,
     handle_cuModuleLoad,
+    handle_cuModuleLoadData,
+    handle_cuModuleLoadDataEx,
+    handle_cuModuleLoadFatBinary,
     handle_cuModuleUnload,
     handle_cuModuleGetLoadingMode,
     handle_cuModuleGetFunction,
@@ -18572,6 +18743,7 @@ static RequestHandler opHandlers[] = {
     handle_cuLinkDestroy,
     handle_cuModuleGetTexRef,
     handle_cuModuleGetSurfRef,
+    handle_cuLibraryLoadData,
     handle_cuLibraryLoadFromFile,
     handle_cuLibraryUnload,
     handle_cuLibraryGetKernel,
@@ -18609,13 +18781,22 @@ static RequestHandler opHandlers[] = {
     handle_cuMemcpyDtoD_v2,
     handle_cuMemcpyDtoA_v2,
     handle_cuMemcpyAtoD_v2,
+    handle_cuMemcpyHtoA_v2,
     handle_cuMemcpyAtoH_v2,
     handle_cuMemcpyAtoA_v2,
+    handle_cuMemcpy2D_v2,
+    handle_cuMemcpy2DUnaligned_v2,
+    handle_cuMemcpy3D_v2,
+    handle_cuMemcpy3DPeer,
     handle_cuMemcpyAsync,
     handle_cuMemcpyPeerAsync,
     handle_cuMemcpyDtoHAsync_v2,
     handle_cuMemcpyDtoDAsync_v2,
+    handle_cuMemcpyHtoAAsync_v2,
     handle_cuMemcpyAtoHAsync_v2,
+    handle_cuMemcpy2DAsync_v2,
+    handle_cuMemcpy3DAsync_v2,
+    handle_cuMemcpy3DPeerAsync,
     handle_cuMemsetD8_v2,
     handle_cuMemsetD16_v2,
     handle_cuMemsetD32_v2,
@@ -18679,6 +18860,7 @@ static RequestHandler opHandlers[] = {
     handle_cuThreadExchangeStreamCaptureMode,
     handle_cuStreamEndCapture,
     handle_cuStreamIsCapturing,
+    handle_cuStreamGetCaptureInfo_v2,
     handle_cuStreamUpdateCaptureDependencies,
     handle_cuStreamAttachMemAsync,
     handle_cuStreamQuery,
@@ -18706,6 +18888,7 @@ static RequestHandler opHandlers[] = {
     handle_cuFuncSetSharedMemConfig,
     handle_cuFuncGetModule,
     handle_cuLaunchKernel,
+    handle_cuLaunchKernelEx,
     handle_cuLaunchCooperativeKernel,
     handle_cuLaunchCooperativeKernelMultiDevice,
     handle_cuLaunchHostFunc,
@@ -18768,6 +18951,8 @@ static RequestHandler opHandlers[] = {
     handle_cuGraphReleaseUserObject,
     handle_cuOccupancyMaxActiveBlocksPerMultiprocessor,
     handle_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags,
+    handle_cuOccupancyMaxPotentialBlockSize,
+    handle_cuOccupancyMaxPotentialBlockSizeWithFlags,
     handle_cuOccupancyAvailableDynamicSMemPerBlock,
     handle_cuTexRefSetArray,
     handle_cuTexRefSetMipmappedArray,
@@ -18815,6 +19000,8 @@ static RequestHandler opHandlers[] = {
     handle_cuGraphicsResourceSetMapFlags_v2,
     handle_cuGraphicsMapResources,
     handle_cuGraphicsUnmapResources,
+    handle_cuGetProcAddress_v2,
+    handle_cuGetExportTable,
     handle_cudaDeviceReset,
     handle_cudaDeviceSynchronize,
     handle_cudaDeviceSetLimit,
@@ -18839,6 +19026,8 @@ static RequestHandler opHandlers[] = {
     handle_cudaThreadSetCacheConfig,
     handle_cudaGetLastError,
     handle_cudaPeekAtLastError,
+    handle_cudaGetErrorName,
+    handle_cudaGetErrorString,
     handle_cudaGetDeviceCount,
     handle_cudaGetDeviceProperties_v2,
     handle_cudaDeviceGetAttribute,
@@ -18882,8 +19071,10 @@ static RequestHandler opHandlers[] = {
     handle_cudaEventSynchronize,
     handle_cudaEventDestroy,
     handle_cudaEventElapsedTime,
+    handle_cudaImportExternalMemory,
     handle_cudaDestroyExternalMemory,
     handle_cudaDestroyExternalSemaphore,
+    handle_cudaLaunchKernel,
     handle_cudaLaunchCooperativeKernelMultiDevice,
     handle_cudaSetDoubleForDevice,
     handle_cudaSetDoubleForHost,
@@ -18910,8 +19101,10 @@ static RequestHandler opHandlers[] = {
     handle_cudaMipmappedArrayGetMemoryRequirements,
     handle_cudaArrayGetSparseProperties,
     handle_cudaMipmappedArrayGetSparseProperties,
+    handle_cudaMemcpy,
     handle_cudaMemcpy2DFromArray,
     handle_cudaMemcpy2DArrayToArray,
+    handle_cudaMemcpyAsync,
     handle_cudaMemcpy2DFromArrayAsync,
     handle_cudaMemset,
     handle_cudaMemset2D,
@@ -18945,6 +19138,7 @@ static RequestHandler opHandlers[] = {
     handle_cudaGraphicsSubResourceGetMappedArray,
     handle_cudaGraphicsResourceGetMappedMipmappedArray,
     handle_cudaGetChannelDesc,
+    handle_cudaCreateChannelDesc,
     handle_cudaDestroyTextureObject,
     handle_cudaGetTextureObjectResourceDesc,
     handle_cudaGetTextureObjectTextureDesc,
@@ -19000,11 +19194,12 @@ static RequestHandler opHandlers[] = {
     handle_cudaUserObjectRelease,
     handle_cudaGraphRetainUserObject,
     handle_cudaGraphReleaseUserObject,
-    handle_cudaMemcpy,
-    handle_cudaMemcpyAsync,
 };
 
 RequestHandler get_handler(const int op)
 {
-    return opHandlers[op];
+   if (op > (sizeof(opHandlers) / sizeof(opHandlers[0]))) {
+       return NULL;
+   }
+   return opHandlers[op];
 }
