@@ -18,6 +18,22 @@ extern int rpc_start_response(const void *conn, const int request_id);
 extern int rpc_write(const void *conn, const void *data, const std::size_t size);
 extern int rpc_end_response(const void *conn, void *return_value);
 
+int handle_nvmlInit_v2(void *conn)
+{
+
+    int request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        return -1;
+
+    nvmlReturn_t result = nvmlInit_v2();
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        return -1;
+
+    return 0;
+}
+
 int handle_nvmlInitWithFlags(void *conn)
 {
     unsigned int flags;
@@ -29,6 +45,22 @@ int handle_nvmlInitWithFlags(void *conn)
         return -1;
 
     nvmlReturn_t result = nvmlInitWithFlags(flags);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        return -1;
+
+    return 0;
+}
+
+int handle_nvmlShutdown(void *conn)
+{
+
+    int request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        return -1;
+
+    nvmlReturn_t result = nvmlShutdown();
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_end_response(conn, &result) < 0)

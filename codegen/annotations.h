@@ -2,7 +2,6 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 /**
- * @disabled
  */
 nvmlReturn_t nvmlInit_v2();
 /**
@@ -10,7 +9,6 @@ nvmlReturn_t nvmlInit_v2();
  */
 nvmlReturn_t nvmlInitWithFlags(unsigned int flags);
 /**
- * @disabled
  */
 nvmlReturn_t nvmlShutdown();
 /**
