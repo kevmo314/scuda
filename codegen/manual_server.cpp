@@ -296,6 +296,8 @@ int handle_cudaLaunchKernel(void *conn)
         return -1;
     }
 
+    std::cout << "Number of kernel arguments: " << num_args << std::endl;
+
     // Allocate memory for the arguments
     args = (void **)malloc(num_args * sizeof(void *));
     if (args == NULL)
@@ -306,14 +308,16 @@ int handle_cudaLaunchKernel(void *conn)
 
     for (int i = 0; i < num_args; ++i)
     {
-        size_t arg_size;
+        int arg_size;
 
-        if (rpc_read(conn, &arg_size, sizeof(size_t)) < 0)
+        if (rpc_read(conn, &arg_size, sizeof(int)) < 0)
         {
             std::cerr << "Failed to read size of argument " << i << " from client." << std::endl;
             free(args);
             return -1;
         }
+
+        std::cout << "Argument " << i << " size: " << arg_size << std::endl;
 
         // Allocate memory for the argument
         args[i] = malloc(arg_size);
@@ -335,6 +339,10 @@ int handle_cudaLaunchKernel(void *conn)
     }
 
     std::cout << "Calling cudaLaunchKernel with func: " << func << std::endl;
+    std::cout << "gridDim: " << gridDim.x << " " << gridDim.y << " " << gridDim.z << std::endl;
+    std::cout << "blockDim: " << blockDim.x << " " << blockDim.y << " " << blockDim.z << std::endl;
+    std::cout << "sharedMem: " << sharedMem << std::endl;
+    std::cout << "stream: " << stream << std::endl;
 
     result = cudaLaunchKernel(func, gridDim, blockDim, args, sharedMem, stream);
     if (result != cudaSuccess)
@@ -379,26 +387,32 @@ int handle___cudaRegisterFatBinary(void *conn)
 {
     std::cout << "REQUEST!!!" << std::endl;
 
-    __cudaFatCudaBinary2 fatCubin = {0, 0, 0, 0};
-    if (rpc_read(conn, &fatCubin.magic, sizeof(int)) < 0 ||
-        rpc_read(conn, &fatCubin.version, sizeof(int)) < 0)
-        return -1;
-
+    __cudaFatCudaBinary2 *fatCubin = (__cudaFatCudaBinary2 *)malloc(sizeof(__cudaFatCudaBinary2));
     unsigned long long size;
-    if (rpc_read(conn, &size, sizeof(unsigned long long)) < 0)
+
+    if (rpc_read(conn, fatCubin, sizeof(__cudaFatCudaBinary2)) < 0 ||
+        rpc_read(conn, &size, sizeof(unsigned long long)) < 0)
         return -1;
 
     void *cubin = malloc(size);
     if (rpc_read(conn, cubin, size) < 0)
         return -1;
 
-    fatCubin.fatbinData = (const unsigned long long *)cubin;
+    fatCubin->text = cubin;
+
+    std::cout << "binary->magic: " << fatCubin->magic << std::endl;
+    std::cout << "binary->version: " << fatCubin->version << std::endl;
+    printf("text: %p\n", fatCubin->text);
+    printf("data: %p\n", fatCubin->data);
+    printf("unknown: %p\n", fatCubin->unknown);
+    printf("text2: %p\n", fatCubin->text2);
+    printf("zero: %p\n", fatCubin->zero);
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
         return -1;
 
-    void **p = __cudaRegisterFatBinary(&fatCubin);
+    void **p = __cudaRegisterFatBinary(fatCubin);
     int return_value = 0;
 
     if (rpc_start_response(conn, request_id) < 0 ||
@@ -455,6 +469,7 @@ int handle___cudaRegisterFunction(void *conn)
         return -1;
 
     std::cout << "fatCubeHandle: " << fatCubinHandle << std::endl;
+    printf("hostFun: %p\n", hostFun);
     std::cout << "deviceFun: " << deviceFun << std::endl;
     std::cout << "deviceName: " << deviceName << std::endl;
     std::cout << "thread_limit: " << thread_limit << std::endl;

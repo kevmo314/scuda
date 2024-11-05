@@ -82,11 +82,15 @@ typedef struct __cudaFatCudaBinary2HeaderRec {
     unsigned long long int  length;
 } __cudaFatCudaBinary2Header;
 
-typedef struct __cudaFatCudaBinaryRec2 {
-    int magic;
-    int version;
-    const unsigned long long* fatbinData;
-    char* f;
+typedef struct __cudaFatCudaBinaryRec2
+{
+    unsigned int magic;
+    unsigned int version;
+    void* text; 
+    void* data; 
+    unsigned long long int unknown;
+    void *text2;
+    unsigned long long int zero;
 } __cudaFatCudaBinary2;
 
 void ptx_from_fatbin(const void *cubin_ptr);

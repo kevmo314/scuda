@@ -8,6 +8,7 @@
 #include <cstring>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "gen_api.h"
 #include "ptx_fatbin.hpp"
@@ -19,6 +20,21 @@ extern int rpc_wait_for_response(const int index);
 extern int rpc_read(const int index, void *data, const std::size_t size);
 extern int rpc_end_request(const int index, void *return_value);
 extern int rpc_close();
+
+#define MAX_FUNCTION_NAME 1024
+#define MAX_ARGS 128
+#define INITIAL_FUNCTION_COUNT 8
+
+struct Function
+{
+    char *name;
+    void *fat_cubin;       // the fat cubin that this function is a part of.
+    const char *host_func; // if registered, points at the host function.
+    int *arg_sizes;
+    int arg_count;
+};
+
+std::vector<Function> functions;
 
 cudaError_t cudaMemcpy(void *dst, const void *src, size_t count, enum cudaMemcpyKind kind)
 {
@@ -289,30 +305,23 @@ cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim, void
         return cudaErrorDevicesUnavailable;
     }
 
-    int num_args = 0;
-    while (args[num_args] != nullptr)
-        num_args++;
+    Function *f = nullptr;
+    for (auto &function : functions)
+        if (function.host_func == func)
+            f = &function;
 
-    if (rpc_write(0, &num_args, sizeof(int)) < 0)
-    {
+    if (f == nullptr ||
+        rpc_write(0, &f->arg_count, sizeof(int)) < 0)
         return cudaErrorDevicesUnavailable;
-    }
 
-    for (int i = 0; i < num_args; ++i)
+    for (int i = 0; i < f->arg_count; ++i)
     {
-        size_t arg_size = sizeof(args[i]);
-        std::cout << "sending argument " << i << " of size " << arg_size << " bytes" << std::endl;
+        std::cout << "sending argument " << i << " of size " << f->arg_sizes[i] << " bytes" << std::endl;
 
         // Send the argument size
-        if (rpc_write(0, &arg_size, sizeof(size_t)) < 0)
-        {
+        if (rpc_write(0, &f->arg_sizes[i], sizeof(int)) < 0 ||
+            rpc_write(0, args[i], f->arg_sizes[i]) < 0)
             return cudaErrorDevicesUnavailable;
-        }
-
-        if (rpc_write(0, args[i], arg_size) < 0)
-        {
-            return cudaErrorDevicesUnavailable;
-        }
     }
 
     if (rpc_wait_for_response(0) < 0)
@@ -328,91 +337,126 @@ cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim, void
     return return_value;
 }
 
-// void ptx_from_fatbin(const void *cubin_ptr)
-// {
-//     assert(cubin_ptr != 0);
-//     if(*(int*)cubin_ptr == __cudaFatMAGIC)
-//     {
-//       __cudaFatCudaBinary *binary = (__cudaFatCudaBinary *)cubin_ptr;
-//       assert(binary->ident != 0);
-//       std::cout << binary->ident << std::endl;
-//       assert(binary->ptx != 0);
-//       assert(binary->ptx->ptx != 0);
-//       int i=0;
-//       while(binary->ptx[i].ptx != 0){
-//         assert(binary->ptx[i].gpuProfileName != 0);
-//         std::cout << binary->ptx[i].gpuProfileName << std::endl;
-//         assert(binary->ptx[i].ptx != 0);
-//         std::cout << binary->ptx[i].ptx << std::endl;
-//         i++;
-//       }
-//     }
-//     else if(*(unsigned*)cubin_ptr == __cudaFatMAGIC2)
-//     {
-// 	__cudaFatCudaBinary2* binary = (__cudaFatCudaBinary2*) cubin_ptr;
+// Function to calculate byte size based on PTX data type
+int get_type_size(const char *type)
+{
+    if (*type == 'u' || *type == 's' || *type == 'f')
+        type++;
+    else
+        return 0; // Unknown type
+    if (*type == '8')
+        return 1;
+    if (*type == '1' && *(type + 1) == '6')
+        return 2;
+    if (*type == '3' && *(type + 1) == '2')
+        return 4;
+    if (*type == '6' && *(type + 1) == '4')
+        return 8;
+    return 0; // Unknown type
+}
 
-//         printf("%x ", binary->magic);
-//         printf("%x ", binary->version);
-//         printf("%p ", binary->fatbinData);
-//         printf("%p ", binary->f);
-//         printf("\n");
+// Function to parse a PTX string and fill functions into a dynamically allocated array
+void parse_ptx_string(void *fatCubin, const char *ptx_string, unsigned long long ptx_len)
+{
+    // for this entire function we work with offsets to avoid risky pointer stuff.
+    for (unsigned long long i = 0; i < ptx_len; i++)
+    {
+        // check if this token is an entry.
+        if (ptx_string[i] != '.' ||
+            i + 5 >= ptx_len ||
+            strncmp(ptx_string + i + 1, "entry", strlen("entry")) != 0)
+            continue;
 
-// 	__cudaFatCudaBinary2Header* header = (__cudaFatCudaBinary2Header*) binary->fatbinData;
-// 	char* base = (char*)(header + 1);
-// 	long long unsigned int offset = 0;
-// 	__cudaFatCudaBinary2EntryRec* entry = (__cudaFatCudaBinary2EntryRec*)(base);
+        char *name = new char[MAX_FUNCTION_NAME];
+        int *arg_sizes = new int[MAX_ARGS];
+        int arg_count = 0;
 
-//         printf("%x ", header->magic);
-//         printf("%x ", header->version);
-//         printf("%llx ", header->length);
-//         printf("\n");
+        // find the next non a-zA-Z0-9_ character
+        i += strlen(".entry");
+        while (i < ptx_len && !isalnum(ptx_string[i]) && ptx_string[i] != '_')
+            i++;
 
-// 	while (!(entry->type & FATBIN_2_PTX) && offset < header->length)
-//         {
-// 	  entry = (__cudaFatCudaBinary2EntryRec*)(base + offset);
-// 	  printf("%x ", entry->type);
-// 	  printf("%x ", entry->binary);
-// 	  printf("%llx ", entry->binarySize);
-// 	  printf("%x ", entry->unknown2);
-// 	  printf("%x ", entry->kindOffset);
-// 	  printf("%x ", entry->unknown3);
-// 	  printf("%x ", entry->unknown4);
-// 	  printf("%x ", entry->name);
-// 	  printf("%x ", entry->nameSize);
-// 	  printf("%llx ", entry->flags);
-// 	  printf("%llx ", entry->unknown7);
-// 	  printf("%llx ", entry->uncompressedBinarySize);
-// 	  printf("\n");
+        // now we're pointing at the start of the name, copy the name to the function
+        int j = 0;
+        for (; j < MAX_FUNCTION_NAME - 1 && i < ptx_len && (isalnum(ptx_string[i]) || ptx_string[i] == '_');)
+            name[j++] = ptx_string[i++];
+        name[j] = '\0';
 
-// 	  printf("%s\n", (char *)((char*)entry + entry->name));
-// 	  printf("%lld %lld bytes\n", entry->binary, entry->binarySize);
+        // find the next ( character to demarcate the arg start or { to demarcate the function body
+        while (i < ptx_len && ptx_string[i] != '(' && ptx_string[i] != '{')
+            i++;
 
-// 	  offset += entry->binary + entry->binarySize;
-// 	}
-//         printf("Found PTX\n");
-//         assert(entry->type & FATBIN_2_PTX);
-// 	printf("%x ", entry->type);
-// 	printf("%x ", entry->binary);
-// 	printf("%llx ", entry->binarySize);
-// 	printf("%x ", entry->unknown2);
-// 	printf("%x ", entry->kindOffset);
-// 	printf("%x ", entry->unknown3);
-// 	printf("%x ", entry->unknown4);
-// 	printf("%x ", entry->name);
-// 	printf("%x ", entry->nameSize);
-// 	printf("%llx ", entry->flags);
-// 	printf("%llx ", entry->unknown7);
-// 	printf("%llx ", entry->uncompressedBinarySize);
-// 	printf("\n");
+        if (ptx_string[i] == '(')
+        {
+            std::cout << "found function args" << std::endl;
 
-// 	printf("%s\n", (char *)((char*)entry + entry->name));
-// 	printf("%ld (C)%lld B (U)%lld B\n", entry->binary, entry->binarySize, entry->uncompressedBinarySize);
-//     }
-//     else
-//     {
-//         printf("Unrecognized CUDA FAT MAGIC 0x%x\n", *(int*)cubin_ptr);
-//     }
-// }
+            // parse out the args-list
+            for (; arg_count < MAX_ARGS; arg_count++)
+            {
+                int arg_size = 0;
+
+                // read until a . is found or )
+                while (i < ptx_len && (ptx_string[i] != '.' && ptx_string[i] != ')'))
+                    i++;
+
+                if (ptx_string[i] == ')')
+                    break;
+
+                // assert that the next token is "param"
+                if (i + 5 >= ptx_len || strncmp(ptx_string + i, ".param", strlen(".param")) != 0)
+                    continue;
+
+                while (true)
+                {
+                    // read the arguments list
+
+                    // read until a . , ) or [
+                    while (i < ptx_len && (ptx_string[i] != '.' && ptx_string[i] != ',' && ptx_string[i] != ')' && ptx_string[i] != '['))
+                        i++;
+
+                    if (ptx_string[i] == '.')
+                    {
+                        std::cout << "found arg type" << std::endl;
+                        // read the type, ignoring if it's not a valid type
+                        int type_size = get_type_size(ptx_string + (++i));
+                        if (type_size == 0)
+                            continue;
+                        arg_size = type_size;
+
+                        std::cout << "arg size: " << arg_size << std::endl;
+                    }
+                    else if (ptx_string[i] == '[')
+                    {
+                        // this is an array type. read until the ]
+                        int start = i + 1;
+                        while (i < ptx_len && ptx_string[i] != ']')
+                            i++;
+
+                        // parse the int value
+                        int n = 0;
+                        for (int j = start; j < i; j++)
+                            n = n * 10 + ptx_string[j] - '0';
+                        arg_size *= n;
+                    }
+                    else if (ptx_string[i] == ',' || ptx_string[i] == ')')
+                        // end of this argument
+                        break;
+                }
+
+                arg_sizes[arg_count] = arg_size;
+            }
+        }
+
+        // add the function to the list
+        functions.push_back(Function{
+            .name = name,
+            .fat_cubin = fatCubin,
+            .host_func = nullptr,
+            .arg_sizes = arg_sizes,
+            .arg_count = arg_count,
+        });
+    }
+}
 
 extern "C" void **__cudaRegisterFatBinary(void *fatCubin)
 {
@@ -426,17 +470,46 @@ extern "C" void **__cudaRegisterFatBinary(void *fatCubin)
     {
         __cudaFatCudaBinary2 *binary = (__cudaFatCudaBinary2 *)fatCubin;
 
-        if (rpc_write(0, &binary->magic, sizeof(int)) < 0 ||
-            rpc_write(0, &binary->version, sizeof(int)) < 0)
+        std::cout << "binary->magic: " << binary->magic << std::endl;
+        std::cout << "binary->version: " << binary->version << std::endl;
+        printf("text: %p\n", binary->text);
+        printf("data: %p\n", binary->data);
+        printf("unknown: %p\n", binary->unknown);
+        printf("text2: %p\n", binary->text2);
+        printf("zero: %p\n", binary->zero);
+
+        if (rpc_write(0, binary, sizeof(__cudaFatCudaBinary2)) < 0)
             return nullptr;
 
-        __cudaFatCudaBinary2Header *header = (__cudaFatCudaBinary2Header *)binary->fatbinData;
+        __cudaFatCudaBinary2Header *header = (__cudaFatCudaBinary2Header *)binary->text;
 
         unsigned long long size = sizeof(__cudaFatCudaBinary2Header) + header->length;
 
         if (rpc_write(0, &size, sizeof(unsigned long long)) < 0 ||
             rpc_write(0, header, size) < 0)
             return nullptr;
+
+        std::vector<Function> functions;
+
+        // also parse the ptx file from the fatbin to store the parameter sizes for the assorted functions
+        char *base = (char *)(header + 1);
+        long long unsigned int offset = 0;
+        __cudaFatCudaBinary2EntryRec *entry = (__cudaFatCudaBinary2EntryRec *)(base);
+        while (offset < header->length)
+        {
+            entry = (__cudaFatCudaBinary2EntryRec *)(base + offset);
+            offset += entry->binary + entry->binarySize;
+
+            if (!(entry->type & FATBIN_2_PTX))
+                continue;
+
+            // print the entire ptx file for debugging
+            for (int i = 0; i < entry->binarySize; i++)
+                std::cout << *(char *)((char *)entry + entry->binary + i);
+            std::cout << std::endl;
+
+            parse_ptx_string(fatCubin, (char *)entry + entry->binary, entry->binarySize);
+        }
     }
 
     if (rpc_wait_for_response(0) < 0 ||
@@ -573,6 +646,14 @@ extern "C" void __cudaRegisterFunction(void **fatCubinHandle,
         rpc_wait_for_response(0) < 0 ||
         rpc_end_request(0, &return_value) < 0)
         return;
+
+    // also memorize the host pointer function
+    for (auto &function : functions)
+    {
+        std::cout << "comparing " << function.name << " with " << deviceName << std::endl;
+        if (strcmp(function.name, deviceName) == 0)
+            function.host_func = hostFun;
+    }
 }
 
 extern "C"
