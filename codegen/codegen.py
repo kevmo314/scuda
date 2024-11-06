@@ -106,9 +106,16 @@ class Operation:
 
 def parse_annotation(annotation: str, params: list[Parameter]) -> list[Operation]:
     operations: list[Operation] = []
+    
     if not annotation:
         return operations
     for line in annotation.split("\n"):
+        # we treat disabled functions a bit differently.
+        # we should record that this function is disabled so that we can create the RPC method but not the actual handler.
+        # this is so that we don't break API compatability by commenting/uncommenting functions from our annotations file.
+        if "@disabled" in line or "@DISABLED" in line:
+            # we can return instantly; the function is disabled and we don't care about operations at this time.
+            return operations, True
         if line.startswith("/**"):
             continue
         if line.startswith("*/"):
@@ -170,7 +177,7 @@ def parse_annotation(annotation: str, params: list[Parameter]) -> list[Operation
                 length_parameter=length_parameter,
             )
             operations.append(operation)
-    return operations
+    return operations, False
 
 
 def error_const(return_type: str) -> str:
@@ -199,6 +206,8 @@ def main():
     )
     annotations: ParsedData = parse_file("annotations.h", options=options)
 
+    # any new parsed libaries should be appended to the END of this list.
+    # this is to maintain proper ordering of our RPC calls.
     functions = (
         nvml_ast.namespace.functions
         + cuda_ast.namespace.functions
@@ -215,20 +224,15 @@ def main():
             print(f"Annotation for {function.name} not found")
             continue
         try:
-            operations = parse_annotation(annotation.doxygen, function.parameters)
+            operations, is_func_disabled = parse_annotation(annotation.doxygen, function.parameters)
         except Exception as e:
             print(f"Error parsing annotation for {function.name}: {e}")
             continue
-        functions_with_annotations.append((function, annotation, operations))
+        functions_with_annotations.append((function, annotation, operations, is_func_disabled))
 
     with open("gen_api.h", "w") as f:
         lastIndex = 0
-        # visited = set()
-        for i, (function, _, _) in enumerate(functions_with_annotations):
-            # value = hash(function.name.format()) % (2**32)
-            # if value in visited:
-            #     print(f"Hash collision for {function.name.format()}")
-            #     continue
+        for i, (function, _, _, _) in enumerate(functions_with_annotations):
             f.write(
                 "#define RPC_{name} {value}\n".format(
                     name=function.name.format(),
@@ -236,15 +240,6 @@ def main():
                 )
             )
             lastIndex += 1
-
-        # Append any manually written implementations to our rpc list so that we maintain proper operation order
-        for j, (handler) in enumerate(MANUAL_IMPLEMENTATIONS):
-            f.write(
-                "#define RPC_{name} {value}\n".format(
-                    name=handler.format(),
-                    value=j + lastIndex,
-                )
-            )
 
     with open("gen_client.cpp", "w") as f:
         f.write(
@@ -264,7 +259,10 @@ def main():
             "extern int rpc_end_request(const int index, void *return_value);\n"
             "extern int rpc_close();\n\n"
         )
-        for function, annotation, operations in functions_with_annotations:
+        for function, annotation, operations, disabled in functions_with_annotations:
+            # we don't generate client function definitions for disabled functions; only the RPC definitions.
+            if disabled: continue
+
             f.write(
                 "{return_type} {name}({params})\n".format(
                     return_type=function.return_type.format(),
@@ -426,14 +424,16 @@ def main():
 
         # we need the base nvmlInit, this is important and should be kept here in the codegen.
         f.write('    {"nvmlInit", (void *)nvmlInit_v2},\n')
-        for function, _, _ in functions_with_annotations:
+        for function, _, _, disabled in functions_with_annotations:
+            if disabled: continue
+
             f.write(
                 '    {{"{name}", (void *){name}}},\n'.format(
                     name=function.name.format()
                 )
             )
         # write manual overrides
-        function_names = set(f.name.format() for f, _, _ in functions_with_annotations)
+        function_names = set(f.name.format() for f, _, _, disabled in functions_with_annotations if not disabled)
         for x, y in MANUAL_REMAPPINGS:
             # ensure y exists in the function list
             if y not in function_names:
@@ -478,7 +478,9 @@ def main():
             "extern int rpc_write(const void *conn, const void *data, const std::size_t size);\n"
             "extern int rpc_end_response(const void *conn, void *return_value);\n\n"
         )
-        for function, annotation, operations in functions_with_annotations:
+        for function, annotation, operations, disabled in functions_with_annotations:
+            if function.name.format() in MANUAL_IMPLEMENTATIONS: continue
+
             # parse the annotation doxygen
             f.write(
                 "int handle_{name}(void *conn)\n".format(
@@ -486,6 +488,12 @@ def main():
                 )
             )
             f.write("{\n")
+
+            if disabled:
+                f.write("   // not implemented; disabled function\n")
+                f.write("   return -1;\n")
+                f.write("}\n\n")
+                continue
 
             for operation in operations:
                 if operation.null_terminated:
@@ -675,15 +683,16 @@ def main():
             f.write("}\n\n")
 
         f.write("static RequestHandler opHandlers[] = {\n")
-        for function, _, _ in functions_with_annotations:
+        for function, _, _, disabled in functions_with_annotations:
             f.write("    handle_{name},\n".format(name=function.name.format()))
-        for handler in MANUAL_IMPLEMENTATIONS:
-            f.write("    handle_{name},\n".format(name=handler.format()))
         f.write("};\n\n")
 
         f.write("RequestHandler get_handler(const int op)\n")
         f.write("{\n")
-        f.write("    return opHandlers[op];\n")
+        f.write("   if (op > (sizeof(opHandlers) / sizeof(opHandlers[0]))) {\n")
+        f.write("       return NULL;\n")
+        f.write("   }\n")
+        f.write("   return opHandlers[op];\n")
         f.write("}\n")
 
 
