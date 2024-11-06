@@ -8,6 +8,7 @@
 #include <cstring>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "gen_api.h"
 #include "ptx_fatbin.hpp"
@@ -19,6 +20,21 @@ extern int rpc_wait_for_response(const int index);
 extern int rpc_read(const int index, void *data, const std::size_t size);
 extern int rpc_end_request(const int index, void *return_value);
 extern int rpc_close();
+
+#define MAX_FUNCTION_NAME 1024
+#define MAX_ARGS 128
+#define INITIAL_FUNCTION_COUNT 8
+
+struct Function
+{
+    char *name;
+    void *fat_cubin;       // the fat cubin that this function is a part of.
+    const char *host_func; // if registered, points at the host function.
+    int *arg_sizes;
+    int arg_count;
+};
+
+std::vector<Function> functions;
 
 cudaError_t cudaMemcpy(void *dst, const void *src, size_t count, enum cudaMemcpyKind kind)
 {
@@ -167,87 +183,87 @@ cudaError_t cudaMemcpyAsync(void *dst, const void *src, size_t count, enum cudaM
 
     return return_value;
 }
-const char* cudaGetErrorString(cudaError_t error)
+const char *cudaGetErrorString(cudaError_t error)
 {
     switch (error)
     {
-        case cudaSuccess:
-            return "cudaSuccess: No errors";
-        case cudaErrorInvalidValue:
-            return "cudaErrorInvalidValue: Invalid value";
-        case cudaErrorMemoryAllocation:
-            return "cudaErrorMemoryAllocation: Out of memory";
-        case cudaErrorInitializationError:
-            return "cudaErrorInitializationError: Initialization error";
-        case cudaErrorLaunchFailure:
-            return "cudaErrorLaunchFailure: Launch failure";
-        case cudaErrorPriorLaunchFailure:
-            return "cudaErrorPriorLaunchFailure: Launch failure of a previous kernel";
-        case cudaErrorLaunchTimeout:
-            return "cudaErrorLaunchTimeout: Launch timed out";
-        case cudaErrorLaunchOutOfResources:
-            return "cudaErrorLaunchOutOfResources: Launch exceeded resources";
-        case cudaErrorInvalidDeviceFunction:
-            return "cudaErrorInvalidDeviceFunction: Invalid device function";
-        case cudaErrorInvalidConfiguration:
-            return "cudaErrorInvalidConfiguration: Invalid configuration";
-        case cudaErrorInvalidDevice:
-            return "cudaErrorInvalidDevice: Invalid device";
-        case cudaErrorInvalidMemcpyDirection:
-            return "cudaErrorInvalidMemcpyDirection: Invalid memory copy direction";
-        case cudaErrorInsufficientDriver:
-            return "cudaErrorInsufficientDriver: CUDA driver is insufficient for the runtime version";
-        case cudaErrorMissingConfiguration:
-            return "cudaErrorMissingConfiguration: Missing configuration";
-        case cudaErrorNoDevice:
-            return "cudaErrorNoDevice: No CUDA-capable device is detected";
-        case cudaErrorArrayIsMapped:
-            return "cudaErrorArrayIsMapped: Array is already mapped";
-        case cudaErrorAlreadyMapped:
-            return "cudaErrorAlreadyMapped: Resource is already mapped";
-        case cudaErrorNoKernelImageForDevice:
-            return "cudaErrorNoKernelImageForDevice: No kernel image is available for the device";
-        case cudaErrorECCUncorrectable:
-            return "cudaErrorECCUncorrectable: Uncorrectable ECC error detected";
-        case cudaErrorSharedObjectSymbolNotFound:
-            return "cudaErrorSharedObjectSymbolNotFound: Shared object symbol not found";
-        case cudaErrorSharedObjectInitFailed:
-            return "cudaErrorSharedObjectInitFailed: Shared object initialization failed";
-        case cudaErrorUnsupportedLimit:
-            return "cudaErrorUnsupportedLimit: Unsupported limit";
-        case cudaErrorDuplicateVariableName:
-            return "cudaErrorDuplicateVariableName: Duplicate global variable name";
-        case cudaErrorDuplicateTextureName:
-            return "cudaErrorDuplicateTextureName: Duplicate texture name";
-        case cudaErrorDuplicateSurfaceName:
-            return "cudaErrorDuplicateSurfaceName: Duplicate surface name";
-        case cudaErrorDevicesUnavailable:
-            return "cudaErrorDevicesUnavailable: All devices are busy or unavailable";
-        case cudaErrorInvalidKernelImage:
-            return "cudaErrorInvalidKernelImage: The kernel image is invalid";
-        case cudaErrorInvalidSource:
-            return "cudaErrorInvalidSource: The device kernel source is invalid";
-        case cudaErrorFileNotFound:
-            return "cudaErrorFileNotFound: File not found";
-        case cudaErrorInvalidPtx:
-            return "cudaErrorInvalidPtx: The PTX is invalid";
-        case cudaErrorInvalidGraphicsContext:
-            return "cudaErrorInvalidGraphicsContext: Invalid OpenGL or DirectX context";
-        case cudaErrorInvalidResourceHandle:
-            return "cudaErrorInvalidResourceHandle: Invalid resource handle";
-        case cudaErrorNotReady:
-            return "cudaErrorNotReady: CUDA operations are not ready";
-        case cudaErrorIllegalAddress:
-            return "cudaErrorIllegalAddress: An illegal memory access occurred";
-        case cudaErrorInvalidPitchValue:
-            return "cudaErrorInvalidPitchValue: Invalid pitch value";
-        case cudaErrorInvalidSymbol:
-            return "cudaErrorInvalidSymbol: Invalid symbol";
-        case cudaErrorUnknown:
-            return "cudaErrorUnknown: Unknown error";
-        // Add any other CUDA error codes that are missing
-        default:
-            return "Unknown CUDA error";
+    case cudaSuccess:
+        return "cudaSuccess: No errors";
+    case cudaErrorInvalidValue:
+        return "cudaErrorInvalidValue: Invalid value";
+    case cudaErrorMemoryAllocation:
+        return "cudaErrorMemoryAllocation: Out of memory";
+    case cudaErrorInitializationError:
+        return "cudaErrorInitializationError: Initialization error";
+    case cudaErrorLaunchFailure:
+        return "cudaErrorLaunchFailure: Launch failure";
+    case cudaErrorPriorLaunchFailure:
+        return "cudaErrorPriorLaunchFailure: Launch failure of a previous kernel";
+    case cudaErrorLaunchTimeout:
+        return "cudaErrorLaunchTimeout: Launch timed out";
+    case cudaErrorLaunchOutOfResources:
+        return "cudaErrorLaunchOutOfResources: Launch exceeded resources";
+    case cudaErrorInvalidDeviceFunction:
+        return "cudaErrorInvalidDeviceFunction: Invalid device function";
+    case cudaErrorInvalidConfiguration:
+        return "cudaErrorInvalidConfiguration: Invalid configuration";
+    case cudaErrorInvalidDevice:
+        return "cudaErrorInvalidDevice: Invalid device";
+    case cudaErrorInvalidMemcpyDirection:
+        return "cudaErrorInvalidMemcpyDirection: Invalid memory copy direction";
+    case cudaErrorInsufficientDriver:
+        return "cudaErrorInsufficientDriver: CUDA driver is insufficient for the runtime version";
+    case cudaErrorMissingConfiguration:
+        return "cudaErrorMissingConfiguration: Missing configuration";
+    case cudaErrorNoDevice:
+        return "cudaErrorNoDevice: No CUDA-capable device is detected";
+    case cudaErrorArrayIsMapped:
+        return "cudaErrorArrayIsMapped: Array is already mapped";
+    case cudaErrorAlreadyMapped:
+        return "cudaErrorAlreadyMapped: Resource is already mapped";
+    case cudaErrorNoKernelImageForDevice:
+        return "cudaErrorNoKernelImageForDevice: No kernel image is available for the device";
+    case cudaErrorECCUncorrectable:
+        return "cudaErrorECCUncorrectable: Uncorrectable ECC error detected";
+    case cudaErrorSharedObjectSymbolNotFound:
+        return "cudaErrorSharedObjectSymbolNotFound: Shared object symbol not found";
+    case cudaErrorSharedObjectInitFailed:
+        return "cudaErrorSharedObjectInitFailed: Shared object initialization failed";
+    case cudaErrorUnsupportedLimit:
+        return "cudaErrorUnsupportedLimit: Unsupported limit";
+    case cudaErrorDuplicateVariableName:
+        return "cudaErrorDuplicateVariableName: Duplicate global variable name";
+    case cudaErrorDuplicateTextureName:
+        return "cudaErrorDuplicateTextureName: Duplicate texture name";
+    case cudaErrorDuplicateSurfaceName:
+        return "cudaErrorDuplicateSurfaceName: Duplicate surface name";
+    case cudaErrorDevicesUnavailable:
+        return "cudaErrorDevicesUnavailable: All devices are busy or unavailable";
+    case cudaErrorInvalidKernelImage:
+        return "cudaErrorInvalidKernelImage: The kernel image is invalid";
+    case cudaErrorInvalidSource:
+        return "cudaErrorInvalidSource: The device kernel source is invalid";
+    case cudaErrorFileNotFound:
+        return "cudaErrorFileNotFound: File not found";
+    case cudaErrorInvalidPtx:
+        return "cudaErrorInvalidPtx: The PTX is invalid";
+    case cudaErrorInvalidGraphicsContext:
+        return "cudaErrorInvalidGraphicsContext: Invalid OpenGL or DirectX context";
+    case cudaErrorInvalidResourceHandle:
+        return "cudaErrorInvalidResourceHandle: Invalid resource handle";
+    case cudaErrorNotReady:
+        return "cudaErrorNotReady: CUDA operations are not ready";
+    case cudaErrorIllegalAddress:
+        return "cudaErrorIllegalAddress: An illegal memory access occurred";
+    case cudaErrorInvalidPitchValue:
+        return "cudaErrorInvalidPitchValue: Invalid pitch value";
+    case cudaErrorInvalidSymbol:
+        return "cudaErrorInvalidSymbol: Invalid symbol";
+    case cudaErrorUnknown:
+        return "cudaErrorUnknown: Unknown error";
+    // Add any other CUDA error codes that are missing
+    default:
+        return "Unknown CUDA error";
     }
 }
 
@@ -289,30 +305,23 @@ cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim, void
         return cudaErrorDevicesUnavailable;
     }
 
-    int num_args = 0;
-    while (args[num_args] != nullptr)
-        num_args++;
+    Function *f = nullptr;
+    for (auto &function : functions)
+        if (function.host_func == func)
+            f = &function;
 
-    if (rpc_write(0, &num_args, sizeof(int)) < 0)
-    {
+    if (f == nullptr ||
+        rpc_write(0, &f->arg_count, sizeof(int)) < 0)
         return cudaErrorDevicesUnavailable;
-    }
 
-    for (int i = 0; i < num_args; ++i)
+    for (int i = 0; i < f->arg_count; ++i)
     {
-        size_t arg_size = sizeof(args[i]);
-        std::cout << "sending argument " << i << " of size " << arg_size << " bytes" << std::endl;
+        std::cout << "sending argument " << i << " of size " << f->arg_sizes[i] << " bytes" << std::endl;
 
         // Send the argument size
-        if (rpc_write(0, &arg_size, sizeof(size_t)) < 0)
-        {
+        if (rpc_write(0, &f->arg_sizes[i], sizeof(int)) < 0 ||
+            rpc_write(0, args[i], f->arg_sizes[i]) < 0)
             return cudaErrorDevicesUnavailable;
-        }
-
-        if (rpc_write(0, args[i], arg_size) < 0)
-        {
-            return cudaErrorDevicesUnavailable;
-        }
     }
 
     if (rpc_wait_for_response(0) < 0)
@@ -328,171 +337,194 @@ cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim, void
     return return_value;
 }
 
-// void ptx_from_fatbin(const void *cubin_ptr)
-// {
-//     assert(cubin_ptr != 0);
-//     if(*(int*)cubin_ptr == __cudaFatMAGIC) 
-//     {
-//       __cudaFatCudaBinary *binary = (__cudaFatCudaBinary *)cubin_ptr;
-//       assert(binary->ident != 0);
-//       std::cout << binary->ident << std::endl;
-//       assert(binary->ptx != 0);
-//       assert(binary->ptx->ptx != 0);
-//       int i=0;
-//       while(binary->ptx[i].ptx != 0){
-//         assert(binary->ptx[i].gpuProfileName != 0);
-//         std::cout << binary->ptx[i].gpuProfileName << std::endl;
-//         assert(binary->ptx[i].ptx != 0);
-//         std::cout << binary->ptx[i].ptx << std::endl;
-//         i++;
-//       }
-//     }
-//     else if(*(unsigned*)cubin_ptr == __cudaFatMAGIC2)
-//     {
-// 	__cudaFatCudaBinary2* binary = (__cudaFatCudaBinary2*) cubin_ptr;
-
-//         printf("%x ", binary->magic);
-//         printf("%x ", binary->version);
-//         printf("%p ", binary->fatbinData);
-//         printf("%p ", binary->f);
-//         printf("\n");
-
-// 	__cudaFatCudaBinary2Header* header = (__cudaFatCudaBinary2Header*) binary->fatbinData;
-// 	char* base = (char*)(header + 1);
-// 	long long unsigned int offset = 0;
-// 	__cudaFatCudaBinary2EntryRec* entry = (__cudaFatCudaBinary2EntryRec*)(base);
-
-//         printf("%x ", header->magic);
-//         printf("%x ", header->version);
-//         printf("%llx ", header->length);
-//         printf("\n");
-
-
-// 	while (!(entry->type & FATBIN_2_PTX) && offset < header->length) 
-//         {
-// 	  entry = (__cudaFatCudaBinary2EntryRec*)(base + offset);
-// 	  printf("%x ", entry->type);
-// 	  printf("%x ", entry->binary);
-// 	  printf("%llx ", entry->binarySize);
-// 	  printf("%x ", entry->unknown2);
-// 	  printf("%x ", entry->kindOffset);
-// 	  printf("%x ", entry->unknown3);
-// 	  printf("%x ", entry->unknown4);
-// 	  printf("%x ", entry->name);
-// 	  printf("%x ", entry->nameSize);
-// 	  printf("%llx ", entry->flags);
-// 	  printf("%llx ", entry->unknown7);
-// 	  printf("%llx ", entry->uncompressedBinarySize);
-// 	  printf("\n");
-
-// 	  printf("%s\n", (char *)((char*)entry + entry->name));
-// 	  printf("%lld %lld bytes\n", entry->binary, entry->binarySize);
-
-// 	  offset += entry->binary + entry->binarySize;
-// 	}
-//         printf("Found PTX\n");
-//         assert(entry->type & FATBIN_2_PTX);
-// 	printf("%x ", entry->type);
-// 	printf("%x ", entry->binary);
-// 	printf("%llx ", entry->binarySize);
-// 	printf("%x ", entry->unknown2);
-// 	printf("%x ", entry->kindOffset);
-// 	printf("%x ", entry->unknown3);
-// 	printf("%x ", entry->unknown4);
-// 	printf("%x ", entry->name);
-// 	printf("%x ", entry->nameSize);
-// 	printf("%llx ", entry->flags);
-// 	printf("%llx ", entry->unknown7);
-// 	printf("%llx ", entry->uncompressedBinarySize);
-// 	printf("\n");
-
-// 	printf("%s\n", (char *)((char*)entry + entry->name));
-// 	printf("%ld (C)%lld B (U)%lld B\n", entry->binary, entry->binarySize, entry->uncompressedBinarySize);
-//     }
-//     else
-//     {
-//         printf("Unrecognized CUDA FAT MAGIC 0x%x\n", *(int*)cubin_ptr);
-//     }
-// }
-
-extern "C" void **__cudaRegisterFatBinary(void **fatCubin)
+// Function to calculate byte size based on PTX data type
+int get_type_size(const char *type)
 {
-    void* return_value;
-    void **result;
+    if (*type == 'u' || *type == 's' || *type == 'f')
+        type++;
+    else
+        return 0; // Unknown type
+    if (*type == '8')
+        return 1;
+    if (*type == '1' && *(type + 1) == '6')
+        return 2;
+    if (*type == '3' && *(type + 1) == '2')
+        return 4;
+    if (*type == '6' && *(type + 1) == '4')
+        return 8;
+    return 0; // Unknown type
+}
 
-    std::cout << "starting __cudaRegisterFatBinary" << std::endl;
+// Function to parse a PTX string and fill functions into a dynamically allocated array
+void parse_ptx_string(void *fatCubin, const char *ptx_string, unsigned long long ptx_len)
+{
+    // for this entire function we work with offsets to avoid risky pointer stuff.
+    for (unsigned long long i = 0; i < ptx_len; i++)
+    {
+        // check if this token is an entry.
+        if (ptx_string[i] != '.' ||
+            i + 5 >= ptx_len ||
+            strncmp(ptx_string + i + 1, "entry", strlen("entry")) != 0)
+            continue;
+
+        char *name = new char[MAX_FUNCTION_NAME];
+        int *arg_sizes = new int[MAX_ARGS];
+        int arg_count = 0;
+
+        // find the next non a-zA-Z0-9_ character
+        i += strlen(".entry");
+        while (i < ptx_len && !isalnum(ptx_string[i]) && ptx_string[i] != '_')
+            i++;
+
+        // now we're pointing at the start of the name, copy the name to the function
+        int j = 0;
+        for (; j < MAX_FUNCTION_NAME - 1 && i < ptx_len && (isalnum(ptx_string[i]) || ptx_string[i] == '_');)
+            name[j++] = ptx_string[i++];
+        name[j] = '\0';
+
+        // find the next ( character to demarcate the arg start or { to demarcate the function body
+        while (i < ptx_len && ptx_string[i] != '(' && ptx_string[i] != '{')
+            i++;
+
+        if (ptx_string[i] == '(')
+        {
+            std::cout << "found function args" << std::endl;
+
+            // parse out the args-list
+            for (; arg_count < MAX_ARGS; arg_count++)
+            {
+                int arg_size = 0;
+
+                // read until a . is found or )
+                while (i < ptx_len && (ptx_string[i] != '.' && ptx_string[i] != ')'))
+                    i++;
+
+                if (ptx_string[i] == ')')
+                    break;
+
+                // assert that the next token is "param"
+                if (i + 5 >= ptx_len || strncmp(ptx_string + i, ".param", strlen(".param")) != 0)
+                    continue;
+
+                while (true)
+                {
+                    // read the arguments list
+
+                    // read until a . , ) or [
+                    while (i < ptx_len && (ptx_string[i] != '.' && ptx_string[i] != ',' && ptx_string[i] != ')' && ptx_string[i] != '['))
+                        i++;
+
+                    if (ptx_string[i] == '.')
+                    {
+                        std::cout << "found arg type" << std::endl;
+                        // read the type, ignoring if it's not a valid type
+                        int type_size = get_type_size(ptx_string + (++i));
+                        if (type_size == 0)
+                            continue;
+                        arg_size = type_size;
+
+                        std::cout << "arg size: " << arg_size << std::endl;
+                    }
+                    else if (ptx_string[i] == '[')
+                    {
+                        // this is an array type. read until the ]
+                        int start = i + 1;
+                        while (i < ptx_len && ptx_string[i] != ']')
+                            i++;
+
+                        // parse the int value
+                        int n = 0;
+                        for (int j = start; j < i; j++)
+                            n = n * 10 + ptx_string[j] - '0';
+                        arg_size *= n;
+                    }
+                    else if (ptx_string[i] == ',' || ptx_string[i] == ')')
+                        // end of this argument
+                        break;
+                }
+
+                arg_sizes[arg_count] = arg_size;
+            }
+        }
+
+        // add the function to the list
+        functions.push_back(Function{
+            .name = name,
+            .fat_cubin = fatCubin,
+            .host_func = nullptr,
+            .arg_sizes = arg_sizes,
+            .arg_count = arg_count,
+        });
+    }
+}
+
+extern "C" void **__cudaRegisterFatBinary(void *fatCubin)
+{
+    void **p;
+    int return_value;
 
     if (rpc_start_request(0, RPC___cudaRegisterFatBinary) < 0)
-    {
-        std::cerr << "Failed to start RPC request for __cudaRegisterFatBinary" << std::endl;
         return nullptr;
+
+    if (*(unsigned *)fatCubin == __cudaFatMAGIC2)
+    {
+        __cudaFatCudaBinary2 *binary = (__cudaFatCudaBinary2 *)fatCubin;
+
+        std::cout << "binary->magic: " << binary->magic << std::endl;
+        std::cout << "binary->version: " << binary->version << std::endl;
+        printf("text: %p\n", binary->text);
+        printf("data: %p\n", binary->data);
+        printf("unknown: %p\n", binary->unknown);
+        printf("text2: %p\n", binary->text2);
+        printf("zero: %p\n", binary->zero);
+
+        if (rpc_write(0, binary, sizeof(__cudaFatCudaBinary2)) < 0)
+            return nullptr;
+
+        __cudaFatCudaBinary2Header *header = (__cudaFatCudaBinary2Header *)binary->text;
+
+        unsigned long long size = sizeof(__cudaFatCudaBinary2Header) + header->length;
+
+        if (rpc_write(0, &size, sizeof(unsigned long long)) < 0 ||
+            rpc_write(0, header, size) < 0)
+            return nullptr;
+
+        std::vector<Function> functions;
+
+        // also parse the ptx file from the fatbin to store the parameter sizes for the assorted functions
+        char *base = (char *)(header + 1);
+        long long unsigned int offset = 0;
+        __cudaFatCudaBinary2EntryRec *entry = (__cudaFatCudaBinary2EntryRec *)(base);
+        while (offset < header->length)
+        {
+            entry = (__cudaFatCudaBinary2EntryRec *)(base + offset);
+            offset += entry->binary + entry->binarySize;
+
+            if (!(entry->type & FATBIN_2_PTX))
+                continue;
+
+            // print the entire ptx file for debugging
+            for (int i = 0; i < entry->binarySize; i++)
+                std::cout << *(char *)((char *)entry + entry->binary + i);
+            std::cout << std::endl;
+
+            parse_ptx_string(fatCubin, (char *)entry + entry->binary, entry->binarySize);
+        }
     }
 
-    // if (*(unsigned*)fatCubin == __cudaFatMAGIC2) {
-    //     __cudaFatCudaBinary2* binary = (__cudaFatCudaBinary2*)fatCubin;
-    //     __cudaFatCudaBinary2Header* header = (__cudaFatCudaBinary2Header*)binary->fatbinData;
-
-    //     if (rpc_write(0, &binary->magic, sizeof(int)) < 0) return nullptr;
-    //     if (rpc_write(0, &binary->version, sizeof(int)) < 0) return nullptr;
-
-    //     printf("MAGIC: %x ", binary->magic);
-    //     printf("BINARY VERSION: %x ", binary->version);
-
-    //     if (rpc_write(0, &header->length, sizeof(unsigned long long)) < 0) return nullptr;
-    //     if (rpc_write(0, header, header->length) < 0) return nullptr;
-
-    //     char* base = (char*)(header + 1);
-    //     long long unsigned int offset = 0;
-    //     __cudaFatCudaBinary2EntryRec* entry = (__cudaFatCudaBinary2EntryRec*)(base);
-
-    //     while (offset < header->length) {
-    //         entry = (__cudaFatCudaBinary2EntryRec*)(base + offset);
-    //         std::cout << "writing entry..." << std::endl;
-    //         printf("ENTRY BINARY SIZE: %llx ", entry->binarySize);
-
-    //         // Send the entire entry
-    //         if (rpc_write(0, &entry->binarySize, sizeof((unsigned long long)__cudaFatCudaBinary2EntryRec::binarySize)) < 0) return nullptr;
-    //         if (rpc_write(0, entry, entry->binarySize) < 0) return nullptr;
-
-    //         // Move to the next entry
-    //         offset += entry->binary + entry->binarySize;
-    //     }
-    // }
-
-    rpc_write(0, fatCubin, sizeof(void **));
-
-    std::cout << "done processing entry on client" << std::endl;
-
-    if (rpc_wait_for_response(0) < 0) 
-    {
-        std::cerr << "Failed to get response from server for __cudaRegisterFatBinary" << std::endl;
+    if (rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, &p, sizeof(void **)) < 0 ||
+        rpc_end_request(0, &return_value) < 0)
         return nullptr;
-    }
 
-    std::cout << "waiting for end complete" << std::endl;
-
-    if (rpc_read(0, &result, sizeof(void *)) < 0)
-    {
-        std::cerr << "Failed to read the result fatCubin from the server" << std::endl;
-        return nullptr;
-    }
-
-    if (rpc_end_request(0, &return_value) < 0)
-    {
-        std::cerr << "Failed to retrieve return value from server" << std::endl;
-        return 0;
-    }
-
-    std::cout << "end complete!! " << result << std::endl;
-
-    return result;
+    return p;
 }
 
 extern "C"
 {
     void __cudaRegisterFatBinaryEnd(void **fatCubinHandle)
     {
-        void* return_value;
+        void *return_value;
 
         std::cout << "!!!! " << fatCubinHandle << std::endl;
 
@@ -525,270 +557,102 @@ extern "C"
     }
 }
 
-extern "C" void __cudaInitModule(void **fatCubinHandle) {
-  std::cout << "__cudaInitModule writing data..." << std::endl;
-}
-
-extern "C" void __cudaUnregisterFatBinary(void **fatCubinHandle) {
-//   std::cout << "__cudaUnregisterFatBinary writing data..." << std::endl;
-}
-
-extern "C" unsigned __cudaPopCallConfiguration(dim3 *gridDim, dim3 *blockDim,
-                                               size_t *sharedMem, void *stream)
+extern "C" void __cudaInitModule(void **fatCubinHandle)
 {
-    unsigned return_value;
+    std::cout << "__cudaInitModule writing data..." << std::endl;
+}
+
+extern "C" void __cudaUnregisterFatBinary(void **fatCubinHandle)
+{
+    //   std::cout << "__cudaUnregisterFatBinary writing data..." << std::endl;
+}
+
+extern "C" cudaError_t __cudaPushCallConfiguration(dim3 gridDim, dim3 blockDim,
+                                                   size_t sharedMem, cudaStream_t stream)
+{
     cudaError_t res;
 
-    std::cout << "received __cudaPopCallConfiguration." << std::endl;
+    if (rpc_start_request(0, RPC___cudaPushCallConfiguration) < 0 ||
+        rpc_write(0, &gridDim, sizeof(dim3)) < 0 ||
+        rpc_write(0, &blockDim, sizeof(dim3)) < 0 ||
+        rpc_write(0, &sharedMem, sizeof(size_t)) < 0 ||
+        rpc_write(0, &stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_request(0, &res) < 0)
+        return cudaErrorDevicesUnavailable;
 
-    int request_id = rpc_start_request(0, RPC___cudaPopCallConfiguration);
-    if (request_id < 0)
-    {
-        std::cerr << "Failed to start RPC request" << std::endl;
-        return 0;
-    }
-
-    if (rpc_write(0, &gridDim, sizeof(dim3 *)) < 0)
-    {
-        std::cerr << "Failed to send gridDim pointer to server" << std::endl;
-        return 0;
-    }
-
-    if (rpc_write(0, &blockDim, sizeof(dim3 *)) < 0)
-    {
-        std::cerr << "Failed to send blockDim pointer to server" << std::endl;
-        return 0;
-    }
-
-    if (rpc_write(0, &sharedMem, sizeof(size_t *)) < 0)
-    {
-        std::cerr << "Failed to send sharedMem pointer to server" << std::endl;
-        return 0;
-    }
-
-    if (rpc_write(0, &stream, sizeof(void *)) < 0)
-    {
-        std::cerr << "Failed to send stream pointer to server" << std::endl;
-        return 0;
-    }
-
-    std::cout << "Calling original __cudaPopCallConfiguration with parameters:" << std::endl;
-    std::cout << "  gridDim: " << gridDim << std::endl;
-    std::cout << "  blockDim: " << blockDim << std::endl;
-    std::cout << "  sharedMem: " << sharedMem << std::endl;
-    std::cout << "  stream: " << stream << std::endl;
-
-    if (rpc_wait_for_response(0) < 0)
-    {
-        std::cerr << "Failed to wait for response from server" << std::endl;
-        return 0;
-    }
-
-    if (rpc_read(0, &return_value, sizeof(unsigned)) < 0)
-    {
-        std::cerr << "Failed to read stream from server" << std::endl;
-        return 0;
-    }
-
-    if (rpc_end_request(0, &res) < 0)
-    {
-        std::cerr << "Failed to retrieve return value from server" << std::endl;
-        return 0;
-    }
-
-    printf("The value of num is: %u\n", return_value);
-
-    return return_value;
+    return res;
 }
 
-extern "C" unsigned __cudaPushCallConfiguration(dim3 gridDim, dim3 blockDim,
-                                     size_t sharedMem,
-                                     struct CUstream_st *stream) {
-  cudaError_t res;
-  unsigned return_value;
-    std::cerr << "received __cudaPushCallConfiguration" << std::endl;
-
-    // Start the RPC request
-    int request_id = rpc_start_request(0, RPC___cudaPushCallConfiguration);
-    if (request_id < 0)
-    {
-        std::cerr << "Failed to start RPC request" << std::endl;
-        return 0;
-    }
-
-    // Write the grid dimensions
-    if (rpc_write(0, &gridDim, sizeof(dim3)) < 0)
-    {
-        std::cerr << "Failed to write grid dimensions" << std::endl;
-        return 0;
-    }
-
-    // Write the block dimensions
-    if (rpc_write(0, &blockDim, sizeof(dim3)) < 0)
-    {
-        std::cerr << "Failed to write block dimensions" << std::endl;
-        return 0;
-    }
-
-    // Write the shared memory size
-    if (rpc_write(0, &sharedMem, sizeof(size_t)) < 0)
-    {
-        std::cerr << "Failed to write shared memory size" << std::endl;
-        return 0;
-    }
-
-    // Write the stream
-    if (rpc_write(0, &stream, sizeof(cudaStream_t)) < 0)
-    {
-        std::cerr << "Failed to write CUDA stream" << std::endl;
-        return 0;
-    }
-
-    std::cout << "Calling original __cudaPushCallConfiguration with parameters:" << std::endl;
-    std::cout << "  gridDim: " << &gridDim << std::endl;
-    std::cout << "  blockDim: " << &blockDim << std::endl;
-    std::cout << "  sharedMem: " << &sharedMem << std::endl;
-    std::cout << "  stream: " << &stream << std::endl;
-
-    // Wait for a response from the server
-    if (rpc_wait_for_response(0) < 0)
-    {
-        std::cerr << "Failed to wait for server response" << std::endl;
-        return 0;
-    }
-
-    if (rpc_read(0, &return_value, sizeof(unsigned)) < 0)
-    {
-        std::cerr << "Failed to read stream from server" << std::endl;
-        return 0;
-    }
-
-    // Get the return value from the server
-    if (rpc_end_request(0, &res) < 0)
-    {
-        std::cerr << "Failed to retrieve return value" << std::endl;
-        return 0;
-    }
-
-    std::cerr << "done with __cudaPushCallConfiguration " << return_value << std::endl;
-
-    return return_value;
-}
-
-extern "C"
+extern "C" cudaError_t __cudaPopCallConfiguration(dim3 *gridDim, dim3 *blockDim,
+                                                  size_t *sharedMem, cudaStream_t *stream)
 {
-    void __cudaRegisterFunction(void **fatCubinHandle,
-                                const char *hostFun,
-                                char *deviceFun,
-                                const char *deviceName,
-                                int thread_limit,
-                                uint3 *tid, uint3 *bid, dim3 *bDim, dim3 *gDim, int *wSize)
-    {
-        void* return_value;
+    cudaError_t res;
 
-        int request_id = rpc_start_request(0, RPC___cudaRegisterFunction);
-        if (request_id < 0)
-        {
-            std::cerr << "Failed to start RPC request" << std::endl;
-            return;
-        }
+    if (rpc_start_request(0, RPC___cudaPopCallConfiguration) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, gridDim, sizeof(dim3)) < 0 ||
+        rpc_read(0, blockDim, sizeof(dim3)) < 0 ||
+        rpc_read(0, sharedMem, sizeof(size_t)) < 0 ||
+        rpc_read(0, stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_end_request(0, &res) < 0)
+        return cudaErrorDevicesUnavailable;
 
-        if (rpc_write(0, &fatCubinHandle, sizeof(void *)) < 0)
-        {
-            std::cerr << "Failed writing fatCubinHandle" << std::endl;
-            return;
-        }
+    return res;
+}
 
-        // Send hostFun length and data
-        size_t hostFunLen = strlen(hostFun) + 1; // Including null terminator
-        if (rpc_write(0, &hostFunLen, sizeof(size_t)) < 0)
-        {
-            std::cerr << "Failed to send hostFun length" << std::endl;
-            return;
-        }
-        if (rpc_write(0, hostFun, hostFunLen) < 0)
-        {
-            std::cerr << "Failed writing hostFun" << std::endl;
-            return;
-        }
+extern "C" void __cudaRegisterFunction(void **fatCubinHandle,
+                                       const char *hostFun,
+                                       char *deviceFun,
+                                       const char *deviceName,
+                                       int thread_limit,
+                                       uint3 *tid, uint3 *bid, dim3 *bDim, dim3 *gDim, int *wSize)
+{
+    std::cout << "Intercepted __cudaRegisterFunction for deviceName: " << deviceName << std::endl;
 
-        std::cout << "hostFunhostFunhostFunhostFunhostFun: " << hostFun << " " << deviceFun << std::endl;
+    void *return_value;
 
-        // Send deviceFun length and data
-        size_t deviceFunLen = strlen(deviceFun) + 1;
-        if (rpc_write(0, &deviceFunLen, sizeof(size_t)) < 0)
-        {
-            std::cerr << "Failed to send deviceFun length" << std::endl;
-            return;
-        }
-        if (rpc_write(0, deviceFun, deviceFunLen) < 0)
-        {
-            std::cerr << "Failed writing deviceFun" << std::endl;
-            return;
-        }
+    size_t deviceFunLen = strlen(deviceFun) + 1;
+    size_t deviceNameLen = strlen(deviceName) + 1;
 
-        // Send deviceName length and data
-        size_t deviceNameLen = strlen(deviceName) + 1;
-        if (rpc_write(0, &deviceNameLen, sizeof(size_t)) < 0)
-        {
-            std::cerr << "Failed to send deviceName length" << std::endl;
-            return;
-        }
-        if (rpc_write(0, deviceName, deviceNameLen) < 0)
-        {
-            std::cerr << "Failed writing deviceName" << std::endl;
-            return;
-        }
+    uint8_t mask = 0;
+    if (tid != nullptr)
+        mask |= 1 << 0;
+    if (bid != nullptr)
+        mask |= 1 << 1;
+    if (bDim != nullptr)
+        mask |= 1 << 2;
+    if (gDim != nullptr)
+        mask |= 1 << 3;
+    if (wSize != nullptr)
+        mask |= 1 << 4;
 
-        if (rpc_write(0, &thread_limit, sizeof(int)) < 0)
-        {
-            std::cerr << "Failed writing thread_limit" << std::endl;
-            return;
-        }
+    printf("fatCubeHandle: %p\n", fatCubinHandle);
 
-        if (rpc_write(0, &tid, sizeof(uint3)) < 0)
-        {
-            std::cerr << "Failed writing tid" << std::endl;
-            return;
-        }
-
-        if (rpc_write(0, &bid, sizeof(uint3)) < 0)
-        {
-            std::cerr << "Failed writing bid" << std::endl;
-            return;
-        }
-
-        if (rpc_write(0, &bDim, sizeof(dim3)) < 0)
-        {
-            std::cerr << "Failed writing bDim" << std::endl;
-            return;
-        }
-
-        if (rpc_write(0, &gDim, sizeof(dim3)) < 0)
-        {
-            std::cerr << "Failed writing gDim" << std::endl;
-            return;
-        }
-
-        if (rpc_write(0, &wSize, sizeof(int)) < 0)
-        {
-            std::cerr << "Failed writing wSize" << std::endl;
-            return;
-        }
-
-        if (rpc_wait_for_response(0) < 0)
-        {
-            std::cerr << "Failed waiting for response" << std::endl;
-            return;
-        }
-
-        if (rpc_end_request(0, &return_value) < 0)
-        {
-            std::cerr << "Failed to end request" << std::endl;
-            return;
-        }
-
+    if (rpc_start_request(0, RPC___cudaRegisterFunction) < 0 ||
+        rpc_write(0, &fatCubinHandle, sizeof(void **)) < 0 ||
+        rpc_write(0, &hostFun, sizeof(const char *)) < 0 ||
+        rpc_write(0, &deviceFunLen, sizeof(size_t)) < 0 ||
+        rpc_write(0, deviceFun, deviceFunLen) < 0 ||
+        rpc_write(0, &deviceNameLen, sizeof(size_t)) < 0 ||
+        rpc_write(0, deviceName, deviceNameLen) < 0 ||
+        rpc_write(0, &thread_limit, sizeof(int)) < 0 ||
+        rpc_write(0, &mask, sizeof(uint8_t)) < 0 ||
+        (tid != nullptr && rpc_write(0, tid, sizeof(uint3)) < 0) ||
+        (bid != nullptr && rpc_write(0, bid, sizeof(uint3)) < 0) ||
+        (bDim != nullptr && rpc_write(0, bDim, sizeof(dim3)) < 0) ||
+        (gDim != nullptr && rpc_write(0, gDim, sizeof(dim3)) < 0) ||
+        (wSize != nullptr && rpc_write(0, wSize, sizeof(int)) < 0) ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_request(0, &return_value) < 0)
         return;
+
+    // also memorize the host pointer function
+    for (auto &function : functions)
+    {
+        std::cout << "comparing " << function.name << " with " << deviceName << std::endl;
+        if (strcmp(function.name, deviceName) == 0)
+            function.host_func = hostFun;
     }
 }
 
