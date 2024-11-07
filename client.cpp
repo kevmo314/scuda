@@ -87,14 +87,24 @@ int rpc_open()
         hints.ai_family = AF_INET;
         hints.ai_socktype = SOCK_STREAM;
         if (getaddrinfo(server_ip, port, &hints, &res) != 0)
+        {
+#ifdef VERBOSE
+            std::cout << "getaddrinfo of " << host << " port " << port << " failed" << std::endl;
+#endif
             return -1;
+        }
 
         int flag = 1;
         int sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
         if (sockfd == -1 ||
             setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, (char *)&flag, sizeof(int)) < 0 ||
             connect(sockfd, res->ai_addr, res->ai_addrlen) < 0)
+        {
+#ifdef VERBOSE
+            std::cout << "connect to " << host << " port " << port << " failed" << std::endl;
+#endif
             return -1;
+        }
 
         conns[nconns++] = {sockfd, 0, 0, 0, 0, PTHREAD_MUTEX_INITIALIZER, PTHREAD_MUTEX_INITIALIZER, PTHREAD_COND_INITIALIZER};
     }
@@ -114,7 +124,12 @@ int rpc_start_request(const int index, const unsigned int op)
 {
     if (rpc_open() < 0 ||
         pthread_mutex_lock(&conns[index].write_mutex) < 0)
+    {
+#ifdef VERBOSE
+        std::cout << "rpc_start_request failed due to rpc_open() < 0 || conns[index].write_mutex lock" << std::endl;
+#endif
         return -1;
+    }
 
     conns[index].write_iov_count = 2;
     conns[index].write_request_op = op;

@@ -10787,6 +10787,12 @@ cudaError_t cudaGraphReleaseUserObject(cudaGraph_t graph, cudaUserObject_t objec
 }
 
 std::unordered_map<std::string, void *> functionMap = {
+    {"__cudaRegisterVar", (void *)__cudaRegisterVar},
+    {"__cudaRegisterFunction", (void *)__cudaRegisterFunction},
+    {"__cudaRegisterFatBinary", (void *)__cudaRegisterFatBinary},
+    {"__cudaRegisterFatBinaryEnd", (void *)__cudaRegisterFatBinaryEnd},
+    {"__cudaPushCallConfiguration", (void *)__cudaPushCallConfiguration},
+    {"__cudaPopCallConfiguration", (void *)__cudaPopCallConfiguration},
     {"nvmlInit", (void *)nvmlInit_v2},
     {"nvmlInit_v2", (void *)nvmlInit_v2},
     {"nvmlInitWithFlags", (void *)nvmlInitWithFlags},
@@ -11597,12 +11603,6 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cudaMemcpy", (void *)cudaMemcpy},
     {"cudaMemcpyAsync", (void *)cudaMemcpyAsync},
     {"cudaLaunchKernel", (void *)cudaLaunchKernel},
-    {"__cudaRegisterVar", (void *)__cudaRegisterVar},
-    {"__cudaRegisterFunction", (void *)__cudaRegisterFunction},
-    {"__cudaRegisterFatBinary", (void *)__cudaRegisterFatBinary},
-    {"__cudaRegisterFatBinaryEnd", (void *)__cudaRegisterFatBinaryEnd},
-    {"__cudaPushCallConfiguration", (void *)__cudaPushCallConfiguration},
-    {"__cudaPopCallConfiguration", (void *)__cudaPopCallConfiguration},
 };
 
 void *get_function_pointer(const char *name)
