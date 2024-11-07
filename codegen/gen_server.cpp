@@ -15502,12 +15502,6 @@ int handle_cudaDestroyExternalSemaphore(void *conn)
     return 0;
 }
 
-int handle_cudaLaunchKernel(void *conn)
-{
-   // not implemented; disabled function
-   return -1;
-}
-
 int handle_cudaLaunchCooperativeKernelMultiDevice(void *conn)
 {
     struct cudaLaunchParams launchParamsList;
@@ -18425,6 +18419,12 @@ int handle_cudaGraphReleaseUserObject(void *conn)
 }
 
 static RequestHandler opHandlers[] = {
+    handle___cudaRegisterVar,
+    handle___cudaRegisterFunction,
+    handle___cudaRegisterFatBinary,
+    handle___cudaRegisterFatBinaryEnd,
+    handle___cudaPushCallConfiguration,
+    handle___cudaPopCallConfiguration,
     handle_nvmlInit_v2,
     handle_nvmlInitWithFlags,
     handle_nvmlShutdown,

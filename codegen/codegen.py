@@ -54,10 +54,25 @@ MANUAL_REMAPPINGS = [
     ("cuMemAllocFromPoolAsync_ptsz", "cuMemAllocFromPoolAsync"),
 ]
 
+# These functions are not exposed in header files, but we need to make sure they are...
+# properly added to our client/server definitions.
+# These, ideally, should never be added or removed. 
+INTERNAL_FUNCTIONS = [
+    "__cudaRegisterVar",
+    "__cudaRegisterFunction",
+    "__cudaRegisterFatBinary",
+    "__cudaRegisterFatBinaryEnd",
+    "__cudaPushCallConfiguration",
+    "__cudaPopCallConfiguration"
+]
+
 # a list of manually implemented cuda/nvml functions.
 # these are automatically appended to each file; operation order is maintained as well.
-MANUAL_IMPLEMENTATIONS = ["cudaMemcpy", "cudaMemcpyAsync"]
-
+MANUAL_IMPLEMENTATIONS = [
+    "cudaMemcpy",
+    "cudaMemcpyAsync",
+    "cudaLaunchKernel"
+]
 
 @dataclass
 class Operation:
@@ -215,6 +230,7 @@ def main():
     )
 
     functions_with_annotations: list[tuple[Function, Function, list[Operation]]] = []
+
     for function in functions:
         try:
             annotation = next(
@@ -232,14 +248,23 @@ def main():
 
     with open("gen_api.h", "w") as f:
         lastIndex = 0
-        for i, (function, _, _, _) in enumerate(functions_with_annotations):
+
+        for i, (function) in enumerate(INTERNAL_FUNCTIONS):
             f.write(
                 "#define RPC_{name} {value}\n".format(
-                    name=function.name.format(),
+                    name=function.format(),
                     value=i,
                 )
             )
             lastIndex += 1
+
+        for i, (function, _, _, _) in enumerate(functions_with_annotations):
+            f.write(
+                "#define RPC_{name} {value}\n".format(
+                    name=function.name.format(),
+                    value=i + lastIndex,
+                )
+            )
 
     with open("gen_client.cpp", "w") as f:
         f.write(
@@ -423,6 +448,12 @@ def main():
         f.write("std::unordered_map<std::string, void *> functionMap = {\n")
 
         # we need the base nvmlInit, this is important and should be kept here in the codegen.
+        for function in INTERNAL_FUNCTIONS:
+            f.write(
+                '    {{"{name}", (void *){name}}},\n'.format(
+                    name=function.format()
+                )
+            )
         f.write('    {"nvmlInit", (void *)nvmlInit_v2},\n')
         for function, _, _, disabled in functions_with_annotations:
             if disabled: continue
@@ -683,6 +714,8 @@ def main():
             f.write("}\n\n")
 
         f.write("static RequestHandler opHandlers[] = {\n")
+        for function in INTERNAL_FUNCTIONS:
+            f.write("    handle_{name},\n".format(name=function.format()))
         for function, _, _, disabled in functions_with_annotations:
             f.write("    handle_{name},\n".format(name=function.name.format()))
         f.write("};\n\n")

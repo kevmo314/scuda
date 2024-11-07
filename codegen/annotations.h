@@ -1,6 +1,7 @@
 #include <nvml.h>
 #include <cuda.h>
 #include <cuda_runtime.h>
+
 /**
  */
 nvmlReturn_t nvmlInit_v2();
