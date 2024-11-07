@@ -27,19 +27,14 @@ int handle_cudaMemcpy(void *conn)
     cudaError_t result;
     void *dst;
 
-    std::cout << "calling cudaMemcpy" << std::endl;
-
     enum cudaMemcpyKind kind;
     if (rpc_read(conn, &kind, sizeof(enum cudaMemcpyKind)) < 0)
     {
         return -1;
     }
 
-    std::cout << "hmmm " << kind << std::endl;
-
     if (kind == cudaMemcpyDeviceToHost)
     {
-        std::cout << "IN HERE cudaMemcpy" << std::endl;
         if (rpc_read(conn, &dst, sizeof(void *)) < 0)
             return -1;
 
@@ -60,8 +55,6 @@ int handle_cudaMemcpy(void *conn)
             return -1;
         }
 
-        std::cout << "call... cudaMemcpy" << std::endl;
-
         result = cudaMemcpy(host_data, dst, count, cudaMemcpyDeviceToHost);
         if (result != cudaSuccess)
         {
@@ -76,18 +69,11 @@ int handle_cudaMemcpy(void *conn)
 
         if (rpc_write(conn, host_data, count) < 0)
         {
-            free(host_data);
             return -1;
         }
-
-        // free temp memory after writing host data back
-        free(host_data);
-
-        std::cout << "about to end... cudaMemcpy" << std::endl;
     }
     else
     {
-        std::cout << "host to device ... cudaMemcpy" << std::endl;
         if (rpc_read(conn, &dst, sizeof(void *)) < 0)
             return -1;
 
@@ -116,20 +102,15 @@ int handle_cudaMemcpy(void *conn)
 
         result = cudaMemcpy(dst, src, count, kind);
 
-        free(src);
-
         if (rpc_start_response(conn, request_id) < 0)
         {
             return -1;
         }
-
-        std::cout << "finishing" << std::endl;
     }
 
     if (rpc_end_response(conn, &result) < 0)
         return -1;
 
-    std::cout << "end cudaMemcpy" << std::endl;
     return 0;
 }
 
@@ -296,8 +277,6 @@ int handle_cudaLaunchKernel(void *conn)
         return -1;
     }
 
-    std::cout << "Number of kernel arguments: " << num_args << std::endl;
-
     // Allocate memory for the arguments
     args = (void **)malloc(num_args * sizeof(void *));
     if (args == NULL)
@@ -316,8 +295,6 @@ int handle_cudaLaunchKernel(void *conn)
             free(args);
             return -1;
         }
-
-        std::cout << "Argument " << i << " size: " << arg_size << std::endl;
 
         // Allocate memory for the argument
         args[i] = malloc(arg_size);
@@ -338,11 +315,10 @@ int handle_cudaLaunchKernel(void *conn)
         }
     }
 
-    std::cout << "Calling cudaLaunchKernel with func: " << func << std::endl;
-    std::cout << "gridDim: " << gridDim.x << " " << gridDim.y << " " << gridDim.z << std::endl;
-    std::cout << "blockDim: " << blockDim.x << " " << blockDim.y << " " << blockDim.z << std::endl;
-    std::cout << "sharedMem: " << sharedMem << std::endl;
-    std::cout << "stream: " << stream << std::endl;
+    // Finalize the request
+    int request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        return -1;
 
     result = cudaLaunchKernel(func, gridDim, blockDim, args, sharedMem, stream);
     if (result != cudaSuccess)
@@ -356,8 +332,6 @@ int handle_cudaLaunchKernel(void *conn)
         return -1;
     }
 
-    std::cout << "Kernel launched successfully!" << std::endl;
-
     // Free argument memory after use
     for (int i = 0; i < num_args; ++i)
     {
@@ -365,20 +339,11 @@ int handle_cudaLaunchKernel(void *conn)
     }
     free(args);
 
-    // Finalize the request
-    int request_id = rpc_end_request(conn);
-    if (request_id < 0)
-    {
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
         return -1;
-    }
 
-    // Send response to the client with the result of the kernel launch
-    if (rpc_start_response(conn, request_id) < 0)
-    {
-        return -1;
-    }
-
-    return result;
+    return 0;
 }
 
 std::unordered_map<void **, __cudaFatCudaBinary2 *> fat_binary_map;
@@ -387,8 +352,6 @@ extern "C" void **__cudaRegisterFatBinary(void *fatCubin);
 
 int handle___cudaRegisterFatBinary(void *conn)
 {
-    std::cout << "REQUEST!!!" << std::endl;
-
     __cudaFatCudaBinary2 *fatCubin = (__cudaFatCudaBinary2 *)malloc(sizeof(__cudaFatCudaBinary2));
     unsigned long long size;
 
@@ -402,19 +365,12 @@ int handle___cudaRegisterFatBinary(void *conn)
 
     fatCubin->text = cubin;
 
-    std::cout << "binary->magic: " << fatCubin->magic << std::endl;
-    std::cout << "binary->version: " << fatCubin->version << std::endl;
-    printf("text: %p\n", fatCubin->text);
-    printf("data: %p\n", fatCubin->data);
-    printf("unknown: %p\n", fatCubin->unknown);
-    printf("text2: %p\n", fatCubin->text2);
-    printf("zero: %p\n", fatCubin->zero);
-
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
         return -1;
 
     void **p = __cudaRegisterFatBinary(fatCubin);
+
     int return_value = 0;
 
     fat_binary_map[p] = fatCubin;
@@ -499,19 +455,10 @@ int handle___cudaRegisterFunction(void *conn)
     if (request_id < 0)
         return -1;
 
-    std::cout << "fatCubeHandle: " << fatCubinHandle << std::endl;
-    printf("hostFun: %p\n", hostFun);
-    std::cout << "deviceFun: " << deviceFun << std::endl;
-    std::cout << "deviceName: " << deviceName << std::endl;
-    std::cout << "thread_limit: " << thread_limit << std::endl;
-    std::cout << "mask: " << mask << std::endl;
-
     __cudaRegisterFunction(fatCubinHandle, hostFun, deviceFun, deviceName, thread_limit,
                            mask & 1 << 0 ? &tid : nullptr, mask & 1 << 1 ? &bid : nullptr,
                            mask & 1 << 2 ? &bDim : nullptr, mask & 1 << 3 ? &gDim : nullptr,
                            mask & 1 << 4 ? &wSize : nullptr);
-
-    std::cout << "done with __cudaRegisterFunction" << std::endl;
 
     if (rpc_start_response(conn, request_id) < 0 || rpc_end_response(conn, &res) < 0)
         return -1;
@@ -529,8 +476,6 @@ int handle___cudaRegisterFatBinaryEnd(void *conn)
     // Read the fatCubinHandle from the client
     if (rpc_read(conn, &fatCubinHandle, sizeof(void **)) < 0)
         return -1;
-
-    std::cout << "received cudaRegisterFatBinaryEnd: " << fatCubinHandle << std::endl;
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -554,8 +499,6 @@ int handle___cudaPushCallConfiguration(void *conn)
     size_t sharedMem;
     cudaStream_t stream;
 
-    std::cout << "received handle___cudaPushCallConfiguration" << std::endl;
-
     // Read the grid dimensions from the client
     if (rpc_read(conn, &gridDim, sizeof(dim3)) < 0 ||
         rpc_read(conn, &blockDim, sizeof(dim3)) < 0 ||
@@ -567,15 +510,7 @@ int handle___cudaPushCallConfiguration(void *conn)
     if (request_id < 0)
         return -1;
 
-    std::cout << "calling __cudaPushCallConfiguration" << std::endl;
-    std::cout << "gridDim: " << gridDim.x << " " << gridDim.y << " " << gridDim.z << std::endl;
-    std::cout << "blockDim: " << blockDim.x << " " << blockDim.y << " " << blockDim.z << std::endl;
-    std::cout << "sharedMem: " << sharedMem << std::endl;
-    std::cout << "stream: " << stream << std::endl;
-
     cudaError_t result = __cudaPushCallConfiguration(gridDim, blockDim, sharedMem, stream);
-
-    std::cout << "got result" << result << std::endl;
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_end_response(conn, &result) < 0)
