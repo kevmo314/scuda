@@ -381,6 +381,8 @@ int handle_cudaLaunchKernel(void *conn)
     return result;
 }
 
+std::unordered_map<void **, __cudaFatCudaBinary2 *> fat_binary_map;
+
 extern "C" void **__cudaRegisterFatBinary(void *fatCubin);
 
 int handle___cudaRegisterFatBinary(void *conn)
@@ -415,8 +417,37 @@ int handle___cudaRegisterFatBinary(void *conn)
     void **p = __cudaRegisterFatBinary(fatCubin);
     int return_value = 0;
 
+    fat_binary_map[p] = fatCubin;
+
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &p, sizeof(void **)) < 0 ||
+        rpc_end_response(conn, &return_value) < 0)
+        return -1;
+
+    return 0;
+}
+
+extern "C" void __cudaUnregisterFatBinary(void **fatCubin);
+
+int handle___cudaUnregisterFatBinary(void *conn)
+{
+    void **fatCubin;
+    if (rpc_read(conn, &fatCubin, sizeof(void **)) < 0)
+        return -1;
+
+    int request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        return -1;
+
+    free(fat_binary_map[fatCubin]->text);
+    free(fat_binary_map[fatCubin]);
+    fat_binary_map.erase(fatCubin);
+
+    __cudaUnregisterFatBinary(fatCubin);
+
+    int return_value = 0;
+
+    if (rpc_start_response(conn, request_id) < 0 ||
         rpc_end_response(conn, &return_value) < 0)
         return -1;
 
