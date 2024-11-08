@@ -26,9 +26,7 @@ extern int rpc_close();
 
 #define MAX_FUNCTION_NAME 1024
 #define MAX_ARGS 128
-#define INITIAL_FUNCTION_COUNT 8
 
-#define FATBIN_TEXT_MAGIC     0xBA55ED50
 #define FATBIN_FLAG_COMPRESS  0x0000000000002000LL
 
 size_t decompress(const uint8_t* input, size_t input_size, uint8_t* output, size_t output_size)
