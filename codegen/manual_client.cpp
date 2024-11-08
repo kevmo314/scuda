@@ -471,14 +471,6 @@ extern "C" void **__cudaRegisterFatBinary(void *fatCubin)
     {
         __cudaFatCudaBinary2 *binary = (__cudaFatCudaBinary2 *)fatCubin;
 
-        std::cout << "binary->magic: " << binary->magic << std::endl;
-        std::cout << "binary->version: " << binary->version << std::endl;
-        printf("text: %p\n", binary->text);
-        printf("data: %p\n", binary->data);
-        printf("unknown: %p\n", binary->unknown);
-        printf("text2: %p\n", binary->text2);
-        printf("zero: %p\n", binary->zero);
-
         if (rpc_write(0, binary, sizeof(__cudaFatCudaBinary2)) < 0)
             return nullptr;
 
@@ -504,11 +496,6 @@ extern "C" void **__cudaRegisterFatBinary(void *fatCubin)
             if (!(entry->type & FATBIN_2_PTX))
                 continue;
 
-            // print the entire ptx file for debugging
-            for (int i = 0; i < entry->binarySize; i++)
-                std::cout << *(char *)((char *)entry + entry->binary + i);
-            std::cout << std::endl;
-
             parse_ptx_string(fatCubin, (char *)entry + entry->binary, entry->binarySize);
         }
     }
@@ -521,41 +508,36 @@ extern "C" void **__cudaRegisterFatBinary(void *fatCubin)
     return p;
 }
 
-extern "C"
+extern "C" void __cudaRegisterFatBinaryEnd(void **fatCubinHandle)
 {
-    void __cudaRegisterFatBinaryEnd(void **fatCubinHandle)
+    void *return_value;
+
+    int request_id = rpc_start_request(0, RPC___cudaRegisterFatBinaryEnd);
+    if (request_id < 0)
     {
-        void *return_value;
-
-        std::cout << "!!!! " << fatCubinHandle << std::endl;
-
-        int request_id = rpc_start_request(0, RPC___cudaRegisterFatBinaryEnd);
-        if (request_id < 0)
-        {
-            std::cerr << "Failed to start RPC request" << std::endl;
-            return;
-        }
-
-        if (rpc_write(0, &fatCubinHandle, sizeof(const void *)) < 0)
-        {
-            return;
-        }
-
-        if (rpc_wait_for_response(0) < 0)
-        {
-            std::cerr << "Failed waiting for response" << std::endl;
-            return;
-        }
-
-        // End the request and check for any errors
-        if (rpc_end_request(0, &return_value) < 0)
-        {
-            std::cerr << "Failed to end request" << std::endl;
-            return;
-        }
-
+        std::cerr << "Failed to start RPC request" << std::endl;
         return;
     }
+
+    if (rpc_write(0, &fatCubinHandle, sizeof(const void *)) < 0)
+    {
+        return;
+    }
+
+    if (rpc_wait_for_response(0) < 0)
+    {
+        std::cerr << "Failed waiting for response" << std::endl;
+        return;
+    }
+
+    // End the request and check for any errors
+    if (rpc_end_request(0, &return_value) < 0)
+    {
+        std::cerr << "Failed to end request" << std::endl;
+        return;
+    }
+
+    return;
 }
 
 extern "C" void __cudaInitModule(void **fatCubinHandle)
