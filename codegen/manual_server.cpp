@@ -378,6 +378,9 @@ int handle_cudaLaunchKernel(void *conn)
         return -1;
     }
 
+    if (rpc_end_response(conn, &result) < 0)
+        return -1;
+
     return result;
 }
 
