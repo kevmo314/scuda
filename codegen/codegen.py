@@ -734,7 +734,7 @@ def main():
         for function in INTERNAL_FUNCTIONS:
             f.write("    handle_{name},\n".format(name=function.format()))
         for function, _, _, disabled in functions_with_annotations:
-            if disabled:
+            if disabled and function.name.format() not in MANUAL_IMPLEMENTATIONS:
                 f.write("    nullptr,\n")
             else:
                 f.write("    handle_{name},\n".format(name=function.name.format()))
