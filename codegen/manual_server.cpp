@@ -24,94 +24,83 @@ FILE *__cudart_trace_output_stream = stdout;
 
 int handle_cudaMemcpy(void *conn)
 {
+    int request_id;
     cudaError_t result;
+    void *src;
     void *dst;
-
+    void *host_data;
+    std::size_t count;
     enum cudaMemcpyKind kind;
+
     if (rpc_read(conn, &kind, sizeof(enum cudaMemcpyKind)) < 0)
-    {
-        return -1;
-    }
+        goto ERROR_0;
 
-    if (kind == cudaMemcpyDeviceToHost)
-    {
-        if (rpc_read(conn, &dst, sizeof(void *)) < 0)
-            return -1;
+    switch (kind) {
+    case cudaMemcpyDeviceToHost:
+        if (rpc_read(conn, &src, sizeof(void *)) < 0 ||
+            rpc_read(conn, &count, sizeof(size_t)) < 0)
+            goto ERROR_0;
 
-        std::size_t count;
-        if (rpc_read(conn, &count, sizeof(size_t)) < 0)
-            return -1;
-
-        void *host_data = malloc(count);
+        host_data = malloc(count);
         if (host_data == NULL)
-        {
-            std::cerr << "Failed to allocate host memory for device-to-host transfer." << std::endl;
-            return -1;
-        }
+            goto ERROR_0;
 
-        int request_id = rpc_end_request(conn);
+        request_id = rpc_end_request(conn);
         if (request_id < 0)
-        {
-            return -1;
-        }
+            goto ERROR_1;
 
-        result = cudaMemcpy(host_data, dst, count, cudaMemcpyDeviceToHost);
-        if (result != cudaSuccess)
-        {
-            free(host_data);
-            return -1;
-        }
+        result = cudaMemcpy(host_data, src, count, cudaMemcpyDeviceToHost);
+
+        if (rpc_start_response(conn, request_id) < 0 ||
+            rpc_write(conn, host_data, count) < 0)
+            goto ERROR_1;
+        break;
+    case cudaMemcpyHostToDevice:
+        if (rpc_read(conn, &dst, sizeof(void *)) < 0 ||
+            rpc_read(conn, &count, sizeof(size_t)) < 0)
+            goto ERROR_0;
+
+        host_data = malloc(count);
+        if (host_data == NULL)
+            goto ERROR_0;
+
+        if (rpc_read(conn, host_data, count) < 0)
+            goto ERROR_1;
+
+        request_id = rpc_end_request(conn);
+        if (request_id < 0)
+            goto ERROR_1;
+
+        result = cudaMemcpy(dst, host_data, count, kind);
 
         if (rpc_start_response(conn, request_id) < 0)
-        {
-            return -1;
-        }
+            goto ERROR_1;
+        break;
+    case cudaMemcpyDeviceToDevice:
+        if (rpc_read(conn, &src, sizeof(void *)) < 0 ||
+            rpc_read(conn, &dst, sizeof(void *)) < 0 ||
+            rpc_read(conn, &count, sizeof(size_t)) < 0)
+            goto ERROR_0;
 
-        if (rpc_write(conn, host_data, count) < 0)
-        {
-            return -1;
-        }
-    }
-    else
-    {
-        if (rpc_read(conn, &dst, sizeof(void *)) < 0)
-            return -1;
-
-        std::size_t count;
-        if (rpc_read(conn, &count, sizeof(size_t)) < 0)
-            return -1;
-
-        void *src = malloc(count);
-        if (src == NULL)
-        {
-            return -1;
-        }
-
-        if (rpc_read(conn, src, count) < 0)
-        {
-            free(src);
-            return -1;
-        }
-
-        int request_id = rpc_end_request(conn);
+        request_id = rpc_end_request(conn);
         if (request_id < 0)
-        {
-            free(src);
-            return -1;
-        }
+            goto ERROR_0;
 
         result = cudaMemcpy(dst, src, count, kind);
 
         if (rpc_start_response(conn, request_id) < 0)
-        {
-            return -1;
-        }
+            goto ERROR_0;
+        break;
     }
 
     if (rpc_end_response(conn, &result) < 0)
-        return -1;
+        goto ERROR_1;
 
     return 0;
+ERROR_1:
+    free((void *)host_data);
+ERROR_0:
+    return -1;
 }
 
 int handle_cudaMemcpyAsync(void *conn)
