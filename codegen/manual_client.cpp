@@ -595,8 +595,6 @@ extern "C" void **__cudaRegisterFatBinary(void *fatCubin)
             rpc_write(0, header, size) < 0)
             return nullptr;
 
-        std::vector<Function> functions;
-
         // also parse the ptx file from the fatbin to store the parameter sizes for the assorted functions
         char *base = (char *)(header + 1);
         long long unsigned int offset = 0;
@@ -648,41 +646,36 @@ extern "C" void **__cudaRegisterFatBinary(void *fatCubin)
     return p;
 }
 
-extern "C"
+extern "C" void __cudaRegisterFatBinaryEnd(void **fatCubinHandle)
 {
-    void __cudaRegisterFatBinaryEnd(void **fatCubinHandle)
+    void *return_value;
+
+    int request_id = rpc_start_request(0, RPC___cudaRegisterFatBinaryEnd);
+    if (request_id < 0)
     {
-        void *return_value;
-
-        std::cout << "!!!! " << fatCubinHandle << std::endl;
-
-        int request_id = rpc_start_request(0, RPC___cudaRegisterFatBinaryEnd);
-        if (request_id < 0)
-        {
-            std::cerr << "Failed to start RPC request" << std::endl;
-            return;
-        }
-
-        if (rpc_write(0, &fatCubinHandle, sizeof(const void *)) < 0)
-        {
-            return;
-        }
-
-        if (rpc_wait_for_response(0) < 0)
-        {
-            std::cerr << "Failed waiting for response" << std::endl;
-            return;
-        }
-
-        // End the request and check for any errors
-        if (rpc_end_request(0, &return_value) < 0)
-        {
-            std::cerr << "Failed to end request" << std::endl;
-            return;
-        }
-
+        std::cerr << "Failed to start RPC request" << std::endl;
         return;
     }
+
+    if (rpc_write(0, &fatCubinHandle, sizeof(const void *)) < 0)
+    {
+        return;
+    }
+
+    if (rpc_wait_for_response(0) < 0)
+    {
+        std::cerr << "Failed waiting for response" << std::endl;
+        return;
+    }
+
+    // End the request and check for any errors
+    if (rpc_end_request(0, &return_value) < 0)
+    {
+        std::cerr << "Failed to end request" << std::endl;
+        return;
+    }
+
+    return;
 }
 
 extern "C" void __cudaInitModule(void **fatCubinHandle)
