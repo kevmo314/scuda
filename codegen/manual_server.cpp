@@ -295,7 +295,7 @@ int handle___cudaRegisterFatBinary(void *conn)
     if (rpc_read(conn, cubin, size) < 0)
         return -1;
 
-    fatCubin->text = cubin;
+    fatCubin->text = (uint64_t)cubin;
 
     int request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -327,7 +327,7 @@ int handle___cudaUnregisterFatBinary(void *conn)
     if (request_id < 0)
         return -1;
 
-    free(fat_binary_map[fatCubin]->text);
+    free((void *)fat_binary_map[fatCubin]->text);
     free(fat_binary_map[fatCubin]);
     fat_binary_map.erase(fatCubin);
 

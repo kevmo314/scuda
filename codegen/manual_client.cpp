@@ -13,6 +13,8 @@
 #include "gen_api.h"
 #include "ptx_fatbin.hpp"
 
+size_t decompress(const uint8_t* input, size_t input_size, uint8_t* output, size_t output_size);
+
 extern int rpc_size();
 extern int rpc_start_request(const int index, const unsigned int request);
 extern int rpc_write(const int index, const void *data, const std::size_t size);
@@ -23,7 +25,115 @@ extern int rpc_close();
 
 #define MAX_FUNCTION_NAME 1024
 #define MAX_ARGS 128
-#define INITIAL_FUNCTION_COUNT 8
+
+#define FATBIN_FLAG_COMPRESS  0x0000000000002000LL
+
+size_t decompress(const uint8_t* input, size_t input_size, uint8_t* output, size_t output_size)
+{
+    size_t ipos = 0, opos = 0;  
+    uint64_t next_nclen;  // length of next non-compressed segment
+    uint64_t next_clen;   // length of next compressed segment
+    uint64_t back_offset; // negative offset where redudant data is located, relative to current opos
+
+    while (ipos < input_size) {
+        next_nclen = (input[ipos] & 0xf0) >> 4;
+        next_clen = 4 + (input[ipos] & 0xf);
+        if (next_nclen == 0xf) {
+            do {
+                next_nclen += input[++ipos];
+            } while (input[ipos] == 0xff);
+        }
+
+        if (memcpy(output + opos, input + (++ipos), next_nclen) == NULL) {
+            fprintf(stderr, "Error copying data");
+            return 0;
+        }
+
+        ipos += next_nclen;
+        opos += next_nclen;
+        if (ipos >= input_size || opos >= output_size) {
+            break;
+        }
+        back_offset = input[ipos] + (input[ipos + 1] << 8);
+        ipos += 2;
+        if (next_clen == 0xf+4) {
+            do {
+                next_clen += input[ipos++];
+            } while (input[ipos - 1] == 0xff);
+        }
+
+        if (next_clen <= back_offset) {
+            if (memcpy(output + opos, output + opos - back_offset, next_clen) == NULL) {
+                fprintf(stderr, "Error copying data");
+                return 0;
+            }
+        } else {
+            if (memcpy(output + opos, output + opos - back_offset, back_offset) == NULL) {
+                fprintf(stderr, "Error copying data");
+                return 0;
+            }
+            for (size_t i = back_offset; i < next_clen; i++) {
+                output[opos + i] = output[opos + i - back_offset];
+            }
+        }
+
+        opos += next_clen;
+    }
+    return opos;
+}
+
+static ssize_t decompress_single_section(const uint8_t *input, uint8_t **output, size_t *output_size,
+                                         struct __cudaFatCudaBinary2HeaderRec *eh, struct __cudaFatCudaBinary2EntryRec *th)
+{
+    size_t padding;
+    size_t input_read = 0;
+    size_t output_written = 0;
+    size_t decompress_ret = 0;
+    const uint8_t zeroes[8] = {0};
+
+    if (input == NULL || output == NULL || eh == NULL || th == NULL) {
+        return 1;
+    }
+
+    uint8_t *mal = (uint8_t *)malloc(th->uncompressedBinarySize + 7);
+    
+    // add max padding of 7 bytes
+    if ((*output = mal) == NULL) {
+        goto error;
+    }
+
+    decompress_ret = decompress(input, th->binarySize, *output, th->uncompressedBinarySize);
+
+    // @brodey - keeping this temporarily so that we can compare the compression returns
+    printf("decompressed return::: : %x \n", decompress_ret);
+    printf("compared return::: : %x \n", th->uncompressedBinarySize);
+
+    if (decompress_ret != th->uncompressedBinarySize) {
+        std::cout << "failed actual decompress..." << std::endl;
+        goto error;
+    }
+    input_read += th->binarySize;
+    output_written += th->uncompressedBinarySize;
+
+    padding = ((8 - (size_t)(input + input_read)) % 8);
+    if (memcmp(input + input_read, zeroes, padding) != 0) {
+        goto error;
+    }
+    input_read += padding;
+
+    padding = ((8 - (size_t)th->uncompressedBinarySize) % 8);
+    // Because we always allocated enough memory for one more elf_header and this is smaller than
+    // the maximal padding of 7, we do not have to reallocate here.
+    memset(*output, 0, padding);
+    output_written += padding;
+
+    *output_size = output_written;
+    return input_read;
+ error:
+    free(*output);
+    *output = NULL;
+    return -1;
+}
 
 struct Function
 {
@@ -476,19 +586,18 @@ extern "C" void **__cudaRegisterFatBinary(void *fatCubin)
 
         __cudaFatCudaBinary2Header *header = (__cudaFatCudaBinary2Header *)binary->text;
 
-        unsigned long long size = sizeof(__cudaFatCudaBinary2Header) + header->length;
+        unsigned long long size = sizeof(__cudaFatCudaBinary2Header) + header->size;
 
         if (rpc_write(0, &size, sizeof(unsigned long long)) < 0 ||
             rpc_write(0, header, size) < 0)
             return nullptr;
 
-        std::vector<Function> functions;
-
         // also parse the ptx file from the fatbin to store the parameter sizes for the assorted functions
         char *base = (char *)(header + 1);
         long long unsigned int offset = 0;
         __cudaFatCudaBinary2EntryRec *entry = (__cudaFatCudaBinary2EntryRec *)(base);
-        while (offset < header->length)
+
+        while (offset < header->size)
         {
             entry = (__cudaFatCudaBinary2EntryRec *)(base + offset);
             offset += entry->binary + entry->binarySize;
@@ -496,7 +605,33 @@ extern "C" void **__cudaRegisterFatBinary(void *fatCubin)
             if (!(entry->type & FATBIN_2_PTX))
                 continue;
 
-            parse_ptx_string(fatCubin, (char *)entry + entry->binary, entry->binarySize);
+            // if compress flag exists, we should decompress before parsing the ptx
+            if (entry->flags & FATBIN_FLAG_COMPRESS) {
+                uint8_t *text_data = NULL;
+                size_t text_data_size = 0;
+
+                std::cout << "decompression required; starting decompress..." << std::endl;
+
+                if (decompress_single_section((const uint8_t*)entry + entry->binary, &text_data, &text_data_size, header, entry) < 0) {
+                    std::cout << "decompressing failed..." << std::endl;
+                    return nullptr;
+                }
+
+                // verify the decompressed output looks right; we should run --no-compress with nvcc before
+                // running this decompression logic to compare outputs.
+                for (int i = 0; i < text_data_size; i++)
+                    std::cout << *(char *)((char *)text_data + i);
+                std::cout << std::endl;
+
+                parse_ptx_string(fatCubin, (char *)text_data, text_data_size);
+            } else {
+                // print the entire ptx file for debugging
+                for (int i = 0; i < entry->binarySize; i++)
+                    std::cout << *(char *)((char *)entry + entry->binary + i);
+                std::cout << std::endl;
+
+                parse_ptx_string(fatCubin, (char *)entry + entry->binary, entry->binarySize);
+            }
         }
     }
 
