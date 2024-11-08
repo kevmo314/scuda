@@ -78,6 +78,7 @@
         "variant": "cpp",
         "format": "cpp",
         "__nullptr": "cpp",
-        "__config": "cpp"
+        "__config": "cpp",
+        "__mutex_base": "cpp"
     }
 }

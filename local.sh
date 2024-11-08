@@ -9,9 +9,9 @@ build() {
   echo "building client..."
 
   if [[ "$(uname)" == "Linux" ]]; then
-    g++ -c -fPIC "$(pwd)/client.cpp" -o "$(pwd)/client.o" -I/usr/local/cuda/include
-    g++ -c -fPIC "$(pwd)/codegen/gen_client.cpp" -o "$(pwd)/codegen/gen_client.o" -I/usr/local/cuda/include
-    g++ -c -fPIC "$(pwd)/codegen/manual_client.cpp" -o "$(pwd)/codegen/manual_client.o" -I/usr/local/cuda/include
+    g++ -Wno-deprecated-declarations -c -fPIC "$(pwd)/client.cpp" -o "$(pwd)/client.o" -I/usr/local/cuda/include
+    g++ -Wno-deprecated-declarations -c -fPIC "$(pwd)/codegen/gen_client.cpp" -o "$(pwd)/codegen/gen_client.o" -I/usr/local/cuda/include
+    g++ -Wno-deprecated-declarations -c -fPIC "$(pwd)/codegen/manual_client.cpp" -o "$(pwd)/codegen/manual_client.o" -I/usr/local/cuda/include
 
     echo "linking client files..."
 
@@ -20,6 +20,10 @@ build() {
   else
     echo "No compiler options set for os $(uname)"
   fi
+
+  echo "building vector file..."
+
+  nvcc --cudart=shared -lnvidia-ml -lcuda --no-compress --keep ./test/vector_add.cu -o vector.o
 
   if [ ! -f "$libscuda_path" ]; then
     echo "libscuda.so not found. build may have failed."
@@ -31,7 +35,7 @@ server() {
   echo "building server..." 
 
   if [[ "$(uname)" == "Linux" ]]; then
-    nvcc -o $server_out_path $server_path -lnvidia-ml -lcuda
+    nvcc --compiler-options -g,-Wno-deprecated-declarations -o $server_out_path $server_path -lnvidia-ml -lcuda --cudart=shared
   else
     echo "No compiler options set for os "$(uname)""
   fi
@@ -150,21 +154,7 @@ run() {
 
   export SCUDA_SERVER=0.0.0.0
 
-  LD_PRELOAD="$libscuda_path" python3 -c "
-import torch
-print('Creating a tensor...')
-tensor = torch.full((10, 10), 5)
-print('Tensor created on CPU:')
-print(tensor)
-
-print('Moving tensor to CUDA...')
-tensor_cuda = tensor.to('cuda:0')
-print('Tensor successfully moved to CUDA')
-
-print('Moving tensor back to CPU...')
-tensor_cpu = tensor_cuda.to('cpu')
-print('Tensor successfully moved back to CPU:')
-"
+  LD_PRELOAD="$libscuda_path" python3 -c "import torch; print(torch.cuda.is_available())"
 }
 
 # Main script logic using a switch case

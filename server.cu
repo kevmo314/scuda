@@ -51,7 +51,6 @@ int request_handler(const conn_t *conn)
 
 void client_handler(int connfd)
 {
-    std::vector<std::future<void>> futures;
     conn_t conn = {connfd};
     if (pthread_mutex_init(&conn.read_mutex, NULL) < 0 ||
         pthread_mutex_init(&conn.write_mutex, NULL) < 0)
@@ -83,20 +82,14 @@ void client_handler(int connfd)
             break;
         }
 
-        // run our request handler in a separate thread
-        auto future = std::async(
-            std::launch::async,
-            [&conn]()
-            {
-                if (request_handler(&conn) < 0)
-                    std::cerr << "Error handling request." << std::endl;
-            });
-
-        futures.push_back(std::move(future));
+        // TODO: this can't be multithreaded as some of the __cuda* functions
+        // assume that they are running in the same thread as the one that
+        // calls cudaLaunchKernel. we'll need to find a better way to map
+        // function calls to threads. maybe each rpc maps to an optional
+        // thread id that is passed to the handler?
+        if (request_handler(&conn) < 0)
+            std::cerr << "Error handling request." << std::endl;
     }
-
-    for (auto &future : futures)
-        future.wait();
 
     if (pthread_mutex_destroy(&conn.read_mutex) < 0 ||
         pthread_mutex_destroy(&conn.write_mutex) < 0)
