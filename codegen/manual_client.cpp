@@ -1,4 +1,3 @@
-#include <zlib.h>
 #include <nvml.h>
 #include <cuda.h>
 #include <cassert>
