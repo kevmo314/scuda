@@ -76,21 +76,22 @@ typedef struct __cudaFatCudaBinary2EntryRec {
     unsigned long long int uncompressedBinarySize;
 } __cudaFatCudaBinary2Entry;
 
-typedef struct __cudaFatCudaBinary2HeaderRec { 
-    unsigned int            magic;
-    unsigned int            version;
-    unsigned long long int  length;
+typedef struct __attribute__((__packed__)) __cudaFatCudaBinary2HeaderRec { 
+    uint32_t magic;
+    uint16_t version;
+    uint16_t header_size;
+    uint64_t size;
 } __cudaFatCudaBinary2Header;
 
-typedef struct __cudaFatCudaBinaryRec2
+typedef struct __attribute__((__packed__)) __cudaFatCudaBinaryRec2
 {
-    unsigned int magic;
-    unsigned int version;
-    void* text; 
-    void* data; 
-    unsigned long long int unknown;
-    void *text2;
-    unsigned long long int zero;
+    uint32_t magic;
+    uint32_t version;
+    uint64_t text;      // points to first text section
+    uint64_t data;      // points to outside of the file
+    uint64_t unknown;
+    uint64_t text2;     // points to second text section
+    uint64_t zero;
 } __cudaFatCudaBinary2;
 
 void ptx_from_fatbin(const void *cubin_ptr);
