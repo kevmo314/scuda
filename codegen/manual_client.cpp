@@ -13,7 +13,7 @@
 #include "gen_api.h"
 #include "ptx_fatbin.hpp"
 
-size_t decompress(const uint8_t* input, size_t input_size, uint8_t* output, size_t output_size);
+size_t decompress(const uint8_t *input, size_t input_size, uint8_t *output, size_t output_size);
 
 extern int rpc_size();
 extern int rpc_start_request(const int index, const unsigned int request);
@@ -26,53 +26,66 @@ extern int rpc_close();
 #define MAX_FUNCTION_NAME 1024
 #define MAX_ARGS 128
 
-#define FATBIN_FLAG_COMPRESS  0x0000000000002000LL
+#define FATBIN_FLAG_COMPRESS 0x0000000000002000LL
 
-size_t decompress(const uint8_t* input, size_t input_size, uint8_t* output, size_t output_size)
+size_t decompress(const uint8_t *input, size_t input_size, uint8_t *output, size_t output_size)
 {
-    size_t ipos = 0, opos = 0;  
+    size_t ipos = 0, opos = 0;
     uint64_t next_nclen;  // length of next non-compressed segment
     uint64_t next_clen;   // length of next compressed segment
     uint64_t back_offset; // negative offset where redudant data is located, relative to current opos
 
-    while (ipos < input_size) {
+    while (ipos < input_size)
+    {
         next_nclen = (input[ipos] & 0xf0) >> 4;
         next_clen = 4 + (input[ipos] & 0xf);
-        if (next_nclen == 0xf) {
-            do {
+        if (next_nclen == 0xf)
+        {
+            do
+            {
                 next_nclen += input[++ipos];
             } while (input[ipos] == 0xff);
         }
 
-        if (memcpy(output + opos, input + (++ipos), next_nclen) == NULL) {
+        if (memcpy(output + opos, input + (++ipos), next_nclen) == NULL)
+        {
             fprintf(stderr, "Error copying data");
             return 0;
         }
 
         ipos += next_nclen;
         opos += next_nclen;
-        if (ipos >= input_size || opos >= output_size) {
+        if (ipos >= input_size || opos >= output_size)
+        {
             break;
         }
         back_offset = input[ipos] + (input[ipos + 1] << 8);
         ipos += 2;
-        if (next_clen == 0xf+4) {
-            do {
+        if (next_clen == 0xf + 4)
+        {
+            do
+            {
                 next_clen += input[ipos++];
             } while (input[ipos - 1] == 0xff);
         }
 
-        if (next_clen <= back_offset) {
-            if (memcpy(output + opos, output + opos - back_offset, next_clen) == NULL) {
+        if (next_clen <= back_offset)
+        {
+            if (memcpy(output + opos, output + opos - back_offset, next_clen) == NULL)
+            {
                 fprintf(stderr, "Error copying data");
                 return 0;
             }
-        } else {
-            if (memcpy(output + opos, output + opos - back_offset, back_offset) == NULL) {
+        }
+        else
+        {
+            if (memcpy(output + opos, output + opos - back_offset, back_offset) == NULL)
+            {
                 fprintf(stderr, "Error copying data");
                 return 0;
             }
-            for (size_t i = back_offset; i < next_clen; i++) {
+            for (size_t i = back_offset; i < next_clen; i++)
+            {
                 output[opos + i] = output[opos + i - back_offset];
             }
         }
@@ -91,14 +104,16 @@ static ssize_t decompress_single_section(const uint8_t *input, uint8_t **output,
     size_t decompress_ret = 0;
     const uint8_t zeroes[8] = {0};
 
-    if (input == NULL || output == NULL || eh == NULL || th == NULL) {
+    if (input == NULL || output == NULL || eh == NULL || th == NULL)
+    {
         return 1;
     }
 
     uint8_t *mal = (uint8_t *)malloc(th->uncompressedBinarySize + 7);
-    
+
     // add max padding of 7 bytes
-    if ((*output = mal) == NULL) {
+    if ((*output = mal) == NULL)
+    {
         goto error;
     }
 
@@ -108,7 +123,8 @@ static ssize_t decompress_single_section(const uint8_t *input, uint8_t **output,
     printf("decompressed return::: : %x \n", decompress_ret);
     printf("compared return::: : %x \n", th->uncompressedBinarySize);
 
-    if (decompress_ret != th->uncompressedBinarySize) {
+    if (decompress_ret != th->uncompressedBinarySize)
+    {
         std::cout << "failed actual decompress..." << std::endl;
         goto error;
     }
@@ -116,7 +132,8 @@ static ssize_t decompress_single_section(const uint8_t *input, uint8_t **output,
     output_written += th->uncompressedBinarySize;
 
     padding = ((8 - (size_t)(input + input_read)) % 8);
-    if (memcmp(input + input_read, zeroes, padding) != 0) {
+    if (memcmp(input + input_read, zeroes, padding) != 0)
+    {
         goto error;
     }
     input_read += padding;
@@ -129,7 +146,7 @@ static ssize_t decompress_single_section(const uint8_t *input, uint8_t **output,
 
     *output_size = output_written;
     return input_read;
- error:
+error:
     free(*output);
     *output = NULL;
     return -1;
@@ -606,13 +623,15 @@ extern "C" void **__cudaRegisterFatBinary(void *fatCubin)
                 continue;
 
             // if compress flag exists, we should decompress before parsing the ptx
-            if (entry->flags & FATBIN_FLAG_COMPRESS) {
+            if (entry->flags & FATBIN_FLAG_COMPRESS)
+            {
                 uint8_t *text_data = NULL;
                 size_t text_data_size = 0;
 
                 std::cout << "decompression required; starting decompress..." << std::endl;
 
-                if (decompress_single_section((const uint8_t*)entry + entry->binary, &text_data, &text_data_size, header, entry) < 0) {
+                if (decompress_single_section((const uint8_t *)entry + entry->binary, &text_data, &text_data_size, header, entry) < 0)
+                {
                     std::cout << "decompressing failed..." << std::endl;
                     return nullptr;
                 }
@@ -624,7 +643,9 @@ extern "C" void **__cudaRegisterFatBinary(void *fatCubin)
                 std::cout << std::endl;
 
                 parse_ptx_string(fatCubin, (char *)text_data, text_data_size);
-            } else {
+            }
+            else
+            {
                 // print the entire ptx file for debugging
                 for (int i = 0; i < entry->binarySize; i++)
                     std::cout << *(char *)((char *)entry + entry->binary + i);
@@ -726,8 +747,6 @@ extern "C" void __cudaRegisterFunction(void **fatCubinHandle,
                                        int thread_limit,
                                        uint3 *tid, uint3 *bid, dim3 *bDim, dim3 *gDim, int *wSize)
 {
-    std::cout << "Intercepted __cudaRegisterFunction for deviceName: " << deviceName << std::endl;
-
     void *return_value;
 
     size_t deviceFunLen = strlen(deviceFun) + 1;
@@ -744,8 +763,6 @@ extern "C" void __cudaRegisterFunction(void **fatCubinHandle,
         mask |= 1 << 3;
     if (wSize != nullptr)
         mask |= 1 << 4;
-
-    printf("fatCubeHandle: %p\n", fatCubinHandle);
 
     if (rpc_start_request(0, RPC___cudaRegisterFunction) < 0 ||
         rpc_write(0, &fatCubinHandle, sizeof(void **)) < 0 ||
@@ -767,11 +784,8 @@ extern "C" void __cudaRegisterFunction(void **fatCubinHandle,
 
     // also memorize the host pointer function
     for (auto &function : functions)
-    {
-        std::cout << "comparing " << function.name << " with " << deviceName << std::endl;
         if (strcmp(function.name, deviceName) == 0)
             function.host_func = hostFun;
-    }
 }
 
 extern "C"
