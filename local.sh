@@ -117,6 +117,16 @@ print('Tensor successfully moved back to CPU:')
   fi
 }
 
+test_vector_add() {
+  output=$(LD_PRELOAD="$libscuda_path" ./vector.o | tail -n 1)
+
+  if [[ "$output" == "PASSED" ]]; then
+    ansi_format "pass" "$pass_message"
+  else
+    ansi_format "fail" "vector_add failed. Got [$output]."
+  fi
+}
+
 #---- declare test cases ----#
 declare -A test_cuda_avail=(
   ["function"]="test_cuda_available"
@@ -133,8 +143,13 @@ declare -A test_tensor_to_cuda_to_cpu=(
   ["pass"]="Tensor successfully moved to CUDA and back to CPU."
 )
 
+declare -A test_vector_add=(
+  ["function"]="test_vector_add"
+  ["pass"]="CUDA vector_add example works."
+)
+
 #---- assign them to our associative array ----#
-tests=("test_cuda_avail" "test_tensor_to_cuda" "test_tensor_to_cuda_to_cpu")
+tests=("test_cuda_avail" "test_tensor_to_cuda" "test_tensor_to_cuda_to_cpu" "test_vector_add")
 
 test() {
   build
@@ -146,7 +161,7 @@ test() {
     pass_message=$(eval "echo \${${test}[pass]}")
 
     eval "$func_name \"$pass_message\""
-done
+  done
 }
 
 run() {

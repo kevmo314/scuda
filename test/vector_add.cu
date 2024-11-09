@@ -61,7 +61,6 @@ int main()
         assert(fabs(out[i] - a[i] - b[i]) < MAX_ERR);
     }
     printf("out[0] = %f\n", out[0]);
-    printf("PASSED\n");
 
     // Deallocate device memory
     printf("Deallocating device memory\n");
@@ -74,4 +73,6 @@ int main()
     free(a);
     free(b);
     free(out);
+
+    printf("PASSED\n");
 }
