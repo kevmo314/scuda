@@ -97,9 +97,18 @@ void client_handler(int connfd)
     close(connfd);
 }
 
-int rpc_read(const void *conn, void *data, const size_t size)
+int rpc_read(const void *conn, void *data, size_t size)
 {
-    return read(((conn_t *)conn)->connfd, data, size);
+    while (true)
+    {
+        ssize_t n = read(((conn_t *)conn)->connfd, data, size);
+        if (n <= 0)
+            return n;
+        size -= n;
+        if (size == 0)
+            return 0;
+        data = (char *)data + n;
+    }
 }
 
 int rpc_write(const void *conn, const void *data, const size_t size)
