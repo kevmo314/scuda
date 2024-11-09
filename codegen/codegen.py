@@ -279,9 +279,10 @@ def main():
             "extern int rpc_size();\n"
             "extern int rpc_start_request(const int index, const unsigned int request);\n"
             "extern int rpc_write(const int index, const void *data, const std::size_t size);\n"
+            "extern int rpc_end_request(const int index);\n"
             "extern int rpc_wait_for_response(const int index);\n"
             "extern int rpc_read(const int index, void *data, const std::size_t size);\n"
-            "extern int rpc_end_request(const int index, void *return_value);\n"
+            "extern int rpc_end_response(const int index, void *return_value);\n"
             "extern int rpc_close();\n\n"
         )
         for function, annotation, operations, disabled in functions_with_annotations:
@@ -430,7 +431,7 @@ def main():
                                 param_type=operation.server_type.format(),
                             )
                         )
-            f.write("        rpc_end_request(0, &return_value) < 0)\n")
+            f.write("        rpc_end_response(0, &return_value) < 0)\n")
             f.write(
                 "        return {error_return};\n".format(
                     error_return=error_const(function.return_type.format())
