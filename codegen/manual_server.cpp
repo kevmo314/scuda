@@ -397,9 +397,6 @@ int handle___cudaRegisterFunction(void *conn)
                            mask & 1 << 2 ? &bDim : nullptr, mask & 1 << 3 ? &gDim : nullptr,
                            mask & 1 << 4 ? &wSize : nullptr);
 
-    if (rpc_start_response(conn, request_id) < 0 || rpc_end_response(conn, &res) < 0)
-        goto ERROR_2;
-
     return 0;
 ERROR_2:
     free((void *)deviceName);
@@ -425,9 +422,6 @@ int handle___cudaRegisterFatBinaryEnd(void *conn)
         return -1;
 
     __cudaRegisterFatBinaryEnd(fatCubinHandle);
-
-    if (rpc_start_response(conn, request_id) < 0 || rpc_end_response(conn, &res) < 0)
-        return -1;
 
     return 0;
 }
@@ -598,17 +592,6 @@ int handle___cudaRegisterVar(void *conn)
         std::cerr << "rpc_end_request failed" << std::endl;
         return -1;
     }
-
-    // Start response phase
-    if (rpc_start_response(conn, request_id) < 0)
-    {
-        std::cerr << "rpc_start_response failed" << std::endl;
-        return -1;
-    }
-
-    // No need to send anything back here; just end the response
-    if (rpc_end_response(conn, &res) < 0)
-        return -1;
 
     return 0;
 }
