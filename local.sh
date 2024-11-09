@@ -21,7 +21,7 @@ build() {
     echo "No compiler options set for os $(uname)"
   fi
 
-  echo "building vector file..."
+  echo "building vector file for test..."
 
   nvcc --cudart=shared -lnvidia-ml -lcuda ./test/vector_add.cu -o vector.o
 
