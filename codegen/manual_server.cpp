@@ -35,7 +35,8 @@ int handle_cudaMemcpy(void *conn)
     if (rpc_read(conn, &kind, sizeof(enum cudaMemcpyKind)) < 0)
         goto ERROR_0;
 
-    switch (kind) {
+    switch (kind)
+    {
     case cudaMemcpyDeviceToHost:
         if (rpc_read(conn, &src, sizeof(void *)) < 0 ||
             rpc_read(conn, &count, sizeof(size_t)) < 0)
@@ -260,7 +261,7 @@ int handle_cudaLaunchKernel(void *conn)
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-            goto ERROR_1;
+        goto ERROR_1;
 
     result = cudaLaunchKernel(func, gridDim, blockDim, args, sharedMem, stream);
 
@@ -495,15 +496,10 @@ void __cudaInitModule(void **fatCubinHandle)
     std::cerr << "calling __cudaInitModule" << std::endl;
 }
 
-typedef void (*__cudaRegisterVar_type)(
-    void **fatCubinHandle,
-    char *hostVar,
-    char *deviceAddress,
-    const char *deviceName,
-    int ext,
-    size_t size,
-    int constant,
-    int global);
+extern "C" void __cudaRegisterVar(void **fatCubinHandle,
+                                  char *hostVar, char *deviceAddress,
+                                  const char *deviceName, int ext, size_t size,
+                                  int constant, int global);
 
 int handle___cudaRegisterVar(void *conn)
 {
@@ -593,16 +589,7 @@ int handle___cudaRegisterVar(void *conn)
 
     std::cout << "Received __cudaRegisterVar with deviceName: " << deviceName << std::endl;
 
-    // Call the original __cudaRegisterVar function
-    __cudaRegisterVar_type orig;
-    orig = (__cudaRegisterVar_type)dlsym(RTLD_NEXT, "__cudaRegisterVar");
-    if (!orig)
-    {
-        std::cerr << "Failed to find original __cudaRegisterVar" << std::endl;
-        return -1;
-    }
-
-    orig(fatCubinHandle, hostVar, deviceAddress, deviceName, ext, size, constant, global);
+    __cudaRegisterVar(fatCubinHandle, hostVar, deviceAddress, deviceName, ext, size, constant, global);
 
     // End request phase
     int request_id = rpc_end_request(conn);
