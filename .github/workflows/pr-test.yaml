@@ -17,7 +17,7 @@ jobs:
         with:
           oauth-client-id: k4oU8AFYf121CNTRL
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
-          tags: tag:ci
+          tags: tag:ci,tag:production
       
       - name: Verify Tailscale IP
         run: tailscale ip
