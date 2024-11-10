@@ -142,24 +142,25 @@ int rpc_write(const int index, const void *data, const size_t size)
     return 0;
 }
 
-int rpc_wait_for_response(const int index)
+int rpc_end_request(const int index)
 {
-    conns[index].write_request_id++;
+    int write_request_id = ++(conns[index].write_request_id);
 
-    conns[index].write_iov[0] = {&conns[index].write_request_id, sizeof(int)};
+    conns[index].write_iov[0] = {&write_request_id, sizeof(int)};
     conns[index].write_iov[1] = {&conns[index].write_request_op, sizeof(unsigned int)};
 
     // write the request to the server
-    if (writev(conns[index].connfd, conns[index].write_iov, conns[index].write_iov_count) < 0)
-    {
-        pthread_mutex_unlock(&conns[index].write_mutex);
+    if (writev(conns[index].connfd, conns[index].write_iov, conns[index].write_iov_count) < 0 ||
+        pthread_mutex_unlock(&conns[index].write_mutex) < 0)
         return -1;
-    }
+    return write_request_id;
+}
 
-    int wait_for_request_id = conns[index].write_request_id;
+int rpc_wait_for_response(const int index)
+{
+    int wait_for_request_id = rpc_end_request(index);
 
-    if (pthread_mutex_unlock(&conns[index].write_mutex) < 0 ||
-        pthread_mutex_lock(&conns[index].read_mutex) < 0)
+    if (pthread_mutex_lock(&conns[index].read_mutex) < 0)
         return -1;
 
     // wait for the response
@@ -214,7 +215,7 @@ int rpc_read(const int index, void *data, size_t size)
     return 0;
 }
 
-int rpc_end_request(const int index, void *result)
+int rpc_end_response(const int index, void *result)
 {
     if (read(conns[index].connfd, result, sizeof(int)) < 0 ||
         pthread_mutex_unlock(&conns[index].read_mutex) < 0)

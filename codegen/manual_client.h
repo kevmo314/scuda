@@ -22,7 +22,6 @@ extern "C" unsigned __cudaPopCallConfiguration(dim3 *gridDim, dim3 *blockDim,
 extern "C" void __cudaInitModule(void **fatCubinHandle);
 extern "C" void __cudaRegisterVar(void **fatCubinHandle, char *hostVar, char *deviceAddress, const char *deviceName, int ext, size_t size, int constant, int global);
 
-
 // cublas
 cublasStatus_t cublasCreate_v2(cublasHandle_t* handle);
 cublasStatus_t cublasSgemm_v2(cublasHandle_t handle,

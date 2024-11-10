@@ -22,6 +22,10 @@ build() {
     echo "No compiler options set for os $(uname)"
   fi
 
+  echo "building vector file..."
+
+  nvcc --cudart=shared -lnvidia-ml -lcuda ./test/vector_add.cu -o vector.o
+
   if [ ! -f "$libscuda_path" ]; then
     echo "libscuda.so not found. build may have failed."
     exit 1
@@ -32,7 +36,7 @@ server() {
   echo "building server..." 
 
   if [[ "$(uname)" == "Linux" ]]; then
-    nvcc -o $server_out_path $server_path -lnvidia-ml -lcuda
+    nvcc --compiler-options -g,-Wno-deprecated-declarations -o $server_out_path $server_path -lnvidia-ml -lcuda --cudart=shared
   else
     echo "No compiler options set for os "$(uname)""
   fi
@@ -114,6 +118,16 @@ print('Tensor successfully moved back to CPU:')
   fi
 }
 
+test_vector_add() {
+  output=$(LD_PRELOAD="$libscuda_path" ./vector.o | tail -n 1)
+
+  if [[ "$output" == "PASSED" ]]; then
+    ansi_format "pass" "$pass_message"
+  else
+    ansi_format "fail" "vector_add failed. Got [$output]."
+  fi
+}
+
 #---- declare test cases ----#
 declare -A test_cuda_avail=(
   ["function"]="test_cuda_available"
@@ -130,8 +144,13 @@ declare -A test_tensor_to_cuda_to_cpu=(
   ["pass"]="Tensor successfully moved to CUDA and back to CPU."
 )
 
+declare -A test_vector_add=(
+  ["function"]="test_vector_add"
+  ["pass"]="CUDA vector_add example works."
+)
+
 #---- assign them to our associative array ----#
-tests=("test_cuda_avail" "test_tensor_to_cuda" "test_tensor_to_cuda_to_cpu")
+tests=("test_cuda_avail" "test_tensor_to_cuda" "test_tensor_to_cuda_to_cpu" "test_vector_add")
 
 test() {
   build
@@ -143,7 +162,7 @@ test() {
     pass_message=$(eval "echo \${${test}[pass]}")
 
     eval "$func_name \"$pass_message\""
-done
+  done
 }
 
 run() {
@@ -151,21 +170,7 @@ run() {
 
   export SCUDA_SERVER=0.0.0.0
 
-  LD_PRELOAD="$libscuda_path" python3 -c "
-import torch
-print('Creating a tensor...')
-tensor = torch.full((10, 10), 5)
-print('Tensor created on CPU:')
-print(tensor)
-
-print('Moving tensor to CUDA...')
-tensor_cuda = tensor.to('cuda:0')
-print('Tensor successfully moved to CUDA')
-
-print('Moving tensor back to CPU...')
-tensor_cpu = tensor_cuda.to('cpu')
-print('Tensor successfully moved back to CPU:')
-"
+  LD_PRELOAD="$libscuda_path" python3 -c "import torch; print(torch.cuda.is_available())"
 }
 
 # Main script logic using a switch case
