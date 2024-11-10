@@ -1,6 +1,7 @@
 #include <nvml.h>
 #include <cuda.h>
 #include <iostream>
+#include <dlfcn.h>
 #include <cublas_v2.h>
 #include <cuda_runtime_api.h>
 
@@ -300,6 +301,124 @@ int handle_cublasSgemm_v2(void *conn)
         return -1;
     }
    
+    if (rpc_read(conn, &ldb, sizeof(int)) < 0) {
+        return -1;
+    }
+
+    if (rpc_read(conn, &beta, sizeof(float)) < 0) {
+        return -1;
+    }
+
+    if (rpc_read(conn, &C, sizeof(float *)) < 0) {
+        return -1;
+    }
+
+    if (rpc_read(conn, &ldc, sizeof(int)) < 0) {
+        return -1;
+    }
+
+    int request_id = rpc_end_request(conn);
+    if (request_id < 0) {
+        return -1;
+    }
+
+    std::cout << "Calling cublasSgemm with handle: " << handle << std::endl;
+
+    printf("Calling cublasSgemm with the following parameters:\n");
+    printf("  Handle: %p\n", handle);
+    printf("  transa: %d, transb: %d\n", transa, transb);
+    printf("  m: %d, n: %d, k: %d\n", m, n, k);
+    printf("  alpha: %f\n", alpha);
+    printf("  A: %p, lda: %d\n", A, lda);
+    printf("  B: %p, ldb: %d\n", B, ldb);
+    printf("  beta: %f\n", beta);
+    printf("  C: %p, ldc: %d\n", C, ldc);
+
+    // Perform cublasSgemm
+    cublasStatus_t result = cublasSgemm(handle, transa, transb, m, n, k, &alpha, A, lda, B, ldb, &beta, C, ldc);
+
+    printf("finished calling cublasSgemm :\n");
+
+    // Send the response
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &result, sizeof(cublasStatus_t)) < 0 ||
+        rpc_end_response(conn, &result) < 0) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int handle_cublasCreate_v2(void *conn)
+{
+    cublasHandle_t* handle;
+
+    if (rpc_read(conn, handle, sizeof(cublasHandle_t)) < 0)
+        return -1;
+
+    int request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        return -1;
+
+    cublasStatus_t result = cublasCreate(handle);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &result, sizeof(cublasStatus_t)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        return -1;
+
+    return 0;
+}
+
+int handle_cublasSgemm_v2(void *conn)
+{
+    cublasHandle_t handle;
+    cublasOperation_t transa, transb;
+    int m, n, k, lda, ldb, ldc;
+    float alpha, beta;
+    const float *A, *B;
+    float *C;
+
+    if (rpc_read(conn, &handle, sizeof(cublasHandle_t)) < 0) {
+        return -1;
+    }
+
+    if (rpc_read(conn, &transa, sizeof(cublasOperation_t)) < 0) {
+        return -1;
+    }
+
+    if (rpc_read(conn, &transb, sizeof(cublasOperation_t)) < 0) {
+        return -1;
+    }
+
+    if (rpc_read(conn, &m, sizeof(int)) < 0) {
+        return -1;
+    }
+
+    if (rpc_read(conn, &n, sizeof(int)) < 0) {
+        return -1;
+    }
+
+    if (rpc_read(conn, &k, sizeof(int)) < 0) {
+        return -1;
+    }
+
+    if (rpc_read(conn, &alpha, sizeof(float)) < 0) {
+        return -1;
+    }
+
+    if (rpc_read(conn, &A, sizeof(const float *)) < 0) {
+        return -1;
+    }
+
+    if (rpc_read(conn, &lda, sizeof(int)) < 0) {
+        return -1;
+    }
+
+    if (rpc_read(conn, &B, sizeof(const float *)) < 0) {
+        return -1;
+    }
+
     if (rpc_read(conn, &ldb, sizeof(int)) < 0) {
         return -1;
     }

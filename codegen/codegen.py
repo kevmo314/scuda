@@ -54,10 +54,27 @@ MANUAL_REMAPPINGS = [
     ("cuMemAllocFromPoolAsync_ptsz", "cuMemAllocFromPoolAsync"),
 ]
 
+# These functions are not exposed in header files, but we need to make sure they are...
+# properly added to our client/server definitions.
+# These, ideally, should never be added or removed. 
+INTERNAL_FUNCTIONS = [
+    "__cudaRegisterVar",
+    "__cudaRegisterFunction",
+    "__cudaRegisterFatBinary",
+    "__cudaRegisterFatBinaryEnd",
+    "__cudaPushCallConfiguration",
+    "__cudaPopCallConfiguration"
+]
+
 # a list of manually implemented cuda/nvml functions.
 # these are automatically appended to each file; operation order is maintained as well.
-MANUAL_IMPLEMENTATIONS = ["cudaMemcpy", "cudaMemcpyAsync", "cublasCreate_v2", "cublasSgemm_v2"]
-
+MANUAL_IMPLEMENTATIONS = [
+    "cudaMemcpy",
+    "cudaMemcpyAsync",
+    "cudaLaunchKernel",
+    "cublasSgemm_v2",
+    "cublasCreate_v2"
+]
 
 @dataclass
 class Operation:
@@ -106,9 +123,16 @@ class Operation:
 
 def parse_annotation(annotation: str, params: list[Parameter]) -> list[Operation]:
     operations: list[Operation] = []
+    
     if not annotation:
         return operations
     for line in annotation.split("\n"):
+        # we treat disabled functions a bit differently.
+        # we should record that this function is disabled so that we can create the RPC method but not the actual handler.
+        # this is so that we don't break API compatability by commenting/uncommenting functions from our annotations file.
+        if "@disabled" in line or "@DISABLED" in line:
+            # we can return instantly; the function is disabled and we don't care about operations at this time.
+            return operations, True
         if line.startswith("/**"):
             continue
         if line.startswith("*/"):
@@ -170,7 +194,7 @@ def parse_annotation(annotation: str, params: list[Parameter]) -> list[Operation
                 length_parameter=length_parameter,
             )
             operations.append(operation)
-    return operations
+    return operations, False
 
 
 def error_const(return_type: str) -> str:
@@ -190,22 +214,27 @@ def prefix_std(type: str) -> str:
 
 
 def main():
-    options = ParserOptions(preprocessor=make_gcc_preprocessor())
+    options = ParserOptions(preprocessor=make_gcc_preprocessor(defines=["CUBLASAPI="]))
 
     nvml_ast: ParsedData = parse_file("/usr/include/nvml.h", options=options)
     cuda_ast: ParsedData = parse_file("/usr/include/cuda.h", options=options)
+    cublas_ast: ParsedData = parse_file("/usr/include/cublas_api.h", options=options)
     cudart_ast: ParsedData = parse_file(
         "/usr/include/cuda_runtime_api.h", options=options
     )
     annotations: ParsedData = parse_file("annotations.h", options=options)
 
+    # any new parsed libaries should be appended to the END of this list.
+    # this is to maintain proper ordering of our RPC calls.
     functions = (
         nvml_ast.namespace.functions
         + cuda_ast.namespace.functions
         + cudart_ast.namespace.functions
+        + cublas_ast.namespace.functions
     )
 
     functions_with_annotations: list[tuple[Function, Function, list[Operation]]] = []
+
     for function in functions:
         try:
             annotation = next(
@@ -215,34 +244,29 @@ def main():
             print(f"Annotation for {function.name} not found")
             continue
         try:
-            operations = parse_annotation(annotation.doxygen, function.parameters)
+            operations, is_func_disabled = parse_annotation(annotation.doxygen, function.parameters)
         except Exception as e:
             print(f"Error parsing annotation for {function.name}: {e}")
             continue
-        functions_with_annotations.append((function, annotation, operations))
+        functions_with_annotations.append((function, annotation, operations, is_func_disabled))
 
     with open("gen_api.h", "w") as f:
         lastIndex = 0
-        # visited = set()
-        for i, (function, _, _) in enumerate(functions_with_annotations):
-            # value = hash(function.name.format()) % (2**32)
-            # if value in visited:
-            #     print(f"Hash collision for {function.name.format()}")
-            #     continue
+
+        for i, (function) in enumerate(INTERNAL_FUNCTIONS):
             f.write(
                 "#define RPC_{name} {value}\n".format(
-                    name=function.name.format(),
+                    name=function.format(),
                     value=i,
                 )
             )
             lastIndex += 1
 
-        # Append any manually written implementations to our rpc list so that we maintain proper operation order
-        for j, (handler) in enumerate(MANUAL_IMPLEMENTATIONS):
+        for i, (function, _, _, _) in enumerate(functions_with_annotations):
             f.write(
                 "#define RPC_{name} {value}\n".format(
-                    name=handler.format(),
-                    value=j + lastIndex,
+                    name=function.name.format(),
+                    value=i + lastIndex,
                 )
             )
 
@@ -250,6 +274,7 @@ def main():
         f.write(
             "#include <nvml.h>\n"
             "#include <cuda.h>\n"
+            "#include <cublas_v2.h>\n"
             "#include <cuda_runtime_api.h>\n\n"
             "#include <cstring>\n"
             "#include <string>\n"
@@ -259,12 +284,16 @@ def main():
             "extern int rpc_size();\n"
             "extern int rpc_start_request(const int index, const unsigned int request);\n"
             "extern int rpc_write(const int index, const void *data, const std::size_t size);\n"
+            "extern int rpc_end_request(const int index);\n"
             "extern int rpc_wait_for_response(const int index);\n"
             "extern int rpc_read(const int index, void *data, const std::size_t size);\n"
-            "extern int rpc_end_request(const int index, void *return_value);\n"
+            "extern int rpc_end_response(const int index, void *return_value);\n"
             "extern int rpc_close();\n\n"
         )
-        for function, annotation, operations in functions_with_annotations:
+        for function, annotation, operations, disabled in functions_with_annotations:
+            # we don't generate client function definitions for disabled functions; only the RPC definitions.
+            if disabled: continue
+
             f.write(
                 "{return_type} {name}({params})\n".format(
                     return_type=function.return_type.format(),
@@ -407,7 +436,7 @@ def main():
                                 param_type=operation.server_type.format(),
                             )
                         )
-            f.write("        rpc_end_request(0, &return_value) < 0)\n")
+            f.write("        rpc_end_response(0, &return_value) < 0)\n")
             f.write(
                 "        return {error_return};\n".format(
                     error_return=error_const(function.return_type.format())
@@ -425,15 +454,23 @@ def main():
         f.write("std::unordered_map<std::string, void *> functionMap = {\n")
 
         # we need the base nvmlInit, this is important and should be kept here in the codegen.
+        for function in INTERNAL_FUNCTIONS:
+            f.write(
+                '    {{"{name}", (void *){name}}},\n'.format(
+                    name=function.format()
+                )
+            )
         f.write('    {"nvmlInit", (void *)nvmlInit_v2},\n')
-        for function, _, _ in functions_with_annotations:
+        for function, _, _, disabled in functions_with_annotations:
+            if disabled: continue
+
             f.write(
                 '    {{"{name}", (void *){name}}},\n'.format(
                     name=function.name.format()
                 )
             )
         # write manual overrides
-        function_names = set(f.name.format() for f, _, _ in functions_with_annotations)
+        function_names = set(f.name.format() for f, _, _, disabled in functions_with_annotations if not disabled)
         for x, y in MANUAL_REMAPPINGS:
             # ensure y exists in the function list
             if y not in function_names:
@@ -465,6 +502,7 @@ def main():
         f.write(
             "#include <nvml.h>\n"
             "#include <cuda.h>\n"
+            "#include <cublas_v2.h>\n"
             "#include <cuda_runtime_api.h>\n\n"
             "#include <cstring>\n"
             "#include <string>\n"
@@ -478,7 +516,9 @@ def main():
             "extern int rpc_write(const void *conn, const void *data, const std::size_t size);\n"
             "extern int rpc_end_response(const void *conn, void *return_value);\n\n"
         )
-        for function, annotation, operations in functions_with_annotations:
+        for function, annotation, operations, disabled in functions_with_annotations:
+            if function.name.format() in MANUAL_IMPLEMENTATIONS or disabled: continue
+
             # parse the annotation doxygen
             f.write(
                 "int handle_{name}(void *conn)\n".format(
@@ -487,7 +527,9 @@ def main():
             )
             f.write("{\n")
 
-            for operation in operations:
+            defers = []
+            # write the variable declarations first.
+            for i, operation in enumerate(operations):
                 if operation.null_terminated:
                     # write the length declaration and the parameter declaration
                     f.write(
@@ -496,47 +538,14 @@ def main():
                         )
                     )
                     f.write(
-                        "    if (rpc_read(conn, &{param_name}_len, sizeof({param_name}_len)) < 0)\n".format(
-                            param_name=operation.parameter.name
+                        "    {server_type} {param_name};\n".format(
+                            server_type=prefix_std(operation.server_type.format()),
+                            param_name=operation.parameter.name,
                         )
                     )
-                    f.write("        return -1;\n")
-                    if isinstance(operation.server_type, Pointer):
-                        # write the malloc declaration
-                        f.write(
-                            "    {server_type} {param_name} = ({server_type})malloc({param_name}_len);\n".format(
-                                param_name=operation.parameter.name,
-                                server_type=prefix_std(operation.server_type.format()),
-                            )
-                        )
-                    else:
-                        # write just the parameter declaration
-                        f.write(
-                            "    {server_type} {param_name};\n".format(
-                                server_type=prefix_std(operation.server_type.format()),
-                                param_name=operation.parameter.name,
-                            )
-                        )
                 elif isinstance(operation.server_type, Pointer):
                     # write the malloc declaration
-                    if length := operation.length_parameter:
-                        f.write(
-                            "    {server_type} {param_name} = ({server_type})malloc({length} * sizeof({base_type}));\n".format(
-                                param_name=operation.parameter.name,
-                                server_type=prefix_std(operation.server_type.format()),
-                                length=length.name,
-                                base_type=operation.server_type.ptr_to.format(),
-                            )
-                        )
-                    elif size := operation.array_size:
-                        f.write(
-                            "    {server_type} {param_name} = ({server_type})malloc({size});\n".format(
-                                param_name=operation.parameter.name,
-                                server_type=prefix_std(operation.server_type.format()),
-                                size=size,
-                            )
-                        )
-                    elif operation.is_opaque_pointer:
+                    if operation.length_parameter or operation.array_size or operation.is_opaque_pointer:
                         # write just the parameter declaration
                         f.write(
                             "    {server_type} {param_name};\n".format(
@@ -551,12 +560,6 @@ def main():
                                 param_name=operation.parameter.name
                             )
                         )
-                        f.write(
-                            "    if (rpc_read(conn, &{param_name}_null_check, 1) < 0)\n".format(
-                                param_name=operation.parameter.name
-                            )
-                        )
-                        f.write("        return -1;\n")
                         # write param declaration
                         f.write(
                             "    {server_type} {param_name} = nullptr;\n".format(
@@ -564,6 +567,65 @@ def main():
                                 param_name=operation.parameter.name,
                             )
                         )
+                else:
+                    # write just the parameter declaration
+                    f.write(
+                        "    {server_type} {param_name};\n".format(
+                            server_type=prefix_std(operation.server_type.format()),
+                            param_name=operation.parameter.name,
+                        )
+                    )
+
+            f.write("    int request_id;\n")
+            f.write("    {return_type} result;\n".format(return_type=function.return_type.format()))
+
+            for i, operation in enumerate(operations):
+                if operation.null_terminated:
+                    # write the length declaration and the parameter declaration
+                    f.write(
+                        "    if (rpc_read(conn, &{param_name}_len, sizeof({param_name}_len)) < 0)\n".format(
+                            param_name=operation.parameter.name
+                        )
+                    )
+                    f.write("        goto ERROR_{index};\n".format(index=len(defers)))
+                    if isinstance(operation.server_type, Pointer):
+                        # write the malloc declaration
+                        f.write(
+                            "    {param_name} = ({server_type})malloc({param_name}_len);\n".format(
+                                param_name=operation.parameter.name,
+                                server_type=prefix_std(operation.server_type.format()),
+                            )
+                        )
+                        defers.append(operation.parameter.name)
+                elif isinstance(operation.server_type, Pointer):
+                    # write the malloc declaration
+                    if length := operation.length_parameter:
+                        f.write(
+                            "    {param_name} = ({server_type})malloc({length} * sizeof({base_type}));\n".format(
+                                param_name=operation.parameter.name,
+                                server_type=prefix_std(operation.server_type.format()),
+                                length=length.name,
+                                base_type=operation.server_type.ptr_to.format(),
+                            )
+                        )
+                        defers.append(operation.parameter.name)
+                    elif size := operation.array_size:
+                        f.write(
+                            "    {param_name} = ({server_type})malloc({size});\n".format(
+                                param_name=operation.parameter.name,
+                                server_type=prefix_std(operation.server_type.format()),
+                                size=size,
+                            )
+                        )
+                        defers.append(operation.parameter.name)
+                    elif operation.nullable:
+                        # read the first byte to determine if it's null
+                        f.write(
+                            "    if (rpc_read(conn, &{param_name}_null_check, 1) < 0)\n".format(
+                                param_name=operation.parameter.name
+                            )
+                        )
+                        f.write("        goto ERROR_{index};\n".format(index=len(defers)))
                         f.write(
                             "    if ({param_name}_null_check) {{\n".format(
                                 param_name=operation.parameter.name
@@ -576,27 +638,23 @@ def main():
                                 base_type=operation.server_type.ptr_to.format(),
                             )
                         )
+                        defers.append(operation.parameter.name)
                         f.write(
                             "        if (rpc_read(conn, {param_name}, sizeof({base_type})) < 0)\n".format(
                                 param_name=operation.parameter.name,
                                 base_type=operation.server_type.ptr_to.format(),
                             )
                         )
-                        f.write("            return -1;\n")
+                        f.write("        goto ERROR_{index};\n".format(index=len(defers)))
                         f.write("    }\n")
+                    elif operation.is_opaque_pointer:
+                        # TODO: figure out what to do here.
+                        pass
                     else:
                         print(function, operation)
                         raise NotImplementedError(
                             "Could not determine length, this parameter is a pointer but neither length nor size is specified"
                         )
-                else:
-                    # write just the parameter declaration
-                    f.write(
-                        "    {server_type} {param_name};\n".format(
-                            server_type=prefix_std(operation.server_type.format()),
-                            param_name=operation.parameter.name,
-                        )
-                    )
                 if operation.send:
                     f.write(
                         "    if (rpc_read(conn, &{param_name}, sizeof({param_type})) < 0)\n".format(
@@ -604,16 +662,16 @@ def main():
                             param_type=operation.server_type.format(),
                         )
                     )
-                    f.write("        return -1;\n")
+                    f.write("        goto ERROR_{index};\n".format(index=len(defers)))
 
             f.write("\n")
             f.write(
-                "    int request_id = rpc_end_request(conn);\n".format(
+                "    request_id = rpc_end_request(conn);\n".format(
                     name=function.name.format()
                 )
             )
             f.write("    if (request_id < 0)\n")
-            f.write("        return -1;\n\n")
+            f.write("        goto ERROR_{index};\n".format(index=len(defers)))
 
             params: list[str] = []
             # these need to be in function param order, not operation order.
@@ -624,8 +682,7 @@ def main():
                 params.append(operation.server_reference)
 
             f.write(
-                "    {return_type} result = {name}({params});\n\n".format(
-                    return_type=function.return_type.format(),
+                "    result = {name}({params});\n\n".format(
                     name=function.name.format(),
                     params=", ".join(params),
                 )
@@ -669,16 +726,25 @@ def main():
                             )
                         )
             f.write("        rpc_end_response(conn, &result) < 0)\n")
-            f.write("        return -1;\n")
+            f.write("        goto ERROR_{index};\n".format(index=len(defers)))
             f.write("\n")
             f.write("    return 0;\n")
+
+            for i, defer in enumerate(defers):
+                f.write("ERROR_{index}:\n".format(index=len(defers) - i))
+                f.write("    free((void *) {param_name});\n".format(param_name=defer))
+            f.write("ERROR_0:\n")
+            f.write("    return -1;\n")
             f.write("}\n\n")
 
         f.write("static RequestHandler opHandlers[] = {\n")
-        for function, _, _ in functions_with_annotations:
-            f.write("    handle_{name},\n".format(name=function.name.format()))
-        for handler in MANUAL_IMPLEMENTATIONS:
-            f.write("    handle_{name},\n".format(name=handler.format()))
+        for function in INTERNAL_FUNCTIONS:
+            f.write("    handle_{name},\n".format(name=function.format()))
+        for function, _, _, disabled in functions_with_annotations:
+            if disabled and function.name.format() not in MANUAL_IMPLEMENTATIONS:
+                f.write("    nullptr,\n")
+            else:
+                f.write("    handle_{name},\n".format(name=function.name.format()))
         f.write("};\n\n")
 
         f.write("RequestHandler get_handler(const int op)\n")
