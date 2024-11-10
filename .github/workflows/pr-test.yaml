@@ -1,0 +1,30 @@
+name: Scuda CI
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  tailscale_job:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          oauth-client-id: k4oU8AFYf121CNTRL
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+      
+      - name: Verify Tailscale IP
+        run: tailscale ip
+
+      - name: Build and Test
+        run: |
+          s test
+
+      - name: Disconnect Tailscale
+        run: tailscale logout
