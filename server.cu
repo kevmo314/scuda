@@ -37,7 +37,7 @@ int request_handler(const conn_t *conn)
     // Attempt to read the operation code from the client
     if (read(conn->connfd, &op, sizeof(unsigned int)) < 0)
         return -1;
-    
+
     auto opHandler = get_handler(op);
 
     if (opHandler == NULL)
@@ -51,7 +51,6 @@ int request_handler(const conn_t *conn)
 
 void client_handler(int connfd)
 {
-    std::vector<std::future<void>> futures;
     conn_t conn = {connfd};
     if (pthread_mutex_init(&conn.read_mutex, NULL) < 0 ||
         pthread_mutex_init(&conn.write_mutex, NULL) < 0)
@@ -83,10 +82,14 @@ void client_handler(int connfd)
             break;
         }
 
+        // TODO: this can't be multithreaded as some of the __cuda* functions
+        // assume that they are running in the same thread as the one that
+        // calls cudaLaunchKernel. we'll need to find a better way to map
+        // function calls to threads. maybe each rpc maps to an optional
+        // thread id that is passed to the handler?
         if (request_handler(&conn) < 0)
             std::cerr << "Error handling request." << std::endl;
     }
-
 
     if (pthread_mutex_destroy(&conn.read_mutex) < 0 ||
         pthread_mutex_destroy(&conn.write_mutex) < 0)
@@ -94,9 +97,18 @@ void client_handler(int connfd)
     close(connfd);
 }
 
-int rpc_read(const void *conn, void *data, const size_t size)
+int rpc_read(const void *conn, void *data, size_t size)
 {
-    return read(((conn_t *)conn)->connfd, data, size);
+    while (true)
+    {
+        ssize_t n = read(((conn_t *)conn)->connfd, data, size);
+        if (n <= 0)
+            return n;
+        size -= n;
+        if (size == 0)
+            return 0;
+        data = (char *)data + n;
+    }
 }
 
 int rpc_write(const void *conn, const void *data, const size_t size)
