@@ -871,7 +871,7 @@ cublasStatus_t cublasCreate_v2(cublasHandle_t* handle)
     if (rpc_start_request(0, RPC_cublasCreate_v2) < 0 ||
         rpc_write(0, handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
-        rpc_end_request(0) < 0)
+        rpc_end_response(0, &return_value) < 0)
     {
         return CUBLAS_STATUS_INTERNAL_ERROR;
     }
@@ -956,7 +956,7 @@ cublasStatus_t cublasSgemm_v2(cublasHandle_t handle,
         return CUBLAS_STATUS_INTERNAL_ERROR;
     }
 
-    if (rpc_end_request(0) < 0) {
+    if (rpc_end_response(0, &return_value) < 0) {
         return CUBLAS_STATUS_INTERNAL_ERROR;
     }
 
