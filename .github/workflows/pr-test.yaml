@@ -22,9 +22,15 @@ jobs:
       - name: Verify Tailscale IP
         run: tailscale ip
 
-      - name: Test SSH
+      - name: Run tests
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa root@100.118.7.128 ls
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa root@100.118.7.128 'bash -s' <<'EOF'
+          #!/bin/bash
+          cd /home/brodey/scuda-latest
+
+          ls
+
+          EOF
 
       - name: Disconnect Tailscale
         run: tailscale logout
