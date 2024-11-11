@@ -35,10 +35,15 @@ jobs:
           sleep 5
 
           export SCUDA_SERVER=0.0.0.0:14834
-          ./local.sh test
+          test_output=$(./local.sh test)
+          test_exit_code=$?
 
-          kill $(ps aux | grep '[s]cuda' | awk '{print $2}')
-          echo "server process terminated. exiting..."
+          if [ $test_exit_code -eq 0 ]; then
+            echo "Tests passed successfully!"
+          else
+            echo "tests failed... Output:"
+            echo "$test_output"
+          fi
 
           exit $test_exit_code
 
