@@ -3,6 +3,10 @@ name: Scuda CI
 on:
   pull_request:
     branches: [main]
+  
+concurrency:
+  group: ci
+  cancel-in-progress: true
 
 jobs:
   tailscale_job:
