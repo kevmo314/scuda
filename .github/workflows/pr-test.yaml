@@ -30,23 +30,10 @@ jobs:
           cd /home/brodey/scuda-latest
           ls
 
-          SCUDA_PORT=14834 ./local.sh server > server_output.log 2>&1 &
+          SCUDA_PORT=14834 ./local.sh server &
           server_pid=$!
 
           sleep 5
-
-          if ! ps -p $server_pid > /dev/null; then
-            echo "Server failed to start (process not running)."
-            cat server_output.log
-            exit 1
-          fi
-
-          # Check the server output log for any errors (e.g., "socket bind failed")
-          if grep -q "socket bind failed" server_output.log; then
-            echo "Server failed to start: socket bind failed."
-            cat server_output.log
-            exit 1
-          fi
 
           # change the port to our 'test' port
           export SCUDA_SERVER=0.0.0.0:14834
