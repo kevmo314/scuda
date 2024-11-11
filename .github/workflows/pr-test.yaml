@@ -31,7 +31,6 @@ jobs:
           ls
 
           SCUDA_PORT=14834 ./local.sh server &
-          server_pid=$!
 
           sleep 5
 
@@ -46,7 +45,7 @@ jobs:
             echo "$test_output"
           fi
 
-          kill -TERM -$server_pid
+          kill $(ps aux | grep '[s]cuda' | awk '{print $2}')
           echo "server process and its children terminated. exiting..."
 
           exit $test_exit_code
