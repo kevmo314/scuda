@@ -167,7 +167,7 @@ test() {
 
     if ! eval "$func_name \"$pass_message\""; then
       echo -e "\033[31mTest failed. Exiting...\033[0m"
-      exit 1
+      return 1
     fi
   done
 }
