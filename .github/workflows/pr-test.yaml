@@ -24,8 +24,7 @@ jobs:
 
       - name: Test SSH
         run: |
-          tailscale ssh root@100.118.7.128
-          ls
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa root@100.118.7.128 ls
 
       - name: Disconnect Tailscale
         run: tailscale logout
