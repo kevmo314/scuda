@@ -35,12 +35,19 @@ jobs:
 
           sleep 5
 
-          # change the port to our 'test' port
           export SCUDA_SERVER=0.0.0.0:14834
-          ./local.sh test && (echo "Tests passed successfully!"; exit 0) || (echo "Tests failed. Exiting..."; exit 1)
+          test_output=$(./local.sh test)
+          test_exit_code=$?
+
+          if [ $test_exit_code -eq 0 ]; then
+            echo "Tests passed successfully!"
+          else
+            echo "tests failed... Output:"
+            echo "$test_output"
+          fi
 
           kill $server_pid
-          echo "server process terminated."
+          echo "Server process terminated."
 
           exit 0
 
