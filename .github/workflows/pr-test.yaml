@@ -23,7 +23,7 @@ jobs:
         run: tailscale ip
 
       - name: Test SSH
-        run: tailscale ssh
+        run: tailscale ssh root@100.118.7.128
 
       - name: Disconnect Tailscale
         run: tailscale logout
