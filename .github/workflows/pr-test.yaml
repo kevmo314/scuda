@@ -43,6 +43,3 @@ jobs:
           echo "server process terminated."
 
           EOF
-
-      - name: Disconnect Tailscale
-        run: tailscale logout
