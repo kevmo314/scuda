@@ -40,9 +40,6 @@ jobs:
 
           if [ $test_exit_code -eq 0 ]; then
             echo "Tests passed successfully!"
-          else
-            echo "Tests failed... Output:"
-            echo "$test_output"
           fi
 
           kill $(ps aux | grep '[s]cuda' | awk '{print $2}')
