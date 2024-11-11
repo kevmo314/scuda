@@ -71,6 +71,7 @@ test_cuda_available() {
 
   if [[ "$output" == "True" ]]; then
     ansi_format "pass" "$pass_message"
+    return 1
   else
     ansi_format "fail" "CUDA is not available. Expected True but got [$output]."
     return 1

@@ -51,6 +51,3 @@ jobs:
           exit $test_exit_code
 
           EOF
-
-      - name: Disconnect
-        run: tailscale down
