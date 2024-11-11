@@ -73,6 +73,7 @@ test_cuda_available() {
     ansi_format "pass" "$pass_message"
   else
     ansi_format "fail" "CUDA is not available. Expected True but got [$output]."
+    return 1
   fi
 }
 
@@ -90,6 +91,7 @@ print('Tensor successfully moved to CUDA')
     ansi_format "pass" "$pass_message"
   else
     ansi_format "fail" "Tensor failed. Got [$output]."
+    return 1
   fi
 }
 
@@ -114,6 +116,7 @@ print('Tensor successfully moved back to CPU:')
     ansi_format "pass" "$pass_message"
   else
     ansi_format "fail" "Tensor failed. Got [$output]."
+    return 1
   fi
 }
 
@@ -124,6 +127,7 @@ test_vector_add() {
     ansi_format "pass" "$pass_message"
   else
     ansi_format "fail" "vector_add failed. Got [$output]."
+    return 1
   fi
 }
 
@@ -160,7 +164,10 @@ test() {
     func_name=$(eval "echo \${${test}[function]}")
     pass_message=$(eval "echo \${${test}[pass]}")
 
-    eval "$func_name \"$pass_message\""
+    if ! eval "$func_name \"$pass_message\""; then
+      echo -e "\033[31mTest failed. Exiting...\033[0m"
+      exit 1
+    fi
   done
 }
 

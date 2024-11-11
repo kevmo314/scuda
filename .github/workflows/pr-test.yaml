@@ -26,9 +26,16 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa root@100.118.7.128 'bash -s' <<'EOF'
           #!/bin/bash
-          cd /home/brodey/scuda-latest
 
+          cd /home/brodey/scuda-latest
           ls
+
+          s server & 
+          server_pid=$!
+          sleep 5
+
+          export SCUDA_SERVER=0.0.0.0
+          s test && echo "Tests passed successfully!" || (echo "Tests failed. Exiting..."; exit 1)
 
           EOF
 
