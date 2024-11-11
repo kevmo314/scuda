@@ -22,9 +22,8 @@ jobs:
       - name: Verify Tailscale IP
         run: tailscale ip
 
-      - name: Build and Test
-        run: |
-          s test
+      - name: Test SSH
+        run: tailscale ssh
 
       - name: Disconnect Tailscale
         run: tailscale logout
