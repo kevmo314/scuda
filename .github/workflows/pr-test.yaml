@@ -42,4 +42,6 @@ jobs:
           kill $server_pid
           echo "server process terminated."
 
+          exit 0
+
           EOF
