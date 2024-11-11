@@ -35,7 +35,7 @@ jobs:
           sleep 5
 
           export SCUDA_SERVER=0.0.0.0
-          ./local.sh test && echo "Tests passed successfully!" || (echo "Tests failed. Exiting..."; exit 1)
+          ./local.sh test && (echo "Tests passed successfully!"; exit 0) || (echo "Tests failed. Exiting..."; exit 1)
 
           EOF
 
