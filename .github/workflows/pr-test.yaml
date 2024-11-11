@@ -40,15 +40,18 @@ jobs:
           test_exit_code=$?
 
           if [ $test_exit_code -eq 0 ]; then
-            echo "Tests passed successfully!"
+            echo "tests passed successfully!"
           else
             echo "tests failed... Output:"
             echo "$test_output"
           fi
 
-          kill $server_pid
-          echo "Server process terminated."
+          kill -TERM -$server_pid
+          echo "server process and its children terminated. exiting..."
 
-          exit 0
+          exit $test_exit_code
 
           EOF
+
+      - name: Disconnect
+        run: tailscale down
