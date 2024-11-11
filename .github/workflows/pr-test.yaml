@@ -30,12 +30,12 @@ jobs:
           cd /home/brodey/scuda-latest
           ls
 
-          s server & 
+          ./local.sh server &
           server_pid=$!
           sleep 5
 
           export SCUDA_SERVER=0.0.0.0
-          s test && echo "Tests passed successfully!" || (echo "Tests failed. Exiting..."; exit 1)
+          ./local.sh test && echo "Tests passed successfully!" || (echo "Tests failed. Exiting..."; exit 1)
 
           EOF
 
