@@ -69,11 +69,14 @@ INTERNAL_FUNCTIONS = [
 # a list of manually implemented cuda/nvml functions.
 # these are automatically appended to each file; operation order is maintained as well.
 MANUAL_IMPLEMENTATIONS = [
+    "cudaFree",
     "cudaMemcpy",
     "cudaMemcpyAsync",
     "cudaLaunchKernel",
     "cublasSgemm_v2",
-    "cublasCreate_v2"
+    "cublasCreate_v2",
+    "cublasCreate_v2",
+    "cublasDestroy_v2"
 ]
 
 @dataclass
@@ -204,6 +207,8 @@ def error_const(return_type: str) -> str:
         return "CUDA_ERROR_DEVICE_UNAVAILABLE"
     if return_type == "cudaError_t":
         return "cudaErrorDevicesUnavailable"
+    if return_type == "cublasStatus_t":
+        return "CUBLAS_STATUS_NOT_INITIALIZED"
     raise NotImplementedError("Unknown return type: %s" % return_type)
 
 

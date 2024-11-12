@@ -4387,6 +4387,7 @@ cudaError_t cudaMallocPitch(void **devPtr, size_t *pitch, size_t width, size_t h
  */
 cudaError_t cudaMallocArray(cudaArray_t *array, const struct cudaChannelFormatDesc *desc, size_t width, size_t height, unsigned int flags);
 /**
+ * @disabled
  * @param devPtr SEND_ONLY
  */
 cudaError_t cudaFree(void *devPtr);
@@ -5553,6 +5554,11 @@ cublasStatus_t cublasCreate_v2(cublasHandle_t* handle);
 /**
  * @disabled
  * @param handle SEND_ONLY
+ */
+cublasStatus_t cublasDestroy_v2(cublasHandle_t handle);
+/**
+ * @disabled
+ * @param handle SEND_ONLY
  * @param transa SEND_ONLY
  * @param transb SEND_ONLY
  * @param m SEND_ONLY
@@ -5564,7 +5570,7 @@ cublasStatus_t cublasCreate_v2(cublasHandle_t* handle);
  * @param B SEND_ONLY
  * @param ldb SEND_ONLY
  * @param beta SEND_ONLY
- * @param c SEND_ONLY
+ * @param C SEND_ONLY
  * @param ldc SEND_ONLY
  */
 cublasStatus_t cublasSgemm_v2(cublasHandle_t handle,

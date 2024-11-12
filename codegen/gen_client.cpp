@@ -9208,18 +9208,6 @@ cudaError_t cudaMallocPitch(void** devPtr, size_t* pitch, size_t width, size_t h
     return return_value;
 }
 
-cudaError_t cudaFree(void* devPtr)
-{
-    cudaError_t return_value;
-
-    if (rpc_start_request(0, RPC_cudaFree) < 0 ||
-        rpc_write(0, &devPtr, sizeof(void*)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return cudaErrorDevicesUnavailable;
-    return return_value;
-}
-
 cudaError_t cudaFreeHost(void* ptr)
 {
     cudaError_t return_value;
@@ -11455,7 +11443,6 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cudaMalloc", (void *)cudaMalloc},
     {"cudaMallocHost", (void *)cudaMallocHost},
     {"cudaMallocPitch", (void *)cudaMallocPitch},
-    {"cudaFree", (void *)cudaFree},
     {"cudaFreeHost", (void *)cudaFreeHost},
     {"cudaFreeArray", (void *)cudaFreeArray},
     {"cudaFreeMipmappedArray", (void *)cudaFreeMipmappedArray},
@@ -11602,11 +11589,14 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cuMemFreeAsync_ptsz", (void *)cuMemFreeAsync},
     {"cuMemAllocAsync_ptsz", (void *)cuMemAllocAsync},
     {"cuMemAllocFromPoolAsync_ptsz", (void *)cuMemAllocFromPoolAsync},
+    {"cudaFree", (void *)cudaFree},
     {"cudaMemcpy", (void *)cudaMemcpy},
     {"cudaMemcpyAsync", (void *)cudaMemcpyAsync},
     {"cudaLaunchKernel", (void *)cudaLaunchKernel},
     {"cublasSgemm_v2", (void *)cublasSgemm_v2},
     {"cublasCreate_v2", (void *)cublasCreate_v2},
+    {"cublasCreate_v2", (void *)cublasCreate_v2},
+    {"cublasDestroy_v2", (void *)cublasDestroy_v2},
 };
 
 void *get_function_pointer(const char *name)

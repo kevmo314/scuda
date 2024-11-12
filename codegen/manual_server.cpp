@@ -53,9 +53,6 @@ int handle_cudaMemcpy(void *conn)
 
         result = cudaMemcpy(host_data, src, count, cudaMemcpyDeviceToHost);
 
-        std::cout << "DONE COPYING " << result << std::endl;
-        std::cout << "DONE COPYING COUNT" << count << std::endl;
-
         if (rpc_start_response(conn, request_id) < 0 ||
             rpc_write(conn, host_data, count) < 0)
             goto ERROR_1;
@@ -112,8 +109,6 @@ int handle_cudaMemcpyAsync(void *conn)
 {
     cudaError_t result;
     void *dst;
-
-    std::cout << "calling cudaMemcpyAsync" << std::endl;
 
     enum cudaMemcpyKind kind;
     if (rpc_read(conn, &kind, sizeof(enum cudaMemcpyKind)) < 0)
@@ -612,7 +607,6 @@ int handle_cublasCreate_v2(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, handle, sizeof(cublasHandle_t)) < 0 ||
-        rpc_write(conn, &result, sizeof(cublasStatus_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         return -1;
 
@@ -628,59 +622,20 @@ int handle_cublasSgemm_v2(void *conn)
     const float *A, *B;
     float *C;
 
-    if (rpc_read(conn, &handle, sizeof(cublasHandle_t)) < 0) {
-        return -1;
-    }
-
-    if (rpc_read(conn, &transa, sizeof(cublasOperation_t)) < 0) {
-        return -1;
-    }
-
-    if (rpc_read(conn, &transb, sizeof(cublasOperation_t)) < 0) {
-        return -1;
-    }
-
-    if (rpc_read(conn, &m, sizeof(int)) < 0) {
-        return -1;
-    }
-
-    if (rpc_read(conn, &n, sizeof(int)) < 0) {
-        return -1;
-    }
-
-    if (rpc_read(conn, &k, sizeof(int)) < 0) {
-        return -1;
-    }
-
-    if (rpc_read(conn, &alpha, sizeof(float)) < 0) {
-        return -1;
-    }
-
-    if (rpc_read(conn, &A, sizeof(const float *)) < 0) {
-        return -1;
-    }
-
-    if (rpc_read(conn, &lda, sizeof(int)) < 0) {
-        return -1;
-    }
-
-    if (rpc_read(conn, &B, sizeof(const float *)) < 0) {
-        return -1;
-    }
-
-    if (rpc_read(conn, &ldb, sizeof(int)) < 0) {
-        return -1;
-    }
-
-    if (rpc_read(conn, &beta, sizeof(float)) < 0) {
-        return -1;
-    }
-
-    if (rpc_read(conn, &C, sizeof(float *)) < 0) {
-        return -1;
-    }
-
-    if (rpc_read(conn, &ldc, sizeof(int)) < 0) {
+    if (rpc_read(conn, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_read(conn, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_read(conn, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_read(conn, &m, sizeof(int)) < 0 ||
+        rpc_read(conn, &n, sizeof(int)) < 0 ||
+        rpc_read(conn, &k, sizeof(int)) < 0 ||
+        rpc_read(conn, &alpha, sizeof(float)) < 0 ||
+        rpc_read(conn, &A, sizeof(const float *)) < 0 ||
+        rpc_read(conn, &lda, sizeof(int)) < 0 ||
+        rpc_read(conn, &B, sizeof(const float *)) < 0 ||
+        rpc_read(conn, &ldb, sizeof(int)) < 0 ||
+        rpc_read(conn, &beta, sizeof(float)) < 0 ||
+        rpc_read(conn, &C, sizeof(float *)) < 0 ||
+        rpc_read(conn, &ldc, sizeof(int)) < 0) {
         return -1;
     }
 
@@ -691,17 +646,56 @@ int handle_cublasSgemm_v2(void *conn)
 
     std::cout << "Calling cublasSgemm with handle: " << handle << std::endl;
 
-    // Perform cublasSgemm
     cublasStatus_t result = cublasSgemm(handle, transa, transb, m, n, k, &alpha, A, lda, B, ldb, &beta, C, ldc);
 
-    printf("finished calling cublasSgemm :\n");
-
-    // Send the response
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &result, sizeof(cublasStatus_t)) < 0 ||
         rpc_end_response(conn, &result) < 0) {
         return -1;
     }
 
     return 0;
 }
+
+int handle_cublasDestroy_v2(void *conn)
+{
+    cublasHandle_t handle;
+
+    if (rpc_read(conn, &handle, sizeof(cublasHandle_t)) < 0) {
+        return -1;
+    }
+
+    int request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        return -1;
+
+    cublasStatus_t result = cublasDestroy(handle);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        return -1;
+
+    return 0;
+}
+
+int handle_cudaFree(void *conn)
+{
+    void* devPtr;
+    int request_id;
+    cudaError_t result;
+    if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaFree(devPtr);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+

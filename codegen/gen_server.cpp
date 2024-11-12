@@ -17756,28 +17756,6 @@ ERROR_0:
     return -1;
 }
 
-int handle_cudaFree(void *conn)
-{
-    void* devPtr;
-    int request_id;
-    cudaError_t result;
-    if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cudaFree(&devPtr);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
 int handle_cudaFreeHost(void *conn)
 {
     void* ptr;
@@ -21607,6 +21585,7 @@ static RequestHandler opHandlers[] = {
     handle_cudaGraphRetainUserObject,
     handle_cudaGraphReleaseUserObject,
     handle_cublasCreate_v2,
+    handle_cublasDestroy_v2,
     handle_cublasSgemm_v2,
 };
 

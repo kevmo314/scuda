@@ -207,11 +207,23 @@ int rpc_read(const int index, void *data, size_t size)
             size -= bytesRead;
         }
     }
-    else if (read(conns[index].connfd, data, size) < 0)
+
+    while (true)
     {
-        pthread_mutex_unlock(&conns[index].read_mutex);
-        return -1;
+        ssize_t n = read(conns[index].connfd, data, size);
+        if (n < 0)
+        {
+            pthread_mutex_unlock(&conns[index].read_mutex);
+            return -1;
+        }
+        if (n <= 0)
+            return n;
+        size -= n;
+        if (size == 0)
+            return 0;
+        data = (char *)data + n;
     }
+
     return 0;
 }
 

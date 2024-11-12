@@ -806,4 +806,5 @@
 #define RPC_cudaGraphRetainUserObject 805
 #define RPC_cudaGraphReleaseUserObject 806
 #define RPC_cublasCreate_v2 807
-#define RPC_cublasSgemm_v2 808
+#define RPC_cublasDestroy_v2 808
+#define RPC_cublasSgemm_v2 809
