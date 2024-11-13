@@ -8776,10 +8776,10 @@ int handle_cuLinkAddData_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_3;
-    result = cuLinkAddData_v2(state, type, data, size, name, numOptions, options, optionValues);
+    result = cuLinkAddData_v2(state, type, &data, size, name, numOptions, options, optionValues);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, data, sizeof(void*)) < 0 ||
+        rpc_write(conn, &data, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_3;
 
@@ -9492,10 +9492,10 @@ int handle_cuMemFreeHost(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cuMemFreeHost(p);
+    result = cuMemFreeHost(&p);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, p, sizeof(void*)) < 0 ||
+        rpc_write(conn, &p, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -9550,11 +9550,11 @@ int handle_cuMemHostGetDevicePointer_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cuMemHostGetDevicePointer_v2(&pdptr, p, Flags);
+    result = cuMemHostGetDevicePointer_v2(&pdptr, &p, Flags);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &pdptr, sizeof(CUdeviceptr)) < 0 ||
-        rpc_write(conn, p, sizeof(void*)) < 0 ||
+        rpc_write(conn, &p, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -9577,11 +9577,11 @@ int handle_cuMemHostGetFlags(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cuMemHostGetFlags(&pFlags, p);
+    result = cuMemHostGetFlags(&pFlags, &p);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &pFlags, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, p, sizeof(void*)) < 0 ||
+        rpc_write(conn, &p, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -9827,10 +9827,10 @@ int handle_cuMemHostRegister_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cuMemHostRegister_v2(p, bytesize, Flags);
+    result = cuMemHostRegister_v2(&p, bytesize, Flags);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, p, sizeof(void*)) < 0 ||
+        rpc_write(conn, &p, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -9850,10 +9850,10 @@ int handle_cuMemHostUnregister(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cuMemHostUnregister(p);
+    result = cuMemHostUnregister(&p);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, p, sizeof(void*)) < 0 ||
+        rpc_write(conn, &p, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -9941,10 +9941,10 @@ int handle_cuMemcpyDtoH_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cuMemcpyDtoH_v2(dstHost, srcDevice, ByteCount);
+    result = cuMemcpyDtoH_v2(&dstHost, srcDevice, ByteCount);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, dstHost, sizeof(void*)) < 0 ||
+        rpc_write(conn, &dstHost, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -10063,7 +10063,7 @@ int handle_cuMemcpyAtoH_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cuMemcpyAtoH_v2(dstHost, srcArray, srcOffset, ByteCount);
+    result = cuMemcpyAtoH_v2(&dstHost, srcArray, srcOffset, ByteCount);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_end_response(conn, &result) < 0)
@@ -10196,10 +10196,10 @@ int handle_cuMemcpyDtoHAsync_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cuMemcpyDtoHAsync_v2(dstHost, srcDevice, ByteCount, hStream);
+    result = cuMemcpyDtoHAsync_v2(&dstHost, srcDevice, ByteCount, hStream);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, dstHost, sizeof(void*)) < 0 ||
+        rpc_write(conn, &dstHost, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -10262,10 +10262,10 @@ int handle_cuMemcpyAtoHAsync_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cuMemcpyAtoHAsync_v2(dstHost, srcArray, srcOffset, ByteCount, hStream);
+    result = cuMemcpyAtoHAsync_v2(&dstHost, srcArray, srcOffset, ByteCount, hStream);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, dstHost, sizeof(void*)) < 0 ||
+        rpc_write(conn, &dstHost, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -10951,10 +10951,10 @@ int handle_cuMemGetHandleForAddressRange(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cuMemGetHandleForAddressRange(handle, dptr, size, handleType, flags);
+    result = cuMemGetHandleForAddressRange(&handle, dptr, size, handleType, flags);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, handle, sizeof(void*)) < 0 ||
+        rpc_write(conn, &handle, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -11153,10 +11153,10 @@ int handle_cuMemExportToShareableHandle(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cuMemExportToShareableHandle(shareableHandle, handle, handleType, flags);
+    result = cuMemExportToShareableHandle(&shareableHandle, handle, handleType, flags);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, shareableHandle, sizeof(void*)) < 0 ||
+        rpc_write(conn, &shareableHandle, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -11182,11 +11182,11 @@ int handle_cuMemImportFromShareableHandle(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cuMemImportFromShareableHandle(&handle, osHandle, shHandleType);
+    result = cuMemImportFromShareableHandle(&handle, &osHandle, shHandleType);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &handle, sizeof(CUmemGenericAllocationHandle)) < 0 ||
-        rpc_write(conn, osHandle, sizeof(void*)) < 0 ||
+        rpc_write(conn, &osHandle, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -11235,11 +11235,11 @@ int handle_cuMemRetainAllocationHandle(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cuMemRetainAllocationHandle(&handle, addr);
+    result = cuMemRetainAllocationHandle(&handle, &addr);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &handle, sizeof(CUmemGenericAllocationHandle)) < 0 ||
-        rpc_write(conn, addr, sizeof(void*)) < 0 ||
+        rpc_write(conn, &addr, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -11344,10 +11344,10 @@ int handle_cuMemPoolSetAttribute(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cuMemPoolSetAttribute(pool, attr, value);
+    result = cuMemPoolSetAttribute(pool, attr, &value);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, value, sizeof(void*)) < 0 ||
+        rpc_write(conn, &value, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -11373,10 +11373,10 @@ int handle_cuMemPoolGetAttribute(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cuMemPoolGetAttribute(pool, attr, value);
+    result = cuMemPoolGetAttribute(pool, attr, &value);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, value, sizeof(void*)) < 0 ||
+        rpc_write(conn, &value, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -11489,10 +11489,10 @@ int handle_cuMemPoolExportToShareableHandle(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cuMemPoolExportToShareableHandle(handle_out, pool, handleType, flags);
+    result = cuMemPoolExportToShareableHandle(&handle_out, pool, handleType, flags);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, handle_out, sizeof(void*)) < 0 ||
+        rpc_write(conn, &handle_out, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -11521,11 +11521,11 @@ int handle_cuMemPoolImportFromShareableHandle(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cuMemPoolImportFromShareableHandle(&pool_out, handle, handleType, flags);
+    result = cuMemPoolImportFromShareableHandle(&pool_out, &handle, handleType, flags);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &pool_out, sizeof(CUmemoryPool)) < 0 ||
-        rpc_write(conn, handle, sizeof(void*)) < 0 ||
+        rpc_write(conn, &handle, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -11607,10 +11607,10 @@ int handle_cuPointerGetAttribute(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cuPointerGetAttribute(data, attribute, ptr);
+    result = cuPointerGetAttribute(&data, attribute, ptr);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, data, sizeof(void*)) < 0 ||
+        rpc_write(conn, &data, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -11704,10 +11704,10 @@ int handle_cuMemRangeGetAttribute(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cuMemRangeGetAttribute(data, dataSize, attribute, devPtr, count);
+    result = cuMemRangeGetAttribute(&data, dataSize, attribute, devPtr, count);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, data, sizeof(void*)) < 0 ||
+        rpc_write(conn, &data, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -11996,10 +11996,10 @@ int handle_cuStreamAddCallback(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cuStreamAddCallback(hStream, callback, userData, flags);
+    result = cuStreamAddCallback(hStream, callback, &userData, flags);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, userData, sizeof(void*)) < 0 ||
+        rpc_write(conn, &userData, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -12809,8 +12809,8 @@ int handle_cuLaunchKernel(void *conn)
     unsigned int blockDimZ;
     unsigned int sharedMemBytes;
     CUstream hStream;
-    void** kernelParams;
-    void** extra;
+    void* kernelParams;
+    void* extra;
     int request_id;
     CUresult result;
     if (rpc_read(conn, &f, sizeof(CUfunction)) < 0)
@@ -12831,15 +12831,15 @@ int handle_cuLaunchKernel(void *conn)
         goto ERROR_0;
     if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
         goto ERROR_0;
-    if (rpc_read(conn, &kernelParams, sizeof(void**)) < 0)
+    if (rpc_read(conn, &kernelParams, sizeof(void*)) < 0)
         goto ERROR_0;
-    if (rpc_read(conn, &extra, sizeof(void**)) < 0)
+    if (rpc_read(conn, &extra, sizeof(void*)) < 0)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cuLaunchKernel(f, gridDimX, gridDimY, gridDimZ, blockDimX, blockDimY, blockDimZ, sharedMemBytes, hStream, kernelParams, extra);
+    result = cuLaunchKernel(f, gridDimX, gridDimY, gridDimZ, blockDimX, blockDimY, blockDimZ, sharedMemBytes, hStream, &kernelParams, &extra);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_end_response(conn, &result) < 0)
@@ -12946,10 +12946,10 @@ int handle_cuLaunchHostFunc(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cuLaunchHostFunc(hStream, fn, userData);
+    result = cuLaunchHostFunc(hStream, fn, &userData);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, userData, sizeof(void*)) < 0 ||
+        rpc_write(conn, &userData, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -13115,10 +13115,10 @@ int handle_cuParamSetv(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cuParamSetv(hfunc, offset, ptr, numbytes);
+    result = cuParamSetv(hfunc, offset, &ptr, numbytes);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, ptr, sizeof(void*)) < 0 ||
+        rpc_write(conn, &ptr, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -13663,10 +13663,10 @@ int handle_cuDeviceGetGraphMemAttribute(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cuDeviceGetGraphMemAttribute(device, attr, value);
+    result = cuDeviceGetGraphMemAttribute(device, attr, &value);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, value, sizeof(void*)) < 0 ||
+        rpc_write(conn, &value, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -13692,10 +13692,10 @@ int handle_cuDeviceSetGraphMemAttribute(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cuDeviceSetGraphMemAttribute(device, attr, value);
+    result = cuDeviceSetGraphMemAttribute(device, attr, &value);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, value, sizeof(void*)) < 0 ||
+        rpc_write(conn, &value, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -14387,11 +14387,11 @@ int handle_cuUserObjectCreate(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cuUserObjectCreate(&object_out, ptr, destroy, initialRefcount, flags);
+    result = cuUserObjectCreate(&object_out, &ptr, destroy, initialRefcount, flags);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &object_out, sizeof(CUuserObject)) < 0 ||
-        rpc_write(conn, ptr, sizeof(void*)) < 0 ||
+        rpc_write(conn, &ptr, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -15515,11 +15515,11 @@ int handle_cuTensorMapReplaceAddress(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cuTensorMapReplaceAddress(&tensorMap, globalAddress);
+    result = cuTensorMapReplaceAddress(&tensorMap, &globalAddress);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &tensorMap, sizeof(CUtensorMap)) < 0 ||
-        rpc_write(conn, globalAddress, sizeof(void*)) < 0 ||
+        rpc_write(conn, &globalAddress, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -16130,11 +16130,11 @@ int handle_cudaIpcGetMemHandle(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaIpcGetMemHandle(&handle, devPtr);
+    result = cudaIpcGetMemHandle(&handle, &devPtr);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &handle, sizeof(cudaIpcMemHandle_t)) < 0 ||
-        rpc_write(conn, devPtr, sizeof(void*)) < 0 ||
+        rpc_write(conn, &devPtr, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -16183,10 +16183,10 @@ int handle_cudaIpcCloseMemHandle(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaIpcCloseMemHandle(devPtr);
+    result = cudaIpcCloseMemHandle(&devPtr);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, devPtr, sizeof(void*)) < 0 ||
+        rpc_write(conn, &devPtr, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -16560,10 +16560,10 @@ int handle_cudaDeviceGetNvSciSyncAttributes(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaDeviceGetNvSciSyncAttributes(nvSciSyncAttrList, device, flags);
+    result = cudaDeviceGetNvSciSyncAttributes(&nvSciSyncAttrList, device, flags);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, nvSciSyncAttrList, sizeof(void*)) < 0 ||
+        rpc_write(conn, &nvSciSyncAttrList, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -17047,10 +17047,10 @@ int handle_cudaStreamAddCallback(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaStreamAddCallback(stream, callback, userData, flags);
+    result = cudaStreamAddCallback(stream, callback, &userData, flags);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, userData, sizeof(void*)) < 0 ||
+        rpc_write(conn, &userData, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -17123,10 +17123,10 @@ int handle_cudaStreamAttachMemAsync(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaStreamAttachMemAsync(stream, devPtr, length, flags);
+    result = cudaStreamAttachMemAsync(stream, &devPtr, length, flags);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, devPtr, sizeof(void*)) < 0 ||
+        rpc_write(conn, &devPtr, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -17631,10 +17631,10 @@ int handle_cudaLaunchHostFunc(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaLaunchHostFunc(stream, fn, userData);
+    result = cudaLaunchHostFunc(stream, fn, &userData);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, userData, sizeof(void*)) < 0 ||
+        rpc_write(conn, &userData, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -17766,7 +17766,7 @@ int handle_cudaFree(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaFree(devPtr);
+    result = cudaFree(&devPtr);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_end_response(conn, &result) < 0)
@@ -17788,7 +17788,7 @@ int handle_cudaFreeHost(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaFreeHost(ptr);
+    result = cudaFreeHost(&ptr);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_end_response(conn, &result) < 0)
@@ -17889,10 +17889,10 @@ int handle_cudaHostRegister(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaHostRegister(ptr, size, flags);
+    result = cudaHostRegister(&ptr, size, flags);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, ptr, sizeof(void*)) < 0 ||
+        rpc_write(conn, &ptr, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -17912,10 +17912,10 @@ int handle_cudaHostUnregister(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaHostUnregister(ptr);
+    result = cudaHostUnregister(&ptr);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, ptr, sizeof(void*)) < 0 ||
+        rpc_write(conn, &ptr, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -17941,11 +17941,11 @@ int handle_cudaHostGetDevicePointer(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaHostGetDevicePointer(&pDevice, pHost, flags);
+    result = cudaHostGetDevicePointer(&pDevice, &pHost, flags);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &pDevice, sizeof(void*)) < 0 ||
-        rpc_write(conn, pHost, sizeof(void*)) < 0 ||
+        rpc_write(conn, &pHost, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -17968,11 +17968,11 @@ int handle_cudaHostGetFlags(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaHostGetFlags(&pFlags, pHost);
+    result = cudaHostGetFlags(&pFlags, &pHost);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &pFlags, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, pHost, sizeof(void*)) < 0 ||
+        rpc_write(conn, &pHost, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -18268,10 +18268,10 @@ int handle_cudaMemcpy2DFromArray(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaMemcpy2DFromArray(dst, dpitch, src, wOffset, hOffset, width, height, kind);
+    result = cudaMemcpy2DFromArray(&dst, dpitch, src, wOffset, hOffset, width, height, kind);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, dst, sizeof(void*)) < 0 ||
+        rpc_write(conn, &dst, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -18361,10 +18361,10 @@ int handle_cudaMemcpy2DFromArrayAsync(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaMemcpy2DFromArrayAsync(dst, dpitch, src, wOffset, hOffset, width, height, kind, stream);
+    result = cudaMemcpy2DFromArrayAsync(&dst, dpitch, src, wOffset, hOffset, width, height, kind, stream);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, dst, sizeof(void*)) < 0 ||
+        rpc_write(conn, &dst, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -18390,10 +18390,10 @@ int handle_cudaMemset(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaMemset(devPtr, value, count);
+    result = cudaMemset(&devPtr, value, count);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, devPtr, sizeof(void*)) < 0 ||
+        rpc_write(conn, &devPtr, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -18425,10 +18425,10 @@ int handle_cudaMemset2D(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaMemset2D(devPtr, pitch, value, width, height);
+    result = cudaMemset2D(&devPtr, pitch, value, width, height);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, devPtr, sizeof(void*)) < 0 ||
+        rpc_write(conn, &devPtr, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -18485,10 +18485,10 @@ int handle_cudaMemsetAsync(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaMemsetAsync(devPtr, value, count, stream);
+    result = cudaMemsetAsync(&devPtr, value, count, stream);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, devPtr, sizeof(void*)) < 0 ||
+        rpc_write(conn, &devPtr, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -18523,10 +18523,10 @@ int handle_cudaMemset2DAsync(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaMemset2DAsync(devPtr, pitch, value, width, height, stream);
+    result = cudaMemset2DAsync(&devPtr, pitch, value, width, height, stream);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, devPtr, sizeof(void*)) < 0 ||
+        rpc_write(conn, &devPtr, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -18592,10 +18592,10 @@ int handle_cudaMemcpyFromArray(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaMemcpyFromArray(dst, src, wOffset, hOffset, count, kind);
+    result = cudaMemcpyFromArray(&dst, src, wOffset, hOffset, count, kind);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, dst, sizeof(void*)) < 0 ||
+        rpc_write(conn, &dst, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -18676,10 +18676,10 @@ int handle_cudaMemcpyFromArrayAsync(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaMemcpyFromArrayAsync(dst, src, wOffset, hOffset, count, kind, stream);
+    result = cudaMemcpyFromArrayAsync(&dst, src, wOffset, hOffset, count, kind, stream);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, dst, sizeof(void*)) < 0 ||
+        rpc_write(conn, &dst, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -18731,10 +18731,10 @@ int handle_cudaFreeAsync(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaFreeAsync(devPtr, hStream);
+    result = cudaFreeAsync(&devPtr, hStream);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, devPtr, sizeof(void*)) < 0 ||
+        rpc_write(conn, &devPtr, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -18785,10 +18785,10 @@ int handle_cudaMemPoolSetAttribute(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaMemPoolSetAttribute(memPool, attr, value);
+    result = cudaMemPoolSetAttribute(memPool, attr, &value);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, value, sizeof(void*)) < 0 ||
+        rpc_write(conn, &value, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -18814,10 +18814,10 @@ int handle_cudaMemPoolGetAttribute(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaMemPoolGetAttribute(memPool, attr, value);
+    result = cudaMemPoolGetAttribute(memPool, attr, &value);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, value, sizeof(void*)) < 0 ||
+        rpc_write(conn, &value, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -18930,10 +18930,10 @@ int handle_cudaMemPoolExportToShareableHandle(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaMemPoolExportToShareableHandle(shareableHandle, memPool, handleType, flags);
+    result = cudaMemPoolExportToShareableHandle(&shareableHandle, memPool, handleType, flags);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, shareableHandle, sizeof(void*)) < 0 ||
+        rpc_write(conn, &shareableHandle, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -18962,11 +18962,11 @@ int handle_cudaMemPoolImportFromShareableHandle(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaMemPoolImportFromShareableHandle(&memPool, shareableHandle, handleType, flags);
+    result = cudaMemPoolImportFromShareableHandle(&memPool, &shareableHandle, handleType, flags);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &memPool, sizeof(cudaMemPool_t)) < 0 ||
-        rpc_write(conn, shareableHandle, sizeof(void*)) < 0 ||
+        rpc_write(conn, &shareableHandle, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -18989,11 +18989,11 @@ int handle_cudaMemPoolExportPointer(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaMemPoolExportPointer(&exportData, ptr);
+    result = cudaMemPoolExportPointer(&exportData, &ptr);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &exportData, sizeof(struct cudaMemPoolPtrExportData)) < 0 ||
-        rpc_write(conn, ptr, sizeof(void*)) < 0 ||
+        rpc_write(conn, &ptr, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -19925,10 +19925,10 @@ int handle_cudaGraphMemFreeNodeGetParams(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaGraphMemFreeNodeGetParams(node, dptr_out);
+    result = cudaGraphMemFreeNodeGetParams(node, &dptr_out);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, dptr_out, sizeof(void*)) < 0 ||
+        rpc_write(conn, &dptr_out, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -19976,10 +19976,10 @@ int handle_cudaDeviceGetGraphMemAttribute(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaDeviceGetGraphMemAttribute(device, attr, value);
+    result = cudaDeviceGetGraphMemAttribute(device, attr, &value);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, value, sizeof(void*)) < 0 ||
+        rpc_write(conn, &value, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -20005,10 +20005,10 @@ int handle_cudaDeviceSetGraphMemAttribute(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaDeviceSetGraphMemAttribute(device, attr, value);
+    result = cudaDeviceSetGraphMemAttribute(device, attr, &value);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, value, sizeof(void*)) < 0 ||
+        rpc_write(conn, &value, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -20675,11 +20675,11 @@ int handle_cudaUserObjectCreate(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaUserObjectCreate(&object_out, ptr, destroy, initialRefcount, flags);
+    result = cudaUserObjectCreate(&object_out, &ptr, destroy, initialRefcount, flags);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &object_out, sizeof(cudaUserObject_t)) < 0 ||
-        rpc_write(conn, ptr, sizeof(void*)) < 0 ||
+        rpc_write(conn, &ptr, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 

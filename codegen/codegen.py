@@ -81,7 +81,6 @@ class Operation:
     args: list[str]
 
     server_type: Type | Pointer
-    wrap_call_in_pointer: bool
     parameter: Parameter
 
     length_parameter: Optional[Parameter]
@@ -102,10 +101,20 @@ class Operation:
             if arg.startswith("SIZE:"):
                 return arg.split(":")[1]
 
+    @property
+    def is_opaque_pointer(self) -> bool:
+        return (
+            isinstance(self.server_type, Pointer)
+            and isinstance(self.server_type.ptr_to, Type)
+            and self.server_type.ptr_to.format() == "void"
+        )
 
     @property
     def server_reference(self) -> str:
-        if self.wrap_call_in_pointer:
+        if (
+            isinstance(self.server_type, Type)
+            and isinstance(self.parameter.type, Pointer)
+        ) or self.is_opaque_pointer:
             return "&" + self.parameter.name
         return self.parameter.name
 
@@ -139,7 +148,6 @@ def parse_annotation(annotation: str, params: list[Parameter]) -> list[Operation
             args = parts[3:]
             send = parts[2] == "SEND_ONLY" or parts[2] == "SEND_RECV"
             length_parameter = None
-            wrap_call_in_pointer = False
             if isinstance(param.type, Pointer):
                 # if there's a length or size arg, use the type, otherwise use the ptr_to type
                 length_arg = next(
@@ -161,14 +169,6 @@ def parse_annotation(annotation: str, params: list[Parameter]) -> list[Operation
                         )
                     server_type = copy.deepcopy(param.type)
                     server_type.ptr_to.const = False
-                elif isinstance(param.type.ptr_to, Pointer) and param.type.ptr_to.ptr_to.format() == "void":
-                    if parts[2] != "SEND_ONLY":
-                        # this is a read/write pointer, make the server type void*
-                        server_type = param.type.ptr_to
-                        wrap_call_in_pointer = True
-                    else:
-                        # this is a totally opaque pointer, make the server type void**
-                        server_type = param.type
                 elif param.type.ptr_to.format() == "void":
                     # treat void pointers as opaque
                     server_type = param.type
@@ -179,7 +179,6 @@ def parse_annotation(annotation: str, params: list[Parameter]) -> list[Operation
                     # otherwise, this is a pointer to a single value
                     server_type = param.type.ptr_to
                     server_type.const = False
-                    wrap_call_in_pointer = True
             elif isinstance(param.type, Type):
                 server_type = param.type
             else:
@@ -189,7 +188,6 @@ def parse_annotation(annotation: str, params: list[Parameter]) -> list[Operation
                 recv=parts[2] == "RECV_ONLY" or parts[2] == "SEND_RECV",
                 args=args,
                 server_type=server_type,
-                wrap_call_in_pointer=wrap_call_in_pointer,
                 parameter=param,
                 length_parameter=length_parameter,
             )
@@ -246,7 +244,6 @@ def main():
         except Exception as e:
             print(f"Error parsing annotation for {function.name}: {e}")
             continue
-
         functions_with_annotations.append((function, annotation, operations, is_func_disabled))
 
     with open("gen_api.h", "w") as f:
@@ -542,7 +539,15 @@ def main():
                     )
                 elif isinstance(operation.server_type, Pointer):
                     # write the malloc declaration
-                    if operation.nullable:
+                    if operation.length_parameter or operation.array_size or operation.is_opaque_pointer:
+                        # write just the parameter declaration
+                        f.write(
+                            "    {server_type} {param_name};\n".format(
+                                server_type=prefix_std(operation.server_type.format()),
+                                param_name=operation.parameter.name,
+                            )
+                        )
+                    elif operation.nullable:
                         # write a parameter declaration and read the first byte to determine if it's null
                         f.write(
                             "    bool {param_name}_null_check;\n".format(
@@ -552,13 +557,6 @@ def main():
                         # write param declaration
                         f.write(
                             "    {server_type} {param_name} = nullptr;\n".format(
-                                server_type=prefix_std(operation.server_type.format()),
-                                param_name=operation.parameter.name,
-                            )
-                        )
-                    else:
-                        f.write(
-                            "    {server_type} {param_name};\n".format(
                                 server_type=prefix_std(operation.server_type.format()),
                                 param_name=operation.parameter.name,
                             )
@@ -643,6 +641,14 @@ def main():
                         )
                         f.write("        goto ERROR_{index};\n".format(index=len(defers)))
                         f.write("    }\n")
+                    elif operation.is_opaque_pointer:
+                        # TODO: figure out what to do here.
+                        pass
+                    else:
+                        print(function, operation)
+                        raise NotImplementedError(
+                            "Could not determine length, this parameter is a pointer but neither length nor size is specified"
+                        )
                 if operation.send:
                     f.write(
                         "    if (rpc_read(conn, &{param_name}, sizeof({param_type})) < 0)\n".format(

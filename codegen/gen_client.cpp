@@ -6615,8 +6615,8 @@ CUresult cuLaunchKernel(CUfunction f, unsigned int gridDimX, unsigned int gridDi
         rpc_write(0, &blockDimZ, sizeof(unsigned int)) < 0 ||
         rpc_write(0, &sharedMemBytes, sizeof(unsigned int)) < 0 ||
         rpc_write(0, &hStream, sizeof(CUstream)) < 0 ||
-        rpc_write(0, &kernelParams, sizeof(void**)) < 0 ||
-        rpc_write(0, &extra, sizeof(void**)) < 0 ||
+        rpc_write(0, &kernelParams, sizeof(void*)) < 0 ||
+        rpc_write(0, &extra, sizeof(void*)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
