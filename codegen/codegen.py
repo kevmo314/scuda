@@ -71,8 +71,7 @@ INTERNAL_FUNCTIONS = [
 MANUAL_IMPLEMENTATIONS = [
     "cudaMemcpy",
     "cudaMemcpyAsync",
-    "cudaLaunchKernel",
-    "cublasSgemm_v2"
+    "cudaLaunchKernel"
 ]
 
 @dataclass
@@ -190,8 +189,10 @@ def parse_annotation(annotation: str, params: list[Parameter]) -> list[Operation
                     server_type = param.type
                 else:
                     # otherwise, this is a pointer to a single value or another pointer
-                    server_type = param.type.ptr_to
-                    server_type.const = False
+                    if param.type.ptr_to.const:
+                        server_type = param.type
+                    else:
+                        server_type = param.type.ptr_to
             elif isinstance(param.type, Type):
                 server_type = param.type
             else:
@@ -386,16 +387,16 @@ def main():
                         )
                     elif operation.nullable:
                         # write the pointer since it is nonzero if not-null
+                        # f.write(
+                        #     "        rpc_write(0, &{param_name}, sizeof({param_type})) < 0 ||\n".format(
+                        #         param_name=operation.parameter.name,
+                        #         param_type=operation.server_type.format(),
+                        #     )
+                        # )
                         f.write(
-                            "        rpc_write(0, &{param_name}, sizeof({param_type})) < 0 ||\n".format(
+                            "        ({param_name} != nullptr && rpc_write(0, {param_name}, sizeof({base_type})) < 0) ||\n".format(
                                 param_name=operation.parameter.name,
-                                param_type=operation.server_type.format(),
-                            )
-                        )
-                        f.write(
-                            "        ({param_name} != nullptr && rpc_write({param_name}, sizeof({base_type})) < 0) ||\n".format(
-                                param_name=operation.parameter.name,
-                                base_type=operation.server_type.ptr_to.format(),
+                                base_type=operation.server_type.format(),
                             )
                         )
                     else:
@@ -568,12 +569,12 @@ def main():
                             )
                         )
                     elif operation.nullable:
-                        # write a parameter declaration and read the first byte to determine if it's null
-                        f.write(
-                            "    bool {param_name}_null_check;\n".format(
-                                param_name=operation.parameter.name
-                            )
-                        )
+                        # # write a parameter declaration and read the first byte to determine if it's null
+                        # f.write(
+                        #     "    bool {param_name}_null_check;\n".format(
+                        #         param_name=operation.parameter.name
+                        #     )
+                        # )
                         # write param declaration
                         f.write(
                             "    {server_type} {param_name} = nullptr;\n".format(
@@ -583,6 +584,7 @@ def main():
                         )
                 else:
                     # write just the parameter declaration
+                    print(f"BINGOO {operation.server_type.format()} {operation.parameter.name}")
                     f.write(
                         "    {server_type} {param_name};\n".format(
                             server_type=prefix_std(operation.server_type.format()),
@@ -633,34 +635,34 @@ def main():
                         )
                         defers.append(operation.parameter.name)
                     elif operation.nullable:
-                        # read the first byte to determine if it's null
+                        # # read the first byte to determine if it's null
+                        # f.write(
+                        #     "    if (rpc_read(conn, &{param_name}_null_check, 1) < 0)\n".format(
+                        #         param_name=operation.parameter.name
+                        #     )
+                        # )
+                        # f.write("        goto ERROR_{index};\n".format(index=len(defers)))
+                        # f.write(
+                        #     "    if ({param_name}_null_check) {{\n".format(
+                        #         param_name=operation.parameter.name
+                        #     )
+                        # )
+                        # f.write(
+                        #     "        {param_name} = ({server_type})malloc(sizeof({base_type}));\n".format(
+                        #         param_name=operation.parameter.name,
+                        #         server_type=operation.server_type.format(),
+                        #         base_type=operation.server_type.ptr_to.format(),
+                        #     )
+                        # )
+                        # defers.append(operation.parameter.name)
                         f.write(
-                            "    if (rpc_read(conn, &{param_name}_null_check, 1) < 0)\n".format(
-                                param_name=operation.parameter.name
-                            )
-                        )
-                        f.write("        goto ERROR_{index};\n".format(index=len(defers)))
-                        f.write(
-                            "    if ({param_name}_null_check) {{\n".format(
-                                param_name=operation.parameter.name
-                            )
-                        )
-                        f.write(
-                            "        {param_name} = ({server_type})malloc(sizeof({base_type}));\n".format(
+                            "        if (rpc_read(conn, (void*){param_name}, sizeof({base_type})) < 0)\n".format(
                                 param_name=operation.parameter.name,
-                                server_type=operation.server_type.format(),
-                                base_type=operation.server_type.ptr_to.format(),
+                                base_type=operation.server_type.format(),
                             )
                         )
-                        defers.append(operation.parameter.name)
-                        f.write(
-                            "        if (rpc_read(conn, {param_name}, sizeof({base_type})) < 0)\n".format(
-                                param_name=operation.parameter.name,
-                                base_type=operation.server_type.ptr_to.format(),
-                            )
-                        )
-                        f.write("        goto ERROR_{index};\n".format(index=len(defers)))
-                        f.write("    }\n")
+                        # f.write("        goto ERROR_{index};\n".format(index=len(defers)))
+                        # f.write("    }\n")
                     elif operation.is_opaque_pointer:
                         # TODO: figure out what to do here.
                         pass

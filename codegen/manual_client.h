@@ -23,11 +23,11 @@ extern "C" void __cudaInitModule(void **fatCubinHandle);
 extern "C" void __cudaRegisterVar(void **fatCubinHandle, char *hostVar, char *deviceAddress, const char *deviceName, int ext, size_t size, int constant, int global);
 
 // cublas
-cublasStatus_t cublasSgemm_v2(cublasHandle_t handle,
-                           cublasOperation_t transa, cublasOperation_t transb,
-                           int m, int n, int k,
-                           const float *alpha,
-                           const float *A, int lda,
-                           const float *B, int ldb,
-                           const float *beta,
-                           float *C, int ldc);
+// cublasStatus_t cublasSgemm_v2(cublasHandle_t handle,
+//                            cublasOperation_t transa, cublasOperation_t transb,
+//                            int m, int n, int k,
+//                            const float *alpha,
+//                            const float *A, int lda,
+//                            const float *B, int ldb,
+//                            const float *beta,
+//                            float *C, int ldc);
