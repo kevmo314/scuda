@@ -3,7 +3,6 @@
 #include <cublas_v2.h>
 #include <cuda_runtime_api.h>
 
-cudaError_t cudaFree(void* devPtr);
 cudaError_t cudaMemcpy(void *dst, const void *src, size_t count, enum cudaMemcpyKind kind);
 cudaError_t cudaMemcpyAsync(void *dst, const void *src, size_t count, enum cudaMemcpyKind kind, cudaStream_t stream);
 cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim, void **args, size_t sharedMem, cudaStream_t stream);
@@ -24,7 +23,6 @@ extern "C" void __cudaInitModule(void **fatCubinHandle);
 extern "C" void __cudaRegisterVar(void **fatCubinHandle, char *hostVar, char *deviceAddress, const char *deviceName, int ext, size_t size, int constant, int global);
 
 // cublas
-// cublasStatus_t cublasDestroy_v2(cublasHandle_t handle);
 cublasStatus_t cublasSgemm_v2(cublasHandle_t handle,
                            cublasOperation_t transa, cublasOperation_t transb,
                            int m, int n, int k,

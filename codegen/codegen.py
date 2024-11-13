@@ -69,7 +69,6 @@ INTERNAL_FUNCTIONS = [
 # a list of manually implemented cuda/nvml functions.
 # these are automatically appended to each file; operation order is maintained as well.
 MANUAL_IMPLEMENTATIONS = [
-    "cudaFree",
     "cudaMemcpy",
     "cudaMemcpyAsync",
     "cudaLaunchKernel",
@@ -81,6 +80,7 @@ class Operation:
     send: bool
     recv: bool
     args: list[str]
+    pointer_to_pointer: bool
 
     server_type: Type | Pointer
     parameter: Parameter
@@ -114,9 +114,11 @@ class Operation:
     @property
     def server_reference(self) -> str:
         if (
-            isinstance(self.server_type, Type)
-            and isinstance(self.parameter.type, Pointer)
-        ) or self.is_opaque_pointer:
+            (isinstance(self.server_type, Type)
+            and isinstance(self.parameter.type, Pointer))
+            # length params are malloc'd, thus dont require a memory reference.
+            or (self.pointer_to_pointer and not self.length_parameter)
+        ):
             return "&" + self.parameter.name
         return self.parameter.name
 
@@ -141,6 +143,7 @@ def parse_annotation(annotation: str, params: list[Parameter]) -> list[Operation
             line = line[2:]
         if line.startswith("@param"):
             parts = line.split()
+
             if len(parts) < 3:
                 continue
             try:
@@ -150,14 +153,20 @@ def parse_annotation(annotation: str, params: list[Parameter]) -> list[Operation
             args = parts[3:]
             send = parts[2] == "SEND_ONLY" or parts[2] == "SEND_RECV"
             length_parameter = None
+
+            p_to_p = False
+
             if isinstance(param.type, Pointer):
                 # if there's a length or size arg, use the type, otherwise use the ptr_to type
                 length_arg = next(
                     (arg for arg in args if arg.startswith("LENGTH:")), None
                 )
                 size_arg = next((arg for arg in args if arg.startswith("SIZE:")), None)
-                opaque_arg = "OPAQUE" in args
                 null_terminated = "NULL_TERMINATED" in args
+
+                if hasattr(param.type.ptr_to, "ptr_to"):
+                    p_to_p = True
+
                 if param.type.ptr_to.const and parts[2] != "SEND_ONLY":
                     # if the parameter is const, then it's a sending parameter only.
                     # validate it as such.
@@ -170,6 +179,7 @@ def parse_annotation(annotation: str, params: list[Parameter]) -> list[Operation
                         length_parameter = next(
                             p for p in params if p.name == length_arg.split(":")[1]
                         )
+
                     server_type = copy.deepcopy(param.type)
                     server_type.ptr_to.const = False
                 elif param.type.ptr_to.format() == "void":
@@ -179,7 +189,7 @@ def parse_annotation(annotation: str, params: list[Parameter]) -> list[Operation
                     # treat null-terminated strings as a special case
                     server_type = param.type
                 else:
-                    # otherwise, this is a pointer to a single value
+                    # otherwise, this is a pointer to a single value or another pointer
                     server_type = param.type.ptr_to
                     server_type.const = False
             elif isinstance(param.type, Type):
@@ -187,6 +197,7 @@ def parse_annotation(annotation: str, params: list[Parameter]) -> list[Operation
             else:
                 raise NotImplementedError("Unknown type")
             operation = Operation(
+                pointer_to_pointer=p_to_p,
                 send=send,
                 recv=parts[2] == "RECV_ONLY" or parts[2] == "SEND_RECV",
                 args=args,

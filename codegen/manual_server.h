@@ -2,7 +2,6 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 
-int handle_cudaFree(void *conn);
 int handle_cudaMemcpy(void *conn);
 int handle_cudaMemcpyAsync(void *conn);
 int handle_cudaLaunchKernel(void *conn);
@@ -15,4 +14,3 @@ int handle___cudaPopCallConfiguration(void *conn);
 
 // cublas
 int handle_cublasSgemm_v2(void *conn);
-// int handle_cublasDestroy_v2(void *conn);

@@ -4387,7 +4387,6 @@ cudaError_t cudaMallocPitch(void **devPtr, size_t *pitch, size_t width, size_t h
  */
 cudaError_t cudaMallocArray(cudaArray_t *array, const struct cudaChannelFormatDesc *desc, size_t width, size_t height, unsigned int flags);
 /**
- * @disabled
  * @param devPtr SEND_ONLY
  */
 cudaError_t cudaFree(void *devPtr);
@@ -5547,12 +5546,10 @@ cudaError_t cudaGetExportTable(const void **ppExportTable, const cudaUUID_t *pEx
  */
 cudaError_t cudaGetFuncBySymbol(cudaFunction_t *functionPtr, const void *symbolPtr);
 /**
- * @disabled
- * @param handle SEND_ONLY
+ * @param handle RECV_ONLY
  */
 cublasStatus_t cublasCreate_v2(cublasHandle_t* handle);
 /**
- * @disabled
  * @param handle SEND_ONLY
  */
 cublasStatus_t cublasDestroy_v2(cublasHandle_t handle);
