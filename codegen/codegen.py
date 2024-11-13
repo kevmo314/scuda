@@ -73,10 +73,7 @@ MANUAL_IMPLEMENTATIONS = [
     "cudaMemcpy",
     "cudaMemcpyAsync",
     "cudaLaunchKernel",
-    "cublasSgemm_v2",
-    "cublasCreate_v2",
-    "cublasCreate_v2",
-    "cublasDestroy_v2"
+    "cublasSgemm_v2"
 ]
 
 @dataclass
@@ -159,6 +156,7 @@ def parse_annotation(annotation: str, params: list[Parameter]) -> list[Operation
                     (arg for arg in args if arg.startswith("LENGTH:")), None
                 )
                 size_arg = next((arg for arg in args if arg.startswith("SIZE:")), None)
+                opaque_arg = "OPAQUE" in args
                 null_terminated = "NULL_TERMINATED" in args
                 if param.type.ptr_to.const and parts[2] != "SEND_ONLY":
                     # if the parameter is const, then it's a sending parameter only.

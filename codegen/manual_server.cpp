@@ -595,24 +595,6 @@ int handle___cudaRegisterVar(void *conn)
     return 0;
 }
 
-int handle_cublasCreate_v2(void *conn)
-{
-    cublasHandle_t *handle;
-
-    int request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        return -1;
-
-    cublasStatus_t result = cublasCreate(handle);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, handle, sizeof(cublasHandle_t)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        return -1;
-
-    return 0;
-}
-
 int handle_cublasSgemm_v2(void *conn)
 {
     cublasHandle_t handle;
@@ -656,26 +638,26 @@ int handle_cublasSgemm_v2(void *conn)
     return 0;
 }
 
-int handle_cublasDestroy_v2(void *conn)
-{
-    cublasHandle_t handle;
+// int handle_cublasDestroy_v2(void *conn)
+// {
+//     cublasHandle_t handle;
 
-    if (rpc_read(conn, &handle, sizeof(cublasHandle_t)) < 0) {
-        return -1;
-    }
+//     if (rpc_read(conn, &handle, sizeof(cublasHandle_t)) < 0) {
+//         return -1;
+//     }
 
-    int request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        return -1;
+//     int request_id = rpc_end_request(conn);
+//     if (request_id < 0)
+//         return -1;
 
-    cublasStatus_t result = cublasDestroy(handle);
+//     cublasStatus_t result = cublasDestroy(handle);
 
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        return -1;
+//     if (rpc_start_response(conn, request_id) < 0 ||
+//         rpc_end_response(conn, &result) < 0)
+//         return -1;
 
-    return 0;
-}
+//     return 0;
+// }
 
 int handle_cudaFree(void *conn)
 {

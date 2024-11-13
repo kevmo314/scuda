@@ -857,39 +857,20 @@ extern "C"
     }
 }
 
-cublasStatus_t cublasCreate_v2(cublasHandle_t* handle)
-{
-    cublasStatus_t return_value;
-    cublasHandle_t h;
+// cublasStatus_t cublasDestroy_v2(cublasHandle_t handle)
+// {
+//     cublasStatus_t return_value;
 
-    if (rpc_start_request(0, RPC_cublasCreate_v2) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, &h, sizeof(cublasHandle_t)) ||
-        rpc_end_response(0, &return_value) < 0)
-    {
-        return CUBLAS_STATUS_INTERNAL_ERROR;
-    }
+//     if (rpc_start_request(0, RPC_cublasDestroy_v2) < 0 ||
+//         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+//         rpc_wait_for_response(0) < 0 ||
+//         rpc_end_response(0, &return_value) < 0)
+//     {
+//         return CUBLAS_STATUS_INTERNAL_ERROR;
+//     }
 
-    // it's important to create the cublas handle on the device and update the pointer on the client
-    *handle = h;
-
-    return return_value;
-}
-
-cublasStatus_t cublasDestroy_v2(cublasHandle_t handle)
-{
-    cublasStatus_t return_value;
-
-    if (rpc_start_request(0, RPC_cublasDestroy_v2) < 0 ||
-        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-    {
-        return CUBLAS_STATUS_INTERNAL_ERROR;
-    }
-
-    return return_value;
-}
+//     return return_value;
+// }
 
 cublasStatus_t cublasSgemm_v2(cublasHandle_t handle,
                               cublasOperation_t transa, cublasOperation_t transb,

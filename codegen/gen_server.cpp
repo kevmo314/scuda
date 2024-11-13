@@ -20776,6 +20776,49 @@ ERROR_0:
     return -1;
 }
 
+int handle_cublasCreate_v2(void *conn)
+{
+    cublasHandle_t handle;
+    int request_id;
+    cublasStatus_t result;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cublasCreate_v2(&handle);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cublasDestroy_v2(void *conn)
+{
+    cublasHandle_t handle;
+    int request_id;
+    cublasStatus_t result;
+    if (rpc_read(conn, &handle, sizeof(cublasHandle_t)) < 0)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cublasDestroy_v2(handle);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 static RequestHandler opHandlers[] = {
     handle___cudaRegisterVar,
     handle___cudaRegisterFunction,

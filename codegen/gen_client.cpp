@@ -10776,6 +10776,30 @@ cudaError_t cudaGraphReleaseUserObject(cudaGraph_t graph, cudaUserObject_t objec
     return return_value;
 }
 
+cublasStatus_t cublasCreate_v2(cublasHandle_t* handle)
+{
+    cublasStatus_t return_value;
+
+    if (rpc_start_request(0, RPC_cublasCreate_v2) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDestroy_v2(cublasHandle_t handle)
+{
+    cublasStatus_t return_value;
+
+    if (rpc_start_request(0, RPC_cublasDestroy_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
 std::unordered_map<std::string, void *> functionMap = {
     {"__cudaRegisterVar", (void *)__cudaRegisterVar},
     {"__cudaRegisterFunction", (void *)__cudaRegisterFunction},
@@ -11550,6 +11574,8 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cudaUserObjectRelease", (void *)cudaUserObjectRelease},
     {"cudaGraphRetainUserObject", (void *)cudaGraphRetainUserObject},
     {"cudaGraphReleaseUserObject", (void *)cudaGraphReleaseUserObject},
+    {"cublasCreate_v2", (void *)cublasCreate_v2},
+    {"cublasDestroy_v2", (void *)cublasDestroy_v2},
     {"cuMemcpy_ptds", (void *)cuMemcpy},
     {"cuMemcpyAsync_ptsz", (void *)cuMemcpyAsync},
     {"cuMemcpyPeer_ptds", (void *)cuMemcpyPeer},
@@ -11594,9 +11620,6 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cudaMemcpyAsync", (void *)cudaMemcpyAsync},
     {"cudaLaunchKernel", (void *)cudaLaunchKernel},
     {"cublasSgemm_v2", (void *)cublasSgemm_v2},
-    {"cublasCreate_v2", (void *)cublasCreate_v2},
-    {"cublasCreate_v2", (void *)cublasCreate_v2},
-    {"cublasDestroy_v2", (void *)cublasDestroy_v2},
 };
 
 void *get_function_pointer(const char *name)
