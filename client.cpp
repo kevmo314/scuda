@@ -86,28 +86,31 @@ int rpc_open()
         memset(&hints, 0, sizeof(hints));
         hints.ai_family = AF_INET;
         hints.ai_socktype = SOCK_STREAM;
-        if (getaddrinfo(server_ip, port, &hints, &res) != 0)
+        if (getaddrinfo(host, port, &hints, &res) != 0)
         {
-#ifdef VERBOSE
             std::cout << "getaddrinfo of " << host << " port " << port << " failed" << std::endl;
-#endif
-            return -1;
+            continue;
         }
 
         int flag = 1;
         int sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
-        if (sockfd == -1 ||
-            setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, (char *)&flag, sizeof(int)) < 0 ||
-            connect(sockfd, res->ai_addr, res->ai_addrlen) < 0)
+        if (sockfd == -1)
         {
-#ifdef VERBOSE
-            std::cout << "connect to " << host << " port " << port << " failed" << std::endl;
-#endif
-            return -1;
+            printf("socket creation failed...\n");
+            exit(1);
+        }
+
+        int opts = setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, (char *)&flag, sizeof(int));
+        if (connect(sockfd, res->ai_addr, res->ai_addrlen) < 0)
+        {
+            std::cerr << "Connecting to " << host << " port " << port << " failed: " 
+              << strerror(errno) << std::endl;
+            exit(1);
         }
 
         conns[nconns++] = {sockfd, 0, 0, 0, 0, PTHREAD_MUTEX_INITIALIZER, PTHREAD_MUTEX_INITIALIZER, PTHREAD_COND_INITIALIZER};
     }
+
     if (pthread_mutex_unlock(&conn_mutex) < 0)
         return -1;
     if (nconns == 0)
@@ -290,6 +293,7 @@ CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion, cu
 
 void *dlsym(void *handle, const char *name) __THROW
 {
+    std::cerr << "starting libscuda..." << std::endl;
     void *func = get_function_pointer(name);
 
     /** proc address function calls are basically dlsym; we should handle this differently at the top level. */
