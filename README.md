@@ -14,6 +14,8 @@ The docker container runs this [matrixMulCUBLAS](https://github.com/zchee/cuda-s
 
 You can view the docker image used [here](./deploy/Dockerfile.cublas-test).
 
+https://github.com/user-attachments/assets/4bf130c5-5544-442f-b1a5-6216255ab499
+
 ### Simple torch example
 
 The below demo displays a NVIDIA GeForce RTX 4090 running on a remote machine (right pane).
