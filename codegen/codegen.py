@@ -71,7 +71,8 @@ INTERNAL_FUNCTIONS = [
 MANUAL_IMPLEMENTATIONS = [
     "cudaMemcpy",
     "cudaMemcpyAsync",
-    "cudaLaunchKernel"
+    "cudaLaunchKernel",
+    "cublasSgemm_v2"
 ]
 
 @dataclass
@@ -79,6 +80,7 @@ class Operation:
     send: bool
     recv: bool
     args: list[str]
+    pointer_to_pointer: bool
 
     server_type: Type | Pointer
     parameter: Parameter
@@ -112,9 +114,11 @@ class Operation:
     @property
     def server_reference(self) -> str:
         if (
-            isinstance(self.server_type, Type)
-            and isinstance(self.parameter.type, Pointer)
-        ) or self.is_opaque_pointer:
+            (isinstance(self.server_type, Type)
+            and isinstance(self.parameter.type, Pointer))
+            # length params are malloc'd, thus dont require a memory reference.
+            or (self.pointer_to_pointer and not self.length_parameter)
+        ):
             return "&" + self.parameter.name
         return self.parameter.name
 
@@ -139,6 +143,7 @@ def parse_annotation(annotation: str, params: list[Parameter]) -> list[Operation
             line = line[2:]
         if line.startswith("@param"):
             parts = line.split()
+
             if len(parts) < 3:
                 continue
             try:
@@ -148,6 +153,9 @@ def parse_annotation(annotation: str, params: list[Parameter]) -> list[Operation
             args = parts[3:]
             send = parts[2] == "SEND_ONLY" or parts[2] == "SEND_RECV"
             length_parameter = None
+
+            p_to_p = False
+
             if isinstance(param.type, Pointer):
                 # if there's a length or size arg, use the type, otherwise use the ptr_to type
                 length_arg = next(
@@ -155,6 +163,10 @@ def parse_annotation(annotation: str, params: list[Parameter]) -> list[Operation
                 )
                 size_arg = next((arg for arg in args if arg.startswith("SIZE:")), None)
                 null_terminated = "NULL_TERMINATED" in args
+
+                if hasattr(param.type.ptr_to, "ptr_to"):
+                    p_to_p = True
+
                 if param.type.ptr_to.const and parts[2] != "SEND_ONLY":
                     # if the parameter is const, then it's a sending parameter only.
                     # validate it as such.
@@ -167,6 +179,7 @@ def parse_annotation(annotation: str, params: list[Parameter]) -> list[Operation
                         length_parameter = next(
                             p for p in params if p.name == length_arg.split(":")[1]
                         )
+
                     server_type = copy.deepcopy(param.type)
                     server_type.ptr_to.const = False
                 elif param.type.ptr_to.format() == "void":
@@ -176,14 +189,17 @@ def parse_annotation(annotation: str, params: list[Parameter]) -> list[Operation
                     # treat null-terminated strings as a special case
                     server_type = param.type
                 else:
-                    # otherwise, this is a pointer to a single value
-                    server_type = param.type.ptr_to
-                    server_type.const = False
+                    # otherwise, this is a pointer to a single value or another pointer
+                    if param.type.ptr_to.const:
+                        server_type = param.type
+                    else:
+                        server_type = param.type.ptr_to
             elif isinstance(param.type, Type):
                 server_type = param.type
             else:
                 raise NotImplementedError("Unknown type")
             operation = Operation(
+                pointer_to_pointer=p_to_p,
                 send=send,
                 recv=parts[2] == "RECV_ONLY" or parts[2] == "SEND_RECV",
                 args=args,
@@ -202,6 +218,8 @@ def error_const(return_type: str) -> str:
         return "CUDA_ERROR_DEVICE_UNAVAILABLE"
     if return_type == "cudaError_t":
         return "cudaErrorDevicesUnavailable"
+    if return_type == "cublasStatus_t":
+        return "CUBLAS_STATUS_NOT_INITIALIZED"
     raise NotImplementedError("Unknown return type: %s" % return_type)
 
 
@@ -212,10 +230,11 @@ def prefix_std(type: str) -> str:
 
 
 def main():
-    options = ParserOptions(preprocessor=make_gcc_preprocessor())
+    options = ParserOptions(preprocessor=make_gcc_preprocessor(defines=["CUBLASAPI="]))
 
     nvml_ast: ParsedData = parse_file("/usr/include/nvml.h", options=options)
     cuda_ast: ParsedData = parse_file("/usr/include/cuda.h", options=options)
+    cublas_ast: ParsedData = parse_file("/usr/include/cublas_api.h", options=options)
     cudart_ast: ParsedData = parse_file(
         "/usr/include/cuda_runtime_api.h", options=options
     )
@@ -227,6 +246,7 @@ def main():
         nvml_ast.namespace.functions
         + cuda_ast.namespace.functions
         + cudart_ast.namespace.functions
+        + cublas_ast.namespace.functions
     )
 
     functions_with_annotations: list[tuple[Function, Function, list[Operation]]] = []
@@ -270,6 +290,7 @@ def main():
         f.write(
             "#include <nvml.h>\n"
             "#include <cuda.h>\n"
+            "#include <cublas_v2.h>\n"
             "#include <cuda_runtime_api.h>\n\n"
             "#include <cstring>\n"
             "#include <string>\n"
@@ -374,9 +395,9 @@ def main():
                             )
                         )
                         f.write(
-                            "        ({param_name} != nullptr && rpc_write({param_name}, sizeof({base_type})) < 0) ||\n".format(
+                            "        ({param_name} != nullptr && rpc_write(0, {param_name}, sizeof({base_type})) < 0) ||\n".format(
                                 param_name=operation.parameter.name,
-                                base_type=operation.server_type.ptr_to.format(),
+                                base_type=operation.server_type.format(),
                             )
                         )
                     else:
@@ -497,6 +518,7 @@ def main():
         f.write(
             "#include <nvml.h>\n"
             "#include <cuda.h>\n"
+            "#include <cublas_v2.h>\n"
             "#include <cuda_runtime_api.h>\n\n"
             "#include <cstring>\n"
             "#include <string>\n"
@@ -634,9 +656,9 @@ def main():
                         )
                         defers.append(operation.parameter.name)
                         f.write(
-                            "        if (rpc_read(conn, {param_name}, sizeof({base_type})) < 0)\n".format(
+                            "        if (rpc_read(conn, (void*){param_name}, sizeof({base_type})) < 0)\n".format(
                                 param_name=operation.parameter.name,
-                                base_type=operation.server_type.ptr_to.format(),
+                                base_type=operation.server_type.format(),
                             )
                         )
                         f.write("        goto ERROR_{index};\n".format(index=len(defers)))

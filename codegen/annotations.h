@@ -1,5 +1,6 @@
 #include <nvml.h>
 #include <cuda.h>
+#include <cublas_v2.h>
 #include <cuda_runtime.h>
 
 /**
@@ -5544,3 +5545,36 @@ cudaError_t cudaGetExportTable(const void **ppExportTable, const cudaUUID_t *pEx
  * @param symbolPtr SEND_RECV
  */
 cudaError_t cudaGetFuncBySymbol(cudaFunction_t *functionPtr, const void *symbolPtr);
+/**
+ * @param handle RECV_ONLY
+ */
+cublasStatus_t cublasCreate_v2(cublasHandle_t* handle);
+/**
+ * @param handle SEND_ONLY
+ */
+cublasStatus_t cublasDestroy_v2(cublasHandle_t handle);
+/**
+ * @disabled
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_ONLY
+ * @param A SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param B SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param beta SEND_ONLY
+ * @param C SEND_ONLY
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasSgemm_v2(cublasHandle_t handle,
+                           cublasOperation_t transa, cublasOperation_t transb,
+                           int m, int n, int k,
+                           const float *alpha,
+                           const float *A, int lda,
+                           const float *B,  int ldb,
+                           const float *beta,
+                           float *C,  int ldc);
