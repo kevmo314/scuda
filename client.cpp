@@ -293,7 +293,6 @@ CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion, cu
 
 void *dlsym(void *handle, const char *name) __THROW
 {
-    std::cerr << "starting libscuda..." << std::endl;
     void *func = get_function_pointer(name);
 
     /** proc address function calls are basically dlsym; we should handle this differently at the top level. */
