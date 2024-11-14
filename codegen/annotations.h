@@ -5554,6 +5554,7 @@ cublasStatus_t cublasCreate_v2(cublasHandle_t* handle);
  */
 cublasStatus_t cublasDestroy_v2(cublasHandle_t handle);
 /**
+ * @disabled
  * @param handle SEND_ONLY
  * @param transa SEND_ONLY
  * @param transb SEND_ONLY
