@@ -170,66 +170,37 @@ cudaError_t cudaMemcpy(void *dst, const void *src, size_t count, enum cudaMemcpy
     cudaError_t return_value;
 
     int request_id = rpc_start_request(0, RPC_cudaMemcpy);
-    if (request_id < 0)
-    {
+    if (request_id < 0 || rpc_write(0, &kind, sizeof(enum cudaMemcpyKind)) < 0)
         return cudaErrorDevicesUnavailable;
-    }
-
-    if (rpc_write(0, &kind, sizeof(enum cudaMemcpyKind)) < 0)
-    {
-        return cudaErrorDevicesUnavailable;
-    }
 
     // we need to swap device directions in this case
-    if (kind == cudaMemcpyDeviceToHost)
+    switch (kind)
     {
-        if (rpc_write(0, &src, sizeof(void *)) < 0)
-        {
+    case cudaMemcpyDeviceToHost:
+        if (rpc_write(0, &src, sizeof(void *)) < 0 ||
+            rpc_write(0, &count, sizeof(size_t)) < 0 ||
+            rpc_wait_for_response(0) < 0 ||
+            rpc_read(0, dst, count) < 0)
             return cudaErrorDevicesUnavailable;
-        }
-
-        if (rpc_write(0, &count, sizeof(size_t)) < 0)
-        {
+        break;
+    case cudaMemcpyHostToDevice:
+        if (rpc_write(0, &dst, sizeof(void *)) < 0 ||
+            rpc_write(0, &count, sizeof(size_t)) < 0 ||
+            rpc_write(0, src, count) < 0 ||
+            rpc_wait_for_response(0) < 0)
             return cudaErrorDevicesUnavailable;
-        }
-
-        if (rpc_wait_for_response(0) < 0)
-        {
+        break;
+    case cudaMemcpyDeviceToDevice:
+        if (rpc_write(0, &dst, sizeof(void *)) < 0 ||
+            rpc_write(0, &src, sizeof(void *)) < 0 ||
+            rpc_write(0, &count, sizeof(size_t)) < 0 ||
+            rpc_wait_for_response(0) < 0)
             return cudaErrorDevicesUnavailable;
-        }
-
-        if (rpc_read(0, dst, count) < 0)
-        {
-            return cudaErrorDevicesUnavailable;
-        }
-    }
-    else
-    {
-        if (rpc_write(0, &dst, sizeof(void *)) < 0)
-        {
-            return cudaErrorDevicesUnavailable;
-        }
-
-        if (rpc_write(0, &count, sizeof(size_t)) < 0)
-        {
-            return cudaErrorDevicesUnavailable;
-        }
-
-        if (rpc_write(0, src, count) < 0)
-        {
-            return cudaErrorDevicesUnavailable;
-        }
-
-        if (rpc_wait_for_response(0) < 0)
-        {
-            return cudaErrorDevicesUnavailable;
-        }
+        break;
     }
 
     if (rpc_end_response(0, &return_value) < 0)
-    {
         return cudaErrorDevicesUnavailable;
-    }
 
     return return_value;
 }
