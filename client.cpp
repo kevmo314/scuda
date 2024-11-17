@@ -209,7 +209,7 @@ int rpc_read(const int index, void *data, size_t size)
             }
             size -= bytesRead;
         }
-        return;
+        return size;
     }
 
     ssize_t n = recv(conns[index].connfd, data, size, MSG_WAITALL);
