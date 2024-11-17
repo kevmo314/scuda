@@ -103,8 +103,8 @@ int rpc_open()
         int opts = setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, (char *)&flag, sizeof(int));
         if (connect(sockfd, res->ai_addr, res->ai_addrlen) < 0)
         {
-            std::cerr << "Connecting to " << host << " port " << port << " failed: " 
-              << strerror(errno) << std::endl;
+            std::cerr << "Connecting to " << host << " port " << port << " failed: "
+                      << strerror(errno) << std::endl;
             exit(1);
         }
 
@@ -209,25 +209,13 @@ int rpc_read(const int index, void *data, size_t size)
             }
             size -= bytesRead;
         }
+        return;
     }
 
-    while (true)
-    {
-        ssize_t n = read(conns[index].connfd, data, size);
-        if (n < 0)
-        {
-            pthread_mutex_unlock(&conns[index].read_mutex);
-            return -1;
-        }
-        if (n <= 0)
-            return n;
-        size -= n;
-        if (size == 0)
-            return 0;
-        data = (char *)data + n;
-    }
-
-    return 0;
+    ssize_t n = recv(conns[index].connfd, data, size, MSG_WAITALL);
+    if (n < 0)
+        pthread_mutex_unlock(&conns[index].read_mutex);
+    return n;
 }
 
 int rpc_end_response(const int index, void *result)
