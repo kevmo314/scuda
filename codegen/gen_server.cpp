@@ -23,6 +23,9 @@ int handle_nvmlInit_v2(void *conn)
 {
     int request_id;
     nvmlReturn_t result;
+    if (
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -43,7 +46,9 @@ int handle_nvmlInitWithFlags(void *conn)
     unsigned int flags;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -64,6 +69,9 @@ int handle_nvmlShutdown(void *conn)
 {
     int request_id;
     nvmlReturn_t result;
+    if (
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -85,23 +93,22 @@ int handle_nvmlSystemGetDriverVersion(void *conn)
     char* version;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &length, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &length, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    version = (char*)malloc(length * sizeof(char));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlSystemGetDriverVersion(version, length);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, version, length * sizeof(char)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) version);
 ERROR_0:
     return -1;
 }
@@ -112,23 +119,22 @@ int handle_nvmlSystemGetNVMLVersion(void *conn)
     char* version;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &length, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &length, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    version = (char*)malloc(length * sizeof(char));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlSystemGetNVMLVersion(version, length);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, version, length * sizeof(char)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) version);
 ERROR_0:
     return -1;
 }
@@ -138,6 +144,9 @@ int handle_nvmlSystemGetCudaDriverVersion(void *conn)
     int cudaDriverVersion;
     int request_id;
     nvmlReturn_t result;
+    if (
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -159,6 +168,9 @@ int handle_nvmlSystemGetCudaDriverVersion_v2(void *conn)
     int cudaDriverVersion;
     int request_id;
     nvmlReturn_t result;
+    if (
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -182,25 +194,23 @@ int handle_nvmlSystemGetProcessName(void *conn)
     char* name;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &pid, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &pid, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &length, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &length, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    name = (char*)malloc(length * sizeof(char));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlSystemGetProcessName(pid, name, length);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, name, length * sizeof(char)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) name);
 ERROR_0:
     return -1;
 }
@@ -210,6 +220,9 @@ int handle_nvmlUnitGetCount(void *conn)
     unsigned int unitCount;
     int request_id;
     nvmlReturn_t result;
+    if (
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -232,7 +245,9 @@ int handle_nvmlUnitGetHandleByIndex(void *conn)
     nvmlUnit_t unit;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &index, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &index, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -256,7 +271,9 @@ int handle_nvmlUnitGetUnitInfo(void *conn)
     nvmlUnitInfo_t info;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &unit, sizeof(nvmlUnit_t)) < 0)
+    if (
+        rpc_read(conn, &unit, sizeof(nvmlUnit_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -280,7 +297,9 @@ int handle_nvmlUnitGetLedState(void *conn)
     nvmlLedState_t state;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &unit, sizeof(nvmlUnit_t)) < 0)
+    if (
+        rpc_read(conn, &unit, sizeof(nvmlUnit_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -304,7 +323,9 @@ int handle_nvmlUnitGetPsuInfo(void *conn)
     nvmlPSUInfo_t psu;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &unit, sizeof(nvmlUnit_t)) < 0)
+    if (
+        rpc_read(conn, &unit, sizeof(nvmlUnit_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -329,9 +350,10 @@ int handle_nvmlUnitGetTemperature(void *conn)
     unsigned int temp;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &unit, sizeof(nvmlUnit_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &type, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &unit, sizeof(nvmlUnit_t)) < 0 ||
+        rpc_read(conn, &type, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -355,7 +377,9 @@ int handle_nvmlUnitGetFanSpeedInfo(void *conn)
     nvmlUnitFanSpeeds_t fanSpeeds;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &unit, sizeof(nvmlUnit_t)) < 0)
+    if (
+        rpc_read(conn, &unit, sizeof(nvmlUnit_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -380,26 +404,24 @@ int handle_nvmlUnitGetDevices(void *conn)
     nvmlDevice_t* devices;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &unit, sizeof(nvmlUnit_t)) < 0)
+    if (
+        rpc_read(conn, &unit, sizeof(nvmlUnit_t)) < 0 ||
+        rpc_read(conn, &deviceCount, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &deviceCount, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    devices = (nvmlDevice_t*)malloc(deviceCount * sizeof(nvmlDevice_t));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlUnitGetDevices(unit, &deviceCount, devices);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &deviceCount, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, devices, deviceCount * sizeof(nvmlDevice_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) devices);
 ERROR_0:
     return -1;
 }
@@ -410,24 +432,23 @@ int handle_nvmlSystemGetHicVersion(void *conn)
     nvmlHwbcEntry_t* hwbcEntries;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &hwbcCount, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &hwbcCount, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    hwbcEntries = (nvmlHwbcEntry_t*)malloc(hwbcCount * sizeof(nvmlHwbcEntry_t));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlSystemGetHicVersion(&hwbcCount, hwbcEntries);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &hwbcCount, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, hwbcEntries, hwbcCount * sizeof(nvmlHwbcEntry_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) hwbcEntries);
 ERROR_0:
     return -1;
 }
@@ -437,6 +458,9 @@ int handle_nvmlDeviceGetCount_v2(void *conn)
     unsigned int deviceCount;
     int request_id;
     nvmlReturn_t result;
+    if (
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -459,7 +483,9 @@ int handle_nvmlDeviceGetAttributes_v2(void *conn)
     nvmlDeviceAttributes_t attributes;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -483,7 +509,9 @@ int handle_nvmlDeviceGetHandleByIndex_v2(void *conn)
     nvmlDevice_t device;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &index, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &index, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -503,15 +531,17 @@ ERROR_0:
 
 int handle_nvmlDeviceGetHandleBySerial(void *conn)
 {
-    std::size_t serial_len;
     const char* serial;
+    std::size_t serial_len;
     nvmlDevice_t device;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &serial_len, sizeof(serial_len)) < 0)
+    if (
+        rpc_read(conn, &serial_len, sizeof(std::size_t)) < 0)
         goto ERROR_0;
     serial = (const char*)malloc(serial_len);
-    if (rpc_read(conn, &serial, sizeof(const char*)) < 0)
+    if (rpc_read(conn, (void *)serial, serial_len) < 0 ||
+        false)
         goto ERROR_1;
 
     request_id = rpc_end_request(conn);
@@ -533,15 +563,17 @@ ERROR_0:
 
 int handle_nvmlDeviceGetHandleByUUID(void *conn)
 {
-    std::size_t uuid_len;
     const char* uuid;
+    std::size_t uuid_len;
     nvmlDevice_t device;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &uuid_len, sizeof(uuid_len)) < 0)
+    if (
+        rpc_read(conn, &uuid_len, sizeof(std::size_t)) < 0)
         goto ERROR_0;
     uuid = (const char*)malloc(uuid_len);
-    if (rpc_read(conn, &uuid, sizeof(const char*)) < 0)
+    if (rpc_read(conn, (void *)uuid, uuid_len) < 0 ||
+        false)
         goto ERROR_1;
 
     request_id = rpc_end_request(conn);
@@ -563,15 +595,17 @@ ERROR_0:
 
 int handle_nvmlDeviceGetHandleByPciBusId_v2(void *conn)
 {
-    std::size_t pciBusId_len;
     const char* pciBusId;
+    std::size_t pciBusId_len;
     nvmlDevice_t device;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &pciBusId_len, sizeof(pciBusId_len)) < 0)
+    if (
+        rpc_read(conn, &pciBusId_len, sizeof(std::size_t)) < 0)
         goto ERROR_0;
     pciBusId = (const char*)malloc(pciBusId_len);
-    if (rpc_read(conn, &pciBusId, sizeof(const char*)) < 0)
+    if (rpc_read(conn, (void *)pciBusId, pciBusId_len) < 0 ||
+        false)
         goto ERROR_1;
 
     request_id = rpc_end_request(conn);
@@ -598,25 +632,23 @@ int handle_nvmlDeviceGetName(void *conn)
     char* name;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &length, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &length, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    name = (char*)malloc(length * sizeof(char));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlDeviceGetName(device, name, length);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, name, length * sizeof(char)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) name);
 ERROR_0:
     return -1;
 }
@@ -627,7 +659,9 @@ int handle_nvmlDeviceGetBrand(void *conn)
     nvmlBrandType_t type;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -651,7 +685,9 @@ int handle_nvmlDeviceGetIndex(void *conn)
     unsigned int index;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -676,25 +712,23 @@ int handle_nvmlDeviceGetSerial(void *conn)
     char* serial;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &length, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &length, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    serial = (char*)malloc(length * sizeof(char));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlDeviceGetSerial(device, serial, length);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, serial, length * sizeof(char)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) serial);
 ERROR_0:
     return -1;
 }
@@ -707,27 +741,24 @@ int handle_nvmlDeviceGetMemoryAffinity(void *conn)
     nvmlAffinityScope_t scope;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &nodeSetSize, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &scope, sizeof(nvmlAffinityScope_t)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &nodeSetSize, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    nodeSet = (unsigned long*)malloc(nodeSetSize * sizeof(unsigned long));
-    if (rpc_read(conn, &scope, sizeof(nvmlAffinityScope_t)) < 0)
-        goto ERROR_1;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlDeviceGetMemoryAffinity(device, nodeSetSize, nodeSet, scope);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, nodeSet, nodeSetSize * sizeof(unsigned long)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) nodeSet);
 ERROR_0:
     return -1;
 }
@@ -740,27 +771,24 @@ int handle_nvmlDeviceGetCpuAffinityWithinScope(void *conn)
     nvmlAffinityScope_t scope;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &cpuSetSize, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &scope, sizeof(nvmlAffinityScope_t)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &cpuSetSize, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    cpuSet = (unsigned long*)malloc(cpuSetSize * sizeof(unsigned long));
-    if (rpc_read(conn, &scope, sizeof(nvmlAffinityScope_t)) < 0)
-        goto ERROR_1;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlDeviceGetCpuAffinityWithinScope(device, cpuSetSize, cpuSet, scope);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, cpuSet, cpuSetSize * sizeof(unsigned long)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) cpuSet);
 ERROR_0:
     return -1;
 }
@@ -772,25 +800,23 @@ int handle_nvmlDeviceGetCpuAffinity(void *conn)
     unsigned long* cpuSet;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &cpuSetSize, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &cpuSetSize, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    cpuSet = (unsigned long*)malloc(cpuSetSize * sizeof(unsigned long));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlDeviceGetCpuAffinity(device, cpuSetSize, cpuSet);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, cpuSet, cpuSetSize * sizeof(unsigned long)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) cpuSet);
 ERROR_0:
     return -1;
 }
@@ -800,7 +826,9 @@ int handle_nvmlDeviceSetCpuAffinity(void *conn)
     nvmlDevice_t device;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -822,7 +850,9 @@ int handle_nvmlDeviceClearCpuAffinity(void *conn)
     nvmlDevice_t device;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -846,9 +876,10 @@ int handle_nvmlDeviceGetTopologyCommonAncestor(void *conn)
     nvmlGpuTopologyLevel_t pathInfo;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device1, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &device2, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device1, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &device2, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -874,28 +905,25 @@ int handle_nvmlDeviceGetTopologyNearestGpus(void *conn)
     nvmlDevice_t* deviceArray;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &level, sizeof(nvmlGpuTopologyLevel_t)) < 0 ||
+        rpc_read(conn, &count, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &level, sizeof(nvmlGpuTopologyLevel_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &count, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    deviceArray = (nvmlDevice_t*)malloc(count * sizeof(nvmlDevice_t));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlDeviceGetTopologyNearestGpus(device, level, &count, deviceArray);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &count, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, deviceArray, count * sizeof(nvmlDevice_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) deviceArray);
 ERROR_0:
     return -1;
 }
@@ -907,26 +935,24 @@ int handle_nvmlSystemGetTopologyGpuSet(void *conn)
     nvmlDevice_t* deviceArray;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &cpuNumber, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &cpuNumber, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &count, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &count, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    deviceArray = (nvmlDevice_t*)malloc(count * sizeof(nvmlDevice_t));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlSystemGetTopologyGpuSet(cpuNumber, &count, deviceArray);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &count, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, deviceArray, count * sizeof(nvmlDevice_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) deviceArray);
 ERROR_0:
     return -1;
 }
@@ -939,11 +965,11 @@ int handle_nvmlDeviceGetP2PStatus(void *conn)
     nvmlGpuP2PStatus_t p2pStatus;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device1, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &device2, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &p2pIndex, sizeof(nvmlGpuP2PCapsIndex_t)) < 0)
+    if (
+        rpc_read(conn, &device1, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &device2, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &p2pIndex, sizeof(nvmlGpuP2PCapsIndex_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -968,25 +994,23 @@ int handle_nvmlDeviceGetUUID(void *conn)
     char* uuid;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &length, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &length, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    uuid = (char*)malloc(length * sizeof(char));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlDeviceGetUUID(device, uuid, length);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, uuid, length * sizeof(char)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) uuid);
 ERROR_0:
     return -1;
 }
@@ -998,25 +1022,23 @@ int handle_nvmlVgpuInstanceGetMdevUUID(void *conn)
     char* mdevUuid;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0)
+    if (
+        rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
+        rpc_read(conn, &size, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &size, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    mdevUuid = (char*)malloc(size * sizeof(char));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlVgpuInstanceGetMdevUUID(vgpuInstance, mdevUuid, size);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, mdevUuid, size * sizeof(char)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) mdevUuid);
 ERROR_0:
     return -1;
 }
@@ -1027,7 +1049,9 @@ int handle_nvmlDeviceGetMinorNumber(void *conn)
     unsigned int minorNumber;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -1052,25 +1076,23 @@ int handle_nvmlDeviceGetBoardPartNumber(void *conn)
     char* partNumber;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &length, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &length, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    partNumber = (char*)malloc(length * sizeof(char));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlDeviceGetBoardPartNumber(device, partNumber, length);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, partNumber, length * sizeof(char)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) partNumber);
 ERROR_0:
     return -1;
 }
@@ -1083,27 +1105,24 @@ int handle_nvmlDeviceGetInforomVersion(void *conn)
     char* version;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &object, sizeof(nvmlInforomObject_t)) < 0 ||
+        rpc_read(conn, &length, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &object, sizeof(nvmlInforomObject_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &length, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    version = (char*)malloc(length * sizeof(char));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlDeviceGetInforomVersion(device, object, version, length);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, version, length * sizeof(char)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) version);
 ERROR_0:
     return -1;
 }
@@ -1115,25 +1134,23 @@ int handle_nvmlDeviceGetInforomImageVersion(void *conn)
     char* version;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &length, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &length, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    version = (char*)malloc(length * sizeof(char));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlDeviceGetInforomImageVersion(device, version, length);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, version, length * sizeof(char)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) version);
 ERROR_0:
     return -1;
 }
@@ -1144,7 +1161,9 @@ int handle_nvmlDeviceGetInforomConfigurationChecksum(void *conn)
     unsigned int checksum;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -1167,7 +1186,9 @@ int handle_nvmlDeviceValidateInforom(void *conn)
     nvmlDevice_t device;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -1190,7 +1211,9 @@ int handle_nvmlDeviceGetDisplayMode(void *conn)
     nvmlEnableState_t display;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -1214,7 +1237,9 @@ int handle_nvmlDeviceGetDisplayActive(void *conn)
     nvmlEnableState_t isActive;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -1238,7 +1263,9 @@ int handle_nvmlDeviceGetPersistenceMode(void *conn)
     nvmlEnableState_t mode;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -1262,7 +1289,9 @@ int handle_nvmlDeviceGetPciInfo_v3(void *conn)
     nvmlPciInfo_t pci;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -1286,7 +1315,9 @@ int handle_nvmlDeviceGetMaxPcieLinkGeneration(void *conn)
     unsigned int maxLinkGen;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -1310,7 +1341,9 @@ int handle_nvmlDeviceGetGpuMaxPcieLinkGeneration(void *conn)
     unsigned int maxLinkGenDevice;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -1334,7 +1367,9 @@ int handle_nvmlDeviceGetMaxPcieLinkWidth(void *conn)
     unsigned int maxLinkWidth;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -1358,7 +1393,9 @@ int handle_nvmlDeviceGetCurrPcieLinkGeneration(void *conn)
     unsigned int currLinkGen;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -1382,7 +1419,9 @@ int handle_nvmlDeviceGetCurrPcieLinkWidth(void *conn)
     unsigned int currLinkWidth;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -1407,9 +1446,10 @@ int handle_nvmlDeviceGetPcieThroughput(void *conn)
     unsigned int value;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &counter, sizeof(nvmlPcieUtilCounter_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &counter, sizeof(nvmlPcieUtilCounter_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -1433,7 +1473,9 @@ int handle_nvmlDeviceGetPcieReplayCounter(void *conn)
     unsigned int value;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -1458,9 +1500,10 @@ int handle_nvmlDeviceGetClockInfo(void *conn)
     unsigned int clock;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &type, sizeof(nvmlClockType_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &type, sizeof(nvmlClockType_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -1485,9 +1528,10 @@ int handle_nvmlDeviceGetMaxClockInfo(void *conn)
     unsigned int clock;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &type, sizeof(nvmlClockType_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &type, sizeof(nvmlClockType_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -1512,9 +1556,10 @@ int handle_nvmlDeviceGetApplicationsClock(void *conn)
     unsigned int clockMHz;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &clockType, sizeof(nvmlClockType_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &clockType, sizeof(nvmlClockType_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -1539,9 +1584,10 @@ int handle_nvmlDeviceGetDefaultApplicationsClock(void *conn)
     unsigned int clockMHz;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &clockType, sizeof(nvmlClockType_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &clockType, sizeof(nvmlClockType_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -1564,7 +1610,9 @@ int handle_nvmlDeviceResetApplicationsClocks(void *conn)
     nvmlDevice_t device;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -1589,11 +1637,11 @@ int handle_nvmlDeviceGetClock(void *conn)
     unsigned int clockMHz;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &clockType, sizeof(nvmlClockType_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &clockId, sizeof(nvmlClockId_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &clockType, sizeof(nvmlClockType_t)) < 0 ||
+        rpc_read(conn, &clockId, sizeof(nvmlClockId_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -1618,9 +1666,10 @@ int handle_nvmlDeviceGetMaxCustomerBoostClock(void *conn)
     unsigned int clockMHz;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &clockType, sizeof(nvmlClockType_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &clockType, sizeof(nvmlClockType_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -1645,26 +1694,24 @@ int handle_nvmlDeviceGetSupportedMemoryClocks(void *conn)
     unsigned int* clocksMHz;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &count, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &count, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    clocksMHz = (unsigned int*)malloc(count * sizeof(unsigned int));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlDeviceGetSupportedMemoryClocks(device, &count, clocksMHz);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &count, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, clocksMHz, count * sizeof(unsigned int)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) clocksMHz);
 ERROR_0:
     return -1;
 }
@@ -1677,28 +1724,25 @@ int handle_nvmlDeviceGetSupportedGraphicsClocks(void *conn)
     unsigned int* clocksMHz;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &memoryClockMHz, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &count, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &memoryClockMHz, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &count, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    clocksMHz = (unsigned int*)malloc(count * sizeof(unsigned int));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlDeviceGetSupportedGraphicsClocks(device, memoryClockMHz, &count, clocksMHz);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &count, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, clocksMHz, count * sizeof(unsigned int)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) clocksMHz);
 ERROR_0:
     return -1;
 }
@@ -1710,7 +1754,9 @@ int handle_nvmlDeviceGetAutoBoostedClocksEnabled(void *conn)
     nvmlEnableState_t defaultIsEnabled;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -1735,9 +1781,10 @@ int handle_nvmlDeviceSetAutoBoostedClocksEnabled(void *conn)
     nvmlEnableState_t enabled;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &enabled, sizeof(nvmlEnableState_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &enabled, sizeof(nvmlEnableState_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -1761,11 +1808,11 @@ int handle_nvmlDeviceSetDefaultAutoBoostedClocksEnabled(void *conn)
     unsigned int flags;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &enabled, sizeof(nvmlEnableState_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &enabled, sizeof(nvmlEnableState_t)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -1788,7 +1835,9 @@ int handle_nvmlDeviceGetFanSpeed(void *conn)
     unsigned int speed;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -1813,9 +1862,10 @@ int handle_nvmlDeviceGetFanSpeed_v2(void *conn)
     unsigned int speed;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &fan, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &fan, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -1840,9 +1890,10 @@ int handle_nvmlDeviceGetTargetFanSpeed(void *conn)
     unsigned int targetSpeed;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &fan, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &fan, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -1866,9 +1917,10 @@ int handle_nvmlDeviceSetDefaultFanSpeed_v2(void *conn)
     unsigned int fan;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &fan, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &fan, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -1892,7 +1944,9 @@ int handle_nvmlDeviceGetMinMaxFanSpeed(void *conn)
     unsigned int maxSpeed;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -1918,9 +1972,10 @@ int handle_nvmlDeviceGetFanControlPolicy_v2(void *conn)
     nvmlFanControlPolicy_t policy;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &fan, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &fan, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -1945,11 +2000,11 @@ int handle_nvmlDeviceSetFanControlPolicy(void *conn)
     nvmlFanControlPolicy_t policy;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &fan, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &policy, sizeof(nvmlFanControlPolicy_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &fan, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &policy, sizeof(nvmlFanControlPolicy_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -1972,7 +2027,9 @@ int handle_nvmlDeviceGetNumFans(void *conn)
     unsigned int numFans;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -1997,9 +2054,10 @@ int handle_nvmlDeviceGetTemperature(void *conn)
     unsigned int temp;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &sensorType, sizeof(nvmlTemperatureSensors_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &sensorType, sizeof(nvmlTemperatureSensors_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -2024,9 +2082,10 @@ int handle_nvmlDeviceGetTemperatureThreshold(void *conn)
     unsigned int temp;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &thresholdType, sizeof(nvmlTemperatureThresholds_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &thresholdType, sizeof(nvmlTemperatureThresholds_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -2051,11 +2110,11 @@ int handle_nvmlDeviceSetTemperatureThreshold(void *conn)
     int temp;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &thresholdType, sizeof(nvmlTemperatureThresholds_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &temp, sizeof(int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &thresholdType, sizeof(nvmlTemperatureThresholds_t)) < 0 ||
+        rpc_read(conn, &temp, sizeof(int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -2080,9 +2139,10 @@ int handle_nvmlDeviceGetThermalSettings(void *conn)
     nvmlGpuThermalSettings_t pThermalSettings;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &sensorIndex, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &sensorIndex, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -2106,7 +2166,9 @@ int handle_nvmlDeviceGetPerformanceState(void *conn)
     nvmlPstates_t pState;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -2130,7 +2192,9 @@ int handle_nvmlDeviceGetCurrentClocksThrottleReasons(void *conn)
     unsigned long long clocksThrottleReasons;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -2154,7 +2218,9 @@ int handle_nvmlDeviceGetSupportedClocksThrottleReasons(void *conn)
     unsigned long long supportedClocksThrottleReasons;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -2178,7 +2244,9 @@ int handle_nvmlDeviceGetPowerState(void *conn)
     nvmlPstates_t pState;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -2202,7 +2270,9 @@ int handle_nvmlDeviceGetPowerManagementMode(void *conn)
     nvmlEnableState_t mode;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -2226,7 +2296,9 @@ int handle_nvmlDeviceGetPowerManagementLimit(void *conn)
     unsigned int limit;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -2251,7 +2323,9 @@ int handle_nvmlDeviceGetPowerManagementLimitConstraints(void *conn)
     unsigned int maxLimit;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -2276,7 +2350,9 @@ int handle_nvmlDeviceGetPowerManagementDefaultLimit(void *conn)
     unsigned int defaultLimit;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -2300,7 +2376,9 @@ int handle_nvmlDeviceGetPowerUsage(void *conn)
     unsigned int power;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -2324,7 +2402,9 @@ int handle_nvmlDeviceGetTotalEnergyConsumption(void *conn)
     unsigned long long energy;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -2348,7 +2428,9 @@ int handle_nvmlDeviceGetEnforcedPowerLimit(void *conn)
     unsigned int limit;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -2373,7 +2455,9 @@ int handle_nvmlDeviceGetGpuOperationMode(void *conn)
     nvmlGpuOperationMode_t pending;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -2398,7 +2482,9 @@ int handle_nvmlDeviceGetMemoryInfo(void *conn)
     nvmlMemory_t memory;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -2422,7 +2508,9 @@ int handle_nvmlDeviceGetMemoryInfo_v2(void *conn)
     nvmlMemory_v2_t memory;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -2446,7 +2534,9 @@ int handle_nvmlDeviceGetComputeMode(void *conn)
     nvmlComputeMode_t mode;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -2471,7 +2561,9 @@ int handle_nvmlDeviceGetCudaComputeCapability(void *conn)
     int minor;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -2497,7 +2589,9 @@ int handle_nvmlDeviceGetEccMode(void *conn)
     nvmlEnableState_t pending;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -2522,7 +2616,9 @@ int handle_nvmlDeviceGetDefaultEccMode(void *conn)
     nvmlEnableState_t defaultMode;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -2546,7 +2642,9 @@ int handle_nvmlDeviceGetBoardId(void *conn)
     unsigned int boardId;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -2570,7 +2668,9 @@ int handle_nvmlDeviceGetMultiGpuBoard(void *conn)
     unsigned int multiGpuBool;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -2596,11 +2696,11 @@ int handle_nvmlDeviceGetTotalEccErrors(void *conn)
     unsigned long long eccCounts;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &errorType, sizeof(nvmlMemoryErrorType_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &counterType, sizeof(nvmlEccCounterType_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &errorType, sizeof(nvmlMemoryErrorType_t)) < 0 ||
+        rpc_read(conn, &counterType, sizeof(nvmlEccCounterType_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -2626,11 +2726,11 @@ int handle_nvmlDeviceGetDetailedEccErrors(void *conn)
     nvmlEccErrorCounts_t eccCounts;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &errorType, sizeof(nvmlMemoryErrorType_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &counterType, sizeof(nvmlEccCounterType_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &errorType, sizeof(nvmlMemoryErrorType_t)) < 0 ||
+        rpc_read(conn, &counterType, sizeof(nvmlEccCounterType_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -2657,13 +2757,12 @@ int handle_nvmlDeviceGetMemoryErrorCounter(void *conn)
     unsigned long long count;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &errorType, sizeof(nvmlMemoryErrorType_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &counterType, sizeof(nvmlEccCounterType_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &locationType, sizeof(nvmlMemoryLocation_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &errorType, sizeof(nvmlMemoryErrorType_t)) < 0 ||
+        rpc_read(conn, &counterType, sizeof(nvmlEccCounterType_t)) < 0 ||
+        rpc_read(conn, &locationType, sizeof(nvmlMemoryLocation_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -2687,7 +2786,9 @@ int handle_nvmlDeviceGetUtilizationRates(void *conn)
     nvmlUtilization_t utilization;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -2712,7 +2813,9 @@ int handle_nvmlDeviceGetEncoderUtilization(void *conn)
     unsigned int samplingPeriodUs;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -2738,9 +2841,10 @@ int handle_nvmlDeviceGetEncoderCapacity(void *conn)
     unsigned int encoderCapacity;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &encoderQueryType, sizeof(nvmlEncoderType_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &encoderQueryType, sizeof(nvmlEncoderType_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -2766,7 +2870,9 @@ int handle_nvmlDeviceGetEncoderStats(void *conn)
     unsigned int averageLatency;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -2793,26 +2899,24 @@ int handle_nvmlDeviceGetEncoderSessions(void *conn)
     nvmlEncoderSessionInfo_t* sessionInfos;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &sessionCount, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &sessionCount, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    sessionInfos = (nvmlEncoderSessionInfo_t*)malloc(sessionCount * sizeof(nvmlEncoderSessionInfo_t));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlDeviceGetEncoderSessions(device, &sessionCount, sessionInfos);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &sessionCount, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, sessionInfos, sessionCount * sizeof(nvmlEncoderSessionInfo_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) sessionInfos);
 ERROR_0:
     return -1;
 }
@@ -2824,7 +2928,9 @@ int handle_nvmlDeviceGetDecoderUtilization(void *conn)
     unsigned int samplingPeriodUs;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -2849,7 +2955,9 @@ int handle_nvmlDeviceGetFBCStats(void *conn)
     nvmlFBCStats_t fbcStats;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -2874,26 +2982,24 @@ int handle_nvmlDeviceGetFBCSessions(void *conn)
     nvmlFBCSessionInfo_t* sessionInfo;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &sessionCount, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &sessionCount, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    sessionInfo = (nvmlFBCSessionInfo_t*)malloc(sessionCount * sizeof(nvmlFBCSessionInfo_t));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlDeviceGetFBCSessions(device, &sessionCount, sessionInfo);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &sessionCount, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, sessionInfo, sessionCount * sizeof(nvmlFBCSessionInfo_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) sessionInfo);
 ERROR_0:
     return -1;
 }
@@ -2905,7 +3011,9 @@ int handle_nvmlDeviceGetDriverModel(void *conn)
     nvmlDriverModel_t pending;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -2931,25 +3039,23 @@ int handle_nvmlDeviceGetVbiosVersion(void *conn)
     char* version;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &length, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &length, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    version = (char*)malloc(length * sizeof(char));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlDeviceGetVbiosVersion(device, version, length);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, version, length * sizeof(char)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) version);
 ERROR_0:
     return -1;
 }
@@ -2960,7 +3066,9 @@ int handle_nvmlDeviceGetBridgeChipInfo(void *conn)
     nvmlBridgeChipHierarchy_t bridgeHierarchy;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -2985,26 +3093,24 @@ int handle_nvmlDeviceGetComputeRunningProcesses_v3(void *conn)
     nvmlProcessInfo_t* infos;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &infoCount, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &infoCount, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    infos = (nvmlProcessInfo_t*)malloc(infoCount * sizeof(nvmlProcessInfo_t));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlDeviceGetComputeRunningProcesses_v3(device, &infoCount, infos);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &infoCount, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, infos, infoCount * sizeof(nvmlProcessInfo_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) infos);
 ERROR_0:
     return -1;
 }
@@ -3016,26 +3122,24 @@ int handle_nvmlDeviceGetGraphicsRunningProcesses_v3(void *conn)
     nvmlProcessInfo_t* infos;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &infoCount, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &infoCount, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    infos = (nvmlProcessInfo_t*)malloc(infoCount * sizeof(nvmlProcessInfo_t));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlDeviceGetGraphicsRunningProcesses_v3(device, &infoCount, infos);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &infoCount, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, infos, infoCount * sizeof(nvmlProcessInfo_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) infos);
 ERROR_0:
     return -1;
 }
@@ -3047,26 +3151,24 @@ int handle_nvmlDeviceGetMPSComputeRunningProcesses_v3(void *conn)
     nvmlProcessInfo_t* infos;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &infoCount, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &infoCount, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    infos = (nvmlProcessInfo_t*)malloc(infoCount * sizeof(nvmlProcessInfo_t));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlDeviceGetMPSComputeRunningProcesses_v3(device, &infoCount, infos);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &infoCount, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, infos, infoCount * sizeof(nvmlProcessInfo_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) infos);
 ERROR_0:
     return -1;
 }
@@ -3078,9 +3180,10 @@ int handle_nvmlDeviceOnSameBoard(void *conn)
     int onSameBoard;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device1, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &device2, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device1, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &device2, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -3105,9 +3208,10 @@ int handle_nvmlDeviceGetAPIRestriction(void *conn)
     nvmlEnableState_t isRestricted;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &apiType, sizeof(nvmlRestrictedAPI_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &apiType, sizeof(nvmlRestrictedAPI_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -3135,19 +3239,17 @@ int handle_nvmlDeviceGetSamples(void *conn)
     nvmlSample_t* samples;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &type, sizeof(nvmlSamplingType_t)) < 0 ||
+        rpc_read(conn, &lastSeenTimeStamp, sizeof(unsigned long long)) < 0 ||
+        rpc_read(conn, &sampleCount, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &type, sizeof(nvmlSamplingType_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &lastSeenTimeStamp, sizeof(unsigned long long)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &sampleCount, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    samples = (nvmlSample_t*)malloc(sampleCount * sizeof(nvmlSample_t));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlDeviceGetSamples(device, type, lastSeenTimeStamp, &sampleValType, &sampleCount, samples);
 
     if (rpc_start_response(conn, request_id) < 0 ||
@@ -3155,11 +3257,9 @@ int handle_nvmlDeviceGetSamples(void *conn)
         rpc_write(conn, &sampleCount, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, samples, sampleCount * sizeof(nvmlSample_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) samples);
 ERROR_0:
     return -1;
 }
@@ -3170,7 +3270,9 @@ int handle_nvmlDeviceGetBAR1MemoryInfo(void *conn)
     nvmlBAR1Memory_t bar1Memory;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -3195,9 +3297,10 @@ int handle_nvmlDeviceGetViolationStatus(void *conn)
     nvmlViolationTime_t violTime;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &perfPolicyType, sizeof(nvmlPerfPolicyType_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &perfPolicyType, sizeof(nvmlPerfPolicyType_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -3221,7 +3324,9 @@ int handle_nvmlDeviceGetIrqNum(void *conn)
     unsigned int irqNum;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -3245,7 +3350,9 @@ int handle_nvmlDeviceGetNumGpuCores(void *conn)
     unsigned int numCores;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -3269,7 +3376,9 @@ int handle_nvmlDeviceGetPowerSource(void *conn)
     nvmlPowerSource_t powerSource;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -3293,7 +3402,9 @@ int handle_nvmlDeviceGetMemoryBusWidth(void *conn)
     unsigned int busWidth;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -3317,7 +3428,9 @@ int handle_nvmlDeviceGetPcieLinkMaxSpeed(void *conn)
     unsigned int maxSpeed;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -3341,7 +3454,9 @@ int handle_nvmlDeviceGetPcieSpeed(void *conn)
     unsigned int pcieSpeed;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -3365,7 +3480,9 @@ int handle_nvmlDeviceGetAdaptiveClockInfoStatus(void *conn)
     unsigned int adaptiveClockStatus;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -3389,7 +3506,9 @@ int handle_nvmlDeviceGetAccountingMode(void *conn)
     nvmlEnableState_t mode;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -3414,9 +3533,10 @@ int handle_nvmlDeviceGetAccountingStats(void *conn)
     nvmlAccountingStats_t stats;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &pid, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &pid, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -3441,26 +3561,24 @@ int handle_nvmlDeviceGetAccountingPids(void *conn)
     unsigned int* pids;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &count, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &count, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    pids = (unsigned int*)malloc(count * sizeof(unsigned int));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlDeviceGetAccountingPids(device, &count, pids);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &count, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, pids, count * sizeof(unsigned int)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) pids);
 ERROR_0:
     return -1;
 }
@@ -3471,7 +3589,9 @@ int handle_nvmlDeviceGetAccountingBufferSize(void *conn)
     unsigned int bufferSize;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -3497,28 +3617,25 @@ int handle_nvmlDeviceGetRetiredPages(void *conn)
     unsigned long long* addresses;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &cause, sizeof(nvmlPageRetirementCause_t)) < 0 ||
+        rpc_read(conn, &pageCount, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &cause, sizeof(nvmlPageRetirementCause_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &pageCount, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    addresses = (unsigned long long*)malloc(pageCount * sizeof(unsigned long long));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlDeviceGetRetiredPages(device, cause, &pageCount, addresses);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &pageCount, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, addresses, pageCount * sizeof(unsigned long long)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) addresses);
 ERROR_0:
     return -1;
 }
@@ -3532,18 +3649,16 @@ int handle_nvmlDeviceGetRetiredPages_v2(void *conn)
     unsigned long long* timestamps;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &cause, sizeof(nvmlPageRetirementCause_t)) < 0 ||
+        rpc_read(conn, &pageCount, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &cause, sizeof(nvmlPageRetirementCause_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &pageCount, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    addresses = (unsigned long long*)malloc(pageCount * sizeof(unsigned long long));
-    timestamps = (unsigned long long*)malloc(pageCount * sizeof(unsigned long long));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_2;
+        goto ERROR_0;
     result = nvmlDeviceGetRetiredPages_v2(device, cause, &pageCount, addresses, timestamps);
 
     if (rpc_start_response(conn, request_id) < 0 ||
@@ -3551,13 +3666,9 @@ int handle_nvmlDeviceGetRetiredPages_v2(void *conn)
         rpc_write(conn, addresses, pageCount * sizeof(unsigned long long)) < 0 ||
         rpc_write(conn, timestamps, pageCount * sizeof(unsigned long long)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_2;
+        goto ERROR_0;
 
     return 0;
-ERROR_2:
-    free((void *) addresses);
-ERROR_1:
-    free((void *) timestamps);
 ERROR_0:
     return -1;
 }
@@ -3568,7 +3679,9 @@ int handle_nvmlDeviceGetRetiredPagesPendingStatus(void *conn)
     nvmlEnableState_t isPending;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -3595,7 +3708,9 @@ int handle_nvmlDeviceGetRemappedRows(void *conn)
     unsigned int failureOccurred;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -3622,7 +3737,9 @@ int handle_nvmlDeviceGetRowRemapperHistogram(void *conn)
     nvmlRowRemapperHistogramValues_t values;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -3646,7 +3763,9 @@ int handle_nvmlDeviceGetArchitecture(void *conn)
     nvmlDeviceArchitecture_t arch;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -3670,9 +3789,10 @@ int handle_nvmlUnitSetLedState(void *conn)
     nvmlLedColor_t color;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &unit, sizeof(nvmlUnit_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &color, sizeof(nvmlLedColor_t)) < 0)
+    if (
+        rpc_read(conn, &unit, sizeof(nvmlUnit_t)) < 0 ||
+        rpc_read(conn, &color, sizeof(nvmlLedColor_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -3695,9 +3815,10 @@ int handle_nvmlDeviceSetPersistenceMode(void *conn)
     nvmlEnableState_t mode;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &mode, sizeof(nvmlEnableState_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &mode, sizeof(nvmlEnableState_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -3720,9 +3841,10 @@ int handle_nvmlDeviceSetComputeMode(void *conn)
     nvmlComputeMode_t mode;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &mode, sizeof(nvmlComputeMode_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &mode, sizeof(nvmlComputeMode_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -3745,9 +3867,10 @@ int handle_nvmlDeviceSetEccMode(void *conn)
     nvmlEnableState_t ecc;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &ecc, sizeof(nvmlEnableState_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &ecc, sizeof(nvmlEnableState_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -3770,9 +3893,10 @@ int handle_nvmlDeviceClearEccErrorCounts(void *conn)
     nvmlEccCounterType_t counterType;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &counterType, sizeof(nvmlEccCounterType_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &counterType, sizeof(nvmlEccCounterType_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -3796,11 +3920,11 @@ int handle_nvmlDeviceSetDriverModel(void *conn)
     unsigned int flags;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &driverModel, sizeof(nvmlDriverModel_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &driverModel, sizeof(nvmlDriverModel_t)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -3824,11 +3948,11 @@ int handle_nvmlDeviceSetGpuLockedClocks(void *conn)
     unsigned int maxGpuClockMHz;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &minGpuClockMHz, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &maxGpuClockMHz, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &minGpuClockMHz, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &maxGpuClockMHz, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -3850,7 +3974,9 @@ int handle_nvmlDeviceResetGpuLockedClocks(void *conn)
     nvmlDevice_t device;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -3874,11 +4000,11 @@ int handle_nvmlDeviceSetMemoryLockedClocks(void *conn)
     unsigned int maxMemClockMHz;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &minMemClockMHz, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &maxMemClockMHz, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &minMemClockMHz, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &maxMemClockMHz, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -3900,7 +4026,9 @@ int handle_nvmlDeviceResetMemoryLockedClocks(void *conn)
     nvmlDevice_t device;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -3924,11 +4052,11 @@ int handle_nvmlDeviceSetApplicationsClocks(void *conn)
     unsigned int graphicsClockMHz;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &memClockMHz, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &graphicsClockMHz, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &memClockMHz, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &graphicsClockMHz, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -3951,7 +4079,9 @@ int handle_nvmlDeviceGetClkMonStatus(void *conn)
     nvmlClkMonStatus_t status;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -3975,9 +4105,10 @@ int handle_nvmlDeviceSetPowerManagementLimit(void *conn)
     unsigned int limit;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &limit, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &limit, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -4000,9 +4131,10 @@ int handle_nvmlDeviceSetGpuOperationMode(void *conn)
     nvmlGpuOperationMode_t mode;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &mode, sizeof(nvmlGpuOperationMode_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &mode, sizeof(nvmlGpuOperationMode_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -4026,11 +4158,11 @@ int handle_nvmlDeviceSetAPIRestriction(void *conn)
     nvmlEnableState_t isRestricted;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &apiType, sizeof(nvmlRestrictedAPI_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &isRestricted, sizeof(nvmlEnableState_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &apiType, sizeof(nvmlRestrictedAPI_t)) < 0 ||
+        rpc_read(conn, &isRestricted, sizeof(nvmlEnableState_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -4053,9 +4185,10 @@ int handle_nvmlDeviceSetAccountingMode(void *conn)
     nvmlEnableState_t mode;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &mode, sizeof(nvmlEnableState_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &mode, sizeof(nvmlEnableState_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -4077,7 +4210,9 @@ int handle_nvmlDeviceClearAccountingPids(void *conn)
     nvmlDevice_t device;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -4101,9 +4236,10 @@ int handle_nvmlDeviceGetNvLinkState(void *conn)
     nvmlEnableState_t isActive;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &link, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &link, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -4128,9 +4264,10 @@ int handle_nvmlDeviceGetNvLinkVersion(void *conn)
     unsigned int version;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &link, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &link, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -4156,11 +4293,11 @@ int handle_nvmlDeviceGetNvLinkCapability(void *conn)
     unsigned int capResult;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &link, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &capability, sizeof(nvmlNvLinkCapability_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &link, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &capability, sizeof(nvmlNvLinkCapability_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -4185,9 +4322,10 @@ int handle_nvmlDeviceGetNvLinkRemotePciInfo_v2(void *conn)
     nvmlPciInfo_t pci;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &link, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &link, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -4213,11 +4351,11 @@ int handle_nvmlDeviceGetNvLinkErrorCounter(void *conn)
     unsigned long long counterValue;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &link, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &counter, sizeof(nvmlNvLinkErrorCounter_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &link, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &counter, sizeof(nvmlNvLinkErrorCounter_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -4241,9 +4379,10 @@ int handle_nvmlDeviceResetNvLinkErrorCounters(void *conn)
     unsigned int link;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &link, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &link, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -4265,25 +4404,23 @@ int handle_nvmlDeviceSetNvLinkUtilizationControl(void *conn)
     nvmlDevice_t device;
     unsigned int link;
     unsigned int counter;
-    nvmlNvLinkUtilizationControl_t control;
+    nvmlNvLinkUtilizationControl_t* control;
     unsigned int reset;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &link, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &counter, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &control, sizeof(nvmlNvLinkUtilizationControl_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &reset, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &link, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &counter, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &control, sizeof(nvmlNvLinkUtilizationControl_t*)) < 0 ||
+        rpc_read(conn, &reset, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = nvmlDeviceSetNvLinkUtilizationControl(device, link, counter, &control, reset);
+    result = nvmlDeviceSetNvLinkUtilizationControl(device, link, counter, control, reset);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_end_response(conn, &result) < 0)
@@ -4302,11 +4439,11 @@ int handle_nvmlDeviceGetNvLinkUtilizationControl(void *conn)
     nvmlNvLinkUtilizationControl_t control;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &link, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &counter, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &link, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &counter, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -4333,11 +4470,11 @@ int handle_nvmlDeviceGetNvLinkUtilizationCounter(void *conn)
     unsigned long long txcounter;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &link, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &counter, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &link, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &counter, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -4364,13 +4501,12 @@ int handle_nvmlDeviceFreezeNvLinkUtilizationCounter(void *conn)
     nvmlEnableState_t freeze;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &link, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &counter, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &freeze, sizeof(nvmlEnableState_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &link, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &counter, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &freeze, sizeof(nvmlEnableState_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -4394,11 +4530,11 @@ int handle_nvmlDeviceResetNvLinkUtilizationCounter(void *conn)
     unsigned int counter;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &link, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &counter, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &link, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &counter, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -4422,9 +4558,10 @@ int handle_nvmlDeviceGetNvLinkRemoteDeviceType(void *conn)
     nvmlIntNvLinkDeviceType_t pNvLinkDeviceType;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &link, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &link, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -4447,6 +4584,9 @@ int handle_nvmlEventSetCreate(void *conn)
     nvmlEventSet_t set;
     int request_id;
     nvmlReturn_t result;
+    if (
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -4470,11 +4610,11 @@ int handle_nvmlDeviceRegisterEvents(void *conn)
     nvmlEventSet_t set;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &eventTypes, sizeof(unsigned long long)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &set, sizeof(nvmlEventSet_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &eventTypes, sizeof(unsigned long long)) < 0 ||
+        rpc_read(conn, &set, sizeof(nvmlEventSet_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -4497,7 +4637,9 @@ int handle_nvmlDeviceGetSupportedEventTypes(void *conn)
     unsigned long long eventTypes;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -4522,9 +4664,10 @@ int handle_nvmlEventSetWait_v2(void *conn)
     unsigned int timeoutms;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &set, sizeof(nvmlEventSet_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &timeoutms, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &set, sizeof(nvmlEventSet_t)) < 0 ||
+        rpc_read(conn, &timeoutms, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -4547,7 +4690,9 @@ int handle_nvmlEventSetFree(void *conn)
     nvmlEventSet_t set;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &set, sizeof(nvmlEventSet_t)) < 0)
+    if (
+        rpc_read(conn, &set, sizeof(nvmlEventSet_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -4570,9 +4715,10 @@ int handle_nvmlDeviceModifyDrainState(void *conn)
     nvmlEnableState_t newState;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &pciInfo, sizeof(nvmlPciInfo_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &newState, sizeof(nvmlEnableState_t)) < 0)
+    if (
+        rpc_read(conn, &pciInfo, sizeof(nvmlPciInfo_t)) < 0 ||
+        rpc_read(conn, &newState, sizeof(nvmlEnableState_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -4581,6 +4727,7 @@ int handle_nvmlDeviceModifyDrainState(void *conn)
     result = nvmlDeviceModifyDrainState(&pciInfo, newState);
 
     if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &pciInfo, sizeof(nvmlPciInfo_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -4595,7 +4742,9 @@ int handle_nvmlDeviceQueryDrainState(void *conn)
     nvmlEnableState_t currentState;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &pciInfo, sizeof(nvmlPciInfo_t)) < 0)
+    if (
+        rpc_read(conn, &pciInfo, sizeof(nvmlPciInfo_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -4604,6 +4753,7 @@ int handle_nvmlDeviceQueryDrainState(void *conn)
     result = nvmlDeviceQueryDrainState(&pciInfo, &currentState);
 
     if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &pciInfo, sizeof(nvmlPciInfo_t)) < 0 ||
         rpc_write(conn, &currentState, sizeof(nvmlEnableState_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
@@ -4620,11 +4770,11 @@ int handle_nvmlDeviceRemoveGpu_v2(void *conn)
     nvmlPcieLinkState_t linkState;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &pciInfo, sizeof(nvmlPciInfo_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &gpuState, sizeof(nvmlDetachGpuState_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &linkState, sizeof(nvmlPcieLinkState_t)) < 0)
+    if (
+        rpc_read(conn, &pciInfo, sizeof(nvmlPciInfo_t)) < 0 ||
+        rpc_read(conn, &gpuState, sizeof(nvmlDetachGpuState_t)) < 0 ||
+        rpc_read(conn, &linkState, sizeof(nvmlPcieLinkState_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -4633,6 +4783,7 @@ int handle_nvmlDeviceRemoveGpu_v2(void *conn)
     result = nvmlDeviceRemoveGpu_v2(&pciInfo, gpuState, linkState);
 
     if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &pciInfo, sizeof(nvmlPciInfo_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -4646,7 +4797,9 @@ int handle_nvmlDeviceDiscoverGpus(void *conn)
     nvmlPciInfo_t pciInfo;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &pciInfo, sizeof(nvmlPciInfo_t)) < 0)
+    if (
+        rpc_read(conn, &pciInfo, sizeof(nvmlPciInfo_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -4655,6 +4808,7 @@ int handle_nvmlDeviceDiscoverGpus(void *conn)
     result = nvmlDeviceDiscoverGpus(&pciInfo);
 
     if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &pciInfo, sizeof(nvmlPciInfo_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -4670,25 +4824,23 @@ int handle_nvmlDeviceGetFieldValues(void *conn)
     nvmlFieldValue_t* values;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &valuesCount, sizeof(int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &valuesCount, sizeof(int)) < 0)
-        goto ERROR_0;
-    values = (nvmlFieldValue_t*)malloc(valuesCount * sizeof(nvmlFieldValue_t));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlDeviceGetFieldValues(device, valuesCount, values);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, values, valuesCount * sizeof(nvmlFieldValue_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) values);
 ERROR_0:
     return -1;
 }
@@ -4700,25 +4852,23 @@ int handle_nvmlDeviceClearFieldValues(void *conn)
     nvmlFieldValue_t* values;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &valuesCount, sizeof(int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &valuesCount, sizeof(int)) < 0)
-        goto ERROR_0;
-    values = (nvmlFieldValue_t*)malloc(valuesCount * sizeof(nvmlFieldValue_t));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlDeviceClearFieldValues(device, valuesCount, values);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, values, valuesCount * sizeof(nvmlFieldValue_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) values);
 ERROR_0:
     return -1;
 }
@@ -4729,7 +4879,9 @@ int handle_nvmlDeviceGetVirtualizationMode(void *conn)
     nvmlGpuVirtualizationMode_t pVirtualMode;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -4753,7 +4905,9 @@ int handle_nvmlDeviceGetHostVgpuMode(void *conn)
     nvmlHostVgpuMode_t pHostVgpuMode;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -4777,9 +4931,10 @@ int handle_nvmlDeviceSetVirtualizationMode(void *conn)
     nvmlGpuVirtualizationMode_t virtualMode;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &virtualMode, sizeof(nvmlGpuVirtualizationMode_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &virtualMode, sizeof(nvmlGpuVirtualizationMode_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -4802,7 +4957,9 @@ int handle_nvmlDeviceGetGridLicensableFeatures_v4(void *conn)
     nvmlGridLicensableFeatures_t pGridLicensableFeatures;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -4828,28 +4985,25 @@ int handle_nvmlDeviceGetProcessUtilization(void *conn)
     unsigned long long lastSeenTimeStamp;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &processSamplesCount, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &lastSeenTimeStamp, sizeof(unsigned long long)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &processSamplesCount, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    utilization = (nvmlProcessUtilizationSample_t*)malloc(processSamplesCount * sizeof(nvmlProcessUtilizationSample_t));
-    if (rpc_read(conn, &lastSeenTimeStamp, sizeof(unsigned long long)) < 0)
-        goto ERROR_1;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlDeviceGetProcessUtilization(device, utilization, &processSamplesCount, lastSeenTimeStamp);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &processSamplesCount, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, utilization, processSamplesCount * sizeof(nvmlProcessUtilizationSample_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) utilization);
 ERROR_0:
     return -1;
 }
@@ -4860,7 +5014,9 @@ int handle_nvmlDeviceGetGspFirmwareVersion(void *conn)
     char version;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -4885,7 +5041,9 @@ int handle_nvmlDeviceGetGspFirmwareMode(void *conn)
     unsigned int defaultMode;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -4910,7 +5068,9 @@ int handle_nvmlGetVgpuDriverCapabilities(void *conn)
     unsigned int capResult;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &capability, sizeof(nvmlVgpuDriverCapability_t)) < 0)
+    if (
+        rpc_read(conn, &capability, sizeof(nvmlVgpuDriverCapability_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -4935,9 +5095,10 @@ int handle_nvmlDeviceGetVgpuCapabilities(void *conn)
     unsigned int capResult;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &capability, sizeof(nvmlDeviceVgpuCapability_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &capability, sizeof(nvmlDeviceVgpuCapability_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -4962,26 +5123,24 @@ int handle_nvmlDeviceGetSupportedVgpus(void *conn)
     nvmlVgpuTypeId_t* vgpuTypeIds;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &vgpuCount, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &vgpuCount, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    vgpuTypeIds = (nvmlVgpuTypeId_t*)malloc(vgpuCount * sizeof(nvmlVgpuTypeId_t));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlDeviceGetSupportedVgpus(device, &vgpuCount, vgpuTypeIds);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &vgpuCount, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, vgpuTypeIds, vgpuCount * sizeof(nvmlVgpuTypeId_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) vgpuTypeIds);
 ERROR_0:
     return -1;
 }
@@ -4993,26 +5152,24 @@ int handle_nvmlDeviceGetCreatableVgpus(void *conn)
     nvmlVgpuTypeId_t* vgpuTypeIds;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &vgpuCount, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &vgpuCount, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    vgpuTypeIds = (nvmlVgpuTypeId_t*)malloc(vgpuCount * sizeof(nvmlVgpuTypeId_t));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlDeviceGetCreatableVgpus(device, &vgpuCount, vgpuTypeIds);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &vgpuCount, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, vgpuTypeIds, vgpuCount * sizeof(nvmlVgpuTypeId_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) vgpuTypeIds);
 ERROR_0:
     return -1;
 }
@@ -5024,24 +5181,23 @@ int handle_nvmlVgpuTypeGetClass(void *conn)
     char* vgpuTypeClass;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0)
+    if (
+        rpc_read(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
+        false)
         goto ERROR_0;
-    vgpuTypeClass = (char*)malloc(size * sizeof(char));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlVgpuTypeGetClass(vgpuTypeId, vgpuTypeClass, &size);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &size, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, vgpuTypeClass, size * sizeof(char)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) vgpuTypeClass);
 ERROR_0:
     return -1;
 }
@@ -5053,26 +5209,24 @@ int handle_nvmlVgpuTypeGetName(void *conn)
     char* vgpuTypeName;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0)
+    if (
+        rpc_read(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
+        rpc_read(conn, &size, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &size, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    vgpuTypeName = (char*)malloc(size * sizeof(char));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlVgpuTypeGetName(vgpuTypeId, vgpuTypeName, &size);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &size, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, vgpuTypeName, size * sizeof(char)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) vgpuTypeName);
 ERROR_0:
     return -1;
 }
@@ -5083,7 +5237,9 @@ int handle_nvmlVgpuTypeGetGpuInstanceProfileId(void *conn)
     unsigned int gpuInstanceProfileId;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0)
+    if (
+        rpc_read(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -5108,7 +5264,9 @@ int handle_nvmlVgpuTypeGetDeviceID(void *conn)
     unsigned long long subsystemID;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0)
+    if (
+        rpc_read(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -5133,7 +5291,9 @@ int handle_nvmlVgpuTypeGetFramebufferSize(void *conn)
     unsigned long long fbSize;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0)
+    if (
+        rpc_read(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -5157,7 +5317,9 @@ int handle_nvmlVgpuTypeGetNumDisplayHeads(void *conn)
     unsigned int numDisplayHeads;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0)
+    if (
+        rpc_read(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -5183,9 +5345,10 @@ int handle_nvmlVgpuTypeGetResolution(void *conn)
     unsigned int ydim;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &displayIndex, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
+        rpc_read(conn, &displayIndex, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -5211,25 +5374,23 @@ int handle_nvmlVgpuTypeGetLicense(void *conn)
     char* vgpuTypeLicenseString;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0)
+    if (
+        rpc_read(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
+        rpc_read(conn, &size, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &size, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    vgpuTypeLicenseString = (char*)malloc(size * sizeof(char));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlVgpuTypeGetLicense(vgpuTypeId, vgpuTypeLicenseString, size);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, vgpuTypeLicenseString, size * sizeof(char)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) vgpuTypeLicenseString);
 ERROR_0:
     return -1;
 }
@@ -5240,7 +5401,9 @@ int handle_nvmlVgpuTypeGetFrameRateLimit(void *conn)
     unsigned int frameRateLimit;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0)
+    if (
+        rpc_read(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -5265,9 +5428,10 @@ int handle_nvmlVgpuTypeGetMaxInstances(void *conn)
     unsigned int vgpuInstanceCount;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -5291,7 +5455,9 @@ int handle_nvmlVgpuTypeGetMaxInstancesPerVm(void *conn)
     unsigned int vgpuInstanceCountPerVm;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0)
+    if (
+        rpc_read(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -5316,26 +5482,24 @@ int handle_nvmlDeviceGetActiveVgpus(void *conn)
     nvmlVgpuInstance_t* vgpuInstances;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &vgpuCount, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &vgpuCount, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    vgpuInstances = (nvmlVgpuInstance_t*)malloc(vgpuCount * sizeof(nvmlVgpuInstance_t));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlDeviceGetActiveVgpus(device, &vgpuCount, vgpuInstances);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &vgpuCount, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, vgpuInstances, vgpuCount * sizeof(nvmlVgpuInstance_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) vgpuInstances);
 ERROR_0:
     return -1;
 }
@@ -5348,26 +5512,24 @@ int handle_nvmlVgpuInstanceGetVmID(void *conn)
     nvmlVgpuVmIdType_t vmIdType;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0)
+    if (
+        rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
+        rpc_read(conn, &size, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &size, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    vmId = (char*)malloc(size * sizeof(char));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlVgpuInstanceGetVmID(vgpuInstance, vmId, size, &vmIdType);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, vmId, size * sizeof(char)) < 0 ||
         rpc_write(conn, &vmIdType, sizeof(nvmlVgpuVmIdType_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) vmId);
 ERROR_0:
     return -1;
 }
@@ -5379,25 +5541,23 @@ int handle_nvmlVgpuInstanceGetUUID(void *conn)
     char* uuid;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0)
+    if (
+        rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
+        rpc_read(conn, &size, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &size, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    uuid = (char*)malloc(size * sizeof(char));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlVgpuInstanceGetUUID(vgpuInstance, uuid, size);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, uuid, size * sizeof(char)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) uuid);
 ERROR_0:
     return -1;
 }
@@ -5409,25 +5569,23 @@ int handle_nvmlVgpuInstanceGetVmDriverVersion(void *conn)
     char* version;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0)
+    if (
+        rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
+        rpc_read(conn, &length, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &length, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    version = (char*)malloc(length * sizeof(char));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlVgpuInstanceGetVmDriverVersion(vgpuInstance, version, length);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, version, length * sizeof(char)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) version);
 ERROR_0:
     return -1;
 }
@@ -5438,7 +5596,9 @@ int handle_nvmlVgpuInstanceGetFbUsage(void *conn)
     unsigned long long fbUsage;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0)
+    if (
+        rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -5462,7 +5622,9 @@ int handle_nvmlVgpuInstanceGetLicenseStatus(void *conn)
     unsigned int licensed;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0)
+    if (
+        rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -5486,7 +5648,9 @@ int handle_nvmlVgpuInstanceGetType(void *conn)
     nvmlVgpuTypeId_t vgpuTypeId;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0)
+    if (
+        rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -5510,7 +5674,9 @@ int handle_nvmlVgpuInstanceGetFrameRateLimit(void *conn)
     unsigned int frameRateLimit;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0)
+    if (
+        rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -5534,7 +5700,9 @@ int handle_nvmlVgpuInstanceGetEccMode(void *conn)
     nvmlEnableState_t eccMode;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0)
+    if (
+        rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -5558,7 +5726,9 @@ int handle_nvmlVgpuInstanceGetEncoderCapacity(void *conn)
     unsigned int encoderCapacity;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0)
+    if (
+        rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -5582,9 +5752,10 @@ int handle_nvmlVgpuInstanceSetEncoderCapacity(void *conn)
     unsigned int encoderCapacity;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &encoderCapacity, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
+        rpc_read(conn, &encoderCapacity, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -5609,7 +5780,9 @@ int handle_nvmlVgpuInstanceGetEncoderStats(void *conn)
     unsigned int averageLatency;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0)
+    if (
+        rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -5636,26 +5809,24 @@ int handle_nvmlVgpuInstanceGetEncoderSessions(void *conn)
     nvmlEncoderSessionInfo_t* sessionInfo;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0)
+    if (
+        rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
+        rpc_read(conn, &sessionCount, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &sessionCount, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    sessionInfo = (nvmlEncoderSessionInfo_t*)malloc(sessionCount * sizeof(nvmlEncoderSessionInfo_t));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlVgpuInstanceGetEncoderSessions(vgpuInstance, &sessionCount, sessionInfo);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &sessionCount, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, sessionInfo, sessionCount * sizeof(nvmlEncoderSessionInfo_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) sessionInfo);
 ERROR_0:
     return -1;
 }
@@ -5666,7 +5837,9 @@ int handle_nvmlVgpuInstanceGetFBCStats(void *conn)
     nvmlFBCStats_t fbcStats;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0)
+    if (
+        rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -5691,26 +5864,24 @@ int handle_nvmlVgpuInstanceGetFBCSessions(void *conn)
     nvmlFBCSessionInfo_t* sessionInfo;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0)
+    if (
+        rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
+        rpc_read(conn, &sessionCount, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &sessionCount, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    sessionInfo = (nvmlFBCSessionInfo_t*)malloc(sessionCount * sizeof(nvmlFBCSessionInfo_t));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlVgpuInstanceGetFBCSessions(vgpuInstance, &sessionCount, sessionInfo);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &sessionCount, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, sessionInfo, sessionCount * sizeof(nvmlFBCSessionInfo_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) sessionInfo);
 ERROR_0:
     return -1;
 }
@@ -5721,7 +5892,9 @@ int handle_nvmlVgpuInstanceGetGpuInstanceId(void *conn)
     unsigned int gpuInstanceId;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0)
+    if (
+        rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -5746,26 +5919,24 @@ int handle_nvmlVgpuInstanceGetGpuPciId(void *conn)
     char* vgpuPciId;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0)
+    if (
+        rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
+        rpc_read(conn, &length, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &length, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    vgpuPciId = (char*)malloc(length * sizeof(char));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlVgpuInstanceGetGpuPciId(vgpuInstance, vgpuPciId, &length);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &length, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, vgpuPciId, length * sizeof(char)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) vgpuPciId);
 ERROR_0:
     return -1;
 }
@@ -5777,9 +5948,10 @@ int handle_nvmlVgpuTypeGetCapabilities(void *conn)
     unsigned int capResult;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &capability, sizeof(nvmlVgpuCapability_t)) < 0)
+    if (
+        rpc_read(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
+        rpc_read(conn, &capability, sizeof(nvmlVgpuCapability_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -5804,26 +5976,24 @@ int handle_nvmlVgpuInstanceGetMetadata(void *conn)
     nvmlVgpuMetadata_t* vgpuMetadata;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0)
+    if (
+        rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
+        rpc_read(conn, &bufferSize, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &bufferSize, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    vgpuMetadata = (nvmlVgpuMetadata_t*)malloc(bufferSize * sizeof(nvmlVgpuMetadata_t));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlVgpuInstanceGetMetadata(vgpuInstance, vgpuMetadata, &bufferSize);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &bufferSize, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, vgpuMetadata, bufferSize * sizeof(nvmlVgpuMetadata_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) vgpuMetadata);
 ERROR_0:
     return -1;
 }
@@ -5835,26 +6005,24 @@ int handle_nvmlDeviceGetVgpuMetadata(void *conn)
     nvmlVgpuPgpuMetadata_t* pgpuMetadata;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &bufferSize, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &bufferSize, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    pgpuMetadata = (nvmlVgpuPgpuMetadata_t*)malloc(bufferSize * sizeof(nvmlVgpuPgpuMetadata_t));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlDeviceGetVgpuMetadata(device, pgpuMetadata, &bufferSize);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &bufferSize, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, pgpuMetadata, bufferSize * sizeof(nvmlVgpuPgpuMetadata_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) pgpuMetadata);
 ERROR_0:
     return -1;
 }
@@ -5866,7 +6034,9 @@ int handle_nvmlGetVgpuCompatibility(void *conn)
     nvmlVgpuPgpuCompatibility_t compatibilityInfo;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &vgpuMetadata, sizeof(nvmlVgpuMetadata_t)) < 0)
+    if (
+        rpc_read(conn, &vgpuMetadata, sizeof(nvmlVgpuMetadata_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -5893,26 +6063,24 @@ int handle_nvmlDeviceGetPgpuMetadataString(void *conn)
     char* pgpuMetadata;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &bufferSize, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &bufferSize, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    pgpuMetadata = (char*)malloc(bufferSize * sizeof(char));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlDeviceGetPgpuMetadataString(device, pgpuMetadata, &bufferSize);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &bufferSize, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, pgpuMetadata, bufferSize * sizeof(char)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) pgpuMetadata);
 ERROR_0:
     return -1;
 }
@@ -5923,7 +6091,9 @@ int handle_nvmlDeviceGetVgpuSchedulerLog(void *conn)
     nvmlVgpuSchedulerLog_t pSchedulerLog;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -5947,7 +6117,9 @@ int handle_nvmlDeviceGetVgpuSchedulerState(void *conn)
     nvmlVgpuSchedulerGetState_t pSchedulerState;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -5971,7 +6143,9 @@ int handle_nvmlDeviceGetVgpuSchedulerCapabilities(void *conn)
     nvmlVgpuSchedulerCapabilities_t pCapabilities;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -5995,6 +6169,9 @@ int handle_nvmlGetVgpuVersion(void *conn)
     nvmlVgpuVersion_t current;
     int request_id;
     nvmlReturn_t result;
+    if (
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -6017,6 +6194,9 @@ int handle_nvmlSetVgpuVersion(void *conn)
     nvmlVgpuVersion_t vgpuVersion;
     int request_id;
     nvmlReturn_t result;
+    if (
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -6042,19 +6222,17 @@ int handle_nvmlDeviceGetVgpuUtilization(void *conn)
     nvmlVgpuInstanceUtilizationSample_t* utilizationSamples;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &lastSeenTimeStamp, sizeof(unsigned long long)) < 0 ||
+        rpc_read(conn, &sampleValType, sizeof(nvmlValueType_t)) < 0 ||
+        rpc_read(conn, &vgpuInstanceSamplesCount, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &lastSeenTimeStamp, sizeof(unsigned long long)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &sampleValType, sizeof(nvmlValueType_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &vgpuInstanceSamplesCount, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    utilizationSamples = (nvmlVgpuInstanceUtilizationSample_t*)malloc(vgpuInstanceSamplesCount * sizeof(nvmlVgpuInstanceUtilizationSample_t));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlDeviceGetVgpuUtilization(device, lastSeenTimeStamp, &sampleValType, &vgpuInstanceSamplesCount, utilizationSamples);
 
     if (rpc_start_response(conn, request_id) < 0 ||
@@ -6062,11 +6240,9 @@ int handle_nvmlDeviceGetVgpuUtilization(void *conn)
         rpc_write(conn, &vgpuInstanceSamplesCount, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, utilizationSamples, vgpuInstanceSamplesCount * sizeof(nvmlVgpuInstanceUtilizationSample_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) utilizationSamples);
 ERROR_0:
     return -1;
 }
@@ -6079,28 +6255,25 @@ int handle_nvmlDeviceGetVgpuProcessUtilization(void *conn)
     nvmlVgpuProcessUtilizationSample_t* utilizationSamples;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &lastSeenTimeStamp, sizeof(unsigned long long)) < 0 ||
+        rpc_read(conn, &vgpuProcessSamplesCount, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &lastSeenTimeStamp, sizeof(unsigned long long)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &vgpuProcessSamplesCount, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    utilizationSamples = (nvmlVgpuProcessUtilizationSample_t*)malloc(vgpuProcessSamplesCount * sizeof(nvmlVgpuProcessUtilizationSample_t));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlDeviceGetVgpuProcessUtilization(device, lastSeenTimeStamp, &vgpuProcessSamplesCount, utilizationSamples);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &vgpuProcessSamplesCount, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, utilizationSamples, vgpuProcessSamplesCount * sizeof(nvmlVgpuProcessUtilizationSample_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) utilizationSamples);
 ERROR_0:
     return -1;
 }
@@ -6111,7 +6284,9 @@ int handle_nvmlVgpuInstanceGetAccountingMode(void *conn)
     nvmlEnableState_t mode;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0)
+    if (
+        rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -6136,26 +6311,24 @@ int handle_nvmlVgpuInstanceGetAccountingPids(void *conn)
     unsigned int* pids;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0)
+    if (
+        rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
+        rpc_read(conn, &count, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &count, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    pids = (unsigned int*)malloc(count * sizeof(unsigned int));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlVgpuInstanceGetAccountingPids(vgpuInstance, &count, pids);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &count, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, pids, count * sizeof(unsigned int)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) pids);
 ERROR_0:
     return -1;
 }
@@ -6167,9 +6340,10 @@ int handle_nvmlVgpuInstanceGetAccountingStats(void *conn)
     nvmlAccountingStats_t stats;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &pid, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
+        rpc_read(conn, &pid, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -6192,7 +6366,9 @@ int handle_nvmlVgpuInstanceClearAccountingPids(void *conn)
     nvmlVgpuInstance_t vgpuInstance;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0)
+    if (
+        rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -6215,7 +6391,9 @@ int handle_nvmlVgpuInstanceGetLicenseInfo_v2(void *conn)
     nvmlVgpuLicenseInfo_t licenseInfo;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0)
+    if (
+        rpc_read(conn, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -6238,6 +6416,9 @@ int handle_nvmlGetExcludedDeviceCount(void *conn)
     unsigned int deviceCount;
     int request_id;
     nvmlReturn_t result;
+    if (
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -6260,7 +6441,9 @@ int handle_nvmlGetExcludedDeviceInfoByIndex(void *conn)
     nvmlExcludedDeviceInfo_t info;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &index, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &index, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -6285,9 +6468,10 @@ int handle_nvmlDeviceSetMigMode(void *conn)
     nvmlReturn_t activationStatus;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &mode, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &mode, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -6312,7 +6496,9 @@ int handle_nvmlDeviceGetMigMode(void *conn)
     unsigned int pendingMode;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -6338,9 +6524,10 @@ int handle_nvmlDeviceGetGpuInstanceProfileInfo(void *conn)
     nvmlGpuInstanceProfileInfo_t info;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &profile, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &profile, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -6365,9 +6552,10 @@ int handle_nvmlDeviceGetGpuInstanceProfileInfoV(void *conn)
     nvmlGpuInstanceProfileInfo_v2_t info;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &profile, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &profile, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -6393,28 +6581,25 @@ int handle_nvmlDeviceGetGpuInstancePossiblePlacements_v2(void *conn)
     nvmlGpuInstancePlacement_t* placements;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &profileId, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &count, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &profileId, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &count, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    placements = (nvmlGpuInstancePlacement_t*)malloc(count * sizeof(nvmlGpuInstancePlacement_t));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlDeviceGetGpuInstancePossiblePlacements_v2(device, profileId, placements, &count);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &count, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, placements, count * sizeof(nvmlGpuInstancePlacement_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) placements);
 ERROR_0:
     return -1;
 }
@@ -6426,9 +6611,10 @@ int handle_nvmlDeviceGetGpuInstanceRemainingCapacity(void *conn)
     unsigned int count;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &profileId, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &profileId, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -6453,9 +6639,10 @@ int handle_nvmlDeviceCreateGpuInstance(void *conn)
     nvmlGpuInstance_t gpuInstance;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &profileId, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &profileId, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -6478,7 +6665,9 @@ int handle_nvmlGpuInstanceDestroy(void *conn)
     nvmlGpuInstance_t gpuInstance;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &gpuInstance, sizeof(nvmlGpuInstance_t)) < 0)
+    if (
+        rpc_read(conn, &gpuInstance, sizeof(nvmlGpuInstance_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -6503,28 +6692,25 @@ int handle_nvmlDeviceGetGpuInstances(void *conn)
     nvmlGpuInstance_t* gpuInstances;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &profileId, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &count, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &profileId, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &count, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    gpuInstances = (nvmlGpuInstance_t*)malloc(count * sizeof(nvmlGpuInstance_t));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlDeviceGetGpuInstances(device, profileId, gpuInstances, &count);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &count, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, gpuInstances, count * sizeof(nvmlGpuInstance_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) gpuInstances);
 ERROR_0:
     return -1;
 }
@@ -6536,9 +6722,10 @@ int handle_nvmlDeviceGetGpuInstanceById(void *conn)
     nvmlGpuInstance_t gpuInstance;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &id, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &id, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -6562,7 +6749,9 @@ int handle_nvmlGpuInstanceGetInfo(void *conn)
     nvmlGpuInstanceInfo_t info;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &gpuInstance, sizeof(nvmlGpuInstance_t)) < 0)
+    if (
+        rpc_read(conn, &gpuInstance, sizeof(nvmlGpuInstance_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -6588,11 +6777,11 @@ int handle_nvmlGpuInstanceGetComputeInstanceProfileInfo(void *conn)
     nvmlComputeInstanceProfileInfo_t info;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &gpuInstance, sizeof(nvmlGpuInstance_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &profile, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &engProfile, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &gpuInstance, sizeof(nvmlGpuInstance_t)) < 0 ||
+        rpc_read(conn, &profile, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &engProfile, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -6618,11 +6807,11 @@ int handle_nvmlGpuInstanceGetComputeInstanceProfileInfoV(void *conn)
     nvmlComputeInstanceProfileInfo_v2_t info;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &gpuInstance, sizeof(nvmlGpuInstance_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &profile, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &engProfile, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &gpuInstance, sizeof(nvmlGpuInstance_t)) < 0 ||
+        rpc_read(conn, &profile, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &engProfile, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -6647,9 +6836,10 @@ int handle_nvmlGpuInstanceGetComputeInstanceRemainingCapacity(void *conn)
     unsigned int count;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &gpuInstance, sizeof(nvmlGpuInstance_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &profileId, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &gpuInstance, sizeof(nvmlGpuInstance_t)) < 0 ||
+        rpc_read(conn, &profileId, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -6675,28 +6865,25 @@ int handle_nvmlGpuInstanceGetComputeInstancePossiblePlacements(void *conn)
     nvmlComputeInstancePlacement_t* placements;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &gpuInstance, sizeof(nvmlGpuInstance_t)) < 0)
+    if (
+        rpc_read(conn, &gpuInstance, sizeof(nvmlGpuInstance_t)) < 0 ||
+        rpc_read(conn, &profileId, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &count, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &profileId, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &count, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    placements = (nvmlComputeInstancePlacement_t*)malloc(count * sizeof(nvmlComputeInstancePlacement_t));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlGpuInstanceGetComputeInstancePossiblePlacements(gpuInstance, profileId, placements, &count);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &count, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, placements, count * sizeof(nvmlComputeInstancePlacement_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) placements);
 ERROR_0:
     return -1;
 }
@@ -6708,9 +6895,10 @@ int handle_nvmlGpuInstanceCreateComputeInstance(void *conn)
     nvmlComputeInstance_t computeInstance;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &gpuInstance, sizeof(nvmlGpuInstance_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &profileId, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &gpuInstance, sizeof(nvmlGpuInstance_t)) < 0 ||
+        rpc_read(conn, &profileId, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -6733,7 +6921,9 @@ int handle_nvmlComputeInstanceDestroy(void *conn)
     nvmlComputeInstance_t computeInstance;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &computeInstance, sizeof(nvmlComputeInstance_t)) < 0)
+    if (
+        rpc_read(conn, &computeInstance, sizeof(nvmlComputeInstance_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -6758,28 +6948,25 @@ int handle_nvmlGpuInstanceGetComputeInstances(void *conn)
     nvmlComputeInstance_t* computeInstances;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &gpuInstance, sizeof(nvmlGpuInstance_t)) < 0)
+    if (
+        rpc_read(conn, &gpuInstance, sizeof(nvmlGpuInstance_t)) < 0 ||
+        rpc_read(conn, &profileId, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &count, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &profileId, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &count, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    computeInstances = (nvmlComputeInstance_t*)malloc(count * sizeof(nvmlComputeInstance_t));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlGpuInstanceGetComputeInstances(gpuInstance, profileId, computeInstances, &count);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &count, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, computeInstances, count * sizeof(nvmlComputeInstance_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) computeInstances);
 ERROR_0:
     return -1;
 }
@@ -6791,9 +6978,10 @@ int handle_nvmlGpuInstanceGetComputeInstanceById(void *conn)
     nvmlComputeInstance_t computeInstance;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &gpuInstance, sizeof(nvmlGpuInstance_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &id, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &gpuInstance, sizeof(nvmlGpuInstance_t)) < 0 ||
+        rpc_read(conn, &id, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -6817,7 +7005,9 @@ int handle_nvmlComputeInstanceGetInfo_v2(void *conn)
     nvmlComputeInstanceInfo_t info;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &computeInstance, sizeof(nvmlComputeInstance_t)) < 0)
+    if (
+        rpc_read(conn, &computeInstance, sizeof(nvmlComputeInstance_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -6841,7 +7031,9 @@ int handle_nvmlDeviceIsMigDeviceHandle(void *conn)
     unsigned int isMigDevice;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -6865,7 +7057,9 @@ int handle_nvmlDeviceGetGpuInstanceId(void *conn)
     unsigned int id;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -6889,7 +7083,9 @@ int handle_nvmlDeviceGetComputeInstanceId(void *conn)
     unsigned int id;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -6913,7 +7109,9 @@ int handle_nvmlDeviceGetMaxMigDeviceCount(void *conn)
     unsigned int count;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -6938,9 +7136,10 @@ int handle_nvmlDeviceGetMigDeviceHandleByIndex(void *conn)
     nvmlDevice_t migDevice;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &index, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &index, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -6964,7 +7163,9 @@ int handle_nvmlDeviceGetDeviceHandleFromMigDeviceHandle(void *conn)
     nvmlDevice_t device;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &migDevice, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &migDevice, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -6988,7 +7189,9 @@ int handle_nvmlDeviceGetBusType(void *conn)
     nvmlBusType_t type;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -7012,7 +7215,9 @@ int handle_nvmlDeviceGetDynamicPstatesInfo(void *conn)
     nvmlGpuDynamicPstatesInfo_t pDynamicPstatesInfo;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -7037,11 +7242,11 @@ int handle_nvmlDeviceSetFanSpeed_v2(void *conn)
     unsigned int speed;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &fan, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &speed, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &fan, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &speed, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -7064,7 +7269,9 @@ int handle_nvmlDeviceGetGpcClkVfOffset(void *conn)
     int offset;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -7088,9 +7295,10 @@ int handle_nvmlDeviceSetGpcClkVfOffset(void *conn)
     int offset;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &offset, sizeof(int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &offset, sizeof(int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -7113,7 +7321,9 @@ int handle_nvmlDeviceGetMemClkVfOffset(void *conn)
     int offset;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -7137,9 +7347,10 @@ int handle_nvmlDeviceSetMemClkVfOffset(void *conn)
     int offset;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &offset, sizeof(int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &offset, sizeof(int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -7165,11 +7376,11 @@ int handle_nvmlDeviceGetMinMaxClockOfPState(void *conn)
     unsigned int maxClockMHz;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &type, sizeof(nvmlClockType_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &pstate, sizeof(nvmlPstates_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &type, sizeof(nvmlClockType_t)) < 0 ||
+        rpc_read(conn, &pstate, sizeof(nvmlPstates_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -7195,25 +7406,23 @@ int handle_nvmlDeviceGetSupportedPerformanceStates(void *conn)
     nvmlPstates_t* pstates;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &size, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &size, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    pstates = (nvmlPstates_t*)malloc(size * sizeof(nvmlPstates_t));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = nvmlDeviceGetSupportedPerformanceStates(device, pstates, size);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, pstates, size * sizeof(nvmlPstates_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) pstates);
 ERROR_0:
     return -1;
 }
@@ -7225,7 +7434,9 @@ int handle_nvmlDeviceGetGpcClkMinMaxVfOffset(void *conn)
     int maxOffset;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -7251,7 +7462,9 @@ int handle_nvmlDeviceGetMemClkMinMaxVfOffset(void *conn)
     int maxOffset;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -7276,7 +7489,9 @@ int handle_nvmlDeviceGetGpuFabricInfo(void *conn)
     nvmlGpuFabricInfo_t gpuFabricInfo;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -7299,6 +7514,9 @@ int handle_nvmlGpmMetricsGet(void *conn)
     nvmlGpmMetricsGet_t metricsGet;
     int request_id;
     nvmlReturn_t result;
+    if (
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -7320,6 +7538,10 @@ int handle_nvmlGpmSampleFree(void *conn)
     nvmlGpmSample_t gpmSample;
     int request_id;
     nvmlReturn_t result;
+    if (
+        rpc_read(conn, &gpmSample, sizeof(nvmlGpmSample_t)) < 0 ||
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -7327,7 +7549,6 @@ int handle_nvmlGpmSampleFree(void *conn)
     result = nvmlGpmSampleFree(gpmSample);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, gpmSample, sizeof(nvmlGpmSample_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -7341,6 +7562,9 @@ int handle_nvmlGpmSampleAlloc(void *conn)
     nvmlGpmSample_t gpmSample;
     int request_id;
     nvmlReturn_t result;
+    if (
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -7363,7 +7587,10 @@ int handle_nvmlGpmSampleGet(void *conn)
     nvmlGpmSample_t gpmSample;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &gpmSample, sizeof(nvmlGpmSample_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -7372,7 +7599,6 @@ int handle_nvmlGpmSampleGet(void *conn)
     result = nvmlGpmSampleGet(device, gpmSample);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, gpmSample, sizeof(nvmlGpmSample_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -7388,9 +7614,11 @@ int handle_nvmlGpmMigSampleGet(void *conn)
     nvmlGpmSample_t gpmSample;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &gpuInstanceId, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_read(conn, &gpuInstanceId, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &gpmSample, sizeof(nvmlGpmSample_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -7399,7 +7627,6 @@ int handle_nvmlGpmMigSampleGet(void *conn)
     result = nvmlGpmMigSampleGet(device, gpuInstanceId, gpmSample);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, gpmSample, sizeof(nvmlGpmSample_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -7414,7 +7641,9 @@ int handle_nvmlGpmQueryDeviceSupport(void *conn)
     nvmlGpmSupport_t gpmSupport;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -7438,7 +7667,9 @@ int handle_nvmlDeviceSetNvLinkDeviceLowPowerThreshold(void *conn)
     nvmlNvLinkPowerThres_t info;
     int request_id;
     nvmlReturn_t result;
-    if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -7461,7 +7692,9 @@ int handle_cuInit(void *conn)
     unsigned int Flags;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &Flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &Flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -7483,6 +7716,9 @@ int handle_cuDriverGetVersion(void *conn)
     int driverVersion;
     int request_id;
     CUresult result;
+    if (
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -7505,7 +7741,9 @@ int handle_cuDeviceGet(void *conn)
     int ordinal;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &ordinal, sizeof(int)) < 0)
+    if (
+        rpc_read(conn, &ordinal, sizeof(int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -7528,6 +7766,9 @@ int handle_cuDeviceGetCount(void *conn)
     int count;
     int request_id;
     CUresult result;
+    if (
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -7551,25 +7792,23 @@ int handle_cuDeviceGetName(void *conn)
     CUdevice dev;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &len, sizeof(int)) < 0)
+    if (
+        rpc_read(conn, &len, sizeof(int)) < 0 ||
+        rpc_read(conn, &dev, sizeof(CUdevice)) < 0 ||
+        false)
         goto ERROR_0;
-    name = (char*)malloc(len * sizeof(char));
-    if (rpc_read(conn, &dev, sizeof(CUdevice)) < 0)
-        goto ERROR_1;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = cuDeviceGetName(name, len, dev);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, name, len * sizeof(char)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) name);
 ERROR_0:
     return -1;
 }
@@ -7580,23 +7819,22 @@ int handle_cuDeviceGetUuid(void *conn)
     CUdevice dev;
     int request_id;
     CUresult result;
-    uuid = (CUuuid*)malloc(16);
-    if (rpc_read(conn, &dev, sizeof(CUdevice)) < 0)
-        goto ERROR_1;
+    if (
+        rpc_read(conn, &dev, sizeof(CUdevice)) < 0 ||
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = cuDeviceGetUuid(uuid, dev);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, uuid, 16) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) uuid);
 ERROR_0:
     return -1;
 }
@@ -7607,56 +7845,52 @@ int handle_cuDeviceGetUuid_v2(void *conn)
     CUdevice dev;
     int request_id;
     CUresult result;
-    uuid = (CUuuid*)malloc(16);
-    if (rpc_read(conn, &dev, sizeof(CUdevice)) < 0)
-        goto ERROR_1;
+    if (
+        rpc_read(conn, &dev, sizeof(CUdevice)) < 0 ||
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = cuDeviceGetUuid_v2(uuid, dev);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, uuid, 16) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) uuid);
 ERROR_0:
     return -1;
 }
 
 int handle_cuDeviceGetLuid(void *conn)
 {
-    std::size_t luid_len;
     char* luid;
+    std::size_t luid_len;
     unsigned int deviceNodeMask;
     CUdevice dev;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &luid_len, sizeof(luid_len)) < 0)
+    if (
+        rpc_read(conn, &dev, sizeof(CUdevice)) < 0 ||
+        false)
         goto ERROR_0;
-    luid = (char*)malloc(luid_len);
-    if (rpc_read(conn, &dev, sizeof(CUdevice)) < 0)
-        goto ERROR_1;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = cuDeviceGetLuid(luid, &deviceNodeMask, dev);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &luid_len, sizeof(luid_len)) < 0 ||
+        rpc_write(conn, &luid_len, sizeof(std::size_t)) < 0 ||
         rpc_write(conn, luid, luid_len) < 0 ||
         rpc_write(conn, &deviceNodeMask, sizeof(unsigned int)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) luid);
 ERROR_0:
     return -1;
 }
@@ -7667,7 +7901,9 @@ int handle_cuDeviceTotalMem_v2(void *conn)
     CUdevice dev;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dev, sizeof(CUdevice)) < 0)
+    if (
+        rpc_read(conn, &dev, sizeof(CUdevice)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -7693,11 +7929,11 @@ int handle_cuDeviceGetTexture1DLinearMaxWidth(void *conn)
     CUdevice dev;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &format, sizeof(CUarray_format)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &numChannels, sizeof(unsigned)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dev, sizeof(CUdevice)) < 0)
+    if (
+        rpc_read(conn, &format, sizeof(CUarray_format)) < 0 ||
+        rpc_read(conn, &numChannels, sizeof(unsigned)) < 0 ||
+        rpc_read(conn, &dev, sizeof(CUdevice)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -7722,9 +7958,10 @@ int handle_cuDeviceGetAttribute(void *conn)
     CUdevice dev;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &attrib, sizeof(CUdevice_attribute)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dev, sizeof(CUdevice)) < 0)
+    if (
+        rpc_read(conn, &attrib, sizeof(CUdevice_attribute)) < 0 ||
+        rpc_read(conn, &dev, sizeof(CUdevice)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -7748,9 +7985,10 @@ int handle_cuDeviceSetMemPool(void *conn)
     CUmemoryPool pool;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dev, sizeof(CUdevice)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &pool, sizeof(CUmemoryPool)) < 0)
+    if (
+        rpc_read(conn, &dev, sizeof(CUdevice)) < 0 ||
+        rpc_read(conn, &pool, sizeof(CUmemoryPool)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -7773,7 +8011,9 @@ int handle_cuDeviceGetMemPool(void *conn)
     CUdevice dev;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dev, sizeof(CUdevice)) < 0)
+    if (
+        rpc_read(conn, &dev, sizeof(CUdevice)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -7797,7 +8037,9 @@ int handle_cuDeviceGetDefaultMemPool(void *conn)
     CUdevice dev;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dev, sizeof(CUdevice)) < 0)
+    if (
+        rpc_read(conn, &dev, sizeof(CUdevice)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -7822,9 +8064,10 @@ int handle_cuDeviceGetExecAffinitySupport(void *conn)
     CUdevice dev;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &type, sizeof(CUexecAffinityType)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dev, sizeof(CUdevice)) < 0)
+    if (
+        rpc_read(conn, &type, sizeof(CUexecAffinityType)) < 0 ||
+        rpc_read(conn, &dev, sizeof(CUdevice)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -7848,9 +8091,10 @@ int handle_cuFlushGPUDirectRDMAWrites(void *conn)
     CUflushGPUDirectRDMAWritesScope scope;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &target, sizeof(CUflushGPUDirectRDMAWritesTarget)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &scope, sizeof(CUflushGPUDirectRDMAWritesScope)) < 0)
+    if (
+        rpc_read(conn, &target, sizeof(CUflushGPUDirectRDMAWritesTarget)) < 0 ||
+        rpc_read(conn, &scope, sizeof(CUflushGPUDirectRDMAWritesScope)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -7873,7 +8117,9 @@ int handle_cuDeviceGetProperties(void *conn)
     CUdevice dev;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dev, sizeof(CUdevice)) < 0)
+    if (
+        rpc_read(conn, &dev, sizeof(CUdevice)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -7898,7 +8144,9 @@ int handle_cuDeviceComputeCapability(void *conn)
     CUdevice dev;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dev, sizeof(CUdevice)) < 0)
+    if (
+        rpc_read(conn, &dev, sizeof(CUdevice)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -7923,7 +8171,9 @@ int handle_cuDevicePrimaryCtxRetain(void *conn)
     CUdevice dev;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dev, sizeof(CUdevice)) < 0)
+    if (
+        rpc_read(conn, &dev, sizeof(CUdevice)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -7946,7 +8196,9 @@ int handle_cuDevicePrimaryCtxRelease_v2(void *conn)
     CUdevice dev;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dev, sizeof(CUdevice)) < 0)
+    if (
+        rpc_read(conn, &dev, sizeof(CUdevice)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -7969,9 +8221,10 @@ int handle_cuDevicePrimaryCtxSetFlags_v2(void *conn)
     unsigned int flags;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dev, sizeof(CUdevice)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &dev, sizeof(CUdevice)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -7995,7 +8248,9 @@ int handle_cuDevicePrimaryCtxGetState(void *conn)
     int active;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dev, sizeof(CUdevice)) < 0)
+    if (
+        rpc_read(conn, &dev, sizeof(CUdevice)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -8019,7 +8274,9 @@ int handle_cuDevicePrimaryCtxReset_v2(void *conn)
     CUdevice dev;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dev, sizeof(CUdevice)) < 0)
+    if (
+        rpc_read(conn, &dev, sizeof(CUdevice)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -8043,9 +8300,10 @@ int handle_cuCtxCreate_v2(void *conn)
     CUdevice dev;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dev, sizeof(CUdevice)) < 0)
+    if (
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &dev, sizeof(CUdevice)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -8072,28 +8330,25 @@ int handle_cuCtxCreate_v3(void *conn)
     CUdevice dev;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &numParams, sizeof(int)) < 0)
+    if (
+        rpc_read(conn, &numParams, sizeof(int)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &dev, sizeof(CUdevice)) < 0 ||
+        false)
         goto ERROR_0;
-    paramsArray = (CUexecAffinityParam*)malloc(numParams * sizeof(CUexecAffinityParam));
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
-        goto ERROR_1;
-    if (rpc_read(conn, &dev, sizeof(CUdevice)) < 0)
-        goto ERROR_1;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = cuCtxCreate_v3(&pctx, paramsArray, numParams, flags, dev);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &pctx, sizeof(CUcontext)) < 0 ||
         rpc_write(conn, paramsArray, numParams * sizeof(CUexecAffinityParam)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) paramsArray);
 ERROR_0:
     return -1;
 }
@@ -8103,7 +8358,9 @@ int handle_cuCtxDestroy_v2(void *conn)
     CUcontext ctx;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &ctx, sizeof(CUcontext)) < 0)
+    if (
+        rpc_read(conn, &ctx, sizeof(CUcontext)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -8125,7 +8382,9 @@ int handle_cuCtxPushCurrent_v2(void *conn)
     CUcontext ctx;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &ctx, sizeof(CUcontext)) < 0)
+    if (
+        rpc_read(conn, &ctx, sizeof(CUcontext)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -8147,6 +8406,9 @@ int handle_cuCtxPopCurrent_v2(void *conn)
     CUcontext pctx;
     int request_id;
     CUresult result;
+    if (
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -8168,7 +8430,9 @@ int handle_cuCtxSetCurrent(void *conn)
     CUcontext ctx;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &ctx, sizeof(CUcontext)) < 0)
+    if (
+        rpc_read(conn, &ctx, sizeof(CUcontext)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -8190,6 +8454,9 @@ int handle_cuCtxGetCurrent(void *conn)
     CUcontext pctx;
     int request_id;
     CUresult result;
+    if (
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -8211,6 +8478,9 @@ int handle_cuCtxGetDevice(void *conn)
     CUdevice device;
     int request_id;
     CUresult result;
+    if (
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -8232,6 +8502,9 @@ int handle_cuCtxGetFlags(void *conn)
     unsigned int flags;
     int request_id;
     CUresult result;
+    if (
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -8254,7 +8527,9 @@ int handle_cuCtxGetId(void *conn)
     unsigned long long ctxId;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &ctx, sizeof(CUcontext)) < 0)
+    if (
+        rpc_read(conn, &ctx, sizeof(CUcontext)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -8276,6 +8551,9 @@ int handle_cuCtxSynchronize(void *conn)
 {
     int request_id;
     CUresult result;
+    if (
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -8297,9 +8575,10 @@ int handle_cuCtxSetLimit(void *conn)
     size_t value;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &limit, sizeof(CUlimit)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &value, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &limit, sizeof(CUlimit)) < 0 ||
+        rpc_read(conn, &value, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -8322,7 +8601,9 @@ int handle_cuCtxGetLimit(void *conn)
     CUlimit limit;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &limit, sizeof(CUlimit)) < 0)
+    if (
+        rpc_read(conn, &limit, sizeof(CUlimit)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -8345,6 +8626,9 @@ int handle_cuCtxGetCacheConfig(void *conn)
     CUfunc_cache pconfig;
     int request_id;
     CUresult result;
+    if (
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -8366,7 +8650,9 @@ int handle_cuCtxSetCacheConfig(void *conn)
     CUfunc_cache config;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &config, sizeof(CUfunc_cache)) < 0)
+    if (
+        rpc_read(conn, &config, sizeof(CUfunc_cache)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -8388,6 +8674,9 @@ int handle_cuCtxGetSharedMemConfig(void *conn)
     CUsharedconfig pConfig;
     int request_id;
     CUresult result;
+    if (
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -8409,7 +8698,9 @@ int handle_cuCtxSetSharedMemConfig(void *conn)
     CUsharedconfig config;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &config, sizeof(CUsharedconfig)) < 0)
+    if (
+        rpc_read(conn, &config, sizeof(CUsharedconfig)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -8432,7 +8723,9 @@ int handle_cuCtxGetApiVersion(void *conn)
     unsigned int version;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &ctx, sizeof(CUcontext)) < 0)
+    if (
+        rpc_read(conn, &ctx, sizeof(CUcontext)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -8456,6 +8749,9 @@ int handle_cuCtxGetStreamPriorityRange(void *conn)
     int greatestPriority;
     int request_id;
     CUresult result;
+    if (
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -8477,6 +8773,9 @@ int handle_cuCtxResetPersistingL2Cache(void *conn)
 {
     int request_id;
     CUresult result;
+    if (
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -8498,7 +8797,9 @@ int handle_cuCtxGetExecAffinity(void *conn)
     CUexecAffinityType type;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &type, sizeof(CUexecAffinityType)) < 0)
+    if (
+        rpc_read(conn, &type, sizeof(CUexecAffinityType)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -8522,7 +8823,9 @@ int handle_cuCtxAttach(void *conn)
     unsigned int flags;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -8545,7 +8848,9 @@ int handle_cuCtxDetach(void *conn)
     CUcontext ctx;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &ctx, sizeof(CUcontext)) < 0)
+    if (
+        rpc_read(conn, &ctx, sizeof(CUcontext)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -8565,14 +8870,16 @@ ERROR_0:
 int handle_cuModuleLoad(void *conn)
 {
     CUmodule module;
-    std::size_t fname_len;
     const char* fname;
+    std::size_t fname_len;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &fname_len, sizeof(fname_len)) < 0)
+    if (
+        rpc_read(conn, &fname_len, sizeof(std::size_t)) < 0)
         goto ERROR_0;
     fname = (const char*)malloc(fname_len);
-    if (rpc_read(conn, &fname, sizeof(const char*)) < 0)
+    if (rpc_read(conn, (void *)fname, fname_len) < 0 ||
+        false)
         goto ERROR_1;
 
     request_id = rpc_end_request(conn);
@@ -8597,7 +8904,9 @@ int handle_cuModuleUnload(void *conn)
     CUmodule hmod;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hmod, sizeof(CUmodule)) < 0)
+    if (
+        rpc_read(conn, &hmod, sizeof(CUmodule)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -8619,7 +8928,9 @@ int handle_cuModuleGetLoadingMode(void *conn)
     CUmoduleLoadingMode mode;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &mode, sizeof(CUmoduleLoadingMode)) < 0)
+    if (
+        rpc_read(conn, &mode, sizeof(CUmoduleLoadingMode)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -8641,16 +8952,17 @@ int handle_cuModuleGetFunction(void *conn)
 {
     CUfunction hfunc;
     CUmodule hmod;
-    std::size_t name_len;
     const char* name;
+    std::size_t name_len;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hmod, sizeof(CUmodule)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &name_len, sizeof(name_len)) < 0)
+    if (
+        rpc_read(conn, &hmod, sizeof(CUmodule)) < 0 ||
+        rpc_read(conn, &name_len, sizeof(std::size_t)) < 0)
         goto ERROR_0;
     name = (const char*)malloc(name_len);
-    if (rpc_read(conn, &name, sizeof(const char*)) < 0)
+    if (rpc_read(conn, (void *)name, name_len) < 0 ||
+        false)
         goto ERROR_1;
 
     request_id = rpc_end_request(conn);
@@ -8675,16 +8987,17 @@ int handle_cuModuleGetGlobal_v2(void *conn)
     CUdeviceptr dptr;
     size_t bytes;
     CUmodule hmod;
-    std::size_t name_len;
     const char* name;
+    std::size_t name_len;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hmod, sizeof(CUmodule)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &name_len, sizeof(name_len)) < 0)
+    if (
+        rpc_read(conn, &hmod, sizeof(CUmodule)) < 0 ||
+        rpc_read(conn, &name_len, sizeof(std::size_t)) < 0)
         goto ERROR_0;
     name = (const char*)malloc(name_len);
-    if (rpc_read(conn, &name, sizeof(const char*)) < 0)
+    if (rpc_read(conn, (void *)name, name_len) < 0 ||
+        false)
         goto ERROR_1;
 
     request_id = rpc_end_request(conn);
@@ -8713,13 +9026,12 @@ int handle_cuLinkCreate_v2(void *conn)
     CUlinkState stateOut;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &numOptions, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &options, sizeof(CUjit_option)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &optionValues, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &stateOut, sizeof(CUlinkState)) < 0)
+    if (
+        rpc_read(conn, &numOptions, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &options, sizeof(CUjit_option)) < 0 ||
+        rpc_read(conn, &optionValues, sizeof(void*)) < 0 ||
+        rpc_read(conn, &stateOut, sizeof(CUlinkState)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -8739,107 +9051,42 @@ ERROR_0:
     return -1;
 }
 
-int handle_cuLinkAddData_v2(void *conn)
-{
-    CUlinkState state;
-    CUjitInputType type;
-    void* data;
-    size_t size;
-    std::size_t name_len;
-    const char* name;
-    unsigned int numOptions;
-    CUjit_option* options;
-    void** optionValues;
-    int request_id;
-    CUresult result;
-    if (rpc_read(conn, &state, sizeof(CUlinkState)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &type, sizeof(CUjitInputType)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &data, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &size, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &name_len, sizeof(name_len)) < 0)
-        goto ERROR_0;
-    name = (const char*)malloc(name_len);
-    if (rpc_read(conn, &name, sizeof(const char*)) < 0)
-        goto ERROR_1;
-    if (rpc_read(conn, &numOptions, sizeof(unsigned int)) < 0)
-        goto ERROR_1;
-    options = (CUjit_option*)malloc(numOptions * sizeof(CUjit_option));
-    if (rpc_read(conn, &options, sizeof(CUjit_option*)) < 0)
-        goto ERROR_2;
-    optionValues = (void**)malloc(numOptions * sizeof(void*));
-    if (rpc_read(conn, &optionValues, sizeof(void**)) < 0)
-        goto ERROR_3;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_3;
-    result = cuLinkAddData_v2(state, type, data, size, name, numOptions, options, optionValues);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, data, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_3;
-
-    return 0;
-ERROR_3:
-    free((void *) name);
-ERROR_2:
-    free((void *) options);
-ERROR_1:
-    free((void *) optionValues);
-ERROR_0:
-    return -1;
-}
-
 int handle_cuLinkAddFile_v2(void *conn)
 {
     CUlinkState state;
     CUjitInputType type;
-    std::size_t path_len;
     const char* path;
+    std::size_t path_len;
     unsigned int numOptions;
     CUjit_option* options;
     void** optionValues;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &state, sizeof(CUlinkState)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &type, sizeof(CUjitInputType)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &path_len, sizeof(path_len)) < 0)
+    if (
+        rpc_read(conn, &state, sizeof(CUlinkState)) < 0 ||
+        rpc_read(conn, &type, sizeof(CUjitInputType)) < 0 ||
+        rpc_read(conn, &path_len, sizeof(std::size_t)) < 0)
         goto ERROR_0;
     path = (const char*)malloc(path_len);
-    if (rpc_read(conn, &path, sizeof(const char*)) < 0)
+    if (rpc_read(conn, (void *)path, path_len) < 0 ||
+        rpc_read(conn, &numOptions, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, options, numOptions * sizeof(CUjit_option)) < 0 ||
+        rpc_read(conn, optionValues, numOptions * sizeof(void*)) < 0 ||
+        false)
         goto ERROR_1;
-    if (rpc_read(conn, &numOptions, sizeof(unsigned int)) < 0)
-        goto ERROR_1;
-    options = (CUjit_option*)malloc(numOptions * sizeof(CUjit_option));
-    if (rpc_read(conn, &options, sizeof(CUjit_option*)) < 0)
-        goto ERROR_2;
-    optionValues = (void**)malloc(numOptions * sizeof(void*));
-    if (rpc_read(conn, &optionValues, sizeof(void**)) < 0)
-        goto ERROR_3;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_3;
+        goto ERROR_1;
     result = cuLinkAddFile_v2(state, type, path, numOptions, options, optionValues);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_3;
+        goto ERROR_1;
 
     return 0;
-ERROR_3:
-    free((void *) path);
-ERROR_2:
-    free((void *) options);
 ERROR_1:
-    free((void *) optionValues);
+    free((void *) path);
 ERROR_0:
     return -1;
 }
@@ -8851,7 +9098,9 @@ int handle_cuLinkComplete(void *conn)
     size_t sizeOut;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &state, sizeof(CUlinkState)) < 0)
+    if (
+        rpc_read(conn, &state, sizeof(CUlinkState)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -8875,7 +9124,9 @@ int handle_cuLinkDestroy(void *conn)
     CUlinkState state;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &state, sizeof(CUlinkState)) < 0)
+    if (
+        rpc_read(conn, &state, sizeof(CUlinkState)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -8896,16 +9147,17 @@ int handle_cuModuleGetTexRef(void *conn)
 {
     CUtexref pTexRef;
     CUmodule hmod;
-    std::size_t name_len;
     const char* name;
+    std::size_t name_len;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hmod, sizeof(CUmodule)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &name_len, sizeof(name_len)) < 0)
+    if (
+        rpc_read(conn, &hmod, sizeof(CUmodule)) < 0 ||
+        rpc_read(conn, &name_len, sizeof(std::size_t)) < 0)
         goto ERROR_0;
     name = (const char*)malloc(name_len);
-    if (rpc_read(conn, &name, sizeof(const char*)) < 0)
+    if (rpc_read(conn, (void *)name, name_len) < 0 ||
+        false)
         goto ERROR_1;
 
     request_id = rpc_end_request(conn);
@@ -8929,16 +9181,17 @@ int handle_cuModuleGetSurfRef(void *conn)
 {
     CUsurfref pSurfRef;
     CUmodule hmod;
-    std::size_t name_len;
     const char* name;
+    std::size_t name_len;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hmod, sizeof(CUmodule)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &name_len, sizeof(name_len)) < 0)
+    if (
+        rpc_read(conn, &hmod, sizeof(CUmodule)) < 0 ||
+        rpc_read(conn, &name_len, sizeof(std::size_t)) < 0)
         goto ERROR_0;
     name = (const char*)malloc(name_len);
-    if (rpc_read(conn, &name, sizeof(const char*)) < 0)
+    if (rpc_read(conn, (void *)name, name_len) < 0 ||
+        false)
         goto ERROR_1;
 
     request_id = rpc_end_request(conn);
@@ -8961,8 +9214,8 @@ ERROR_0:
 int handle_cuLibraryLoadFromFile(void *conn)
 {
     CUlibrary library;
-    std::size_t fileName_len;
     const char* fileName;
+    std::size_t fileName_len;
     unsigned int numJitOptions;
     CUjit_option* jitOptions;
     void** jitOptionsValues;
@@ -8971,49 +9224,33 @@ int handle_cuLibraryLoadFromFile(void *conn)
     void** libraryOptionValues;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &fileName_len, sizeof(fileName_len)) < 0)
+    if (
+        rpc_read(conn, &fileName_len, sizeof(std::size_t)) < 0)
         goto ERROR_0;
     fileName = (const char*)malloc(fileName_len);
-    if (rpc_read(conn, &fileName, sizeof(const char*)) < 0)
+    if (rpc_read(conn, (void *)fileName, fileName_len) < 0 ||
+        rpc_read(conn, &numJitOptions, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, jitOptions, numJitOptions * sizeof(CUjit_option)) < 0 ||
+        rpc_read(conn, jitOptionsValues, numJitOptions * sizeof(void*)) < 0 ||
+        rpc_read(conn, &numLibraryOptions, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, libraryOptions, numLibraryOptions * sizeof(CUlibraryOption)) < 0 ||
+        rpc_read(conn, libraryOptionValues, numLibraryOptions * sizeof(void*)) < 0 ||
+        false)
         goto ERROR_1;
-    if (rpc_read(conn, &numJitOptions, sizeof(unsigned int)) < 0)
-        goto ERROR_1;
-    jitOptions = (CUjit_option*)malloc(numJitOptions * sizeof(CUjit_option));
-    if (rpc_read(conn, &jitOptions, sizeof(CUjit_option*)) < 0)
-        goto ERROR_2;
-    jitOptionsValues = (void**)malloc(numJitOptions * sizeof(void*));
-    if (rpc_read(conn, &jitOptionsValues, sizeof(void**)) < 0)
-        goto ERROR_3;
-    if (rpc_read(conn, &numLibraryOptions, sizeof(unsigned int)) < 0)
-        goto ERROR_3;
-    libraryOptions = (CUlibraryOption*)malloc(numLibraryOptions * sizeof(CUlibraryOption));
-    if (rpc_read(conn, &libraryOptions, sizeof(CUlibraryOption*)) < 0)
-        goto ERROR_4;
-    libraryOptionValues = (void**)malloc(numLibraryOptions * sizeof(void*));
-    if (rpc_read(conn, &libraryOptionValues, sizeof(void**)) < 0)
-        goto ERROR_5;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_5;
+        goto ERROR_1;
     result = cuLibraryLoadFromFile(&library, fileName, jitOptions, jitOptionsValues, numJitOptions, libraryOptions, libraryOptionValues, numLibraryOptions);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &library, sizeof(CUlibrary)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_5;
+        goto ERROR_1;
 
     return 0;
-ERROR_5:
-    free((void *) fileName);
-ERROR_4:
-    free((void *) jitOptions);
-ERROR_3:
-    free((void *) jitOptionsValues);
-ERROR_2:
-    free((void *) libraryOptions);
 ERROR_1:
-    free((void *) libraryOptionValues);
+    free((void *) fileName);
 ERROR_0:
     return -1;
 }
@@ -9023,7 +9260,9 @@ int handle_cuLibraryUnload(void *conn)
     CUlibrary library;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &library, sizeof(CUlibrary)) < 0)
+    if (
+        rpc_read(conn, &library, sizeof(CUlibrary)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -9044,16 +9283,17 @@ int handle_cuLibraryGetKernel(void *conn)
 {
     CUkernel pKernel;
     CUlibrary library;
-    std::size_t name_len;
     const char* name;
+    std::size_t name_len;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &library, sizeof(CUlibrary)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &name_len, sizeof(name_len)) < 0)
+    if (
+        rpc_read(conn, &library, sizeof(CUlibrary)) < 0 ||
+        rpc_read(conn, &name_len, sizeof(std::size_t)) < 0)
         goto ERROR_0;
     name = (const char*)malloc(name_len);
-    if (rpc_read(conn, &name, sizeof(const char*)) < 0)
+    if (rpc_read(conn, (void *)name, name_len) < 0 ||
+        false)
         goto ERROR_1;
 
     request_id = rpc_end_request(conn);
@@ -9079,7 +9319,9 @@ int handle_cuLibraryGetModule(void *conn)
     CUlibrary library;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &library, sizeof(CUlibrary)) < 0)
+    if (
+        rpc_read(conn, &library, sizeof(CUlibrary)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -9103,7 +9345,9 @@ int handle_cuKernelGetFunction(void *conn)
     CUkernel kernel;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &kernel, sizeof(CUkernel)) < 0)
+    if (
+        rpc_read(conn, &kernel, sizeof(CUkernel)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -9126,16 +9370,17 @@ int handle_cuLibraryGetGlobal(void *conn)
     CUdeviceptr dptr;
     size_t bytes;
     CUlibrary library;
-    std::size_t name_len;
     const char* name;
+    std::size_t name_len;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &library, sizeof(CUlibrary)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &name_len, sizeof(name_len)) < 0)
+    if (
+        rpc_read(conn, &library, sizeof(CUlibrary)) < 0 ||
+        rpc_read(conn, &name_len, sizeof(std::size_t)) < 0)
         goto ERROR_0;
     name = (const char*)malloc(name_len);
-    if (rpc_read(conn, &name, sizeof(const char*)) < 0)
+    if (rpc_read(conn, (void *)name, name_len) < 0 ||
+        false)
         goto ERROR_1;
 
     request_id = rpc_end_request(conn);
@@ -9161,16 +9406,17 @@ int handle_cuLibraryGetManaged(void *conn)
     CUdeviceptr dptr;
     size_t bytes;
     CUlibrary library;
-    std::size_t name_len;
     const char* name;
+    std::size_t name_len;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &library, sizeof(CUlibrary)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &name_len, sizeof(name_len)) < 0)
+    if (
+        rpc_read(conn, &library, sizeof(CUlibrary)) < 0 ||
+        rpc_read(conn, &name_len, sizeof(std::size_t)) < 0)
         goto ERROR_0;
     name = (const char*)malloc(name_len);
-    if (rpc_read(conn, &name, sizeof(const char*)) < 0)
+    if (rpc_read(conn, (void *)name, name_len) < 0 ||
+        false)
         goto ERROR_1;
 
     request_id = rpc_end_request(conn);
@@ -9195,16 +9441,17 @@ int handle_cuLibraryGetUnifiedFunction(void *conn)
 {
     void* fptr;
     CUlibrary library;
-    std::size_t symbol_len;
     const char* symbol;
+    std::size_t symbol_len;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &library, sizeof(CUlibrary)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &symbol_len, sizeof(symbol_len)) < 0)
+    if (
+        rpc_read(conn, &library, sizeof(CUlibrary)) < 0 ||
+        rpc_read(conn, &symbol_len, sizeof(std::size_t)) < 0)
         goto ERROR_0;
     symbol = (const char*)malloc(symbol_len);
-    if (rpc_read(conn, &symbol, sizeof(const char*)) < 0)
+    if (rpc_read(conn, (void *)symbol, symbol_len) < 0 ||
+        false)
         goto ERROR_1;
 
     request_id = rpc_end_request(conn);
@@ -9232,13 +9479,12 @@ int handle_cuKernelGetAttribute(void *conn)
     CUdevice dev;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pi, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &attrib, sizeof(CUfunction_attribute)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &kernel, sizeof(CUkernel)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dev, sizeof(CUdevice)) < 0)
+    if (
+        rpc_read(conn, &pi, sizeof(int)) < 0 ||
+        rpc_read(conn, &attrib, sizeof(CUfunction_attribute)) < 0 ||
+        rpc_read(conn, &kernel, sizeof(CUkernel)) < 0 ||
+        rpc_read(conn, &dev, sizeof(CUdevice)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -9264,13 +9510,12 @@ int handle_cuKernelSetAttribute(void *conn)
     CUdevice dev;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &attrib, sizeof(CUfunction_attribute)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &val, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &kernel, sizeof(CUkernel)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dev, sizeof(CUdevice)) < 0)
+    if (
+        rpc_read(conn, &attrib, sizeof(CUfunction_attribute)) < 0 ||
+        rpc_read(conn, &val, sizeof(int)) < 0 ||
+        rpc_read(conn, &kernel, sizeof(CUkernel)) < 0 ||
+        rpc_read(conn, &dev, sizeof(CUdevice)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -9294,11 +9539,11 @@ int handle_cuKernelSetCacheConfig(void *conn)
     CUdevice dev;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &kernel, sizeof(CUkernel)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &config, sizeof(CUfunc_cache)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dev, sizeof(CUdevice)) < 0)
+    if (
+        rpc_read(conn, &kernel, sizeof(CUkernel)) < 0 ||
+        rpc_read(conn, &config, sizeof(CUfunc_cache)) < 0 ||
+        rpc_read(conn, &dev, sizeof(CUdevice)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -9321,9 +9566,10 @@ int handle_cuMemGetInfo_v2(void *conn)
     size_t total;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &free, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &total, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &free, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &total, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -9348,9 +9594,10 @@ int handle_cuMemAlloc_v2(void *conn)
     size_t bytesize;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &bytesize, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &bytesize, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -9377,15 +9624,13 @@ int handle_cuMemAllocPitch_v2(void *conn)
     unsigned int ElementSizeBytes;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &pPitch, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &WidthInBytes, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &Height, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &ElementSizeBytes, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &pPitch, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &WidthInBytes, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &Height, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &ElementSizeBytes, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -9409,7 +9654,9 @@ int handle_cuMemFree_v2(void *conn)
     CUdeviceptr dptr;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0)
+    if (
+        rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -9433,11 +9680,11 @@ int handle_cuMemGetAddressRange_v2(void *conn)
     CUdeviceptr dptr;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pbase, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &psize, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0)
+    if (
+        rpc_read(conn, &pbase, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &psize, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -9462,9 +9709,9 @@ int handle_cuMemAllocHost_v2(void *conn)
     size_t bytesize;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pp, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &bytesize, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &bytesize, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -9487,7 +9734,9 @@ int handle_cuMemFreeHost(void *conn)
     void* p;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &p, sizeof(void*)) < 0)
+    if (
+        rpc_read(conn, &p, sizeof(void*)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -9496,7 +9745,6 @@ int handle_cuMemFreeHost(void *conn)
     result = cuMemFreeHost(p);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, p, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -9512,11 +9760,10 @@ int handle_cuMemHostAlloc(void *conn)
     unsigned int Flags;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pp, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &bytesize, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &Flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &bytesize, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &Flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -9541,11 +9788,11 @@ int handle_cuMemHostGetDevicePointer_v2(void *conn)
     unsigned int Flags;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pdptr, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &p, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &Flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &pdptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &p, sizeof(void*)) < 0 ||
+        rpc_read(conn, &Flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -9555,7 +9802,6 @@ int handle_cuMemHostGetDevicePointer_v2(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &pdptr, sizeof(CUdeviceptr)) < 0 ||
-        rpc_write(conn, p, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -9570,9 +9816,10 @@ int handle_cuMemHostGetFlags(void *conn)
     void* p;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pFlags, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &p, sizeof(void*)) < 0)
+    if (
+        rpc_read(conn, &pFlags, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &p, sizeof(void*)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -9582,7 +9829,6 @@ int handle_cuMemHostGetFlags(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &pFlags, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, p, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -9598,11 +9844,11 @@ int handle_cuMemAllocManaged(void *conn)
     unsigned int flags;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &bytesize, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &bytesize, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -9623,16 +9869,17 @@ ERROR_0:
 int handle_cuDeviceGetByPCIBusId(void *conn)
 {
     CUdevice dev;
-    std::size_t pciBusId_len;
     const char* pciBusId;
+    std::size_t pciBusId_len;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dev, sizeof(CUdevice)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &pciBusId_len, sizeof(pciBusId_len)) < 0)
+    if (
+        rpc_read(conn, &dev, sizeof(CUdevice)) < 0 ||
+        rpc_read(conn, &pciBusId_len, sizeof(std::size_t)) < 0)
         goto ERROR_0;
     pciBusId = (const char*)malloc(pciBusId_len);
-    if (rpc_read(conn, &pciBusId, sizeof(const char*)) < 0)
+    if (rpc_read(conn, (void *)pciBusId, pciBusId_len) < 0 ||
+        false)
         goto ERROR_1;
 
     request_id = rpc_end_request(conn);
@@ -9659,25 +9906,23 @@ int handle_cuDeviceGetPCIBusId(void *conn)
     CUdevice dev;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &len, sizeof(int)) < 0)
+    if (
+        rpc_read(conn, &len, sizeof(int)) < 0 ||
+        rpc_read(conn, &dev, sizeof(CUdevice)) < 0 ||
+        false)
         goto ERROR_0;
-    pciBusId = (char*)malloc(len * sizeof(char));
-    if (rpc_read(conn, &dev, sizeof(CUdevice)) < 0)
-        goto ERROR_1;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = cuDeviceGetPCIBusId(pciBusId, len, dev);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, pciBusId, len * sizeof(char)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) pciBusId);
 ERROR_0:
     return -1;
 }
@@ -9688,9 +9933,10 @@ int handle_cuIpcGetEventHandle(void *conn)
     CUevent event;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pHandle, sizeof(CUipcEventHandle)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &event, sizeof(CUevent)) < 0)
+    if (
+        rpc_read(conn, &pHandle, sizeof(CUipcEventHandle)) < 0 ||
+        rpc_read(conn, &event, sizeof(CUevent)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -9714,9 +9960,10 @@ int handle_cuIpcOpenEventHandle(void *conn)
     CUipcEventHandle handle;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &phEvent, sizeof(CUevent)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &handle, sizeof(CUipcEventHandle)) < 0)
+    if (
+        rpc_read(conn, &phEvent, sizeof(CUevent)) < 0 ||
+        rpc_read(conn, &handle, sizeof(CUipcEventHandle)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -9740,9 +9987,10 @@ int handle_cuIpcGetMemHandle(void *conn)
     CUdeviceptr dptr;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pHandle, sizeof(CUipcMemHandle)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0)
+    if (
+        rpc_read(conn, &pHandle, sizeof(CUipcMemHandle)) < 0 ||
+        rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -9767,11 +10015,11 @@ int handle_cuIpcOpenMemHandle_v2(void *conn)
     unsigned int Flags;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pdptr, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &handle, sizeof(CUipcMemHandle)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &Flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &pdptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &handle, sizeof(CUipcMemHandle)) < 0 ||
+        rpc_read(conn, &Flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -9794,7 +10042,9 @@ int handle_cuIpcCloseMemHandle(void *conn)
     CUdeviceptr dptr;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0)
+    if (
+        rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -9811,58 +10061,6 @@ ERROR_0:
     return -1;
 }
 
-int handle_cuMemHostRegister_v2(void *conn)
-{
-    void* p;
-    size_t bytesize;
-    unsigned int Flags;
-    int request_id;
-    CUresult result;
-    if (rpc_read(conn, &p, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &bytesize, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &Flags, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cuMemHostRegister_v2(p, bytesize, Flags);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, p, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_cuMemHostUnregister(void *conn)
-{
-    void* p;
-    int request_id;
-    CUresult result;
-    if (rpc_read(conn, &p, sizeof(void*)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cuMemHostUnregister(p);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, p, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
 int handle_cuMemcpy(void *conn)
 {
     CUdeviceptr dst;
@@ -9870,11 +10068,11 @@ int handle_cuMemcpy(void *conn)
     size_t ByteCount;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dst, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &src, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &ByteCount, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &dst, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &src, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &ByteCount, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -9900,15 +10098,13 @@ int handle_cuMemcpyPeer(void *conn)
     size_t ByteCount;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dstContext, sizeof(CUcontext)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &srcDevice, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &srcContext, sizeof(CUcontext)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &ByteCount, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &dstContext, sizeof(CUcontext)) < 0 ||
+        rpc_read(conn, &srcDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &srcContext, sizeof(CUcontext)) < 0 ||
+        rpc_read(conn, &ByteCount, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -9925,27 +10121,26 @@ ERROR_0:
     return -1;
 }
 
-int handle_cuMemcpyDtoH_v2(void *conn)
+int handle_cuMemcpyHtoD_v2(void *conn)
 {
-    void* dstHost;
-    CUdeviceptr srcDevice;
+    CUdeviceptr dstDevice;
+    const void* srcHost;
     size_t ByteCount;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dstHost, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &srcDevice, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &ByteCount, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &srcHost, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &ByteCount, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cuMemcpyDtoH_v2(dstHost, srcDevice, ByteCount);
+    result = cuMemcpyHtoD_v2(dstDevice, srcHost, ByteCount);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, dstHost, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -9961,11 +10156,11 @@ int handle_cuMemcpyDtoD_v2(void *conn)
     size_t ByteCount;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &srcDevice, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &ByteCount, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &srcDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &ByteCount, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -9990,13 +10185,12 @@ int handle_cuMemcpyDtoA_v2(void *conn)
     size_t ByteCount;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dstArray, sizeof(CUarray)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dstOffset, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &srcDevice, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &ByteCount, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &dstArray, sizeof(CUarray)) < 0 ||
+        rpc_read(conn, &dstOffset, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &srcDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &ByteCount, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -10021,13 +10215,12 @@ int handle_cuMemcpyAtoD_v2(void *conn)
     size_t ByteCount;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &srcArray, sizeof(CUarray)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &srcOffset, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &ByteCount, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &srcArray, sizeof(CUarray)) < 0 ||
+        rpc_read(conn, &srcOffset, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &ByteCount, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -10052,13 +10245,12 @@ int handle_cuMemcpyAtoH_v2(void *conn)
     size_t ByteCount;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dstHost, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &srcArray, sizeof(CUarray)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &srcOffset, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &ByteCount, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &dstHost, sizeof(void*)) < 0 ||
+        rpc_read(conn, &srcArray, sizeof(CUarray)) < 0 ||
+        rpc_read(conn, &srcOffset, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &ByteCount, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -10084,15 +10276,13 @@ int handle_cuMemcpyAtoA_v2(void *conn)
     size_t ByteCount;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dstArray, sizeof(CUarray)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dstOffset, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &srcArray, sizeof(CUarray)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &srcOffset, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &ByteCount, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &dstArray, sizeof(CUarray)) < 0 ||
+        rpc_read(conn, &dstOffset, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &srcArray, sizeof(CUarray)) < 0 ||
+        rpc_read(conn, &srcOffset, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &ByteCount, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -10117,13 +10307,12 @@ int handle_cuMemcpyAsync(void *conn)
     CUstream hStream;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dst, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &src, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &ByteCount, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
+    if (
+        rpc_read(conn, &dst, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &src, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &ByteCount, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -10150,17 +10339,14 @@ int handle_cuMemcpyPeerAsync(void *conn)
     CUstream hStream;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dstContext, sizeof(CUcontext)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &srcDevice, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &srcContext, sizeof(CUcontext)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &ByteCount, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
+    if (
+        rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &dstContext, sizeof(CUcontext)) < 0 ||
+        rpc_read(conn, &srcDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &srcContext, sizeof(CUcontext)) < 0 ||
+        rpc_read(conn, &ByteCount, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -10177,30 +10363,28 @@ ERROR_0:
     return -1;
 }
 
-int handle_cuMemcpyDtoHAsync_v2(void *conn)
+int handle_cuMemcpyHtoDAsync_v2(void *conn)
 {
-    void* dstHost;
-    CUdeviceptr srcDevice;
+    CUdeviceptr dstDevice;
+    const void* srcHost;
     size_t ByteCount;
     CUstream hStream;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dstHost, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &srcDevice, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &ByteCount, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
+    if (
+        rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &srcHost, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &ByteCount, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cuMemcpyDtoHAsync_v2(dstHost, srcDevice, ByteCount, hStream);
+    result = cuMemcpyHtoDAsync_v2(dstDevice, srcHost, ByteCount, hStream);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, dstHost, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -10217,13 +10401,12 @@ int handle_cuMemcpyDtoDAsync_v2(void *conn)
     CUstream hStream;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &srcDevice, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &ByteCount, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
+    if (
+        rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &srcDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &ByteCount, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -10240,41 +10423,6 @@ ERROR_0:
     return -1;
 }
 
-int handle_cuMemcpyAtoHAsync_v2(void *conn)
-{
-    void* dstHost;
-    CUarray srcArray;
-    size_t srcOffset;
-    size_t ByteCount;
-    CUstream hStream;
-    int request_id;
-    CUresult result;
-    if (rpc_read(conn, &dstHost, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &srcArray, sizeof(CUarray)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &srcOffset, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &ByteCount, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cuMemcpyAtoHAsync_v2(dstHost, srcArray, srcOffset, ByteCount, hStream);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, dstHost, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
 int handle_cuMemsetD8_v2(void *conn)
 {
     CUdeviceptr dstDevice;
@@ -10282,11 +10430,11 @@ int handle_cuMemsetD8_v2(void *conn)
     size_t N;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &uc, sizeof(unsigned char)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &N, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &uc, sizeof(unsigned char)) < 0 ||
+        rpc_read(conn, &N, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -10310,11 +10458,11 @@ int handle_cuMemsetD16_v2(void *conn)
     size_t N;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &us, sizeof(unsigned short)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &N, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &us, sizeof(unsigned short)) < 0 ||
+        rpc_read(conn, &N, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -10338,11 +10486,11 @@ int handle_cuMemsetD32_v2(void *conn)
     size_t N;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &ui, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &N, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &ui, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &N, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -10368,15 +10516,13 @@ int handle_cuMemsetD2D8_v2(void *conn)
     size_t Height;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dstPitch, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &uc, sizeof(unsigned char)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &Width, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &Height, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &dstPitch, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &uc, sizeof(unsigned char)) < 0 ||
+        rpc_read(conn, &Width, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &Height, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -10402,15 +10548,13 @@ int handle_cuMemsetD2D16_v2(void *conn)
     size_t Height;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dstPitch, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &us, sizeof(unsigned short)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &Width, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &Height, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &dstPitch, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &us, sizeof(unsigned short)) < 0 ||
+        rpc_read(conn, &Width, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &Height, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -10436,15 +10580,13 @@ int handle_cuMemsetD2D32_v2(void *conn)
     size_t Height;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dstPitch, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &ui, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &Width, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &Height, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &dstPitch, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &ui, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &Width, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &Height, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -10469,13 +10611,12 @@ int handle_cuMemsetD8Async(void *conn)
     CUstream hStream;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &uc, sizeof(unsigned char)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &N, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
+    if (
+        rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &uc, sizeof(unsigned char)) < 0 ||
+        rpc_read(conn, &N, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -10500,13 +10641,12 @@ int handle_cuMemsetD16Async(void *conn)
     CUstream hStream;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &us, sizeof(unsigned short)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &N, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
+    if (
+        rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &us, sizeof(unsigned short)) < 0 ||
+        rpc_read(conn, &N, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -10531,13 +10671,12 @@ int handle_cuMemsetD32Async(void *conn)
     CUstream hStream;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &ui, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &N, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
+    if (
+        rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &ui, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &N, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -10564,17 +10703,14 @@ int handle_cuMemsetD2D8Async(void *conn)
     CUstream hStream;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dstPitch, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &uc, sizeof(unsigned char)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &Width, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &Height, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
+    if (
+        rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &dstPitch, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &uc, sizeof(unsigned char)) < 0 ||
+        rpc_read(conn, &Width, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &Height, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -10601,17 +10737,14 @@ int handle_cuMemsetD2D16Async(void *conn)
     CUstream hStream;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dstPitch, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &us, sizeof(unsigned short)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &Width, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &Height, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
+    if (
+        rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &dstPitch, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &us, sizeof(unsigned short)) < 0 ||
+        rpc_read(conn, &Width, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &Height, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -10638,17 +10771,14 @@ int handle_cuMemsetD2D32Async(void *conn)
     CUstream hStream;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dstPitch, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &ui, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &Width, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &Height, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
+    if (
+        rpc_read(conn, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &dstPitch, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &ui, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &Width, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &Height, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -10665,15 +10795,43 @@ ERROR_0:
     return -1;
 }
 
+int handle_cuArrayCreate_v2(void *conn)
+{
+    CUarray pHandle;
+    const CUDA_ARRAY_DESCRIPTOR* pAllocateArray;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &pHandle, sizeof(CUarray)) < 0 ||
+        rpc_read(conn, &pAllocateArray, sizeof(const CUDA_ARRAY_DESCRIPTOR*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuArrayCreate_v2(&pHandle, pAllocateArray);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &pHandle, sizeof(CUarray)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cuArrayGetDescriptor_v2(void *conn)
 {
     CUDA_ARRAY_DESCRIPTOR pArrayDescriptor;
     CUarray hArray;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pArrayDescriptor, sizeof(CUDA_ARRAY_DESCRIPTOR)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hArray, sizeof(CUarray)) < 0)
+    if (
+        rpc_read(conn, &pArrayDescriptor, sizeof(CUDA_ARRAY_DESCRIPTOR)) < 0 ||
+        rpc_read(conn, &hArray, sizeof(CUarray)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -10697,9 +10855,10 @@ int handle_cuArrayGetSparseProperties(void *conn)
     CUarray array;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &sparseProperties, sizeof(CUDA_ARRAY_SPARSE_PROPERTIES)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &array, sizeof(CUarray)) < 0)
+    if (
+        rpc_read(conn, &sparseProperties, sizeof(CUDA_ARRAY_SPARSE_PROPERTIES)) < 0 ||
+        rpc_read(conn, &array, sizeof(CUarray)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -10723,9 +10882,10 @@ int handle_cuMipmappedArrayGetSparseProperties(void *conn)
     CUmipmappedArray mipmap;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &sparseProperties, sizeof(CUDA_ARRAY_SPARSE_PROPERTIES)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &mipmap, sizeof(CUmipmappedArray)) < 0)
+    if (
+        rpc_read(conn, &sparseProperties, sizeof(CUDA_ARRAY_SPARSE_PROPERTIES)) < 0 ||
+        rpc_read(conn, &mipmap, sizeof(CUmipmappedArray)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -10750,11 +10910,11 @@ int handle_cuArrayGetMemoryRequirements(void *conn)
     CUdevice device;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &memoryRequirements, sizeof(CUDA_ARRAY_MEMORY_REQUIREMENTS)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &array, sizeof(CUarray)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &device, sizeof(CUdevice)) < 0)
+    if (
+        rpc_read(conn, &memoryRequirements, sizeof(CUDA_ARRAY_MEMORY_REQUIREMENTS)) < 0 ||
+        rpc_read(conn, &array, sizeof(CUarray)) < 0 ||
+        rpc_read(conn, &device, sizeof(CUdevice)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -10779,11 +10939,11 @@ int handle_cuMipmappedArrayGetMemoryRequirements(void *conn)
     CUdevice device;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &memoryRequirements, sizeof(CUDA_ARRAY_MEMORY_REQUIREMENTS)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &mipmap, sizeof(CUmipmappedArray)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &device, sizeof(CUdevice)) < 0)
+    if (
+        rpc_read(conn, &memoryRequirements, sizeof(CUDA_ARRAY_MEMORY_REQUIREMENTS)) < 0 ||
+        rpc_read(conn, &mipmap, sizeof(CUmipmappedArray)) < 0 ||
+        rpc_read(conn, &device, sizeof(CUdevice)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -10808,11 +10968,11 @@ int handle_cuArrayGetPlane(void *conn)
     unsigned int planeIdx;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pPlaneArray, sizeof(CUarray)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hArray, sizeof(CUarray)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &planeIdx, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &pPlaneArray, sizeof(CUarray)) < 0 ||
+        rpc_read(conn, &hArray, sizeof(CUarray)) < 0 ||
+        rpc_read(conn, &planeIdx, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -10835,7 +10995,9 @@ int handle_cuArrayDestroy(void *conn)
     CUarray hArray;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hArray, sizeof(CUarray)) < 0)
+    if (
+        rpc_read(conn, &hArray, sizeof(CUarray)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -10852,15 +11014,43 @@ ERROR_0:
     return -1;
 }
 
+int handle_cuArray3DCreate_v2(void *conn)
+{
+    CUarray pHandle;
+    const CUDA_ARRAY3D_DESCRIPTOR* pAllocateArray;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &pHandle, sizeof(CUarray)) < 0 ||
+        rpc_read(conn, &pAllocateArray, sizeof(const CUDA_ARRAY3D_DESCRIPTOR*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuArray3DCreate_v2(&pHandle, pAllocateArray);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &pHandle, sizeof(CUarray)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cuArray3DGetDescriptor_v2(void *conn)
 {
     CUDA_ARRAY3D_DESCRIPTOR pArrayDescriptor;
     CUarray hArray;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pArrayDescriptor, sizeof(CUDA_ARRAY3D_DESCRIPTOR)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hArray, sizeof(CUarray)) < 0)
+    if (
+        rpc_read(conn, &pArrayDescriptor, sizeof(CUDA_ARRAY3D_DESCRIPTOR)) < 0 ||
+        rpc_read(conn, &hArray, sizeof(CUarray)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -10878,6 +11068,35 @@ ERROR_0:
     return -1;
 }
 
+int handle_cuMipmappedArrayCreate(void *conn)
+{
+    CUmipmappedArray pHandle;
+    const CUDA_ARRAY3D_DESCRIPTOR* pMipmappedArrayDesc;
+    unsigned int numMipmapLevels;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &pHandle, sizeof(CUmipmappedArray)) < 0 ||
+        rpc_read(conn, &pMipmappedArrayDesc, sizeof(const CUDA_ARRAY3D_DESCRIPTOR*)) < 0 ||
+        rpc_read(conn, &numMipmapLevels, sizeof(unsigned int)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuMipmappedArrayCreate(&pHandle, pMipmappedArrayDesc, numMipmapLevels);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &pHandle, sizeof(CUmipmappedArray)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cuMipmappedArrayGetLevel(void *conn)
 {
     CUarray pLevelArray;
@@ -10885,11 +11104,11 @@ int handle_cuMipmappedArrayGetLevel(void *conn)
     unsigned int level;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pLevelArray, sizeof(CUarray)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hMipmappedArray, sizeof(CUmipmappedArray)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &level, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &pLevelArray, sizeof(CUarray)) < 0 ||
+        rpc_read(conn, &hMipmappedArray, sizeof(CUmipmappedArray)) < 0 ||
+        rpc_read(conn, &level, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -10912,7 +11131,9 @@ int handle_cuMipmappedArrayDestroy(void *conn)
     CUmipmappedArray hMipmappedArray;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hMipmappedArray, sizeof(CUmipmappedArray)) < 0)
+    if (
+        rpc_read(conn, &hMipmappedArray, sizeof(CUmipmappedArray)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -10921,41 +11142,6 @@ int handle_cuMipmappedArrayDestroy(void *conn)
     result = cuMipmappedArrayDestroy(hMipmappedArray);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_cuMemGetHandleForAddressRange(void *conn)
-{
-    void* handle;
-    CUdeviceptr dptr;
-    size_t size;
-    CUmemRangeHandleType handleType;
-    unsigned long long flags;
-    int request_id;
-    CUresult result;
-    if (rpc_read(conn, &handle, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &size, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &handleType, sizeof(CUmemRangeHandleType)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned long long)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cuMemGetHandleForAddressRange(handle, dptr, size, handleType, flags);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, handle, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -10973,15 +11159,13 @@ int handle_cuMemAddressReserve(void *conn)
     unsigned long long flags;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &ptr, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &size, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &alignment, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &addr, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned long long)) < 0)
+    if (
+        rpc_read(conn, &ptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &size, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &alignment, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &addr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned long long)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -11005,9 +11189,10 @@ int handle_cuMemAddressFree(void *conn)
     size_t size;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &ptr, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &size, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &ptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &size, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -11024,12 +11209,45 @@ ERROR_0:
     return -1;
 }
 
+int handle_cuMemCreate(void *conn)
+{
+    CUmemGenericAllocationHandle handle;
+    size_t size;
+    const CUmemAllocationProp* prop;
+    unsigned long long flags;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &handle, sizeof(CUmemGenericAllocationHandle)) < 0 ||
+        rpc_read(conn, &size, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &prop, sizeof(const CUmemAllocationProp*)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned long long)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuMemCreate(&handle, size, prop, flags);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &handle, sizeof(CUmemGenericAllocationHandle)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cuMemRelease(void *conn)
 {
     CUmemGenericAllocationHandle handle;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &handle, sizeof(CUmemGenericAllocationHandle)) < 0)
+    if (
+        rpc_read(conn, &handle, sizeof(CUmemGenericAllocationHandle)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -11055,15 +11273,13 @@ int handle_cuMemMap(void *conn)
     unsigned long long flags;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &ptr, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &size, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &offset, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &handle, sizeof(CUmemGenericAllocationHandle)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned long long)) < 0)
+    if (
+        rpc_read(conn, &ptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &size, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &offset, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &handle, sizeof(CUmemGenericAllocationHandle)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned long long)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -11087,11 +11303,11 @@ int handle_cuMemMapArrayAsync(void *conn)
     CUstream hStream;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &mapInfoList, sizeof(CUarrayMapInfo)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &count, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
+    if (
+        rpc_read(conn, &mapInfoList, sizeof(CUarrayMapInfo)) < 0 ||
+        rpc_read(conn, &count, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -11115,9 +11331,10 @@ int handle_cuMemUnmap(void *conn)
     size_t size;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &ptr, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &size, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &ptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &size, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -11134,30 +11351,28 @@ ERROR_0:
     return -1;
 }
 
-int handle_cuMemExportToShareableHandle(void *conn)
+int handle_cuMemSetAccess(void *conn)
 {
-    void* shareableHandle;
-    CUmemGenericAllocationHandle handle;
-    CUmemAllocationHandleType handleType;
-    unsigned long long flags;
+    CUdeviceptr ptr;
+    size_t size;
+    const CUmemAccessDesc* desc;
+    size_t count;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &shareableHandle, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &handle, sizeof(CUmemGenericAllocationHandle)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &handleType, sizeof(CUmemAllocationHandleType)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned long long)) < 0)
+    if (
+        rpc_read(conn, &ptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &size, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &desc, sizeof(const CUmemAccessDesc*)) < 0 ||
+        rpc_read(conn, &count, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cuMemExportToShareableHandle(shareableHandle, handle, handleType, flags);
+    result = cuMemSetAccess(ptr, size, desc, count);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, shareableHandle, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -11166,28 +11381,56 @@ ERROR_0:
     return -1;
 }
 
-int handle_cuMemImportFromShareableHandle(void *conn)
+int handle_cuMemGetAccess(void *conn)
 {
-    CUmemGenericAllocationHandle handle;
-    void* osHandle;
-    CUmemAllocationHandleType shHandleType;
+    unsigned long long flags;
+    const CUmemLocation* location;
+    CUdeviceptr ptr;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &handle, sizeof(CUmemGenericAllocationHandle)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &osHandle, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &shHandleType, sizeof(CUmemAllocationHandleType)) < 0)
+    if (
+        rpc_read(conn, &flags, sizeof(unsigned long long)) < 0 ||
+        rpc_read(conn, &location, sizeof(const CUmemLocation*)) < 0 ||
+        rpc_read(conn, &ptr, sizeof(CUdeviceptr)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cuMemImportFromShareableHandle(&handle, osHandle, shHandleType);
+    result = cuMemGetAccess(&flags, location, ptr);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &handle, sizeof(CUmemGenericAllocationHandle)) < 0 ||
-        rpc_write(conn, osHandle, sizeof(void*)) < 0 ||
+        rpc_write(conn, &flags, sizeof(unsigned long long)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cuMemGetAllocationGranularity(void *conn)
+{
+    size_t granularity;
+    const CUmemAllocationProp* prop;
+    CUmemAllocationGranularity_flags option;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &granularity, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &prop, sizeof(const CUmemAllocationProp*)) < 0 ||
+        rpc_read(conn, &option, sizeof(CUmemAllocationGranularity_flags)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuMemGetAllocationGranularity(&granularity, prop, option);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &granularity, sizeof(size_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -11202,9 +11445,10 @@ int handle_cuMemGetAllocationPropertiesFromHandle(void *conn)
     CUmemGenericAllocationHandle handle;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &prop, sizeof(CUmemAllocationProp)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &handle, sizeof(CUmemGenericAllocationHandle)) < 0)
+    if (
+        rpc_read(conn, &prop, sizeof(CUmemAllocationProp)) < 0 ||
+        rpc_read(conn, &handle, sizeof(CUmemGenericAllocationHandle)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -11222,42 +11466,16 @@ ERROR_0:
     return -1;
 }
 
-int handle_cuMemRetainAllocationHandle(void *conn)
-{
-    CUmemGenericAllocationHandle handle;
-    void* addr;
-    int request_id;
-    CUresult result;
-    if (rpc_read(conn, &handle, sizeof(CUmemGenericAllocationHandle)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &addr, sizeof(void*)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cuMemRetainAllocationHandle(&handle, addr);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &handle, sizeof(CUmemGenericAllocationHandle)) < 0 ||
-        rpc_write(conn, addr, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
 int handle_cuMemFreeAsync(void *conn)
 {
     CUdeviceptr dptr;
     CUstream hStream;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
+    if (
+        rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -11281,11 +11499,11 @@ int handle_cuMemAllocAsync(void *conn)
     CUstream hStream;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &bytesize, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
+    if (
+        rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &bytesize, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -11309,9 +11527,10 @@ int handle_cuMemPoolTrimTo(void *conn)
     size_t minBytesToKeep;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pool, sizeof(CUmemoryPool)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &minBytesToKeep, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &pool, sizeof(CUmemoryPool)) < 0 ||
+        rpc_read(conn, &minBytesToKeep, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -11328,56 +11547,26 @@ ERROR_0:
     return -1;
 }
 
-int handle_cuMemPoolSetAttribute(void *conn)
+int handle_cuMemPoolSetAccess(void *conn)
 {
     CUmemoryPool pool;
-    CUmemPool_attribute attr;
-    void* value;
+    const CUmemAccessDesc* map;
+    size_t count;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pool, sizeof(CUmemoryPool)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &attr, sizeof(CUmemPool_attribute)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &value, sizeof(void*)) < 0)
+    if (
+        rpc_read(conn, &pool, sizeof(CUmemoryPool)) < 0 ||
+        rpc_read(conn, &map, sizeof(const CUmemAccessDesc*)) < 0 ||
+        rpc_read(conn, &count, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cuMemPoolSetAttribute(pool, attr, value);
+    result = cuMemPoolSetAccess(pool, map, count);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, value, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_cuMemPoolGetAttribute(void *conn)
-{
-    CUmemoryPool pool;
-    CUmemPool_attribute attr;
-    void* value;
-    int request_id;
-    CUresult result;
-    if (rpc_read(conn, &pool, sizeof(CUmemoryPool)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &attr, sizeof(CUmemPool_attribute)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &value, sizeof(void*)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cuMemPoolGetAttribute(pool, attr, value);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, value, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -11393,11 +11582,11 @@ int handle_cuMemPoolGetAccess(void *conn)
     CUmemLocation location;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &flags, sizeof(CUmemAccess_flags)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &memPool, sizeof(CUmemoryPool)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &location, sizeof(CUmemLocation)) < 0)
+    if (
+        rpc_read(conn, &flags, sizeof(CUmemAccess_flags)) < 0 ||
+        rpc_read(conn, &memPool, sizeof(CUmemoryPool)) < 0 ||
+        rpc_read(conn, &location, sizeof(CUmemLocation)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -11416,12 +11605,41 @@ ERROR_0:
     return -1;
 }
 
+int handle_cuMemPoolCreate(void *conn)
+{
+    CUmemoryPool pool;
+    const CUmemPoolProps* poolProps;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &pool, sizeof(CUmemoryPool)) < 0 ||
+        rpc_read(conn, &poolProps, sizeof(const CUmemPoolProps*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuMemPoolCreate(&pool, poolProps);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &pool, sizeof(CUmemoryPool)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cuMemPoolDestroy(void *conn)
 {
     CUmemoryPool pool;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pool, sizeof(CUmemoryPool)) < 0)
+    if (
+        rpc_read(conn, &pool, sizeof(CUmemoryPool)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -11446,13 +11664,12 @@ int handle_cuMemAllocFromPoolAsync(void *conn)
     CUstream hStream;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &bytesize, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &pool, sizeof(CUmemoryPool)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
+    if (
+        rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &bytesize, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &pool, sizeof(CUmemoryPool)) < 0 ||
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -11470,80 +11687,16 @@ ERROR_0:
     return -1;
 }
 
-int handle_cuMemPoolExportToShareableHandle(void *conn)
-{
-    void* handle_out;
-    CUmemoryPool pool;
-    CUmemAllocationHandleType handleType;
-    unsigned long long flags;
-    int request_id;
-    CUresult result;
-    if (rpc_read(conn, &handle_out, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &pool, sizeof(CUmemoryPool)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &handleType, sizeof(CUmemAllocationHandleType)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned long long)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cuMemPoolExportToShareableHandle(handle_out, pool, handleType, flags);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, handle_out, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_cuMemPoolImportFromShareableHandle(void *conn)
-{
-    CUmemoryPool pool_out;
-    void* handle;
-    CUmemAllocationHandleType handleType;
-    unsigned long long flags;
-    int request_id;
-    CUresult result;
-    if (rpc_read(conn, &pool_out, sizeof(CUmemoryPool)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &handle, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &handleType, sizeof(CUmemAllocationHandleType)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned long long)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cuMemPoolImportFromShareableHandle(&pool_out, handle, handleType, flags);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &pool_out, sizeof(CUmemoryPool)) < 0 ||
-        rpc_write(conn, handle, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
 int handle_cuMemPoolExportPointer(void *conn)
 {
     CUmemPoolPtrExportData shareData_out;
     CUdeviceptr ptr;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &shareData_out, sizeof(CUmemPoolPtrExportData)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &ptr, sizeof(CUdeviceptr)) < 0)
+    if (
+        rpc_read(conn, &shareData_out, sizeof(CUmemPoolPtrExportData)) < 0 ||
+        rpc_read(conn, &ptr, sizeof(CUdeviceptr)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -11568,11 +11721,11 @@ int handle_cuMemPoolImportPointer(void *conn)
     CUmemPoolPtrExportData shareData;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &ptr_out, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &pool, sizeof(CUmemoryPool)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &shareData, sizeof(CUmemPoolPtrExportData)) < 0)
+    if (
+        rpc_read(conn, &ptr_out, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &pool, sizeof(CUmemoryPool)) < 0 ||
+        rpc_read(conn, &shareData, sizeof(CUmemPoolPtrExportData)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -11591,35 +11744,6 @@ ERROR_0:
     return -1;
 }
 
-int handle_cuPointerGetAttribute(void *conn)
-{
-    void* data;
-    CUpointer_attribute attribute;
-    CUdeviceptr ptr;
-    int request_id;
-    CUresult result;
-    if (rpc_read(conn, &data, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &attribute, sizeof(CUpointer_attribute)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &ptr, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cuPointerGetAttribute(data, attribute, ptr);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, data, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
 int handle_cuMemPrefetchAsync(void *conn)
 {
     CUdeviceptr devPtr;
@@ -11628,13 +11752,12 @@ int handle_cuMemPrefetchAsync(void *conn)
     CUstream hStream;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &devPtr, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &count, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dstDevice, sizeof(CUdevice)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
+    if (
+        rpc_read(conn, &devPtr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &count, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &dstDevice, sizeof(CUdevice)) < 0 ||
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -11659,13 +11782,12 @@ int handle_cuMemAdvise(void *conn)
     CUdevice device;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &devPtr, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &count, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &advice, sizeof(CUmem_advise)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &device, sizeof(CUdevice)) < 0)
+    if (
+        rpc_read(conn, &devPtr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &count, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &advice, sizeof(CUmem_advise)) < 0 ||
+        rpc_read(conn, &device, sizeof(CUdevice)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -11674,41 +11796,6 @@ int handle_cuMemAdvise(void *conn)
     result = cuMemAdvise(devPtr, count, advice, device);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_cuMemRangeGetAttribute(void *conn)
-{
-    void* data;
-    size_t dataSize;
-    CUmem_range_attribute attribute;
-    CUdeviceptr devPtr;
-    size_t count;
-    int request_id;
-    CUresult result;
-    if (rpc_read(conn, &data, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dataSize, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &attribute, sizeof(CUmem_range_attribute)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &devPtr, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &count, sizeof(size_t)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cuMemRangeGetAttribute(data, dataSize, attribute, devPtr, count);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, data, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -11727,17 +11814,14 @@ int handle_cuMemRangeGetAttributes(void *conn)
     size_t count;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &data, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dataSizes, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &attributes, sizeof(CUmem_range_attribute)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &numAttributes, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &devPtr, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &count, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &data, sizeof(void*)) < 0 ||
+        rpc_read(conn, &dataSizes, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &attributes, sizeof(CUmem_range_attribute)) < 0 ||
+        rpc_read(conn, &numAttributes, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &devPtr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &count, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -11757,6 +11841,34 @@ ERROR_0:
     return -1;
 }
 
+int handle_cuPointerSetAttribute(void *conn)
+{
+    const void* value;
+    CUpointer_attribute attribute;
+    CUdeviceptr ptr;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &value, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &attribute, sizeof(CUpointer_attribute)) < 0 ||
+        rpc_read(conn, &ptr, sizeof(CUdeviceptr)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuPointerSetAttribute(value, attribute, ptr);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cuPointerGetAttributes(void *conn)
 {
     unsigned int numAttributes;
@@ -11765,13 +11877,12 @@ int handle_cuPointerGetAttributes(void *conn)
     CUdeviceptr ptr;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &numAttributes, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &attributes, sizeof(CUpointer_attribute)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &data, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &ptr, sizeof(CUdeviceptr)) < 0)
+    if (
+        rpc_read(conn, &numAttributes, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &attributes, sizeof(CUpointer_attribute)) < 0 ||
+        rpc_read(conn, &data, sizeof(void*)) < 0 ||
+        rpc_read(conn, &ptr, sizeof(CUdeviceptr)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -11796,9 +11907,10 @@ int handle_cuStreamCreate(void *conn)
     unsigned int Flags;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &phStream, sizeof(CUstream)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &Flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &phStream, sizeof(CUstream)) < 0 ||
+        rpc_read(conn, &Flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -11823,11 +11935,11 @@ int handle_cuStreamCreateWithPriority(void *conn)
     int priority;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &phStream, sizeof(CUstream)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &priority, sizeof(int)) < 0)
+    if (
+        rpc_read(conn, &phStream, sizeof(CUstream)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &priority, sizeof(int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -11851,9 +11963,10 @@ int handle_cuStreamGetPriority(void *conn)
     int priority;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &priority, sizeof(int)) < 0)
+    if (
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        rpc_read(conn, &priority, sizeof(int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -11877,9 +11990,10 @@ int handle_cuStreamGetFlags(void *conn)
     unsigned int flags;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -11903,9 +12017,10 @@ int handle_cuStreamGetId(void *conn)
     unsigned long long streamId;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &streamId, sizeof(unsigned long long)) < 0)
+    if (
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        rpc_read(conn, &streamId, sizeof(unsigned long long)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -11929,9 +12044,10 @@ int handle_cuStreamGetCtx(void *conn)
     CUcontext pctx;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &pctx, sizeof(CUcontext)) < 0)
+    if (
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        rpc_read(conn, &pctx, sizeof(CUcontext)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -11956,11 +12072,11 @@ int handle_cuStreamWaitEvent(void *conn)
     unsigned int Flags;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hEvent, sizeof(CUevent)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &Flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        rpc_read(conn, &hEvent, sizeof(CUevent)) < 0 ||
+        rpc_read(conn, &Flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -11977,47 +12093,16 @@ ERROR_0:
     return -1;
 }
 
-int handle_cuStreamAddCallback(void *conn)
-{
-    CUstream hStream;
-    CUstreamCallback callback;
-    void* userData;
-    unsigned int flags;
-    int request_id;
-    CUresult result;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &callback, sizeof(CUstreamCallback)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &userData, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cuStreamAddCallback(hStream, callback, userData, flags);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, userData, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
 int handle_cuStreamBeginCapture_v2(void *conn)
 {
     CUstream hStream;
     CUstreamCaptureMode mode;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &mode, sizeof(CUstreamCaptureMode)) < 0)
+    if (
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        rpc_read(conn, &mode, sizeof(CUstreamCaptureMode)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -12039,7 +12124,9 @@ int handle_cuThreadExchangeStreamCaptureMode(void *conn)
     CUstreamCaptureMode mode;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &mode, sizeof(CUstreamCaptureMode)) < 0)
+    if (
+        rpc_read(conn, &mode, sizeof(CUstreamCaptureMode)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -12063,9 +12150,10 @@ int handle_cuStreamEndCapture(void *conn)
     CUgraph phGraph;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &phGraph, sizeof(CUgraph)) < 0)
+    if (
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        rpc_read(conn, &phGraph, sizeof(CUgraph)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -12089,9 +12177,10 @@ int handle_cuStreamIsCapturing(void *conn)
     CUstreamCaptureStatus captureStatus;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &captureStatus, sizeof(CUstreamCaptureStatus)) < 0)
+    if (
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        rpc_read(conn, &captureStatus, sizeof(CUstreamCaptureStatus)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -12117,13 +12206,12 @@ int handle_cuStreamUpdateCaptureDependencies(void *conn)
     unsigned int flags;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dependencies, sizeof(CUgraphNode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &numDependencies, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        rpc_read(conn, &dependencies, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -12149,13 +12237,12 @@ int handle_cuStreamAttachMemAsync(void *conn)
     unsigned int flags;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &length, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &length, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -12177,7 +12264,9 @@ int handle_cuStreamQuery(void *conn)
     CUstream hStream;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
+    if (
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -12199,7 +12288,9 @@ int handle_cuStreamSynchronize(void *conn)
     CUstream hStream;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
+    if (
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -12221,7 +12312,9 @@ int handle_cuStreamDestroy_v2(void *conn)
     CUstream hStream;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
+    if (
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -12244,9 +12337,10 @@ int handle_cuStreamCopyAttributes(void *conn)
     CUstream src;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dst, sizeof(CUstream)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &src, sizeof(CUstream)) < 0)
+    if (
+        rpc_read(conn, &dst, sizeof(CUstream)) < 0 ||
+        rpc_read(conn, &src, sizeof(CUstream)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -12270,11 +12364,11 @@ int handle_cuStreamGetAttribute(void *conn)
     CUstreamAttrValue value_out;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &attr, sizeof(CUstreamAttrID)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &value_out, sizeof(CUstreamAttrValue)) < 0)
+    if (
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        rpc_read(conn, &attr, sizeof(CUstreamAttrID)) < 0 ||
+        rpc_read(conn, &value_out, sizeof(CUstreamAttrValue)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -12292,15 +12386,44 @@ ERROR_0:
     return -1;
 }
 
+int handle_cuStreamSetAttribute(void *conn)
+{
+    CUstream hStream;
+    CUstreamAttrID attr;
+    const CUstreamAttrValue* value;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        rpc_read(conn, &attr, sizeof(CUstreamAttrID)) < 0 ||
+        rpc_read(conn, &value, sizeof(const CUstreamAttrValue*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuStreamSetAttribute(hStream, attr, value);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cuEventCreate(void *conn)
 {
     CUevent phEvent;
     unsigned int Flags;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &phEvent, sizeof(CUevent)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &Flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &phEvent, sizeof(CUevent)) < 0 ||
+        rpc_read(conn, &Flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -12324,9 +12447,10 @@ int handle_cuEventRecord(void *conn)
     CUstream hStream;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hEvent, sizeof(CUevent)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
+    if (
+        rpc_read(conn, &hEvent, sizeof(CUevent)) < 0 ||
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -12350,11 +12474,11 @@ int handle_cuEventRecordWithFlags(void *conn)
     unsigned int flags;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hEvent, sizeof(CUevent)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &hEvent, sizeof(CUevent)) < 0 ||
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -12376,7 +12500,9 @@ int handle_cuEventQuery(void *conn)
     CUevent hEvent;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hEvent, sizeof(CUevent)) < 0)
+    if (
+        rpc_read(conn, &hEvent, sizeof(CUevent)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -12398,7 +12524,9 @@ int handle_cuEventSynchronize(void *conn)
     CUevent hEvent;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hEvent, sizeof(CUevent)) < 0)
+    if (
+        rpc_read(conn, &hEvent, sizeof(CUevent)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -12420,7 +12548,9 @@ int handle_cuEventDestroy_v2(void *conn)
     CUevent hEvent;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hEvent, sizeof(CUevent)) < 0)
+    if (
+        rpc_read(conn, &hEvent, sizeof(CUevent)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -12444,11 +12574,11 @@ int handle_cuEventElapsedTime(void *conn)
     CUevent hEnd;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pMilliseconds, sizeof(float)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hStart, sizeof(CUevent)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hEnd, sizeof(CUevent)) < 0)
+    if (
+        rpc_read(conn, &pMilliseconds, sizeof(float)) < 0 ||
+        rpc_read(conn, &hStart, sizeof(CUevent)) < 0 ||
+        rpc_read(conn, &hEnd, sizeof(CUevent)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -12466,12 +12596,99 @@ ERROR_0:
     return -1;
 }
 
+int handle_cuImportExternalMemory(void *conn)
+{
+    CUexternalMemory extMem_out;
+    const CUDA_EXTERNAL_MEMORY_HANDLE_DESC* memHandleDesc;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &extMem_out, sizeof(CUexternalMemory)) < 0 ||
+        rpc_read(conn, &memHandleDesc, sizeof(const CUDA_EXTERNAL_MEMORY_HANDLE_DESC*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuImportExternalMemory(&extMem_out, memHandleDesc);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &extMem_out, sizeof(CUexternalMemory)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cuExternalMemoryGetMappedBuffer(void *conn)
+{
+    CUdeviceptr devPtr;
+    CUexternalMemory extMem;
+    const CUDA_EXTERNAL_MEMORY_BUFFER_DESC* bufferDesc;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &devPtr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &extMem, sizeof(CUexternalMemory)) < 0 ||
+        rpc_read(conn, &bufferDesc, sizeof(const CUDA_EXTERNAL_MEMORY_BUFFER_DESC*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuExternalMemoryGetMappedBuffer(&devPtr, extMem, bufferDesc);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &devPtr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cuExternalMemoryGetMappedMipmappedArray(void *conn)
+{
+    CUmipmappedArray mipmap;
+    CUexternalMemory extMem;
+    const CUDA_EXTERNAL_MEMORY_MIPMAPPED_ARRAY_DESC* mipmapDesc;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &mipmap, sizeof(CUmipmappedArray)) < 0 ||
+        rpc_read(conn, &extMem, sizeof(CUexternalMemory)) < 0 ||
+        rpc_read(conn, &mipmapDesc, sizeof(const CUDA_EXTERNAL_MEMORY_MIPMAPPED_ARRAY_DESC*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuExternalMemoryGetMappedMipmappedArray(&mipmap, extMem, mipmapDesc);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &mipmap, sizeof(CUmipmappedArray)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cuDestroyExternalMemory(void *conn)
 {
     CUexternalMemory extMem;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &extMem, sizeof(CUexternalMemory)) < 0)
+    if (
+        rpc_read(conn, &extMem, sizeof(CUexternalMemory)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -12488,12 +12705,101 @@ ERROR_0:
     return -1;
 }
 
+int handle_cuImportExternalSemaphore(void *conn)
+{
+    CUexternalSemaphore extSem_out;
+    const CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC* semHandleDesc;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &extSem_out, sizeof(CUexternalSemaphore)) < 0 ||
+        rpc_read(conn, &semHandleDesc, sizeof(const CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuImportExternalSemaphore(&extSem_out, semHandleDesc);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &extSem_out, sizeof(CUexternalSemaphore)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cuSignalExternalSemaphoresAsync(void *conn)
+{
+    const CUexternalSemaphore* extSemArray;
+    const CUDA_EXTERNAL_SEMAPHORE_SIGNAL_PARAMS* paramsArray;
+    unsigned int numExtSems;
+    CUstream stream;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &extSemArray, sizeof(const CUexternalSemaphore*)) < 0 ||
+        rpc_read(conn, &paramsArray, sizeof(const CUDA_EXTERNAL_SEMAPHORE_SIGNAL_PARAMS*)) < 0 ||
+        rpc_read(conn, &numExtSems, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &stream, sizeof(CUstream)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuSignalExternalSemaphoresAsync(extSemArray, paramsArray, numExtSems, stream);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cuWaitExternalSemaphoresAsync(void *conn)
+{
+    const CUexternalSemaphore* extSemArray;
+    const CUDA_EXTERNAL_SEMAPHORE_WAIT_PARAMS* paramsArray;
+    unsigned int numExtSems;
+    CUstream stream;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &extSemArray, sizeof(const CUexternalSemaphore*)) < 0 ||
+        rpc_read(conn, &paramsArray, sizeof(const CUDA_EXTERNAL_SEMAPHORE_WAIT_PARAMS*)) < 0 ||
+        rpc_read(conn, &numExtSems, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &stream, sizeof(CUstream)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuWaitExternalSemaphoresAsync(extSemArray, paramsArray, numExtSems, stream);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cuDestroyExternalSemaphore(void *conn)
 {
     CUexternalSemaphore extSem;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &extSem, sizeof(CUexternalSemaphore)) < 0)
+    if (
+        rpc_read(conn, &extSem, sizeof(CUexternalSemaphore)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -12518,13 +12824,12 @@ int handle_cuStreamWaitValue32_v2(void *conn)
     unsigned int flags;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &stream, sizeof(CUstream)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &addr, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &value, sizeof(cuuint32_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &stream, sizeof(CUstream)) < 0 ||
+        rpc_read(conn, &addr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &value, sizeof(cuuint32_t)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -12549,13 +12854,12 @@ int handle_cuStreamWaitValue64_v2(void *conn)
     unsigned int flags;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &stream, sizeof(CUstream)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &addr, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &value, sizeof(cuuint64_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &stream, sizeof(CUstream)) < 0 ||
+        rpc_read(conn, &addr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &value, sizeof(cuuint64_t)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -12580,13 +12884,12 @@ int handle_cuStreamWriteValue32_v2(void *conn)
     unsigned int flags;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &stream, sizeof(CUstream)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &addr, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &value, sizeof(cuuint32_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &stream, sizeof(CUstream)) < 0 ||
+        rpc_read(conn, &addr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &value, sizeof(cuuint32_t)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -12611,13 +12914,12 @@ int handle_cuStreamWriteValue64_v2(void *conn)
     unsigned int flags;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &stream, sizeof(CUstream)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &addr, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &value, sizeof(cuuint64_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &stream, sizeof(CUstream)) < 0 ||
+        rpc_read(conn, &addr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &value, sizeof(cuuint64_t)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -12642,13 +12944,12 @@ int handle_cuStreamBatchMemOp_v2(void *conn)
     unsigned int flags;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &stream, sizeof(CUstream)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &count, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &paramArray, sizeof(CUstreamBatchMemOpParams)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &stream, sizeof(CUstream)) < 0 ||
+        rpc_read(conn, &count, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &paramArray, sizeof(CUstreamBatchMemOpParams)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -12673,11 +12974,11 @@ int handle_cuFuncGetAttribute(void *conn)
     CUfunction hfunc;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pi, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &attrib, sizeof(CUfunction_attribute)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hfunc, sizeof(CUfunction)) < 0)
+    if (
+        rpc_read(conn, &pi, sizeof(int)) < 0 ||
+        rpc_read(conn, &attrib, sizeof(CUfunction_attribute)) < 0 ||
+        rpc_read(conn, &hfunc, sizeof(CUfunction)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -12702,11 +13003,11 @@ int handle_cuFuncSetAttribute(void *conn)
     int value;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hfunc, sizeof(CUfunction)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &attrib, sizeof(CUfunction_attribute)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &value, sizeof(int)) < 0)
+    if (
+        rpc_read(conn, &hfunc, sizeof(CUfunction)) < 0 ||
+        rpc_read(conn, &attrib, sizeof(CUfunction_attribute)) < 0 ||
+        rpc_read(conn, &value, sizeof(int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -12729,9 +13030,10 @@ int handle_cuFuncSetCacheConfig(void *conn)
     CUfunc_cache config;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hfunc, sizeof(CUfunction)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &config, sizeof(CUfunc_cache)) < 0)
+    if (
+        rpc_read(conn, &hfunc, sizeof(CUfunction)) < 0 ||
+        rpc_read(conn, &config, sizeof(CUfunc_cache)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -12754,9 +13056,10 @@ int handle_cuFuncSetSharedMemConfig(void *conn)
     CUsharedconfig config;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hfunc, sizeof(CUfunction)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &config, sizeof(CUsharedconfig)) < 0)
+    if (
+        rpc_read(conn, &hfunc, sizeof(CUfunction)) < 0 ||
+        rpc_read(conn, &config, sizeof(CUsharedconfig)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -12779,9 +13082,10 @@ int handle_cuFuncGetModule(void *conn)
     CUfunction hfunc;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hmod, sizeof(CUmodule)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hfunc, sizeof(CUfunction)) < 0)
+    if (
+        rpc_read(conn, &hmod, sizeof(CUmodule)) < 0 ||
+        rpc_read(conn, &hfunc, sizeof(CUfunction)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -12810,37 +13114,29 @@ int handle_cuLaunchKernel(void *conn)
     unsigned int blockDimZ;
     unsigned int sharedMemBytes;
     CUstream hStream;
-    void* kernelParams;
-    void* extra;
+    void** kernelParams;
+    void** extra;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &f, sizeof(CUfunction)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &gridDimX, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &gridDimY, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &gridDimZ, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &blockDimX, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &blockDimY, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &blockDimZ, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &sharedMemBytes, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &kernelParams, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &extra, sizeof(void*)) < 0)
+    if (
+        rpc_read(conn, &f, sizeof(CUfunction)) < 0 ||
+        rpc_read(conn, &gridDimX, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &gridDimY, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &gridDimZ, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &blockDimX, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &blockDimY, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &blockDimZ, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &sharedMemBytes, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        rpc_read(conn, &kernelParams, sizeof(void**)) < 0 ||
+        rpc_read(conn, &extra, sizeof(void**)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cuLaunchKernel(f, gridDimX, gridDimY, gridDimZ, blockDimX, blockDimY, blockDimZ, sharedMemBytes, hStream, &kernelParams, &extra);
+    result = cuLaunchKernel(f, gridDimX, gridDimY, gridDimZ, blockDimX, blockDimY, blockDimZ, sharedMemBytes, hStream, kernelParams, extra);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_end_response(conn, &result) < 0)
@@ -12865,25 +13161,18 @@ int handle_cuLaunchCooperativeKernel(void *conn)
     void* kernelParams;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &f, sizeof(CUfunction)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &gridDimX, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &gridDimY, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &gridDimZ, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &blockDimX, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &blockDimY, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &blockDimZ, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &sharedMemBytes, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &kernelParams, sizeof(void*)) < 0)
+    if (
+        rpc_read(conn, &f, sizeof(CUfunction)) < 0 ||
+        rpc_read(conn, &gridDimX, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &gridDimY, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &gridDimZ, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &blockDimX, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &blockDimY, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &blockDimZ, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &sharedMemBytes, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        rpc_read(conn, &kernelParams, sizeof(void*)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -12908,11 +13197,11 @@ int handle_cuLaunchCooperativeKernelMultiDevice(void *conn)
     unsigned int flags;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &launchParamsList, sizeof(CUDA_LAUNCH_PARAMS)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &numDevices, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &launchParamsList, sizeof(CUDA_LAUNCH_PARAMS)) < 0 ||
+        rpc_read(conn, &numDevices, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -12930,35 +13219,6 @@ ERROR_0:
     return -1;
 }
 
-int handle_cuLaunchHostFunc(void *conn)
-{
-    CUstream hStream;
-    CUhostFn fn;
-    void* userData;
-    int request_id;
-    CUresult result;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &fn, sizeof(CUhostFn)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &userData, sizeof(void*)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cuLaunchHostFunc(hStream, fn, userData);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, userData, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
 int handle_cuFuncSetBlockShape(void *conn)
 {
     CUfunction hfunc;
@@ -12967,13 +13227,12 @@ int handle_cuFuncSetBlockShape(void *conn)
     int z;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hfunc, sizeof(CUfunction)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &x, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &y, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &z, sizeof(int)) < 0)
+    if (
+        rpc_read(conn, &hfunc, sizeof(CUfunction)) < 0 ||
+        rpc_read(conn, &x, sizeof(int)) < 0 ||
+        rpc_read(conn, &y, sizeof(int)) < 0 ||
+        rpc_read(conn, &z, sizeof(int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -12996,9 +13255,10 @@ int handle_cuFuncSetSharedSize(void *conn)
     unsigned int bytes;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hfunc, sizeof(CUfunction)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &bytes, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &hfunc, sizeof(CUfunction)) < 0 ||
+        rpc_read(conn, &bytes, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -13021,9 +13281,10 @@ int handle_cuParamSetSize(void *conn)
     unsigned int numbytes;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hfunc, sizeof(CUfunction)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &numbytes, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &hfunc, sizeof(CUfunction)) < 0 ||
+        rpc_read(conn, &numbytes, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -13047,11 +13308,11 @@ int handle_cuParamSeti(void *conn)
     unsigned int value;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hfunc, sizeof(CUfunction)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &offset, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &value, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &hfunc, sizeof(CUfunction)) < 0 ||
+        rpc_read(conn, &offset, sizeof(int)) < 0 ||
+        rpc_read(conn, &value, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -13075,11 +13336,11 @@ int handle_cuParamSetf(void *conn)
     float value;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hfunc, sizeof(CUfunction)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &offset, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &value, sizeof(float)) < 0)
+    if (
+        rpc_read(conn, &hfunc, sizeof(CUfunction)) < 0 ||
+        rpc_read(conn, &offset, sizeof(int)) < 0 ||
+        rpc_read(conn, &value, sizeof(float)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -13096,44 +13357,14 @@ ERROR_0:
     return -1;
 }
 
-int handle_cuParamSetv(void *conn)
-{
-    CUfunction hfunc;
-    int offset;
-    void* ptr;
-    unsigned int numbytes;
-    int request_id;
-    CUresult result;
-    if (rpc_read(conn, &hfunc, sizeof(CUfunction)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &offset, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &ptr, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &numbytes, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cuParamSetv(hfunc, offset, ptr, numbytes);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, ptr, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
 int handle_cuLaunch(void *conn)
 {
     CUfunction f;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &f, sizeof(CUfunction)) < 0)
+    if (
+        rpc_read(conn, &f, sizeof(CUfunction)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -13157,11 +13388,11 @@ int handle_cuLaunchGrid(void *conn)
     int grid_height;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &f, sizeof(CUfunction)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &grid_width, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &grid_height, sizeof(int)) < 0)
+    if (
+        rpc_read(conn, &f, sizeof(CUfunction)) < 0 ||
+        rpc_read(conn, &grid_width, sizeof(int)) < 0 ||
+        rpc_read(conn, &grid_height, sizeof(int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -13186,13 +13417,12 @@ int handle_cuLaunchGridAsync(void *conn)
     CUstream hStream;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &f, sizeof(CUfunction)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &grid_width, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &grid_height, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
+    if (
+        rpc_read(conn, &f, sizeof(CUfunction)) < 0 ||
+        rpc_read(conn, &grid_width, sizeof(int)) < 0 ||
+        rpc_read(conn, &grid_height, sizeof(int)) < 0 ||
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -13216,11 +13446,11 @@ int handle_cuParamSetTexRef(void *conn)
     CUtexref hTexRef;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hfunc, sizeof(CUfunction)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &texunit, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0)
+    if (
+        rpc_read(conn, &hfunc, sizeof(CUfunction)) < 0 ||
+        rpc_read(conn, &texunit, sizeof(int)) < 0 ||
+        rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -13243,9 +13473,10 @@ int handle_cuGraphCreate(void *conn)
     unsigned int flags;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &phGraph, sizeof(CUgraph)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &phGraph, sizeof(CUgraph)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -13263,15 +13494,49 @@ ERROR_0:
     return -1;
 }
 
+int handle_cuGraphAddKernelNode_v2(void *conn)
+{
+    CUgraphNode phGraphNode;
+    CUgraph hGraph;
+    const CUgraphNode* dependencies;
+    size_t numDependencies;
+    const CUDA_KERNEL_NODE_PARAMS* nodeParams;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_read(conn, &dependencies, sizeof(const CUgraphNode*)) < 0 ||
+        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &nodeParams, sizeof(const CUDA_KERNEL_NODE_PARAMS*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuGraphAddKernelNode_v2(&phGraphNode, hGraph, dependencies, numDependencies, nodeParams);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cuGraphKernelNodeGetParams_v2(void *conn)
 {
     CUgraphNode hNode;
     CUDA_KERNEL_NODE_PARAMS nodeParams;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &nodeParams, sizeof(CUDA_KERNEL_NODE_PARAMS)) < 0)
+    if (
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &nodeParams, sizeof(CUDA_KERNEL_NODE_PARAMS)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -13289,15 +13554,77 @@ ERROR_0:
     return -1;
 }
 
+int handle_cuGraphKernelNodeSetParams_v2(void *conn)
+{
+    CUgraphNode hNode;
+    const CUDA_KERNEL_NODE_PARAMS* nodeParams;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &nodeParams, sizeof(const CUDA_KERNEL_NODE_PARAMS*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuGraphKernelNodeSetParams_v2(hNode, nodeParams);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cuGraphAddMemcpyNode(void *conn)
+{
+    CUgraphNode phGraphNode;
+    CUgraph hGraph;
+    const CUgraphNode* dependencies;
+    size_t numDependencies;
+    const CUDA_MEMCPY3D* copyParams;
+    CUcontext ctx;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_read(conn, &dependencies, sizeof(const CUgraphNode*)) < 0 ||
+        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &copyParams, sizeof(const CUDA_MEMCPY3D*)) < 0 ||
+        rpc_read(conn, &ctx, sizeof(CUcontext)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuGraphAddMemcpyNode(&phGraphNode, hGraph, dependencies, numDependencies, copyParams, ctx);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cuGraphMemcpyNodeGetParams(void *conn)
 {
     CUgraphNode hNode;
     CUDA_MEMCPY3D nodeParams;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &nodeParams, sizeof(CUDA_MEMCPY3D)) < 0)
+    if (
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &nodeParams, sizeof(CUDA_MEMCPY3D)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -13315,15 +13642,77 @@ ERROR_0:
     return -1;
 }
 
+int handle_cuGraphMemcpyNodeSetParams(void *conn)
+{
+    CUgraphNode hNode;
+    const CUDA_MEMCPY3D* nodeParams;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &nodeParams, sizeof(const CUDA_MEMCPY3D*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuGraphMemcpyNodeSetParams(hNode, nodeParams);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cuGraphAddMemsetNode(void *conn)
+{
+    CUgraphNode phGraphNode;
+    CUgraph hGraph;
+    const CUgraphNode* dependencies;
+    size_t numDependencies;
+    const CUDA_MEMSET_NODE_PARAMS* memsetParams;
+    CUcontext ctx;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_read(conn, &dependencies, sizeof(const CUgraphNode*)) < 0 ||
+        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &memsetParams, sizeof(const CUDA_MEMSET_NODE_PARAMS*)) < 0 ||
+        rpc_read(conn, &ctx, sizeof(CUcontext)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuGraphAddMemsetNode(&phGraphNode, hGraph, dependencies, numDependencies, memsetParams, ctx);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cuGraphMemsetNodeGetParams(void *conn)
 {
     CUgraphNode hNode;
     CUDA_MEMSET_NODE_PARAMS nodeParams;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &nodeParams, sizeof(CUDA_MEMSET_NODE_PARAMS)) < 0)
+    if (
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &nodeParams, sizeof(CUDA_MEMSET_NODE_PARAMS)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -13341,15 +13730,75 @@ ERROR_0:
     return -1;
 }
 
+int handle_cuGraphMemsetNodeSetParams(void *conn)
+{
+    CUgraphNode hNode;
+    const CUDA_MEMSET_NODE_PARAMS* nodeParams;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &nodeParams, sizeof(const CUDA_MEMSET_NODE_PARAMS*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuGraphMemsetNodeSetParams(hNode, nodeParams);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cuGraphAddHostNode(void *conn)
+{
+    CUgraphNode phGraphNode;
+    CUgraph hGraph;
+    const CUgraphNode* dependencies;
+    size_t numDependencies;
+    const CUDA_HOST_NODE_PARAMS* nodeParams;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_read(conn, &dependencies, sizeof(const CUgraphNode*)) < 0 ||
+        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &nodeParams, sizeof(const CUDA_HOST_NODE_PARAMS*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuGraphAddHostNode(&phGraphNode, hGraph, dependencies, numDependencies, nodeParams);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cuGraphHostNodeGetParams(void *conn)
 {
     CUgraphNode hNode;
     CUDA_HOST_NODE_PARAMS nodeParams;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &nodeParams, sizeof(CUDA_HOST_NODE_PARAMS)) < 0)
+    if (
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &nodeParams, sizeof(CUDA_HOST_NODE_PARAMS)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -13367,15 +13816,75 @@ ERROR_0:
     return -1;
 }
 
+int handle_cuGraphHostNodeSetParams(void *conn)
+{
+    CUgraphNode hNode;
+    const CUDA_HOST_NODE_PARAMS* nodeParams;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &nodeParams, sizeof(const CUDA_HOST_NODE_PARAMS*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuGraphHostNodeSetParams(hNode, nodeParams);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cuGraphAddChildGraphNode(void *conn)
+{
+    CUgraphNode phGraphNode;
+    CUgraph hGraph;
+    const CUgraphNode* dependencies;
+    size_t numDependencies;
+    CUgraph childGraph;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_read(conn, &dependencies, sizeof(const CUgraphNode*)) < 0 ||
+        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &childGraph, sizeof(CUgraph)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuGraphAddChildGraphNode(&phGraphNode, hGraph, dependencies, numDependencies, childGraph);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cuGraphChildGraphNodeGetGraph(void *conn)
 {
     CUgraphNode hNode;
     CUgraph phGraph;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &phGraph, sizeof(CUgraph)) < 0)
+    if (
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &phGraph, sizeof(CUgraph)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -13393,15 +13902,80 @@ ERROR_0:
     return -1;
 }
 
+int handle_cuGraphAddEmptyNode(void *conn)
+{
+    CUgraphNode phGraphNode;
+    CUgraph hGraph;
+    const CUgraphNode* dependencies;
+    size_t numDependencies;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_read(conn, &dependencies, sizeof(const CUgraphNode*)) < 0 ||
+        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuGraphAddEmptyNode(&phGraphNode, hGraph, dependencies, numDependencies);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cuGraphAddEventRecordNode(void *conn)
+{
+    CUgraphNode phGraphNode;
+    CUgraph hGraph;
+    const CUgraphNode* dependencies;
+    size_t numDependencies;
+    CUevent event;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_read(conn, &dependencies, sizeof(const CUgraphNode*)) < 0 ||
+        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &event, sizeof(CUevent)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuGraphAddEventRecordNode(&phGraphNode, hGraph, dependencies, numDependencies, event);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cuGraphEventRecordNodeGetEvent(void *conn)
 {
     CUgraphNode hNode;
     CUevent event_out;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &event_out, sizeof(CUevent)) < 0)
+    if (
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &event_out, sizeof(CUevent)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -13425,9 +13999,10 @@ int handle_cuGraphEventRecordNodeSetEvent(void *conn)
     CUevent event;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &event, sizeof(CUevent)) < 0)
+    if (
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &event, sizeof(CUevent)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -13444,15 +14019,49 @@ ERROR_0:
     return -1;
 }
 
+int handle_cuGraphAddEventWaitNode(void *conn)
+{
+    CUgraphNode phGraphNode;
+    CUgraph hGraph;
+    const CUgraphNode* dependencies;
+    size_t numDependencies;
+    CUevent event;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_read(conn, &dependencies, sizeof(const CUgraphNode*)) < 0 ||
+        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &event, sizeof(CUevent)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuGraphAddEventWaitNode(&phGraphNode, hGraph, dependencies, numDependencies, event);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cuGraphEventWaitNodeGetEvent(void *conn)
 {
     CUgraphNode hNode;
     CUevent event_out;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &event_out, sizeof(CUevent)) < 0)
+    if (
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &event_out, sizeof(CUevent)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -13476,9 +14085,10 @@ int handle_cuGraphEventWaitNodeSetEvent(void *conn)
     CUevent event;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &event, sizeof(CUevent)) < 0)
+    if (
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &event, sizeof(CUevent)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -13495,15 +14105,49 @@ ERROR_0:
     return -1;
 }
 
+int handle_cuGraphAddExternalSemaphoresSignalNode(void *conn)
+{
+    CUgraphNode phGraphNode;
+    CUgraph hGraph;
+    const CUgraphNode* dependencies;
+    size_t numDependencies;
+    const CUDA_EXT_SEM_SIGNAL_NODE_PARAMS* nodeParams;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_read(conn, &dependencies, sizeof(const CUgraphNode*)) < 0 ||
+        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &nodeParams, sizeof(const CUDA_EXT_SEM_SIGNAL_NODE_PARAMS*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuGraphAddExternalSemaphoresSignalNode(&phGraphNode, hGraph, dependencies, numDependencies, nodeParams);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cuGraphExternalSemaphoresSignalNodeGetParams(void *conn)
 {
     CUgraphNode hNode;
     CUDA_EXT_SEM_SIGNAL_NODE_PARAMS params_out;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &params_out, sizeof(CUDA_EXT_SEM_SIGNAL_NODE_PARAMS)) < 0)
+    if (
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &params_out, sizeof(CUDA_EXT_SEM_SIGNAL_NODE_PARAMS)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -13521,15 +14165,75 @@ ERROR_0:
     return -1;
 }
 
+int handle_cuGraphExternalSemaphoresSignalNodeSetParams(void *conn)
+{
+    CUgraphNode hNode;
+    const CUDA_EXT_SEM_SIGNAL_NODE_PARAMS* nodeParams;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &nodeParams, sizeof(const CUDA_EXT_SEM_SIGNAL_NODE_PARAMS*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuGraphExternalSemaphoresSignalNodeSetParams(hNode, nodeParams);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cuGraphAddExternalSemaphoresWaitNode(void *conn)
+{
+    CUgraphNode phGraphNode;
+    CUgraph hGraph;
+    const CUgraphNode* dependencies;
+    size_t numDependencies;
+    const CUDA_EXT_SEM_WAIT_NODE_PARAMS* nodeParams;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_read(conn, &dependencies, sizeof(const CUgraphNode*)) < 0 ||
+        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &nodeParams, sizeof(const CUDA_EXT_SEM_WAIT_NODE_PARAMS*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuGraphAddExternalSemaphoresWaitNode(&phGraphNode, hGraph, dependencies, numDependencies, nodeParams);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cuGraphExternalSemaphoresWaitNodeGetParams(void *conn)
 {
     CUgraphNode hNode;
     CUDA_EXT_SEM_WAIT_NODE_PARAMS params_out;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &params_out, sizeof(CUDA_EXT_SEM_WAIT_NODE_PARAMS)) < 0)
+    if (
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &params_out, sizeof(CUDA_EXT_SEM_WAIT_NODE_PARAMS)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -13547,15 +14251,75 @@ ERROR_0:
     return -1;
 }
 
+int handle_cuGraphExternalSemaphoresWaitNodeSetParams(void *conn)
+{
+    CUgraphNode hNode;
+    const CUDA_EXT_SEM_WAIT_NODE_PARAMS* nodeParams;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &nodeParams, sizeof(const CUDA_EXT_SEM_WAIT_NODE_PARAMS*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuGraphExternalSemaphoresWaitNodeSetParams(hNode, nodeParams);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cuGraphAddBatchMemOpNode(void *conn)
+{
+    CUgraphNode phGraphNode;
+    CUgraph hGraph;
+    const CUgraphNode* dependencies;
+    size_t numDependencies;
+    const CUDA_BATCH_MEM_OP_NODE_PARAMS* nodeParams;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_read(conn, &dependencies, sizeof(const CUgraphNode*)) < 0 ||
+        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &nodeParams, sizeof(const CUDA_BATCH_MEM_OP_NODE_PARAMS*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuGraphAddBatchMemOpNode(&phGraphNode, hGraph, dependencies, numDependencies, nodeParams);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cuGraphBatchMemOpNodeGetParams(void *conn)
 {
     CUgraphNode hNode;
     CUDA_BATCH_MEM_OP_NODE_PARAMS nodeParams_out;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &nodeParams_out, sizeof(CUDA_BATCH_MEM_OP_NODE_PARAMS)) < 0)
+    if (
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &nodeParams_out, sizeof(CUDA_BATCH_MEM_OP_NODE_PARAMS)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -13573,15 +14337,104 @@ ERROR_0:
     return -1;
 }
 
+int handle_cuGraphBatchMemOpNodeSetParams(void *conn)
+{
+    CUgraphNode hNode;
+    const CUDA_BATCH_MEM_OP_NODE_PARAMS* nodeParams;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &nodeParams, sizeof(const CUDA_BATCH_MEM_OP_NODE_PARAMS*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuGraphBatchMemOpNodeSetParams(hNode, nodeParams);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cuGraphExecBatchMemOpNodeSetParams(void *conn)
+{
+    CUgraphExec hGraphExec;
+    CUgraphNode hNode;
+    const CUDA_BATCH_MEM_OP_NODE_PARAMS* nodeParams;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &nodeParams, sizeof(const CUDA_BATCH_MEM_OP_NODE_PARAMS*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuGraphExecBatchMemOpNodeSetParams(hGraphExec, hNode, nodeParams);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cuGraphAddMemAllocNode(void *conn)
+{
+    CUgraphNode phGraphNode;
+    CUgraph hGraph;
+    const CUgraphNode* dependencies;
+    size_t numDependencies;
+    CUDA_MEM_ALLOC_NODE_PARAMS nodeParams;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_read(conn, &dependencies, sizeof(const CUgraphNode*)) < 0 ||
+        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &nodeParams, sizeof(CUDA_MEM_ALLOC_NODE_PARAMS)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuGraphAddMemAllocNode(&phGraphNode, hGraph, dependencies, numDependencies, &nodeParams);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(conn, &nodeParams, sizeof(CUDA_MEM_ALLOC_NODE_PARAMS)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cuGraphMemAllocNodeGetParams(void *conn)
 {
     CUgraphNode hNode;
     CUDA_MEM_ALLOC_NODE_PARAMS params_out;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &params_out, sizeof(CUDA_MEM_ALLOC_NODE_PARAMS)) < 0)
+    if (
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &params_out, sizeof(CUDA_MEM_ALLOC_NODE_PARAMS)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -13599,15 +14452,49 @@ ERROR_0:
     return -1;
 }
 
+int handle_cuGraphAddMemFreeNode(void *conn)
+{
+    CUgraphNode phGraphNode;
+    CUgraph hGraph;
+    size_t numDependencies;
+    CUgraphNode* dependencies;
+    CUdeviceptr dptr;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_read(conn, dependencies, numDependencies * sizeof(const CUgraphNode)) < 0 ||
+        rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuGraphAddMemFreeNode(&phGraphNode, hGraph, dependencies, numDependencies, dptr);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cuGraphMemFreeNodeGetParams(void *conn)
 {
     CUgraphNode hNode;
     CUdeviceptr dptr_out;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dptr_out, sizeof(CUdeviceptr)) < 0)
+    if (
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &dptr_out, sizeof(CUdeviceptr)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -13630,7 +14517,9 @@ int handle_cuDeviceGraphMemTrim(void *conn)
     CUdevice device;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &device, sizeof(CUdevice)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(CUdevice)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -13647,73 +14536,16 @@ ERROR_0:
     return -1;
 }
 
-int handle_cuDeviceGetGraphMemAttribute(void *conn)
-{
-    CUdevice device;
-    CUgraphMem_attribute attr;
-    void* value;
-    int request_id;
-    CUresult result;
-    if (rpc_read(conn, &device, sizeof(CUdevice)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &attr, sizeof(CUgraphMem_attribute)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &value, sizeof(void*)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cuDeviceGetGraphMemAttribute(device, attr, value);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, value, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_cuDeviceSetGraphMemAttribute(void *conn)
-{
-    CUdevice device;
-    CUgraphMem_attribute attr;
-    void* value;
-    int request_id;
-    CUresult result;
-    if (rpc_read(conn, &device, sizeof(CUdevice)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &attr, sizeof(CUgraphMem_attribute)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &value, sizeof(void*)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cuDeviceSetGraphMemAttribute(device, attr, value);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, value, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
 int handle_cuGraphClone(void *conn)
 {
     CUgraph phGraphClone;
     CUgraph originalGraph;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &phGraphClone, sizeof(CUgraph)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &originalGraph, sizeof(CUgraph)) < 0)
+    if (
+        rpc_read(conn, &phGraphClone, sizeof(CUgraph)) < 0 ||
+        rpc_read(conn, &originalGraph, sizeof(CUgraph)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -13738,11 +14570,11 @@ int handle_cuGraphNodeFindInClone(void *conn)
     CUgraph hClonedGraph;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &phNode, sizeof(CUgraphNode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hOriginalNode, sizeof(CUgraphNode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hClonedGraph, sizeof(CUgraph)) < 0)
+    if (
+        rpc_read(conn, &phNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &hOriginalNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &hClonedGraph, sizeof(CUgraph)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -13766,9 +14598,10 @@ int handle_cuGraphNodeGetType(void *conn)
     CUgraphNodeType type;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &type, sizeof(CUgraphNodeType)) < 0)
+    if (
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &type, sizeof(CUgraphNodeType)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -13793,11 +14626,11 @@ int handle_cuGraphGetNodes(void *conn)
     size_t numNodes;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hGraph, sizeof(CUgraph)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &nodes, sizeof(CUgraphNode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &numNodes, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_read(conn, &nodes, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &numNodes, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -13823,11 +14656,11 @@ int handle_cuGraphGetRootNodes(void *conn)
     size_t numRootNodes;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hGraph, sizeof(CUgraph)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &rootNodes, sizeof(CUgraphNode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &numRootNodes, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_read(conn, &rootNodes, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &numRootNodes, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -13854,13 +14687,12 @@ int handle_cuGraphGetEdges(void *conn)
     size_t numEdges;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hGraph, sizeof(CUgraph)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &from, sizeof(CUgraphNode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &to, sizeof(CUgraphNode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &numEdges, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_read(conn, &from, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &to, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &numEdges, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -13887,11 +14719,11 @@ int handle_cuGraphNodeGetDependencies(void *conn)
     size_t numDependencies;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dependencies, sizeof(CUgraphNode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &numDependencies, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &dependencies, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -13917,11 +14749,11 @@ int handle_cuGraphNodeGetDependentNodes(void *conn)
     size_t numDependentNodes;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dependentNodes, sizeof(CUgraphNode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &numDependentNodes, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &dependentNodes, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &numDependentNodes, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -13940,12 +14772,74 @@ ERROR_0:
     return -1;
 }
 
+int handle_cuGraphAddDependencies(void *conn)
+{
+    CUgraph hGraph;
+    const CUgraphNode* from;
+    const CUgraphNode* to;
+    size_t numDependencies;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_read(conn, &from, sizeof(const CUgraphNode*)) < 0 ||
+        rpc_read(conn, &to, sizeof(const CUgraphNode*)) < 0 ||
+        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuGraphAddDependencies(hGraph, from, to, numDependencies);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cuGraphRemoveDependencies(void *conn)
+{
+    CUgraph hGraph;
+    const CUgraphNode* from;
+    const CUgraphNode* to;
+    size_t numDependencies;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_read(conn, &from, sizeof(const CUgraphNode*)) < 0 ||
+        rpc_read(conn, &to, sizeof(const CUgraphNode*)) < 0 ||
+        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuGraphRemoveDependencies(hGraph, from, to, numDependencies);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cuGraphDestroyNode(void *conn)
 {
     CUgraphNode hNode;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0)
+    if (
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -13969,11 +14863,11 @@ int handle_cuGraphInstantiateWithFlags(void *conn)
     unsigned long long flags;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &phGraphExec, sizeof(CUgraphExec)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hGraph, sizeof(CUgraph)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned long long)) < 0)
+    if (
+        rpc_read(conn, &phGraphExec, sizeof(CUgraphExec)) < 0 ||
+        rpc_read(conn, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned long long)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -13998,11 +14892,11 @@ int handle_cuGraphInstantiateWithParams(void *conn)
     CUDA_GRAPH_INSTANTIATE_PARAMS instantiateParams;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &phGraphExec, sizeof(CUgraphExec)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hGraph, sizeof(CUgraph)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &instantiateParams, sizeof(CUDA_GRAPH_INSTANTIATE_PARAMS)) < 0)
+    if (
+        rpc_read(conn, &phGraphExec, sizeof(CUgraphExec)) < 0 ||
+        rpc_read(conn, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_read(conn, &instantiateParams, sizeof(CUDA_GRAPH_INSTANTIATE_PARAMS)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -14027,9 +14921,10 @@ int handle_cuGraphExecGetFlags(void *conn)
     cuuint64_t flags;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hGraphExec, sizeof(CUgraphExec)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(cuuint64_t)) < 0)
+    if (
+        rpc_read(conn, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
+        rpc_read(conn, &flags, sizeof(cuuint64_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -14047,6 +14942,122 @@ ERROR_0:
     return -1;
 }
 
+int handle_cuGraphExecKernelNodeSetParams_v2(void *conn)
+{
+    CUgraphExec hGraphExec;
+    CUgraphNode hNode;
+    const CUDA_KERNEL_NODE_PARAMS* nodeParams;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &nodeParams, sizeof(const CUDA_KERNEL_NODE_PARAMS*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuGraphExecKernelNodeSetParams_v2(hGraphExec, hNode, nodeParams);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cuGraphExecMemcpyNodeSetParams(void *conn)
+{
+    CUgraphExec hGraphExec;
+    CUgraphNode hNode;
+    const CUDA_MEMCPY3D* copyParams;
+    CUcontext ctx;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &copyParams, sizeof(const CUDA_MEMCPY3D*)) < 0 ||
+        rpc_read(conn, &ctx, sizeof(CUcontext)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuGraphExecMemcpyNodeSetParams(hGraphExec, hNode, copyParams, ctx);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cuGraphExecMemsetNodeSetParams(void *conn)
+{
+    CUgraphExec hGraphExec;
+    CUgraphNode hNode;
+    const CUDA_MEMSET_NODE_PARAMS* memsetParams;
+    CUcontext ctx;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &memsetParams, sizeof(const CUDA_MEMSET_NODE_PARAMS*)) < 0 ||
+        rpc_read(conn, &ctx, sizeof(CUcontext)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuGraphExecMemsetNodeSetParams(hGraphExec, hNode, memsetParams, ctx);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cuGraphExecHostNodeSetParams(void *conn)
+{
+    CUgraphExec hGraphExec;
+    CUgraphNode hNode;
+    const CUDA_HOST_NODE_PARAMS* nodeParams;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &nodeParams, sizeof(const CUDA_HOST_NODE_PARAMS*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuGraphExecHostNodeSetParams(hGraphExec, hNode, nodeParams);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cuGraphExecChildGraphNodeSetParams(void *conn)
 {
     CUgraphExec hGraphExec;
@@ -14054,11 +15065,11 @@ int handle_cuGraphExecChildGraphNodeSetParams(void *conn)
     CUgraph childGraph;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hGraphExec, sizeof(CUgraphExec)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &childGraph, sizeof(CUgraph)) < 0)
+    if (
+        rpc_read(conn, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &childGraph, sizeof(CUgraph)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -14082,11 +15093,11 @@ int handle_cuGraphExecEventRecordNodeSetEvent(void *conn)
     CUevent event;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hGraphExec, sizeof(CUgraphExec)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &event, sizeof(CUevent)) < 0)
+    if (
+        rpc_read(conn, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &event, sizeof(CUevent)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -14110,17 +15121,73 @@ int handle_cuGraphExecEventWaitNodeSetEvent(void *conn)
     CUevent event;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hGraphExec, sizeof(CUgraphExec)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &event, sizeof(CUevent)) < 0)
+    if (
+        rpc_read(conn, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &event, sizeof(CUevent)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
     result = cuGraphExecEventWaitNodeSetEvent(hGraphExec, hNode, event);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cuGraphExecExternalSemaphoresSignalNodeSetParams(void *conn)
+{
+    CUgraphExec hGraphExec;
+    CUgraphNode hNode;
+    const CUDA_EXT_SEM_SIGNAL_NODE_PARAMS* nodeParams;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &nodeParams, sizeof(const CUDA_EXT_SEM_SIGNAL_NODE_PARAMS*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuGraphExecExternalSemaphoresSignalNodeSetParams(hGraphExec, hNode, nodeParams);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cuGraphExecExternalSemaphoresWaitNodeSetParams(void *conn)
+{
+    CUgraphExec hGraphExec;
+    CUgraphNode hNode;
+    const CUDA_EXT_SEM_WAIT_NODE_PARAMS* nodeParams;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &nodeParams, sizeof(const CUDA_EXT_SEM_WAIT_NODE_PARAMS*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuGraphExecExternalSemaphoresWaitNodeSetParams(hGraphExec, hNode, nodeParams);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_end_response(conn, &result) < 0)
@@ -14138,11 +15205,11 @@ int handle_cuGraphNodeSetEnabled(void *conn)
     unsigned int isEnabled;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hGraphExec, sizeof(CUgraphExec)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &isEnabled, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &isEnabled, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -14166,11 +15233,11 @@ int handle_cuGraphNodeGetEnabled(void *conn)
     unsigned int isEnabled;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hGraphExec, sizeof(CUgraphExec)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &isEnabled, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &isEnabled, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -14194,9 +15261,10 @@ int handle_cuGraphUpload(void *conn)
     CUstream hStream;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hGraphExec, sizeof(CUgraphExec)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
+    if (
+        rpc_read(conn, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -14219,9 +15287,10 @@ int handle_cuGraphLaunch(void *conn)
     CUstream hStream;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hGraphExec, sizeof(CUgraphExec)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
+    if (
+        rpc_read(conn, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -14243,7 +15312,9 @@ int handle_cuGraphExecDestroy(void *conn)
     CUgraphExec hGraphExec;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hGraphExec, sizeof(CUgraphExec)) < 0)
+    if (
+        rpc_read(conn, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -14265,7 +15336,9 @@ int handle_cuGraphDestroy(void *conn)
     CUgraph hGraph;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hGraph, sizeof(CUgraph)) < 0)
+    if (
+        rpc_read(conn, &hGraph, sizeof(CUgraph)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -14289,11 +15362,11 @@ int handle_cuGraphExecUpdate_v2(void *conn)
     CUgraphExecUpdateResultInfo resultInfo;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hGraphExec, sizeof(CUgraphExec)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hGraph, sizeof(CUgraph)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &resultInfo, sizeof(CUgraphExecUpdateResultInfo)) < 0)
+    if (
+        rpc_read(conn, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
+        rpc_read(conn, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_read(conn, &resultInfo, sizeof(CUgraphExecUpdateResultInfo)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -14317,9 +15390,10 @@ int handle_cuGraphKernelNodeCopyAttributes(void *conn)
     CUgraphNode src;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dst, sizeof(CUgraphNode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &src, sizeof(CUgraphNode)) < 0)
+    if (
+        rpc_read(conn, &dst, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &src, sizeof(CUgraphNode)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -14343,11 +15417,11 @@ int handle_cuGraphKernelNodeGetAttribute(void *conn)
     CUkernelNodeAttrValue value_out;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &attr, sizeof(CUkernelNodeAttrID)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &value_out, sizeof(CUkernelNodeAttrValue)) < 0)
+    if (
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &attr, sizeof(CUkernelNodeAttrID)) < 0 ||
+        rpc_read(conn, &value_out, sizeof(CUkernelNodeAttrValue)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -14365,34 +15439,54 @@ ERROR_0:
     return -1;
 }
 
-int handle_cuUserObjectCreate(void *conn)
+int handle_cuGraphKernelNodeSetAttribute(void *conn)
 {
-    CUuserObject object_out;
-    void* ptr;
-    CUhostFn destroy;
-    unsigned int initialRefcount;
-    unsigned int flags;
+    CUgraphNode hNode;
+    CUkernelNodeAttrID attr;
+    const CUkernelNodeAttrValue* value;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &object_out, sizeof(CUuserObject)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &ptr, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &destroy, sizeof(CUhostFn)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &initialRefcount, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(conn, &attr, sizeof(CUkernelNodeAttrID)) < 0 ||
+        rpc_read(conn, &value, sizeof(const CUkernelNodeAttrValue*)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cuUserObjectCreate(&object_out, ptr, destroy, initialRefcount, flags);
+    result = cuGraphKernelNodeSetAttribute(hNode, attr, value);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &object_out, sizeof(CUuserObject)) < 0 ||
-        rpc_write(conn, ptr, sizeof(void*)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cuGraphDebugDotPrint(void *conn)
+{
+    CUgraph hGraph;
+    const char* path;
+    unsigned int flags;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_read(conn, &path, sizeof(const char*)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuGraphDebugDotPrint(hGraph, path, flags);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -14407,9 +15501,10 @@ int handle_cuUserObjectRetain(void *conn)
     unsigned int count;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &object, sizeof(CUuserObject)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &count, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &object, sizeof(CUuserObject)) < 0 ||
+        rpc_read(conn, &count, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -14432,9 +15527,10 @@ int handle_cuUserObjectRelease(void *conn)
     unsigned int count;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &object, sizeof(CUuserObject)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &count, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &object, sizeof(CUuserObject)) < 0 ||
+        rpc_read(conn, &count, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -14459,13 +15555,12 @@ int handle_cuGraphRetainUserObject(void *conn)
     unsigned int flags;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &graph, sizeof(CUgraph)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &object, sizeof(CUuserObject)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &count, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &graph, sizeof(CUgraph)) < 0 ||
+        rpc_read(conn, &object, sizeof(CUuserObject)) < 0 ||
+        rpc_read(conn, &count, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -14489,11 +15584,11 @@ int handle_cuGraphReleaseUserObject(void *conn)
     unsigned int count;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &graph, sizeof(CUgraph)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &object, sizeof(CUuserObject)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &count, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &graph, sizeof(CUgraph)) < 0 ||
+        rpc_read(conn, &object, sizeof(CUuserObject)) < 0 ||
+        rpc_read(conn, &count, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -14518,13 +15613,12 @@ int handle_cuOccupancyMaxActiveBlocksPerMultiprocessor(void *conn)
     size_t dynamicSMemSize;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &numBlocks, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &func, sizeof(CUfunction)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &blockSize, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dynamicSMemSize, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &numBlocks, sizeof(int)) < 0 ||
+        rpc_read(conn, &func, sizeof(CUfunction)) < 0 ||
+        rpc_read(conn, &blockSize, sizeof(int)) < 0 ||
+        rpc_read(conn, &dynamicSMemSize, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -14551,15 +15645,13 @@ int handle_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(void *conn)
     unsigned int flags;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &numBlocks, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &func, sizeof(CUfunction)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &blockSize, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dynamicSMemSize, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &numBlocks, sizeof(int)) < 0 ||
+        rpc_read(conn, &func, sizeof(CUfunction)) < 0 ||
+        rpc_read(conn, &blockSize, sizeof(int)) < 0 ||
+        rpc_read(conn, &dynamicSMemSize, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -14585,13 +15677,12 @@ int handle_cuOccupancyAvailableDynamicSMemPerBlock(void *conn)
     int blockSize;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &dynamicSmemSize, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &func, sizeof(CUfunction)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &numBlocks, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &blockSize, sizeof(int)) < 0)
+    if (
+        rpc_read(conn, &dynamicSmemSize, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &func, sizeof(CUfunction)) < 0 ||
+        rpc_read(conn, &numBlocks, sizeof(int)) < 0 ||
+        rpc_read(conn, &blockSize, sizeof(int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -14609,6 +15700,64 @@ ERROR_0:
     return -1;
 }
 
+int handle_cuOccupancyMaxPotentialClusterSize(void *conn)
+{
+    int clusterSize;
+    CUfunction func;
+    const CUlaunchConfig* config;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &clusterSize, sizeof(int)) < 0 ||
+        rpc_read(conn, &func, sizeof(CUfunction)) < 0 ||
+        rpc_read(conn, &config, sizeof(const CUlaunchConfig*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuOccupancyMaxPotentialClusterSize(&clusterSize, func, config);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &clusterSize, sizeof(int)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cuOccupancyMaxActiveClusters(void *conn)
+{
+    int numClusters;
+    CUfunction func;
+    const CUlaunchConfig* config;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &numClusters, sizeof(int)) < 0 ||
+        rpc_read(conn, &func, sizeof(CUfunction)) < 0 ||
+        rpc_read(conn, &config, sizeof(const CUlaunchConfig*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuOccupancyMaxActiveClusters(&numClusters, func, config);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &numClusters, sizeof(int)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cuTexRefSetArray(void *conn)
 {
     CUtexref hTexRef;
@@ -14616,11 +15765,11 @@ int handle_cuTexRefSetArray(void *conn)
     unsigned int Flags;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hArray, sizeof(CUarray)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &Flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
+        rpc_read(conn, &hArray, sizeof(CUarray)) < 0 ||
+        rpc_read(conn, &Flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -14644,11 +15793,11 @@ int handle_cuTexRefSetMipmappedArray(void *conn)
     unsigned int Flags;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hMipmappedArray, sizeof(CUmipmappedArray)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &Flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
+        rpc_read(conn, &hMipmappedArray, sizeof(CUmipmappedArray)) < 0 ||
+        rpc_read(conn, &Flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -14673,13 +15822,12 @@ int handle_cuTexRefSetAddress_v2(void *conn)
     size_t bytes;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &ByteOffset, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &bytes, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &ByteOffset, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
+        rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &bytes, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -14697,6 +15845,36 @@ ERROR_0:
     return -1;
 }
 
+int handle_cuTexRefSetAddress2D_v3(void *conn)
+{
+    CUtexref hTexRef;
+    const CUDA_ARRAY_DESCRIPTOR* desc;
+    CUdeviceptr dptr;
+    size_t Pitch;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
+        rpc_read(conn, &desc, sizeof(const CUDA_ARRAY_DESCRIPTOR*)) < 0 ||
+        rpc_read(conn, &dptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &Pitch, sizeof(size_t)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuTexRefSetAddress2D_v3(hTexRef, desc, dptr, Pitch);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cuTexRefSetFormat(void *conn)
 {
     CUtexref hTexRef;
@@ -14704,11 +15882,11 @@ int handle_cuTexRefSetFormat(void *conn)
     int NumPackedComponents;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &fmt, sizeof(CUarray_format)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &NumPackedComponents, sizeof(int)) < 0)
+    if (
+        rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
+        rpc_read(conn, &fmt, sizeof(CUarray_format)) < 0 ||
+        rpc_read(conn, &NumPackedComponents, sizeof(int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -14732,11 +15910,11 @@ int handle_cuTexRefSetAddressMode(void *conn)
     CUaddress_mode am;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dim, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &am, sizeof(CUaddress_mode)) < 0)
+    if (
+        rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
+        rpc_read(conn, &dim, sizeof(int)) < 0 ||
+        rpc_read(conn, &am, sizeof(CUaddress_mode)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -14759,9 +15937,10 @@ int handle_cuTexRefSetFilterMode(void *conn)
     CUfilter_mode fm;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &fm, sizeof(CUfilter_mode)) < 0)
+    if (
+        rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
+        rpc_read(conn, &fm, sizeof(CUfilter_mode)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -14784,9 +15963,10 @@ int handle_cuTexRefSetMipmapFilterMode(void *conn)
     CUfilter_mode fm;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &fm, sizeof(CUfilter_mode)) < 0)
+    if (
+        rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
+        rpc_read(conn, &fm, sizeof(CUfilter_mode)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -14809,9 +15989,10 @@ int handle_cuTexRefSetMipmapLevelBias(void *conn)
     float bias;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &bias, sizeof(float)) < 0)
+    if (
+        rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
+        rpc_read(conn, &bias, sizeof(float)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -14835,11 +16016,11 @@ int handle_cuTexRefSetMipmapLevelClamp(void *conn)
     float maxMipmapLevelClamp;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &minMipmapLevelClamp, sizeof(float)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &maxMipmapLevelClamp, sizeof(float)) < 0)
+    if (
+        rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
+        rpc_read(conn, &minMipmapLevelClamp, sizeof(float)) < 0 ||
+        rpc_read(conn, &maxMipmapLevelClamp, sizeof(float)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -14862,9 +16043,10 @@ int handle_cuTexRefSetMaxAnisotropy(void *conn)
     unsigned int maxAniso;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &maxAniso, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
+        rpc_read(conn, &maxAniso, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -14887,9 +16069,10 @@ int handle_cuTexRefSetBorderColor(void *conn)
     float pBorderColor;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &pBorderColor, sizeof(float)) < 0)
+    if (
+        rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
+        rpc_read(conn, &pBorderColor, sizeof(float)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -14913,9 +16096,10 @@ int handle_cuTexRefSetFlags(void *conn)
     unsigned int Flags;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &Flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
+        rpc_read(conn, &Flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -14938,9 +16122,10 @@ int handle_cuTexRefGetAddress_v2(void *conn)
     CUtexref hTexRef;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pdptr, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0)
+    if (
+        rpc_read(conn, &pdptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -14964,9 +16149,10 @@ int handle_cuTexRefGetArray(void *conn)
     CUtexref hTexRef;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &phArray, sizeof(CUarray)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0)
+    if (
+        rpc_read(conn, &phArray, sizeof(CUarray)) < 0 ||
+        rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -14990,9 +16176,10 @@ int handle_cuTexRefGetMipmappedArray(void *conn)
     CUtexref hTexRef;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &phMipmappedArray, sizeof(CUmipmappedArray)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0)
+    if (
+        rpc_read(conn, &phMipmappedArray, sizeof(CUmipmappedArray)) < 0 ||
+        rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15017,11 +16204,11 @@ int handle_cuTexRefGetAddressMode(void *conn)
     int dim;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pam, sizeof(CUaddress_mode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dim, sizeof(int)) < 0)
+    if (
+        rpc_read(conn, &pam, sizeof(CUaddress_mode)) < 0 ||
+        rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
+        rpc_read(conn, &dim, sizeof(int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15045,9 +16232,10 @@ int handle_cuTexRefGetFilterMode(void *conn)
     CUtexref hTexRef;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pfm, sizeof(CUfilter_mode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0)
+    if (
+        rpc_read(conn, &pfm, sizeof(CUfilter_mode)) < 0 ||
+        rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15072,11 +16260,11 @@ int handle_cuTexRefGetFormat(void *conn)
     CUtexref hTexRef;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pFormat, sizeof(CUarray_format)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &pNumChannels, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0)
+    if (
+        rpc_read(conn, &pFormat, sizeof(CUarray_format)) < 0 ||
+        rpc_read(conn, &pNumChannels, sizeof(int)) < 0 ||
+        rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15101,9 +16289,10 @@ int handle_cuTexRefGetMipmapFilterMode(void *conn)
     CUtexref hTexRef;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pfm, sizeof(CUfilter_mode)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0)
+    if (
+        rpc_read(conn, &pfm, sizeof(CUfilter_mode)) < 0 ||
+        rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15127,9 +16316,10 @@ int handle_cuTexRefGetMipmapLevelBias(void *conn)
     CUtexref hTexRef;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pbias, sizeof(float)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0)
+    if (
+        rpc_read(conn, &pbias, sizeof(float)) < 0 ||
+        rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15154,11 +16344,11 @@ int handle_cuTexRefGetMipmapLevelClamp(void *conn)
     CUtexref hTexRef;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pminMipmapLevelClamp, sizeof(float)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &pmaxMipmapLevelClamp, sizeof(float)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0)
+    if (
+        rpc_read(conn, &pminMipmapLevelClamp, sizeof(float)) < 0 ||
+        rpc_read(conn, &pmaxMipmapLevelClamp, sizeof(float)) < 0 ||
+        rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15183,9 +16373,10 @@ int handle_cuTexRefGetMaxAnisotropy(void *conn)
     CUtexref hTexRef;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pmaxAniso, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0)
+    if (
+        rpc_read(conn, &pmaxAniso, sizeof(int)) < 0 ||
+        rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15209,9 +16400,10 @@ int handle_cuTexRefGetBorderColor(void *conn)
     CUtexref hTexRef;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pBorderColor, sizeof(float)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0)
+    if (
+        rpc_read(conn, &pBorderColor, sizeof(float)) < 0 ||
+        rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15235,9 +16427,10 @@ int handle_cuTexRefGetFlags(void *conn)
     CUtexref hTexRef;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pFlags, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0)
+    if (
+        rpc_read(conn, &pFlags, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15260,7 +16453,9 @@ int handle_cuTexRefCreate(void *conn)
     CUtexref pTexRef;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pTexRef, sizeof(CUtexref)) < 0)
+    if (
+        rpc_read(conn, &pTexRef, sizeof(CUtexref)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15283,7 +16478,9 @@ int handle_cuTexRefDestroy(void *conn)
     CUtexref hTexRef;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0)
+    if (
+        rpc_read(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15307,11 +16504,11 @@ int handle_cuSurfRefSetArray(void *conn)
     unsigned int Flags;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &hSurfRef, sizeof(CUsurfref)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hArray, sizeof(CUarray)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &Flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &hSurfRef, sizeof(CUsurfref)) < 0 ||
+        rpc_read(conn, &hArray, sizeof(CUarray)) < 0 ||
+        rpc_read(conn, &Flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15334,9 +16531,10 @@ int handle_cuSurfRefGetArray(void *conn)
     CUsurfref hSurfRef;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &phArray, sizeof(CUarray)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hSurfRef, sizeof(CUsurfref)) < 0)
+    if (
+        rpc_read(conn, &phArray, sizeof(CUarray)) < 0 ||
+        rpc_read(conn, &hSurfRef, sizeof(CUsurfref)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15354,12 +16552,45 @@ ERROR_0:
     return -1;
 }
 
+int handle_cuTexObjectCreate(void *conn)
+{
+    CUtexObject pTexObject;
+    const CUDA_RESOURCE_DESC* pResDesc;
+    const CUDA_TEXTURE_DESC* pTexDesc;
+    const CUDA_RESOURCE_VIEW_DESC* pResViewDesc;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &pTexObject, sizeof(CUtexObject)) < 0 ||
+        rpc_read(conn, &pResDesc, sizeof(const CUDA_RESOURCE_DESC*)) < 0 ||
+        rpc_read(conn, &pTexDesc, sizeof(const CUDA_TEXTURE_DESC*)) < 0 ||
+        rpc_read(conn, &pResViewDesc, sizeof(const CUDA_RESOURCE_VIEW_DESC*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuTexObjectCreate(&pTexObject, pResDesc, pTexDesc, pResViewDesc);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &pTexObject, sizeof(CUtexObject)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cuTexObjectDestroy(void *conn)
 {
     CUtexObject texObject;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &texObject, sizeof(CUtexObject)) < 0)
+    if (
+        rpc_read(conn, &texObject, sizeof(CUtexObject)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15382,9 +16613,10 @@ int handle_cuTexObjectGetResourceDesc(void *conn)
     CUtexObject texObject;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pResDesc, sizeof(CUDA_RESOURCE_DESC)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &texObject, sizeof(CUtexObject)) < 0)
+    if (
+        rpc_read(conn, &pResDesc, sizeof(CUDA_RESOURCE_DESC)) < 0 ||
+        rpc_read(conn, &texObject, sizeof(CUtexObject)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15408,9 +16640,10 @@ int handle_cuTexObjectGetTextureDesc(void *conn)
     CUtexObject texObject;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pTexDesc, sizeof(CUDA_TEXTURE_DESC)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &texObject, sizeof(CUtexObject)) < 0)
+    if (
+        rpc_read(conn, &pTexDesc, sizeof(CUDA_TEXTURE_DESC)) < 0 ||
+        rpc_read(conn, &texObject, sizeof(CUtexObject)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15434,9 +16667,10 @@ int handle_cuTexObjectGetResourceViewDesc(void *conn)
     CUtexObject texObject;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pResViewDesc, sizeof(CUDA_RESOURCE_VIEW_DESC)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &texObject, sizeof(CUtexObject)) < 0)
+    if (
+        rpc_read(conn, &pResViewDesc, sizeof(CUDA_RESOURCE_VIEW_DESC)) < 0 ||
+        rpc_read(conn, &texObject, sizeof(CUtexObject)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15454,12 +16688,41 @@ ERROR_0:
     return -1;
 }
 
+int handle_cuSurfObjectCreate(void *conn)
+{
+    CUsurfObject pSurfObject;
+    const CUDA_RESOURCE_DESC* pResDesc;
+    int request_id;
+    CUresult result;
+    if (
+        rpc_read(conn, &pSurfObject, sizeof(CUsurfObject)) < 0 ||
+        rpc_read(conn, &pResDesc, sizeof(const CUDA_RESOURCE_DESC*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cuSurfObjectCreate(&pSurfObject, pResDesc);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &pSurfObject, sizeof(CUsurfObject)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cuSurfObjectDestroy(void *conn)
 {
     CUsurfObject surfObject;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &surfObject, sizeof(CUsurfObject)) < 0)
+    if (
+        rpc_read(conn, &surfObject, sizeof(CUsurfObject)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15482,9 +16745,10 @@ int handle_cuSurfObjectGetResourceDesc(void *conn)
     CUsurfObject surfObject;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pResDesc, sizeof(CUDA_RESOURCE_DESC)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &surfObject, sizeof(CUsurfObject)) < 0)
+    if (
+        rpc_read(conn, &pResDesc, sizeof(CUDA_RESOURCE_DESC)) < 0 ||
+        rpc_read(conn, &surfObject, sizeof(CUsurfObject)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15502,33 +16766,6 @@ ERROR_0:
     return -1;
 }
 
-int handle_cuTensorMapReplaceAddress(void *conn)
-{
-    CUtensorMap tensorMap;
-    void* globalAddress;
-    int request_id;
-    CUresult result;
-    if (rpc_read(conn, &tensorMap, sizeof(CUtensorMap)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &globalAddress, sizeof(void*)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cuTensorMapReplaceAddress(&tensorMap, globalAddress);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &tensorMap, sizeof(CUtensorMap)) < 0 ||
-        rpc_write(conn, globalAddress, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
 int handle_cuDeviceCanAccessPeer(void *conn)
 {
     int canAccessPeer;
@@ -15536,11 +16773,11 @@ int handle_cuDeviceCanAccessPeer(void *conn)
     CUdevice peerDev;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &canAccessPeer, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dev, sizeof(CUdevice)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &peerDev, sizeof(CUdevice)) < 0)
+    if (
+        rpc_read(conn, &canAccessPeer, sizeof(int)) < 0 ||
+        rpc_read(conn, &dev, sizeof(CUdevice)) < 0 ||
+        rpc_read(conn, &peerDev, sizeof(CUdevice)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15564,9 +16801,10 @@ int handle_cuCtxEnablePeerAccess(void *conn)
     unsigned int Flags;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &peerContext, sizeof(CUcontext)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &Flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &peerContext, sizeof(CUcontext)) < 0 ||
+        rpc_read(conn, &Flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15588,7 +16826,9 @@ int handle_cuCtxDisablePeerAccess(void *conn)
     CUcontext peerContext;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &peerContext, sizeof(CUcontext)) < 0)
+    if (
+        rpc_read(conn, &peerContext, sizeof(CUcontext)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15613,13 +16853,12 @@ int handle_cuDeviceGetP2PAttribute(void *conn)
     CUdevice dstDevice;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &value, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &attrib, sizeof(CUdevice_P2PAttribute)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &srcDevice, sizeof(CUdevice)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dstDevice, sizeof(CUdevice)) < 0)
+    if (
+        rpc_read(conn, &value, sizeof(int)) < 0 ||
+        rpc_read(conn, &attrib, sizeof(CUdevice_P2PAttribute)) < 0 ||
+        rpc_read(conn, &srcDevice, sizeof(CUdevice)) < 0 ||
+        rpc_read(conn, &dstDevice, sizeof(CUdevice)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15642,7 +16881,9 @@ int handle_cuGraphicsUnregisterResource(void *conn)
     CUgraphicsResource resource;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &resource, sizeof(CUgraphicsResource)) < 0)
+    if (
+        rpc_read(conn, &resource, sizeof(CUgraphicsResource)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15667,13 +16908,12 @@ int handle_cuGraphicsSubResourceGetMappedArray(void *conn)
     unsigned int mipLevel;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pArray, sizeof(CUarray)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &resource, sizeof(CUgraphicsResource)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &arrayIndex, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &mipLevel, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &pArray, sizeof(CUarray)) < 0 ||
+        rpc_read(conn, &resource, sizeof(CUgraphicsResource)) < 0 ||
+        rpc_read(conn, &arrayIndex, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &mipLevel, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15697,9 +16937,10 @@ int handle_cuGraphicsResourceGetMappedMipmappedArray(void *conn)
     CUgraphicsResource resource;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pMipmappedArray, sizeof(CUmipmappedArray)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &resource, sizeof(CUgraphicsResource)) < 0)
+    if (
+        rpc_read(conn, &pMipmappedArray, sizeof(CUmipmappedArray)) < 0 ||
+        rpc_read(conn, &resource, sizeof(CUgraphicsResource)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15724,11 +16965,11 @@ int handle_cuGraphicsResourceGetMappedPointer_v2(void *conn)
     CUgraphicsResource resource;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &pDevPtr, sizeof(CUdeviceptr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &pSize, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &resource, sizeof(CUgraphicsResource)) < 0)
+    if (
+        rpc_read(conn, &pDevPtr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_read(conn, &pSize, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &resource, sizeof(CUgraphicsResource)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15753,9 +16994,10 @@ int handle_cuGraphicsResourceSetMapFlags_v2(void *conn)
     unsigned int flags;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &resource, sizeof(CUgraphicsResource)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &resource, sizeof(CUgraphicsResource)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15779,11 +17021,11 @@ int handle_cuGraphicsMapResources(void *conn)
     CUstream hStream;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &count, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &resources, sizeof(CUgraphicsResource)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
+    if (
+        rpc_read(conn, &count, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &resources, sizeof(CUgraphicsResource)) < 0 ||
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15808,11 +17050,11 @@ int handle_cuGraphicsUnmapResources(void *conn)
     CUstream hStream;
     int request_id;
     CUresult result;
-    if (rpc_read(conn, &count, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &resources, sizeof(CUgraphicsResource)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hStream, sizeof(CUstream)) < 0)
+    if (
+        rpc_read(conn, &count, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &resources, sizeof(CUgraphicsResource)) < 0 ||
+        rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15834,6 +17076,9 @@ int handle_cudaDeviceReset(void *conn)
 {
     int request_id;
     cudaError_t result;
+    if (
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -15853,6 +17098,9 @@ int handle_cudaDeviceSynchronize(void *conn)
 {
     int request_id;
     cudaError_t result;
+    if (
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -15874,9 +17122,10 @@ int handle_cudaDeviceSetLimit(void *conn)
     size_t value;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &limit, sizeof(enum cudaLimit)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &value, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &limit, sizeof(enum cudaLimit)) < 0 ||
+        rpc_read(conn, &value, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15899,9 +17148,10 @@ int handle_cudaDeviceGetLimit(void *conn)
     enum cudaLimit limit;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &pValue, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &limit, sizeof(enum cudaLimit)) < 0)
+    if (
+        rpc_read(conn, &pValue, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &limit, sizeof(enum cudaLimit)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15919,12 +17169,43 @@ ERROR_0:
     return -1;
 }
 
+int handle_cudaDeviceGetTexture1DLinearMaxWidth(void *conn)
+{
+    size_t maxWidthInElements;
+    const struct cudaChannelFormatDesc* fmtDesc;
+    int device;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &maxWidthInElements, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &fmtDesc, sizeof(const struct cudaChannelFormatDesc*)) < 0 ||
+        rpc_read(conn, &device, sizeof(int)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaDeviceGetTexture1DLinearMaxWidth(&maxWidthInElements, fmtDesc, device);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &maxWidthInElements, sizeof(size_t)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cudaDeviceGetCacheConfig(void *conn)
 {
     enum cudaFuncCache pCacheConfig;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &pCacheConfig, sizeof(enum cudaFuncCache)) < 0)
+    if (
+        rpc_read(conn, &pCacheConfig, sizeof(enum cudaFuncCache)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15948,9 +17229,10 @@ int handle_cudaDeviceGetStreamPriorityRange(void *conn)
     int greatestPriority;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &leastPriority, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &greatestPriority, sizeof(int)) < 0)
+    if (
+        rpc_read(conn, &leastPriority, sizeof(int)) < 0 ||
+        rpc_read(conn, &greatestPriority, sizeof(int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15974,7 +17256,9 @@ int handle_cudaDeviceSetCacheConfig(void *conn)
     enum cudaFuncCache cacheConfig;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &cacheConfig, sizeof(enum cudaFuncCache)) < 0)
+    if (
+        rpc_read(conn, &cacheConfig, sizeof(enum cudaFuncCache)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -15996,7 +17280,9 @@ int handle_cudaDeviceGetSharedMemConfig(void *conn)
     enum cudaSharedMemConfig pConfig;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &pConfig, sizeof(enum cudaSharedMemConfig)) < 0)
+    if (
+        rpc_read(conn, &pConfig, sizeof(enum cudaSharedMemConfig)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -16019,7 +17305,9 @@ int handle_cudaDeviceSetSharedMemConfig(void *conn)
     enum cudaSharedMemConfig config;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &config, sizeof(enum cudaSharedMemConfig)) < 0)
+    if (
+        rpc_read(conn, &config, sizeof(enum cudaSharedMemConfig)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -16036,6 +17324,33 @@ ERROR_0:
     return -1;
 }
 
+int handle_cudaDeviceGetByPCIBusId(void *conn)
+{
+    int device;
+    const char* pciBusId;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &device, sizeof(int)) < 0 ||
+        rpc_read(conn, &pciBusId, sizeof(const char*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaDeviceGetByPCIBusId(&device, pciBusId);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &device, sizeof(int)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cudaDeviceGetPCIBusId(void *conn)
 {
     char pciBusId;
@@ -16043,11 +17358,11 @@ int handle_cudaDeviceGetPCIBusId(void *conn)
     int device;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &pciBusId, sizeof(char)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &len, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &device, sizeof(int)) < 0)
+    if (
+        rpc_read(conn, &pciBusId, sizeof(char)) < 0 ||
+        rpc_read(conn, &len, sizeof(int)) < 0 ||
+        rpc_read(conn, &device, sizeof(int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -16071,9 +17386,10 @@ int handle_cudaIpcGetEventHandle(void *conn)
     cudaEvent_t event;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &handle, sizeof(cudaIpcEventHandle_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &event, sizeof(cudaEvent_t)) < 0)
+    if (
+        rpc_read(conn, &handle, sizeof(cudaIpcEventHandle_t)) < 0 ||
+        rpc_read(conn, &event, sizeof(cudaEvent_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -16097,9 +17413,10 @@ int handle_cudaIpcOpenEventHandle(void *conn)
     cudaIpcEventHandle_t handle;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &event, sizeof(cudaEvent_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &handle, sizeof(cudaIpcEventHandle_t)) < 0)
+    if (
+        rpc_read(conn, &event, sizeof(cudaEvent_t)) < 0 ||
+        rpc_read(conn, &handle, sizeof(cudaIpcEventHandle_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -16117,33 +17434,6 @@ ERROR_0:
     return -1;
 }
 
-int handle_cudaIpcGetMemHandle(void *conn)
-{
-    cudaIpcMemHandle_t handle;
-    void* devPtr;
-    int request_id;
-    cudaError_t result;
-    if (rpc_read(conn, &handle, sizeof(cudaIpcMemHandle_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cudaIpcGetMemHandle(&handle, devPtr);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &handle, sizeof(cudaIpcMemHandle_t)) < 0 ||
-        rpc_write(conn, devPtr, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
 int handle_cudaIpcOpenMemHandle(void *conn)
 {
     void* devPtr;
@@ -16151,11 +17441,11 @@ int handle_cudaIpcOpenMemHandle(void *conn)
     unsigned int flags;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &handle, sizeof(cudaIpcMemHandle_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &devPtr, sizeof(void*)) < 0 ||
+        rpc_read(conn, &handle, sizeof(cudaIpcMemHandle_t)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -16173,38 +17463,16 @@ ERROR_0:
     return -1;
 }
 
-int handle_cudaIpcCloseMemHandle(void *conn)
-{
-    void* devPtr;
-    int request_id;
-    cudaError_t result;
-    if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cudaIpcCloseMemHandle(devPtr);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, devPtr, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
 int handle_cudaDeviceFlushGPUDirectRDMAWrites(void *conn)
 {
     enum cudaFlushGPUDirectRDMAWritesTarget target;
     enum cudaFlushGPUDirectRDMAWritesScope scope;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &target, sizeof(enum cudaFlushGPUDirectRDMAWritesTarget)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &scope, sizeof(enum cudaFlushGPUDirectRDMAWritesScope)) < 0)
+    if (
+        rpc_read(conn, &target, sizeof(enum cudaFlushGPUDirectRDMAWritesTarget)) < 0 ||
+        rpc_read(conn, &scope, sizeof(enum cudaFlushGPUDirectRDMAWritesScope)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -16225,6 +17493,9 @@ int handle_cudaThreadExit(void *conn)
 {
     int request_id;
     cudaError_t result;
+    if (
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -16244,6 +17515,9 @@ int handle_cudaThreadSynchronize(void *conn)
 {
     int request_id;
     cudaError_t result;
+    if (
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -16265,9 +17539,10 @@ int handle_cudaThreadSetLimit(void *conn)
     size_t value;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &limit, sizeof(enum cudaLimit)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &value, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &limit, sizeof(enum cudaLimit)) < 0 ||
+        rpc_read(conn, &value, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -16290,9 +17565,10 @@ int handle_cudaThreadGetLimit(void *conn)
     enum cudaLimit limit;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &pValue, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &limit, sizeof(enum cudaLimit)) < 0)
+    if (
+        rpc_read(conn, &pValue, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &limit, sizeof(enum cudaLimit)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -16315,7 +17591,9 @@ int handle_cudaThreadGetCacheConfig(void *conn)
     enum cudaFuncCache pCacheConfig;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &pCacheConfig, sizeof(enum cudaFuncCache)) < 0)
+    if (
+        rpc_read(conn, &pCacheConfig, sizeof(enum cudaFuncCache)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -16338,7 +17616,9 @@ int handle_cudaThreadSetCacheConfig(void *conn)
     enum cudaFuncCache cacheConfig;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &cacheConfig, sizeof(enum cudaFuncCache)) < 0)
+    if (
+        rpc_read(conn, &cacheConfig, sizeof(enum cudaFuncCache)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -16359,6 +17639,9 @@ int handle_cudaGetLastError(void *conn)
 {
     int request_id;
     cudaError_t result;
+    if (
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -16378,6 +17661,9 @@ int handle_cudaPeekAtLastError(void *conn)
 {
     int request_id;
     cudaError_t result;
+    if (
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -16398,6 +17684,9 @@ int handle_cudaGetDeviceCount(void *conn)
     int count;
     int request_id;
     cudaError_t result;
+    if (
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -16420,7 +17709,9 @@ int handle_cudaGetDeviceProperties_v2(void *conn)
     int device;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &device, sizeof(int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -16445,11 +17736,11 @@ int handle_cudaDeviceGetAttribute(void *conn)
     int device;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &value, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &attr, sizeof(enum cudaDeviceAttr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &device, sizeof(int)) < 0)
+    if (
+        rpc_read(conn, &value, sizeof(int)) < 0 ||
+        rpc_read(conn, &attr, sizeof(enum cudaDeviceAttr)) < 0 ||
+        rpc_read(conn, &device, sizeof(int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -16473,9 +17764,10 @@ int handle_cudaDeviceGetDefaultMemPool(void *conn)
     int device;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &memPool, sizeof(cudaMemPool_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &device, sizeof(int)) < 0)
+    if (
+        rpc_read(conn, &memPool, sizeof(cudaMemPool_t)) < 0 ||
+        rpc_read(conn, &device, sizeof(int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -16499,9 +17791,10 @@ int handle_cudaDeviceSetMemPool(void *conn)
     cudaMemPool_t memPool;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &device, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &memPool, sizeof(cudaMemPool_t)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(int)) < 0 ||
+        rpc_read(conn, &memPool, sizeof(cudaMemPool_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -16524,9 +17817,10 @@ int handle_cudaDeviceGetMemPool(void *conn)
     int device;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &memPool, sizeof(cudaMemPool_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &device, sizeof(int)) < 0)
+    if (
+        rpc_read(conn, &memPool, sizeof(cudaMemPool_t)) < 0 ||
+        rpc_read(conn, &device, sizeof(int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -16544,35 +17838,6 @@ ERROR_0:
     return -1;
 }
 
-int handle_cudaDeviceGetNvSciSyncAttributes(void *conn)
-{
-    void* nvSciSyncAttrList;
-    int device;
-    int flags;
-    int request_id;
-    cudaError_t result;
-    if (rpc_read(conn, &nvSciSyncAttrList, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &device, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(int)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cudaDeviceGetNvSciSyncAttributes(nvSciSyncAttrList, device, flags);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, nvSciSyncAttrList, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
 int handle_cudaDeviceGetP2PAttribute(void *conn)
 {
     int value;
@@ -16581,13 +17846,12 @@ int handle_cudaDeviceGetP2PAttribute(void *conn)
     int dstDevice;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &value, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &attr, sizeof(enum cudaDeviceP2PAttr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &srcDevice, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dstDevice, sizeof(int)) < 0)
+    if (
+        rpc_read(conn, &value, sizeof(int)) < 0 ||
+        rpc_read(conn, &attr, sizeof(enum cudaDeviceP2PAttr)) < 0 ||
+        rpc_read(conn, &srcDevice, sizeof(int)) < 0 ||
+        rpc_read(conn, &dstDevice, sizeof(int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -16605,6 +17869,33 @@ ERROR_0:
     return -1;
 }
 
+int handle_cudaChooseDevice(void *conn)
+{
+    int device;
+    const struct cudaDeviceProp* prop;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &device, sizeof(int)) < 0 ||
+        rpc_read(conn, &prop, sizeof(const struct cudaDeviceProp*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaChooseDevice(&device, prop);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &device, sizeof(int)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cudaInitDevice(void *conn)
 {
     int device;
@@ -16612,11 +17903,11 @@ int handle_cudaInitDevice(void *conn)
     unsigned int flags;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &device, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &deviceFlags, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(int)) < 0 ||
+        rpc_read(conn, &deviceFlags, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -16638,7 +17929,9 @@ int handle_cudaSetDevice(void *conn)
     int device;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &device, sizeof(int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -16660,7 +17953,9 @@ int handle_cudaGetDevice(void *conn)
     int device;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &device, sizeof(int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -16684,9 +17979,10 @@ int handle_cudaSetValidDevices(void *conn)
     int len;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &device_arr, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &len, sizeof(int)) < 0)
+    if (
+        rpc_read(conn, &device_arr, sizeof(int)) < 0 ||
+        rpc_read(conn, &len, sizeof(int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -16709,7 +18005,9 @@ int handle_cudaSetDeviceFlags(void *conn)
     unsigned int flags;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -16731,7 +18029,9 @@ int handle_cudaGetDeviceFlags(void *conn)
     unsigned int flags;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -16754,7 +18054,9 @@ int handle_cudaStreamCreate(void *conn)
     cudaStream_t pStream;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &pStream, sizeof(cudaStream_t)) < 0)
+    if (
+        rpc_read(conn, &pStream, sizeof(cudaStream_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -16778,9 +18080,10 @@ int handle_cudaStreamCreateWithFlags(void *conn)
     unsigned int flags;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &pStream, sizeof(cudaStream_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &pStream, sizeof(cudaStream_t)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -16805,11 +18108,11 @@ int handle_cudaStreamCreateWithPriority(void *conn)
     int priority;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &pStream, sizeof(cudaStream_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &priority, sizeof(int)) < 0)
+    if (
+        rpc_read(conn, &pStream, sizeof(cudaStream_t)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &priority, sizeof(int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -16833,9 +18136,10 @@ int handle_cudaStreamGetPriority(void *conn)
     int priority;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &hStream, sizeof(cudaStream_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &priority, sizeof(int)) < 0)
+    if (
+        rpc_read(conn, &hStream, sizeof(cudaStream_t)) < 0 ||
+        rpc_read(conn, &priority, sizeof(int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -16859,9 +18163,10 @@ int handle_cudaStreamGetFlags(void *conn)
     unsigned int flags;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &hStream, sizeof(cudaStream_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &hStream, sizeof(cudaStream_t)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -16885,9 +18190,10 @@ int handle_cudaStreamGetId(void *conn)
     unsigned long long streamId;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &hStream, sizeof(cudaStream_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &streamId, sizeof(unsigned long long)) < 0)
+    if (
+        rpc_read(conn, &hStream, sizeof(cudaStream_t)) < 0 ||
+        rpc_read(conn, &streamId, sizeof(unsigned long long)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -16909,6 +18215,9 @@ int handle_cudaCtxResetPersistingL2Cache(void *conn)
 {
     int request_id;
     cudaError_t result;
+    if (
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -16930,9 +18239,10 @@ int handle_cudaStreamCopyAttributes(void *conn)
     cudaStream_t src;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &dst, sizeof(cudaStream_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &src, sizeof(cudaStream_t)) < 0)
+    if (
+        rpc_read(conn, &dst, sizeof(cudaStream_t)) < 0 ||
+        rpc_read(conn, &src, sizeof(cudaStream_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -16956,11 +18266,11 @@ int handle_cudaStreamGetAttribute(void *conn)
     cudaLaunchAttributeValue value_out;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &hStream, sizeof(cudaStream_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &attr, sizeof(cudaLaunchAttributeID)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &value_out, sizeof(cudaLaunchAttributeValue)) < 0)
+    if (
+        rpc_read(conn, &hStream, sizeof(cudaStream_t)) < 0 ||
+        rpc_read(conn, &attr, sizeof(cudaLaunchAttributeID)) < 0 ||
+        rpc_read(conn, &value_out, sizeof(cudaLaunchAttributeValue)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -16978,12 +18288,42 @@ ERROR_0:
     return -1;
 }
 
+int handle_cudaStreamSetAttribute(void *conn)
+{
+    cudaStream_t hStream;
+    cudaLaunchAttributeID attr;
+    const cudaLaunchAttributeValue* value;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &hStream, sizeof(cudaStream_t)) < 0 ||
+        rpc_read(conn, &attr, sizeof(cudaLaunchAttributeID)) < 0 ||
+        rpc_read(conn, &value, sizeof(const cudaLaunchAttributeValue*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaStreamSetAttribute(hStream, attr, value);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cudaStreamDestroy(void *conn)
 {
     cudaStream_t stream;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0)
+    if (
+        rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -17007,11 +18347,11 @@ int handle_cudaStreamWaitEvent(void *conn)
     unsigned int flags;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &event, sizeof(cudaEvent_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_read(conn, &event, sizeof(cudaEvent_t)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -17028,44 +18368,14 @@ ERROR_0:
     return -1;
 }
 
-int handle_cudaStreamAddCallback(void *conn)
-{
-    cudaStream_t stream;
-    cudaStreamCallback_t callback;
-    void* userData;
-    unsigned int flags;
-    int request_id;
-    cudaError_t result;
-    if (rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &callback, sizeof(cudaStreamCallback_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &userData, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cudaStreamAddCallback(stream, callback, userData, flags);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, userData, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
 int handle_cudaStreamSynchronize(void *conn)
 {
     cudaStream_t stream;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0)
+    if (
+        rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -17087,7 +18397,9 @@ int handle_cudaStreamQuery(void *conn)
     cudaStream_t stream;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0)
+    if (
+        rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -17104,47 +18416,16 @@ ERROR_0:
     return -1;
 }
 
-int handle_cudaStreamAttachMemAsync(void *conn)
-{
-    cudaStream_t stream;
-    void* devPtr;
-    size_t length;
-    unsigned int flags;
-    int request_id;
-    cudaError_t result;
-    if (rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &length, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cudaStreamAttachMemAsync(stream, devPtr, length, flags);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, devPtr, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
 int handle_cudaStreamBeginCapture(void *conn)
 {
     cudaStream_t stream;
     enum cudaStreamCaptureMode mode;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &mode, sizeof(enum cudaStreamCaptureMode)) < 0)
+    if (
+        rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_read(conn, &mode, sizeof(enum cudaStreamCaptureMode)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -17166,7 +18447,9 @@ int handle_cudaThreadExchangeStreamCaptureMode(void *conn)
     enum cudaStreamCaptureMode mode;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &mode, sizeof(enum cudaStreamCaptureMode)) < 0)
+    if (
+        rpc_read(conn, &mode, sizeof(enum cudaStreamCaptureMode)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -17190,9 +18473,10 @@ int handle_cudaStreamEndCapture(void *conn)
     cudaGraph_t pGraph;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &pGraph, sizeof(cudaGraph_t)) < 0)
+    if (
+        rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_read(conn, &pGraph, sizeof(cudaGraph_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -17216,9 +18500,10 @@ int handle_cudaStreamIsCapturing(void *conn)
     enum cudaStreamCaptureStatus pCaptureStatus;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &pCaptureStatus, sizeof(enum cudaStreamCaptureStatus)) < 0)
+    if (
+        rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_read(conn, &pCaptureStatus, sizeof(enum cudaStreamCaptureStatus)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -17246,13 +18531,14 @@ int handle_cudaStreamGetCaptureInfo_v2(void *conn)
     const cudaGraphNode_t** dependencies_out;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0)
+    if (
+        rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+        false)
         goto ERROR_0;
-    dependencies_out = (const cudaGraphNode_t**)malloc(numDependencies_out * sizeof(const cudaGraphNode_t*));
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = cudaStreamGetCaptureInfo_v2(stream, &captureStatus_out, &id_out, &graph_out, dependencies_out, &numDependencies_out);
 
     if (rpc_start_response(conn, request_id) < 0 ||
@@ -17262,11 +18548,9 @@ int handle_cudaStreamGetCaptureInfo_v2(void *conn)
         rpc_write(conn, &numDependencies_out, sizeof(size_t)) < 0 ||
         rpc_write(conn, dependencies_out, numDependencies_out * sizeof(const cudaGraphNode_t*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) dependencies_out);
 ERROR_0:
     return -1;
 }
@@ -17279,28 +18563,24 @@ int handle_cudaStreamUpdateCaptureDependencies(void *conn)
     unsigned int flags;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0)
+    if (
+        rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_read(conn, dependencies, numDependencies * sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
-    if (rpc_read(conn, &numDependencies, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    dependencies = (cudaGraphNode_t*)malloc(numDependencies * sizeof(cudaGraphNode_t));
-    if (rpc_read(conn, &dependencies, sizeof(cudaGraphNode_t*)) < 0)
-        goto ERROR_1;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
-        goto ERROR_1;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
-        goto ERROR_1;
+        goto ERROR_0;
     result = cudaStreamUpdateCaptureDependencies(stream, dependencies, numDependencies, flags);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_end_response(conn, &result) < 0)
-        goto ERROR_1;
+        goto ERROR_0;
 
     return 0;
-ERROR_1:
-    free((void *) dependencies);
 ERROR_0:
     return -1;
 }
@@ -17310,6 +18590,9 @@ int handle_cudaEventCreate(void *conn)
     cudaEvent_t event;
     int request_id;
     cudaError_t result;
+    if (
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -17332,7 +18615,9 @@ int handle_cudaEventCreateWithFlags(void *conn)
     unsigned int flags;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -17356,9 +18641,10 @@ int handle_cudaEventRecord(void *conn)
     cudaStream_t stream;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &event, sizeof(cudaEvent_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0)
+    if (
+        rpc_read(conn, &event, sizeof(cudaEvent_t)) < 0 ||
+        rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -17382,11 +18668,11 @@ int handle_cudaEventRecordWithFlags(void *conn)
     unsigned int flags;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &event, sizeof(cudaEvent_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &event, sizeof(cudaEvent_t)) < 0 ||
+        rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -17408,7 +18694,9 @@ int handle_cudaEventQuery(void *conn)
     cudaEvent_t event;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &event, sizeof(cudaEvent_t)) < 0)
+    if (
+        rpc_read(conn, &event, sizeof(cudaEvent_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -17430,7 +18718,9 @@ int handle_cudaEventSynchronize(void *conn)
     cudaEvent_t event;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &event, sizeof(cudaEvent_t)) < 0)
+    if (
+        rpc_read(conn, &event, sizeof(cudaEvent_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -17452,7 +18742,9 @@ int handle_cudaEventDestroy(void *conn)
     cudaEvent_t event;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &event, sizeof(cudaEvent_t)) < 0)
+    if (
+        rpc_read(conn, &event, sizeof(cudaEvent_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -17476,9 +18768,10 @@ int handle_cudaEventElapsedTime(void *conn)
     cudaEvent_t end;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &start, sizeof(cudaEvent_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &end, sizeof(cudaEvent_t)) < 0)
+    if (
+        rpc_read(conn, &start, sizeof(cudaEvent_t)) < 0 ||
+        rpc_read(conn, &end, sizeof(cudaEvent_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -17496,12 +18789,72 @@ ERROR_0:
     return -1;
 }
 
+int handle_cudaExternalMemoryGetMappedBuffer(void *conn)
+{
+    void* devPtr;
+    cudaExternalMemory_t extMem;
+    const struct cudaExternalMemoryBufferDesc* bufferDesc;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &devPtr, sizeof(void*)) < 0 ||
+        rpc_read(conn, &extMem, sizeof(cudaExternalMemory_t)) < 0 ||
+        rpc_read(conn, &bufferDesc, sizeof(const struct cudaExternalMemoryBufferDesc*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaExternalMemoryGetMappedBuffer(&devPtr, extMem, bufferDesc);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &devPtr, sizeof(void*)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaExternalMemoryGetMappedMipmappedArray(void *conn)
+{
+    cudaMipmappedArray_t mipmap;
+    cudaExternalMemory_t extMem;
+    const struct cudaExternalMemoryMipmappedArrayDesc* mipmapDesc;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &mipmap, sizeof(cudaMipmappedArray_t)) < 0 ||
+        rpc_read(conn, &extMem, sizeof(cudaExternalMemory_t)) < 0 ||
+        rpc_read(conn, &mipmapDesc, sizeof(const struct cudaExternalMemoryMipmappedArrayDesc*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaExternalMemoryGetMappedMipmappedArray(&mipmap, extMem, mipmapDesc);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &mipmap, sizeof(cudaMipmappedArray_t)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cudaDestroyExternalMemory(void *conn)
 {
     cudaExternalMemory_t extMem;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &extMem, sizeof(cudaExternalMemory_t)) < 0)
+    if (
+        rpc_read(conn, &extMem, sizeof(cudaExternalMemory_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -17518,12 +18871,101 @@ ERROR_0:
     return -1;
 }
 
+int handle_cudaImportExternalSemaphore(void *conn)
+{
+    cudaExternalSemaphore_t extSem_out;
+    const struct cudaExternalSemaphoreHandleDesc* semHandleDesc;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &extSem_out, sizeof(cudaExternalSemaphore_t)) < 0 ||
+        rpc_read(conn, &semHandleDesc, sizeof(const struct cudaExternalSemaphoreHandleDesc*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaImportExternalSemaphore(&extSem_out, semHandleDesc);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &extSem_out, sizeof(cudaExternalSemaphore_t)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaSignalExternalSemaphoresAsync_v2(void *conn)
+{
+    const cudaExternalSemaphore_t* extSemArray;
+    const struct cudaExternalSemaphoreSignalParams* paramsArray;
+    unsigned int numExtSems;
+    cudaStream_t stream;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &extSemArray, sizeof(const cudaExternalSemaphore_t*)) < 0 ||
+        rpc_read(conn, &paramsArray, sizeof(const struct cudaExternalSemaphoreSignalParams*)) < 0 ||
+        rpc_read(conn, &numExtSems, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaSignalExternalSemaphoresAsync_v2(extSemArray, paramsArray, numExtSems, stream);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaWaitExternalSemaphoresAsync_v2(void *conn)
+{
+    const cudaExternalSemaphore_t* extSemArray;
+    const struct cudaExternalSemaphoreWaitParams* paramsArray;
+    unsigned int numExtSems;
+    cudaStream_t stream;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &extSemArray, sizeof(const cudaExternalSemaphore_t*)) < 0 ||
+        rpc_read(conn, &paramsArray, sizeof(const struct cudaExternalSemaphoreWaitParams*)) < 0 ||
+        rpc_read(conn, &numExtSems, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaWaitExternalSemaphoresAsync_v2(extSemArray, paramsArray, numExtSems, stream);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cudaDestroyExternalSemaphore(void *conn)
 {
     cudaExternalSemaphore_t extSem;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &extSem, sizeof(cudaExternalSemaphore_t)) < 0)
+    if (
+        rpc_read(conn, &extSem, sizeof(cudaExternalSemaphore_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -17540,6 +18982,70 @@ ERROR_0:
     return -1;
 }
 
+int handle_cudaLaunchKernelExC(void *conn)
+{
+    const cudaLaunchConfig_t* config;
+    const void* func;
+    void* args;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &config, sizeof(const cudaLaunchConfig_t*)) < 0 ||
+        rpc_read(conn, &func, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &args, sizeof(void*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaLaunchKernelExC(config, func, &args);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &args, sizeof(void*)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaLaunchCooperativeKernel(void *conn)
+{
+    const void* func;
+    dim3 gridDim;
+    dim3 blockDim;
+    void* args;
+    size_t sharedMem;
+    cudaStream_t stream;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &func, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &gridDim, sizeof(dim3)) < 0 ||
+        rpc_read(conn, &blockDim, sizeof(dim3)) < 0 ||
+        rpc_read(conn, &args, sizeof(void*)) < 0 ||
+        rpc_read(conn, &sharedMem, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaLaunchCooperativeKernel(func, gridDim, blockDim, &args, sharedMem, stream);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &args, sizeof(void*)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cudaLaunchCooperativeKernelMultiDevice(void *conn)
 {
     struct cudaLaunchParams launchParamsList;
@@ -17547,11 +19053,11 @@ int handle_cudaLaunchCooperativeKernelMultiDevice(void *conn)
     unsigned int flags;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &launchParamsList, sizeof(struct cudaLaunchParams)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &numDevices, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &launchParamsList, sizeof(struct cudaLaunchParams)) < 0 ||
+        rpc_read(conn, &numDevices, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -17569,12 +19075,121 @@ ERROR_0:
     return -1;
 }
 
+int handle_cudaFuncSetCacheConfig(void *conn)
+{
+    const void* func;
+    enum cudaFuncCache cacheConfig;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &func, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &cacheConfig, sizeof(enum cudaFuncCache)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaFuncSetCacheConfig(func, cacheConfig);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaFuncSetSharedMemConfig(void *conn)
+{
+    const void* func;
+    enum cudaSharedMemConfig config;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &func, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &config, sizeof(enum cudaSharedMemConfig)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaFuncSetSharedMemConfig(func, config);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaFuncGetAttributes(void *conn)
+{
+    struct cudaFuncAttributes attr;
+    const void* func;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &attr, sizeof(struct cudaFuncAttributes)) < 0 ||
+        rpc_read(conn, &func, sizeof(const void*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaFuncGetAttributes(&attr, func);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &attr, sizeof(struct cudaFuncAttributes)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaFuncSetAttribute(void *conn)
+{
+    const void* func;
+    enum cudaFuncAttribute attr;
+    int value;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &func, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &attr, sizeof(enum cudaFuncAttribute)) < 0 ||
+        rpc_read(conn, &value, sizeof(int)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaFuncSetAttribute(func, attr, value);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cudaSetDoubleForDevice(void *conn)
 {
     double d;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &d, sizeof(double)) < 0)
+    if (
+        rpc_read(conn, &d, sizeof(double)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -17597,7 +19212,9 @@ int handle_cudaSetDoubleForHost(void *conn)
     double d;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &d, sizeof(double)) < 0)
+    if (
+        rpc_read(conn, &d, sizeof(double)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -17615,27 +19232,151 @@ ERROR_0:
     return -1;
 }
 
-int handle_cudaLaunchHostFunc(void *conn)
+int handle_cudaOccupancyMaxActiveBlocksPerMultiprocessor(void *conn)
 {
-    cudaStream_t stream;
-    cudaHostFn_t fn;
-    void* userData;
+    int numBlocks;
+    const void* func;
+    int blockSize;
+    size_t dynamicSMemSize;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &fn, sizeof(cudaHostFn_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &userData, sizeof(void*)) < 0)
+    if (
+        rpc_read(conn, &numBlocks, sizeof(int)) < 0 ||
+        rpc_read(conn, &func, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &blockSize, sizeof(int)) < 0 ||
+        rpc_read(conn, &dynamicSMemSize, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaLaunchHostFunc(stream, fn, userData);
+    result = cudaOccupancyMaxActiveBlocksPerMultiprocessor(&numBlocks, func, blockSize, dynamicSMemSize);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, userData, sizeof(void*)) < 0 ||
+        rpc_write(conn, &numBlocks, sizeof(int)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaOccupancyAvailableDynamicSMemPerBlock(void *conn)
+{
+    size_t dynamicSmemSize;
+    const void* func;
+    int numBlocks;
+    int blockSize;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &dynamicSmemSize, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &func, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &numBlocks, sizeof(int)) < 0 ||
+        rpc_read(conn, &blockSize, sizeof(int)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaOccupancyAvailableDynamicSMemPerBlock(&dynamicSmemSize, func, numBlocks, blockSize);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &dynamicSmemSize, sizeof(size_t)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(void *conn)
+{
+    int numBlocks;
+    const void* func;
+    int blockSize;
+    size_t dynamicSMemSize;
+    unsigned int flags;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &numBlocks, sizeof(int)) < 0 ||
+        rpc_read(conn, &func, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &blockSize, sizeof(int)) < 0 ||
+        rpc_read(conn, &dynamicSMemSize, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(&numBlocks, func, blockSize, dynamicSMemSize, flags);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &numBlocks, sizeof(int)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaOccupancyMaxPotentialClusterSize(void *conn)
+{
+    int clusterSize;
+    const void* func;
+    const cudaLaunchConfig_t* launchConfig;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &clusterSize, sizeof(int)) < 0 ||
+        rpc_read(conn, &func, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &launchConfig, sizeof(const cudaLaunchConfig_t*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaOccupancyMaxPotentialClusterSize(&clusterSize, func, launchConfig);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &clusterSize, sizeof(int)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaOccupancyMaxActiveClusters(void *conn)
+{
+    int numClusters;
+    const void* func;
+    const cudaLaunchConfig_t* launchConfig;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &numClusters, sizeof(int)) < 0 ||
+        rpc_read(conn, &func, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &launchConfig, sizeof(const cudaLaunchConfig_t*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaOccupancyMaxActiveClusters(&numClusters, func, launchConfig);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &numClusters, sizeof(int)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -17651,11 +19392,11 @@ int handle_cudaMallocManaged(void *conn)
     unsigned int flags;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &size, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &devPtr, sizeof(void*)) < 0 ||
+        rpc_read(conn, &size, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -17679,7 +19420,9 @@ int handle_cudaMalloc(void *conn)
     size_t size;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &size, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &size, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -17703,9 +19446,10 @@ int handle_cudaMallocHost(void *conn)
     size_t size;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &ptr, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &size, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &ptr, sizeof(void*)) < 0 ||
+        rpc_read(conn, &size, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -17731,13 +19475,12 @@ int handle_cudaMallocPitch(void *conn)
     size_t height;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &pitch, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &width, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &height, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &devPtr, sizeof(void*)) < 0 ||
+        rpc_read(conn, &pitch, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &width, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &height, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -17756,12 +19499,47 @@ ERROR_0:
     return -1;
 }
 
+int handle_cudaMallocArray(void *conn)
+{
+    cudaArray_t array;
+    const struct cudaChannelFormatDesc* desc;
+    size_t width;
+    size_t height;
+    unsigned int flags;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &array, sizeof(cudaArray_t)) < 0 ||
+        rpc_read(conn, &desc, sizeof(const struct cudaChannelFormatDesc*)) < 0 ||
+        rpc_read(conn, &width, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &height, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaMallocArray(&array, desc, width, height, flags);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &array, sizeof(cudaArray_t)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cudaFree(void *conn)
 {
     void* devPtr;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
+    if (
+        rpc_read(conn, &devPtr, sizeof(void*)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -17783,7 +19561,9 @@ int handle_cudaFreeHost(void *conn)
     void* ptr;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &ptr, sizeof(void*)) < 0)
+    if (
+        rpc_read(conn, &ptr, sizeof(void*)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -17805,7 +19585,9 @@ int handle_cudaFreeArray(void *conn)
     cudaArray_t array;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &array, sizeof(cudaArray_t)) < 0)
+    if (
+        rpc_read(conn, &array, sizeof(cudaArray_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -17827,7 +19609,9 @@ int handle_cudaFreeMipmappedArray(void *conn)
     cudaMipmappedArray_t mipmappedArray;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &mipmappedArray, sizeof(cudaMipmappedArray_t)) < 0)
+    if (
+        rpc_read(conn, &mipmappedArray, sizeof(cudaMipmappedArray_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -17851,11 +19635,11 @@ int handle_cudaHostAlloc(void *conn)
     unsigned int flags;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &pHost, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &size, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &pHost, sizeof(void*)) < 0 ||
+        rpc_read(conn, &size, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -17873,124 +19657,16 @@ ERROR_0:
     return -1;
 }
 
-int handle_cudaHostRegister(void *conn)
-{
-    void* ptr;
-    size_t size;
-    unsigned int flags;
-    int request_id;
-    cudaError_t result;
-    if (rpc_read(conn, &ptr, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &size, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cudaHostRegister(ptr, size, flags);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, ptr, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_cudaHostUnregister(void *conn)
-{
-    void* ptr;
-    int request_id;
-    cudaError_t result;
-    if (rpc_read(conn, &ptr, sizeof(void*)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cudaHostUnregister(ptr);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, ptr, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_cudaHostGetDevicePointer(void *conn)
-{
-    void* pDevice;
-    void* pHost;
-    unsigned int flags;
-    int request_id;
-    cudaError_t result;
-    if (rpc_read(conn, &pDevice, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &pHost, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cudaHostGetDevicePointer(&pDevice, pHost, flags);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &pDevice, sizeof(void*)) < 0 ||
-        rpc_write(conn, pHost, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_cudaHostGetFlags(void *conn)
-{
-    unsigned int pFlags;
-    void* pHost;
-    int request_id;
-    cudaError_t result;
-    if (rpc_read(conn, &pFlags, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &pHost, sizeof(void*)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cudaHostGetFlags(&pFlags, pHost);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &pFlags, sizeof(unsigned int)) < 0 ||
-        rpc_write(conn, pHost, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
 int handle_cudaMalloc3D(void *conn)
 {
     struct cudaPitchedPtr pitchedDevPtr;
     struct cudaExtent extent;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &pitchedDevPtr, sizeof(struct cudaPitchedPtr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &extent, sizeof(struct cudaExtent)) < 0)
+    if (
+        rpc_read(conn, &pitchedDevPtr, sizeof(struct cudaPitchedPtr)) < 0 ||
+        rpc_read(conn, &extent, sizeof(struct cudaExtent)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -18008,6 +19684,70 @@ ERROR_0:
     return -1;
 }
 
+int handle_cudaMalloc3DArray(void *conn)
+{
+    cudaArray_t array;
+    const struct cudaChannelFormatDesc* desc;
+    struct cudaExtent extent;
+    unsigned int flags;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &array, sizeof(cudaArray_t)) < 0 ||
+        rpc_read(conn, &desc, sizeof(const struct cudaChannelFormatDesc*)) < 0 ||
+        rpc_read(conn, &extent, sizeof(struct cudaExtent)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaMalloc3DArray(&array, desc, extent, flags);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &array, sizeof(cudaArray_t)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaMallocMipmappedArray(void *conn)
+{
+    cudaMipmappedArray_t mipmappedArray;
+    const struct cudaChannelFormatDesc* desc;
+    struct cudaExtent extent;
+    unsigned int numLevels;
+    unsigned int flags;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &mipmappedArray, sizeof(cudaMipmappedArray_t)) < 0 ||
+        rpc_read(conn, &desc, sizeof(const struct cudaChannelFormatDesc*)) < 0 ||
+        rpc_read(conn, &extent, sizeof(struct cudaExtent)) < 0 ||
+        rpc_read(conn, &numLevels, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaMallocMipmappedArray(&mipmappedArray, desc, extent, numLevels, flags);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &mipmappedArray, sizeof(cudaMipmappedArray_t)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cudaGetMipmappedArrayLevel(void *conn)
 {
     cudaArray_t levelArray;
@@ -18015,11 +19755,11 @@ int handle_cudaGetMipmappedArrayLevel(void *conn)
     unsigned int level;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &levelArray, sizeof(cudaArray_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &mipmappedArray, sizeof(cudaMipmappedArray_const_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &level, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &levelArray, sizeof(cudaArray_t)) < 0 ||
+        rpc_read(conn, &mipmappedArray, sizeof(cudaMipmappedArray_const_t)) < 0 ||
+        rpc_read(conn, &level, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -18037,15 +19777,116 @@ ERROR_0:
     return -1;
 }
 
+int handle_cudaMemcpy3D(void *conn)
+{
+    const struct cudaMemcpy3DParms* p;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &p, sizeof(const struct cudaMemcpy3DParms*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaMemcpy3D(p);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaMemcpy3DPeer(void *conn)
+{
+    const struct cudaMemcpy3DPeerParms* p;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &p, sizeof(const struct cudaMemcpy3DPeerParms*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaMemcpy3DPeer(p);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaMemcpy3DAsync(void *conn)
+{
+    const struct cudaMemcpy3DParms* p;
+    cudaStream_t stream;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &p, sizeof(const struct cudaMemcpy3DParms*)) < 0 ||
+        rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaMemcpy3DAsync(p, stream);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaMemcpy3DPeerAsync(void *conn)
+{
+    const struct cudaMemcpy3DPeerParms* p;
+    cudaStream_t stream;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &p, sizeof(const struct cudaMemcpy3DPeerParms*)) < 0 ||
+        rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaMemcpy3DPeerAsync(p, stream);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cudaMemGetInfo(void *conn)
 {
     size_t free;
     size_t total;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &free, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &total, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &free, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &total, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -18072,13 +19913,12 @@ int handle_cudaArrayGetInfo(void *conn)
     cudaArray_t array;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &desc, sizeof(struct cudaChannelFormatDesc)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &extent, sizeof(struct cudaExtent)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &array, sizeof(cudaArray_t)) < 0)
+    if (
+        rpc_read(conn, &desc, sizeof(struct cudaChannelFormatDesc)) < 0 ||
+        rpc_read(conn, &extent, sizeof(struct cudaExtent)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &array, sizeof(cudaArray_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -18105,11 +19945,11 @@ int handle_cudaArrayGetPlane(void *conn)
     unsigned int planeIdx;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &pPlaneArray, sizeof(cudaArray_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hArray, sizeof(cudaArray_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &planeIdx, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &pPlaneArray, sizeof(cudaArray_t)) < 0 ||
+        rpc_read(conn, &hArray, sizeof(cudaArray_t)) < 0 ||
+        rpc_read(conn, &planeIdx, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -18134,11 +19974,11 @@ int handle_cudaArrayGetMemoryRequirements(void *conn)
     int device;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &memoryRequirements, sizeof(struct cudaArrayMemoryRequirements)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &array, sizeof(cudaArray_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &device, sizeof(int)) < 0)
+    if (
+        rpc_read(conn, &memoryRequirements, sizeof(struct cudaArrayMemoryRequirements)) < 0 ||
+        rpc_read(conn, &array, sizeof(cudaArray_t)) < 0 ||
+        rpc_read(conn, &device, sizeof(int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -18163,11 +20003,11 @@ int handle_cudaMipmappedArrayGetMemoryRequirements(void *conn)
     int device;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &memoryRequirements, sizeof(struct cudaArrayMemoryRequirements)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &mipmap, sizeof(cudaMipmappedArray_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &device, sizeof(int)) < 0)
+    if (
+        rpc_read(conn, &memoryRequirements, sizeof(struct cudaArrayMemoryRequirements)) < 0 ||
+        rpc_read(conn, &mipmap, sizeof(cudaMipmappedArray_t)) < 0 ||
+        rpc_read(conn, &device, sizeof(int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -18191,9 +20031,10 @@ int handle_cudaArrayGetSparseProperties(void *conn)
     cudaArray_t array;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &sparseProperties, sizeof(struct cudaArraySparseProperties)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &array, sizeof(cudaArray_t)) < 0)
+    if (
+        rpc_read(conn, &sparseProperties, sizeof(struct cudaArraySparseProperties)) < 0 ||
+        rpc_read(conn, &array, sizeof(cudaArray_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -18217,9 +20058,10 @@ int handle_cudaMipmappedArrayGetSparseProperties(void *conn)
     cudaMipmappedArray_t mipmap;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &sparseProperties, sizeof(struct cudaArraySparseProperties)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &mipmap, sizeof(cudaMipmappedArray_t)) < 0)
+    if (
+        rpc_read(conn, &sparseProperties, sizeof(struct cudaArraySparseProperties)) < 0 ||
+        rpc_read(conn, &mipmap, sizeof(cudaMipmappedArray_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -18237,42 +20079,36 @@ ERROR_0:
     return -1;
 }
 
-int handle_cudaMemcpy2DFromArray(void *conn)
+int handle_cudaMemcpy2DToArray(void *conn)
 {
-    void* dst;
-    size_t dpitch;
-    cudaArray_const_t src;
+    cudaArray_t dst;
     size_t wOffset;
     size_t hOffset;
+    const void* src;
+    size_t spitch;
     size_t width;
     size_t height;
     enum cudaMemcpyKind kind;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &dst, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dpitch, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &src, sizeof(cudaArray_const_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &wOffset, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hOffset, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &width, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &height, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &kind, sizeof(enum cudaMemcpyKind)) < 0)
+    if (
+        rpc_read(conn, &dst, sizeof(cudaArray_t)) < 0 ||
+        rpc_read(conn, &wOffset, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &hOffset, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &src, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &spitch, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &width, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &height, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &kind, sizeof(enum cudaMemcpyKind)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaMemcpy2DFromArray(dst, dpitch, src, wOffset, hOffset, width, height, kind);
+    result = cudaMemcpy2DToArray(dst, wOffset, hOffset, src, spitch, width, height, kind);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, dst, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -18294,23 +20130,17 @@ int handle_cudaMemcpy2DArrayToArray(void *conn)
     enum cudaMemcpyKind kind;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &dst, sizeof(cudaArray_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &wOffsetDst, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hOffsetDst, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &src, sizeof(cudaArray_const_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &wOffsetSrc, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hOffsetSrc, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &width, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &height, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &kind, sizeof(enum cudaMemcpyKind)) < 0)
+    if (
+        rpc_read(conn, &dst, sizeof(cudaArray_t)) < 0 ||
+        rpc_read(conn, &wOffsetDst, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &hOffsetDst, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &src, sizeof(cudaArray_const_t)) < 0 ||
+        rpc_read(conn, &wOffsetSrc, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &hOffsetSrc, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &width, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &height, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &kind, sizeof(enum cudaMemcpyKind)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -18327,45 +20157,70 @@ ERROR_0:
     return -1;
 }
 
-int handle_cudaMemcpy2DFromArrayAsync(void *conn)
+int handle_cudaMemcpyToSymbol(void *conn)
 {
-    void* dst;
-    size_t dpitch;
-    cudaArray_const_t src;
+    const void* symbol;
+    const void* src;
+    size_t count;
+    size_t offset;
+    enum cudaMemcpyKind kind;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &symbol, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &src, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &count, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &offset, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &kind, sizeof(enum cudaMemcpyKind)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaMemcpyToSymbol(symbol, src, count, offset, kind);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaMemcpy2DToArrayAsync(void *conn)
+{
+    cudaArray_t dst;
     size_t wOffset;
     size_t hOffset;
+    const void* src;
+    size_t spitch;
     size_t width;
     size_t height;
     enum cudaMemcpyKind kind;
     cudaStream_t stream;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &dst, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dpitch, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &src, sizeof(cudaArray_const_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &wOffset, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hOffset, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &width, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &height, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &kind, sizeof(enum cudaMemcpyKind)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0)
+    if (
+        rpc_read(conn, &dst, sizeof(cudaArray_t)) < 0 ||
+        rpc_read(conn, &wOffset, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &hOffset, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &src, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &spitch, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &width, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &height, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &kind, sizeof(enum cudaMemcpyKind)) < 0 ||
+        rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaMemcpy2DFromArrayAsync(dst, dpitch, src, wOffset, hOffset, width, height, kind, stream);
+    result = cudaMemcpy2DToArrayAsync(dst, wOffset, hOffset, src, spitch, width, height, kind, stream);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, dst, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -18374,62 +20229,32 @@ ERROR_0:
     return -1;
 }
 
-int handle_cudaMemset(void *conn)
+int handle_cudaMemcpyToSymbolAsync(void *conn)
 {
-    void* devPtr;
-    int value;
+    const void* symbol;
+    const void* src;
     size_t count;
+    size_t offset;
+    enum cudaMemcpyKind kind;
+    cudaStream_t stream;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &value, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &count, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &symbol, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &src, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &count, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &offset, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &kind, sizeof(enum cudaMemcpyKind)) < 0 ||
+        rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaMemset(devPtr, value, count);
+    result = cudaMemcpyToSymbolAsync(symbol, src, count, offset, kind, stream);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, devPtr, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_cudaMemset2D(void *conn)
-{
-    void* devPtr;
-    size_t pitch;
-    int value;
-    size_t width;
-    size_t height;
-    int request_id;
-    cudaError_t result;
-    if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &pitch, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &value, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &width, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &height, sizeof(size_t)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cudaMemset2D(devPtr, pitch, value, width, height);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, devPtr, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -18445,11 +20270,11 @@ int handle_cudaMemset3D(void *conn)
     struct cudaExtent extent;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &pitchedDevPtr, sizeof(struct cudaPitchedPtr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &value, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &extent, sizeof(struct cudaExtent)) < 0)
+    if (
+        rpc_read(conn, &pitchedDevPtr, sizeof(struct cudaPitchedPtr)) < 0 ||
+        rpc_read(conn, &value, sizeof(int)) < 0 ||
+        rpc_read(conn, &extent, sizeof(struct cudaExtent)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -18466,76 +20291,6 @@ ERROR_0:
     return -1;
 }
 
-int handle_cudaMemsetAsync(void *conn)
-{
-    void* devPtr;
-    int value;
-    size_t count;
-    cudaStream_t stream;
-    int request_id;
-    cudaError_t result;
-    if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &value, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &count, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cudaMemsetAsync(devPtr, value, count, stream);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, devPtr, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_cudaMemset2DAsync(void *conn)
-{
-    void* devPtr;
-    size_t pitch;
-    int value;
-    size_t width;
-    size_t height;
-    cudaStream_t stream;
-    int request_id;
-    cudaError_t result;
-    if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &pitch, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &value, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &width, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &height, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cudaMemset2DAsync(devPtr, pitch, value, width, height, stream);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, devPtr, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
 int handle_cudaMemset3DAsync(void *conn)
 {
     struct cudaPitchedPtr pitchedDevPtr;
@@ -18544,13 +20299,12 @@ int handle_cudaMemset3DAsync(void *conn)
     cudaStream_t stream;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &pitchedDevPtr, sizeof(struct cudaPitchedPtr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &value, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &extent, sizeof(struct cudaExtent)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0)
+    if (
+        rpc_read(conn, &pitchedDevPtr, sizeof(struct cudaPitchedPtr)) < 0 ||
+        rpc_read(conn, &value, sizeof(int)) < 0 ||
+        rpc_read(conn, &extent, sizeof(struct cudaExtent)) < 0 ||
+        rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -18567,36 +20321,183 @@ ERROR_0:
     return -1;
 }
 
-int handle_cudaMemcpyFromArray(void *conn)
+int handle_cudaGetSymbolAddress(void *conn)
 {
-    void* dst;
-    cudaArray_const_t src;
-    size_t wOffset;
-    size_t hOffset;
-    size_t count;
-    enum cudaMemcpyKind kind;
+    void* devPtr;
+    const void* symbol;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &dst, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &src, sizeof(cudaArray_const_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &wOffset, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hOffset, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &count, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &kind, sizeof(enum cudaMemcpyKind)) < 0)
+    if (
+        rpc_read(conn, &devPtr, sizeof(void*)) < 0 ||
+        rpc_read(conn, &symbol, sizeof(const void*)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaMemcpyFromArray(dst, src, wOffset, hOffset, count, kind);
+    result = cudaGetSymbolAddress(&devPtr, symbol);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, dst, sizeof(void*)) < 0 ||
+        rpc_write(conn, &devPtr, sizeof(void*)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaGetSymbolSize(void *conn)
+{
+    size_t size;
+    const void* symbol;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &size, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &symbol, sizeof(const void*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaGetSymbolSize(&size, symbol);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &size, sizeof(size_t)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaMemPrefetchAsync(void *conn)
+{
+    const void* devPtr;
+    size_t count;
+    int dstDevice;
+    cudaStream_t stream;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &devPtr, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &count, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &dstDevice, sizeof(int)) < 0 ||
+        rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaMemPrefetchAsync(devPtr, count, dstDevice, stream);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaMemAdvise(void *conn)
+{
+    const void* devPtr;
+    size_t count;
+    enum cudaMemoryAdvise advice;
+    int device;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &devPtr, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &count, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &advice, sizeof(enum cudaMemoryAdvise)) < 0 ||
+        rpc_read(conn, &device, sizeof(int)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaMemAdvise(devPtr, count, advice, device);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaMemRangeGetAttributes(void *conn)
+{
+    void* data;
+    size_t dataSizes;
+    enum cudaMemRangeAttribute attributes;
+    size_t numAttributes;
+    const void* devPtr;
+    size_t count;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &data, sizeof(void*)) < 0 ||
+        rpc_read(conn, &dataSizes, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &attributes, sizeof(enum cudaMemRangeAttribute)) < 0 ||
+        rpc_read(conn, &numAttributes, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &devPtr, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &count, sizeof(size_t)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaMemRangeGetAttributes(&data, &dataSizes, &attributes, numAttributes, devPtr, count);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &data, sizeof(void*)) < 0 ||
+        rpc_write(conn, &dataSizes, sizeof(size_t)) < 0 ||
+        rpc_write(conn, &attributes, sizeof(enum cudaMemRangeAttribute)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaMemcpyToArray(void *conn)
+{
+    cudaArray_t dst;
+    size_t wOffset;
+    size_t hOffset;
+    const void* src;
+    size_t count;
+    enum cudaMemcpyKind kind;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &dst, sizeof(cudaArray_t)) < 0 ||
+        rpc_read(conn, &wOffset, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &hOffset, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &src, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &count, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &kind, sizeof(enum cudaMemcpyKind)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaMemcpyToArray(dst, wOffset, hOffset, src, count, kind);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -18617,21 +20518,16 @@ int handle_cudaMemcpyArrayToArray(void *conn)
     enum cudaMemcpyKind kind;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &dst, sizeof(cudaArray_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &wOffsetDst, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hOffsetDst, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &src, sizeof(cudaArray_const_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &wOffsetSrc, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hOffsetSrc, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &count, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &kind, sizeof(enum cudaMemcpyKind)) < 0)
+    if (
+        rpc_read(conn, &dst, sizeof(cudaArray_t)) < 0 ||
+        rpc_read(conn, &wOffsetDst, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &hOffsetDst, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &src, sizeof(cudaArray_const_t)) < 0 ||
+        rpc_read(conn, &wOffsetSrc, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &hOffsetSrc, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &count, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &kind, sizeof(enum cudaMemcpyKind)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -18648,39 +20544,34 @@ ERROR_0:
     return -1;
 }
 
-int handle_cudaMemcpyFromArrayAsync(void *conn)
+int handle_cudaMemcpyToArrayAsync(void *conn)
 {
-    void* dst;
-    cudaArray_const_t src;
+    cudaArray_t dst;
     size_t wOffset;
     size_t hOffset;
+    const void* src;
     size_t count;
     enum cudaMemcpyKind kind;
     cudaStream_t stream;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &dst, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &src, sizeof(cudaArray_const_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &wOffset, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hOffset, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &count, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &kind, sizeof(enum cudaMemcpyKind)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0)
+    if (
+        rpc_read(conn, &dst, sizeof(cudaArray_t)) < 0 ||
+        rpc_read(conn, &wOffset, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &hOffset, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &src, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &count, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &kind, sizeof(enum cudaMemcpyKind)) < 0 ||
+        rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaMemcpyFromArrayAsync(dst, src, wOffset, hOffset, count, kind, stream);
+    result = cudaMemcpyToArrayAsync(dst, wOffset, hOffset, src, count, kind, stream);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, dst, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -18696,11 +20587,11 @@ int handle_cudaMallocAsync(void *conn)
     cudaStream_t hStream;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &size, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hStream, sizeof(cudaStream_t)) < 0)
+    if (
+        rpc_read(conn, &devPtr, sizeof(void*)) < 0 ||
+        rpc_read(conn, &size, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &hStream, sizeof(cudaStream_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -18718,41 +20609,16 @@ ERROR_0:
     return -1;
 }
 
-int handle_cudaFreeAsync(void *conn)
-{
-    void* devPtr;
-    cudaStream_t hStream;
-    int request_id;
-    cudaError_t result;
-    if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hStream, sizeof(cudaStream_t)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cudaFreeAsync(devPtr, hStream);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, devPtr, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
 int handle_cudaMemPoolTrimTo(void *conn)
 {
     cudaMemPool_t memPool;
     size_t minBytesToKeep;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &memPool, sizeof(cudaMemPool_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &minBytesToKeep, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &memPool, sizeof(cudaMemPool_t)) < 0 ||
+        rpc_read(conn, &minBytesToKeep, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -18769,56 +20635,26 @@ ERROR_0:
     return -1;
 }
 
-int handle_cudaMemPoolSetAttribute(void *conn)
+int handle_cudaMemPoolSetAccess(void *conn)
 {
     cudaMemPool_t memPool;
-    enum cudaMemPoolAttr attr;
-    void* value;
+    const struct cudaMemAccessDesc* descList;
+    size_t count;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &memPool, sizeof(cudaMemPool_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &attr, sizeof(enum cudaMemPoolAttr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &value, sizeof(void*)) < 0)
+    if (
+        rpc_read(conn, &memPool, sizeof(cudaMemPool_t)) < 0 ||
+        rpc_read(conn, &descList, sizeof(const struct cudaMemAccessDesc*)) < 0 ||
+        rpc_read(conn, &count, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaMemPoolSetAttribute(memPool, attr, value);
+    result = cudaMemPoolSetAccess(memPool, descList, count);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, value, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_cudaMemPoolGetAttribute(void *conn)
-{
-    cudaMemPool_t memPool;
-    enum cudaMemPoolAttr attr;
-    void* value;
-    int request_id;
-    cudaError_t result;
-    if (rpc_read(conn, &memPool, sizeof(cudaMemPool_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &attr, sizeof(enum cudaMemPoolAttr)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &value, sizeof(void*)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cudaMemPoolGetAttribute(memPool, attr, value);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, value, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -18834,11 +20670,11 @@ int handle_cudaMemPoolGetAccess(void *conn)
     struct cudaMemLocation location;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &flags, sizeof(enum cudaMemAccessFlags)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &memPool, sizeof(cudaMemPool_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &location, sizeof(struct cudaMemLocation)) < 0)
+    if (
+        rpc_read(conn, &flags, sizeof(enum cudaMemAccessFlags)) < 0 ||
+        rpc_read(conn, &memPool, sizeof(cudaMemPool_t)) < 0 ||
+        rpc_read(conn, &location, sizeof(struct cudaMemLocation)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -18857,12 +20693,41 @@ ERROR_0:
     return -1;
 }
 
+int handle_cudaMemPoolCreate(void *conn)
+{
+    cudaMemPool_t memPool;
+    const struct cudaMemPoolProps* poolProps;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &memPool, sizeof(cudaMemPool_t)) < 0 ||
+        rpc_read(conn, &poolProps, sizeof(const struct cudaMemPoolProps*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaMemPoolCreate(&memPool, poolProps);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &memPool, sizeof(cudaMemPool_t)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cudaMemPoolDestroy(void *conn)
 {
     cudaMemPool_t memPool;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &memPool, sizeof(cudaMemPool_t)) < 0)
+    if (
+        rpc_read(conn, &memPool, sizeof(cudaMemPool_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -18887,13 +20752,12 @@ int handle_cudaMallocFromPoolAsync(void *conn)
     cudaStream_t stream;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &ptr, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &size, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &memPool, sizeof(cudaMemPool_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0)
+    if (
+        rpc_read(conn, &ptr, sizeof(void*)) < 0 ||
+        rpc_read(conn, &size, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &memPool, sizeof(cudaMemPool_t)) < 0 ||
+        rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -18911,98 +20775,6 @@ ERROR_0:
     return -1;
 }
 
-int handle_cudaMemPoolExportToShareableHandle(void *conn)
-{
-    void* shareableHandle;
-    cudaMemPool_t memPool;
-    enum cudaMemAllocationHandleType handleType;
-    unsigned int flags;
-    int request_id;
-    cudaError_t result;
-    if (rpc_read(conn, &shareableHandle, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &memPool, sizeof(cudaMemPool_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &handleType, sizeof(enum cudaMemAllocationHandleType)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cudaMemPoolExportToShareableHandle(shareableHandle, memPool, handleType, flags);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, shareableHandle, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_cudaMemPoolImportFromShareableHandle(void *conn)
-{
-    cudaMemPool_t memPool;
-    void* shareableHandle;
-    enum cudaMemAllocationHandleType handleType;
-    unsigned int flags;
-    int request_id;
-    cudaError_t result;
-    if (rpc_read(conn, &memPool, sizeof(cudaMemPool_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &shareableHandle, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &handleType, sizeof(enum cudaMemAllocationHandleType)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cudaMemPoolImportFromShareableHandle(&memPool, shareableHandle, handleType, flags);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &memPool, sizeof(cudaMemPool_t)) < 0 ||
-        rpc_write(conn, shareableHandle, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_cudaMemPoolExportPointer(void *conn)
-{
-    struct cudaMemPoolPtrExportData exportData;
-    void* ptr;
-    int request_id;
-    cudaError_t result;
-    if (rpc_read(conn, &exportData, sizeof(struct cudaMemPoolPtrExportData)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &ptr, sizeof(void*)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cudaMemPoolExportPointer(&exportData, ptr);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &exportData, sizeof(struct cudaMemPoolPtrExportData)) < 0 ||
-        rpc_write(conn, ptr, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
 int handle_cudaMemPoolImportPointer(void *conn)
 {
     void* ptr;
@@ -19010,11 +20782,11 @@ int handle_cudaMemPoolImportPointer(void *conn)
     struct cudaMemPoolPtrExportData exportData;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &ptr, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &memPool, sizeof(cudaMemPool_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &exportData, sizeof(struct cudaMemPoolPtrExportData)) < 0)
+    if (
+        rpc_read(conn, &ptr, sizeof(void*)) < 0 ||
+        rpc_read(conn, &memPool, sizeof(cudaMemPool_t)) < 0 ||
+        rpc_read(conn, &exportData, sizeof(struct cudaMemPoolPtrExportData)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19033,6 +20805,33 @@ ERROR_0:
     return -1;
 }
 
+int handle_cudaPointerGetAttributes(void *conn)
+{
+    struct cudaPointerAttributes attributes;
+    const void* ptr;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &attributes, sizeof(struct cudaPointerAttributes)) < 0 ||
+        rpc_read(conn, &ptr, sizeof(const void*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaPointerGetAttributes(&attributes, ptr);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &attributes, sizeof(struct cudaPointerAttributes)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cudaDeviceCanAccessPeer(void *conn)
 {
     int canAccessPeer;
@@ -19040,11 +20839,11 @@ int handle_cudaDeviceCanAccessPeer(void *conn)
     int peerDevice;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &canAccessPeer, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &device, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &peerDevice, sizeof(int)) < 0)
+    if (
+        rpc_read(conn, &canAccessPeer, sizeof(int)) < 0 ||
+        rpc_read(conn, &device, sizeof(int)) < 0 ||
+        rpc_read(conn, &peerDevice, sizeof(int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19068,9 +20867,10 @@ int handle_cudaDeviceEnablePeerAccess(void *conn)
     unsigned int flags;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &peerDevice, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &peerDevice, sizeof(int)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19092,7 +20892,9 @@ int handle_cudaDeviceDisablePeerAccess(void *conn)
     int peerDevice;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &peerDevice, sizeof(int)) < 0)
+    if (
+        rpc_read(conn, &peerDevice, sizeof(int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19114,7 +20916,9 @@ int handle_cudaGraphicsUnregisterResource(void *conn)
     cudaGraphicsResource_t resource;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &resource, sizeof(cudaGraphicsResource_t)) < 0)
+    if (
+        rpc_read(conn, &resource, sizeof(cudaGraphicsResource_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19137,9 +20941,10 @@ int handle_cudaGraphicsResourceSetMapFlags(void *conn)
     unsigned int flags;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &resource, sizeof(cudaGraphicsResource_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &resource, sizeof(cudaGraphicsResource_t)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19163,11 +20968,11 @@ int handle_cudaGraphicsMapResources(void *conn)
     cudaStream_t stream;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &count, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &resources, sizeof(cudaGraphicsResource_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0)
+    if (
+        rpc_read(conn, &count, sizeof(int)) < 0 ||
+        rpc_read(conn, &resources, sizeof(cudaGraphicsResource_t)) < 0 ||
+        rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19192,11 +20997,11 @@ int handle_cudaGraphicsUnmapResources(void *conn)
     cudaStream_t stream;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &count, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &resources, sizeof(cudaGraphicsResource_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0)
+    if (
+        rpc_read(conn, &count, sizeof(int)) < 0 ||
+        rpc_read(conn, &resources, sizeof(cudaGraphicsResource_t)) < 0 ||
+        rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19221,11 +21026,11 @@ int handle_cudaGraphicsResourceGetMappedPointer(void *conn)
     cudaGraphicsResource_t resource;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &devPtr, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &size, sizeof(size_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &resource, sizeof(cudaGraphicsResource_t)) < 0)
+    if (
+        rpc_read(conn, &devPtr, sizeof(void*)) < 0 ||
+        rpc_read(conn, &size, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &resource, sizeof(cudaGraphicsResource_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19252,13 +21057,12 @@ int handle_cudaGraphicsSubResourceGetMappedArray(void *conn)
     unsigned int mipLevel;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &array, sizeof(cudaArray_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &resource, sizeof(cudaGraphicsResource_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &arrayIndex, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &mipLevel, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &array, sizeof(cudaArray_t)) < 0 ||
+        rpc_read(conn, &resource, sizeof(cudaGraphicsResource_t)) < 0 ||
+        rpc_read(conn, &arrayIndex, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &mipLevel, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19282,9 +21086,10 @@ int handle_cudaGraphicsResourceGetMappedMipmappedArray(void *conn)
     cudaGraphicsResource_t resource;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &mipmappedArray, sizeof(cudaMipmappedArray_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &resource, sizeof(cudaGraphicsResource_t)) < 0)
+    if (
+        rpc_read(conn, &mipmappedArray, sizeof(cudaMipmappedArray_t)) < 0 ||
+        rpc_read(conn, &resource, sizeof(cudaGraphicsResource_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19308,9 +21113,10 @@ int handle_cudaGetChannelDesc(void *conn)
     cudaArray_const_t array;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &desc, sizeof(struct cudaChannelFormatDesc)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &array, sizeof(cudaArray_const_t)) < 0)
+    if (
+        rpc_read(conn, &desc, sizeof(struct cudaChannelFormatDesc)) < 0 ||
+        rpc_read(conn, &array, sizeof(cudaArray_const_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19328,12 +21134,45 @@ ERROR_0:
     return -1;
 }
 
+int handle_cudaCreateTextureObject(void *conn)
+{
+    cudaTextureObject_t pTexObject;
+    const struct cudaResourceDesc* pResDesc;
+    const struct cudaTextureDesc* pTexDesc;
+    const struct cudaResourceViewDesc* pResViewDesc;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &pTexObject, sizeof(cudaTextureObject_t)) < 0 ||
+        rpc_read(conn, &pResDesc, sizeof(const struct cudaResourceDesc*)) < 0 ||
+        rpc_read(conn, &pTexDesc, sizeof(const struct cudaTextureDesc*)) < 0 ||
+        rpc_read(conn, &pResViewDesc, sizeof(const struct cudaResourceViewDesc*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaCreateTextureObject(&pTexObject, pResDesc, pTexDesc, pResViewDesc);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &pTexObject, sizeof(cudaTextureObject_t)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cudaDestroyTextureObject(void *conn)
 {
     cudaTextureObject_t texObject;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &texObject, sizeof(cudaTextureObject_t)) < 0)
+    if (
+        rpc_read(conn, &texObject, sizeof(cudaTextureObject_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19356,9 +21195,10 @@ int handle_cudaGetTextureObjectResourceDesc(void *conn)
     cudaTextureObject_t texObject;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &pResDesc, sizeof(struct cudaResourceDesc)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &texObject, sizeof(cudaTextureObject_t)) < 0)
+    if (
+        rpc_read(conn, &pResDesc, sizeof(struct cudaResourceDesc)) < 0 ||
+        rpc_read(conn, &texObject, sizeof(cudaTextureObject_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19382,9 +21222,10 @@ int handle_cudaGetTextureObjectTextureDesc(void *conn)
     cudaTextureObject_t texObject;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &pTexDesc, sizeof(struct cudaTextureDesc)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &texObject, sizeof(cudaTextureObject_t)) < 0)
+    if (
+        rpc_read(conn, &pTexDesc, sizeof(struct cudaTextureDesc)) < 0 ||
+        rpc_read(conn, &texObject, sizeof(cudaTextureObject_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19408,9 +21249,10 @@ int handle_cudaGetTextureObjectResourceViewDesc(void *conn)
     cudaTextureObject_t texObject;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &pResViewDesc, sizeof(struct cudaResourceViewDesc)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &texObject, sizeof(cudaTextureObject_t)) < 0)
+    if (
+        rpc_read(conn, &pResViewDesc, sizeof(struct cudaResourceViewDesc)) < 0 ||
+        rpc_read(conn, &texObject, sizeof(cudaTextureObject_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19428,12 +21270,41 @@ ERROR_0:
     return -1;
 }
 
+int handle_cudaCreateSurfaceObject(void *conn)
+{
+    cudaSurfaceObject_t pSurfObject;
+    const struct cudaResourceDesc* pResDesc;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &pSurfObject, sizeof(cudaSurfaceObject_t)) < 0 ||
+        rpc_read(conn, &pResDesc, sizeof(const struct cudaResourceDesc*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaCreateSurfaceObject(&pSurfObject, pResDesc);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &pSurfObject, sizeof(cudaSurfaceObject_t)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cudaDestroySurfaceObject(void *conn)
 {
     cudaSurfaceObject_t surfObject;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &surfObject, sizeof(cudaSurfaceObject_t)) < 0)
+    if (
+        rpc_read(conn, &surfObject, sizeof(cudaSurfaceObject_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19456,9 +21327,10 @@ int handle_cudaGetSurfaceObjectResourceDesc(void *conn)
     cudaSurfaceObject_t surfObject;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &pResDesc, sizeof(struct cudaResourceDesc)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &surfObject, sizeof(cudaSurfaceObject_t)) < 0)
+    if (
+        rpc_read(conn, &pResDesc, sizeof(struct cudaResourceDesc)) < 0 ||
+        rpc_read(conn, &surfObject, sizeof(cudaSurfaceObject_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19481,7 +21353,9 @@ int handle_cudaDriverGetVersion(void *conn)
     int driverVersion;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &driverVersion, sizeof(int)) < 0)
+    if (
+        rpc_read(conn, &driverVersion, sizeof(int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19504,7 +21378,9 @@ int handle_cudaRuntimeGetVersion(void *conn)
     int runtimeVersion;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &runtimeVersion, sizeof(int)) < 0)
+    if (
+        rpc_read(conn, &runtimeVersion, sizeof(int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19528,9 +21404,10 @@ int handle_cudaGraphCreate(void *conn)
     unsigned int flags;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &pGraph, sizeof(cudaGraph_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &pGraph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19548,15 +21425,49 @@ ERROR_0:
     return -1;
 }
 
+int handle_cudaGraphAddKernelNode(void *conn)
+{
+    cudaGraphNode_t pGraphNode;
+    cudaGraph_t graph;
+    const cudaGraphNode_t* pDependencies;
+    size_t numDependencies;
+    const struct cudaKernelNodeParams* pNodeParams;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_read(conn, &pDependencies, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &pNodeParams, sizeof(const struct cudaKernelNodeParams*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaGraphAddKernelNode(&pGraphNode, graph, pDependencies, numDependencies, pNodeParams);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cudaGraphKernelNodeGetParams(void *conn)
 {
     cudaGraphNode_t node;
     struct cudaKernelNodeParams pNodeParams;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &pNodeParams, sizeof(struct cudaKernelNodeParams)) < 0)
+    if (
+        rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &pNodeParams, sizeof(struct cudaKernelNodeParams)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19574,15 +21485,42 @@ ERROR_0:
     return -1;
 }
 
+int handle_cudaGraphKernelNodeSetParams(void *conn)
+{
+    cudaGraphNode_t node;
+    const struct cudaKernelNodeParams* pNodeParams;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &pNodeParams, sizeof(const struct cudaKernelNodeParams*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaGraphKernelNodeSetParams(node, pNodeParams);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cudaGraphKernelNodeCopyAttributes(void *conn)
 {
     cudaGraphNode_t hSrc;
     cudaGraphNode_t hDst;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &hSrc, sizeof(cudaGraphNode_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hDst, sizeof(cudaGraphNode_t)) < 0)
+    if (
+        rpc_read(conn, &hSrc, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &hDst, sizeof(cudaGraphNode_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19606,11 +21544,11 @@ int handle_cudaGraphKernelNodeGetAttribute(void *conn)
     cudaLaunchAttributeValue value_out;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &hNode, sizeof(cudaGraphNode_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &attr, sizeof(cudaLaunchAttributeID)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &value_out, sizeof(cudaLaunchAttributeValue)) < 0)
+    if (
+        rpc_read(conn, &hNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &attr, sizeof(cudaLaunchAttributeID)) < 0 ||
+        rpc_read(conn, &value_out, sizeof(cudaLaunchAttributeValue)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19628,15 +21566,118 @@ ERROR_0:
     return -1;
 }
 
+int handle_cudaGraphKernelNodeSetAttribute(void *conn)
+{
+    cudaGraphNode_t hNode;
+    cudaLaunchAttributeID attr;
+    const cudaLaunchAttributeValue* value;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &hNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &attr, sizeof(cudaLaunchAttributeID)) < 0 ||
+        rpc_read(conn, &value, sizeof(const cudaLaunchAttributeValue*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaGraphKernelNodeSetAttribute(hNode, attr, value);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaGraphAddMemcpyNode(void *conn)
+{
+    cudaGraphNode_t pGraphNode;
+    cudaGraph_t graph;
+    const cudaGraphNode_t* pDependencies;
+    size_t numDependencies;
+    const struct cudaMemcpy3DParms* pCopyParams;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_read(conn, &pDependencies, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &pCopyParams, sizeof(const struct cudaMemcpy3DParms*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaGraphAddMemcpyNode(&pGraphNode, graph, pDependencies, numDependencies, pCopyParams);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaGraphAddMemcpyNodeToSymbol(void *conn)
+{
+    cudaGraphNode_t pGraphNode;
+    cudaGraph_t graph;
+    const cudaGraphNode_t* pDependencies;
+    size_t numDependencies;
+    const void* symbol;
+    const void* src;
+    size_t count;
+    size_t offset;
+    enum cudaMemcpyKind kind;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_read(conn, &pDependencies, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &symbol, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &src, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &count, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &offset, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &kind, sizeof(enum cudaMemcpyKind)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaGraphAddMemcpyNodeToSymbol(&pGraphNode, graph, pDependencies, numDependencies, symbol, src, count, offset, kind);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cudaGraphMemcpyNodeGetParams(void *conn)
 {
     cudaGraphNode_t node;
     struct cudaMemcpy3DParms pNodeParams;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &pNodeParams, sizeof(struct cudaMemcpy3DParms)) < 0)
+    if (
+        rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &pNodeParams, sizeof(struct cudaMemcpy3DParms)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19654,15 +21695,109 @@ ERROR_0:
     return -1;
 }
 
+int handle_cudaGraphMemcpyNodeSetParams(void *conn)
+{
+    cudaGraphNode_t node;
+    const struct cudaMemcpy3DParms* pNodeParams;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &pNodeParams, sizeof(const struct cudaMemcpy3DParms*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaGraphMemcpyNodeSetParams(node, pNodeParams);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaGraphMemcpyNodeSetParamsToSymbol(void *conn)
+{
+    cudaGraphNode_t node;
+    const void* symbol;
+    const void* src;
+    size_t count;
+    size_t offset;
+    enum cudaMemcpyKind kind;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &symbol, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &src, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &count, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &offset, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &kind, sizeof(enum cudaMemcpyKind)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaGraphMemcpyNodeSetParamsToSymbol(node, symbol, src, count, offset, kind);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaGraphAddMemsetNode(void *conn)
+{
+    cudaGraphNode_t pGraphNode;
+    cudaGraph_t graph;
+    const cudaGraphNode_t* pDependencies;
+    size_t numDependencies;
+    const struct cudaMemsetParams* pMemsetParams;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_read(conn, &pDependencies, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &pMemsetParams, sizeof(const struct cudaMemsetParams*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaGraphAddMemsetNode(&pGraphNode, graph, pDependencies, numDependencies, pMemsetParams);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cudaGraphMemsetNodeGetParams(void *conn)
 {
     cudaGraphNode_t node;
     struct cudaMemsetParams pNodeParams;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &pNodeParams, sizeof(struct cudaMemsetParams)) < 0)
+    if (
+        rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &pNodeParams, sizeof(struct cudaMemsetParams)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19680,15 +21815,75 @@ ERROR_0:
     return -1;
 }
 
+int handle_cudaGraphMemsetNodeSetParams(void *conn)
+{
+    cudaGraphNode_t node;
+    const struct cudaMemsetParams* pNodeParams;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &pNodeParams, sizeof(const struct cudaMemsetParams*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaGraphMemsetNodeSetParams(node, pNodeParams);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaGraphAddHostNode(void *conn)
+{
+    cudaGraphNode_t pGraphNode;
+    cudaGraph_t graph;
+    const cudaGraphNode_t* pDependencies;
+    size_t numDependencies;
+    const struct cudaHostNodeParams* pNodeParams;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_read(conn, &pDependencies, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &pNodeParams, sizeof(const struct cudaHostNodeParams*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaGraphAddHostNode(&pGraphNode, graph, pDependencies, numDependencies, pNodeParams);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cudaGraphHostNodeGetParams(void *conn)
 {
     cudaGraphNode_t node;
     struct cudaHostNodeParams pNodeParams;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &pNodeParams, sizeof(struct cudaHostNodeParams)) < 0)
+    if (
+        rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &pNodeParams, sizeof(struct cudaHostNodeParams)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19706,15 +21901,75 @@ ERROR_0:
     return -1;
 }
 
+int handle_cudaGraphHostNodeSetParams(void *conn)
+{
+    cudaGraphNode_t node;
+    const struct cudaHostNodeParams* pNodeParams;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &pNodeParams, sizeof(const struct cudaHostNodeParams*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaGraphHostNodeSetParams(node, pNodeParams);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaGraphAddChildGraphNode(void *conn)
+{
+    cudaGraphNode_t pGraphNode;
+    cudaGraph_t graph;
+    const cudaGraphNode_t* pDependencies;
+    size_t numDependencies;
+    cudaGraph_t childGraph;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_read(conn, &pDependencies, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &childGraph, sizeof(cudaGraph_t)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaGraphAddChildGraphNode(&pGraphNode, graph, pDependencies, numDependencies, childGraph);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cudaGraphChildGraphNodeGetGraph(void *conn)
 {
     cudaGraphNode_t node;
     cudaGraph_t pGraph;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &pGraph, sizeof(cudaGraph_t)) < 0)
+    if (
+        rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &pGraph, sizeof(cudaGraph_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19732,15 +21987,80 @@ ERROR_0:
     return -1;
 }
 
+int handle_cudaGraphAddEmptyNode(void *conn)
+{
+    cudaGraphNode_t pGraphNode;
+    cudaGraph_t graph;
+    const cudaGraphNode_t* pDependencies;
+    size_t numDependencies;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_read(conn, &pDependencies, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaGraphAddEmptyNode(&pGraphNode, graph, pDependencies, numDependencies);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaGraphAddEventRecordNode(void *conn)
+{
+    cudaGraphNode_t pGraphNode;
+    cudaGraph_t graph;
+    const cudaGraphNode_t* pDependencies;
+    size_t numDependencies;
+    cudaEvent_t event;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_read(conn, &pDependencies, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &event, sizeof(cudaEvent_t)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaGraphAddEventRecordNode(&pGraphNode, graph, pDependencies, numDependencies, event);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cudaGraphEventRecordNodeGetEvent(void *conn)
 {
     cudaGraphNode_t node;
     cudaEvent_t event_out;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &event_out, sizeof(cudaEvent_t)) < 0)
+    if (
+        rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &event_out, sizeof(cudaEvent_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19764,9 +22084,10 @@ int handle_cudaGraphEventRecordNodeSetEvent(void *conn)
     cudaEvent_t event;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &event, sizeof(cudaEvent_t)) < 0)
+    if (
+        rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &event, sizeof(cudaEvent_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19783,15 +22104,49 @@ ERROR_0:
     return -1;
 }
 
+int handle_cudaGraphAddEventWaitNode(void *conn)
+{
+    cudaGraphNode_t pGraphNode;
+    cudaGraph_t graph;
+    const cudaGraphNode_t* pDependencies;
+    size_t numDependencies;
+    cudaEvent_t event;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_read(conn, &pDependencies, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &event, sizeof(cudaEvent_t)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaGraphAddEventWaitNode(&pGraphNode, graph, pDependencies, numDependencies, event);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cudaGraphEventWaitNodeGetEvent(void *conn)
 {
     cudaGraphNode_t node;
     cudaEvent_t event_out;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &event_out, sizeof(cudaEvent_t)) < 0)
+    if (
+        rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &event_out, sizeof(cudaEvent_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19815,9 +22170,10 @@ int handle_cudaGraphEventWaitNodeSetEvent(void *conn)
     cudaEvent_t event;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &event, sizeof(cudaEvent_t)) < 0)
+    if (
+        rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &event, sizeof(cudaEvent_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19834,15 +22190,49 @@ ERROR_0:
     return -1;
 }
 
+int handle_cudaGraphAddExternalSemaphoresSignalNode(void *conn)
+{
+    cudaGraphNode_t pGraphNode;
+    cudaGraph_t graph;
+    const cudaGraphNode_t* pDependencies;
+    size_t numDependencies;
+    const struct cudaExternalSemaphoreSignalNodeParams* nodeParams;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_read(conn, &pDependencies, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &nodeParams, sizeof(const struct cudaExternalSemaphoreSignalNodeParams*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaGraphAddExternalSemaphoresSignalNode(&pGraphNode, graph, pDependencies, numDependencies, nodeParams);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cudaGraphExternalSemaphoresSignalNodeGetParams(void *conn)
 {
     cudaGraphNode_t hNode;
     struct cudaExternalSemaphoreSignalNodeParams params_out;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &hNode, sizeof(cudaGraphNode_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &params_out, sizeof(struct cudaExternalSemaphoreSignalNodeParams)) < 0)
+    if (
+        rpc_read(conn, &hNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &params_out, sizeof(struct cudaExternalSemaphoreSignalNodeParams)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19860,15 +22250,75 @@ ERROR_0:
     return -1;
 }
 
+int handle_cudaGraphExternalSemaphoresSignalNodeSetParams(void *conn)
+{
+    cudaGraphNode_t hNode;
+    const struct cudaExternalSemaphoreSignalNodeParams* nodeParams;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &hNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &nodeParams, sizeof(const struct cudaExternalSemaphoreSignalNodeParams*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaGraphExternalSemaphoresSignalNodeSetParams(hNode, nodeParams);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaGraphAddExternalSemaphoresWaitNode(void *conn)
+{
+    cudaGraphNode_t pGraphNode;
+    cudaGraph_t graph;
+    const cudaGraphNode_t* pDependencies;
+    size_t numDependencies;
+    const struct cudaExternalSemaphoreWaitNodeParams* nodeParams;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_read(conn, &pDependencies, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &nodeParams, sizeof(const struct cudaExternalSemaphoreWaitNodeParams*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaGraphAddExternalSemaphoresWaitNode(&pGraphNode, graph, pDependencies, numDependencies, nodeParams);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cudaGraphExternalSemaphoresWaitNodeGetParams(void *conn)
 {
     cudaGraphNode_t hNode;
     struct cudaExternalSemaphoreWaitNodeParams params_out;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &hNode, sizeof(cudaGraphNode_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &params_out, sizeof(struct cudaExternalSemaphoreWaitNodeParams)) < 0)
+    if (
+        rpc_read(conn, &hNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &params_out, sizeof(struct cudaExternalSemaphoreWaitNodeParams)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19886,15 +22336,76 @@ ERROR_0:
     return -1;
 }
 
+int handle_cudaGraphExternalSemaphoresWaitNodeSetParams(void *conn)
+{
+    cudaGraphNode_t hNode;
+    const struct cudaExternalSemaphoreWaitNodeParams* nodeParams;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &hNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &nodeParams, sizeof(const struct cudaExternalSemaphoreWaitNodeParams*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaGraphExternalSemaphoresWaitNodeSetParams(hNode, nodeParams);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaGraphAddMemAllocNode(void *conn)
+{
+    cudaGraphNode_t pGraphNode;
+    cudaGraph_t graph;
+    const cudaGraphNode_t* pDependencies;
+    size_t numDependencies;
+    struct cudaMemAllocNodeParams nodeParams;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_read(conn, &pDependencies, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &nodeParams, sizeof(struct cudaMemAllocNodeParams)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaGraphAddMemAllocNode(&pGraphNode, graph, pDependencies, numDependencies, &nodeParams);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(conn, &nodeParams, sizeof(struct cudaMemAllocNodeParams)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cudaGraphMemAllocNodeGetParams(void *conn)
 {
     cudaGraphNode_t node;
     struct cudaMemAllocNodeParams params_out;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &params_out, sizeof(struct cudaMemAllocNodeParams)) < 0)
+    if (
+        rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &params_out, sizeof(struct cudaMemAllocNodeParams)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19912,38 +22423,14 @@ ERROR_0:
     return -1;
 }
 
-int handle_cudaGraphMemFreeNodeGetParams(void *conn)
-{
-    cudaGraphNode_t node;
-    void* dptr_out;
-    int request_id;
-    cudaError_t result;
-    if (rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &dptr_out, sizeof(void*)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cudaGraphMemFreeNodeGetParams(node, dptr_out);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, dptr_out, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
 int handle_cudaDeviceGraphMemTrim(void *conn)
 {
     int device;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &device, sizeof(int)) < 0)
+    if (
+        rpc_read(conn, &device, sizeof(int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -19960,73 +22447,16 @@ ERROR_0:
     return -1;
 }
 
-int handle_cudaDeviceGetGraphMemAttribute(void *conn)
-{
-    int device;
-    enum cudaGraphMemAttributeType attr;
-    void* value;
-    int request_id;
-    cudaError_t result;
-    if (rpc_read(conn, &device, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &attr, sizeof(enum cudaGraphMemAttributeType)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &value, sizeof(void*)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cudaDeviceGetGraphMemAttribute(device, attr, value);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, value, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_cudaDeviceSetGraphMemAttribute(void *conn)
-{
-    int device;
-    enum cudaGraphMemAttributeType attr;
-    void* value;
-    int request_id;
-    cudaError_t result;
-    if (rpc_read(conn, &device, sizeof(int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &attr, sizeof(enum cudaGraphMemAttributeType)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &value, sizeof(void*)) < 0)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    result = cudaDeviceSetGraphMemAttribute(device, attr, value);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, value, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
 int handle_cudaGraphClone(void *conn)
 {
     cudaGraph_t pGraphClone;
     cudaGraph_t originalGraph;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &pGraphClone, sizeof(cudaGraph_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &originalGraph, sizeof(cudaGraph_t)) < 0)
+    if (
+        rpc_read(conn, &pGraphClone, sizeof(cudaGraph_t)) < 0 ||
+        rpc_read(conn, &originalGraph, sizeof(cudaGraph_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -20051,11 +22481,11 @@ int handle_cudaGraphNodeFindInClone(void *conn)
     cudaGraph_t clonedGraph;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &pNode, sizeof(cudaGraphNode_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &originalNode, sizeof(cudaGraphNode_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &clonedGraph, sizeof(cudaGraph_t)) < 0)
+    if (
+        rpc_read(conn, &pNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &originalNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &clonedGraph, sizeof(cudaGraph_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -20079,9 +22509,10 @@ int handle_cudaGraphNodeGetType(void *conn)
     enum cudaGraphNodeType pType;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &pType, sizeof(enum cudaGraphNodeType)) < 0)
+    if (
+        rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &pType, sizeof(enum cudaGraphNodeType)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -20106,11 +22537,11 @@ int handle_cudaGraphGetNodes(void *conn)
     size_t numNodes;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &nodes, sizeof(cudaGraphNode_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &numNodes, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_read(conn, &nodes, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &numNodes, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -20136,11 +22567,11 @@ int handle_cudaGraphGetRootNodes(void *conn)
     size_t pNumRootNodes;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &pRootNodes, sizeof(cudaGraphNode_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &pNumRootNodes, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_read(conn, &pRootNodes, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &pNumRootNodes, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -20167,13 +22598,12 @@ int handle_cudaGraphGetEdges(void *conn)
     size_t numEdges;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &from, sizeof(cudaGraphNode_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &to, sizeof(cudaGraphNode_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &numEdges, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_read(conn, &from, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &to, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &numEdges, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -20200,11 +22630,11 @@ int handle_cudaGraphNodeGetDependencies(void *conn)
     size_t pNumDependencies;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &pDependencies, sizeof(cudaGraphNode_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &pNumDependencies, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &pDependencies, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &pNumDependencies, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -20230,11 +22660,11 @@ int handle_cudaGraphNodeGetDependentNodes(void *conn)
     size_t pNumDependentNodes;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &pDependentNodes, sizeof(cudaGraphNode_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &pNumDependentNodes, sizeof(size_t)) < 0)
+    if (
+        rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &pDependentNodes, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &pNumDependentNodes, sizeof(size_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -20253,12 +22683,74 @@ ERROR_0:
     return -1;
 }
 
+int handle_cudaGraphAddDependencies(void *conn)
+{
+    cudaGraph_t graph;
+    const cudaGraphNode_t* from;
+    const cudaGraphNode_t* to;
+    size_t numDependencies;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_read(conn, &from, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_read(conn, &to, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaGraphAddDependencies(graph, from, to, numDependencies);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaGraphRemoveDependencies(void *conn)
+{
+    cudaGraph_t graph;
+    const cudaGraphNode_t* from;
+    const cudaGraphNode_t* to;
+    size_t numDependencies;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_read(conn, &from, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_read(conn, &to, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaGraphRemoveDependencies(graph, from, to, numDependencies);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cudaGraphDestroyNode(void *conn)
 {
     cudaGraphNode_t node;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0)
+    if (
+        rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -20282,11 +22774,11 @@ int handle_cudaGraphInstantiate(void *conn)
     unsigned long long flags;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &pGraphExec, sizeof(cudaGraphExec_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned long long)) < 0)
+    if (
+        rpc_read(conn, &pGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned long long)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -20311,11 +22803,11 @@ int handle_cudaGraphInstantiateWithFlags(void *conn)
     unsigned long long flags;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &pGraphExec, sizeof(cudaGraphExec_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned long long)) < 0)
+    if (
+        rpc_read(conn, &pGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned long long)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -20340,11 +22832,11 @@ int handle_cudaGraphInstantiateWithParams(void *conn)
     cudaGraphInstantiateParams instantiateParams;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &pGraphExec, sizeof(cudaGraphExec_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &instantiateParams, sizeof(cudaGraphInstantiateParams)) < 0)
+    if (
+        rpc_read(conn, &pGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_read(conn, &instantiateParams, sizeof(cudaGraphInstantiateParams)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -20369,9 +22861,10 @@ int handle_cudaGraphExecGetFlags(void *conn)
     unsigned long long flags;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &graphExec, sizeof(cudaGraphExec_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned long long)) < 0)
+    if (
+        rpc_read(conn, &graphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned long long)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -20389,6 +22882,154 @@ ERROR_0:
     return -1;
 }
 
+int handle_cudaGraphExecKernelNodeSetParams(void *conn)
+{
+    cudaGraphExec_t hGraphExec;
+    cudaGraphNode_t node;
+    const struct cudaKernelNodeParams* pNodeParams;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &hGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &pNodeParams, sizeof(const struct cudaKernelNodeParams*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaGraphExecKernelNodeSetParams(hGraphExec, node, pNodeParams);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaGraphExecMemcpyNodeSetParams(void *conn)
+{
+    cudaGraphExec_t hGraphExec;
+    cudaGraphNode_t node;
+    const struct cudaMemcpy3DParms* pNodeParams;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &hGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &pNodeParams, sizeof(const struct cudaMemcpy3DParms*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaGraphExecMemcpyNodeSetParams(hGraphExec, node, pNodeParams);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaGraphExecMemcpyNodeSetParamsToSymbol(void *conn)
+{
+    cudaGraphExec_t hGraphExec;
+    cudaGraphNode_t node;
+    const void* symbol;
+    const void* src;
+    size_t count;
+    size_t offset;
+    enum cudaMemcpyKind kind;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &hGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &symbol, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &src, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &count, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &offset, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &kind, sizeof(enum cudaMemcpyKind)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaGraphExecMemcpyNodeSetParamsToSymbol(hGraphExec, node, symbol, src, count, offset, kind);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaGraphExecMemsetNodeSetParams(void *conn)
+{
+    cudaGraphExec_t hGraphExec;
+    cudaGraphNode_t node;
+    const struct cudaMemsetParams* pNodeParams;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &hGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &pNodeParams, sizeof(const struct cudaMemsetParams*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaGraphExecMemsetNodeSetParams(hGraphExec, node, pNodeParams);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaGraphExecHostNodeSetParams(void *conn)
+{
+    cudaGraphExec_t hGraphExec;
+    cudaGraphNode_t node;
+    const struct cudaHostNodeParams* pNodeParams;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &hGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &pNodeParams, sizeof(const struct cudaHostNodeParams*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaGraphExecHostNodeSetParams(hGraphExec, node, pNodeParams);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cudaGraphExecChildGraphNodeSetParams(void *conn)
 {
     cudaGraphExec_t hGraphExec;
@@ -20396,11 +23037,11 @@ int handle_cudaGraphExecChildGraphNodeSetParams(void *conn)
     cudaGraph_t childGraph;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &hGraphExec, sizeof(cudaGraphExec_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &childGraph, sizeof(cudaGraph_t)) < 0)
+    if (
+        rpc_read(conn, &hGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_read(conn, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &childGraph, sizeof(cudaGraph_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -20424,11 +23065,11 @@ int handle_cudaGraphExecEventRecordNodeSetEvent(void *conn)
     cudaEvent_t event;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &hGraphExec, sizeof(cudaGraphExec_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hNode, sizeof(cudaGraphNode_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &event, sizeof(cudaEvent_t)) < 0)
+    if (
+        rpc_read(conn, &hGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_read(conn, &hNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &event, sizeof(cudaEvent_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -20452,17 +23093,73 @@ int handle_cudaGraphExecEventWaitNodeSetEvent(void *conn)
     cudaEvent_t event;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &hGraphExec, sizeof(cudaGraphExec_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hNode, sizeof(cudaGraphNode_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &event, sizeof(cudaEvent_t)) < 0)
+    if (
+        rpc_read(conn, &hGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_read(conn, &hNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &event, sizeof(cudaEvent_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
     result = cudaGraphExecEventWaitNodeSetEvent(hGraphExec, hNode, event);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaGraphExecExternalSemaphoresSignalNodeSetParams(void *conn)
+{
+    cudaGraphExec_t hGraphExec;
+    cudaGraphNode_t hNode;
+    const struct cudaExternalSemaphoreSignalNodeParams* nodeParams;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &hGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_read(conn, &hNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &nodeParams, sizeof(const struct cudaExternalSemaphoreSignalNodeParams*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaGraphExecExternalSemaphoresSignalNodeSetParams(hGraphExec, hNode, nodeParams);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaGraphExecExternalSemaphoresWaitNodeSetParams(void *conn)
+{
+    cudaGraphExec_t hGraphExec;
+    cudaGraphNode_t hNode;
+    const struct cudaExternalSemaphoreWaitNodeParams* nodeParams;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &hGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_read(conn, &hNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &nodeParams, sizeof(const struct cudaExternalSemaphoreWaitNodeParams*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaGraphExecExternalSemaphoresWaitNodeSetParams(hGraphExec, hNode, nodeParams);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_end_response(conn, &result) < 0)
@@ -20480,11 +23177,11 @@ int handle_cudaGraphNodeSetEnabled(void *conn)
     unsigned int isEnabled;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &hGraphExec, sizeof(cudaGraphExec_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hNode, sizeof(cudaGraphNode_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &isEnabled, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &hGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_read(conn, &hNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &isEnabled, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -20508,11 +23205,11 @@ int handle_cudaGraphNodeGetEnabled(void *conn)
     unsigned int isEnabled;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &hGraphExec, sizeof(cudaGraphExec_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hNode, sizeof(cudaGraphNode_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &isEnabled, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &hGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_read(conn, &hNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &isEnabled, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -20537,11 +23234,11 @@ int handle_cudaGraphExecUpdate(void *conn)
     cudaGraphExecUpdateResultInfo resultInfo;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &hGraphExec, sizeof(cudaGraphExec_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &hGraph, sizeof(cudaGraph_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &resultInfo, sizeof(cudaGraphExecUpdateResultInfo)) < 0)
+    if (
+        rpc_read(conn, &hGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_read(conn, &hGraph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_read(conn, &resultInfo, sizeof(cudaGraphExecUpdateResultInfo)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -20565,9 +23262,10 @@ int handle_cudaGraphUpload(void *conn)
     cudaStream_t stream;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &graphExec, sizeof(cudaGraphExec_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0)
+    if (
+        rpc_read(conn, &graphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -20590,9 +23288,10 @@ int handle_cudaGraphLaunch(void *conn)
     cudaStream_t stream;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &graphExec, sizeof(cudaGraphExec_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0)
+    if (
+        rpc_read(conn, &graphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -20614,7 +23313,9 @@ int handle_cudaGraphExecDestroy(void *conn)
     cudaGraphExec_t graphExec;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &graphExec, sizeof(cudaGraphExec_t)) < 0)
+    if (
+        rpc_read(conn, &graphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -20636,7 +23337,9 @@ int handle_cudaGraphDestroy(void *conn)
     cudaGraph_t graph;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0)
+    if (
+        rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -20653,34 +23356,26 @@ ERROR_0:
     return -1;
 }
 
-int handle_cudaUserObjectCreate(void *conn)
+int handle_cudaGraphDebugDotPrint(void *conn)
 {
-    cudaUserObject_t object_out;
-    void* ptr;
-    cudaHostFn_t destroy;
-    unsigned int initialRefcount;
+    cudaGraph_t graph;
+    const char* path;
     unsigned int flags;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &object_out, sizeof(cudaUserObject_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &ptr, sizeof(void*)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &destroy, sizeof(cudaHostFn_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &initialRefcount, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_read(conn, &path, sizeof(const char*)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    result = cudaUserObjectCreate(&object_out, ptr, destroy, initialRefcount, flags);
+    result = cudaGraphDebugDotPrint(graph, path, flags);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &object_out, sizeof(cudaUserObject_t)) < 0 ||
-        rpc_write(conn, ptr, sizeof(void*)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -20695,9 +23390,10 @@ int handle_cudaUserObjectRetain(void *conn)
     unsigned int count;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &object, sizeof(cudaUserObject_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &count, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &object, sizeof(cudaUserObject_t)) < 0 ||
+        rpc_read(conn, &count, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -20720,9 +23416,10 @@ int handle_cudaUserObjectRelease(void *conn)
     unsigned int count;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &object, sizeof(cudaUserObject_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &count, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &object, sizeof(cudaUserObject_t)) < 0 ||
+        rpc_read(conn, &count, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -20747,13 +23444,12 @@ int handle_cudaGraphRetainUserObject(void *conn)
     unsigned int flags;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &object, sizeof(cudaUserObject_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &count, sizeof(unsigned int)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_read(conn, &object, sizeof(cudaUserObject_t)) < 0 ||
+        rpc_read(conn, &count, sizeof(unsigned int)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -20777,11 +23473,11 @@ int handle_cudaGraphReleaseUserObject(void *conn)
     unsigned int count;
     int request_id;
     cudaError_t result;
-    if (rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &object, sizeof(cudaUserObject_t)) < 0)
-        goto ERROR_0;
-    if (rpc_read(conn, &count, sizeof(unsigned int)) < 0)
+    if (
+        rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_read(conn, &object, sizeof(cudaUserObject_t)) < 0 ||
+        rpc_read(conn, &count, sizeof(unsigned int)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
@@ -20798,11 +23494,100 @@ ERROR_0:
     return -1;
 }
 
+int handle_cudaGetDriverEntryPoint(void *conn)
+{
+    const char* symbol;
+    void* funcPtr;
+    unsigned long long flags;
+    enum cudaDriverEntryPointQueryResult driverStatus;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &symbol, sizeof(const char*)) < 0 ||
+        rpc_read(conn, &funcPtr, sizeof(void*)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned long long)) < 0 ||
+        rpc_read(conn, &driverStatus, sizeof(enum cudaDriverEntryPointQueryResult)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaGetDriverEntryPoint(symbol, &funcPtr, flags, &driverStatus);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &funcPtr, sizeof(void*)) < 0 ||
+        rpc_write(conn, &driverStatus, sizeof(enum cudaDriverEntryPointQueryResult)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaGetExportTable(void *conn)
+{
+    const void* ppExportTable;
+    const cudaUUID_t* pExportTableId;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &ppExportTable, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &pExportTableId, sizeof(const cudaUUID_t*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaGetExportTable(&ppExportTable, pExportTableId);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &ppExportTable, sizeof(const void*)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaGetFuncBySymbol(void *conn)
+{
+    cudaFunction_t functionPtr;
+    const void* symbolPtr;
+    int request_id;
+    cudaError_t result;
+    if (
+        rpc_read(conn, &functionPtr, sizeof(cudaFunction_t)) < 0 ||
+        rpc_read(conn, &symbolPtr, sizeof(const void*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudaGetFuncBySymbol(&functionPtr, symbolPtr);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &functionPtr, sizeof(cudaFunction_t)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 int handle_cublasCreate_v2(void *conn)
 {
     cublasHandle_t handle;
     int request_id;
     cublasStatus_t result;
+    if (
+        false)
+        goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -20824,13 +23609,69 @@ int handle_cublasDestroy_v2(void *conn)
     cublasHandle_t handle;
     int request_id;
     cublasStatus_t result;
-    if (rpc_read(conn, &handle, sizeof(cublasHandle_t)) < 0)
+    if (
+        rpc_read(conn, &handle, sizeof(cublasHandle_t)) < 0 ||
+        false)
         goto ERROR_0;
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
     result = cublasDestroy_v2(handle);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cublasSgemm_v2(void *conn)
+{
+    cublasHandle_t handle;
+    cublasOperation_t transa;
+    cublasOperation_t transb;
+    int m;
+    int n;
+    int k;
+    float* alpha_null_check;
+    float alpha;
+    const float* A;
+    int lda;
+    const float* B;
+    int ldb;
+    float* beta_null_check;
+    float beta;
+    float* C;
+    int ldc;
+    int request_id;
+    cublasStatus_t result;
+    if (
+        rpc_read(conn, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_read(conn, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_read(conn, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_read(conn, &m, sizeof(int)) < 0 ||
+        rpc_read(conn, &n, sizeof(int)) < 0 ||
+        rpc_read(conn, &k, sizeof(int)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const float*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const float)) < 0) ||
+        rpc_read(conn, &A, sizeof(const float*)) < 0 ||
+        rpc_read(conn, &lda, sizeof(int)) < 0 ||
+        rpc_read(conn, &B, sizeof(const float*)) < 0 ||
+        rpc_read(conn, &ldb, sizeof(int)) < 0 ||
+        rpc_read(conn, &beta_null_check, sizeof(const float*)) < 0 ||
+        (beta_null_check && rpc_read(conn, &beta, sizeof(const float)) < 0) ||
+        rpc_read(conn, &C, sizeof(float*)) < 0 ||
+        rpc_read(conn, &ldc, sizeof(int)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cublasSgemm_v2(handle, transa, transb, m, n, k, &alpha, A, lda, B, ldb, &beta, C, ldc);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_end_response(conn, &result) < 0)
@@ -21192,7 +24033,6 @@ static RequestHandler opHandlers[] = {
     handle_cuModuleGetFunction,
     handle_cuModuleGetGlobal_v2,
     handle_cuLinkCreate_v2,
-    handle_cuLinkAddData_v2,
     handle_cuLinkAddFile_v2,
     handle_cuLinkComplete,
     handle_cuLinkDestroy,
@@ -21228,11 +24068,9 @@ static RequestHandler opHandlers[] = {
     handle_cuIpcGetMemHandle,
     handle_cuIpcOpenMemHandle_v2,
     handle_cuIpcCloseMemHandle,
-    handle_cuMemHostRegister_v2,
-    handle_cuMemHostUnregister,
     handle_cuMemcpy,
     handle_cuMemcpyPeer,
-    handle_cuMemcpyDtoH_v2,
+    handle_cuMemcpyHtoD_v2,
     handle_cuMemcpyDtoD_v2,
     handle_cuMemcpyDtoA_v2,
     handle_cuMemcpyAtoD_v2,
@@ -21245,10 +24083,9 @@ static RequestHandler opHandlers[] = {
     nullptr,
     handle_cuMemcpyAsync,
     handle_cuMemcpyPeerAsync,
-    handle_cuMemcpyDtoHAsync_v2,
+    handle_cuMemcpyHtoDAsync_v2,
     handle_cuMemcpyDtoDAsync_v2,
     nullptr,
-    handle_cuMemcpyAtoHAsync_v2,
     nullptr,
     nullptr,
     nullptr,
@@ -21264,6 +24101,7 @@ static RequestHandler opHandlers[] = {
     handle_cuMemsetD2D8Async,
     handle_cuMemsetD2D16Async,
     handle_cuMemsetD2D32Async,
+    handle_cuArrayCreate_v2,
     handle_cuArrayGetDescriptor_v2,
     handle_cuArrayGetSparseProperties,
     handle_cuMipmappedArrayGetSparseProperties,
@@ -21271,37 +24109,36 @@ static RequestHandler opHandlers[] = {
     handle_cuMipmappedArrayGetMemoryRequirements,
     handle_cuArrayGetPlane,
     handle_cuArrayDestroy,
+    handle_cuArray3DCreate_v2,
     handle_cuArray3DGetDescriptor_v2,
+    handle_cuMipmappedArrayCreate,
     handle_cuMipmappedArrayGetLevel,
     handle_cuMipmappedArrayDestroy,
-    handle_cuMemGetHandleForAddressRange,
     handle_cuMemAddressReserve,
     handle_cuMemAddressFree,
+    handle_cuMemCreate,
     handle_cuMemRelease,
     handle_cuMemMap,
     handle_cuMemMapArrayAsync,
     handle_cuMemUnmap,
-    handle_cuMemExportToShareableHandle,
-    handle_cuMemImportFromShareableHandle,
+    handle_cuMemSetAccess,
+    handle_cuMemGetAccess,
+    handle_cuMemGetAllocationGranularity,
     handle_cuMemGetAllocationPropertiesFromHandle,
-    handle_cuMemRetainAllocationHandle,
     handle_cuMemFreeAsync,
     handle_cuMemAllocAsync,
     handle_cuMemPoolTrimTo,
-    handle_cuMemPoolSetAttribute,
-    handle_cuMemPoolGetAttribute,
+    handle_cuMemPoolSetAccess,
     handle_cuMemPoolGetAccess,
+    handle_cuMemPoolCreate,
     handle_cuMemPoolDestroy,
     handle_cuMemAllocFromPoolAsync,
-    handle_cuMemPoolExportToShareableHandle,
-    handle_cuMemPoolImportFromShareableHandle,
     handle_cuMemPoolExportPointer,
     handle_cuMemPoolImportPointer,
-    handle_cuPointerGetAttribute,
     handle_cuMemPrefetchAsync,
     handle_cuMemAdvise,
-    handle_cuMemRangeGetAttribute,
     handle_cuMemRangeGetAttributes,
+    handle_cuPointerSetAttribute,
     handle_cuPointerGetAttributes,
     handle_cuStreamCreate,
     handle_cuStreamCreateWithPriority,
@@ -21310,7 +24147,6 @@ static RequestHandler opHandlers[] = {
     handle_cuStreamGetId,
     handle_cuStreamGetCtx,
     handle_cuStreamWaitEvent,
-    handle_cuStreamAddCallback,
     handle_cuStreamBeginCapture_v2,
     handle_cuThreadExchangeStreamCaptureMode,
     handle_cuStreamEndCapture,
@@ -21323,6 +24159,7 @@ static RequestHandler opHandlers[] = {
     handle_cuStreamDestroy_v2,
     handle_cuStreamCopyAttributes,
     handle_cuStreamGetAttribute,
+    handle_cuStreamSetAttribute,
     handle_cuEventCreate,
     handle_cuEventRecord,
     handle_cuEventRecordWithFlags,
@@ -21330,7 +24167,13 @@ static RequestHandler opHandlers[] = {
     handle_cuEventSynchronize,
     handle_cuEventDestroy_v2,
     handle_cuEventElapsedTime,
+    handle_cuImportExternalMemory,
+    handle_cuExternalMemoryGetMappedBuffer,
+    handle_cuExternalMemoryGetMappedMipmappedArray,
     handle_cuDestroyExternalMemory,
+    handle_cuImportExternalSemaphore,
+    handle_cuSignalExternalSemaphoresAsync,
+    handle_cuWaitExternalSemaphoresAsync,
     handle_cuDestroyExternalSemaphore,
     handle_cuStreamWaitValue32_v2,
     handle_cuStreamWaitValue64_v2,
@@ -21346,35 +24189,52 @@ static RequestHandler opHandlers[] = {
     nullptr,
     handle_cuLaunchCooperativeKernel,
     handle_cuLaunchCooperativeKernelMultiDevice,
-    handle_cuLaunchHostFunc,
     handle_cuFuncSetBlockShape,
     handle_cuFuncSetSharedSize,
     handle_cuParamSetSize,
     handle_cuParamSeti,
     handle_cuParamSetf,
-    handle_cuParamSetv,
     handle_cuLaunch,
     handle_cuLaunchGrid,
     handle_cuLaunchGridAsync,
     handle_cuParamSetTexRef,
     handle_cuGraphCreate,
+    handle_cuGraphAddKernelNode_v2,
     handle_cuGraphKernelNodeGetParams_v2,
+    handle_cuGraphKernelNodeSetParams_v2,
+    handle_cuGraphAddMemcpyNode,
     handle_cuGraphMemcpyNodeGetParams,
+    handle_cuGraphMemcpyNodeSetParams,
+    handle_cuGraphAddMemsetNode,
     handle_cuGraphMemsetNodeGetParams,
+    handle_cuGraphMemsetNodeSetParams,
+    handle_cuGraphAddHostNode,
     handle_cuGraphHostNodeGetParams,
+    handle_cuGraphHostNodeSetParams,
+    handle_cuGraphAddChildGraphNode,
     handle_cuGraphChildGraphNodeGetGraph,
+    handle_cuGraphAddEmptyNode,
+    handle_cuGraphAddEventRecordNode,
     handle_cuGraphEventRecordNodeGetEvent,
     handle_cuGraphEventRecordNodeSetEvent,
+    handle_cuGraphAddEventWaitNode,
     handle_cuGraphEventWaitNodeGetEvent,
     handle_cuGraphEventWaitNodeSetEvent,
+    handle_cuGraphAddExternalSemaphoresSignalNode,
     handle_cuGraphExternalSemaphoresSignalNodeGetParams,
+    handle_cuGraphExternalSemaphoresSignalNodeSetParams,
+    handle_cuGraphAddExternalSemaphoresWaitNode,
     handle_cuGraphExternalSemaphoresWaitNodeGetParams,
+    handle_cuGraphExternalSemaphoresWaitNodeSetParams,
+    handle_cuGraphAddBatchMemOpNode,
     handle_cuGraphBatchMemOpNodeGetParams,
+    handle_cuGraphBatchMemOpNodeSetParams,
+    handle_cuGraphExecBatchMemOpNodeSetParams,
+    handle_cuGraphAddMemAllocNode,
     handle_cuGraphMemAllocNodeGetParams,
+    handle_cuGraphAddMemFreeNode,
     handle_cuGraphMemFreeNodeGetParams,
     handle_cuDeviceGraphMemTrim,
-    handle_cuDeviceGetGraphMemAttribute,
-    handle_cuDeviceSetGraphMemAttribute,
     handle_cuGraphClone,
     handle_cuGraphNodeFindInClone,
     handle_cuGraphNodeGetType,
@@ -21383,13 +24243,21 @@ static RequestHandler opHandlers[] = {
     handle_cuGraphGetEdges,
     handle_cuGraphNodeGetDependencies,
     handle_cuGraphNodeGetDependentNodes,
+    handle_cuGraphAddDependencies,
+    handle_cuGraphRemoveDependencies,
     handle_cuGraphDestroyNode,
     handle_cuGraphInstantiateWithFlags,
     handle_cuGraphInstantiateWithParams,
     handle_cuGraphExecGetFlags,
+    handle_cuGraphExecKernelNodeSetParams_v2,
+    handle_cuGraphExecMemcpyNodeSetParams,
+    handle_cuGraphExecMemsetNodeSetParams,
+    handle_cuGraphExecHostNodeSetParams,
     handle_cuGraphExecChildGraphNodeSetParams,
     handle_cuGraphExecEventRecordNodeSetEvent,
     handle_cuGraphExecEventWaitNodeSetEvent,
+    handle_cuGraphExecExternalSemaphoresSignalNodeSetParams,
+    handle_cuGraphExecExternalSemaphoresWaitNodeSetParams,
     handle_cuGraphNodeSetEnabled,
     handle_cuGraphNodeGetEnabled,
     handle_cuGraphUpload,
@@ -21399,7 +24267,8 @@ static RequestHandler opHandlers[] = {
     handle_cuGraphExecUpdate_v2,
     handle_cuGraphKernelNodeCopyAttributes,
     handle_cuGraphKernelNodeGetAttribute,
-    handle_cuUserObjectCreate,
+    handle_cuGraphKernelNodeSetAttribute,
+    handle_cuGraphDebugDotPrint,
     handle_cuUserObjectRetain,
     handle_cuUserObjectRelease,
     handle_cuGraphRetainUserObject,
@@ -21409,9 +24278,12 @@ static RequestHandler opHandlers[] = {
     nullptr,
     nullptr,
     handle_cuOccupancyAvailableDynamicSMemPerBlock,
+    handle_cuOccupancyMaxPotentialClusterSize,
+    handle_cuOccupancyMaxActiveClusters,
     handle_cuTexRefSetArray,
     handle_cuTexRefSetMipmappedArray,
     handle_cuTexRefSetAddress_v2,
+    handle_cuTexRefSetAddress2D_v3,
     handle_cuTexRefSetFormat,
     handle_cuTexRefSetAddressMode,
     handle_cuTexRefSetFilterMode,
@@ -21437,13 +24309,14 @@ static RequestHandler opHandlers[] = {
     handle_cuTexRefDestroy,
     handle_cuSurfRefSetArray,
     handle_cuSurfRefGetArray,
+    handle_cuTexObjectCreate,
     handle_cuTexObjectDestroy,
     handle_cuTexObjectGetResourceDesc,
     handle_cuTexObjectGetTextureDesc,
     handle_cuTexObjectGetResourceViewDesc,
+    handle_cuSurfObjectCreate,
     handle_cuSurfObjectDestroy,
     handle_cuSurfObjectGetResourceDesc,
-    handle_cuTensorMapReplaceAddress,
     handle_cuDeviceCanAccessPeer,
     handle_cuCtxEnablePeerAccess,
     handle_cuCtxDisablePeerAccess,
@@ -21461,17 +24334,17 @@ static RequestHandler opHandlers[] = {
     handle_cudaDeviceSynchronize,
     handle_cudaDeviceSetLimit,
     handle_cudaDeviceGetLimit,
+    handle_cudaDeviceGetTexture1DLinearMaxWidth,
     handle_cudaDeviceGetCacheConfig,
     handle_cudaDeviceGetStreamPriorityRange,
     handle_cudaDeviceSetCacheConfig,
     handle_cudaDeviceGetSharedMemConfig,
     handle_cudaDeviceSetSharedMemConfig,
+    handle_cudaDeviceGetByPCIBusId,
     handle_cudaDeviceGetPCIBusId,
     handle_cudaIpcGetEventHandle,
     handle_cudaIpcOpenEventHandle,
-    handle_cudaIpcGetMemHandle,
     handle_cudaIpcOpenMemHandle,
-    handle_cudaIpcCloseMemHandle,
     handle_cudaDeviceFlushGPUDirectRDMAWrites,
     handle_cudaThreadExit,
     handle_cudaThreadSynchronize,
@@ -21489,8 +24362,8 @@ static RequestHandler opHandlers[] = {
     handle_cudaDeviceGetDefaultMemPool,
     handle_cudaDeviceSetMemPool,
     handle_cudaDeviceGetMemPool,
-    handle_cudaDeviceGetNvSciSyncAttributes,
     handle_cudaDeviceGetP2PAttribute,
+    handle_cudaChooseDevice,
     handle_cudaInitDevice,
     handle_cudaSetDevice,
     handle_cudaGetDevice,
@@ -21506,12 +24379,11 @@ static RequestHandler opHandlers[] = {
     handle_cudaCtxResetPersistingL2Cache,
     handle_cudaStreamCopyAttributes,
     handle_cudaStreamGetAttribute,
+    handle_cudaStreamSetAttribute,
     handle_cudaStreamDestroy,
     handle_cudaStreamWaitEvent,
-    handle_cudaStreamAddCallback,
     handle_cudaStreamSynchronize,
     handle_cudaStreamQuery,
-    handle_cudaStreamAttachMemAsync,
     handle_cudaStreamBeginCapture,
     handle_cudaThreadExchangeStreamCaptureMode,
     handle_cudaStreamEndCapture,
@@ -21527,28 +24399,46 @@ static RequestHandler opHandlers[] = {
     handle_cudaEventDestroy,
     handle_cudaEventElapsedTime,
     nullptr,
+    handle_cudaExternalMemoryGetMappedBuffer,
+    handle_cudaExternalMemoryGetMappedMipmappedArray,
     handle_cudaDestroyExternalMemory,
+    handle_cudaImportExternalSemaphore,
+    handle_cudaSignalExternalSemaphoresAsync_v2,
+    handle_cudaWaitExternalSemaphoresAsync_v2,
     handle_cudaDestroyExternalSemaphore,
     handle_cudaLaunchKernel,
+    handle_cudaLaunchKernelExC,
+    handle_cudaLaunchCooperativeKernel,
     handle_cudaLaunchCooperativeKernelMultiDevice,
+    handle_cudaFuncSetCacheConfig,
+    handle_cudaFuncSetSharedMemConfig,
+    handle_cudaFuncGetAttributes,
+    handle_cudaFuncSetAttribute,
     handle_cudaSetDoubleForDevice,
     handle_cudaSetDoubleForHost,
-    handle_cudaLaunchHostFunc,
+    handle_cudaOccupancyMaxActiveBlocksPerMultiprocessor,
+    handle_cudaOccupancyAvailableDynamicSMemPerBlock,
+    handle_cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags,
+    handle_cudaOccupancyMaxPotentialClusterSize,
+    handle_cudaOccupancyMaxActiveClusters,
     handle_cudaMallocManaged,
     handle_cudaMalloc,
     handle_cudaMallocHost,
     handle_cudaMallocPitch,
+    handle_cudaMallocArray,
     handle_cudaFree,
     handle_cudaFreeHost,
     handle_cudaFreeArray,
     handle_cudaFreeMipmappedArray,
     handle_cudaHostAlloc,
-    handle_cudaHostRegister,
-    handle_cudaHostUnregister,
-    handle_cudaHostGetDevicePointer,
-    handle_cudaHostGetFlags,
     handle_cudaMalloc3D,
+    handle_cudaMalloc3DArray,
+    handle_cudaMallocMipmappedArray,
     handle_cudaGetMipmappedArrayLevel,
+    handle_cudaMemcpy3D,
+    handle_cudaMemcpy3DPeer,
+    handle_cudaMemcpy3DAsync,
+    handle_cudaMemcpy3DPeerAsync,
     handle_cudaMemGetInfo,
     handle_cudaArrayGetInfo,
     handle_cudaArrayGetPlane,
@@ -21557,31 +24447,31 @@ static RequestHandler opHandlers[] = {
     handle_cudaArrayGetSparseProperties,
     handle_cudaMipmappedArrayGetSparseProperties,
     handle_cudaMemcpy,
-    handle_cudaMemcpy2DFromArray,
+    handle_cudaMemcpy2DToArray,
     handle_cudaMemcpy2DArrayToArray,
+    handle_cudaMemcpyToSymbol,
     handle_cudaMemcpyAsync,
-    handle_cudaMemcpy2DFromArrayAsync,
-    handle_cudaMemset,
-    handle_cudaMemset2D,
+    handle_cudaMemcpy2DToArrayAsync,
+    handle_cudaMemcpyToSymbolAsync,
     handle_cudaMemset3D,
-    handle_cudaMemsetAsync,
-    handle_cudaMemset2DAsync,
     handle_cudaMemset3DAsync,
-    handle_cudaMemcpyFromArray,
+    handle_cudaGetSymbolAddress,
+    handle_cudaGetSymbolSize,
+    handle_cudaMemPrefetchAsync,
+    handle_cudaMemAdvise,
+    handle_cudaMemRangeGetAttributes,
+    handle_cudaMemcpyToArray,
     handle_cudaMemcpyArrayToArray,
-    handle_cudaMemcpyFromArrayAsync,
+    handle_cudaMemcpyToArrayAsync,
     handle_cudaMallocAsync,
-    handle_cudaFreeAsync,
     handle_cudaMemPoolTrimTo,
-    handle_cudaMemPoolSetAttribute,
-    handle_cudaMemPoolGetAttribute,
+    handle_cudaMemPoolSetAccess,
     handle_cudaMemPoolGetAccess,
+    handle_cudaMemPoolCreate,
     handle_cudaMemPoolDestroy,
     handle_cudaMallocFromPoolAsync,
-    handle_cudaMemPoolExportToShareableHandle,
-    handle_cudaMemPoolImportFromShareableHandle,
-    handle_cudaMemPoolExportPointer,
     handle_cudaMemPoolImportPointer,
+    handle_cudaPointerGetAttributes,
     handle_cudaDeviceCanAccessPeer,
     handle_cudaDeviceEnablePeerAccess,
     handle_cudaDeviceDisablePeerAccess,
@@ -21594,33 +24484,52 @@ static RequestHandler opHandlers[] = {
     handle_cudaGraphicsResourceGetMappedMipmappedArray,
     handle_cudaGetChannelDesc,
     nullptr,
+    handle_cudaCreateTextureObject,
     handle_cudaDestroyTextureObject,
     handle_cudaGetTextureObjectResourceDesc,
     handle_cudaGetTextureObjectTextureDesc,
     handle_cudaGetTextureObjectResourceViewDesc,
+    handle_cudaCreateSurfaceObject,
     handle_cudaDestroySurfaceObject,
     handle_cudaGetSurfaceObjectResourceDesc,
     handle_cudaDriverGetVersion,
     handle_cudaRuntimeGetVersion,
     handle_cudaGraphCreate,
+    handle_cudaGraphAddKernelNode,
     handle_cudaGraphKernelNodeGetParams,
+    handle_cudaGraphKernelNodeSetParams,
     handle_cudaGraphKernelNodeCopyAttributes,
     handle_cudaGraphKernelNodeGetAttribute,
+    handle_cudaGraphKernelNodeSetAttribute,
+    handle_cudaGraphAddMemcpyNode,
+    handle_cudaGraphAddMemcpyNodeToSymbol,
     handle_cudaGraphMemcpyNodeGetParams,
+    handle_cudaGraphMemcpyNodeSetParams,
+    handle_cudaGraphMemcpyNodeSetParamsToSymbol,
+    handle_cudaGraphAddMemsetNode,
     handle_cudaGraphMemsetNodeGetParams,
+    handle_cudaGraphMemsetNodeSetParams,
+    handle_cudaGraphAddHostNode,
     handle_cudaGraphHostNodeGetParams,
+    handle_cudaGraphHostNodeSetParams,
+    handle_cudaGraphAddChildGraphNode,
     handle_cudaGraphChildGraphNodeGetGraph,
+    handle_cudaGraphAddEmptyNode,
+    handle_cudaGraphAddEventRecordNode,
     handle_cudaGraphEventRecordNodeGetEvent,
     handle_cudaGraphEventRecordNodeSetEvent,
+    handle_cudaGraphAddEventWaitNode,
     handle_cudaGraphEventWaitNodeGetEvent,
     handle_cudaGraphEventWaitNodeSetEvent,
+    handle_cudaGraphAddExternalSemaphoresSignalNode,
     handle_cudaGraphExternalSemaphoresSignalNodeGetParams,
+    handle_cudaGraphExternalSemaphoresSignalNodeSetParams,
+    handle_cudaGraphAddExternalSemaphoresWaitNode,
     handle_cudaGraphExternalSemaphoresWaitNodeGetParams,
+    handle_cudaGraphExternalSemaphoresWaitNodeSetParams,
+    handle_cudaGraphAddMemAllocNode,
     handle_cudaGraphMemAllocNodeGetParams,
-    handle_cudaGraphMemFreeNodeGetParams,
     handle_cudaDeviceGraphMemTrim,
-    handle_cudaDeviceGetGraphMemAttribute,
-    handle_cudaDeviceSetGraphMemAttribute,
     handle_cudaGraphClone,
     handle_cudaGraphNodeFindInClone,
     handle_cudaGraphNodeGetType,
@@ -21629,14 +24538,23 @@ static RequestHandler opHandlers[] = {
     handle_cudaGraphGetEdges,
     handle_cudaGraphNodeGetDependencies,
     handle_cudaGraphNodeGetDependentNodes,
+    handle_cudaGraphAddDependencies,
+    handle_cudaGraphRemoveDependencies,
     handle_cudaGraphDestroyNode,
     handle_cudaGraphInstantiate,
     handle_cudaGraphInstantiateWithFlags,
     handle_cudaGraphInstantiateWithParams,
     handle_cudaGraphExecGetFlags,
+    handle_cudaGraphExecKernelNodeSetParams,
+    handle_cudaGraphExecMemcpyNodeSetParams,
+    handle_cudaGraphExecMemcpyNodeSetParamsToSymbol,
+    handle_cudaGraphExecMemsetNodeSetParams,
+    handle_cudaGraphExecHostNodeSetParams,
     handle_cudaGraphExecChildGraphNodeSetParams,
     handle_cudaGraphExecEventRecordNodeSetEvent,
     handle_cudaGraphExecEventWaitNodeSetEvent,
+    handle_cudaGraphExecExternalSemaphoresSignalNodeSetParams,
+    handle_cudaGraphExecExternalSemaphoresWaitNodeSetParams,
     handle_cudaGraphNodeSetEnabled,
     handle_cudaGraphNodeGetEnabled,
     handle_cudaGraphExecUpdate,
@@ -21644,11 +24562,14 @@ static RequestHandler opHandlers[] = {
     handle_cudaGraphLaunch,
     handle_cudaGraphExecDestroy,
     handle_cudaGraphDestroy,
-    handle_cudaUserObjectCreate,
+    handle_cudaGraphDebugDotPrint,
     handle_cudaUserObjectRetain,
     handle_cudaUserObjectRelease,
     handle_cudaGraphRetainUserObject,
     handle_cudaGraphReleaseUserObject,
+    handle_cudaGetDriverEntryPoint,
+    handle_cudaGetExportTable,
+    handle_cudaGetFuncBySymbol,
     handle_cublasCreate_v2,
     handle_cublasDestroy_v2,
     handle_cublasSgemm_v2,
@@ -21656,8 +24577,7 @@ static RequestHandler opHandlers[] = {
 
 RequestHandler get_handler(const int op)
 {
-   if (op > (sizeof(opHandlers) / sizeof(opHandlers[0]))) {
-       return NULL;
-   }
-   return opHandlers[op];
+    if (op > (sizeof(opHandlers) / sizeof(opHandlers[0])))
+        return nullptr;
+    return opHandlers[op];
 }

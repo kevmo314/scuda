@@ -961,23 +961,23 @@ nvmlReturn_t nvmlEventSetWait_v2(nvmlEventSet_t set, nvmlEventData_t *data, unsi
  */
 nvmlReturn_t nvmlEventSetFree(nvmlEventSet_t set);
 /**
- * @param pciInfo SEND_ONLY DEREFERENCE
+ * @param pciInfo SEND_RECV
  * @param newState SEND_ONLY
  */
 nvmlReturn_t nvmlDeviceModifyDrainState(nvmlPciInfo_t *pciInfo, nvmlEnableState_t newState);
 /**
- * @param pciInfo SEND_ONLY DEREFERENCE
+ * @param pciInfo SEND_RECV
  * @param currentState RECV_ONLY
  */
 nvmlReturn_t nvmlDeviceQueryDrainState(nvmlPciInfo_t *pciInfo, nvmlEnableState_t *currentState);
 /**
- * @param pciInfo SEND_ONLY DEREFERENCE
+ * @param pciInfo SEND_RECV
  * @param gpuState SEND_ONLY
  * @param linkState SEND_ONLY
  */
 nvmlReturn_t nvmlDeviceRemoveGpu_v2(nvmlPciInfo_t *pciInfo, nvmlDetachGpuState_t gpuState, nvmlPcieLinkState_t linkState);
 /**
- * @param pciInfo SEND_ONLY DEREFERENCE
+ * @param pciInfo SEND_RECV
  */
 nvmlReturn_t nvmlDeviceDiscoverGpus(nvmlPciInfo_t *pciInfo);
 /**
@@ -1553,7 +1553,7 @@ nvmlReturn_t nvmlDeviceGetGpuFabricInfo(nvmlDevice_t device, nvmlGpuFabricInfo_t
  */
 nvmlReturn_t nvmlGpmMetricsGet(nvmlGpmMetricsGet_t *metricsGet);
 /**
- * @param gpmSample RECV_ONLY
+ * @param gpmSample SEND_ONLY
  */
 nvmlReturn_t nvmlGpmSampleFree(nvmlGpmSample_t gpmSample);
 /**
@@ -1562,13 +1562,13 @@ nvmlReturn_t nvmlGpmSampleFree(nvmlGpmSample_t gpmSample);
 nvmlReturn_t nvmlGpmSampleAlloc(nvmlGpmSample_t *gpmSample);
 /**
  * @param device SEND_ONLY
- * @param gpmSample RECV_ONLY SIZE:sizeof(nvmlGpmSample_t)
+ * @param gpmSample SEND_ONLY
  */
 nvmlReturn_t nvmlGpmSampleGet(nvmlDevice_t device, nvmlGpmSample_t gpmSample);
 /**
  * @param device SEND_ONLY
  * @param gpuInstanceId SEND_ONLY
- * @param gpmSample RECV_ONLY SIZE:sizeof(nvmlGpmSample_t)
+ * @param gpmSample SEND_ONLY
  */
 nvmlReturn_t nvmlGpmMigSampleGet(nvmlDevice_t device, unsigned int gpuInstanceId, nvmlGpmSample_t gpmSample);
 /**
@@ -2041,29 +2041,29 @@ CUresult cuMemFree_v2(CUdeviceptr dptr);
  */
 CUresult cuMemGetAddressRange_v2(CUdeviceptr *pbase, size_t *psize, CUdeviceptr dptr);
 /**
- * @param pp SEND_RECV
+ * @param pp RECV_ONLY
  * @param bytesize SEND_ONLY
  */
 CUresult cuMemAllocHost_v2(void **pp, size_t bytesize);
 /**
- * @param p SEND_RECV
+ * @param p SEND_ONLY
  */
 CUresult cuMemFreeHost(void *p);
 /**
- * @param pp SEND_RECV
+ * @param pp RECV_ONLY
  * @param bytesize SEND_ONLY
  * @param Flags SEND_ONLY
  */
 CUresult cuMemHostAlloc(void **pp, size_t bytesize, unsigned int Flags);
 /**
  * @param pdptr SEND_RECV
- * @param p SEND_RECV
+ * @param p SEND_ONLY
  * @param Flags SEND_ONLY
  */
 CUresult cuMemHostGetDevicePointer_v2(CUdeviceptr *pdptr, void *p, unsigned int Flags);
 /**
  * @param pFlags SEND_RECV
- * @param p SEND_RECV
+ * @param p SEND_ONLY
  */
 CUresult cuMemHostGetFlags(unsigned int *pFlags, void *p);
 /**
@@ -3237,8 +3237,8 @@ CUresult cuGraphMemAllocNodeGetParams(CUgraphNode hNode, CUDA_MEM_ALLOC_NODE_PAR
 /**
  * @param phGraphNode SEND_RECV
  * @param hGraph SEND_ONLY
- * @param dependencies SEND_RECV
  * @param numDependencies SEND_ONLY
+ * @param dependencies SEND_ONLY LENGTH:numDependencies
  * @param dptr SEND_ONLY
  */
 CUresult cuGraphAddMemFreeNode(CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies, size_t numDependencies, CUdeviceptr dptr);
@@ -5548,33 +5548,32 @@ cudaError_t cudaGetFuncBySymbol(cudaFunction_t *functionPtr, const void *symbolP
 /**
  * @param handle RECV_ONLY
  */
-cublasStatus_t cublasCreate_v2(cublasHandle_t* handle);
+cublasStatus_t cublasCreate_v2(cublasHandle_t *handle);
 /**
  * @param handle SEND_ONLY
  */
 cublasStatus_t cublasDestroy_v2(cublasHandle_t handle);
 /**
- * @disabled
  * @param handle SEND_ONLY
  * @param transa SEND_ONLY
  * @param transb SEND_ONLY
  * @param m SEND_ONLY
  * @param n SEND_ONLY
  * @param k SEND_ONLY
- * @param alpha SEND_ONLY
+ * @param alpha SEND_ONLY NULLABLE
  * @param A SEND_ONLY
  * @param lda SEND_ONLY
  * @param B SEND_ONLY
  * @param ldb SEND_ONLY
- * @param beta SEND_ONLY
+ * @param beta SEND_ONLY NULLABLE
  * @param C SEND_ONLY
  * @param ldc SEND_ONLY
  */
 cublasStatus_t cublasSgemm_v2(cublasHandle_t handle,
-                           cublasOperation_t transa, cublasOperation_t transb,
-                           int m, int n, int k,
-                           const float *alpha,
-                           const float *A, int lda,
-                           const float *B,  int ldb,
-                           const float *beta,
-                           float *C,  int ldc);
+                              cublasOperation_t transa, cublasOperation_t transb,
+                              int m, int n, int k,
+                              const float *alpha,
+                              const float *A, int lda,
+                              const float *B, int ldb,
+                              const float *beta,
+                              float *C, int ldc);
