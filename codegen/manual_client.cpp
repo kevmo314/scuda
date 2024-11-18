@@ -827,38 +827,3 @@ extern "C"
         }
     }
 }
-
-// cublasStatus_t cublasSgemm_v2(cublasHandle_t handle,
-//                               cublasOperation_t transa, cublasOperation_t transb,
-//                               int m, int n, int k,
-//                               const float *alpha,
-//                               const float *A, int lda,
-//                               const float *B, int ldb,
-//                               const float *beta,
-//                               float *C, int ldc)
-// {
-//     cublasStatus_t return_value;
-
-//     if (rpc_start_request(0, RPC_cublasSgemm_v2) < 0 ||
-//         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
-//         rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
-//         rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
-//         rpc_write(0, &m, sizeof(int)) < 0 ||
-//         rpc_write(0, &n, sizeof(int)) < 0 ||
-//         rpc_write(0, &k, sizeof(int)) < 0 ||
-//         rpc_write(0, alpha, sizeof(float)) < 0 ||
-//         rpc_write(0, &A, sizeof(const float *)) < 0 ||
-//         rpc_write(0, &lda, sizeof(int)) < 0 ||
-//         rpc_write(0, &B, sizeof(const float *)) < 0 ||
-//         rpc_write(0, &ldb, sizeof(int)) < 0 ||
-//         rpc_write(0, beta, sizeof(float)) < 0 ||
-//         rpc_write(0, &C, sizeof(float *)) < 0 ||
-//         rpc_write(0, &ldc, sizeof(int)) < 0 ||
-//         rpc_wait_for_response(0) < 0 ||
-//         rpc_end_response(0, &return_value) < 0)
-//     {
-//         return CUBLAS_STATUS_INTERNAL_ERROR;
-//     }
-
-//     return return_value;
-// }
