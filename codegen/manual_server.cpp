@@ -2,6 +2,7 @@
 #include <cuda.h>
 #include <iostream>
 #include <dlfcn.h>
+#include <cublas_v2.h>
 #include <cuda_runtime_api.h>
 #include <cuda_runtime.h>
 
@@ -108,8 +109,6 @@ int handle_cudaMemcpyAsync(void *conn)
 {
     cudaError_t result;
     void *dst;
-
-    std::cout << "calling cudaMemcpyAsync" << std::endl;
 
     enum cudaMemcpyKind kind;
     if (rpc_read(conn, &kind, sizeof(enum cudaMemcpyKind)) < 0)

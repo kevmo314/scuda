@@ -1,5 +1,6 @@
 #include <nvml.h>
 #include <cuda.h>
+#include <cublas_v2.h>
 #include <cuda_runtime_api.h>
 
 #include <cstring>
@@ -22,7 +23,6 @@ extern int rpc_close();
 nvmlReturn_t nvmlInit_v2()
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlInit_v2) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -33,7 +33,6 @@ nvmlReturn_t nvmlInit_v2()
 nvmlReturn_t nvmlInitWithFlags(unsigned int flags)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlInitWithFlags) < 0 ||
         rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -45,7 +44,6 @@ nvmlReturn_t nvmlInitWithFlags(unsigned int flags)
 nvmlReturn_t nvmlShutdown()
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlShutdown) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -58,7 +56,6 @@ nvmlReturn_t nvmlShutdown()
 nvmlReturn_t nvmlSystemGetDriverVersion(char* version, unsigned int length)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlSystemGetDriverVersion) < 0 ||
         rpc_write(0, &length, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -71,7 +68,6 @@ nvmlReturn_t nvmlSystemGetDriverVersion(char* version, unsigned int length)
 nvmlReturn_t nvmlSystemGetNVMLVersion(char* version, unsigned int length)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlSystemGetNVMLVersion) < 0 ||
         rpc_write(0, &length, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -84,7 +80,6 @@ nvmlReturn_t nvmlSystemGetNVMLVersion(char* version, unsigned int length)
 nvmlReturn_t nvmlSystemGetCudaDriverVersion(int* cudaDriverVersion)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlSystemGetCudaDriverVersion) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, cudaDriverVersion, sizeof(int)) < 0 ||
@@ -96,7 +91,6 @@ nvmlReturn_t nvmlSystemGetCudaDriverVersion(int* cudaDriverVersion)
 nvmlReturn_t nvmlSystemGetCudaDriverVersion_v2(int* cudaDriverVersion)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlSystemGetCudaDriverVersion_v2) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, cudaDriverVersion, sizeof(int)) < 0 ||
@@ -108,7 +102,6 @@ nvmlReturn_t nvmlSystemGetCudaDriverVersion_v2(int* cudaDriverVersion)
 nvmlReturn_t nvmlSystemGetProcessName(unsigned int pid, char* name, unsigned int length)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlSystemGetProcessName) < 0 ||
         rpc_write(0, &pid, sizeof(unsigned int)) < 0 ||
         rpc_write(0, &length, sizeof(unsigned int)) < 0 ||
@@ -122,7 +115,6 @@ nvmlReturn_t nvmlSystemGetProcessName(unsigned int pid, char* name, unsigned int
 nvmlReturn_t nvmlUnitGetCount(unsigned int* unitCount)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlUnitGetCount) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, unitCount, sizeof(unsigned int)) < 0 ||
@@ -134,7 +126,6 @@ nvmlReturn_t nvmlUnitGetCount(unsigned int* unitCount)
 nvmlReturn_t nvmlUnitGetHandleByIndex(unsigned int index, nvmlUnit_t* unit)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlUnitGetHandleByIndex) < 0 ||
         rpc_write(0, &index, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -147,7 +138,6 @@ nvmlReturn_t nvmlUnitGetHandleByIndex(unsigned int index, nvmlUnit_t* unit)
 nvmlReturn_t nvmlUnitGetUnitInfo(nvmlUnit_t unit, nvmlUnitInfo_t* info)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlUnitGetUnitInfo) < 0 ||
         rpc_write(0, &unit, sizeof(nvmlUnit_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -160,7 +150,6 @@ nvmlReturn_t nvmlUnitGetUnitInfo(nvmlUnit_t unit, nvmlUnitInfo_t* info)
 nvmlReturn_t nvmlUnitGetLedState(nvmlUnit_t unit, nvmlLedState_t* state)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlUnitGetLedState) < 0 ||
         rpc_write(0, &unit, sizeof(nvmlUnit_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -173,7 +162,6 @@ nvmlReturn_t nvmlUnitGetLedState(nvmlUnit_t unit, nvmlLedState_t* state)
 nvmlReturn_t nvmlUnitGetPsuInfo(nvmlUnit_t unit, nvmlPSUInfo_t* psu)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlUnitGetPsuInfo) < 0 ||
         rpc_write(0, &unit, sizeof(nvmlUnit_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -186,7 +174,6 @@ nvmlReturn_t nvmlUnitGetPsuInfo(nvmlUnit_t unit, nvmlPSUInfo_t* psu)
 nvmlReturn_t nvmlUnitGetTemperature(nvmlUnit_t unit, unsigned int type, unsigned int* temp)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlUnitGetTemperature) < 0 ||
         rpc_write(0, &unit, sizeof(nvmlUnit_t)) < 0 ||
         rpc_write(0, &type, sizeof(unsigned int)) < 0 ||
@@ -200,7 +187,6 @@ nvmlReturn_t nvmlUnitGetTemperature(nvmlUnit_t unit, unsigned int type, unsigned
 nvmlReturn_t nvmlUnitGetFanSpeedInfo(nvmlUnit_t unit, nvmlUnitFanSpeeds_t* fanSpeeds)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlUnitGetFanSpeedInfo) < 0 ||
         rpc_write(0, &unit, sizeof(nvmlUnit_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -213,10 +199,9 @@ nvmlReturn_t nvmlUnitGetFanSpeedInfo(nvmlUnit_t unit, nvmlUnitFanSpeeds_t* fanSp
 nvmlReturn_t nvmlUnitGetDevices(nvmlUnit_t unit, unsigned int* deviceCount, nvmlDevice_t* devices)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlUnitGetDevices) < 0 ||
         rpc_write(0, &unit, sizeof(nvmlUnit_t)) < 0 ||
-        rpc_write(0, &deviceCount, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, deviceCount, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, deviceCount, sizeof(unsigned int)) < 0 ||
         rpc_read(0, devices, *deviceCount * sizeof(nvmlDevice_t)) < 0 ||
@@ -228,9 +213,8 @@ nvmlReturn_t nvmlUnitGetDevices(nvmlUnit_t unit, unsigned int* deviceCount, nvml
 nvmlReturn_t nvmlSystemGetHicVersion(unsigned int* hwbcCount, nvmlHwbcEntry_t* hwbcEntries)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlSystemGetHicVersion) < 0 ||
-        rpc_write(0, &hwbcCount, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, hwbcCount, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, hwbcCount, sizeof(unsigned int)) < 0 ||
         rpc_read(0, hwbcEntries, *hwbcCount * sizeof(nvmlHwbcEntry_t)) < 0 ||
@@ -242,7 +226,6 @@ nvmlReturn_t nvmlSystemGetHicVersion(unsigned int* hwbcCount, nvmlHwbcEntry_t* h
 nvmlReturn_t nvmlDeviceGetCount_v2(unsigned int* deviceCount)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetCount_v2) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, deviceCount, sizeof(unsigned int)) < 0 ||
@@ -254,7 +237,6 @@ nvmlReturn_t nvmlDeviceGetCount_v2(unsigned int* deviceCount)
 nvmlReturn_t nvmlDeviceGetAttributes_v2(nvmlDevice_t device, nvmlDeviceAttributes_t* attributes)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetAttributes_v2) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -267,7 +249,6 @@ nvmlReturn_t nvmlDeviceGetAttributes_v2(nvmlDevice_t device, nvmlDeviceAttribute
 nvmlReturn_t nvmlDeviceGetHandleByIndex_v2(unsigned int index, nvmlDevice_t* device)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetHandleByIndex_v2) < 0 ||
         rpc_write(0, &index, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -280,7 +261,6 @@ nvmlReturn_t nvmlDeviceGetHandleByIndex_v2(unsigned int index, nvmlDevice_t* dev
 nvmlReturn_t nvmlDeviceGetHandleBySerial(const char* serial, nvmlDevice_t* device)
 {
     nvmlReturn_t return_value;
-
     std::size_t serial_len = std::strlen(serial) + 1;
     if (rpc_start_request(0, RPC_nvmlDeviceGetHandleBySerial) < 0 ||
         rpc_write(0, &serial_len, sizeof(std::size_t)) < 0 ||
@@ -295,7 +275,6 @@ nvmlReturn_t nvmlDeviceGetHandleBySerial(const char* serial, nvmlDevice_t* devic
 nvmlReturn_t nvmlDeviceGetHandleByUUID(const char* uuid, nvmlDevice_t* device)
 {
     nvmlReturn_t return_value;
-
     std::size_t uuid_len = std::strlen(uuid) + 1;
     if (rpc_start_request(0, RPC_nvmlDeviceGetHandleByUUID) < 0 ||
         rpc_write(0, &uuid_len, sizeof(std::size_t)) < 0 ||
@@ -310,7 +289,6 @@ nvmlReturn_t nvmlDeviceGetHandleByUUID(const char* uuid, nvmlDevice_t* device)
 nvmlReturn_t nvmlDeviceGetHandleByPciBusId_v2(const char* pciBusId, nvmlDevice_t* device)
 {
     nvmlReturn_t return_value;
-
     std::size_t pciBusId_len = std::strlen(pciBusId) + 1;
     if (rpc_start_request(0, RPC_nvmlDeviceGetHandleByPciBusId_v2) < 0 ||
         rpc_write(0, &pciBusId_len, sizeof(std::size_t)) < 0 ||
@@ -325,7 +303,6 @@ nvmlReturn_t nvmlDeviceGetHandleByPciBusId_v2(const char* pciBusId, nvmlDevice_t
 nvmlReturn_t nvmlDeviceGetName(nvmlDevice_t device, char* name, unsigned int length)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetName) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &length, sizeof(unsigned int)) < 0 ||
@@ -339,7 +316,6 @@ nvmlReturn_t nvmlDeviceGetName(nvmlDevice_t device, char* name, unsigned int len
 nvmlReturn_t nvmlDeviceGetBrand(nvmlDevice_t device, nvmlBrandType_t* type)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetBrand) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -352,7 +328,6 @@ nvmlReturn_t nvmlDeviceGetBrand(nvmlDevice_t device, nvmlBrandType_t* type)
 nvmlReturn_t nvmlDeviceGetIndex(nvmlDevice_t device, unsigned int* index)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetIndex) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -365,7 +340,6 @@ nvmlReturn_t nvmlDeviceGetIndex(nvmlDevice_t device, unsigned int* index)
 nvmlReturn_t nvmlDeviceGetSerial(nvmlDevice_t device, char* serial, unsigned int length)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetSerial) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &length, sizeof(unsigned int)) < 0 ||
@@ -379,7 +353,6 @@ nvmlReturn_t nvmlDeviceGetSerial(nvmlDevice_t device, char* serial, unsigned int
 nvmlReturn_t nvmlDeviceGetMemoryAffinity(nvmlDevice_t device, unsigned int nodeSetSize, unsigned long* nodeSet, nvmlAffinityScope_t scope)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetMemoryAffinity) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &nodeSetSize, sizeof(unsigned int)) < 0 ||
@@ -394,7 +367,6 @@ nvmlReturn_t nvmlDeviceGetMemoryAffinity(nvmlDevice_t device, unsigned int nodeS
 nvmlReturn_t nvmlDeviceGetCpuAffinityWithinScope(nvmlDevice_t device, unsigned int cpuSetSize, unsigned long* cpuSet, nvmlAffinityScope_t scope)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetCpuAffinityWithinScope) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &cpuSetSize, sizeof(unsigned int)) < 0 ||
@@ -409,7 +381,6 @@ nvmlReturn_t nvmlDeviceGetCpuAffinityWithinScope(nvmlDevice_t device, unsigned i
 nvmlReturn_t nvmlDeviceGetCpuAffinity(nvmlDevice_t device, unsigned int cpuSetSize, unsigned long* cpuSet)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetCpuAffinity) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &cpuSetSize, sizeof(unsigned int)) < 0 ||
@@ -423,7 +394,6 @@ nvmlReturn_t nvmlDeviceGetCpuAffinity(nvmlDevice_t device, unsigned int cpuSetSi
 nvmlReturn_t nvmlDeviceSetCpuAffinity(nvmlDevice_t device)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceSetCpuAffinity) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -435,7 +405,6 @@ nvmlReturn_t nvmlDeviceSetCpuAffinity(nvmlDevice_t device)
 nvmlReturn_t nvmlDeviceClearCpuAffinity(nvmlDevice_t device)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceClearCpuAffinity) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -447,7 +416,6 @@ nvmlReturn_t nvmlDeviceClearCpuAffinity(nvmlDevice_t device)
 nvmlReturn_t nvmlDeviceGetTopologyCommonAncestor(nvmlDevice_t device1, nvmlDevice_t device2, nvmlGpuTopologyLevel_t* pathInfo)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetTopologyCommonAncestor) < 0 ||
         rpc_write(0, &device1, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &device2, sizeof(nvmlDevice_t)) < 0 ||
@@ -461,11 +429,10 @@ nvmlReturn_t nvmlDeviceGetTopologyCommonAncestor(nvmlDevice_t device1, nvmlDevic
 nvmlReturn_t nvmlDeviceGetTopologyNearestGpus(nvmlDevice_t device, nvmlGpuTopologyLevel_t level, unsigned int* count, nvmlDevice_t* deviceArray)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetTopologyNearestGpus) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &level, sizeof(nvmlGpuTopologyLevel_t)) < 0 ||
-        rpc_write(0, &count, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, count, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, count, sizeof(unsigned int)) < 0 ||
         rpc_read(0, deviceArray, *count * sizeof(nvmlDevice_t)) < 0 ||
@@ -477,10 +444,9 @@ nvmlReturn_t nvmlDeviceGetTopologyNearestGpus(nvmlDevice_t device, nvmlGpuTopolo
 nvmlReturn_t nvmlSystemGetTopologyGpuSet(unsigned int cpuNumber, unsigned int* count, nvmlDevice_t* deviceArray)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlSystemGetTopologyGpuSet) < 0 ||
         rpc_write(0, &cpuNumber, sizeof(unsigned int)) < 0 ||
-        rpc_write(0, &count, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, count, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, count, sizeof(unsigned int)) < 0 ||
         rpc_read(0, deviceArray, *count * sizeof(nvmlDevice_t)) < 0 ||
@@ -492,7 +458,6 @@ nvmlReturn_t nvmlSystemGetTopologyGpuSet(unsigned int cpuNumber, unsigned int* c
 nvmlReturn_t nvmlDeviceGetP2PStatus(nvmlDevice_t device1, nvmlDevice_t device2, nvmlGpuP2PCapsIndex_t p2pIndex, nvmlGpuP2PStatus_t* p2pStatus)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetP2PStatus) < 0 ||
         rpc_write(0, &device1, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &device2, sizeof(nvmlDevice_t)) < 0 ||
@@ -507,7 +472,6 @@ nvmlReturn_t nvmlDeviceGetP2PStatus(nvmlDevice_t device1, nvmlDevice_t device2, 
 nvmlReturn_t nvmlDeviceGetUUID(nvmlDevice_t device, char* uuid, unsigned int length)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetUUID) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &length, sizeof(unsigned int)) < 0 ||
@@ -521,7 +485,6 @@ nvmlReturn_t nvmlDeviceGetUUID(nvmlDevice_t device, char* uuid, unsigned int len
 nvmlReturn_t nvmlVgpuInstanceGetMdevUUID(nvmlVgpuInstance_t vgpuInstance, char* mdevUuid, unsigned int size)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlVgpuInstanceGetMdevUUID) < 0 ||
         rpc_write(0, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
         rpc_write(0, &size, sizeof(unsigned int)) < 0 ||
@@ -535,7 +498,6 @@ nvmlReturn_t nvmlVgpuInstanceGetMdevUUID(nvmlVgpuInstance_t vgpuInstance, char* 
 nvmlReturn_t nvmlDeviceGetMinorNumber(nvmlDevice_t device, unsigned int* minorNumber)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetMinorNumber) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -548,7 +510,6 @@ nvmlReturn_t nvmlDeviceGetMinorNumber(nvmlDevice_t device, unsigned int* minorNu
 nvmlReturn_t nvmlDeviceGetBoardPartNumber(nvmlDevice_t device, char* partNumber, unsigned int length)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetBoardPartNumber) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &length, sizeof(unsigned int)) < 0 ||
@@ -562,7 +523,6 @@ nvmlReturn_t nvmlDeviceGetBoardPartNumber(nvmlDevice_t device, char* partNumber,
 nvmlReturn_t nvmlDeviceGetInforomVersion(nvmlDevice_t device, nvmlInforomObject_t object, char* version, unsigned int length)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetInforomVersion) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &object, sizeof(nvmlInforomObject_t)) < 0 ||
@@ -577,7 +537,6 @@ nvmlReturn_t nvmlDeviceGetInforomVersion(nvmlDevice_t device, nvmlInforomObject_
 nvmlReturn_t nvmlDeviceGetInforomImageVersion(nvmlDevice_t device, char* version, unsigned int length)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetInforomImageVersion) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &length, sizeof(unsigned int)) < 0 ||
@@ -591,7 +550,6 @@ nvmlReturn_t nvmlDeviceGetInforomImageVersion(nvmlDevice_t device, char* version
 nvmlReturn_t nvmlDeviceGetInforomConfigurationChecksum(nvmlDevice_t device, unsigned int* checksum)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetInforomConfigurationChecksum) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -604,7 +562,6 @@ nvmlReturn_t nvmlDeviceGetInforomConfigurationChecksum(nvmlDevice_t device, unsi
 nvmlReturn_t nvmlDeviceValidateInforom(nvmlDevice_t device)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceValidateInforom) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -616,7 +573,6 @@ nvmlReturn_t nvmlDeviceValidateInforom(nvmlDevice_t device)
 nvmlReturn_t nvmlDeviceGetDisplayMode(nvmlDevice_t device, nvmlEnableState_t* display)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetDisplayMode) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -629,7 +585,6 @@ nvmlReturn_t nvmlDeviceGetDisplayMode(nvmlDevice_t device, nvmlEnableState_t* di
 nvmlReturn_t nvmlDeviceGetDisplayActive(nvmlDevice_t device, nvmlEnableState_t* isActive)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetDisplayActive) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -642,7 +597,6 @@ nvmlReturn_t nvmlDeviceGetDisplayActive(nvmlDevice_t device, nvmlEnableState_t* 
 nvmlReturn_t nvmlDeviceGetPersistenceMode(nvmlDevice_t device, nvmlEnableState_t* mode)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetPersistenceMode) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -655,7 +609,6 @@ nvmlReturn_t nvmlDeviceGetPersistenceMode(nvmlDevice_t device, nvmlEnableState_t
 nvmlReturn_t nvmlDeviceGetPciInfo_v3(nvmlDevice_t device, nvmlPciInfo_t* pci)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetPciInfo_v3) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -668,7 +621,6 @@ nvmlReturn_t nvmlDeviceGetPciInfo_v3(nvmlDevice_t device, nvmlPciInfo_t* pci)
 nvmlReturn_t nvmlDeviceGetMaxPcieLinkGeneration(nvmlDevice_t device, unsigned int* maxLinkGen)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetMaxPcieLinkGeneration) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -681,7 +633,6 @@ nvmlReturn_t nvmlDeviceGetMaxPcieLinkGeneration(nvmlDevice_t device, unsigned in
 nvmlReturn_t nvmlDeviceGetGpuMaxPcieLinkGeneration(nvmlDevice_t device, unsigned int* maxLinkGenDevice)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetGpuMaxPcieLinkGeneration) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -694,7 +645,6 @@ nvmlReturn_t nvmlDeviceGetGpuMaxPcieLinkGeneration(nvmlDevice_t device, unsigned
 nvmlReturn_t nvmlDeviceGetMaxPcieLinkWidth(nvmlDevice_t device, unsigned int* maxLinkWidth)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetMaxPcieLinkWidth) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -707,7 +657,6 @@ nvmlReturn_t nvmlDeviceGetMaxPcieLinkWidth(nvmlDevice_t device, unsigned int* ma
 nvmlReturn_t nvmlDeviceGetCurrPcieLinkGeneration(nvmlDevice_t device, unsigned int* currLinkGen)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetCurrPcieLinkGeneration) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -720,7 +669,6 @@ nvmlReturn_t nvmlDeviceGetCurrPcieLinkGeneration(nvmlDevice_t device, unsigned i
 nvmlReturn_t nvmlDeviceGetCurrPcieLinkWidth(nvmlDevice_t device, unsigned int* currLinkWidth)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetCurrPcieLinkWidth) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -733,7 +681,6 @@ nvmlReturn_t nvmlDeviceGetCurrPcieLinkWidth(nvmlDevice_t device, unsigned int* c
 nvmlReturn_t nvmlDeviceGetPcieThroughput(nvmlDevice_t device, nvmlPcieUtilCounter_t counter, unsigned int* value)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetPcieThroughput) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &counter, sizeof(nvmlPcieUtilCounter_t)) < 0 ||
@@ -747,7 +694,6 @@ nvmlReturn_t nvmlDeviceGetPcieThroughput(nvmlDevice_t device, nvmlPcieUtilCounte
 nvmlReturn_t nvmlDeviceGetPcieReplayCounter(nvmlDevice_t device, unsigned int* value)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetPcieReplayCounter) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -760,7 +706,6 @@ nvmlReturn_t nvmlDeviceGetPcieReplayCounter(nvmlDevice_t device, unsigned int* v
 nvmlReturn_t nvmlDeviceGetClockInfo(nvmlDevice_t device, nvmlClockType_t type, unsigned int* clock)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetClockInfo) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &type, sizeof(nvmlClockType_t)) < 0 ||
@@ -774,7 +719,6 @@ nvmlReturn_t nvmlDeviceGetClockInfo(nvmlDevice_t device, nvmlClockType_t type, u
 nvmlReturn_t nvmlDeviceGetMaxClockInfo(nvmlDevice_t device, nvmlClockType_t type, unsigned int* clock)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetMaxClockInfo) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &type, sizeof(nvmlClockType_t)) < 0 ||
@@ -788,7 +732,6 @@ nvmlReturn_t nvmlDeviceGetMaxClockInfo(nvmlDevice_t device, nvmlClockType_t type
 nvmlReturn_t nvmlDeviceGetApplicationsClock(nvmlDevice_t device, nvmlClockType_t clockType, unsigned int* clockMHz)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetApplicationsClock) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &clockType, sizeof(nvmlClockType_t)) < 0 ||
@@ -802,7 +745,6 @@ nvmlReturn_t nvmlDeviceGetApplicationsClock(nvmlDevice_t device, nvmlClockType_t
 nvmlReturn_t nvmlDeviceGetDefaultApplicationsClock(nvmlDevice_t device, nvmlClockType_t clockType, unsigned int* clockMHz)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetDefaultApplicationsClock) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &clockType, sizeof(nvmlClockType_t)) < 0 ||
@@ -816,7 +758,6 @@ nvmlReturn_t nvmlDeviceGetDefaultApplicationsClock(nvmlDevice_t device, nvmlCloc
 nvmlReturn_t nvmlDeviceResetApplicationsClocks(nvmlDevice_t device)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceResetApplicationsClocks) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -828,7 +769,6 @@ nvmlReturn_t nvmlDeviceResetApplicationsClocks(nvmlDevice_t device)
 nvmlReturn_t nvmlDeviceGetClock(nvmlDevice_t device, nvmlClockType_t clockType, nvmlClockId_t clockId, unsigned int* clockMHz)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetClock) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &clockType, sizeof(nvmlClockType_t)) < 0 ||
@@ -843,7 +783,6 @@ nvmlReturn_t nvmlDeviceGetClock(nvmlDevice_t device, nvmlClockType_t clockType, 
 nvmlReturn_t nvmlDeviceGetMaxCustomerBoostClock(nvmlDevice_t device, nvmlClockType_t clockType, unsigned int* clockMHz)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetMaxCustomerBoostClock) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &clockType, sizeof(nvmlClockType_t)) < 0 ||
@@ -857,10 +796,9 @@ nvmlReturn_t nvmlDeviceGetMaxCustomerBoostClock(nvmlDevice_t device, nvmlClockTy
 nvmlReturn_t nvmlDeviceGetSupportedMemoryClocks(nvmlDevice_t device, unsigned int* count, unsigned int* clocksMHz)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetSupportedMemoryClocks) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(0, &count, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, count, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, count, sizeof(unsigned int)) < 0 ||
         rpc_read(0, clocksMHz, *count * sizeof(unsigned int)) < 0 ||
@@ -872,11 +810,10 @@ nvmlReturn_t nvmlDeviceGetSupportedMemoryClocks(nvmlDevice_t device, unsigned in
 nvmlReturn_t nvmlDeviceGetSupportedGraphicsClocks(nvmlDevice_t device, unsigned int memoryClockMHz, unsigned int* count, unsigned int* clocksMHz)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetSupportedGraphicsClocks) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &memoryClockMHz, sizeof(unsigned int)) < 0 ||
-        rpc_write(0, &count, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, count, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, count, sizeof(unsigned int)) < 0 ||
         rpc_read(0, clocksMHz, *count * sizeof(unsigned int)) < 0 ||
@@ -888,7 +825,6 @@ nvmlReturn_t nvmlDeviceGetSupportedGraphicsClocks(nvmlDevice_t device, unsigned 
 nvmlReturn_t nvmlDeviceGetAutoBoostedClocksEnabled(nvmlDevice_t device, nvmlEnableState_t* isEnabled, nvmlEnableState_t* defaultIsEnabled)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetAutoBoostedClocksEnabled) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -902,7 +838,6 @@ nvmlReturn_t nvmlDeviceGetAutoBoostedClocksEnabled(nvmlDevice_t device, nvmlEnab
 nvmlReturn_t nvmlDeviceSetAutoBoostedClocksEnabled(nvmlDevice_t device, nvmlEnableState_t enabled)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceSetAutoBoostedClocksEnabled) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &enabled, sizeof(nvmlEnableState_t)) < 0 ||
@@ -915,7 +850,6 @@ nvmlReturn_t nvmlDeviceSetAutoBoostedClocksEnabled(nvmlDevice_t device, nvmlEnab
 nvmlReturn_t nvmlDeviceSetDefaultAutoBoostedClocksEnabled(nvmlDevice_t device, nvmlEnableState_t enabled, unsigned int flags)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceSetDefaultAutoBoostedClocksEnabled) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &enabled, sizeof(nvmlEnableState_t)) < 0 ||
@@ -929,7 +863,6 @@ nvmlReturn_t nvmlDeviceSetDefaultAutoBoostedClocksEnabled(nvmlDevice_t device, n
 nvmlReturn_t nvmlDeviceGetFanSpeed(nvmlDevice_t device, unsigned int* speed)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetFanSpeed) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -942,7 +875,6 @@ nvmlReturn_t nvmlDeviceGetFanSpeed(nvmlDevice_t device, unsigned int* speed)
 nvmlReturn_t nvmlDeviceGetFanSpeed_v2(nvmlDevice_t device, unsigned int fan, unsigned int* speed)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetFanSpeed_v2) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &fan, sizeof(unsigned int)) < 0 ||
@@ -956,7 +888,6 @@ nvmlReturn_t nvmlDeviceGetFanSpeed_v2(nvmlDevice_t device, unsigned int fan, uns
 nvmlReturn_t nvmlDeviceGetTargetFanSpeed(nvmlDevice_t device, unsigned int fan, unsigned int* targetSpeed)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetTargetFanSpeed) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &fan, sizeof(unsigned int)) < 0 ||
@@ -970,7 +901,6 @@ nvmlReturn_t nvmlDeviceGetTargetFanSpeed(nvmlDevice_t device, unsigned int fan, 
 nvmlReturn_t nvmlDeviceSetDefaultFanSpeed_v2(nvmlDevice_t device, unsigned int fan)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceSetDefaultFanSpeed_v2) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &fan, sizeof(unsigned int)) < 0 ||
@@ -983,7 +913,6 @@ nvmlReturn_t nvmlDeviceSetDefaultFanSpeed_v2(nvmlDevice_t device, unsigned int f
 nvmlReturn_t nvmlDeviceGetMinMaxFanSpeed(nvmlDevice_t device, unsigned int* minSpeed, unsigned int* maxSpeed)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetMinMaxFanSpeed) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -997,7 +926,6 @@ nvmlReturn_t nvmlDeviceGetMinMaxFanSpeed(nvmlDevice_t device, unsigned int* minS
 nvmlReturn_t nvmlDeviceGetFanControlPolicy_v2(nvmlDevice_t device, unsigned int fan, nvmlFanControlPolicy_t* policy)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetFanControlPolicy_v2) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &fan, sizeof(unsigned int)) < 0 ||
@@ -1011,7 +939,6 @@ nvmlReturn_t nvmlDeviceGetFanControlPolicy_v2(nvmlDevice_t device, unsigned int 
 nvmlReturn_t nvmlDeviceSetFanControlPolicy(nvmlDevice_t device, unsigned int fan, nvmlFanControlPolicy_t policy)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceSetFanControlPolicy) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &fan, sizeof(unsigned int)) < 0 ||
@@ -1025,7 +952,6 @@ nvmlReturn_t nvmlDeviceSetFanControlPolicy(nvmlDevice_t device, unsigned int fan
 nvmlReturn_t nvmlDeviceGetNumFans(nvmlDevice_t device, unsigned int* numFans)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetNumFans) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1038,7 +964,6 @@ nvmlReturn_t nvmlDeviceGetNumFans(nvmlDevice_t device, unsigned int* numFans)
 nvmlReturn_t nvmlDeviceGetTemperature(nvmlDevice_t device, nvmlTemperatureSensors_t sensorType, unsigned int* temp)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetTemperature) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &sensorType, sizeof(nvmlTemperatureSensors_t)) < 0 ||
@@ -1052,7 +977,6 @@ nvmlReturn_t nvmlDeviceGetTemperature(nvmlDevice_t device, nvmlTemperatureSensor
 nvmlReturn_t nvmlDeviceGetTemperatureThreshold(nvmlDevice_t device, nvmlTemperatureThresholds_t thresholdType, unsigned int* temp)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetTemperatureThreshold) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &thresholdType, sizeof(nvmlTemperatureThresholds_t)) < 0 ||
@@ -1066,11 +990,10 @@ nvmlReturn_t nvmlDeviceGetTemperatureThreshold(nvmlDevice_t device, nvmlTemperat
 nvmlReturn_t nvmlDeviceSetTemperatureThreshold(nvmlDevice_t device, nvmlTemperatureThresholds_t thresholdType, int* temp)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceSetTemperatureThreshold) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &thresholdType, sizeof(nvmlTemperatureThresholds_t)) < 0 ||
-        rpc_write(0, &temp, sizeof(int)) < 0 ||
+        rpc_write(0, temp, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, temp, sizeof(int)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -1081,7 +1004,6 @@ nvmlReturn_t nvmlDeviceSetTemperatureThreshold(nvmlDevice_t device, nvmlTemperat
 nvmlReturn_t nvmlDeviceGetThermalSettings(nvmlDevice_t device, unsigned int sensorIndex, nvmlGpuThermalSettings_t* pThermalSettings)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetThermalSettings) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &sensorIndex, sizeof(unsigned int)) < 0 ||
@@ -1095,7 +1017,6 @@ nvmlReturn_t nvmlDeviceGetThermalSettings(nvmlDevice_t device, unsigned int sens
 nvmlReturn_t nvmlDeviceGetPerformanceState(nvmlDevice_t device, nvmlPstates_t* pState)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetPerformanceState) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1108,7 +1029,6 @@ nvmlReturn_t nvmlDeviceGetPerformanceState(nvmlDevice_t device, nvmlPstates_t* p
 nvmlReturn_t nvmlDeviceGetCurrentClocksThrottleReasons(nvmlDevice_t device, unsigned long long* clocksThrottleReasons)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetCurrentClocksThrottleReasons) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1121,7 +1041,6 @@ nvmlReturn_t nvmlDeviceGetCurrentClocksThrottleReasons(nvmlDevice_t device, unsi
 nvmlReturn_t nvmlDeviceGetSupportedClocksThrottleReasons(nvmlDevice_t device, unsigned long long* supportedClocksThrottleReasons)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetSupportedClocksThrottleReasons) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1134,7 +1053,6 @@ nvmlReturn_t nvmlDeviceGetSupportedClocksThrottleReasons(nvmlDevice_t device, un
 nvmlReturn_t nvmlDeviceGetPowerState(nvmlDevice_t device, nvmlPstates_t* pState)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetPowerState) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1147,7 +1065,6 @@ nvmlReturn_t nvmlDeviceGetPowerState(nvmlDevice_t device, nvmlPstates_t* pState)
 nvmlReturn_t nvmlDeviceGetPowerManagementMode(nvmlDevice_t device, nvmlEnableState_t* mode)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetPowerManagementMode) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1160,7 +1077,6 @@ nvmlReturn_t nvmlDeviceGetPowerManagementMode(nvmlDevice_t device, nvmlEnableSta
 nvmlReturn_t nvmlDeviceGetPowerManagementLimit(nvmlDevice_t device, unsigned int* limit)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetPowerManagementLimit) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1173,7 +1089,6 @@ nvmlReturn_t nvmlDeviceGetPowerManagementLimit(nvmlDevice_t device, unsigned int
 nvmlReturn_t nvmlDeviceGetPowerManagementLimitConstraints(nvmlDevice_t device, unsigned int* minLimit, unsigned int* maxLimit)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetPowerManagementLimitConstraints) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1187,7 +1102,6 @@ nvmlReturn_t nvmlDeviceGetPowerManagementLimitConstraints(nvmlDevice_t device, u
 nvmlReturn_t nvmlDeviceGetPowerManagementDefaultLimit(nvmlDevice_t device, unsigned int* defaultLimit)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetPowerManagementDefaultLimit) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1200,7 +1114,6 @@ nvmlReturn_t nvmlDeviceGetPowerManagementDefaultLimit(nvmlDevice_t device, unsig
 nvmlReturn_t nvmlDeviceGetPowerUsage(nvmlDevice_t device, unsigned int* power)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetPowerUsage) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1213,7 +1126,6 @@ nvmlReturn_t nvmlDeviceGetPowerUsage(nvmlDevice_t device, unsigned int* power)
 nvmlReturn_t nvmlDeviceGetTotalEnergyConsumption(nvmlDevice_t device, unsigned long long* energy)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetTotalEnergyConsumption) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1226,7 +1138,6 @@ nvmlReturn_t nvmlDeviceGetTotalEnergyConsumption(nvmlDevice_t device, unsigned l
 nvmlReturn_t nvmlDeviceGetEnforcedPowerLimit(nvmlDevice_t device, unsigned int* limit)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetEnforcedPowerLimit) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1239,7 +1150,6 @@ nvmlReturn_t nvmlDeviceGetEnforcedPowerLimit(nvmlDevice_t device, unsigned int* 
 nvmlReturn_t nvmlDeviceGetGpuOperationMode(nvmlDevice_t device, nvmlGpuOperationMode_t* current, nvmlGpuOperationMode_t* pending)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetGpuOperationMode) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1253,7 +1163,6 @@ nvmlReturn_t nvmlDeviceGetGpuOperationMode(nvmlDevice_t device, nvmlGpuOperation
 nvmlReturn_t nvmlDeviceGetMemoryInfo(nvmlDevice_t device, nvmlMemory_t* memory)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetMemoryInfo) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1266,7 +1175,6 @@ nvmlReturn_t nvmlDeviceGetMemoryInfo(nvmlDevice_t device, nvmlMemory_t* memory)
 nvmlReturn_t nvmlDeviceGetMemoryInfo_v2(nvmlDevice_t device, nvmlMemory_v2_t* memory)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetMemoryInfo_v2) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1279,7 +1187,6 @@ nvmlReturn_t nvmlDeviceGetMemoryInfo_v2(nvmlDevice_t device, nvmlMemory_v2_t* me
 nvmlReturn_t nvmlDeviceGetComputeMode(nvmlDevice_t device, nvmlComputeMode_t* mode)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetComputeMode) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1292,7 +1199,6 @@ nvmlReturn_t nvmlDeviceGetComputeMode(nvmlDevice_t device, nvmlComputeMode_t* mo
 nvmlReturn_t nvmlDeviceGetCudaComputeCapability(nvmlDevice_t device, int* major, int* minor)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetCudaComputeCapability) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1306,7 +1212,6 @@ nvmlReturn_t nvmlDeviceGetCudaComputeCapability(nvmlDevice_t device, int* major,
 nvmlReturn_t nvmlDeviceGetEccMode(nvmlDevice_t device, nvmlEnableState_t* current, nvmlEnableState_t* pending)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetEccMode) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1320,7 +1225,6 @@ nvmlReturn_t nvmlDeviceGetEccMode(nvmlDevice_t device, nvmlEnableState_t* curren
 nvmlReturn_t nvmlDeviceGetDefaultEccMode(nvmlDevice_t device, nvmlEnableState_t* defaultMode)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetDefaultEccMode) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1333,7 +1237,6 @@ nvmlReturn_t nvmlDeviceGetDefaultEccMode(nvmlDevice_t device, nvmlEnableState_t*
 nvmlReturn_t nvmlDeviceGetBoardId(nvmlDevice_t device, unsigned int* boardId)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetBoardId) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1346,7 +1249,6 @@ nvmlReturn_t nvmlDeviceGetBoardId(nvmlDevice_t device, unsigned int* boardId)
 nvmlReturn_t nvmlDeviceGetMultiGpuBoard(nvmlDevice_t device, unsigned int* multiGpuBool)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetMultiGpuBoard) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1359,7 +1261,6 @@ nvmlReturn_t nvmlDeviceGetMultiGpuBoard(nvmlDevice_t device, unsigned int* multi
 nvmlReturn_t nvmlDeviceGetTotalEccErrors(nvmlDevice_t device, nvmlMemoryErrorType_t errorType, nvmlEccCounterType_t counterType, unsigned long long* eccCounts)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetTotalEccErrors) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &errorType, sizeof(nvmlMemoryErrorType_t)) < 0 ||
@@ -1374,7 +1275,6 @@ nvmlReturn_t nvmlDeviceGetTotalEccErrors(nvmlDevice_t device, nvmlMemoryErrorTyp
 nvmlReturn_t nvmlDeviceGetDetailedEccErrors(nvmlDevice_t device, nvmlMemoryErrorType_t errorType, nvmlEccCounterType_t counterType, nvmlEccErrorCounts_t* eccCounts)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetDetailedEccErrors) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &errorType, sizeof(nvmlMemoryErrorType_t)) < 0 ||
@@ -1389,7 +1289,6 @@ nvmlReturn_t nvmlDeviceGetDetailedEccErrors(nvmlDevice_t device, nvmlMemoryError
 nvmlReturn_t nvmlDeviceGetMemoryErrorCounter(nvmlDevice_t device, nvmlMemoryErrorType_t errorType, nvmlEccCounterType_t counterType, nvmlMemoryLocation_t locationType, unsigned long long* count)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetMemoryErrorCounter) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &errorType, sizeof(nvmlMemoryErrorType_t)) < 0 ||
@@ -1405,7 +1304,6 @@ nvmlReturn_t nvmlDeviceGetMemoryErrorCounter(nvmlDevice_t device, nvmlMemoryErro
 nvmlReturn_t nvmlDeviceGetUtilizationRates(nvmlDevice_t device, nvmlUtilization_t* utilization)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetUtilizationRates) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1418,7 +1316,6 @@ nvmlReturn_t nvmlDeviceGetUtilizationRates(nvmlDevice_t device, nvmlUtilization_
 nvmlReturn_t nvmlDeviceGetEncoderUtilization(nvmlDevice_t device, unsigned int* utilization, unsigned int* samplingPeriodUs)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetEncoderUtilization) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1432,7 +1329,6 @@ nvmlReturn_t nvmlDeviceGetEncoderUtilization(nvmlDevice_t device, unsigned int* 
 nvmlReturn_t nvmlDeviceGetEncoderCapacity(nvmlDevice_t device, nvmlEncoderType_t encoderQueryType, unsigned int* encoderCapacity)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetEncoderCapacity) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &encoderQueryType, sizeof(nvmlEncoderType_t)) < 0 ||
@@ -1446,7 +1342,6 @@ nvmlReturn_t nvmlDeviceGetEncoderCapacity(nvmlDevice_t device, nvmlEncoderType_t
 nvmlReturn_t nvmlDeviceGetEncoderStats(nvmlDevice_t device, unsigned int* sessionCount, unsigned int* averageFps, unsigned int* averageLatency)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetEncoderStats) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1461,10 +1356,9 @@ nvmlReturn_t nvmlDeviceGetEncoderStats(nvmlDevice_t device, unsigned int* sessio
 nvmlReturn_t nvmlDeviceGetEncoderSessions(nvmlDevice_t device, unsigned int* sessionCount, nvmlEncoderSessionInfo_t* sessionInfos)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetEncoderSessions) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(0, &sessionCount, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, sessionCount, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, sessionCount, sizeof(unsigned int)) < 0 ||
         rpc_read(0, sessionInfos, *sessionCount * sizeof(nvmlEncoderSessionInfo_t)) < 0 ||
@@ -1476,7 +1370,6 @@ nvmlReturn_t nvmlDeviceGetEncoderSessions(nvmlDevice_t device, unsigned int* ses
 nvmlReturn_t nvmlDeviceGetDecoderUtilization(nvmlDevice_t device, unsigned int* utilization, unsigned int* samplingPeriodUs)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetDecoderUtilization) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1490,7 +1383,6 @@ nvmlReturn_t nvmlDeviceGetDecoderUtilization(nvmlDevice_t device, unsigned int* 
 nvmlReturn_t nvmlDeviceGetFBCStats(nvmlDevice_t device, nvmlFBCStats_t* fbcStats)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetFBCStats) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1503,10 +1395,9 @@ nvmlReturn_t nvmlDeviceGetFBCStats(nvmlDevice_t device, nvmlFBCStats_t* fbcStats
 nvmlReturn_t nvmlDeviceGetFBCSessions(nvmlDevice_t device, unsigned int* sessionCount, nvmlFBCSessionInfo_t* sessionInfo)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetFBCSessions) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(0, &sessionCount, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, sessionCount, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, sessionCount, sizeof(unsigned int)) < 0 ||
         rpc_read(0, sessionInfo, *sessionCount * sizeof(nvmlFBCSessionInfo_t)) < 0 ||
@@ -1518,7 +1409,6 @@ nvmlReturn_t nvmlDeviceGetFBCSessions(nvmlDevice_t device, unsigned int* session
 nvmlReturn_t nvmlDeviceGetDriverModel(nvmlDevice_t device, nvmlDriverModel_t* current, nvmlDriverModel_t* pending)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetDriverModel) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1532,7 +1422,6 @@ nvmlReturn_t nvmlDeviceGetDriverModel(nvmlDevice_t device, nvmlDriverModel_t* cu
 nvmlReturn_t nvmlDeviceGetVbiosVersion(nvmlDevice_t device, char* version, unsigned int length)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetVbiosVersion) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &length, sizeof(unsigned int)) < 0 ||
@@ -1546,7 +1435,6 @@ nvmlReturn_t nvmlDeviceGetVbiosVersion(nvmlDevice_t device, char* version, unsig
 nvmlReturn_t nvmlDeviceGetBridgeChipInfo(nvmlDevice_t device, nvmlBridgeChipHierarchy_t* bridgeHierarchy)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetBridgeChipInfo) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1559,10 +1447,9 @@ nvmlReturn_t nvmlDeviceGetBridgeChipInfo(nvmlDevice_t device, nvmlBridgeChipHier
 nvmlReturn_t nvmlDeviceGetComputeRunningProcesses_v3(nvmlDevice_t device, unsigned int* infoCount, nvmlProcessInfo_t* infos)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetComputeRunningProcesses_v3) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(0, &infoCount, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, infoCount, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, infoCount, sizeof(unsigned int)) < 0 ||
         rpc_read(0, infos, *infoCount * sizeof(nvmlProcessInfo_t)) < 0 ||
@@ -1574,10 +1461,9 @@ nvmlReturn_t nvmlDeviceGetComputeRunningProcesses_v3(nvmlDevice_t device, unsign
 nvmlReturn_t nvmlDeviceGetGraphicsRunningProcesses_v3(nvmlDevice_t device, unsigned int* infoCount, nvmlProcessInfo_t* infos)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetGraphicsRunningProcesses_v3) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(0, &infoCount, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, infoCount, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, infoCount, sizeof(unsigned int)) < 0 ||
         rpc_read(0, infos, *infoCount * sizeof(nvmlProcessInfo_t)) < 0 ||
@@ -1589,10 +1475,9 @@ nvmlReturn_t nvmlDeviceGetGraphicsRunningProcesses_v3(nvmlDevice_t device, unsig
 nvmlReturn_t nvmlDeviceGetMPSComputeRunningProcesses_v3(nvmlDevice_t device, unsigned int* infoCount, nvmlProcessInfo_t* infos)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetMPSComputeRunningProcesses_v3) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(0, &infoCount, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, infoCount, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, infoCount, sizeof(unsigned int)) < 0 ||
         rpc_read(0, infos, *infoCount * sizeof(nvmlProcessInfo_t)) < 0 ||
@@ -1604,7 +1489,6 @@ nvmlReturn_t nvmlDeviceGetMPSComputeRunningProcesses_v3(nvmlDevice_t device, uns
 nvmlReturn_t nvmlDeviceOnSameBoard(nvmlDevice_t device1, nvmlDevice_t device2, int* onSameBoard)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceOnSameBoard) < 0 ||
         rpc_write(0, &device1, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &device2, sizeof(nvmlDevice_t)) < 0 ||
@@ -1618,7 +1502,6 @@ nvmlReturn_t nvmlDeviceOnSameBoard(nvmlDevice_t device1, nvmlDevice_t device2, i
 nvmlReturn_t nvmlDeviceGetAPIRestriction(nvmlDevice_t device, nvmlRestrictedAPI_t apiType, nvmlEnableState_t* isRestricted)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetAPIRestriction) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &apiType, sizeof(nvmlRestrictedAPI_t)) < 0 ||
@@ -1632,12 +1515,11 @@ nvmlReturn_t nvmlDeviceGetAPIRestriction(nvmlDevice_t device, nvmlRestrictedAPI_
 nvmlReturn_t nvmlDeviceGetSamples(nvmlDevice_t device, nvmlSamplingType_t type, unsigned long long lastSeenTimeStamp, nvmlValueType_t* sampleValType, unsigned int* sampleCount, nvmlSample_t* samples)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetSamples) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &type, sizeof(nvmlSamplingType_t)) < 0 ||
         rpc_write(0, &lastSeenTimeStamp, sizeof(unsigned long long)) < 0 ||
-        rpc_write(0, &sampleCount, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, sampleCount, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, sampleValType, sizeof(nvmlValueType_t)) < 0 ||
         rpc_read(0, sampleCount, sizeof(unsigned int)) < 0 ||
@@ -1650,7 +1532,6 @@ nvmlReturn_t nvmlDeviceGetSamples(nvmlDevice_t device, nvmlSamplingType_t type, 
 nvmlReturn_t nvmlDeviceGetBAR1MemoryInfo(nvmlDevice_t device, nvmlBAR1Memory_t* bar1Memory)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetBAR1MemoryInfo) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1663,7 +1544,6 @@ nvmlReturn_t nvmlDeviceGetBAR1MemoryInfo(nvmlDevice_t device, nvmlBAR1Memory_t* 
 nvmlReturn_t nvmlDeviceGetViolationStatus(nvmlDevice_t device, nvmlPerfPolicyType_t perfPolicyType, nvmlViolationTime_t* violTime)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetViolationStatus) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &perfPolicyType, sizeof(nvmlPerfPolicyType_t)) < 0 ||
@@ -1677,7 +1557,6 @@ nvmlReturn_t nvmlDeviceGetViolationStatus(nvmlDevice_t device, nvmlPerfPolicyTyp
 nvmlReturn_t nvmlDeviceGetIrqNum(nvmlDevice_t device, unsigned int* irqNum)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetIrqNum) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1690,7 +1569,6 @@ nvmlReturn_t nvmlDeviceGetIrqNum(nvmlDevice_t device, unsigned int* irqNum)
 nvmlReturn_t nvmlDeviceGetNumGpuCores(nvmlDevice_t device, unsigned int* numCores)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetNumGpuCores) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1703,7 +1581,6 @@ nvmlReturn_t nvmlDeviceGetNumGpuCores(nvmlDevice_t device, unsigned int* numCore
 nvmlReturn_t nvmlDeviceGetPowerSource(nvmlDevice_t device, nvmlPowerSource_t* powerSource)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetPowerSource) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1716,7 +1593,6 @@ nvmlReturn_t nvmlDeviceGetPowerSource(nvmlDevice_t device, nvmlPowerSource_t* po
 nvmlReturn_t nvmlDeviceGetMemoryBusWidth(nvmlDevice_t device, unsigned int* busWidth)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetMemoryBusWidth) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1729,7 +1605,6 @@ nvmlReturn_t nvmlDeviceGetMemoryBusWidth(nvmlDevice_t device, unsigned int* busW
 nvmlReturn_t nvmlDeviceGetPcieLinkMaxSpeed(nvmlDevice_t device, unsigned int* maxSpeed)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetPcieLinkMaxSpeed) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1742,7 +1617,6 @@ nvmlReturn_t nvmlDeviceGetPcieLinkMaxSpeed(nvmlDevice_t device, unsigned int* ma
 nvmlReturn_t nvmlDeviceGetPcieSpeed(nvmlDevice_t device, unsigned int* pcieSpeed)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetPcieSpeed) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1755,7 +1629,6 @@ nvmlReturn_t nvmlDeviceGetPcieSpeed(nvmlDevice_t device, unsigned int* pcieSpeed
 nvmlReturn_t nvmlDeviceGetAdaptiveClockInfoStatus(nvmlDevice_t device, unsigned int* adaptiveClockStatus)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetAdaptiveClockInfoStatus) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1768,7 +1641,6 @@ nvmlReturn_t nvmlDeviceGetAdaptiveClockInfoStatus(nvmlDevice_t device, unsigned 
 nvmlReturn_t nvmlDeviceGetAccountingMode(nvmlDevice_t device, nvmlEnableState_t* mode)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetAccountingMode) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1781,7 +1653,6 @@ nvmlReturn_t nvmlDeviceGetAccountingMode(nvmlDevice_t device, nvmlEnableState_t*
 nvmlReturn_t nvmlDeviceGetAccountingStats(nvmlDevice_t device, unsigned int pid, nvmlAccountingStats_t* stats)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetAccountingStats) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &pid, sizeof(unsigned int)) < 0 ||
@@ -1795,10 +1666,9 @@ nvmlReturn_t nvmlDeviceGetAccountingStats(nvmlDevice_t device, unsigned int pid,
 nvmlReturn_t nvmlDeviceGetAccountingPids(nvmlDevice_t device, unsigned int* count, unsigned int* pids)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetAccountingPids) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(0, &count, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, count, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, count, sizeof(unsigned int)) < 0 ||
         rpc_read(0, pids, *count * sizeof(unsigned int)) < 0 ||
@@ -1810,7 +1680,6 @@ nvmlReturn_t nvmlDeviceGetAccountingPids(nvmlDevice_t device, unsigned int* coun
 nvmlReturn_t nvmlDeviceGetAccountingBufferSize(nvmlDevice_t device, unsigned int* bufferSize)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetAccountingBufferSize) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1823,11 +1692,10 @@ nvmlReturn_t nvmlDeviceGetAccountingBufferSize(nvmlDevice_t device, unsigned int
 nvmlReturn_t nvmlDeviceGetRetiredPages(nvmlDevice_t device, nvmlPageRetirementCause_t cause, unsigned int* pageCount, unsigned long long* addresses)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetRetiredPages) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &cause, sizeof(nvmlPageRetirementCause_t)) < 0 ||
-        rpc_write(0, &pageCount, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, pageCount, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pageCount, sizeof(unsigned int)) < 0 ||
         rpc_read(0, addresses, *pageCount * sizeof(unsigned long long)) < 0 ||
@@ -1839,11 +1707,10 @@ nvmlReturn_t nvmlDeviceGetRetiredPages(nvmlDevice_t device, nvmlPageRetirementCa
 nvmlReturn_t nvmlDeviceGetRetiredPages_v2(nvmlDevice_t device, nvmlPageRetirementCause_t cause, unsigned int* pageCount, unsigned long long* addresses, unsigned long long* timestamps)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetRetiredPages_v2) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &cause, sizeof(nvmlPageRetirementCause_t)) < 0 ||
-        rpc_write(0, &pageCount, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, pageCount, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pageCount, sizeof(unsigned int)) < 0 ||
         rpc_read(0, addresses, *pageCount * sizeof(unsigned long long)) < 0 ||
@@ -1856,7 +1723,6 @@ nvmlReturn_t nvmlDeviceGetRetiredPages_v2(nvmlDevice_t device, nvmlPageRetiremen
 nvmlReturn_t nvmlDeviceGetRetiredPagesPendingStatus(nvmlDevice_t device, nvmlEnableState_t* isPending)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetRetiredPagesPendingStatus) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1869,7 +1735,6 @@ nvmlReturn_t nvmlDeviceGetRetiredPagesPendingStatus(nvmlDevice_t device, nvmlEna
 nvmlReturn_t nvmlDeviceGetRemappedRows(nvmlDevice_t device, unsigned int* corrRows, unsigned int* uncRows, unsigned int* isPending, unsigned int* failureOccurred)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetRemappedRows) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1885,7 +1750,6 @@ nvmlReturn_t nvmlDeviceGetRemappedRows(nvmlDevice_t device, unsigned int* corrRo
 nvmlReturn_t nvmlDeviceGetRowRemapperHistogram(nvmlDevice_t device, nvmlRowRemapperHistogramValues_t* values)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetRowRemapperHistogram) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1898,7 +1762,6 @@ nvmlReturn_t nvmlDeviceGetRowRemapperHistogram(nvmlDevice_t device, nvmlRowRemap
 nvmlReturn_t nvmlDeviceGetArchitecture(nvmlDevice_t device, nvmlDeviceArchitecture_t* arch)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetArchitecture) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -1911,7 +1774,6 @@ nvmlReturn_t nvmlDeviceGetArchitecture(nvmlDevice_t device, nvmlDeviceArchitectu
 nvmlReturn_t nvmlUnitSetLedState(nvmlUnit_t unit, nvmlLedColor_t color)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlUnitSetLedState) < 0 ||
         rpc_write(0, &unit, sizeof(nvmlUnit_t)) < 0 ||
         rpc_write(0, &color, sizeof(nvmlLedColor_t)) < 0 ||
@@ -1924,7 +1786,6 @@ nvmlReturn_t nvmlUnitSetLedState(nvmlUnit_t unit, nvmlLedColor_t color)
 nvmlReturn_t nvmlDeviceSetPersistenceMode(nvmlDevice_t device, nvmlEnableState_t mode)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceSetPersistenceMode) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &mode, sizeof(nvmlEnableState_t)) < 0 ||
@@ -1937,7 +1798,6 @@ nvmlReturn_t nvmlDeviceSetPersistenceMode(nvmlDevice_t device, nvmlEnableState_t
 nvmlReturn_t nvmlDeviceSetComputeMode(nvmlDevice_t device, nvmlComputeMode_t mode)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceSetComputeMode) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &mode, sizeof(nvmlComputeMode_t)) < 0 ||
@@ -1950,7 +1810,6 @@ nvmlReturn_t nvmlDeviceSetComputeMode(nvmlDevice_t device, nvmlComputeMode_t mod
 nvmlReturn_t nvmlDeviceSetEccMode(nvmlDevice_t device, nvmlEnableState_t ecc)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceSetEccMode) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &ecc, sizeof(nvmlEnableState_t)) < 0 ||
@@ -1963,7 +1822,6 @@ nvmlReturn_t nvmlDeviceSetEccMode(nvmlDevice_t device, nvmlEnableState_t ecc)
 nvmlReturn_t nvmlDeviceClearEccErrorCounts(nvmlDevice_t device, nvmlEccCounterType_t counterType)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceClearEccErrorCounts) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &counterType, sizeof(nvmlEccCounterType_t)) < 0 ||
@@ -1976,7 +1834,6 @@ nvmlReturn_t nvmlDeviceClearEccErrorCounts(nvmlDevice_t device, nvmlEccCounterTy
 nvmlReturn_t nvmlDeviceSetDriverModel(nvmlDevice_t device, nvmlDriverModel_t driverModel, unsigned int flags)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceSetDriverModel) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &driverModel, sizeof(nvmlDriverModel_t)) < 0 ||
@@ -1990,7 +1847,6 @@ nvmlReturn_t nvmlDeviceSetDriverModel(nvmlDevice_t device, nvmlDriverModel_t dri
 nvmlReturn_t nvmlDeviceSetGpuLockedClocks(nvmlDevice_t device, unsigned int minGpuClockMHz, unsigned int maxGpuClockMHz)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceSetGpuLockedClocks) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &minGpuClockMHz, sizeof(unsigned int)) < 0 ||
@@ -2004,7 +1860,6 @@ nvmlReturn_t nvmlDeviceSetGpuLockedClocks(nvmlDevice_t device, unsigned int minG
 nvmlReturn_t nvmlDeviceResetGpuLockedClocks(nvmlDevice_t device)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceResetGpuLockedClocks) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -2016,7 +1871,6 @@ nvmlReturn_t nvmlDeviceResetGpuLockedClocks(nvmlDevice_t device)
 nvmlReturn_t nvmlDeviceSetMemoryLockedClocks(nvmlDevice_t device, unsigned int minMemClockMHz, unsigned int maxMemClockMHz)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceSetMemoryLockedClocks) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &minMemClockMHz, sizeof(unsigned int)) < 0 ||
@@ -2030,7 +1884,6 @@ nvmlReturn_t nvmlDeviceSetMemoryLockedClocks(nvmlDevice_t device, unsigned int m
 nvmlReturn_t nvmlDeviceResetMemoryLockedClocks(nvmlDevice_t device)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceResetMemoryLockedClocks) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -2042,7 +1895,6 @@ nvmlReturn_t nvmlDeviceResetMemoryLockedClocks(nvmlDevice_t device)
 nvmlReturn_t nvmlDeviceSetApplicationsClocks(nvmlDevice_t device, unsigned int memClockMHz, unsigned int graphicsClockMHz)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceSetApplicationsClocks) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &memClockMHz, sizeof(unsigned int)) < 0 ||
@@ -2056,7 +1908,6 @@ nvmlReturn_t nvmlDeviceSetApplicationsClocks(nvmlDevice_t device, unsigned int m
 nvmlReturn_t nvmlDeviceGetClkMonStatus(nvmlDevice_t device, nvmlClkMonStatus_t* status)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetClkMonStatus) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -2069,7 +1920,6 @@ nvmlReturn_t nvmlDeviceGetClkMonStatus(nvmlDevice_t device, nvmlClkMonStatus_t* 
 nvmlReturn_t nvmlDeviceSetPowerManagementLimit(nvmlDevice_t device, unsigned int limit)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceSetPowerManagementLimit) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &limit, sizeof(unsigned int)) < 0 ||
@@ -2082,7 +1932,6 @@ nvmlReturn_t nvmlDeviceSetPowerManagementLimit(nvmlDevice_t device, unsigned int
 nvmlReturn_t nvmlDeviceSetGpuOperationMode(nvmlDevice_t device, nvmlGpuOperationMode_t mode)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceSetGpuOperationMode) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &mode, sizeof(nvmlGpuOperationMode_t)) < 0 ||
@@ -2095,7 +1944,6 @@ nvmlReturn_t nvmlDeviceSetGpuOperationMode(nvmlDevice_t device, nvmlGpuOperation
 nvmlReturn_t nvmlDeviceSetAPIRestriction(nvmlDevice_t device, nvmlRestrictedAPI_t apiType, nvmlEnableState_t isRestricted)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceSetAPIRestriction) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &apiType, sizeof(nvmlRestrictedAPI_t)) < 0 ||
@@ -2109,7 +1957,6 @@ nvmlReturn_t nvmlDeviceSetAPIRestriction(nvmlDevice_t device, nvmlRestrictedAPI_
 nvmlReturn_t nvmlDeviceSetAccountingMode(nvmlDevice_t device, nvmlEnableState_t mode)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceSetAccountingMode) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &mode, sizeof(nvmlEnableState_t)) < 0 ||
@@ -2122,7 +1969,6 @@ nvmlReturn_t nvmlDeviceSetAccountingMode(nvmlDevice_t device, nvmlEnableState_t 
 nvmlReturn_t nvmlDeviceClearAccountingPids(nvmlDevice_t device)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceClearAccountingPids) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -2134,7 +1980,6 @@ nvmlReturn_t nvmlDeviceClearAccountingPids(nvmlDevice_t device)
 nvmlReturn_t nvmlDeviceGetNvLinkState(nvmlDevice_t device, unsigned int link, nvmlEnableState_t* isActive)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetNvLinkState) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &link, sizeof(unsigned int)) < 0 ||
@@ -2148,7 +1993,6 @@ nvmlReturn_t nvmlDeviceGetNvLinkState(nvmlDevice_t device, unsigned int link, nv
 nvmlReturn_t nvmlDeviceGetNvLinkVersion(nvmlDevice_t device, unsigned int link, unsigned int* version)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetNvLinkVersion) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &link, sizeof(unsigned int)) < 0 ||
@@ -2162,7 +2006,6 @@ nvmlReturn_t nvmlDeviceGetNvLinkVersion(nvmlDevice_t device, unsigned int link, 
 nvmlReturn_t nvmlDeviceGetNvLinkCapability(nvmlDevice_t device, unsigned int link, nvmlNvLinkCapability_t capability, unsigned int* capResult)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetNvLinkCapability) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &link, sizeof(unsigned int)) < 0 ||
@@ -2177,7 +2020,6 @@ nvmlReturn_t nvmlDeviceGetNvLinkCapability(nvmlDevice_t device, unsigned int lin
 nvmlReturn_t nvmlDeviceGetNvLinkRemotePciInfo_v2(nvmlDevice_t device, unsigned int link, nvmlPciInfo_t* pci)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetNvLinkRemotePciInfo_v2) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &link, sizeof(unsigned int)) < 0 ||
@@ -2191,7 +2033,6 @@ nvmlReturn_t nvmlDeviceGetNvLinkRemotePciInfo_v2(nvmlDevice_t device, unsigned i
 nvmlReturn_t nvmlDeviceGetNvLinkErrorCounter(nvmlDevice_t device, unsigned int link, nvmlNvLinkErrorCounter_t counter, unsigned long long* counterValue)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetNvLinkErrorCounter) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &link, sizeof(unsigned int)) < 0 ||
@@ -2206,7 +2047,6 @@ nvmlReturn_t nvmlDeviceGetNvLinkErrorCounter(nvmlDevice_t device, unsigned int l
 nvmlReturn_t nvmlDeviceResetNvLinkErrorCounters(nvmlDevice_t device, unsigned int link)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceResetNvLinkErrorCounters) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &link, sizeof(unsigned int)) < 0 ||
@@ -2219,12 +2059,11 @@ nvmlReturn_t nvmlDeviceResetNvLinkErrorCounters(nvmlDevice_t device, unsigned in
 nvmlReturn_t nvmlDeviceSetNvLinkUtilizationControl(nvmlDevice_t device, unsigned int link, unsigned int counter, nvmlNvLinkUtilizationControl_t* control, unsigned int reset)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceSetNvLinkUtilizationControl) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &link, sizeof(unsigned int)) < 0 ||
         rpc_write(0, &counter, sizeof(unsigned int)) < 0 ||
-        rpc_write(0, &control, sizeof(nvmlNvLinkUtilizationControl_t)) < 0 ||
+        rpc_write(0, &control, sizeof(nvmlNvLinkUtilizationControl_t*)) < 0 ||
         rpc_write(0, &reset, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -2235,7 +2074,6 @@ nvmlReturn_t nvmlDeviceSetNvLinkUtilizationControl(nvmlDevice_t device, unsigned
 nvmlReturn_t nvmlDeviceGetNvLinkUtilizationControl(nvmlDevice_t device, unsigned int link, unsigned int counter, nvmlNvLinkUtilizationControl_t* control)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetNvLinkUtilizationControl) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &link, sizeof(unsigned int)) < 0 ||
@@ -2250,7 +2088,6 @@ nvmlReturn_t nvmlDeviceGetNvLinkUtilizationControl(nvmlDevice_t device, unsigned
 nvmlReturn_t nvmlDeviceGetNvLinkUtilizationCounter(nvmlDevice_t device, unsigned int link, unsigned int counter, unsigned long long* rxcounter, unsigned long long* txcounter)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetNvLinkUtilizationCounter) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &link, sizeof(unsigned int)) < 0 ||
@@ -2266,7 +2103,6 @@ nvmlReturn_t nvmlDeviceGetNvLinkUtilizationCounter(nvmlDevice_t device, unsigned
 nvmlReturn_t nvmlDeviceFreezeNvLinkUtilizationCounter(nvmlDevice_t device, unsigned int link, unsigned int counter, nvmlEnableState_t freeze)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceFreezeNvLinkUtilizationCounter) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &link, sizeof(unsigned int)) < 0 ||
@@ -2281,7 +2117,6 @@ nvmlReturn_t nvmlDeviceFreezeNvLinkUtilizationCounter(nvmlDevice_t device, unsig
 nvmlReturn_t nvmlDeviceResetNvLinkUtilizationCounter(nvmlDevice_t device, unsigned int link, unsigned int counter)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceResetNvLinkUtilizationCounter) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &link, sizeof(unsigned int)) < 0 ||
@@ -2295,7 +2130,6 @@ nvmlReturn_t nvmlDeviceResetNvLinkUtilizationCounter(nvmlDevice_t device, unsign
 nvmlReturn_t nvmlDeviceGetNvLinkRemoteDeviceType(nvmlDevice_t device, unsigned int link, nvmlIntNvLinkDeviceType_t* pNvLinkDeviceType)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetNvLinkRemoteDeviceType) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &link, sizeof(unsigned int)) < 0 ||
@@ -2309,7 +2143,6 @@ nvmlReturn_t nvmlDeviceGetNvLinkRemoteDeviceType(nvmlDevice_t device, unsigned i
 nvmlReturn_t nvmlEventSetCreate(nvmlEventSet_t* set)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlEventSetCreate) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, set, sizeof(nvmlEventSet_t)) < 0 ||
@@ -2321,7 +2154,6 @@ nvmlReturn_t nvmlEventSetCreate(nvmlEventSet_t* set)
 nvmlReturn_t nvmlDeviceRegisterEvents(nvmlDevice_t device, unsigned long long eventTypes, nvmlEventSet_t set)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceRegisterEvents) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &eventTypes, sizeof(unsigned long long)) < 0 ||
@@ -2335,7 +2167,6 @@ nvmlReturn_t nvmlDeviceRegisterEvents(nvmlDevice_t device, unsigned long long ev
 nvmlReturn_t nvmlDeviceGetSupportedEventTypes(nvmlDevice_t device, unsigned long long* eventTypes)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetSupportedEventTypes) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -2348,7 +2179,6 @@ nvmlReturn_t nvmlDeviceGetSupportedEventTypes(nvmlDevice_t device, unsigned long
 nvmlReturn_t nvmlEventSetWait_v2(nvmlEventSet_t set, nvmlEventData_t* data, unsigned int timeoutms)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlEventSetWait_v2) < 0 ||
         rpc_write(0, &set, sizeof(nvmlEventSet_t)) < 0 ||
         rpc_write(0, &timeoutms, sizeof(unsigned int)) < 0 ||
@@ -2362,7 +2192,6 @@ nvmlReturn_t nvmlEventSetWait_v2(nvmlEventSet_t set, nvmlEventData_t* data, unsi
 nvmlReturn_t nvmlEventSetFree(nvmlEventSet_t set)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlEventSetFree) < 0 ||
         rpc_write(0, &set, sizeof(nvmlEventSet_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -2374,11 +2203,11 @@ nvmlReturn_t nvmlEventSetFree(nvmlEventSet_t set)
 nvmlReturn_t nvmlDeviceModifyDrainState(nvmlPciInfo_t* pciInfo, nvmlEnableState_t newState)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceModifyDrainState) < 0 ||
-        rpc_write(0, &pciInfo, sizeof(nvmlPciInfo_t)) < 0 ||
+        rpc_write(0, pciInfo, sizeof(nvmlPciInfo_t)) < 0 ||
         rpc_write(0, &newState, sizeof(nvmlEnableState_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, pciInfo, sizeof(nvmlPciInfo_t)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return NVML_ERROR_GPU_IS_LOST;
     return return_value;
@@ -2387,10 +2216,10 @@ nvmlReturn_t nvmlDeviceModifyDrainState(nvmlPciInfo_t* pciInfo, nvmlEnableState_
 nvmlReturn_t nvmlDeviceQueryDrainState(nvmlPciInfo_t* pciInfo, nvmlEnableState_t* currentState)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceQueryDrainState) < 0 ||
-        rpc_write(0, &pciInfo, sizeof(nvmlPciInfo_t)) < 0 ||
+        rpc_write(0, pciInfo, sizeof(nvmlPciInfo_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, pciInfo, sizeof(nvmlPciInfo_t)) < 0 ||
         rpc_read(0, currentState, sizeof(nvmlEnableState_t)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return NVML_ERROR_GPU_IS_LOST;
@@ -2400,12 +2229,12 @@ nvmlReturn_t nvmlDeviceQueryDrainState(nvmlPciInfo_t* pciInfo, nvmlEnableState_t
 nvmlReturn_t nvmlDeviceRemoveGpu_v2(nvmlPciInfo_t* pciInfo, nvmlDetachGpuState_t gpuState, nvmlPcieLinkState_t linkState)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceRemoveGpu_v2) < 0 ||
-        rpc_write(0, &pciInfo, sizeof(nvmlPciInfo_t)) < 0 ||
+        rpc_write(0, pciInfo, sizeof(nvmlPciInfo_t)) < 0 ||
         rpc_write(0, &gpuState, sizeof(nvmlDetachGpuState_t)) < 0 ||
         rpc_write(0, &linkState, sizeof(nvmlPcieLinkState_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, pciInfo, sizeof(nvmlPciInfo_t)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return NVML_ERROR_GPU_IS_LOST;
     return return_value;
@@ -2414,10 +2243,10 @@ nvmlReturn_t nvmlDeviceRemoveGpu_v2(nvmlPciInfo_t* pciInfo, nvmlDetachGpuState_t
 nvmlReturn_t nvmlDeviceDiscoverGpus(nvmlPciInfo_t* pciInfo)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceDiscoverGpus) < 0 ||
-        rpc_write(0, &pciInfo, sizeof(nvmlPciInfo_t)) < 0 ||
+        rpc_write(0, pciInfo, sizeof(nvmlPciInfo_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, pciInfo, sizeof(nvmlPciInfo_t)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return NVML_ERROR_GPU_IS_LOST;
     return return_value;
@@ -2426,7 +2255,6 @@ nvmlReturn_t nvmlDeviceDiscoverGpus(nvmlPciInfo_t* pciInfo)
 nvmlReturn_t nvmlDeviceGetFieldValues(nvmlDevice_t device, int valuesCount, nvmlFieldValue_t* values)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetFieldValues) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &valuesCount, sizeof(int)) < 0 ||
@@ -2440,7 +2268,6 @@ nvmlReturn_t nvmlDeviceGetFieldValues(nvmlDevice_t device, int valuesCount, nvml
 nvmlReturn_t nvmlDeviceClearFieldValues(nvmlDevice_t device, int valuesCount, nvmlFieldValue_t* values)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceClearFieldValues) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &valuesCount, sizeof(int)) < 0 ||
@@ -2454,7 +2281,6 @@ nvmlReturn_t nvmlDeviceClearFieldValues(nvmlDevice_t device, int valuesCount, nv
 nvmlReturn_t nvmlDeviceGetVirtualizationMode(nvmlDevice_t device, nvmlGpuVirtualizationMode_t* pVirtualMode)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetVirtualizationMode) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -2467,7 +2293,6 @@ nvmlReturn_t nvmlDeviceGetVirtualizationMode(nvmlDevice_t device, nvmlGpuVirtual
 nvmlReturn_t nvmlDeviceGetHostVgpuMode(nvmlDevice_t device, nvmlHostVgpuMode_t* pHostVgpuMode)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetHostVgpuMode) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -2480,7 +2305,6 @@ nvmlReturn_t nvmlDeviceGetHostVgpuMode(nvmlDevice_t device, nvmlHostVgpuMode_t* 
 nvmlReturn_t nvmlDeviceSetVirtualizationMode(nvmlDevice_t device, nvmlGpuVirtualizationMode_t virtualMode)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceSetVirtualizationMode) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &virtualMode, sizeof(nvmlGpuVirtualizationMode_t)) < 0 ||
@@ -2493,7 +2317,6 @@ nvmlReturn_t nvmlDeviceSetVirtualizationMode(nvmlDevice_t device, nvmlGpuVirtual
 nvmlReturn_t nvmlDeviceGetGridLicensableFeatures_v4(nvmlDevice_t device, nvmlGridLicensableFeatures_t* pGridLicensableFeatures)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetGridLicensableFeatures_v4) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -2506,10 +2329,9 @@ nvmlReturn_t nvmlDeviceGetGridLicensableFeatures_v4(nvmlDevice_t device, nvmlGri
 nvmlReturn_t nvmlDeviceGetProcessUtilization(nvmlDevice_t device, nvmlProcessUtilizationSample_t* utilization, unsigned int* processSamplesCount, unsigned long long lastSeenTimeStamp)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetProcessUtilization) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(0, &processSamplesCount, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, processSamplesCount, sizeof(unsigned int)) < 0 ||
         rpc_write(0, &lastSeenTimeStamp, sizeof(unsigned long long)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, processSamplesCount, sizeof(unsigned int)) < 0 ||
@@ -2522,7 +2344,6 @@ nvmlReturn_t nvmlDeviceGetProcessUtilization(nvmlDevice_t device, nvmlProcessUti
 nvmlReturn_t nvmlDeviceGetGspFirmwareVersion(nvmlDevice_t device, char* version)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetGspFirmwareVersion) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -2535,7 +2356,6 @@ nvmlReturn_t nvmlDeviceGetGspFirmwareVersion(nvmlDevice_t device, char* version)
 nvmlReturn_t nvmlDeviceGetGspFirmwareMode(nvmlDevice_t device, unsigned int* isEnabled, unsigned int* defaultMode)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetGspFirmwareMode) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -2549,7 +2369,6 @@ nvmlReturn_t nvmlDeviceGetGspFirmwareMode(nvmlDevice_t device, unsigned int* isE
 nvmlReturn_t nvmlGetVgpuDriverCapabilities(nvmlVgpuDriverCapability_t capability, unsigned int* capResult)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlGetVgpuDriverCapabilities) < 0 ||
         rpc_write(0, &capability, sizeof(nvmlVgpuDriverCapability_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -2562,7 +2381,6 @@ nvmlReturn_t nvmlGetVgpuDriverCapabilities(nvmlVgpuDriverCapability_t capability
 nvmlReturn_t nvmlDeviceGetVgpuCapabilities(nvmlDevice_t device, nvmlDeviceVgpuCapability_t capability, unsigned int* capResult)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetVgpuCapabilities) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &capability, sizeof(nvmlDeviceVgpuCapability_t)) < 0 ||
@@ -2576,10 +2394,9 @@ nvmlReturn_t nvmlDeviceGetVgpuCapabilities(nvmlDevice_t device, nvmlDeviceVgpuCa
 nvmlReturn_t nvmlDeviceGetSupportedVgpus(nvmlDevice_t device, unsigned int* vgpuCount, nvmlVgpuTypeId_t* vgpuTypeIds)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetSupportedVgpus) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(0, &vgpuCount, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, vgpuCount, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, vgpuCount, sizeof(unsigned int)) < 0 ||
         rpc_read(0, vgpuTypeIds, *vgpuCount * sizeof(nvmlVgpuTypeId_t)) < 0 ||
@@ -2591,10 +2408,9 @@ nvmlReturn_t nvmlDeviceGetSupportedVgpus(nvmlDevice_t device, unsigned int* vgpu
 nvmlReturn_t nvmlDeviceGetCreatableVgpus(nvmlDevice_t device, unsigned int* vgpuCount, nvmlVgpuTypeId_t* vgpuTypeIds)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetCreatableVgpus) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(0, &vgpuCount, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, vgpuCount, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, vgpuCount, sizeof(unsigned int)) < 0 ||
         rpc_read(0, vgpuTypeIds, *vgpuCount * sizeof(nvmlVgpuTypeId_t)) < 0 ||
@@ -2606,7 +2422,6 @@ nvmlReturn_t nvmlDeviceGetCreatableVgpus(nvmlDevice_t device, unsigned int* vgpu
 nvmlReturn_t nvmlVgpuTypeGetClass(nvmlVgpuTypeId_t vgpuTypeId, char* vgpuTypeClass, unsigned int* size)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlVgpuTypeGetClass) < 0 ||
         rpc_write(0, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -2620,10 +2435,9 @@ nvmlReturn_t nvmlVgpuTypeGetClass(nvmlVgpuTypeId_t vgpuTypeId, char* vgpuTypeCla
 nvmlReturn_t nvmlVgpuTypeGetName(nvmlVgpuTypeId_t vgpuTypeId, char* vgpuTypeName, unsigned int* size)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlVgpuTypeGetName) < 0 ||
         rpc_write(0, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
-        rpc_write(0, &size, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, size, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, size, sizeof(unsigned int)) < 0 ||
         rpc_read(0, vgpuTypeName, *size * sizeof(char)) < 0 ||
@@ -2635,7 +2449,6 @@ nvmlReturn_t nvmlVgpuTypeGetName(nvmlVgpuTypeId_t vgpuTypeId, char* vgpuTypeName
 nvmlReturn_t nvmlVgpuTypeGetGpuInstanceProfileId(nvmlVgpuTypeId_t vgpuTypeId, unsigned int* gpuInstanceProfileId)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlVgpuTypeGetGpuInstanceProfileId) < 0 ||
         rpc_write(0, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -2648,7 +2461,6 @@ nvmlReturn_t nvmlVgpuTypeGetGpuInstanceProfileId(nvmlVgpuTypeId_t vgpuTypeId, un
 nvmlReturn_t nvmlVgpuTypeGetDeviceID(nvmlVgpuTypeId_t vgpuTypeId, unsigned long long* deviceID, unsigned long long* subsystemID)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlVgpuTypeGetDeviceID) < 0 ||
         rpc_write(0, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -2662,7 +2474,6 @@ nvmlReturn_t nvmlVgpuTypeGetDeviceID(nvmlVgpuTypeId_t vgpuTypeId, unsigned long 
 nvmlReturn_t nvmlVgpuTypeGetFramebufferSize(nvmlVgpuTypeId_t vgpuTypeId, unsigned long long* fbSize)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlVgpuTypeGetFramebufferSize) < 0 ||
         rpc_write(0, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -2675,7 +2486,6 @@ nvmlReturn_t nvmlVgpuTypeGetFramebufferSize(nvmlVgpuTypeId_t vgpuTypeId, unsigne
 nvmlReturn_t nvmlVgpuTypeGetNumDisplayHeads(nvmlVgpuTypeId_t vgpuTypeId, unsigned int* numDisplayHeads)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlVgpuTypeGetNumDisplayHeads) < 0 ||
         rpc_write(0, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -2688,7 +2498,6 @@ nvmlReturn_t nvmlVgpuTypeGetNumDisplayHeads(nvmlVgpuTypeId_t vgpuTypeId, unsigne
 nvmlReturn_t nvmlVgpuTypeGetResolution(nvmlVgpuTypeId_t vgpuTypeId, unsigned int displayIndex, unsigned int* xdim, unsigned int* ydim)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlVgpuTypeGetResolution) < 0 ||
         rpc_write(0, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
         rpc_write(0, &displayIndex, sizeof(unsigned int)) < 0 ||
@@ -2703,7 +2512,6 @@ nvmlReturn_t nvmlVgpuTypeGetResolution(nvmlVgpuTypeId_t vgpuTypeId, unsigned int
 nvmlReturn_t nvmlVgpuTypeGetLicense(nvmlVgpuTypeId_t vgpuTypeId, char* vgpuTypeLicenseString, unsigned int size)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlVgpuTypeGetLicense) < 0 ||
         rpc_write(0, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
         rpc_write(0, &size, sizeof(unsigned int)) < 0 ||
@@ -2717,7 +2525,6 @@ nvmlReturn_t nvmlVgpuTypeGetLicense(nvmlVgpuTypeId_t vgpuTypeId, char* vgpuTypeL
 nvmlReturn_t nvmlVgpuTypeGetFrameRateLimit(nvmlVgpuTypeId_t vgpuTypeId, unsigned int* frameRateLimit)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlVgpuTypeGetFrameRateLimit) < 0 ||
         rpc_write(0, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -2730,7 +2537,6 @@ nvmlReturn_t nvmlVgpuTypeGetFrameRateLimit(nvmlVgpuTypeId_t vgpuTypeId, unsigned
 nvmlReturn_t nvmlVgpuTypeGetMaxInstances(nvmlDevice_t device, nvmlVgpuTypeId_t vgpuTypeId, unsigned int* vgpuInstanceCount)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlVgpuTypeGetMaxInstances) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
@@ -2744,7 +2550,6 @@ nvmlReturn_t nvmlVgpuTypeGetMaxInstances(nvmlDevice_t device, nvmlVgpuTypeId_t v
 nvmlReturn_t nvmlVgpuTypeGetMaxInstancesPerVm(nvmlVgpuTypeId_t vgpuTypeId, unsigned int* vgpuInstanceCountPerVm)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlVgpuTypeGetMaxInstancesPerVm) < 0 ||
         rpc_write(0, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -2757,10 +2562,9 @@ nvmlReturn_t nvmlVgpuTypeGetMaxInstancesPerVm(nvmlVgpuTypeId_t vgpuTypeId, unsig
 nvmlReturn_t nvmlDeviceGetActiveVgpus(nvmlDevice_t device, unsigned int* vgpuCount, nvmlVgpuInstance_t* vgpuInstances)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetActiveVgpus) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(0, &vgpuCount, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, vgpuCount, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, vgpuCount, sizeof(unsigned int)) < 0 ||
         rpc_read(0, vgpuInstances, *vgpuCount * sizeof(nvmlVgpuInstance_t)) < 0 ||
@@ -2772,7 +2576,6 @@ nvmlReturn_t nvmlDeviceGetActiveVgpus(nvmlDevice_t device, unsigned int* vgpuCou
 nvmlReturn_t nvmlVgpuInstanceGetVmID(nvmlVgpuInstance_t vgpuInstance, char* vmId, unsigned int size, nvmlVgpuVmIdType_t* vmIdType)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlVgpuInstanceGetVmID) < 0 ||
         rpc_write(0, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
         rpc_write(0, &size, sizeof(unsigned int)) < 0 ||
@@ -2787,7 +2590,6 @@ nvmlReturn_t nvmlVgpuInstanceGetVmID(nvmlVgpuInstance_t vgpuInstance, char* vmId
 nvmlReturn_t nvmlVgpuInstanceGetUUID(nvmlVgpuInstance_t vgpuInstance, char* uuid, unsigned int size)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlVgpuInstanceGetUUID) < 0 ||
         rpc_write(0, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
         rpc_write(0, &size, sizeof(unsigned int)) < 0 ||
@@ -2801,7 +2603,6 @@ nvmlReturn_t nvmlVgpuInstanceGetUUID(nvmlVgpuInstance_t vgpuInstance, char* uuid
 nvmlReturn_t nvmlVgpuInstanceGetVmDriverVersion(nvmlVgpuInstance_t vgpuInstance, char* version, unsigned int length)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlVgpuInstanceGetVmDriverVersion) < 0 ||
         rpc_write(0, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
         rpc_write(0, &length, sizeof(unsigned int)) < 0 ||
@@ -2815,7 +2616,6 @@ nvmlReturn_t nvmlVgpuInstanceGetVmDriverVersion(nvmlVgpuInstance_t vgpuInstance,
 nvmlReturn_t nvmlVgpuInstanceGetFbUsage(nvmlVgpuInstance_t vgpuInstance, unsigned long long* fbUsage)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlVgpuInstanceGetFbUsage) < 0 ||
         rpc_write(0, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -2828,7 +2628,6 @@ nvmlReturn_t nvmlVgpuInstanceGetFbUsage(nvmlVgpuInstance_t vgpuInstance, unsigne
 nvmlReturn_t nvmlVgpuInstanceGetLicenseStatus(nvmlVgpuInstance_t vgpuInstance, unsigned int* licensed)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlVgpuInstanceGetLicenseStatus) < 0 ||
         rpc_write(0, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -2841,7 +2640,6 @@ nvmlReturn_t nvmlVgpuInstanceGetLicenseStatus(nvmlVgpuInstance_t vgpuInstance, u
 nvmlReturn_t nvmlVgpuInstanceGetType(nvmlVgpuInstance_t vgpuInstance, nvmlVgpuTypeId_t* vgpuTypeId)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlVgpuInstanceGetType) < 0 ||
         rpc_write(0, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -2854,7 +2652,6 @@ nvmlReturn_t nvmlVgpuInstanceGetType(nvmlVgpuInstance_t vgpuInstance, nvmlVgpuTy
 nvmlReturn_t nvmlVgpuInstanceGetFrameRateLimit(nvmlVgpuInstance_t vgpuInstance, unsigned int* frameRateLimit)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlVgpuInstanceGetFrameRateLimit) < 0 ||
         rpc_write(0, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -2867,7 +2664,6 @@ nvmlReturn_t nvmlVgpuInstanceGetFrameRateLimit(nvmlVgpuInstance_t vgpuInstance, 
 nvmlReturn_t nvmlVgpuInstanceGetEccMode(nvmlVgpuInstance_t vgpuInstance, nvmlEnableState_t* eccMode)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlVgpuInstanceGetEccMode) < 0 ||
         rpc_write(0, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -2880,7 +2676,6 @@ nvmlReturn_t nvmlVgpuInstanceGetEccMode(nvmlVgpuInstance_t vgpuInstance, nvmlEna
 nvmlReturn_t nvmlVgpuInstanceGetEncoderCapacity(nvmlVgpuInstance_t vgpuInstance, unsigned int* encoderCapacity)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlVgpuInstanceGetEncoderCapacity) < 0 ||
         rpc_write(0, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -2893,7 +2688,6 @@ nvmlReturn_t nvmlVgpuInstanceGetEncoderCapacity(nvmlVgpuInstance_t vgpuInstance,
 nvmlReturn_t nvmlVgpuInstanceSetEncoderCapacity(nvmlVgpuInstance_t vgpuInstance, unsigned int encoderCapacity)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlVgpuInstanceSetEncoderCapacity) < 0 ||
         rpc_write(0, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
         rpc_write(0, &encoderCapacity, sizeof(unsigned int)) < 0 ||
@@ -2906,7 +2700,6 @@ nvmlReturn_t nvmlVgpuInstanceSetEncoderCapacity(nvmlVgpuInstance_t vgpuInstance,
 nvmlReturn_t nvmlVgpuInstanceGetEncoderStats(nvmlVgpuInstance_t vgpuInstance, unsigned int* sessionCount, unsigned int* averageFps, unsigned int* averageLatency)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlVgpuInstanceGetEncoderStats) < 0 ||
         rpc_write(0, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -2921,10 +2714,9 @@ nvmlReturn_t nvmlVgpuInstanceGetEncoderStats(nvmlVgpuInstance_t vgpuInstance, un
 nvmlReturn_t nvmlVgpuInstanceGetEncoderSessions(nvmlVgpuInstance_t vgpuInstance, unsigned int* sessionCount, nvmlEncoderSessionInfo_t* sessionInfo)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlVgpuInstanceGetEncoderSessions) < 0 ||
         rpc_write(0, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
-        rpc_write(0, &sessionCount, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, sessionCount, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, sessionCount, sizeof(unsigned int)) < 0 ||
         rpc_read(0, sessionInfo, *sessionCount * sizeof(nvmlEncoderSessionInfo_t)) < 0 ||
@@ -2936,7 +2728,6 @@ nvmlReturn_t nvmlVgpuInstanceGetEncoderSessions(nvmlVgpuInstance_t vgpuInstance,
 nvmlReturn_t nvmlVgpuInstanceGetFBCStats(nvmlVgpuInstance_t vgpuInstance, nvmlFBCStats_t* fbcStats)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlVgpuInstanceGetFBCStats) < 0 ||
         rpc_write(0, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -2949,10 +2740,9 @@ nvmlReturn_t nvmlVgpuInstanceGetFBCStats(nvmlVgpuInstance_t vgpuInstance, nvmlFB
 nvmlReturn_t nvmlVgpuInstanceGetFBCSessions(nvmlVgpuInstance_t vgpuInstance, unsigned int* sessionCount, nvmlFBCSessionInfo_t* sessionInfo)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlVgpuInstanceGetFBCSessions) < 0 ||
         rpc_write(0, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
-        rpc_write(0, &sessionCount, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, sessionCount, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, sessionCount, sizeof(unsigned int)) < 0 ||
         rpc_read(0, sessionInfo, *sessionCount * sizeof(nvmlFBCSessionInfo_t)) < 0 ||
@@ -2964,7 +2754,6 @@ nvmlReturn_t nvmlVgpuInstanceGetFBCSessions(nvmlVgpuInstance_t vgpuInstance, uns
 nvmlReturn_t nvmlVgpuInstanceGetGpuInstanceId(nvmlVgpuInstance_t vgpuInstance, unsigned int* gpuInstanceId)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlVgpuInstanceGetGpuInstanceId) < 0 ||
         rpc_write(0, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -2977,10 +2766,9 @@ nvmlReturn_t nvmlVgpuInstanceGetGpuInstanceId(nvmlVgpuInstance_t vgpuInstance, u
 nvmlReturn_t nvmlVgpuInstanceGetGpuPciId(nvmlVgpuInstance_t vgpuInstance, char* vgpuPciId, unsigned int* length)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlVgpuInstanceGetGpuPciId) < 0 ||
         rpc_write(0, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
-        rpc_write(0, &length, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, length, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, length, sizeof(unsigned int)) < 0 ||
         rpc_read(0, vgpuPciId, *length * sizeof(char)) < 0 ||
@@ -2992,7 +2780,6 @@ nvmlReturn_t nvmlVgpuInstanceGetGpuPciId(nvmlVgpuInstance_t vgpuInstance, char* 
 nvmlReturn_t nvmlVgpuTypeGetCapabilities(nvmlVgpuTypeId_t vgpuTypeId, nvmlVgpuCapability_t capability, unsigned int* capResult)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlVgpuTypeGetCapabilities) < 0 ||
         rpc_write(0, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
         rpc_write(0, &capability, sizeof(nvmlVgpuCapability_t)) < 0 ||
@@ -3006,10 +2793,9 @@ nvmlReturn_t nvmlVgpuTypeGetCapabilities(nvmlVgpuTypeId_t vgpuTypeId, nvmlVgpuCa
 nvmlReturn_t nvmlVgpuInstanceGetMetadata(nvmlVgpuInstance_t vgpuInstance, nvmlVgpuMetadata_t* vgpuMetadata, unsigned int* bufferSize)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlVgpuInstanceGetMetadata) < 0 ||
         rpc_write(0, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
-        rpc_write(0, &bufferSize, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, bufferSize, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, bufferSize, sizeof(unsigned int)) < 0 ||
         rpc_read(0, vgpuMetadata, *bufferSize * sizeof(nvmlVgpuMetadata_t)) < 0 ||
@@ -3021,10 +2807,9 @@ nvmlReturn_t nvmlVgpuInstanceGetMetadata(nvmlVgpuInstance_t vgpuInstance, nvmlVg
 nvmlReturn_t nvmlDeviceGetVgpuMetadata(nvmlDevice_t device, nvmlVgpuPgpuMetadata_t* pgpuMetadata, unsigned int* bufferSize)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetVgpuMetadata) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(0, &bufferSize, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, bufferSize, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, bufferSize, sizeof(unsigned int)) < 0 ||
         rpc_read(0, pgpuMetadata, *bufferSize * sizeof(nvmlVgpuPgpuMetadata_t)) < 0 ||
@@ -3036,9 +2821,8 @@ nvmlReturn_t nvmlDeviceGetVgpuMetadata(nvmlDevice_t device, nvmlVgpuPgpuMetadata
 nvmlReturn_t nvmlGetVgpuCompatibility(nvmlVgpuMetadata_t* vgpuMetadata, nvmlVgpuPgpuMetadata_t* pgpuMetadata, nvmlVgpuPgpuCompatibility_t* compatibilityInfo)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlGetVgpuCompatibility) < 0 ||
-        rpc_write(0, &vgpuMetadata, sizeof(nvmlVgpuMetadata_t)) < 0 ||
+        rpc_write(0, vgpuMetadata, sizeof(nvmlVgpuMetadata_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, vgpuMetadata, sizeof(nvmlVgpuMetadata_t)) < 0 ||
         rpc_read(0, pgpuMetadata, sizeof(nvmlVgpuPgpuMetadata_t)) < 0 ||
@@ -3051,10 +2835,9 @@ nvmlReturn_t nvmlGetVgpuCompatibility(nvmlVgpuMetadata_t* vgpuMetadata, nvmlVgpu
 nvmlReturn_t nvmlDeviceGetPgpuMetadataString(nvmlDevice_t device, char* pgpuMetadata, unsigned int* bufferSize)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetPgpuMetadataString) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
-        rpc_write(0, &bufferSize, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, bufferSize, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, bufferSize, sizeof(unsigned int)) < 0 ||
         rpc_read(0, pgpuMetadata, *bufferSize * sizeof(char)) < 0 ||
@@ -3066,7 +2849,6 @@ nvmlReturn_t nvmlDeviceGetPgpuMetadataString(nvmlDevice_t device, char* pgpuMeta
 nvmlReturn_t nvmlDeviceGetVgpuSchedulerLog(nvmlDevice_t device, nvmlVgpuSchedulerLog_t* pSchedulerLog)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetVgpuSchedulerLog) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -3079,7 +2861,6 @@ nvmlReturn_t nvmlDeviceGetVgpuSchedulerLog(nvmlDevice_t device, nvmlVgpuSchedule
 nvmlReturn_t nvmlDeviceGetVgpuSchedulerState(nvmlDevice_t device, nvmlVgpuSchedulerGetState_t* pSchedulerState)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetVgpuSchedulerState) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -3092,7 +2873,6 @@ nvmlReturn_t nvmlDeviceGetVgpuSchedulerState(nvmlDevice_t device, nvmlVgpuSchedu
 nvmlReturn_t nvmlDeviceGetVgpuSchedulerCapabilities(nvmlDevice_t device, nvmlVgpuSchedulerCapabilities_t* pCapabilities)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetVgpuSchedulerCapabilities) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -3105,7 +2885,6 @@ nvmlReturn_t nvmlDeviceGetVgpuSchedulerCapabilities(nvmlDevice_t device, nvmlVgp
 nvmlReturn_t nvmlGetVgpuVersion(nvmlVgpuVersion_t* supported, nvmlVgpuVersion_t* current)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlGetVgpuVersion) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, supported, sizeof(nvmlVgpuVersion_t)) < 0 ||
@@ -3118,7 +2897,6 @@ nvmlReturn_t nvmlGetVgpuVersion(nvmlVgpuVersion_t* supported, nvmlVgpuVersion_t*
 nvmlReturn_t nvmlSetVgpuVersion(nvmlVgpuVersion_t* vgpuVersion)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlSetVgpuVersion) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, vgpuVersion, sizeof(nvmlVgpuVersion_t)) < 0 ||
@@ -3130,12 +2908,11 @@ nvmlReturn_t nvmlSetVgpuVersion(nvmlVgpuVersion_t* vgpuVersion)
 nvmlReturn_t nvmlDeviceGetVgpuUtilization(nvmlDevice_t device, unsigned long long lastSeenTimeStamp, nvmlValueType_t* sampleValType, unsigned int* vgpuInstanceSamplesCount, nvmlVgpuInstanceUtilizationSample_t* utilizationSamples)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetVgpuUtilization) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &lastSeenTimeStamp, sizeof(unsigned long long)) < 0 ||
-        rpc_write(0, &sampleValType, sizeof(nvmlValueType_t)) < 0 ||
-        rpc_write(0, &vgpuInstanceSamplesCount, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, sampleValType, sizeof(nvmlValueType_t)) < 0 ||
+        rpc_write(0, vgpuInstanceSamplesCount, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, sampleValType, sizeof(nvmlValueType_t)) < 0 ||
         rpc_read(0, vgpuInstanceSamplesCount, sizeof(unsigned int)) < 0 ||
@@ -3148,11 +2925,10 @@ nvmlReturn_t nvmlDeviceGetVgpuUtilization(nvmlDevice_t device, unsigned long lon
 nvmlReturn_t nvmlDeviceGetVgpuProcessUtilization(nvmlDevice_t device, unsigned long long lastSeenTimeStamp, unsigned int* vgpuProcessSamplesCount, nvmlVgpuProcessUtilizationSample_t* utilizationSamples)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetVgpuProcessUtilization) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &lastSeenTimeStamp, sizeof(unsigned long long)) < 0 ||
-        rpc_write(0, &vgpuProcessSamplesCount, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, vgpuProcessSamplesCount, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, vgpuProcessSamplesCount, sizeof(unsigned int)) < 0 ||
         rpc_read(0, utilizationSamples, *vgpuProcessSamplesCount * sizeof(nvmlVgpuProcessUtilizationSample_t)) < 0 ||
@@ -3164,7 +2940,6 @@ nvmlReturn_t nvmlDeviceGetVgpuProcessUtilization(nvmlDevice_t device, unsigned l
 nvmlReturn_t nvmlVgpuInstanceGetAccountingMode(nvmlVgpuInstance_t vgpuInstance, nvmlEnableState_t* mode)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlVgpuInstanceGetAccountingMode) < 0 ||
         rpc_write(0, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -3177,10 +2952,9 @@ nvmlReturn_t nvmlVgpuInstanceGetAccountingMode(nvmlVgpuInstance_t vgpuInstance, 
 nvmlReturn_t nvmlVgpuInstanceGetAccountingPids(nvmlVgpuInstance_t vgpuInstance, unsigned int* count, unsigned int* pids)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlVgpuInstanceGetAccountingPids) < 0 ||
         rpc_write(0, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
-        rpc_write(0, &count, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, count, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, count, sizeof(unsigned int)) < 0 ||
         rpc_read(0, pids, *count * sizeof(unsigned int)) < 0 ||
@@ -3192,7 +2966,6 @@ nvmlReturn_t nvmlVgpuInstanceGetAccountingPids(nvmlVgpuInstance_t vgpuInstance, 
 nvmlReturn_t nvmlVgpuInstanceGetAccountingStats(nvmlVgpuInstance_t vgpuInstance, unsigned int pid, nvmlAccountingStats_t* stats)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlVgpuInstanceGetAccountingStats) < 0 ||
         rpc_write(0, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
         rpc_write(0, &pid, sizeof(unsigned int)) < 0 ||
@@ -3206,7 +2979,6 @@ nvmlReturn_t nvmlVgpuInstanceGetAccountingStats(nvmlVgpuInstance_t vgpuInstance,
 nvmlReturn_t nvmlVgpuInstanceClearAccountingPids(nvmlVgpuInstance_t vgpuInstance)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlVgpuInstanceClearAccountingPids) < 0 ||
         rpc_write(0, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -3218,7 +2990,6 @@ nvmlReturn_t nvmlVgpuInstanceClearAccountingPids(nvmlVgpuInstance_t vgpuInstance
 nvmlReturn_t nvmlVgpuInstanceGetLicenseInfo_v2(nvmlVgpuInstance_t vgpuInstance, nvmlVgpuLicenseInfo_t* licenseInfo)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlVgpuInstanceGetLicenseInfo_v2) < 0 ||
         rpc_write(0, &vgpuInstance, sizeof(nvmlVgpuInstance_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -3231,7 +3002,6 @@ nvmlReturn_t nvmlVgpuInstanceGetLicenseInfo_v2(nvmlVgpuInstance_t vgpuInstance, 
 nvmlReturn_t nvmlGetExcludedDeviceCount(unsigned int* deviceCount)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlGetExcludedDeviceCount) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, deviceCount, sizeof(unsigned int)) < 0 ||
@@ -3243,7 +3013,6 @@ nvmlReturn_t nvmlGetExcludedDeviceCount(unsigned int* deviceCount)
 nvmlReturn_t nvmlGetExcludedDeviceInfoByIndex(unsigned int index, nvmlExcludedDeviceInfo_t* info)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlGetExcludedDeviceInfoByIndex) < 0 ||
         rpc_write(0, &index, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -3256,7 +3025,6 @@ nvmlReturn_t nvmlGetExcludedDeviceInfoByIndex(unsigned int index, nvmlExcludedDe
 nvmlReturn_t nvmlDeviceSetMigMode(nvmlDevice_t device, unsigned int mode, nvmlReturn_t* activationStatus)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceSetMigMode) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &mode, sizeof(unsigned int)) < 0 ||
@@ -3270,7 +3038,6 @@ nvmlReturn_t nvmlDeviceSetMigMode(nvmlDevice_t device, unsigned int mode, nvmlRe
 nvmlReturn_t nvmlDeviceGetMigMode(nvmlDevice_t device, unsigned int* currentMode, unsigned int* pendingMode)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetMigMode) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -3284,7 +3051,6 @@ nvmlReturn_t nvmlDeviceGetMigMode(nvmlDevice_t device, unsigned int* currentMode
 nvmlReturn_t nvmlDeviceGetGpuInstanceProfileInfo(nvmlDevice_t device, unsigned int profile, nvmlGpuInstanceProfileInfo_t* info)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetGpuInstanceProfileInfo) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &profile, sizeof(unsigned int)) < 0 ||
@@ -3298,7 +3064,6 @@ nvmlReturn_t nvmlDeviceGetGpuInstanceProfileInfo(nvmlDevice_t device, unsigned i
 nvmlReturn_t nvmlDeviceGetGpuInstanceProfileInfoV(nvmlDevice_t device, unsigned int profile, nvmlGpuInstanceProfileInfo_v2_t* info)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetGpuInstanceProfileInfoV) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &profile, sizeof(unsigned int)) < 0 ||
@@ -3312,11 +3077,10 @@ nvmlReturn_t nvmlDeviceGetGpuInstanceProfileInfoV(nvmlDevice_t device, unsigned 
 nvmlReturn_t nvmlDeviceGetGpuInstancePossiblePlacements_v2(nvmlDevice_t device, unsigned int profileId, nvmlGpuInstancePlacement_t* placements, unsigned int* count)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetGpuInstancePossiblePlacements_v2) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &profileId, sizeof(unsigned int)) < 0 ||
-        rpc_write(0, &count, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, count, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, count, sizeof(unsigned int)) < 0 ||
         rpc_read(0, placements, *count * sizeof(nvmlGpuInstancePlacement_t)) < 0 ||
@@ -3328,7 +3092,6 @@ nvmlReturn_t nvmlDeviceGetGpuInstancePossiblePlacements_v2(nvmlDevice_t device, 
 nvmlReturn_t nvmlDeviceGetGpuInstanceRemainingCapacity(nvmlDevice_t device, unsigned int profileId, unsigned int* count)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetGpuInstanceRemainingCapacity) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &profileId, sizeof(unsigned int)) < 0 ||
@@ -3342,7 +3105,6 @@ nvmlReturn_t nvmlDeviceGetGpuInstanceRemainingCapacity(nvmlDevice_t device, unsi
 nvmlReturn_t nvmlDeviceCreateGpuInstance(nvmlDevice_t device, unsigned int profileId, nvmlGpuInstance_t* gpuInstance)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceCreateGpuInstance) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &profileId, sizeof(unsigned int)) < 0 ||
@@ -3356,7 +3118,6 @@ nvmlReturn_t nvmlDeviceCreateGpuInstance(nvmlDevice_t device, unsigned int profi
 nvmlReturn_t nvmlGpuInstanceDestroy(nvmlGpuInstance_t gpuInstance)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlGpuInstanceDestroy) < 0 ||
         rpc_write(0, &gpuInstance, sizeof(nvmlGpuInstance_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -3368,11 +3129,10 @@ nvmlReturn_t nvmlGpuInstanceDestroy(nvmlGpuInstance_t gpuInstance)
 nvmlReturn_t nvmlDeviceGetGpuInstances(nvmlDevice_t device, unsigned int profileId, nvmlGpuInstance_t* gpuInstances, unsigned int* count)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetGpuInstances) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &profileId, sizeof(unsigned int)) < 0 ||
-        rpc_write(0, &count, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, count, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, count, sizeof(unsigned int)) < 0 ||
         rpc_read(0, gpuInstances, *count * sizeof(nvmlGpuInstance_t)) < 0 ||
@@ -3384,7 +3144,6 @@ nvmlReturn_t nvmlDeviceGetGpuInstances(nvmlDevice_t device, unsigned int profile
 nvmlReturn_t nvmlDeviceGetGpuInstanceById(nvmlDevice_t device, unsigned int id, nvmlGpuInstance_t* gpuInstance)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetGpuInstanceById) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &id, sizeof(unsigned int)) < 0 ||
@@ -3398,7 +3157,6 @@ nvmlReturn_t nvmlDeviceGetGpuInstanceById(nvmlDevice_t device, unsigned int id, 
 nvmlReturn_t nvmlGpuInstanceGetInfo(nvmlGpuInstance_t gpuInstance, nvmlGpuInstanceInfo_t* info)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlGpuInstanceGetInfo) < 0 ||
         rpc_write(0, &gpuInstance, sizeof(nvmlGpuInstance_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -3411,7 +3169,6 @@ nvmlReturn_t nvmlGpuInstanceGetInfo(nvmlGpuInstance_t gpuInstance, nvmlGpuInstan
 nvmlReturn_t nvmlGpuInstanceGetComputeInstanceProfileInfo(nvmlGpuInstance_t gpuInstance, unsigned int profile, unsigned int engProfile, nvmlComputeInstanceProfileInfo_t* info)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlGpuInstanceGetComputeInstanceProfileInfo) < 0 ||
         rpc_write(0, &gpuInstance, sizeof(nvmlGpuInstance_t)) < 0 ||
         rpc_write(0, &profile, sizeof(unsigned int)) < 0 ||
@@ -3426,7 +3183,6 @@ nvmlReturn_t nvmlGpuInstanceGetComputeInstanceProfileInfo(nvmlGpuInstance_t gpuI
 nvmlReturn_t nvmlGpuInstanceGetComputeInstanceProfileInfoV(nvmlGpuInstance_t gpuInstance, unsigned int profile, unsigned int engProfile, nvmlComputeInstanceProfileInfo_v2_t* info)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlGpuInstanceGetComputeInstanceProfileInfoV) < 0 ||
         rpc_write(0, &gpuInstance, sizeof(nvmlGpuInstance_t)) < 0 ||
         rpc_write(0, &profile, sizeof(unsigned int)) < 0 ||
@@ -3441,7 +3197,6 @@ nvmlReturn_t nvmlGpuInstanceGetComputeInstanceProfileInfoV(nvmlGpuInstance_t gpu
 nvmlReturn_t nvmlGpuInstanceGetComputeInstanceRemainingCapacity(nvmlGpuInstance_t gpuInstance, unsigned int profileId, unsigned int* count)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlGpuInstanceGetComputeInstanceRemainingCapacity) < 0 ||
         rpc_write(0, &gpuInstance, sizeof(nvmlGpuInstance_t)) < 0 ||
         rpc_write(0, &profileId, sizeof(unsigned int)) < 0 ||
@@ -3455,11 +3210,10 @@ nvmlReturn_t nvmlGpuInstanceGetComputeInstanceRemainingCapacity(nvmlGpuInstance_
 nvmlReturn_t nvmlGpuInstanceGetComputeInstancePossiblePlacements(nvmlGpuInstance_t gpuInstance, unsigned int profileId, nvmlComputeInstancePlacement_t* placements, unsigned int* count)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlGpuInstanceGetComputeInstancePossiblePlacements) < 0 ||
         rpc_write(0, &gpuInstance, sizeof(nvmlGpuInstance_t)) < 0 ||
         rpc_write(0, &profileId, sizeof(unsigned int)) < 0 ||
-        rpc_write(0, &count, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, count, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, count, sizeof(unsigned int)) < 0 ||
         rpc_read(0, placements, *count * sizeof(nvmlComputeInstancePlacement_t)) < 0 ||
@@ -3471,7 +3225,6 @@ nvmlReturn_t nvmlGpuInstanceGetComputeInstancePossiblePlacements(nvmlGpuInstance
 nvmlReturn_t nvmlGpuInstanceCreateComputeInstance(nvmlGpuInstance_t gpuInstance, unsigned int profileId, nvmlComputeInstance_t* computeInstance)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlGpuInstanceCreateComputeInstance) < 0 ||
         rpc_write(0, &gpuInstance, sizeof(nvmlGpuInstance_t)) < 0 ||
         rpc_write(0, &profileId, sizeof(unsigned int)) < 0 ||
@@ -3485,7 +3238,6 @@ nvmlReturn_t nvmlGpuInstanceCreateComputeInstance(nvmlGpuInstance_t gpuInstance,
 nvmlReturn_t nvmlComputeInstanceDestroy(nvmlComputeInstance_t computeInstance)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlComputeInstanceDestroy) < 0 ||
         rpc_write(0, &computeInstance, sizeof(nvmlComputeInstance_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -3497,11 +3249,10 @@ nvmlReturn_t nvmlComputeInstanceDestroy(nvmlComputeInstance_t computeInstance)
 nvmlReturn_t nvmlGpuInstanceGetComputeInstances(nvmlGpuInstance_t gpuInstance, unsigned int profileId, nvmlComputeInstance_t* computeInstances, unsigned int* count)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlGpuInstanceGetComputeInstances) < 0 ||
         rpc_write(0, &gpuInstance, sizeof(nvmlGpuInstance_t)) < 0 ||
         rpc_write(0, &profileId, sizeof(unsigned int)) < 0 ||
-        rpc_write(0, &count, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, count, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, count, sizeof(unsigned int)) < 0 ||
         rpc_read(0, computeInstances, *count * sizeof(nvmlComputeInstance_t)) < 0 ||
@@ -3513,7 +3264,6 @@ nvmlReturn_t nvmlGpuInstanceGetComputeInstances(nvmlGpuInstance_t gpuInstance, u
 nvmlReturn_t nvmlGpuInstanceGetComputeInstanceById(nvmlGpuInstance_t gpuInstance, unsigned int id, nvmlComputeInstance_t* computeInstance)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlGpuInstanceGetComputeInstanceById) < 0 ||
         rpc_write(0, &gpuInstance, sizeof(nvmlGpuInstance_t)) < 0 ||
         rpc_write(0, &id, sizeof(unsigned int)) < 0 ||
@@ -3527,7 +3277,6 @@ nvmlReturn_t nvmlGpuInstanceGetComputeInstanceById(nvmlGpuInstance_t gpuInstance
 nvmlReturn_t nvmlComputeInstanceGetInfo_v2(nvmlComputeInstance_t computeInstance, nvmlComputeInstanceInfo_t* info)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlComputeInstanceGetInfo_v2) < 0 ||
         rpc_write(0, &computeInstance, sizeof(nvmlComputeInstance_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -3540,7 +3289,6 @@ nvmlReturn_t nvmlComputeInstanceGetInfo_v2(nvmlComputeInstance_t computeInstance
 nvmlReturn_t nvmlDeviceIsMigDeviceHandle(nvmlDevice_t device, unsigned int* isMigDevice)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceIsMigDeviceHandle) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -3553,7 +3301,6 @@ nvmlReturn_t nvmlDeviceIsMigDeviceHandle(nvmlDevice_t device, unsigned int* isMi
 nvmlReturn_t nvmlDeviceGetGpuInstanceId(nvmlDevice_t device, unsigned int* id)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetGpuInstanceId) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -3566,7 +3313,6 @@ nvmlReturn_t nvmlDeviceGetGpuInstanceId(nvmlDevice_t device, unsigned int* id)
 nvmlReturn_t nvmlDeviceGetComputeInstanceId(nvmlDevice_t device, unsigned int* id)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetComputeInstanceId) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -3579,7 +3325,6 @@ nvmlReturn_t nvmlDeviceGetComputeInstanceId(nvmlDevice_t device, unsigned int* i
 nvmlReturn_t nvmlDeviceGetMaxMigDeviceCount(nvmlDevice_t device, unsigned int* count)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetMaxMigDeviceCount) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -3592,7 +3337,6 @@ nvmlReturn_t nvmlDeviceGetMaxMigDeviceCount(nvmlDevice_t device, unsigned int* c
 nvmlReturn_t nvmlDeviceGetMigDeviceHandleByIndex(nvmlDevice_t device, unsigned int index, nvmlDevice_t* migDevice)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetMigDeviceHandleByIndex) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &index, sizeof(unsigned int)) < 0 ||
@@ -3606,7 +3350,6 @@ nvmlReturn_t nvmlDeviceGetMigDeviceHandleByIndex(nvmlDevice_t device, unsigned i
 nvmlReturn_t nvmlDeviceGetDeviceHandleFromMigDeviceHandle(nvmlDevice_t migDevice, nvmlDevice_t* device)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetDeviceHandleFromMigDeviceHandle) < 0 ||
         rpc_write(0, &migDevice, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -3619,7 +3362,6 @@ nvmlReturn_t nvmlDeviceGetDeviceHandleFromMigDeviceHandle(nvmlDevice_t migDevice
 nvmlReturn_t nvmlDeviceGetBusType(nvmlDevice_t device, nvmlBusType_t* type)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetBusType) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -3632,7 +3374,6 @@ nvmlReturn_t nvmlDeviceGetBusType(nvmlDevice_t device, nvmlBusType_t* type)
 nvmlReturn_t nvmlDeviceGetDynamicPstatesInfo(nvmlDevice_t device, nvmlGpuDynamicPstatesInfo_t* pDynamicPstatesInfo)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetDynamicPstatesInfo) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -3645,7 +3386,6 @@ nvmlReturn_t nvmlDeviceGetDynamicPstatesInfo(nvmlDevice_t device, nvmlGpuDynamic
 nvmlReturn_t nvmlDeviceSetFanSpeed_v2(nvmlDevice_t device, unsigned int fan, unsigned int speed)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceSetFanSpeed_v2) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &fan, sizeof(unsigned int)) < 0 ||
@@ -3659,7 +3399,6 @@ nvmlReturn_t nvmlDeviceSetFanSpeed_v2(nvmlDevice_t device, unsigned int fan, uns
 nvmlReturn_t nvmlDeviceGetGpcClkVfOffset(nvmlDevice_t device, int* offset)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetGpcClkVfOffset) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -3672,7 +3411,6 @@ nvmlReturn_t nvmlDeviceGetGpcClkVfOffset(nvmlDevice_t device, int* offset)
 nvmlReturn_t nvmlDeviceSetGpcClkVfOffset(nvmlDevice_t device, int offset)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceSetGpcClkVfOffset) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &offset, sizeof(int)) < 0 ||
@@ -3685,7 +3423,6 @@ nvmlReturn_t nvmlDeviceSetGpcClkVfOffset(nvmlDevice_t device, int offset)
 nvmlReturn_t nvmlDeviceGetMemClkVfOffset(nvmlDevice_t device, int* offset)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetMemClkVfOffset) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -3698,7 +3435,6 @@ nvmlReturn_t nvmlDeviceGetMemClkVfOffset(nvmlDevice_t device, int* offset)
 nvmlReturn_t nvmlDeviceSetMemClkVfOffset(nvmlDevice_t device, int offset)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceSetMemClkVfOffset) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &offset, sizeof(int)) < 0 ||
@@ -3711,7 +3447,6 @@ nvmlReturn_t nvmlDeviceSetMemClkVfOffset(nvmlDevice_t device, int offset)
 nvmlReturn_t nvmlDeviceGetMinMaxClockOfPState(nvmlDevice_t device, nvmlClockType_t type, nvmlPstates_t pstate, unsigned int* minClockMHz, unsigned int* maxClockMHz)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetMinMaxClockOfPState) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &type, sizeof(nvmlClockType_t)) < 0 ||
@@ -3727,7 +3462,6 @@ nvmlReturn_t nvmlDeviceGetMinMaxClockOfPState(nvmlDevice_t device, nvmlClockType
 nvmlReturn_t nvmlDeviceGetSupportedPerformanceStates(nvmlDevice_t device, nvmlPstates_t* pstates, unsigned int size)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetSupportedPerformanceStates) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &size, sizeof(unsigned int)) < 0 ||
@@ -3741,7 +3475,6 @@ nvmlReturn_t nvmlDeviceGetSupportedPerformanceStates(nvmlDevice_t device, nvmlPs
 nvmlReturn_t nvmlDeviceGetGpcClkMinMaxVfOffset(nvmlDevice_t device, int* minOffset, int* maxOffset)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetGpcClkMinMaxVfOffset) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -3755,7 +3488,6 @@ nvmlReturn_t nvmlDeviceGetGpcClkMinMaxVfOffset(nvmlDevice_t device, int* minOffs
 nvmlReturn_t nvmlDeviceGetMemClkMinMaxVfOffset(nvmlDevice_t device, int* minOffset, int* maxOffset)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetMemClkMinMaxVfOffset) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -3769,7 +3501,6 @@ nvmlReturn_t nvmlDeviceGetMemClkMinMaxVfOffset(nvmlDevice_t device, int* minOffs
 nvmlReturn_t nvmlDeviceGetGpuFabricInfo(nvmlDevice_t device, nvmlGpuFabricInfo_t* gpuFabricInfo)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceGetGpuFabricInfo) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -3782,7 +3513,6 @@ nvmlReturn_t nvmlDeviceGetGpuFabricInfo(nvmlDevice_t device, nvmlGpuFabricInfo_t
 nvmlReturn_t nvmlGpmMetricsGet(nvmlGpmMetricsGet_t* metricsGet)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlGpmMetricsGet) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, metricsGet, sizeof(nvmlGpmMetricsGet_t)) < 0 ||
@@ -3794,10 +3524,9 @@ nvmlReturn_t nvmlGpmMetricsGet(nvmlGpmMetricsGet_t* metricsGet)
 nvmlReturn_t nvmlGpmSampleFree(nvmlGpmSample_t gpmSample)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlGpmSampleFree) < 0 ||
+        rpc_write(0, &gpmSample, sizeof(nvmlGpmSample_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, gpmSample, sizeof(nvmlGpmSample_t)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return NVML_ERROR_GPU_IS_LOST;
     return return_value;
@@ -3806,7 +3535,6 @@ nvmlReturn_t nvmlGpmSampleFree(nvmlGpmSample_t gpmSample)
 nvmlReturn_t nvmlGpmSampleAlloc(nvmlGpmSample_t* gpmSample)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlGpmSampleAlloc) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, gpmSample, sizeof(nvmlGpmSample_t)) < 0 ||
@@ -3818,11 +3546,10 @@ nvmlReturn_t nvmlGpmSampleAlloc(nvmlGpmSample_t* gpmSample)
 nvmlReturn_t nvmlGpmSampleGet(nvmlDevice_t device, nvmlGpmSample_t gpmSample)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlGpmSampleGet) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
+        rpc_write(0, &gpmSample, sizeof(nvmlGpmSample_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, gpmSample, sizeof(nvmlGpmSample_t)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return NVML_ERROR_GPU_IS_LOST;
     return return_value;
@@ -3831,12 +3558,11 @@ nvmlReturn_t nvmlGpmSampleGet(nvmlDevice_t device, nvmlGpmSample_t gpmSample)
 nvmlReturn_t nvmlGpmMigSampleGet(nvmlDevice_t device, unsigned int gpuInstanceId, nvmlGpmSample_t gpmSample)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlGpmMigSampleGet) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_write(0, &gpuInstanceId, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, &gpmSample, sizeof(nvmlGpmSample_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, gpmSample, sizeof(nvmlGpmSample_t)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return NVML_ERROR_GPU_IS_LOST;
     return return_value;
@@ -3845,7 +3571,6 @@ nvmlReturn_t nvmlGpmMigSampleGet(nvmlDevice_t device, unsigned int gpuInstanceId
 nvmlReturn_t nvmlGpmQueryDeviceSupport(nvmlDevice_t device, nvmlGpmSupport_t* gpmSupport)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlGpmQueryDeviceSupport) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -3858,7 +3583,6 @@ nvmlReturn_t nvmlGpmQueryDeviceSupport(nvmlDevice_t device, nvmlGpmSupport_t* gp
 nvmlReturn_t nvmlDeviceSetNvLinkDeviceLowPowerThreshold(nvmlDevice_t device, nvmlNvLinkPowerThres_t* info)
 {
     nvmlReturn_t return_value;
-
     if (rpc_start_request(0, RPC_nvmlDeviceSetNvLinkDeviceLowPowerThreshold) < 0 ||
         rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -3871,7 +3595,6 @@ nvmlReturn_t nvmlDeviceSetNvLinkDeviceLowPowerThreshold(nvmlDevice_t device, nvm
 CUresult cuInit(unsigned int Flags)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuInit) < 0 ||
         rpc_write(0, &Flags, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -3883,7 +3606,6 @@ CUresult cuInit(unsigned int Flags)
 CUresult cuDriverGetVersion(int* driverVersion)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuDriverGetVersion) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, driverVersion, sizeof(int)) < 0 ||
@@ -3895,7 +3617,6 @@ CUresult cuDriverGetVersion(int* driverVersion)
 CUresult cuDeviceGet(CUdevice* device, int ordinal)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuDeviceGet) < 0 ||
         rpc_write(0, &ordinal, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -3908,7 +3629,6 @@ CUresult cuDeviceGet(CUdevice* device, int ordinal)
 CUresult cuDeviceGetCount(int* count)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuDeviceGetCount) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, count, sizeof(int)) < 0 ||
@@ -3920,7 +3640,6 @@ CUresult cuDeviceGetCount(int* count)
 CUresult cuDeviceGetName(char* name, int len, CUdevice dev)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuDeviceGetName) < 0 ||
         rpc_write(0, &len, sizeof(int)) < 0 ||
         rpc_write(0, &dev, sizeof(CUdevice)) < 0 ||
@@ -3934,7 +3653,6 @@ CUresult cuDeviceGetName(char* name, int len, CUdevice dev)
 CUresult cuDeviceGetUuid(CUuuid* uuid, CUdevice dev)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuDeviceGetUuid) < 0 ||
         rpc_write(0, &dev, sizeof(CUdevice)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -3947,7 +3665,6 @@ CUresult cuDeviceGetUuid(CUuuid* uuid, CUdevice dev)
 CUresult cuDeviceGetUuid_v2(CUuuid* uuid, CUdevice dev)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuDeviceGetUuid_v2) < 0 ||
         rpc_write(0, &dev, sizeof(CUdevice)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -3960,12 +3677,11 @@ CUresult cuDeviceGetUuid_v2(CUuuid* uuid, CUdevice dev)
 CUresult cuDeviceGetLuid(char* luid, unsigned int* deviceNodeMask, CUdevice dev)
 {
     CUresult return_value;
-
-    std::size_t luid_len = std::strlen(luid) + 1;
+    std::size_t luid_len;
     if (rpc_start_request(0, RPC_cuDeviceGetLuid) < 0 ||
         rpc_write(0, &dev, sizeof(CUdevice)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, &luid_len, sizeof(luid_len)) < 0 ||
+        rpc_read(0, &luid_len, sizeof(std::size_t)) < 0 ||
         rpc_read(0, luid, luid_len) < 0 ||
         rpc_read(0, deviceNodeMask, sizeof(unsigned int)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -3976,7 +3692,6 @@ CUresult cuDeviceGetLuid(char* luid, unsigned int* deviceNodeMask, CUdevice dev)
 CUresult cuDeviceTotalMem_v2(size_t* bytes, CUdevice dev)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuDeviceTotalMem_v2) < 0 ||
         rpc_write(0, &dev, sizeof(CUdevice)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -3989,7 +3704,6 @@ CUresult cuDeviceTotalMem_v2(size_t* bytes, CUdevice dev)
 CUresult cuDeviceGetTexture1DLinearMaxWidth(size_t* maxWidthInElements, CUarray_format format, unsigned numChannels, CUdevice dev)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuDeviceGetTexture1DLinearMaxWidth) < 0 ||
         rpc_write(0, &format, sizeof(CUarray_format)) < 0 ||
         rpc_write(0, &numChannels, sizeof(unsigned)) < 0 ||
@@ -4004,7 +3718,6 @@ CUresult cuDeviceGetTexture1DLinearMaxWidth(size_t* maxWidthInElements, CUarray_
 CUresult cuDeviceGetAttribute(int* pi, CUdevice_attribute attrib, CUdevice dev)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuDeviceGetAttribute) < 0 ||
         rpc_write(0, &attrib, sizeof(CUdevice_attribute)) < 0 ||
         rpc_write(0, &dev, sizeof(CUdevice)) < 0 ||
@@ -4018,7 +3731,6 @@ CUresult cuDeviceGetAttribute(int* pi, CUdevice_attribute attrib, CUdevice dev)
 CUresult cuDeviceSetMemPool(CUdevice dev, CUmemoryPool pool)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuDeviceSetMemPool) < 0 ||
         rpc_write(0, &dev, sizeof(CUdevice)) < 0 ||
         rpc_write(0, &pool, sizeof(CUmemoryPool)) < 0 ||
@@ -4031,7 +3743,6 @@ CUresult cuDeviceSetMemPool(CUdevice dev, CUmemoryPool pool)
 CUresult cuDeviceGetMemPool(CUmemoryPool* pool, CUdevice dev)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuDeviceGetMemPool) < 0 ||
         rpc_write(0, &dev, sizeof(CUdevice)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -4044,7 +3755,6 @@ CUresult cuDeviceGetMemPool(CUmemoryPool* pool, CUdevice dev)
 CUresult cuDeviceGetDefaultMemPool(CUmemoryPool* pool_out, CUdevice dev)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuDeviceGetDefaultMemPool) < 0 ||
         rpc_write(0, &dev, sizeof(CUdevice)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -4057,7 +3767,6 @@ CUresult cuDeviceGetDefaultMemPool(CUmemoryPool* pool_out, CUdevice dev)
 CUresult cuDeviceGetExecAffinitySupport(int* pi, CUexecAffinityType type, CUdevice dev)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuDeviceGetExecAffinitySupport) < 0 ||
         rpc_write(0, &type, sizeof(CUexecAffinityType)) < 0 ||
         rpc_write(0, &dev, sizeof(CUdevice)) < 0 ||
@@ -4071,7 +3780,6 @@ CUresult cuDeviceGetExecAffinitySupport(int* pi, CUexecAffinityType type, CUdevi
 CUresult cuFlushGPUDirectRDMAWrites(CUflushGPUDirectRDMAWritesTarget target, CUflushGPUDirectRDMAWritesScope scope)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuFlushGPUDirectRDMAWrites) < 0 ||
         rpc_write(0, &target, sizeof(CUflushGPUDirectRDMAWritesTarget)) < 0 ||
         rpc_write(0, &scope, sizeof(CUflushGPUDirectRDMAWritesScope)) < 0 ||
@@ -4084,7 +3792,6 @@ CUresult cuFlushGPUDirectRDMAWrites(CUflushGPUDirectRDMAWritesTarget target, CUf
 CUresult cuDeviceGetProperties(CUdevprop* prop, CUdevice dev)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuDeviceGetProperties) < 0 ||
         rpc_write(0, &dev, sizeof(CUdevice)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -4097,7 +3804,6 @@ CUresult cuDeviceGetProperties(CUdevprop* prop, CUdevice dev)
 CUresult cuDeviceComputeCapability(int* major, int* minor, CUdevice dev)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuDeviceComputeCapability) < 0 ||
         rpc_write(0, &dev, sizeof(CUdevice)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -4111,7 +3817,6 @@ CUresult cuDeviceComputeCapability(int* major, int* minor, CUdevice dev)
 CUresult cuDevicePrimaryCtxRetain(CUcontext* pctx, CUdevice dev)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuDevicePrimaryCtxRetain) < 0 ||
         rpc_write(0, &dev, sizeof(CUdevice)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -4124,7 +3829,6 @@ CUresult cuDevicePrimaryCtxRetain(CUcontext* pctx, CUdevice dev)
 CUresult cuDevicePrimaryCtxRelease_v2(CUdevice dev)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuDevicePrimaryCtxRelease_v2) < 0 ||
         rpc_write(0, &dev, sizeof(CUdevice)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -4136,7 +3840,6 @@ CUresult cuDevicePrimaryCtxRelease_v2(CUdevice dev)
 CUresult cuDevicePrimaryCtxSetFlags_v2(CUdevice dev, unsigned int flags)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuDevicePrimaryCtxSetFlags_v2) < 0 ||
         rpc_write(0, &dev, sizeof(CUdevice)) < 0 ||
         rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
@@ -4149,7 +3852,6 @@ CUresult cuDevicePrimaryCtxSetFlags_v2(CUdevice dev, unsigned int flags)
 CUresult cuDevicePrimaryCtxGetState(CUdevice dev, unsigned int* flags, int* active)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuDevicePrimaryCtxGetState) < 0 ||
         rpc_write(0, &dev, sizeof(CUdevice)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -4163,7 +3865,6 @@ CUresult cuDevicePrimaryCtxGetState(CUdevice dev, unsigned int* flags, int* acti
 CUresult cuDevicePrimaryCtxReset_v2(CUdevice dev)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuDevicePrimaryCtxReset_v2) < 0 ||
         rpc_write(0, &dev, sizeof(CUdevice)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -4175,7 +3876,6 @@ CUresult cuDevicePrimaryCtxReset_v2(CUdevice dev)
 CUresult cuCtxCreate_v2(CUcontext* pctx, unsigned int flags, CUdevice dev)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuCtxCreate_v2) < 0 ||
         rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
         rpc_write(0, &dev, sizeof(CUdevice)) < 0 ||
@@ -4189,7 +3889,6 @@ CUresult cuCtxCreate_v2(CUcontext* pctx, unsigned int flags, CUdevice dev)
 CUresult cuCtxCreate_v3(CUcontext* pctx, CUexecAffinityParam* paramsArray, int numParams, unsigned int flags, CUdevice dev)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuCtxCreate_v3) < 0 ||
         rpc_write(0, &numParams, sizeof(int)) < 0 ||
         rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
@@ -4205,7 +3904,6 @@ CUresult cuCtxCreate_v3(CUcontext* pctx, CUexecAffinityParam* paramsArray, int n
 CUresult cuCtxDestroy_v2(CUcontext ctx)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuCtxDestroy_v2) < 0 ||
         rpc_write(0, &ctx, sizeof(CUcontext)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -4217,7 +3915,6 @@ CUresult cuCtxDestroy_v2(CUcontext ctx)
 CUresult cuCtxPushCurrent_v2(CUcontext ctx)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuCtxPushCurrent_v2) < 0 ||
         rpc_write(0, &ctx, sizeof(CUcontext)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -4229,7 +3926,6 @@ CUresult cuCtxPushCurrent_v2(CUcontext ctx)
 CUresult cuCtxPopCurrent_v2(CUcontext* pctx)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuCtxPopCurrent_v2) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pctx, sizeof(CUcontext)) < 0 ||
@@ -4241,7 +3937,6 @@ CUresult cuCtxPopCurrent_v2(CUcontext* pctx)
 CUresult cuCtxSetCurrent(CUcontext ctx)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuCtxSetCurrent) < 0 ||
         rpc_write(0, &ctx, sizeof(CUcontext)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -4253,7 +3948,6 @@ CUresult cuCtxSetCurrent(CUcontext ctx)
 CUresult cuCtxGetCurrent(CUcontext* pctx)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuCtxGetCurrent) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pctx, sizeof(CUcontext)) < 0 ||
@@ -4265,7 +3959,6 @@ CUresult cuCtxGetCurrent(CUcontext* pctx)
 CUresult cuCtxGetDevice(CUdevice* device)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuCtxGetDevice) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, device, sizeof(CUdevice)) < 0 ||
@@ -4277,7 +3970,6 @@ CUresult cuCtxGetDevice(CUdevice* device)
 CUresult cuCtxGetFlags(unsigned int* flags)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuCtxGetFlags) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, flags, sizeof(unsigned int)) < 0 ||
@@ -4289,7 +3981,6 @@ CUresult cuCtxGetFlags(unsigned int* flags)
 CUresult cuCtxGetId(CUcontext ctx, unsigned long long* ctxId)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuCtxGetId) < 0 ||
         rpc_write(0, &ctx, sizeof(CUcontext)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -4302,7 +3993,6 @@ CUresult cuCtxGetId(CUcontext ctx, unsigned long long* ctxId)
 CUresult cuCtxSynchronize()
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuCtxSynchronize) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -4313,7 +4003,6 @@ CUresult cuCtxSynchronize()
 CUresult cuCtxSetLimit(CUlimit limit, size_t value)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuCtxSetLimit) < 0 ||
         rpc_write(0, &limit, sizeof(CUlimit)) < 0 ||
         rpc_write(0, &value, sizeof(size_t)) < 0 ||
@@ -4326,7 +4015,6 @@ CUresult cuCtxSetLimit(CUlimit limit, size_t value)
 CUresult cuCtxGetLimit(size_t* pvalue, CUlimit limit)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuCtxGetLimit) < 0 ||
         rpc_write(0, &limit, sizeof(CUlimit)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -4339,7 +4027,6 @@ CUresult cuCtxGetLimit(size_t* pvalue, CUlimit limit)
 CUresult cuCtxGetCacheConfig(CUfunc_cache* pconfig)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuCtxGetCacheConfig) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pconfig, sizeof(CUfunc_cache)) < 0 ||
@@ -4351,7 +4038,6 @@ CUresult cuCtxGetCacheConfig(CUfunc_cache* pconfig)
 CUresult cuCtxSetCacheConfig(CUfunc_cache config)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuCtxSetCacheConfig) < 0 ||
         rpc_write(0, &config, sizeof(CUfunc_cache)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -4363,7 +4049,6 @@ CUresult cuCtxSetCacheConfig(CUfunc_cache config)
 CUresult cuCtxGetSharedMemConfig(CUsharedconfig* pConfig)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuCtxGetSharedMemConfig) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pConfig, sizeof(CUsharedconfig)) < 0 ||
@@ -4375,7 +4060,6 @@ CUresult cuCtxGetSharedMemConfig(CUsharedconfig* pConfig)
 CUresult cuCtxSetSharedMemConfig(CUsharedconfig config)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuCtxSetSharedMemConfig) < 0 ||
         rpc_write(0, &config, sizeof(CUsharedconfig)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -4387,7 +4071,6 @@ CUresult cuCtxSetSharedMemConfig(CUsharedconfig config)
 CUresult cuCtxGetApiVersion(CUcontext ctx, unsigned int* version)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuCtxGetApiVersion) < 0 ||
         rpc_write(0, &ctx, sizeof(CUcontext)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -4400,7 +4083,6 @@ CUresult cuCtxGetApiVersion(CUcontext ctx, unsigned int* version)
 CUresult cuCtxGetStreamPriorityRange(int* leastPriority, int* greatestPriority)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuCtxGetStreamPriorityRange) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, leastPriority, sizeof(int)) < 0 ||
@@ -4413,7 +4095,6 @@ CUresult cuCtxGetStreamPriorityRange(int* leastPriority, int* greatestPriority)
 CUresult cuCtxResetPersistingL2Cache()
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuCtxResetPersistingL2Cache) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -4424,7 +4105,6 @@ CUresult cuCtxResetPersistingL2Cache()
 CUresult cuCtxGetExecAffinity(CUexecAffinityParam* pExecAffinity, CUexecAffinityType type)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuCtxGetExecAffinity) < 0 ||
         rpc_write(0, &type, sizeof(CUexecAffinityType)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -4437,7 +4117,6 @@ CUresult cuCtxGetExecAffinity(CUexecAffinityParam* pExecAffinity, CUexecAffinity
 CUresult cuCtxAttach(CUcontext* pctx, unsigned int flags)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuCtxAttach) < 0 ||
         rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -4450,7 +4129,6 @@ CUresult cuCtxAttach(CUcontext* pctx, unsigned int flags)
 CUresult cuCtxDetach(CUcontext ctx)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuCtxDetach) < 0 ||
         rpc_write(0, &ctx, sizeof(CUcontext)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -4462,7 +4140,6 @@ CUresult cuCtxDetach(CUcontext ctx)
 CUresult cuModuleLoad(CUmodule* module, const char* fname)
 {
     CUresult return_value;
-
     std::size_t fname_len = std::strlen(fname) + 1;
     if (rpc_start_request(0, RPC_cuModuleLoad) < 0 ||
         rpc_write(0, &fname_len, sizeof(std::size_t)) < 0 ||
@@ -4477,7 +4154,6 @@ CUresult cuModuleLoad(CUmodule* module, const char* fname)
 CUresult cuModuleUnload(CUmodule hmod)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuModuleUnload) < 0 ||
         rpc_write(0, &hmod, sizeof(CUmodule)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -4489,9 +4165,8 @@ CUresult cuModuleUnload(CUmodule hmod)
 CUresult cuModuleGetLoadingMode(CUmoduleLoadingMode* mode)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuModuleGetLoadingMode) < 0 ||
-        rpc_write(0, &mode, sizeof(CUmoduleLoadingMode)) < 0 ||
+        rpc_write(0, mode, sizeof(CUmoduleLoadingMode)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, mode, sizeof(CUmoduleLoadingMode)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -4502,7 +4177,6 @@ CUresult cuModuleGetLoadingMode(CUmoduleLoadingMode* mode)
 CUresult cuModuleGetFunction(CUfunction* hfunc, CUmodule hmod, const char* name)
 {
     CUresult return_value;
-
     std::size_t name_len = std::strlen(name) + 1;
     if (rpc_start_request(0, RPC_cuModuleGetFunction) < 0 ||
         rpc_write(0, &hmod, sizeof(CUmodule)) < 0 ||
@@ -4518,7 +4192,6 @@ CUresult cuModuleGetFunction(CUfunction* hfunc, CUmodule hmod, const char* name)
 CUresult cuModuleGetGlobal_v2(CUdeviceptr* dptr, size_t* bytes, CUmodule hmod, const char* name)
 {
     CUresult return_value;
-
     std::size_t name_len = std::strlen(name) + 1;
     if (rpc_start_request(0, RPC_cuModuleGetGlobal_v2) < 0 ||
         rpc_write(0, &hmod, sizeof(CUmodule)) < 0 ||
@@ -4535,12 +4208,11 @@ CUresult cuModuleGetGlobal_v2(CUdeviceptr* dptr, size_t* bytes, CUmodule hmod, c
 CUresult cuLinkCreate_v2(unsigned int numOptions, CUjit_option* options, void** optionValues, CUlinkState* stateOut)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuLinkCreate_v2) < 0 ||
         rpc_write(0, &numOptions, sizeof(unsigned int)) < 0 ||
-        rpc_write(0, &options, sizeof(CUjit_option)) < 0 ||
-        rpc_write(0, &optionValues, sizeof(void*)) < 0 ||
-        rpc_write(0, &stateOut, sizeof(CUlinkState)) < 0 ||
+        rpc_write(0, options, sizeof(CUjit_option)) < 0 ||
+        rpc_write(0, optionValues, sizeof(void*)) < 0 ||
+        rpc_write(0, stateOut, sizeof(CUlinkState)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, options, sizeof(CUjit_option)) < 0 ||
         rpc_read(0, optionValues, sizeof(void*)) < 0 ||
@@ -4550,32 +4222,9 @@ CUresult cuLinkCreate_v2(unsigned int numOptions, CUjit_option* options, void** 
     return return_value;
 }
 
-CUresult cuLinkAddData_v2(CUlinkState state, CUjitInputType type, void* data, size_t size, const char* name, unsigned int numOptions, CUjit_option* options, void** optionValues)
-{
-    CUresult return_value;
-
-    std::size_t name_len = std::strlen(name) + 1;
-    if (rpc_start_request(0, RPC_cuLinkAddData_v2) < 0 ||
-        rpc_write(0, &state, sizeof(CUlinkState)) < 0 ||
-        rpc_write(0, &type, sizeof(CUjitInputType)) < 0 ||
-        rpc_write(0, &data, sizeof(void*)) < 0 ||
-        rpc_write(0, &size, sizeof(size_t)) < 0 ||
-        rpc_write(0, &name_len, sizeof(std::size_t)) < 0 ||
-        rpc_write(0, name, name_len) < 0 ||
-        rpc_write(0, &numOptions, sizeof(unsigned int)) < 0 ||
-        rpc_write(0, options, numOptions * sizeof(CUjit_option)) < 0 ||
-        rpc_write(0, optionValues, numOptions * sizeof(void*)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, data, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    return return_value;
-}
-
 CUresult cuLinkAddFile_v2(CUlinkState state, CUjitInputType type, const char* path, unsigned int numOptions, CUjit_option* options, void** optionValues)
 {
     CUresult return_value;
-
     std::size_t path_len = std::strlen(path) + 1;
     if (rpc_start_request(0, RPC_cuLinkAddFile_v2) < 0 ||
         rpc_write(0, &state, sizeof(CUlinkState)) < 0 ||
@@ -4594,7 +4243,6 @@ CUresult cuLinkAddFile_v2(CUlinkState state, CUjitInputType type, const char* pa
 CUresult cuLinkComplete(CUlinkState state, void** cubinOut, size_t* sizeOut)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuLinkComplete) < 0 ||
         rpc_write(0, &state, sizeof(CUlinkState)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -4608,7 +4256,6 @@ CUresult cuLinkComplete(CUlinkState state, void** cubinOut, size_t* sizeOut)
 CUresult cuLinkDestroy(CUlinkState state)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuLinkDestroy) < 0 ||
         rpc_write(0, &state, sizeof(CUlinkState)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -4620,7 +4267,6 @@ CUresult cuLinkDestroy(CUlinkState state)
 CUresult cuModuleGetTexRef(CUtexref* pTexRef, CUmodule hmod, const char* name)
 {
     CUresult return_value;
-
     std::size_t name_len = std::strlen(name) + 1;
     if (rpc_start_request(0, RPC_cuModuleGetTexRef) < 0 ||
         rpc_write(0, &hmod, sizeof(CUmodule)) < 0 ||
@@ -4636,7 +4282,6 @@ CUresult cuModuleGetTexRef(CUtexref* pTexRef, CUmodule hmod, const char* name)
 CUresult cuModuleGetSurfRef(CUsurfref* pSurfRef, CUmodule hmod, const char* name)
 {
     CUresult return_value;
-
     std::size_t name_len = std::strlen(name) + 1;
     if (rpc_start_request(0, RPC_cuModuleGetSurfRef) < 0 ||
         rpc_write(0, &hmod, sizeof(CUmodule)) < 0 ||
@@ -4652,7 +4297,6 @@ CUresult cuModuleGetSurfRef(CUsurfref* pSurfRef, CUmodule hmod, const char* name
 CUresult cuLibraryLoadFromFile(CUlibrary* library, const char* fileName, CUjit_option* jitOptions, void** jitOptionsValues, unsigned int numJitOptions, CUlibraryOption* libraryOptions, void** libraryOptionValues, unsigned int numLibraryOptions)
 {
     CUresult return_value;
-
     std::size_t fileName_len = std::strlen(fileName) + 1;
     if (rpc_start_request(0, RPC_cuLibraryLoadFromFile) < 0 ||
         rpc_write(0, &fileName_len, sizeof(std::size_t)) < 0 ||
@@ -4673,7 +4317,6 @@ CUresult cuLibraryLoadFromFile(CUlibrary* library, const char* fileName, CUjit_o
 CUresult cuLibraryUnload(CUlibrary library)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuLibraryUnload) < 0 ||
         rpc_write(0, &library, sizeof(CUlibrary)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -4685,7 +4328,6 @@ CUresult cuLibraryUnload(CUlibrary library)
 CUresult cuLibraryGetKernel(CUkernel* pKernel, CUlibrary library, const char* name)
 {
     CUresult return_value;
-
     std::size_t name_len = std::strlen(name) + 1;
     if (rpc_start_request(0, RPC_cuLibraryGetKernel) < 0 ||
         rpc_write(0, &library, sizeof(CUlibrary)) < 0 ||
@@ -4701,7 +4343,6 @@ CUresult cuLibraryGetKernel(CUkernel* pKernel, CUlibrary library, const char* na
 CUresult cuLibraryGetModule(CUmodule* pMod, CUlibrary library)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuLibraryGetModule) < 0 ||
         rpc_write(0, &library, sizeof(CUlibrary)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -4714,7 +4355,6 @@ CUresult cuLibraryGetModule(CUmodule* pMod, CUlibrary library)
 CUresult cuKernelGetFunction(CUfunction* pFunc, CUkernel kernel)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuKernelGetFunction) < 0 ||
         rpc_write(0, &kernel, sizeof(CUkernel)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -4727,7 +4367,6 @@ CUresult cuKernelGetFunction(CUfunction* pFunc, CUkernel kernel)
 CUresult cuLibraryGetGlobal(CUdeviceptr* dptr, size_t* bytes, CUlibrary library, const char* name)
 {
     CUresult return_value;
-
     std::size_t name_len = std::strlen(name) + 1;
     if (rpc_start_request(0, RPC_cuLibraryGetGlobal) < 0 ||
         rpc_write(0, &library, sizeof(CUlibrary)) < 0 ||
@@ -4744,7 +4383,6 @@ CUresult cuLibraryGetGlobal(CUdeviceptr* dptr, size_t* bytes, CUlibrary library,
 CUresult cuLibraryGetManaged(CUdeviceptr* dptr, size_t* bytes, CUlibrary library, const char* name)
 {
     CUresult return_value;
-
     std::size_t name_len = std::strlen(name) + 1;
     if (rpc_start_request(0, RPC_cuLibraryGetManaged) < 0 ||
         rpc_write(0, &library, sizeof(CUlibrary)) < 0 ||
@@ -4761,7 +4399,6 @@ CUresult cuLibraryGetManaged(CUdeviceptr* dptr, size_t* bytes, CUlibrary library
 CUresult cuLibraryGetUnifiedFunction(void** fptr, CUlibrary library, const char* symbol)
 {
     CUresult return_value;
-
     std::size_t symbol_len = std::strlen(symbol) + 1;
     if (rpc_start_request(0, RPC_cuLibraryGetUnifiedFunction) < 0 ||
         rpc_write(0, &library, sizeof(CUlibrary)) < 0 ||
@@ -4777,9 +4414,8 @@ CUresult cuLibraryGetUnifiedFunction(void** fptr, CUlibrary library, const char*
 CUresult cuKernelGetAttribute(int* pi, CUfunction_attribute attrib, CUkernel kernel, CUdevice dev)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuKernelGetAttribute) < 0 ||
-        rpc_write(0, &pi, sizeof(int)) < 0 ||
+        rpc_write(0, pi, sizeof(int)) < 0 ||
         rpc_write(0, &attrib, sizeof(CUfunction_attribute)) < 0 ||
         rpc_write(0, &kernel, sizeof(CUkernel)) < 0 ||
         rpc_write(0, &dev, sizeof(CUdevice)) < 0 ||
@@ -4793,7 +4429,6 @@ CUresult cuKernelGetAttribute(int* pi, CUfunction_attribute attrib, CUkernel ker
 CUresult cuKernelSetAttribute(CUfunction_attribute attrib, int val, CUkernel kernel, CUdevice dev)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuKernelSetAttribute) < 0 ||
         rpc_write(0, &attrib, sizeof(CUfunction_attribute)) < 0 ||
         rpc_write(0, &val, sizeof(int)) < 0 ||
@@ -4808,7 +4443,6 @@ CUresult cuKernelSetAttribute(CUfunction_attribute attrib, int val, CUkernel ker
 CUresult cuKernelSetCacheConfig(CUkernel kernel, CUfunc_cache config, CUdevice dev)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuKernelSetCacheConfig) < 0 ||
         rpc_write(0, &kernel, sizeof(CUkernel)) < 0 ||
         rpc_write(0, &config, sizeof(CUfunc_cache)) < 0 ||
@@ -4822,10 +4456,9 @@ CUresult cuKernelSetCacheConfig(CUkernel kernel, CUfunc_cache config, CUdevice d
 CUresult cuMemGetInfo_v2(size_t* free, size_t* total)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemGetInfo_v2) < 0 ||
-        rpc_write(0, &free, sizeof(size_t)) < 0 ||
-        rpc_write(0, &total, sizeof(size_t)) < 0 ||
+        rpc_write(0, free, sizeof(size_t)) < 0 ||
+        rpc_write(0, total, sizeof(size_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, free, sizeof(size_t)) < 0 ||
         rpc_read(0, total, sizeof(size_t)) < 0 ||
@@ -4837,9 +4470,8 @@ CUresult cuMemGetInfo_v2(size_t* free, size_t* total)
 CUresult cuMemAlloc_v2(CUdeviceptr* dptr, size_t bytesize)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemAlloc_v2) < 0 ||
-        rpc_write(0, &dptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(0, dptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &bytesize, sizeof(size_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, dptr, sizeof(CUdeviceptr)) < 0 ||
@@ -4851,10 +4483,9 @@ CUresult cuMemAlloc_v2(CUdeviceptr* dptr, size_t bytesize)
 CUresult cuMemAllocPitch_v2(CUdeviceptr* dptr, size_t* pPitch, size_t WidthInBytes, size_t Height, unsigned int ElementSizeBytes)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemAllocPitch_v2) < 0 ||
-        rpc_write(0, &dptr, sizeof(CUdeviceptr)) < 0 ||
-        rpc_write(0, &pPitch, sizeof(size_t)) < 0 ||
+        rpc_write(0, dptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(0, pPitch, sizeof(size_t)) < 0 ||
         rpc_write(0, &WidthInBytes, sizeof(size_t)) < 0 ||
         rpc_write(0, &Height, sizeof(size_t)) < 0 ||
         rpc_write(0, &ElementSizeBytes, sizeof(unsigned int)) < 0 ||
@@ -4869,7 +4500,6 @@ CUresult cuMemAllocPitch_v2(CUdeviceptr* dptr, size_t* pPitch, size_t WidthInByt
 CUresult cuMemFree_v2(CUdeviceptr dptr)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemFree_v2) < 0 ||
         rpc_write(0, &dptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -4881,10 +4511,9 @@ CUresult cuMemFree_v2(CUdeviceptr dptr)
 CUresult cuMemGetAddressRange_v2(CUdeviceptr* pbase, size_t* psize, CUdeviceptr dptr)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemGetAddressRange_v2) < 0 ||
-        rpc_write(0, &pbase, sizeof(CUdeviceptr)) < 0 ||
-        rpc_write(0, &psize, sizeof(size_t)) < 0 ||
+        rpc_write(0, pbase, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(0, psize, sizeof(size_t)) < 0 ||
         rpc_write(0, &dptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pbase, sizeof(CUdeviceptr)) < 0 ||
@@ -4897,9 +4526,7 @@ CUresult cuMemGetAddressRange_v2(CUdeviceptr* pbase, size_t* psize, CUdeviceptr 
 CUresult cuMemAllocHost_v2(void** pp, size_t bytesize)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemAllocHost_v2) < 0 ||
-        rpc_write(0, &pp, sizeof(void*)) < 0 ||
         rpc_write(0, &bytesize, sizeof(size_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pp, sizeof(void*)) < 0 ||
@@ -4911,11 +4538,9 @@ CUresult cuMemAllocHost_v2(void** pp, size_t bytesize)
 CUresult cuMemFreeHost(void* p)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemFreeHost) < 0 ||
         rpc_write(0, &p, sizeof(void*)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, p, sizeof(void*)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
@@ -4924,9 +4549,7 @@ CUresult cuMemFreeHost(void* p)
 CUresult cuMemHostAlloc(void** pp, size_t bytesize, unsigned int Flags)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemHostAlloc) < 0 ||
-        rpc_write(0, &pp, sizeof(void*)) < 0 ||
         rpc_write(0, &bytesize, sizeof(size_t)) < 0 ||
         rpc_write(0, &Flags, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -4939,14 +4562,12 @@ CUresult cuMemHostAlloc(void** pp, size_t bytesize, unsigned int Flags)
 CUresult cuMemHostGetDevicePointer_v2(CUdeviceptr* pdptr, void* p, unsigned int Flags)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemHostGetDevicePointer_v2) < 0 ||
-        rpc_write(0, &pdptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(0, pdptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &p, sizeof(void*)) < 0 ||
         rpc_write(0, &Flags, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pdptr, sizeof(CUdeviceptr)) < 0 ||
-        rpc_read(0, p, sizeof(void*)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
@@ -4955,13 +4576,11 @@ CUresult cuMemHostGetDevicePointer_v2(CUdeviceptr* pdptr, void* p, unsigned int 
 CUresult cuMemHostGetFlags(unsigned int* pFlags, void* p)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemHostGetFlags) < 0 ||
-        rpc_write(0, &pFlags, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, pFlags, sizeof(unsigned int)) < 0 ||
         rpc_write(0, &p, sizeof(void*)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pFlags, sizeof(unsigned int)) < 0 ||
-        rpc_read(0, p, sizeof(void*)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
@@ -4970,9 +4589,8 @@ CUresult cuMemHostGetFlags(unsigned int* pFlags, void* p)
 CUresult cuMemAllocManaged(CUdeviceptr* dptr, size_t bytesize, unsigned int flags)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemAllocManaged) < 0 ||
-        rpc_write(0, &dptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(0, dptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &bytesize, sizeof(size_t)) < 0 ||
         rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -4985,10 +4603,9 @@ CUresult cuMemAllocManaged(CUdeviceptr* dptr, size_t bytesize, unsigned int flag
 CUresult cuDeviceGetByPCIBusId(CUdevice* dev, const char* pciBusId)
 {
     CUresult return_value;
-
     std::size_t pciBusId_len = std::strlen(pciBusId) + 1;
     if (rpc_start_request(0, RPC_cuDeviceGetByPCIBusId) < 0 ||
-        rpc_write(0, &dev, sizeof(CUdevice)) < 0 ||
+        rpc_write(0, dev, sizeof(CUdevice)) < 0 ||
         rpc_write(0, &pciBusId_len, sizeof(std::size_t)) < 0 ||
         rpc_write(0, pciBusId, pciBusId_len) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -5001,7 +4618,6 @@ CUresult cuDeviceGetByPCIBusId(CUdevice* dev, const char* pciBusId)
 CUresult cuDeviceGetPCIBusId(char* pciBusId, int len, CUdevice dev)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuDeviceGetPCIBusId) < 0 ||
         rpc_write(0, &len, sizeof(int)) < 0 ||
         rpc_write(0, &dev, sizeof(CUdevice)) < 0 ||
@@ -5015,9 +4631,8 @@ CUresult cuDeviceGetPCIBusId(char* pciBusId, int len, CUdevice dev)
 CUresult cuIpcGetEventHandle(CUipcEventHandle* pHandle, CUevent event)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuIpcGetEventHandle) < 0 ||
-        rpc_write(0, &pHandle, sizeof(CUipcEventHandle)) < 0 ||
+        rpc_write(0, pHandle, sizeof(CUipcEventHandle)) < 0 ||
         rpc_write(0, &event, sizeof(CUevent)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pHandle, sizeof(CUipcEventHandle)) < 0 ||
@@ -5029,9 +4644,8 @@ CUresult cuIpcGetEventHandle(CUipcEventHandle* pHandle, CUevent event)
 CUresult cuIpcOpenEventHandle(CUevent* phEvent, CUipcEventHandle handle)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuIpcOpenEventHandle) < 0 ||
-        rpc_write(0, &phEvent, sizeof(CUevent)) < 0 ||
+        rpc_write(0, phEvent, sizeof(CUevent)) < 0 ||
         rpc_write(0, &handle, sizeof(CUipcEventHandle)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, phEvent, sizeof(CUevent)) < 0 ||
@@ -5043,9 +4657,8 @@ CUresult cuIpcOpenEventHandle(CUevent* phEvent, CUipcEventHandle handle)
 CUresult cuIpcGetMemHandle(CUipcMemHandle* pHandle, CUdeviceptr dptr)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuIpcGetMemHandle) < 0 ||
-        rpc_write(0, &pHandle, sizeof(CUipcMemHandle)) < 0 ||
+        rpc_write(0, pHandle, sizeof(CUipcMemHandle)) < 0 ||
         rpc_write(0, &dptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pHandle, sizeof(CUipcMemHandle)) < 0 ||
@@ -5057,9 +4670,8 @@ CUresult cuIpcGetMemHandle(CUipcMemHandle* pHandle, CUdeviceptr dptr)
 CUresult cuIpcOpenMemHandle_v2(CUdeviceptr* pdptr, CUipcMemHandle handle, unsigned int Flags)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuIpcOpenMemHandle_v2) < 0 ||
-        rpc_write(0, &pdptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(0, pdptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &handle, sizeof(CUipcMemHandle)) < 0 ||
         rpc_write(0, &Flags, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -5072,7 +4684,6 @@ CUresult cuIpcOpenMemHandle_v2(CUdeviceptr* pdptr, CUipcMemHandle handle, unsign
 CUresult cuIpcCloseMemHandle(CUdeviceptr dptr)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuIpcCloseMemHandle) < 0 ||
         rpc_write(0, &dptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -5081,38 +4692,9 @@ CUresult cuIpcCloseMemHandle(CUdeviceptr dptr)
     return return_value;
 }
 
-CUresult cuMemHostRegister_v2(void* p, size_t bytesize, unsigned int Flags)
-{
-    CUresult return_value;
-
-    if (rpc_start_request(0, RPC_cuMemHostRegister_v2) < 0 ||
-        rpc_write(0, &p, sizeof(void*)) < 0 ||
-        rpc_write(0, &bytesize, sizeof(size_t)) < 0 ||
-        rpc_write(0, &Flags, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, p, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    return return_value;
-}
-
-CUresult cuMemHostUnregister(void* p)
-{
-    CUresult return_value;
-
-    if (rpc_start_request(0, RPC_cuMemHostUnregister) < 0 ||
-        rpc_write(0, &p, sizeof(void*)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, p, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    return return_value;
-}
-
 CUresult cuMemcpy(CUdeviceptr dst, CUdeviceptr src, size_t ByteCount)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemcpy) < 0 ||
         rpc_write(0, &dst, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &src, sizeof(CUdeviceptr)) < 0 ||
@@ -5126,7 +4708,6 @@ CUresult cuMemcpy(CUdeviceptr dst, CUdeviceptr src, size_t ByteCount)
 CUresult cuMemcpyPeer(CUdeviceptr dstDevice, CUcontext dstContext, CUdeviceptr srcDevice, CUcontext srcContext, size_t ByteCount)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemcpyPeer) < 0 ||
         rpc_write(0, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &dstContext, sizeof(CUcontext)) < 0 ||
@@ -5139,16 +4720,14 @@ CUresult cuMemcpyPeer(CUdeviceptr dstDevice, CUcontext dstContext, CUdeviceptr s
     return return_value;
 }
 
-CUresult cuMemcpyDtoH_v2(void* dstHost, CUdeviceptr srcDevice, size_t ByteCount)
+CUresult cuMemcpyHtoD_v2(CUdeviceptr dstDevice, const void* srcHost, size_t ByteCount)
 {
     CUresult return_value;
-
-    if (rpc_start_request(0, RPC_cuMemcpyDtoH_v2) < 0 ||
-        rpc_write(0, &dstHost, sizeof(void*)) < 0 ||
-        rpc_write(0, &srcDevice, sizeof(CUdeviceptr)) < 0 ||
+    if (rpc_start_request(0, RPC_cuMemcpyHtoD_v2) < 0 ||
+        rpc_write(0, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(0, &srcHost, sizeof(const void*)) < 0 ||
         rpc_write(0, &ByteCount, sizeof(size_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, dstHost, sizeof(void*)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
@@ -5157,7 +4736,6 @@ CUresult cuMemcpyDtoH_v2(void* dstHost, CUdeviceptr srcDevice, size_t ByteCount)
 CUresult cuMemcpyDtoD_v2(CUdeviceptr dstDevice, CUdeviceptr srcDevice, size_t ByteCount)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemcpyDtoD_v2) < 0 ||
         rpc_write(0, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &srcDevice, sizeof(CUdeviceptr)) < 0 ||
@@ -5171,7 +4749,6 @@ CUresult cuMemcpyDtoD_v2(CUdeviceptr dstDevice, CUdeviceptr srcDevice, size_t By
 CUresult cuMemcpyDtoA_v2(CUarray dstArray, size_t dstOffset, CUdeviceptr srcDevice, size_t ByteCount)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemcpyDtoA_v2) < 0 ||
         rpc_write(0, &dstArray, sizeof(CUarray)) < 0 ||
         rpc_write(0, &dstOffset, sizeof(size_t)) < 0 ||
@@ -5186,7 +4763,6 @@ CUresult cuMemcpyDtoA_v2(CUarray dstArray, size_t dstOffset, CUdeviceptr srcDevi
 CUresult cuMemcpyAtoD_v2(CUdeviceptr dstDevice, CUarray srcArray, size_t srcOffset, size_t ByteCount)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemcpyAtoD_v2) < 0 ||
         rpc_write(0, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &srcArray, sizeof(CUarray)) < 0 ||
@@ -5201,7 +4777,6 @@ CUresult cuMemcpyAtoD_v2(CUdeviceptr dstDevice, CUarray srcArray, size_t srcOffs
 CUresult cuMemcpyAtoH_v2(void* dstHost, CUarray srcArray, size_t srcOffset, size_t ByteCount)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemcpyAtoH_v2) < 0 ||
         rpc_write(0, &dstHost, sizeof(void*)) < 0 ||
         rpc_write(0, &srcArray, sizeof(CUarray)) < 0 ||
@@ -5216,7 +4791,6 @@ CUresult cuMemcpyAtoH_v2(void* dstHost, CUarray srcArray, size_t srcOffset, size
 CUresult cuMemcpyAtoA_v2(CUarray dstArray, size_t dstOffset, CUarray srcArray, size_t srcOffset, size_t ByteCount)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemcpyAtoA_v2) < 0 ||
         rpc_write(0, &dstArray, sizeof(CUarray)) < 0 ||
         rpc_write(0, &dstOffset, sizeof(size_t)) < 0 ||
@@ -5232,7 +4806,6 @@ CUresult cuMemcpyAtoA_v2(CUarray dstArray, size_t dstOffset, CUarray srcArray, s
 CUresult cuMemcpyAsync(CUdeviceptr dst, CUdeviceptr src, size_t ByteCount, CUstream hStream)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemcpyAsync) < 0 ||
         rpc_write(0, &dst, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &src, sizeof(CUdeviceptr)) < 0 ||
@@ -5247,7 +4820,6 @@ CUresult cuMemcpyAsync(CUdeviceptr dst, CUdeviceptr src, size_t ByteCount, CUstr
 CUresult cuMemcpyPeerAsync(CUdeviceptr dstDevice, CUcontext dstContext, CUdeviceptr srcDevice, CUcontext srcContext, size_t ByteCount, CUstream hStream)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemcpyPeerAsync) < 0 ||
         rpc_write(0, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &dstContext, sizeof(CUcontext)) < 0 ||
@@ -5261,17 +4833,15 @@ CUresult cuMemcpyPeerAsync(CUdeviceptr dstDevice, CUcontext dstContext, CUdevice
     return return_value;
 }
 
-CUresult cuMemcpyDtoHAsync_v2(void* dstHost, CUdeviceptr srcDevice, size_t ByteCount, CUstream hStream)
+CUresult cuMemcpyHtoDAsync_v2(CUdeviceptr dstDevice, const void* srcHost, size_t ByteCount, CUstream hStream)
 {
     CUresult return_value;
-
-    if (rpc_start_request(0, RPC_cuMemcpyDtoHAsync_v2) < 0 ||
-        rpc_write(0, &dstHost, sizeof(void*)) < 0 ||
-        rpc_write(0, &srcDevice, sizeof(CUdeviceptr)) < 0 ||
+    if (rpc_start_request(0, RPC_cuMemcpyHtoDAsync_v2) < 0 ||
+        rpc_write(0, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(0, &srcHost, sizeof(const void*)) < 0 ||
         rpc_write(0, &ByteCount, sizeof(size_t)) < 0 ||
         rpc_write(0, &hStream, sizeof(CUstream)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, dstHost, sizeof(void*)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
@@ -5280,7 +4850,6 @@ CUresult cuMemcpyDtoHAsync_v2(void* dstHost, CUdeviceptr srcDevice, size_t ByteC
 CUresult cuMemcpyDtoDAsync_v2(CUdeviceptr dstDevice, CUdeviceptr srcDevice, size_t ByteCount, CUstream hStream)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemcpyDtoDAsync_v2) < 0 ||
         rpc_write(0, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &srcDevice, sizeof(CUdeviceptr)) < 0 ||
@@ -5292,27 +4861,9 @@ CUresult cuMemcpyDtoDAsync_v2(CUdeviceptr dstDevice, CUdeviceptr srcDevice, size
     return return_value;
 }
 
-CUresult cuMemcpyAtoHAsync_v2(void* dstHost, CUarray srcArray, size_t srcOffset, size_t ByteCount, CUstream hStream)
-{
-    CUresult return_value;
-
-    if (rpc_start_request(0, RPC_cuMemcpyAtoHAsync_v2) < 0 ||
-        rpc_write(0, &dstHost, sizeof(void*)) < 0 ||
-        rpc_write(0, &srcArray, sizeof(CUarray)) < 0 ||
-        rpc_write(0, &srcOffset, sizeof(size_t)) < 0 ||
-        rpc_write(0, &ByteCount, sizeof(size_t)) < 0 ||
-        rpc_write(0, &hStream, sizeof(CUstream)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, dstHost, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    return return_value;
-}
-
 CUresult cuMemsetD8_v2(CUdeviceptr dstDevice, unsigned char uc, size_t N)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemsetD8_v2) < 0 ||
         rpc_write(0, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &uc, sizeof(unsigned char)) < 0 ||
@@ -5326,7 +4877,6 @@ CUresult cuMemsetD8_v2(CUdeviceptr dstDevice, unsigned char uc, size_t N)
 CUresult cuMemsetD16_v2(CUdeviceptr dstDevice, unsigned short us, size_t N)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemsetD16_v2) < 0 ||
         rpc_write(0, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &us, sizeof(unsigned short)) < 0 ||
@@ -5340,7 +4890,6 @@ CUresult cuMemsetD16_v2(CUdeviceptr dstDevice, unsigned short us, size_t N)
 CUresult cuMemsetD32_v2(CUdeviceptr dstDevice, unsigned int ui, size_t N)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemsetD32_v2) < 0 ||
         rpc_write(0, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &ui, sizeof(unsigned int)) < 0 ||
@@ -5354,7 +4903,6 @@ CUresult cuMemsetD32_v2(CUdeviceptr dstDevice, unsigned int ui, size_t N)
 CUresult cuMemsetD2D8_v2(CUdeviceptr dstDevice, size_t dstPitch, unsigned char uc, size_t Width, size_t Height)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemsetD2D8_v2) < 0 ||
         rpc_write(0, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &dstPitch, sizeof(size_t)) < 0 ||
@@ -5370,7 +4918,6 @@ CUresult cuMemsetD2D8_v2(CUdeviceptr dstDevice, size_t dstPitch, unsigned char u
 CUresult cuMemsetD2D16_v2(CUdeviceptr dstDevice, size_t dstPitch, unsigned short us, size_t Width, size_t Height)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemsetD2D16_v2) < 0 ||
         rpc_write(0, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &dstPitch, sizeof(size_t)) < 0 ||
@@ -5386,7 +4933,6 @@ CUresult cuMemsetD2D16_v2(CUdeviceptr dstDevice, size_t dstPitch, unsigned short
 CUresult cuMemsetD2D32_v2(CUdeviceptr dstDevice, size_t dstPitch, unsigned int ui, size_t Width, size_t Height)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemsetD2D32_v2) < 0 ||
         rpc_write(0, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &dstPitch, sizeof(size_t)) < 0 ||
@@ -5402,7 +4948,6 @@ CUresult cuMemsetD2D32_v2(CUdeviceptr dstDevice, size_t dstPitch, unsigned int u
 CUresult cuMemsetD8Async(CUdeviceptr dstDevice, unsigned char uc, size_t N, CUstream hStream)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemsetD8Async) < 0 ||
         rpc_write(0, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &uc, sizeof(unsigned char)) < 0 ||
@@ -5417,7 +4962,6 @@ CUresult cuMemsetD8Async(CUdeviceptr dstDevice, unsigned char uc, size_t N, CUst
 CUresult cuMemsetD16Async(CUdeviceptr dstDevice, unsigned short us, size_t N, CUstream hStream)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemsetD16Async) < 0 ||
         rpc_write(0, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &us, sizeof(unsigned short)) < 0 ||
@@ -5432,7 +4976,6 @@ CUresult cuMemsetD16Async(CUdeviceptr dstDevice, unsigned short us, size_t N, CU
 CUresult cuMemsetD32Async(CUdeviceptr dstDevice, unsigned int ui, size_t N, CUstream hStream)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemsetD32Async) < 0 ||
         rpc_write(0, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &ui, sizeof(unsigned int)) < 0 ||
@@ -5447,7 +4990,6 @@ CUresult cuMemsetD32Async(CUdeviceptr dstDevice, unsigned int ui, size_t N, CUst
 CUresult cuMemsetD2D8Async(CUdeviceptr dstDevice, size_t dstPitch, unsigned char uc, size_t Width, size_t Height, CUstream hStream)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemsetD2D8Async) < 0 ||
         rpc_write(0, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &dstPitch, sizeof(size_t)) < 0 ||
@@ -5464,7 +5006,6 @@ CUresult cuMemsetD2D8Async(CUdeviceptr dstDevice, size_t dstPitch, unsigned char
 CUresult cuMemsetD2D16Async(CUdeviceptr dstDevice, size_t dstPitch, unsigned short us, size_t Width, size_t Height, CUstream hStream)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemsetD2D16Async) < 0 ||
         rpc_write(0, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &dstPitch, sizeof(size_t)) < 0 ||
@@ -5481,7 +5022,6 @@ CUresult cuMemsetD2D16Async(CUdeviceptr dstDevice, size_t dstPitch, unsigned sho
 CUresult cuMemsetD2D32Async(CUdeviceptr dstDevice, size_t dstPitch, unsigned int ui, size_t Width, size_t Height, CUstream hStream)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemsetD2D32Async) < 0 ||
         rpc_write(0, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &dstPitch, sizeof(size_t)) < 0 ||
@@ -5495,12 +5035,24 @@ CUresult cuMemsetD2D32Async(CUdeviceptr dstDevice, size_t dstPitch, unsigned int
     return return_value;
 }
 
+CUresult cuArrayCreate_v2(CUarray* pHandle, const CUDA_ARRAY_DESCRIPTOR* pAllocateArray)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuArrayCreate_v2) < 0 ||
+        rpc_write(0, pHandle, sizeof(CUarray)) < 0 ||
+        rpc_write(0, &pAllocateArray, sizeof(const CUDA_ARRAY_DESCRIPTOR*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, pHandle, sizeof(CUarray)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
 CUresult cuArrayGetDescriptor_v2(CUDA_ARRAY_DESCRIPTOR* pArrayDescriptor, CUarray hArray)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuArrayGetDescriptor_v2) < 0 ||
-        rpc_write(0, &pArrayDescriptor, sizeof(CUDA_ARRAY_DESCRIPTOR)) < 0 ||
+        rpc_write(0, pArrayDescriptor, sizeof(CUDA_ARRAY_DESCRIPTOR)) < 0 ||
         rpc_write(0, &hArray, sizeof(CUarray)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pArrayDescriptor, sizeof(CUDA_ARRAY_DESCRIPTOR)) < 0 ||
@@ -5512,9 +5064,8 @@ CUresult cuArrayGetDescriptor_v2(CUDA_ARRAY_DESCRIPTOR* pArrayDescriptor, CUarra
 CUresult cuArrayGetSparseProperties(CUDA_ARRAY_SPARSE_PROPERTIES* sparseProperties, CUarray array)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuArrayGetSparseProperties) < 0 ||
-        rpc_write(0, &sparseProperties, sizeof(CUDA_ARRAY_SPARSE_PROPERTIES)) < 0 ||
+        rpc_write(0, sparseProperties, sizeof(CUDA_ARRAY_SPARSE_PROPERTIES)) < 0 ||
         rpc_write(0, &array, sizeof(CUarray)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, sparseProperties, sizeof(CUDA_ARRAY_SPARSE_PROPERTIES)) < 0 ||
@@ -5526,9 +5077,8 @@ CUresult cuArrayGetSparseProperties(CUDA_ARRAY_SPARSE_PROPERTIES* sparseProperti
 CUresult cuMipmappedArrayGetSparseProperties(CUDA_ARRAY_SPARSE_PROPERTIES* sparseProperties, CUmipmappedArray mipmap)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMipmappedArrayGetSparseProperties) < 0 ||
-        rpc_write(0, &sparseProperties, sizeof(CUDA_ARRAY_SPARSE_PROPERTIES)) < 0 ||
+        rpc_write(0, sparseProperties, sizeof(CUDA_ARRAY_SPARSE_PROPERTIES)) < 0 ||
         rpc_write(0, &mipmap, sizeof(CUmipmappedArray)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, sparseProperties, sizeof(CUDA_ARRAY_SPARSE_PROPERTIES)) < 0 ||
@@ -5540,9 +5090,8 @@ CUresult cuMipmappedArrayGetSparseProperties(CUDA_ARRAY_SPARSE_PROPERTIES* spars
 CUresult cuArrayGetMemoryRequirements(CUDA_ARRAY_MEMORY_REQUIREMENTS* memoryRequirements, CUarray array, CUdevice device)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuArrayGetMemoryRequirements) < 0 ||
-        rpc_write(0, &memoryRequirements, sizeof(CUDA_ARRAY_MEMORY_REQUIREMENTS)) < 0 ||
+        rpc_write(0, memoryRequirements, sizeof(CUDA_ARRAY_MEMORY_REQUIREMENTS)) < 0 ||
         rpc_write(0, &array, sizeof(CUarray)) < 0 ||
         rpc_write(0, &device, sizeof(CUdevice)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -5555,9 +5104,8 @@ CUresult cuArrayGetMemoryRequirements(CUDA_ARRAY_MEMORY_REQUIREMENTS* memoryRequ
 CUresult cuMipmappedArrayGetMemoryRequirements(CUDA_ARRAY_MEMORY_REQUIREMENTS* memoryRequirements, CUmipmappedArray mipmap, CUdevice device)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMipmappedArrayGetMemoryRequirements) < 0 ||
-        rpc_write(0, &memoryRequirements, sizeof(CUDA_ARRAY_MEMORY_REQUIREMENTS)) < 0 ||
+        rpc_write(0, memoryRequirements, sizeof(CUDA_ARRAY_MEMORY_REQUIREMENTS)) < 0 ||
         rpc_write(0, &mipmap, sizeof(CUmipmappedArray)) < 0 ||
         rpc_write(0, &device, sizeof(CUdevice)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -5570,9 +5118,8 @@ CUresult cuMipmappedArrayGetMemoryRequirements(CUDA_ARRAY_MEMORY_REQUIREMENTS* m
 CUresult cuArrayGetPlane(CUarray* pPlaneArray, CUarray hArray, unsigned int planeIdx)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuArrayGetPlane) < 0 ||
-        rpc_write(0, &pPlaneArray, sizeof(CUarray)) < 0 ||
+        rpc_write(0, pPlaneArray, sizeof(CUarray)) < 0 ||
         rpc_write(0, &hArray, sizeof(CUarray)) < 0 ||
         rpc_write(0, &planeIdx, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -5585,7 +5132,6 @@ CUresult cuArrayGetPlane(CUarray* pPlaneArray, CUarray hArray, unsigned int plan
 CUresult cuArrayDestroy(CUarray hArray)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuArrayDestroy) < 0 ||
         rpc_write(0, &hArray, sizeof(CUarray)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -5594,12 +5140,24 @@ CUresult cuArrayDestroy(CUarray hArray)
     return return_value;
 }
 
+CUresult cuArray3DCreate_v2(CUarray* pHandle, const CUDA_ARRAY3D_DESCRIPTOR* pAllocateArray)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuArray3DCreate_v2) < 0 ||
+        rpc_write(0, pHandle, sizeof(CUarray)) < 0 ||
+        rpc_write(0, &pAllocateArray, sizeof(const CUDA_ARRAY3D_DESCRIPTOR*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, pHandle, sizeof(CUarray)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
 CUresult cuArray3DGetDescriptor_v2(CUDA_ARRAY3D_DESCRIPTOR* pArrayDescriptor, CUarray hArray)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuArray3DGetDescriptor_v2) < 0 ||
-        rpc_write(0, &pArrayDescriptor, sizeof(CUDA_ARRAY3D_DESCRIPTOR)) < 0 ||
+        rpc_write(0, pArrayDescriptor, sizeof(CUDA_ARRAY3D_DESCRIPTOR)) < 0 ||
         rpc_write(0, &hArray, sizeof(CUarray)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pArrayDescriptor, sizeof(CUDA_ARRAY3D_DESCRIPTOR)) < 0 ||
@@ -5608,12 +5166,25 @@ CUresult cuArray3DGetDescriptor_v2(CUDA_ARRAY3D_DESCRIPTOR* pArrayDescriptor, CU
     return return_value;
 }
 
+CUresult cuMipmappedArrayCreate(CUmipmappedArray* pHandle, const CUDA_ARRAY3D_DESCRIPTOR* pMipmappedArrayDesc, unsigned int numMipmapLevels)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuMipmappedArrayCreate) < 0 ||
+        rpc_write(0, pHandle, sizeof(CUmipmappedArray)) < 0 ||
+        rpc_write(0, &pMipmappedArrayDesc, sizeof(const CUDA_ARRAY3D_DESCRIPTOR*)) < 0 ||
+        rpc_write(0, &numMipmapLevels, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, pHandle, sizeof(CUmipmappedArray)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
 CUresult cuMipmappedArrayGetLevel(CUarray* pLevelArray, CUmipmappedArray hMipmappedArray, unsigned int level)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMipmappedArrayGetLevel) < 0 ||
-        rpc_write(0, &pLevelArray, sizeof(CUarray)) < 0 ||
+        rpc_write(0, pLevelArray, sizeof(CUarray)) < 0 ||
         rpc_write(0, &hMipmappedArray, sizeof(CUmipmappedArray)) < 0 ||
         rpc_write(0, &level, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -5626,7 +5197,6 @@ CUresult cuMipmappedArrayGetLevel(CUarray* pLevelArray, CUmipmappedArray hMipmap
 CUresult cuMipmappedArrayDestroy(CUmipmappedArray hMipmappedArray)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMipmappedArrayDestroy) < 0 ||
         rpc_write(0, &hMipmappedArray, sizeof(CUmipmappedArray)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -5635,29 +5205,11 @@ CUresult cuMipmappedArrayDestroy(CUmipmappedArray hMipmappedArray)
     return return_value;
 }
 
-CUresult cuMemGetHandleForAddressRange(void* handle, CUdeviceptr dptr, size_t size, CUmemRangeHandleType handleType, unsigned long long flags)
-{
-    CUresult return_value;
-
-    if (rpc_start_request(0, RPC_cuMemGetHandleForAddressRange) < 0 ||
-        rpc_write(0, &handle, sizeof(void*)) < 0 ||
-        rpc_write(0, &dptr, sizeof(CUdeviceptr)) < 0 ||
-        rpc_write(0, &size, sizeof(size_t)) < 0 ||
-        rpc_write(0, &handleType, sizeof(CUmemRangeHandleType)) < 0 ||
-        rpc_write(0, &flags, sizeof(unsigned long long)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, handle, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    return return_value;
-}
-
 CUresult cuMemAddressReserve(CUdeviceptr* ptr, size_t size, size_t alignment, CUdeviceptr addr, unsigned long long flags)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemAddressReserve) < 0 ||
-        rpc_write(0, &ptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(0, ptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &size, sizeof(size_t)) < 0 ||
         rpc_write(0, &alignment, sizeof(size_t)) < 0 ||
         rpc_write(0, &addr, sizeof(CUdeviceptr)) < 0 ||
@@ -5672,7 +5224,6 @@ CUresult cuMemAddressReserve(CUdeviceptr* ptr, size_t size, size_t alignment, CU
 CUresult cuMemAddressFree(CUdeviceptr ptr, size_t size)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemAddressFree) < 0 ||
         rpc_write(0, &ptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &size, sizeof(size_t)) < 0 ||
@@ -5682,10 +5233,24 @@ CUresult cuMemAddressFree(CUdeviceptr ptr, size_t size)
     return return_value;
 }
 
+CUresult cuMemCreate(CUmemGenericAllocationHandle* handle, size_t size, const CUmemAllocationProp* prop, unsigned long long flags)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuMemCreate) < 0 ||
+        rpc_write(0, handle, sizeof(CUmemGenericAllocationHandle)) < 0 ||
+        rpc_write(0, &size, sizeof(size_t)) < 0 ||
+        rpc_write(0, &prop, sizeof(const CUmemAllocationProp*)) < 0 ||
+        rpc_write(0, &flags, sizeof(unsigned long long)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, handle, sizeof(CUmemGenericAllocationHandle)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
 CUresult cuMemRelease(CUmemGenericAllocationHandle handle)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemRelease) < 0 ||
         rpc_write(0, &handle, sizeof(CUmemGenericAllocationHandle)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -5697,7 +5262,6 @@ CUresult cuMemRelease(CUmemGenericAllocationHandle handle)
 CUresult cuMemMap(CUdeviceptr ptr, size_t size, size_t offset, CUmemGenericAllocationHandle handle, unsigned long long flags)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemMap) < 0 ||
         rpc_write(0, &ptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &size, sizeof(size_t)) < 0 ||
@@ -5713,9 +5277,8 @@ CUresult cuMemMap(CUdeviceptr ptr, size_t size, size_t offset, CUmemGenericAlloc
 CUresult cuMemMapArrayAsync(CUarrayMapInfo* mapInfoList, unsigned int count, CUstream hStream)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemMapArrayAsync) < 0 ||
-        rpc_write(0, &mapInfoList, sizeof(CUarrayMapInfo)) < 0 ||
+        rpc_write(0, mapInfoList, sizeof(CUarrayMapInfo)) < 0 ||
         rpc_write(0, &count, sizeof(unsigned int)) < 0 ||
         rpc_write(0, &hStream, sizeof(CUstream)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -5728,7 +5291,6 @@ CUresult cuMemMapArrayAsync(CUarrayMapInfo* mapInfoList, unsigned int count, CUs
 CUresult cuMemUnmap(CUdeviceptr ptr, size_t size)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemUnmap) < 0 ||
         rpc_write(0, &ptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &size, sizeof(size_t)) < 0 ||
@@ -5738,33 +5300,43 @@ CUresult cuMemUnmap(CUdeviceptr ptr, size_t size)
     return return_value;
 }
 
-CUresult cuMemExportToShareableHandle(void* shareableHandle, CUmemGenericAllocationHandle handle, CUmemAllocationHandleType handleType, unsigned long long flags)
+CUresult cuMemSetAccess(CUdeviceptr ptr, size_t size, const CUmemAccessDesc* desc, size_t count)
 {
     CUresult return_value;
-
-    if (rpc_start_request(0, RPC_cuMemExportToShareableHandle) < 0 ||
-        rpc_write(0, &shareableHandle, sizeof(void*)) < 0 ||
-        rpc_write(0, &handle, sizeof(CUmemGenericAllocationHandle)) < 0 ||
-        rpc_write(0, &handleType, sizeof(CUmemAllocationHandleType)) < 0 ||
-        rpc_write(0, &flags, sizeof(unsigned long long)) < 0 ||
+    if (rpc_start_request(0, RPC_cuMemSetAccess) < 0 ||
+        rpc_write(0, &ptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(0, &size, sizeof(size_t)) < 0 ||
+        rpc_write(0, &desc, sizeof(const CUmemAccessDesc*)) < 0 ||
+        rpc_write(0, &count, sizeof(size_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, shareableHandle, sizeof(void*)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
 }
 
-CUresult cuMemImportFromShareableHandle(CUmemGenericAllocationHandle* handle, void* osHandle, CUmemAllocationHandleType shHandleType)
+CUresult cuMemGetAccess(unsigned long long* flags, const CUmemLocation* location, CUdeviceptr ptr)
 {
     CUresult return_value;
-
-    if (rpc_start_request(0, RPC_cuMemImportFromShareableHandle) < 0 ||
-        rpc_write(0, &handle, sizeof(CUmemGenericAllocationHandle)) < 0 ||
-        rpc_write(0, &osHandle, sizeof(void*)) < 0 ||
-        rpc_write(0, &shHandleType, sizeof(CUmemAllocationHandleType)) < 0 ||
+    if (rpc_start_request(0, RPC_cuMemGetAccess) < 0 ||
+        rpc_write(0, flags, sizeof(unsigned long long)) < 0 ||
+        rpc_write(0, &location, sizeof(const CUmemLocation*)) < 0 ||
+        rpc_write(0, &ptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, handle, sizeof(CUmemGenericAllocationHandle)) < 0 ||
-        rpc_read(0, osHandle, sizeof(void*)) < 0 ||
+        rpc_read(0, flags, sizeof(unsigned long long)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuMemGetAllocationGranularity(size_t* granularity, const CUmemAllocationProp* prop, CUmemAllocationGranularity_flags option)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuMemGetAllocationGranularity) < 0 ||
+        rpc_write(0, granularity, sizeof(size_t)) < 0 ||
+        rpc_write(0, &prop, sizeof(const CUmemAllocationProp*)) < 0 ||
+        rpc_write(0, &option, sizeof(CUmemAllocationGranularity_flags)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, granularity, sizeof(size_t)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
@@ -5773,9 +5345,8 @@ CUresult cuMemImportFromShareableHandle(CUmemGenericAllocationHandle* handle, vo
 CUresult cuMemGetAllocationPropertiesFromHandle(CUmemAllocationProp* prop, CUmemGenericAllocationHandle handle)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemGetAllocationPropertiesFromHandle) < 0 ||
-        rpc_write(0, &prop, sizeof(CUmemAllocationProp)) < 0 ||
+        rpc_write(0, prop, sizeof(CUmemAllocationProp)) < 0 ||
         rpc_write(0, &handle, sizeof(CUmemGenericAllocationHandle)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, prop, sizeof(CUmemAllocationProp)) < 0 ||
@@ -5784,25 +5355,9 @@ CUresult cuMemGetAllocationPropertiesFromHandle(CUmemAllocationProp* prop, CUmem
     return return_value;
 }
 
-CUresult cuMemRetainAllocationHandle(CUmemGenericAllocationHandle* handle, void* addr)
-{
-    CUresult return_value;
-
-    if (rpc_start_request(0, RPC_cuMemRetainAllocationHandle) < 0 ||
-        rpc_write(0, &handle, sizeof(CUmemGenericAllocationHandle)) < 0 ||
-        rpc_write(0, &addr, sizeof(void*)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, handle, sizeof(CUmemGenericAllocationHandle)) < 0 ||
-        rpc_read(0, addr, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    return return_value;
-}
-
 CUresult cuMemFreeAsync(CUdeviceptr dptr, CUstream hStream)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemFreeAsync) < 0 ||
         rpc_write(0, &dptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &hStream, sizeof(CUstream)) < 0 ||
@@ -5815,9 +5370,8 @@ CUresult cuMemFreeAsync(CUdeviceptr dptr, CUstream hStream)
 CUresult cuMemAllocAsync(CUdeviceptr* dptr, size_t bytesize, CUstream hStream)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemAllocAsync) < 0 ||
-        rpc_write(0, &dptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(0, dptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &bytesize, sizeof(size_t)) < 0 ||
         rpc_write(0, &hStream, sizeof(CUstream)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -5830,7 +5384,6 @@ CUresult cuMemAllocAsync(CUdeviceptr* dptr, size_t bytesize, CUstream hStream)
 CUresult cuMemPoolTrimTo(CUmemoryPool pool, size_t minBytesToKeep)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemPoolTrimTo) < 0 ||
         rpc_write(0, &pool, sizeof(CUmemoryPool)) < 0 ||
         rpc_write(0, &minBytesToKeep, sizeof(size_t)) < 0 ||
@@ -5840,31 +5393,14 @@ CUresult cuMemPoolTrimTo(CUmemoryPool pool, size_t minBytesToKeep)
     return return_value;
 }
 
-CUresult cuMemPoolSetAttribute(CUmemoryPool pool, CUmemPool_attribute attr, void* value)
+CUresult cuMemPoolSetAccess(CUmemoryPool pool, const CUmemAccessDesc* map, size_t count)
 {
     CUresult return_value;
-
-    if (rpc_start_request(0, RPC_cuMemPoolSetAttribute) < 0 ||
+    if (rpc_start_request(0, RPC_cuMemPoolSetAccess) < 0 ||
         rpc_write(0, &pool, sizeof(CUmemoryPool)) < 0 ||
-        rpc_write(0, &attr, sizeof(CUmemPool_attribute)) < 0 ||
-        rpc_write(0, &value, sizeof(void*)) < 0 ||
+        rpc_write(0, &map, sizeof(const CUmemAccessDesc*)) < 0 ||
+        rpc_write(0, &count, sizeof(size_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, value, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    return return_value;
-}
-
-CUresult cuMemPoolGetAttribute(CUmemoryPool pool, CUmemPool_attribute attr, void* value)
-{
-    CUresult return_value;
-
-    if (rpc_start_request(0, RPC_cuMemPoolGetAttribute) < 0 ||
-        rpc_write(0, &pool, sizeof(CUmemoryPool)) < 0 ||
-        rpc_write(0, &attr, sizeof(CUmemPool_attribute)) < 0 ||
-        rpc_write(0, &value, sizeof(void*)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, value, sizeof(void*)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
@@ -5873,11 +5409,10 @@ CUresult cuMemPoolGetAttribute(CUmemoryPool pool, CUmemPool_attribute attr, void
 CUresult cuMemPoolGetAccess(CUmemAccess_flags* flags, CUmemoryPool memPool, CUmemLocation* location)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemPoolGetAccess) < 0 ||
-        rpc_write(0, &flags, sizeof(CUmemAccess_flags)) < 0 ||
+        rpc_write(0, flags, sizeof(CUmemAccess_flags)) < 0 ||
         rpc_write(0, &memPool, sizeof(CUmemoryPool)) < 0 ||
-        rpc_write(0, &location, sizeof(CUmemLocation)) < 0 ||
+        rpc_write(0, location, sizeof(CUmemLocation)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, flags, sizeof(CUmemAccess_flags)) < 0 ||
         rpc_read(0, location, sizeof(CUmemLocation)) < 0 ||
@@ -5886,10 +5421,22 @@ CUresult cuMemPoolGetAccess(CUmemAccess_flags* flags, CUmemoryPool memPool, CUme
     return return_value;
 }
 
+CUresult cuMemPoolCreate(CUmemoryPool* pool, const CUmemPoolProps* poolProps)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuMemPoolCreate) < 0 ||
+        rpc_write(0, pool, sizeof(CUmemoryPool)) < 0 ||
+        rpc_write(0, &poolProps, sizeof(const CUmemPoolProps*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, pool, sizeof(CUmemoryPool)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
 CUresult cuMemPoolDestroy(CUmemoryPool pool)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemPoolDestroy) < 0 ||
         rpc_write(0, &pool, sizeof(CUmemoryPool)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -5901,9 +5448,8 @@ CUresult cuMemPoolDestroy(CUmemoryPool pool)
 CUresult cuMemAllocFromPoolAsync(CUdeviceptr* dptr, size_t bytesize, CUmemoryPool pool, CUstream hStream)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemAllocFromPoolAsync) < 0 ||
-        rpc_write(0, &dptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(0, dptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &bytesize, sizeof(size_t)) < 0 ||
         rpc_write(0, &pool, sizeof(CUmemoryPool)) < 0 ||
         rpc_write(0, &hStream, sizeof(CUstream)) < 0 ||
@@ -5914,45 +5460,11 @@ CUresult cuMemAllocFromPoolAsync(CUdeviceptr* dptr, size_t bytesize, CUmemoryPoo
     return return_value;
 }
 
-CUresult cuMemPoolExportToShareableHandle(void* handle_out, CUmemoryPool pool, CUmemAllocationHandleType handleType, unsigned long long flags)
-{
-    CUresult return_value;
-
-    if (rpc_start_request(0, RPC_cuMemPoolExportToShareableHandle) < 0 ||
-        rpc_write(0, &handle_out, sizeof(void*)) < 0 ||
-        rpc_write(0, &pool, sizeof(CUmemoryPool)) < 0 ||
-        rpc_write(0, &handleType, sizeof(CUmemAllocationHandleType)) < 0 ||
-        rpc_write(0, &flags, sizeof(unsigned long long)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, handle_out, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    return return_value;
-}
-
-CUresult cuMemPoolImportFromShareableHandle(CUmemoryPool* pool_out, void* handle, CUmemAllocationHandleType handleType, unsigned long long flags)
-{
-    CUresult return_value;
-
-    if (rpc_start_request(0, RPC_cuMemPoolImportFromShareableHandle) < 0 ||
-        rpc_write(0, &pool_out, sizeof(CUmemoryPool)) < 0 ||
-        rpc_write(0, &handle, sizeof(void*)) < 0 ||
-        rpc_write(0, &handleType, sizeof(CUmemAllocationHandleType)) < 0 ||
-        rpc_write(0, &flags, sizeof(unsigned long long)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, pool_out, sizeof(CUmemoryPool)) < 0 ||
-        rpc_read(0, handle, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    return return_value;
-}
-
 CUresult cuMemPoolExportPointer(CUmemPoolPtrExportData* shareData_out, CUdeviceptr ptr)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemPoolExportPointer) < 0 ||
-        rpc_write(0, &shareData_out, sizeof(CUmemPoolPtrExportData)) < 0 ||
+        rpc_write(0, shareData_out, sizeof(CUmemPoolPtrExportData)) < 0 ||
         rpc_write(0, &ptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, shareData_out, sizeof(CUmemPoolPtrExportData)) < 0 ||
@@ -5964,11 +5476,10 @@ CUresult cuMemPoolExportPointer(CUmemPoolPtrExportData* shareData_out, CUdevicep
 CUresult cuMemPoolImportPointer(CUdeviceptr* ptr_out, CUmemoryPool pool, CUmemPoolPtrExportData* shareData)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemPoolImportPointer) < 0 ||
-        rpc_write(0, &ptr_out, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(0, ptr_out, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &pool, sizeof(CUmemoryPool)) < 0 ||
-        rpc_write(0, &shareData, sizeof(CUmemPoolPtrExportData)) < 0 ||
+        rpc_write(0, shareData, sizeof(CUmemPoolPtrExportData)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, ptr_out, sizeof(CUdeviceptr)) < 0 ||
         rpc_read(0, shareData, sizeof(CUmemPoolPtrExportData)) < 0 ||
@@ -5977,25 +5488,9 @@ CUresult cuMemPoolImportPointer(CUdeviceptr* ptr_out, CUmemoryPool pool, CUmemPo
     return return_value;
 }
 
-CUresult cuPointerGetAttribute(void* data, CUpointer_attribute attribute, CUdeviceptr ptr)
-{
-    CUresult return_value;
-
-    if (rpc_start_request(0, RPC_cuPointerGetAttribute) < 0 ||
-        rpc_write(0, &data, sizeof(void*)) < 0 ||
-        rpc_write(0, &attribute, sizeof(CUpointer_attribute)) < 0 ||
-        rpc_write(0, &ptr, sizeof(CUdeviceptr)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, data, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    return return_value;
-}
-
 CUresult cuMemPrefetchAsync(CUdeviceptr devPtr, size_t count, CUdevice dstDevice, CUstream hStream)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemPrefetchAsync) < 0 ||
         rpc_write(0, &devPtr, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &count, sizeof(size_t)) < 0 ||
@@ -6010,7 +5505,6 @@ CUresult cuMemPrefetchAsync(CUdeviceptr devPtr, size_t count, CUdevice dstDevice
 CUresult cuMemAdvise(CUdeviceptr devPtr, size_t count, CUmem_advise advice, CUdevice device)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemAdvise) < 0 ||
         rpc_write(0, &devPtr, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &count, sizeof(size_t)) < 0 ||
@@ -6022,31 +5516,13 @@ CUresult cuMemAdvise(CUdeviceptr devPtr, size_t count, CUmem_advise advice, CUde
     return return_value;
 }
 
-CUresult cuMemRangeGetAttribute(void* data, size_t dataSize, CUmem_range_attribute attribute, CUdeviceptr devPtr, size_t count)
-{
-    CUresult return_value;
-
-    if (rpc_start_request(0, RPC_cuMemRangeGetAttribute) < 0 ||
-        rpc_write(0, &data, sizeof(void*)) < 0 ||
-        rpc_write(0, &dataSize, sizeof(size_t)) < 0 ||
-        rpc_write(0, &attribute, sizeof(CUmem_range_attribute)) < 0 ||
-        rpc_write(0, &devPtr, sizeof(CUdeviceptr)) < 0 ||
-        rpc_write(0, &count, sizeof(size_t)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, data, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    return return_value;
-}
-
 CUresult cuMemRangeGetAttributes(void** data, size_t* dataSizes, CUmem_range_attribute* attributes, size_t numAttributes, CUdeviceptr devPtr, size_t count)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuMemRangeGetAttributes) < 0 ||
-        rpc_write(0, &data, sizeof(void*)) < 0 ||
-        rpc_write(0, &dataSizes, sizeof(size_t)) < 0 ||
-        rpc_write(0, &attributes, sizeof(CUmem_range_attribute)) < 0 ||
+        rpc_write(0, data, sizeof(void*)) < 0 ||
+        rpc_write(0, dataSizes, sizeof(size_t)) < 0 ||
+        rpc_write(0, attributes, sizeof(CUmem_range_attribute)) < 0 ||
         rpc_write(0, &numAttributes, sizeof(size_t)) < 0 ||
         rpc_write(0, &devPtr, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &count, sizeof(size_t)) < 0 ||
@@ -6059,14 +5535,26 @@ CUresult cuMemRangeGetAttributes(void** data, size_t* dataSizes, CUmem_range_att
     return return_value;
 }
 
+CUresult cuPointerSetAttribute(const void* value, CUpointer_attribute attribute, CUdeviceptr ptr)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuPointerSetAttribute) < 0 ||
+        rpc_write(0, &value, sizeof(const void*)) < 0 ||
+        rpc_write(0, &attribute, sizeof(CUpointer_attribute)) < 0 ||
+        rpc_write(0, &ptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
 CUresult cuPointerGetAttributes(unsigned int numAttributes, CUpointer_attribute* attributes, void** data, CUdeviceptr ptr)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuPointerGetAttributes) < 0 ||
         rpc_write(0, &numAttributes, sizeof(unsigned int)) < 0 ||
-        rpc_write(0, &attributes, sizeof(CUpointer_attribute)) < 0 ||
-        rpc_write(0, &data, sizeof(void*)) < 0 ||
+        rpc_write(0, attributes, sizeof(CUpointer_attribute)) < 0 ||
+        rpc_write(0, data, sizeof(void*)) < 0 ||
         rpc_write(0, &ptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, attributes, sizeof(CUpointer_attribute)) < 0 ||
@@ -6079,9 +5567,8 @@ CUresult cuPointerGetAttributes(unsigned int numAttributes, CUpointer_attribute*
 CUresult cuStreamCreate(CUstream* phStream, unsigned int Flags)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuStreamCreate) < 0 ||
-        rpc_write(0, &phStream, sizeof(CUstream)) < 0 ||
+        rpc_write(0, phStream, sizeof(CUstream)) < 0 ||
         rpc_write(0, &Flags, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, phStream, sizeof(CUstream)) < 0 ||
@@ -6093,9 +5580,8 @@ CUresult cuStreamCreate(CUstream* phStream, unsigned int Flags)
 CUresult cuStreamCreateWithPriority(CUstream* phStream, unsigned int flags, int priority)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuStreamCreateWithPriority) < 0 ||
-        rpc_write(0, &phStream, sizeof(CUstream)) < 0 ||
+        rpc_write(0, phStream, sizeof(CUstream)) < 0 ||
         rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
         rpc_write(0, &priority, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -6108,10 +5594,9 @@ CUresult cuStreamCreateWithPriority(CUstream* phStream, unsigned int flags, int 
 CUresult cuStreamGetPriority(CUstream hStream, int* priority)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuStreamGetPriority) < 0 ||
         rpc_write(0, &hStream, sizeof(CUstream)) < 0 ||
-        rpc_write(0, &priority, sizeof(int)) < 0 ||
+        rpc_write(0, priority, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, priority, sizeof(int)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -6122,10 +5607,9 @@ CUresult cuStreamGetPriority(CUstream hStream, int* priority)
 CUresult cuStreamGetFlags(CUstream hStream, unsigned int* flags)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuStreamGetFlags) < 0 ||
         rpc_write(0, &hStream, sizeof(CUstream)) < 0 ||
-        rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, flags, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, flags, sizeof(unsigned int)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -6136,10 +5620,9 @@ CUresult cuStreamGetFlags(CUstream hStream, unsigned int* flags)
 CUresult cuStreamGetId(CUstream hStream, unsigned long long* streamId)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuStreamGetId) < 0 ||
         rpc_write(0, &hStream, sizeof(CUstream)) < 0 ||
-        rpc_write(0, &streamId, sizeof(unsigned long long)) < 0 ||
+        rpc_write(0, streamId, sizeof(unsigned long long)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, streamId, sizeof(unsigned long long)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -6150,10 +5633,9 @@ CUresult cuStreamGetId(CUstream hStream, unsigned long long* streamId)
 CUresult cuStreamGetCtx(CUstream hStream, CUcontext* pctx)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuStreamGetCtx) < 0 ||
         rpc_write(0, &hStream, sizeof(CUstream)) < 0 ||
-        rpc_write(0, &pctx, sizeof(CUcontext)) < 0 ||
+        rpc_write(0, pctx, sizeof(CUcontext)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pctx, sizeof(CUcontext)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -6164,7 +5646,6 @@ CUresult cuStreamGetCtx(CUstream hStream, CUcontext* pctx)
 CUresult cuStreamWaitEvent(CUstream hStream, CUevent hEvent, unsigned int Flags)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuStreamWaitEvent) < 0 ||
         rpc_write(0, &hStream, sizeof(CUstream)) < 0 ||
         rpc_write(0, &hEvent, sizeof(CUevent)) < 0 ||
@@ -6175,26 +5656,9 @@ CUresult cuStreamWaitEvent(CUstream hStream, CUevent hEvent, unsigned int Flags)
     return return_value;
 }
 
-CUresult cuStreamAddCallback(CUstream hStream, CUstreamCallback callback, void* userData, unsigned int flags)
-{
-    CUresult return_value;
-
-    if (rpc_start_request(0, RPC_cuStreamAddCallback) < 0 ||
-        rpc_write(0, &hStream, sizeof(CUstream)) < 0 ||
-        rpc_write(0, &callback, sizeof(CUstreamCallback)) < 0 ||
-        rpc_write(0, &userData, sizeof(void*)) < 0 ||
-        rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, userData, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    return return_value;
-}
-
 CUresult cuStreamBeginCapture_v2(CUstream hStream, CUstreamCaptureMode mode)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuStreamBeginCapture_v2) < 0 ||
         rpc_write(0, &hStream, sizeof(CUstream)) < 0 ||
         rpc_write(0, &mode, sizeof(CUstreamCaptureMode)) < 0 ||
@@ -6207,9 +5671,8 @@ CUresult cuStreamBeginCapture_v2(CUstream hStream, CUstreamCaptureMode mode)
 CUresult cuThreadExchangeStreamCaptureMode(CUstreamCaptureMode* mode)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuThreadExchangeStreamCaptureMode) < 0 ||
-        rpc_write(0, &mode, sizeof(CUstreamCaptureMode)) < 0 ||
+        rpc_write(0, mode, sizeof(CUstreamCaptureMode)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, mode, sizeof(CUstreamCaptureMode)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -6220,10 +5683,9 @@ CUresult cuThreadExchangeStreamCaptureMode(CUstreamCaptureMode* mode)
 CUresult cuStreamEndCapture(CUstream hStream, CUgraph* phGraph)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuStreamEndCapture) < 0 ||
         rpc_write(0, &hStream, sizeof(CUstream)) < 0 ||
-        rpc_write(0, &phGraph, sizeof(CUgraph)) < 0 ||
+        rpc_write(0, phGraph, sizeof(CUgraph)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, phGraph, sizeof(CUgraph)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -6234,10 +5696,9 @@ CUresult cuStreamEndCapture(CUstream hStream, CUgraph* phGraph)
 CUresult cuStreamIsCapturing(CUstream hStream, CUstreamCaptureStatus* captureStatus)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuStreamIsCapturing) < 0 ||
         rpc_write(0, &hStream, sizeof(CUstream)) < 0 ||
-        rpc_write(0, &captureStatus, sizeof(CUstreamCaptureStatus)) < 0 ||
+        rpc_write(0, captureStatus, sizeof(CUstreamCaptureStatus)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, captureStatus, sizeof(CUstreamCaptureStatus)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -6248,10 +5709,9 @@ CUresult cuStreamIsCapturing(CUstream hStream, CUstreamCaptureStatus* captureSta
 CUresult cuStreamUpdateCaptureDependencies(CUstream hStream, CUgraphNode* dependencies, size_t numDependencies, unsigned int flags)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuStreamUpdateCaptureDependencies) < 0 ||
         rpc_write(0, &hStream, sizeof(CUstream)) < 0 ||
-        rpc_write(0, &dependencies, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, dependencies, sizeof(CUgraphNode)) < 0 ||
         rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
         rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -6264,7 +5724,6 @@ CUresult cuStreamUpdateCaptureDependencies(CUstream hStream, CUgraphNode* depend
 CUresult cuStreamAttachMemAsync(CUstream hStream, CUdeviceptr dptr, size_t length, unsigned int flags)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuStreamAttachMemAsync) < 0 ||
         rpc_write(0, &hStream, sizeof(CUstream)) < 0 ||
         rpc_write(0, &dptr, sizeof(CUdeviceptr)) < 0 ||
@@ -6279,7 +5738,6 @@ CUresult cuStreamAttachMemAsync(CUstream hStream, CUdeviceptr dptr, size_t lengt
 CUresult cuStreamQuery(CUstream hStream)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuStreamQuery) < 0 ||
         rpc_write(0, &hStream, sizeof(CUstream)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -6291,7 +5749,6 @@ CUresult cuStreamQuery(CUstream hStream)
 CUresult cuStreamSynchronize(CUstream hStream)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuStreamSynchronize) < 0 ||
         rpc_write(0, &hStream, sizeof(CUstream)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -6303,7 +5760,6 @@ CUresult cuStreamSynchronize(CUstream hStream)
 CUresult cuStreamDestroy_v2(CUstream hStream)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuStreamDestroy_v2) < 0 ||
         rpc_write(0, &hStream, sizeof(CUstream)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -6315,7 +5771,6 @@ CUresult cuStreamDestroy_v2(CUstream hStream)
 CUresult cuStreamCopyAttributes(CUstream dst, CUstream src)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuStreamCopyAttributes) < 0 ||
         rpc_write(0, &dst, sizeof(CUstream)) < 0 ||
         rpc_write(0, &src, sizeof(CUstream)) < 0 ||
@@ -6328,13 +5783,25 @@ CUresult cuStreamCopyAttributes(CUstream dst, CUstream src)
 CUresult cuStreamGetAttribute(CUstream hStream, CUstreamAttrID attr, CUstreamAttrValue* value_out)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuStreamGetAttribute) < 0 ||
         rpc_write(0, &hStream, sizeof(CUstream)) < 0 ||
         rpc_write(0, &attr, sizeof(CUstreamAttrID)) < 0 ||
-        rpc_write(0, &value_out, sizeof(CUstreamAttrValue)) < 0 ||
+        rpc_write(0, value_out, sizeof(CUstreamAttrValue)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, value_out, sizeof(CUstreamAttrValue)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuStreamSetAttribute(CUstream hStream, CUstreamAttrID attr, const CUstreamAttrValue* value)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuStreamSetAttribute) < 0 ||
+        rpc_write(0, &hStream, sizeof(CUstream)) < 0 ||
+        rpc_write(0, &attr, sizeof(CUstreamAttrID)) < 0 ||
+        rpc_write(0, &value, sizeof(const CUstreamAttrValue*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
@@ -6343,9 +5810,8 @@ CUresult cuStreamGetAttribute(CUstream hStream, CUstreamAttrID attr, CUstreamAtt
 CUresult cuEventCreate(CUevent* phEvent, unsigned int Flags)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuEventCreate) < 0 ||
-        rpc_write(0, &phEvent, sizeof(CUevent)) < 0 ||
+        rpc_write(0, phEvent, sizeof(CUevent)) < 0 ||
         rpc_write(0, &Flags, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, phEvent, sizeof(CUevent)) < 0 ||
@@ -6357,7 +5823,6 @@ CUresult cuEventCreate(CUevent* phEvent, unsigned int Flags)
 CUresult cuEventRecord(CUevent hEvent, CUstream hStream)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuEventRecord) < 0 ||
         rpc_write(0, &hEvent, sizeof(CUevent)) < 0 ||
         rpc_write(0, &hStream, sizeof(CUstream)) < 0 ||
@@ -6370,7 +5835,6 @@ CUresult cuEventRecord(CUevent hEvent, CUstream hStream)
 CUresult cuEventRecordWithFlags(CUevent hEvent, CUstream hStream, unsigned int flags)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuEventRecordWithFlags) < 0 ||
         rpc_write(0, &hEvent, sizeof(CUevent)) < 0 ||
         rpc_write(0, &hStream, sizeof(CUstream)) < 0 ||
@@ -6384,7 +5848,6 @@ CUresult cuEventRecordWithFlags(CUevent hEvent, CUstream hStream, unsigned int f
 CUresult cuEventQuery(CUevent hEvent)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuEventQuery) < 0 ||
         rpc_write(0, &hEvent, sizeof(CUevent)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -6396,7 +5859,6 @@ CUresult cuEventQuery(CUevent hEvent)
 CUresult cuEventSynchronize(CUevent hEvent)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuEventSynchronize) < 0 ||
         rpc_write(0, &hEvent, sizeof(CUevent)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -6408,7 +5870,6 @@ CUresult cuEventSynchronize(CUevent hEvent)
 CUresult cuEventDestroy_v2(CUevent hEvent)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuEventDestroy_v2) < 0 ||
         rpc_write(0, &hEvent, sizeof(CUevent)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -6420,9 +5881,8 @@ CUresult cuEventDestroy_v2(CUevent hEvent)
 CUresult cuEventElapsedTime(float* pMilliseconds, CUevent hStart, CUevent hEnd)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuEventElapsedTime) < 0 ||
-        rpc_write(0, &pMilliseconds, sizeof(float)) < 0 ||
+        rpc_write(0, pMilliseconds, sizeof(float)) < 0 ||
         rpc_write(0, &hStart, sizeof(CUevent)) < 0 ||
         rpc_write(0, &hEnd, sizeof(CUevent)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -6432,12 +5892,93 @@ CUresult cuEventElapsedTime(float* pMilliseconds, CUevent hStart, CUevent hEnd)
     return return_value;
 }
 
+CUresult cuImportExternalMemory(CUexternalMemory* extMem_out, const CUDA_EXTERNAL_MEMORY_HANDLE_DESC* memHandleDesc)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuImportExternalMemory) < 0 ||
+        rpc_write(0, extMem_out, sizeof(CUexternalMemory)) < 0 ||
+        rpc_write(0, &memHandleDesc, sizeof(const CUDA_EXTERNAL_MEMORY_HANDLE_DESC*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, extMem_out, sizeof(CUexternalMemory)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuExternalMemoryGetMappedBuffer(CUdeviceptr* devPtr, CUexternalMemory extMem, const CUDA_EXTERNAL_MEMORY_BUFFER_DESC* bufferDesc)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuExternalMemoryGetMappedBuffer) < 0 ||
+        rpc_write(0, devPtr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(0, &extMem, sizeof(CUexternalMemory)) < 0 ||
+        rpc_write(0, &bufferDesc, sizeof(const CUDA_EXTERNAL_MEMORY_BUFFER_DESC*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, devPtr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuExternalMemoryGetMappedMipmappedArray(CUmipmappedArray* mipmap, CUexternalMemory extMem, const CUDA_EXTERNAL_MEMORY_MIPMAPPED_ARRAY_DESC* mipmapDesc)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuExternalMemoryGetMappedMipmappedArray) < 0 ||
+        rpc_write(0, mipmap, sizeof(CUmipmappedArray)) < 0 ||
+        rpc_write(0, &extMem, sizeof(CUexternalMemory)) < 0 ||
+        rpc_write(0, &mipmapDesc, sizeof(const CUDA_EXTERNAL_MEMORY_MIPMAPPED_ARRAY_DESC*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, mipmap, sizeof(CUmipmappedArray)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
 CUresult cuDestroyExternalMemory(CUexternalMemory extMem)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuDestroyExternalMemory) < 0 ||
         rpc_write(0, &extMem, sizeof(CUexternalMemory)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuImportExternalSemaphore(CUexternalSemaphore* extSem_out, const CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC* semHandleDesc)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuImportExternalSemaphore) < 0 ||
+        rpc_write(0, extSem_out, sizeof(CUexternalSemaphore)) < 0 ||
+        rpc_write(0, &semHandleDesc, sizeof(const CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, extSem_out, sizeof(CUexternalSemaphore)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuSignalExternalSemaphoresAsync(const CUexternalSemaphore* extSemArray, const CUDA_EXTERNAL_SEMAPHORE_SIGNAL_PARAMS* paramsArray, unsigned int numExtSems, CUstream stream)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuSignalExternalSemaphoresAsync) < 0 ||
+        rpc_write(0, &extSemArray, sizeof(const CUexternalSemaphore*)) < 0 ||
+        rpc_write(0, &paramsArray, sizeof(const CUDA_EXTERNAL_SEMAPHORE_SIGNAL_PARAMS*)) < 0 ||
+        rpc_write(0, &numExtSems, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, &stream, sizeof(CUstream)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuWaitExternalSemaphoresAsync(const CUexternalSemaphore* extSemArray, const CUDA_EXTERNAL_SEMAPHORE_WAIT_PARAMS* paramsArray, unsigned int numExtSems, CUstream stream)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuWaitExternalSemaphoresAsync) < 0 ||
+        rpc_write(0, &extSemArray, sizeof(const CUexternalSemaphore*)) < 0 ||
+        rpc_write(0, &paramsArray, sizeof(const CUDA_EXTERNAL_SEMAPHORE_WAIT_PARAMS*)) < 0 ||
+        rpc_write(0, &numExtSems, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, &stream, sizeof(CUstream)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
@@ -6447,7 +5988,6 @@ CUresult cuDestroyExternalMemory(CUexternalMemory extMem)
 CUresult cuDestroyExternalSemaphore(CUexternalSemaphore extSem)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuDestroyExternalSemaphore) < 0 ||
         rpc_write(0, &extSem, sizeof(CUexternalSemaphore)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -6459,7 +5999,6 @@ CUresult cuDestroyExternalSemaphore(CUexternalSemaphore extSem)
 CUresult cuStreamWaitValue32_v2(CUstream stream, CUdeviceptr addr, cuuint32_t value, unsigned int flags)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuStreamWaitValue32_v2) < 0 ||
         rpc_write(0, &stream, sizeof(CUstream)) < 0 ||
         rpc_write(0, &addr, sizeof(CUdeviceptr)) < 0 ||
@@ -6474,7 +6013,6 @@ CUresult cuStreamWaitValue32_v2(CUstream stream, CUdeviceptr addr, cuuint32_t va
 CUresult cuStreamWaitValue64_v2(CUstream stream, CUdeviceptr addr, cuuint64_t value, unsigned int flags)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuStreamWaitValue64_v2) < 0 ||
         rpc_write(0, &stream, sizeof(CUstream)) < 0 ||
         rpc_write(0, &addr, sizeof(CUdeviceptr)) < 0 ||
@@ -6489,7 +6027,6 @@ CUresult cuStreamWaitValue64_v2(CUstream stream, CUdeviceptr addr, cuuint64_t va
 CUresult cuStreamWriteValue32_v2(CUstream stream, CUdeviceptr addr, cuuint32_t value, unsigned int flags)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuStreamWriteValue32_v2) < 0 ||
         rpc_write(0, &stream, sizeof(CUstream)) < 0 ||
         rpc_write(0, &addr, sizeof(CUdeviceptr)) < 0 ||
@@ -6504,7 +6041,6 @@ CUresult cuStreamWriteValue32_v2(CUstream stream, CUdeviceptr addr, cuuint32_t v
 CUresult cuStreamWriteValue64_v2(CUstream stream, CUdeviceptr addr, cuuint64_t value, unsigned int flags)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuStreamWriteValue64_v2) < 0 ||
         rpc_write(0, &stream, sizeof(CUstream)) < 0 ||
         rpc_write(0, &addr, sizeof(CUdeviceptr)) < 0 ||
@@ -6519,11 +6055,10 @@ CUresult cuStreamWriteValue64_v2(CUstream stream, CUdeviceptr addr, cuuint64_t v
 CUresult cuStreamBatchMemOp_v2(CUstream stream, unsigned int count, CUstreamBatchMemOpParams* paramArray, unsigned int flags)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuStreamBatchMemOp_v2) < 0 ||
         rpc_write(0, &stream, sizeof(CUstream)) < 0 ||
         rpc_write(0, &count, sizeof(unsigned int)) < 0 ||
-        rpc_write(0, &paramArray, sizeof(CUstreamBatchMemOpParams)) < 0 ||
+        rpc_write(0, paramArray, sizeof(CUstreamBatchMemOpParams)) < 0 ||
         rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, paramArray, sizeof(CUstreamBatchMemOpParams)) < 0 ||
@@ -6535,9 +6070,8 @@ CUresult cuStreamBatchMemOp_v2(CUstream stream, unsigned int count, CUstreamBatc
 CUresult cuFuncGetAttribute(int* pi, CUfunction_attribute attrib, CUfunction hfunc)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuFuncGetAttribute) < 0 ||
-        rpc_write(0, &pi, sizeof(int)) < 0 ||
+        rpc_write(0, pi, sizeof(int)) < 0 ||
         rpc_write(0, &attrib, sizeof(CUfunction_attribute)) < 0 ||
         rpc_write(0, &hfunc, sizeof(CUfunction)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -6550,7 +6084,6 @@ CUresult cuFuncGetAttribute(int* pi, CUfunction_attribute attrib, CUfunction hfu
 CUresult cuFuncSetAttribute(CUfunction hfunc, CUfunction_attribute attrib, int value)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuFuncSetAttribute) < 0 ||
         rpc_write(0, &hfunc, sizeof(CUfunction)) < 0 ||
         rpc_write(0, &attrib, sizeof(CUfunction_attribute)) < 0 ||
@@ -6564,7 +6097,6 @@ CUresult cuFuncSetAttribute(CUfunction hfunc, CUfunction_attribute attrib, int v
 CUresult cuFuncSetCacheConfig(CUfunction hfunc, CUfunc_cache config)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuFuncSetCacheConfig) < 0 ||
         rpc_write(0, &hfunc, sizeof(CUfunction)) < 0 ||
         rpc_write(0, &config, sizeof(CUfunc_cache)) < 0 ||
@@ -6577,7 +6109,6 @@ CUresult cuFuncSetCacheConfig(CUfunction hfunc, CUfunc_cache config)
 CUresult cuFuncSetSharedMemConfig(CUfunction hfunc, CUsharedconfig config)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuFuncSetSharedMemConfig) < 0 ||
         rpc_write(0, &hfunc, sizeof(CUfunction)) < 0 ||
         rpc_write(0, &config, sizeof(CUsharedconfig)) < 0 ||
@@ -6590,9 +6121,8 @@ CUresult cuFuncSetSharedMemConfig(CUfunction hfunc, CUsharedconfig config)
 CUresult cuFuncGetModule(CUmodule* hmod, CUfunction hfunc)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuFuncGetModule) < 0 ||
-        rpc_write(0, &hmod, sizeof(CUmodule)) < 0 ||
+        rpc_write(0, hmod, sizeof(CUmodule)) < 0 ||
         rpc_write(0, &hfunc, sizeof(CUfunction)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, hmod, sizeof(CUmodule)) < 0 ||
@@ -6604,7 +6134,6 @@ CUresult cuFuncGetModule(CUmodule* hmod, CUfunction hfunc)
 CUresult cuLaunchKernel(CUfunction f, unsigned int gridDimX, unsigned int gridDimY, unsigned int gridDimZ, unsigned int blockDimX, unsigned int blockDimY, unsigned int blockDimZ, unsigned int sharedMemBytes, CUstream hStream, void** kernelParams, void** extra)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuLaunchKernel) < 0 ||
         rpc_write(0, &f, sizeof(CUfunction)) < 0 ||
         rpc_write(0, &gridDimX, sizeof(unsigned int)) < 0 ||
@@ -6615,8 +6144,8 @@ CUresult cuLaunchKernel(CUfunction f, unsigned int gridDimX, unsigned int gridDi
         rpc_write(0, &blockDimZ, sizeof(unsigned int)) < 0 ||
         rpc_write(0, &sharedMemBytes, sizeof(unsigned int)) < 0 ||
         rpc_write(0, &hStream, sizeof(CUstream)) < 0 ||
-        rpc_write(0, &kernelParams, sizeof(void*)) < 0 ||
-        rpc_write(0, &extra, sizeof(void*)) < 0 ||
+        rpc_write(0, &kernelParams, sizeof(void**)) < 0 ||
+        rpc_write(0, &extra, sizeof(void**)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
@@ -6626,7 +6155,6 @@ CUresult cuLaunchKernel(CUfunction f, unsigned int gridDimX, unsigned int gridDi
 CUresult cuLaunchCooperativeKernel(CUfunction f, unsigned int gridDimX, unsigned int gridDimY, unsigned int gridDimZ, unsigned int blockDimX, unsigned int blockDimY, unsigned int blockDimZ, unsigned int sharedMemBytes, CUstream hStream, void** kernelParams)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuLaunchCooperativeKernel) < 0 ||
         rpc_write(0, &f, sizeof(CUfunction)) < 0 ||
         rpc_write(0, &gridDimX, sizeof(unsigned int)) < 0 ||
@@ -6637,7 +6165,7 @@ CUresult cuLaunchCooperativeKernel(CUfunction f, unsigned int gridDimX, unsigned
         rpc_write(0, &blockDimZ, sizeof(unsigned int)) < 0 ||
         rpc_write(0, &sharedMemBytes, sizeof(unsigned int)) < 0 ||
         rpc_write(0, &hStream, sizeof(CUstream)) < 0 ||
-        rpc_write(0, &kernelParams, sizeof(void*)) < 0 ||
+        rpc_write(0, kernelParams, sizeof(void*)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, kernelParams, sizeof(void*)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -6648,9 +6176,8 @@ CUresult cuLaunchCooperativeKernel(CUfunction f, unsigned int gridDimX, unsigned
 CUresult cuLaunchCooperativeKernelMultiDevice(CUDA_LAUNCH_PARAMS* launchParamsList, unsigned int numDevices, unsigned int flags)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuLaunchCooperativeKernelMultiDevice) < 0 ||
-        rpc_write(0, &launchParamsList, sizeof(CUDA_LAUNCH_PARAMS)) < 0 ||
+        rpc_write(0, launchParamsList, sizeof(CUDA_LAUNCH_PARAMS)) < 0 ||
         rpc_write(0, &numDevices, sizeof(unsigned int)) < 0 ||
         rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -6660,25 +6187,9 @@ CUresult cuLaunchCooperativeKernelMultiDevice(CUDA_LAUNCH_PARAMS* launchParamsLi
     return return_value;
 }
 
-CUresult cuLaunchHostFunc(CUstream hStream, CUhostFn fn, void* userData)
-{
-    CUresult return_value;
-
-    if (rpc_start_request(0, RPC_cuLaunchHostFunc) < 0 ||
-        rpc_write(0, &hStream, sizeof(CUstream)) < 0 ||
-        rpc_write(0, &fn, sizeof(CUhostFn)) < 0 ||
-        rpc_write(0, &userData, sizeof(void*)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, userData, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    return return_value;
-}
-
 CUresult cuFuncSetBlockShape(CUfunction hfunc, int x, int y, int z)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuFuncSetBlockShape) < 0 ||
         rpc_write(0, &hfunc, sizeof(CUfunction)) < 0 ||
         rpc_write(0, &x, sizeof(int)) < 0 ||
@@ -6693,7 +6204,6 @@ CUresult cuFuncSetBlockShape(CUfunction hfunc, int x, int y, int z)
 CUresult cuFuncSetSharedSize(CUfunction hfunc, unsigned int bytes)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuFuncSetSharedSize) < 0 ||
         rpc_write(0, &hfunc, sizeof(CUfunction)) < 0 ||
         rpc_write(0, &bytes, sizeof(unsigned int)) < 0 ||
@@ -6706,7 +6216,6 @@ CUresult cuFuncSetSharedSize(CUfunction hfunc, unsigned int bytes)
 CUresult cuParamSetSize(CUfunction hfunc, unsigned int numbytes)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuParamSetSize) < 0 ||
         rpc_write(0, &hfunc, sizeof(CUfunction)) < 0 ||
         rpc_write(0, &numbytes, sizeof(unsigned int)) < 0 ||
@@ -6719,7 +6228,6 @@ CUresult cuParamSetSize(CUfunction hfunc, unsigned int numbytes)
 CUresult cuParamSeti(CUfunction hfunc, int offset, unsigned int value)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuParamSeti) < 0 ||
         rpc_write(0, &hfunc, sizeof(CUfunction)) < 0 ||
         rpc_write(0, &offset, sizeof(int)) < 0 ||
@@ -6733,7 +6241,6 @@ CUresult cuParamSeti(CUfunction hfunc, int offset, unsigned int value)
 CUresult cuParamSetf(CUfunction hfunc, int offset, float value)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuParamSetf) < 0 ||
         rpc_write(0, &hfunc, sizeof(CUfunction)) < 0 ||
         rpc_write(0, &offset, sizeof(int)) < 0 ||
@@ -6744,26 +6251,9 @@ CUresult cuParamSetf(CUfunction hfunc, int offset, float value)
     return return_value;
 }
 
-CUresult cuParamSetv(CUfunction hfunc, int offset, void* ptr, unsigned int numbytes)
-{
-    CUresult return_value;
-
-    if (rpc_start_request(0, RPC_cuParamSetv) < 0 ||
-        rpc_write(0, &hfunc, sizeof(CUfunction)) < 0 ||
-        rpc_write(0, &offset, sizeof(int)) < 0 ||
-        rpc_write(0, &ptr, sizeof(void*)) < 0 ||
-        rpc_write(0, &numbytes, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, ptr, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    return return_value;
-}
-
 CUresult cuLaunch(CUfunction f)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuLaunch) < 0 ||
         rpc_write(0, &f, sizeof(CUfunction)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -6775,7 +6265,6 @@ CUresult cuLaunch(CUfunction f)
 CUresult cuLaunchGrid(CUfunction f, int grid_width, int grid_height)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuLaunchGrid) < 0 ||
         rpc_write(0, &f, sizeof(CUfunction)) < 0 ||
         rpc_write(0, &grid_width, sizeof(int)) < 0 ||
@@ -6789,7 +6278,6 @@ CUresult cuLaunchGrid(CUfunction f, int grid_width, int grid_height)
 CUresult cuLaunchGridAsync(CUfunction f, int grid_width, int grid_height, CUstream hStream)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuLaunchGridAsync) < 0 ||
         rpc_write(0, &f, sizeof(CUfunction)) < 0 ||
         rpc_write(0, &grid_width, sizeof(int)) < 0 ||
@@ -6804,7 +6292,6 @@ CUresult cuLaunchGridAsync(CUfunction f, int grid_width, int grid_height, CUstre
 CUresult cuParamSetTexRef(CUfunction hfunc, int texunit, CUtexref hTexRef)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuParamSetTexRef) < 0 ||
         rpc_write(0, &hfunc, sizeof(CUfunction)) < 0 ||
         rpc_write(0, &texunit, sizeof(int)) < 0 ||
@@ -6818,9 +6305,8 @@ CUresult cuParamSetTexRef(CUfunction hfunc, int texunit, CUtexref hTexRef)
 CUresult cuGraphCreate(CUgraph* phGraph, unsigned int flags)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphCreate) < 0 ||
-        rpc_write(0, &phGraph, sizeof(CUgraph)) < 0 ||
+        rpc_write(0, phGraph, sizeof(CUgraph)) < 0 ||
         rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, phGraph, sizeof(CUgraph)) < 0 ||
@@ -6829,15 +6315,59 @@ CUresult cuGraphCreate(CUgraph* phGraph, unsigned int flags)
     return return_value;
 }
 
+CUresult cuGraphAddKernelNode_v2(CUgraphNode* phGraphNode, CUgraph hGraph, const CUgraphNode* dependencies, size_t numDependencies, const CUDA_KERNEL_NODE_PARAMS* nodeParams)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuGraphAddKernelNode_v2) < 0 ||
+        rpc_write(0, phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_write(0, &dependencies, sizeof(const CUgraphNode*)) < 0 ||
+        rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_write(0, &nodeParams, sizeof(const CUDA_KERNEL_NODE_PARAMS*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
 CUresult cuGraphKernelNodeGetParams_v2(CUgraphNode hNode, CUDA_KERNEL_NODE_PARAMS* nodeParams)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphKernelNodeGetParams_v2) < 0 ||
         rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
-        rpc_write(0, &nodeParams, sizeof(CUDA_KERNEL_NODE_PARAMS)) < 0 ||
+        rpc_write(0, nodeParams, sizeof(CUDA_KERNEL_NODE_PARAMS)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, nodeParams, sizeof(CUDA_KERNEL_NODE_PARAMS)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphKernelNodeSetParams_v2(CUgraphNode hNode, const CUDA_KERNEL_NODE_PARAMS* nodeParams)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuGraphKernelNodeSetParams_v2) < 0 ||
+        rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, &nodeParams, sizeof(const CUDA_KERNEL_NODE_PARAMS*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphAddMemcpyNode(CUgraphNode* phGraphNode, CUgraph hGraph, const CUgraphNode* dependencies, size_t numDependencies, const CUDA_MEMCPY3D* copyParams, CUcontext ctx)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuGraphAddMemcpyNode) < 0 ||
+        rpc_write(0, phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_write(0, &dependencies, sizeof(const CUgraphNode*)) < 0 ||
+        rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_write(0, &copyParams, sizeof(const CUDA_MEMCPY3D*)) < 0 ||
+        rpc_write(0, &ctx, sizeof(CUcontext)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, phGraphNode, sizeof(CUgraphNode)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
@@ -6846,12 +6376,40 @@ CUresult cuGraphKernelNodeGetParams_v2(CUgraphNode hNode, CUDA_KERNEL_NODE_PARAM
 CUresult cuGraphMemcpyNodeGetParams(CUgraphNode hNode, CUDA_MEMCPY3D* nodeParams)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphMemcpyNodeGetParams) < 0 ||
         rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
-        rpc_write(0, &nodeParams, sizeof(CUDA_MEMCPY3D)) < 0 ||
+        rpc_write(0, nodeParams, sizeof(CUDA_MEMCPY3D)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, nodeParams, sizeof(CUDA_MEMCPY3D)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphMemcpyNodeSetParams(CUgraphNode hNode, const CUDA_MEMCPY3D* nodeParams)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuGraphMemcpyNodeSetParams) < 0 ||
+        rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, &nodeParams, sizeof(const CUDA_MEMCPY3D*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphAddMemsetNode(CUgraphNode* phGraphNode, CUgraph hGraph, const CUgraphNode* dependencies, size_t numDependencies, const CUDA_MEMSET_NODE_PARAMS* memsetParams, CUcontext ctx)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuGraphAddMemsetNode) < 0 ||
+        rpc_write(0, phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_write(0, &dependencies, sizeof(const CUgraphNode*)) < 0 ||
+        rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_write(0, &memsetParams, sizeof(const CUDA_MEMSET_NODE_PARAMS*)) < 0 ||
+        rpc_write(0, &ctx, sizeof(CUcontext)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, phGraphNode, sizeof(CUgraphNode)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
@@ -6860,12 +6418,39 @@ CUresult cuGraphMemcpyNodeGetParams(CUgraphNode hNode, CUDA_MEMCPY3D* nodeParams
 CUresult cuGraphMemsetNodeGetParams(CUgraphNode hNode, CUDA_MEMSET_NODE_PARAMS* nodeParams)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphMemsetNodeGetParams) < 0 ||
         rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
-        rpc_write(0, &nodeParams, sizeof(CUDA_MEMSET_NODE_PARAMS)) < 0 ||
+        rpc_write(0, nodeParams, sizeof(CUDA_MEMSET_NODE_PARAMS)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, nodeParams, sizeof(CUDA_MEMSET_NODE_PARAMS)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphMemsetNodeSetParams(CUgraphNode hNode, const CUDA_MEMSET_NODE_PARAMS* nodeParams)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuGraphMemsetNodeSetParams) < 0 ||
+        rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, &nodeParams, sizeof(const CUDA_MEMSET_NODE_PARAMS*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphAddHostNode(CUgraphNode* phGraphNode, CUgraph hGraph, const CUgraphNode* dependencies, size_t numDependencies, const CUDA_HOST_NODE_PARAMS* nodeParams)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuGraphAddHostNode) < 0 ||
+        rpc_write(0, phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_write(0, &dependencies, sizeof(const CUgraphNode*)) < 0 ||
+        rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_write(0, &nodeParams, sizeof(const CUDA_HOST_NODE_PARAMS*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, phGraphNode, sizeof(CUgraphNode)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
@@ -6874,12 +6459,39 @@ CUresult cuGraphMemsetNodeGetParams(CUgraphNode hNode, CUDA_MEMSET_NODE_PARAMS* 
 CUresult cuGraphHostNodeGetParams(CUgraphNode hNode, CUDA_HOST_NODE_PARAMS* nodeParams)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphHostNodeGetParams) < 0 ||
         rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
-        rpc_write(0, &nodeParams, sizeof(CUDA_HOST_NODE_PARAMS)) < 0 ||
+        rpc_write(0, nodeParams, sizeof(CUDA_HOST_NODE_PARAMS)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, nodeParams, sizeof(CUDA_HOST_NODE_PARAMS)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphHostNodeSetParams(CUgraphNode hNode, const CUDA_HOST_NODE_PARAMS* nodeParams)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuGraphHostNodeSetParams) < 0 ||
+        rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, &nodeParams, sizeof(const CUDA_HOST_NODE_PARAMS*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphAddChildGraphNode(CUgraphNode* phGraphNode, CUgraph hGraph, const CUgraphNode* dependencies, size_t numDependencies, CUgraph childGraph)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuGraphAddChildGraphNode) < 0 ||
+        rpc_write(0, phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_write(0, &dependencies, sizeof(const CUgraphNode*)) < 0 ||
+        rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_write(0, &childGraph, sizeof(CUgraph)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, phGraphNode, sizeof(CUgraphNode)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
@@ -6888,12 +6500,42 @@ CUresult cuGraphHostNodeGetParams(CUgraphNode hNode, CUDA_HOST_NODE_PARAMS* node
 CUresult cuGraphChildGraphNodeGetGraph(CUgraphNode hNode, CUgraph* phGraph)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphChildGraphNodeGetGraph) < 0 ||
         rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
-        rpc_write(0, &phGraph, sizeof(CUgraph)) < 0 ||
+        rpc_write(0, phGraph, sizeof(CUgraph)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, phGraph, sizeof(CUgraph)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphAddEmptyNode(CUgraphNode* phGraphNode, CUgraph hGraph, const CUgraphNode* dependencies, size_t numDependencies)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuGraphAddEmptyNode) < 0 ||
+        rpc_write(0, phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_write(0, &dependencies, sizeof(const CUgraphNode*)) < 0 ||
+        rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphAddEventRecordNode(CUgraphNode* phGraphNode, CUgraph hGraph, const CUgraphNode* dependencies, size_t numDependencies, CUevent event)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuGraphAddEventRecordNode) < 0 ||
+        rpc_write(0, phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_write(0, &dependencies, sizeof(const CUgraphNode*)) < 0 ||
+        rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_write(0, &event, sizeof(CUevent)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, phGraphNode, sizeof(CUgraphNode)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
@@ -6902,10 +6544,9 @@ CUresult cuGraphChildGraphNodeGetGraph(CUgraphNode hNode, CUgraph* phGraph)
 CUresult cuGraphEventRecordNodeGetEvent(CUgraphNode hNode, CUevent* event_out)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphEventRecordNodeGetEvent) < 0 ||
         rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
-        rpc_write(0, &event_out, sizeof(CUevent)) < 0 ||
+        rpc_write(0, event_out, sizeof(CUevent)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, event_out, sizeof(CUevent)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -6916,7 +6557,6 @@ CUresult cuGraphEventRecordNodeGetEvent(CUgraphNode hNode, CUevent* event_out)
 CUresult cuGraphEventRecordNodeSetEvent(CUgraphNode hNode, CUevent event)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphEventRecordNodeSetEvent) < 0 ||
         rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(0, &event, sizeof(CUevent)) < 0 ||
@@ -6926,13 +6566,28 @@ CUresult cuGraphEventRecordNodeSetEvent(CUgraphNode hNode, CUevent event)
     return return_value;
 }
 
+CUresult cuGraphAddEventWaitNode(CUgraphNode* phGraphNode, CUgraph hGraph, const CUgraphNode* dependencies, size_t numDependencies, CUevent event)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuGraphAddEventWaitNode) < 0 ||
+        rpc_write(0, phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_write(0, &dependencies, sizeof(const CUgraphNode*)) < 0 ||
+        rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_write(0, &event, sizeof(CUevent)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
 CUresult cuGraphEventWaitNodeGetEvent(CUgraphNode hNode, CUevent* event_out)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphEventWaitNodeGetEvent) < 0 ||
         rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
-        rpc_write(0, &event_out, sizeof(CUevent)) < 0 ||
+        rpc_write(0, event_out, sizeof(CUevent)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, event_out, sizeof(CUevent)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -6943,7 +6598,6 @@ CUresult cuGraphEventWaitNodeGetEvent(CUgraphNode hNode, CUevent* event_out)
 CUresult cuGraphEventWaitNodeSetEvent(CUgraphNode hNode, CUevent event)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphEventWaitNodeSetEvent) < 0 ||
         rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(0, &event, sizeof(CUevent)) < 0 ||
@@ -6953,15 +6607,58 @@ CUresult cuGraphEventWaitNodeSetEvent(CUgraphNode hNode, CUevent event)
     return return_value;
 }
 
+CUresult cuGraphAddExternalSemaphoresSignalNode(CUgraphNode* phGraphNode, CUgraph hGraph, const CUgraphNode* dependencies, size_t numDependencies, const CUDA_EXT_SEM_SIGNAL_NODE_PARAMS* nodeParams)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuGraphAddExternalSemaphoresSignalNode) < 0 ||
+        rpc_write(0, phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_write(0, &dependencies, sizeof(const CUgraphNode*)) < 0 ||
+        rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_write(0, &nodeParams, sizeof(const CUDA_EXT_SEM_SIGNAL_NODE_PARAMS*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
 CUresult cuGraphExternalSemaphoresSignalNodeGetParams(CUgraphNode hNode, CUDA_EXT_SEM_SIGNAL_NODE_PARAMS* params_out)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphExternalSemaphoresSignalNodeGetParams) < 0 ||
         rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
-        rpc_write(0, &params_out, sizeof(CUDA_EXT_SEM_SIGNAL_NODE_PARAMS)) < 0 ||
+        rpc_write(0, params_out, sizeof(CUDA_EXT_SEM_SIGNAL_NODE_PARAMS)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, params_out, sizeof(CUDA_EXT_SEM_SIGNAL_NODE_PARAMS)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphExternalSemaphoresSignalNodeSetParams(CUgraphNode hNode, const CUDA_EXT_SEM_SIGNAL_NODE_PARAMS* nodeParams)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuGraphExternalSemaphoresSignalNodeSetParams) < 0 ||
+        rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, &nodeParams, sizeof(const CUDA_EXT_SEM_SIGNAL_NODE_PARAMS*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphAddExternalSemaphoresWaitNode(CUgraphNode* phGraphNode, CUgraph hGraph, const CUgraphNode* dependencies, size_t numDependencies, const CUDA_EXT_SEM_WAIT_NODE_PARAMS* nodeParams)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuGraphAddExternalSemaphoresWaitNode) < 0 ||
+        rpc_write(0, phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_write(0, &dependencies, sizeof(const CUgraphNode*)) < 0 ||
+        rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_write(0, &nodeParams, sizeof(const CUDA_EXT_SEM_WAIT_NODE_PARAMS*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, phGraphNode, sizeof(CUgraphNode)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
@@ -6970,12 +6667,39 @@ CUresult cuGraphExternalSemaphoresSignalNodeGetParams(CUgraphNode hNode, CUDA_EX
 CUresult cuGraphExternalSemaphoresWaitNodeGetParams(CUgraphNode hNode, CUDA_EXT_SEM_WAIT_NODE_PARAMS* params_out)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphExternalSemaphoresWaitNodeGetParams) < 0 ||
         rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
-        rpc_write(0, &params_out, sizeof(CUDA_EXT_SEM_WAIT_NODE_PARAMS)) < 0 ||
+        rpc_write(0, params_out, sizeof(CUDA_EXT_SEM_WAIT_NODE_PARAMS)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, params_out, sizeof(CUDA_EXT_SEM_WAIT_NODE_PARAMS)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphExternalSemaphoresWaitNodeSetParams(CUgraphNode hNode, const CUDA_EXT_SEM_WAIT_NODE_PARAMS* nodeParams)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuGraphExternalSemaphoresWaitNodeSetParams) < 0 ||
+        rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, &nodeParams, sizeof(const CUDA_EXT_SEM_WAIT_NODE_PARAMS*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphAddBatchMemOpNode(CUgraphNode* phGraphNode, CUgraph hGraph, const CUgraphNode* dependencies, size_t numDependencies, const CUDA_BATCH_MEM_OP_NODE_PARAMS* nodeParams)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuGraphAddBatchMemOpNode) < 0 ||
+        rpc_write(0, phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_write(0, &dependencies, sizeof(const CUgraphNode*)) < 0 ||
+        rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_write(0, &nodeParams, sizeof(const CUDA_BATCH_MEM_OP_NODE_PARAMS*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, phGraphNode, sizeof(CUgraphNode)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
@@ -6984,12 +6708,53 @@ CUresult cuGraphExternalSemaphoresWaitNodeGetParams(CUgraphNode hNode, CUDA_EXT_
 CUresult cuGraphBatchMemOpNodeGetParams(CUgraphNode hNode, CUDA_BATCH_MEM_OP_NODE_PARAMS* nodeParams_out)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphBatchMemOpNodeGetParams) < 0 ||
         rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
-        rpc_write(0, &nodeParams_out, sizeof(CUDA_BATCH_MEM_OP_NODE_PARAMS)) < 0 ||
+        rpc_write(0, nodeParams_out, sizeof(CUDA_BATCH_MEM_OP_NODE_PARAMS)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, nodeParams_out, sizeof(CUDA_BATCH_MEM_OP_NODE_PARAMS)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphBatchMemOpNodeSetParams(CUgraphNode hNode, const CUDA_BATCH_MEM_OP_NODE_PARAMS* nodeParams)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuGraphBatchMemOpNodeSetParams) < 0 ||
+        rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, &nodeParams, sizeof(const CUDA_BATCH_MEM_OP_NODE_PARAMS*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphExecBatchMemOpNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNode, const CUDA_BATCH_MEM_OP_NODE_PARAMS* nodeParams)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuGraphExecBatchMemOpNodeSetParams) < 0 ||
+        rpc_write(0, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
+        rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, &nodeParams, sizeof(const CUDA_BATCH_MEM_OP_NODE_PARAMS*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphAddMemAllocNode(CUgraphNode* phGraphNode, CUgraph hGraph, const CUgraphNode* dependencies, size_t numDependencies, CUDA_MEM_ALLOC_NODE_PARAMS* nodeParams)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuGraphAddMemAllocNode) < 0 ||
+        rpc_write(0, phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_write(0, &dependencies, sizeof(const CUgraphNode*)) < 0 ||
+        rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_write(0, nodeParams, sizeof(CUDA_MEM_ALLOC_NODE_PARAMS)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_read(0, nodeParams, sizeof(CUDA_MEM_ALLOC_NODE_PARAMS)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
@@ -6998,12 +6763,27 @@ CUresult cuGraphBatchMemOpNodeGetParams(CUgraphNode hNode, CUDA_BATCH_MEM_OP_NOD
 CUresult cuGraphMemAllocNodeGetParams(CUgraphNode hNode, CUDA_MEM_ALLOC_NODE_PARAMS* params_out)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphMemAllocNodeGetParams) < 0 ||
         rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
-        rpc_write(0, &params_out, sizeof(CUDA_MEM_ALLOC_NODE_PARAMS)) < 0 ||
+        rpc_write(0, params_out, sizeof(CUDA_MEM_ALLOC_NODE_PARAMS)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, params_out, sizeof(CUDA_MEM_ALLOC_NODE_PARAMS)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphAddMemFreeNode(CUgraphNode* phGraphNode, CUgraph hGraph, const CUgraphNode* dependencies, size_t numDependencies, CUdeviceptr dptr)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuGraphAddMemFreeNode) < 0 ||
+        rpc_write(0, phGraphNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_write(0, dependencies, numDependencies * sizeof(const CUgraphNode)) < 0 ||
+        rpc_write(0, &dptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, phGraphNode, sizeof(CUgraphNode)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
@@ -7012,10 +6792,9 @@ CUresult cuGraphMemAllocNodeGetParams(CUgraphNode hNode, CUDA_MEM_ALLOC_NODE_PAR
 CUresult cuGraphMemFreeNodeGetParams(CUgraphNode hNode, CUdeviceptr* dptr_out)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphMemFreeNodeGetParams) < 0 ||
         rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
-        rpc_write(0, &dptr_out, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(0, dptr_out, sizeof(CUdeviceptr)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, dptr_out, sizeof(CUdeviceptr)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -7026,7 +6805,6 @@ CUresult cuGraphMemFreeNodeGetParams(CUgraphNode hNode, CUdeviceptr* dptr_out)
 CUresult cuDeviceGraphMemTrim(CUdevice device)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuDeviceGraphMemTrim) < 0 ||
         rpc_write(0, &device, sizeof(CUdevice)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -7035,42 +6813,11 @@ CUresult cuDeviceGraphMemTrim(CUdevice device)
     return return_value;
 }
 
-CUresult cuDeviceGetGraphMemAttribute(CUdevice device, CUgraphMem_attribute attr, void* value)
-{
-    CUresult return_value;
-
-    if (rpc_start_request(0, RPC_cuDeviceGetGraphMemAttribute) < 0 ||
-        rpc_write(0, &device, sizeof(CUdevice)) < 0 ||
-        rpc_write(0, &attr, sizeof(CUgraphMem_attribute)) < 0 ||
-        rpc_write(0, &value, sizeof(void*)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, value, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    return return_value;
-}
-
-CUresult cuDeviceSetGraphMemAttribute(CUdevice device, CUgraphMem_attribute attr, void* value)
-{
-    CUresult return_value;
-
-    if (rpc_start_request(0, RPC_cuDeviceSetGraphMemAttribute) < 0 ||
-        rpc_write(0, &device, sizeof(CUdevice)) < 0 ||
-        rpc_write(0, &attr, sizeof(CUgraphMem_attribute)) < 0 ||
-        rpc_write(0, &value, sizeof(void*)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, value, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    return return_value;
-}
-
 CUresult cuGraphClone(CUgraph* phGraphClone, CUgraph originalGraph)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphClone) < 0 ||
-        rpc_write(0, &phGraphClone, sizeof(CUgraph)) < 0 ||
+        rpc_write(0, phGraphClone, sizeof(CUgraph)) < 0 ||
         rpc_write(0, &originalGraph, sizeof(CUgraph)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, phGraphClone, sizeof(CUgraph)) < 0 ||
@@ -7082,9 +6829,8 @@ CUresult cuGraphClone(CUgraph* phGraphClone, CUgraph originalGraph)
 CUresult cuGraphNodeFindInClone(CUgraphNode* phNode, CUgraphNode hOriginalNode, CUgraph hClonedGraph)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphNodeFindInClone) < 0 ||
-        rpc_write(0, &phNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, phNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(0, &hOriginalNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(0, &hClonedGraph, sizeof(CUgraph)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -7097,10 +6843,9 @@ CUresult cuGraphNodeFindInClone(CUgraphNode* phNode, CUgraphNode hOriginalNode, 
 CUresult cuGraphNodeGetType(CUgraphNode hNode, CUgraphNodeType* type)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphNodeGetType) < 0 ||
         rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
-        rpc_write(0, &type, sizeof(CUgraphNodeType)) < 0 ||
+        rpc_write(0, type, sizeof(CUgraphNodeType)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, type, sizeof(CUgraphNodeType)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -7111,11 +6856,10 @@ CUresult cuGraphNodeGetType(CUgraphNode hNode, CUgraphNodeType* type)
 CUresult cuGraphGetNodes(CUgraph hGraph, CUgraphNode* nodes, size_t* numNodes)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphGetNodes) < 0 ||
         rpc_write(0, &hGraph, sizeof(CUgraph)) < 0 ||
-        rpc_write(0, &nodes, sizeof(CUgraphNode)) < 0 ||
-        rpc_write(0, &numNodes, sizeof(size_t)) < 0 ||
+        rpc_write(0, nodes, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, numNodes, sizeof(size_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, nodes, sizeof(CUgraphNode)) < 0 ||
         rpc_read(0, numNodes, sizeof(size_t)) < 0 ||
@@ -7127,11 +6871,10 @@ CUresult cuGraphGetNodes(CUgraph hGraph, CUgraphNode* nodes, size_t* numNodes)
 CUresult cuGraphGetRootNodes(CUgraph hGraph, CUgraphNode* rootNodes, size_t* numRootNodes)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphGetRootNodes) < 0 ||
         rpc_write(0, &hGraph, sizeof(CUgraph)) < 0 ||
-        rpc_write(0, &rootNodes, sizeof(CUgraphNode)) < 0 ||
-        rpc_write(0, &numRootNodes, sizeof(size_t)) < 0 ||
+        rpc_write(0, rootNodes, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, numRootNodes, sizeof(size_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, rootNodes, sizeof(CUgraphNode)) < 0 ||
         rpc_read(0, numRootNodes, sizeof(size_t)) < 0 ||
@@ -7143,12 +6886,11 @@ CUresult cuGraphGetRootNodes(CUgraph hGraph, CUgraphNode* rootNodes, size_t* num
 CUresult cuGraphGetEdges(CUgraph hGraph, CUgraphNode* from, CUgraphNode* to, size_t* numEdges)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphGetEdges) < 0 ||
         rpc_write(0, &hGraph, sizeof(CUgraph)) < 0 ||
-        rpc_write(0, &from, sizeof(CUgraphNode)) < 0 ||
-        rpc_write(0, &to, sizeof(CUgraphNode)) < 0 ||
-        rpc_write(0, &numEdges, sizeof(size_t)) < 0 ||
+        rpc_write(0, from, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, to, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, numEdges, sizeof(size_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, from, sizeof(CUgraphNode)) < 0 ||
         rpc_read(0, to, sizeof(CUgraphNode)) < 0 ||
@@ -7161,11 +6903,10 @@ CUresult cuGraphGetEdges(CUgraph hGraph, CUgraphNode* from, CUgraphNode* to, siz
 CUresult cuGraphNodeGetDependencies(CUgraphNode hNode, CUgraphNode* dependencies, size_t* numDependencies)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphNodeGetDependencies) < 0 ||
         rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
-        rpc_write(0, &dependencies, sizeof(CUgraphNode)) < 0 ||
-        rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_write(0, dependencies, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, numDependencies, sizeof(size_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, dependencies, sizeof(CUgraphNode)) < 0 ||
         rpc_read(0, numDependencies, sizeof(size_t)) < 0 ||
@@ -7177,11 +6918,10 @@ CUresult cuGraphNodeGetDependencies(CUgraphNode hNode, CUgraphNode* dependencies
 CUresult cuGraphNodeGetDependentNodes(CUgraphNode hNode, CUgraphNode* dependentNodes, size_t* numDependentNodes)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphNodeGetDependentNodes) < 0 ||
         rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
-        rpc_write(0, &dependentNodes, sizeof(CUgraphNode)) < 0 ||
-        rpc_write(0, &numDependentNodes, sizeof(size_t)) < 0 ||
+        rpc_write(0, dependentNodes, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, numDependentNodes, sizeof(size_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, dependentNodes, sizeof(CUgraphNode)) < 0 ||
         rpc_read(0, numDependentNodes, sizeof(size_t)) < 0 ||
@@ -7190,10 +6930,37 @@ CUresult cuGraphNodeGetDependentNodes(CUgraphNode hNode, CUgraphNode* dependentN
     return return_value;
 }
 
+CUresult cuGraphAddDependencies(CUgraph hGraph, const CUgraphNode* from, const CUgraphNode* to, size_t numDependencies)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuGraphAddDependencies) < 0 ||
+        rpc_write(0, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_write(0, &from, sizeof(const CUgraphNode*)) < 0 ||
+        rpc_write(0, &to, sizeof(const CUgraphNode*)) < 0 ||
+        rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphRemoveDependencies(CUgraph hGraph, const CUgraphNode* from, const CUgraphNode* to, size_t numDependencies)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuGraphRemoveDependencies) < 0 ||
+        rpc_write(0, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_write(0, &from, sizeof(const CUgraphNode*)) < 0 ||
+        rpc_write(0, &to, sizeof(const CUgraphNode*)) < 0 ||
+        rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
 CUresult cuGraphDestroyNode(CUgraphNode hNode)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphDestroyNode) < 0 ||
         rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -7205,9 +6972,8 @@ CUresult cuGraphDestroyNode(CUgraphNode hNode)
 CUresult cuGraphInstantiateWithFlags(CUgraphExec* phGraphExec, CUgraph hGraph, unsigned long long flags)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphInstantiateWithFlags) < 0 ||
-        rpc_write(0, &phGraphExec, sizeof(CUgraphExec)) < 0 ||
+        rpc_write(0, phGraphExec, sizeof(CUgraphExec)) < 0 ||
         rpc_write(0, &hGraph, sizeof(CUgraph)) < 0 ||
         rpc_write(0, &flags, sizeof(unsigned long long)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -7220,11 +6986,10 @@ CUresult cuGraphInstantiateWithFlags(CUgraphExec* phGraphExec, CUgraph hGraph, u
 CUresult cuGraphInstantiateWithParams(CUgraphExec* phGraphExec, CUgraph hGraph, CUDA_GRAPH_INSTANTIATE_PARAMS* instantiateParams)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphInstantiateWithParams) < 0 ||
-        rpc_write(0, &phGraphExec, sizeof(CUgraphExec)) < 0 ||
+        rpc_write(0, phGraphExec, sizeof(CUgraphExec)) < 0 ||
         rpc_write(0, &hGraph, sizeof(CUgraph)) < 0 ||
-        rpc_write(0, &instantiateParams, sizeof(CUDA_GRAPH_INSTANTIATE_PARAMS)) < 0 ||
+        rpc_write(0, instantiateParams, sizeof(CUDA_GRAPH_INSTANTIATE_PARAMS)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, phGraphExec, sizeof(CUgraphExec)) < 0 ||
         rpc_read(0, instantiateParams, sizeof(CUDA_GRAPH_INSTANTIATE_PARAMS)) < 0 ||
@@ -7236,12 +7001,65 @@ CUresult cuGraphInstantiateWithParams(CUgraphExec* phGraphExec, CUgraph hGraph, 
 CUresult cuGraphExecGetFlags(CUgraphExec hGraphExec, cuuint64_t* flags)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphExecGetFlags) < 0 ||
         rpc_write(0, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
-        rpc_write(0, &flags, sizeof(cuuint64_t)) < 0 ||
+        rpc_write(0, flags, sizeof(cuuint64_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, flags, sizeof(cuuint64_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphExecKernelNodeSetParams_v2(CUgraphExec hGraphExec, CUgraphNode hNode, const CUDA_KERNEL_NODE_PARAMS* nodeParams)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuGraphExecKernelNodeSetParams_v2) < 0 ||
+        rpc_write(0, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
+        rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, &nodeParams, sizeof(const CUDA_KERNEL_NODE_PARAMS*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphExecMemcpyNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNode, const CUDA_MEMCPY3D* copyParams, CUcontext ctx)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuGraphExecMemcpyNodeSetParams) < 0 ||
+        rpc_write(0, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
+        rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, &copyParams, sizeof(const CUDA_MEMCPY3D*)) < 0 ||
+        rpc_write(0, &ctx, sizeof(CUcontext)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphExecMemsetNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNode, const CUDA_MEMSET_NODE_PARAMS* memsetParams, CUcontext ctx)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuGraphExecMemsetNodeSetParams) < 0 ||
+        rpc_write(0, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
+        rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, &memsetParams, sizeof(const CUDA_MEMSET_NODE_PARAMS*)) < 0 ||
+        rpc_write(0, &ctx, sizeof(CUcontext)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphExecHostNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNode, const CUDA_HOST_NODE_PARAMS* nodeParams)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuGraphExecHostNodeSetParams) < 0 ||
+        rpc_write(0, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
+        rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, &nodeParams, sizeof(const CUDA_HOST_NODE_PARAMS*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
@@ -7250,7 +7068,6 @@ CUresult cuGraphExecGetFlags(CUgraphExec hGraphExec, cuuint64_t* flags)
 CUresult cuGraphExecChildGraphNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNode, CUgraph childGraph)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphExecChildGraphNodeSetParams) < 0 ||
         rpc_write(0, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
         rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
@@ -7264,7 +7081,6 @@ CUresult cuGraphExecChildGraphNodeSetParams(CUgraphExec hGraphExec, CUgraphNode 
 CUresult cuGraphExecEventRecordNodeSetEvent(CUgraphExec hGraphExec, CUgraphNode hNode, CUevent event)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphExecEventRecordNodeSetEvent) < 0 ||
         rpc_write(0, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
         rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
@@ -7278,7 +7094,6 @@ CUresult cuGraphExecEventRecordNodeSetEvent(CUgraphExec hGraphExec, CUgraphNode 
 CUresult cuGraphExecEventWaitNodeSetEvent(CUgraphExec hGraphExec, CUgraphNode hNode, CUevent event)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphExecEventWaitNodeSetEvent) < 0 ||
         rpc_write(0, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
         rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
@@ -7289,10 +7104,35 @@ CUresult cuGraphExecEventWaitNodeSetEvent(CUgraphExec hGraphExec, CUgraphNode hN
     return return_value;
 }
 
+CUresult cuGraphExecExternalSemaphoresSignalNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNode, const CUDA_EXT_SEM_SIGNAL_NODE_PARAMS* nodeParams)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuGraphExecExternalSemaphoresSignalNodeSetParams) < 0 ||
+        rpc_write(0, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
+        rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, &nodeParams, sizeof(const CUDA_EXT_SEM_SIGNAL_NODE_PARAMS*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuGraphExecExternalSemaphoresWaitNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNode, const CUDA_EXT_SEM_WAIT_NODE_PARAMS* nodeParams)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuGraphExecExternalSemaphoresWaitNodeSetParams) < 0 ||
+        rpc_write(0, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
+        rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, &nodeParams, sizeof(const CUDA_EXT_SEM_WAIT_NODE_PARAMS*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
 CUresult cuGraphNodeSetEnabled(CUgraphExec hGraphExec, CUgraphNode hNode, unsigned int isEnabled)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphNodeSetEnabled) < 0 ||
         rpc_write(0, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
         rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
@@ -7306,11 +7146,10 @@ CUresult cuGraphNodeSetEnabled(CUgraphExec hGraphExec, CUgraphNode hNode, unsign
 CUresult cuGraphNodeGetEnabled(CUgraphExec hGraphExec, CUgraphNode hNode, unsigned int* isEnabled)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphNodeGetEnabled) < 0 ||
         rpc_write(0, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
         rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
-        rpc_write(0, &isEnabled, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, isEnabled, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, isEnabled, sizeof(unsigned int)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -7321,7 +7160,6 @@ CUresult cuGraphNodeGetEnabled(CUgraphExec hGraphExec, CUgraphNode hNode, unsign
 CUresult cuGraphUpload(CUgraphExec hGraphExec, CUstream hStream)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphUpload) < 0 ||
         rpc_write(0, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
         rpc_write(0, &hStream, sizeof(CUstream)) < 0 ||
@@ -7334,7 +7172,6 @@ CUresult cuGraphUpload(CUgraphExec hGraphExec, CUstream hStream)
 CUresult cuGraphLaunch(CUgraphExec hGraphExec, CUstream hStream)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphLaunch) < 0 ||
         rpc_write(0, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
         rpc_write(0, &hStream, sizeof(CUstream)) < 0 ||
@@ -7347,7 +7184,6 @@ CUresult cuGraphLaunch(CUgraphExec hGraphExec, CUstream hStream)
 CUresult cuGraphExecDestroy(CUgraphExec hGraphExec)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphExecDestroy) < 0 ||
         rpc_write(0, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -7359,7 +7195,6 @@ CUresult cuGraphExecDestroy(CUgraphExec hGraphExec)
 CUresult cuGraphDestroy(CUgraph hGraph)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphDestroy) < 0 ||
         rpc_write(0, &hGraph, sizeof(CUgraph)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -7371,11 +7206,10 @@ CUresult cuGraphDestroy(CUgraph hGraph)
 CUresult cuGraphExecUpdate_v2(CUgraphExec hGraphExec, CUgraph hGraph, CUgraphExecUpdateResultInfo* resultInfo)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphExecUpdate_v2) < 0 ||
         rpc_write(0, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
         rpc_write(0, &hGraph, sizeof(CUgraph)) < 0 ||
-        rpc_write(0, &resultInfo, sizeof(CUgraphExecUpdateResultInfo)) < 0 ||
+        rpc_write(0, resultInfo, sizeof(CUgraphExecUpdateResultInfo)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, resultInfo, sizeof(CUgraphExecUpdateResultInfo)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -7386,7 +7220,6 @@ CUresult cuGraphExecUpdate_v2(CUgraphExec hGraphExec, CUgraph hGraph, CUgraphExe
 CUresult cuGraphKernelNodeCopyAttributes(CUgraphNode dst, CUgraphNode src)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphKernelNodeCopyAttributes) < 0 ||
         rpc_write(0, &dst, sizeof(CUgraphNode)) < 0 ||
         rpc_write(0, &src, sizeof(CUgraphNode)) < 0 ||
@@ -7399,11 +7232,10 @@ CUresult cuGraphKernelNodeCopyAttributes(CUgraphNode dst, CUgraphNode src)
 CUresult cuGraphKernelNodeGetAttribute(CUgraphNode hNode, CUkernelNodeAttrID attr, CUkernelNodeAttrValue* value_out)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphKernelNodeGetAttribute) < 0 ||
         rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(0, &attr, sizeof(CUkernelNodeAttrID)) < 0 ||
-        rpc_write(0, &value_out, sizeof(CUkernelNodeAttrValue)) < 0 ||
+        rpc_write(0, value_out, sizeof(CUkernelNodeAttrValue)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, value_out, sizeof(CUkernelNodeAttrValue)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -7411,19 +7243,27 @@ CUresult cuGraphKernelNodeGetAttribute(CUgraphNode hNode, CUkernelNodeAttrID att
     return return_value;
 }
 
-CUresult cuUserObjectCreate(CUuserObject* object_out, void* ptr, CUhostFn destroy, unsigned int initialRefcount, unsigned int flags)
+CUresult cuGraphKernelNodeSetAttribute(CUgraphNode hNode, CUkernelNodeAttrID attr, const CUkernelNodeAttrValue* value)
 {
     CUresult return_value;
+    if (rpc_start_request(0, RPC_cuGraphKernelNodeSetAttribute) < 0 ||
+        rpc_write(0, &hNode, sizeof(CUgraphNode)) < 0 ||
+        rpc_write(0, &attr, sizeof(CUkernelNodeAttrID)) < 0 ||
+        rpc_write(0, &value, sizeof(const CUkernelNodeAttrValue*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
 
-    if (rpc_start_request(0, RPC_cuUserObjectCreate) < 0 ||
-        rpc_write(0, &object_out, sizeof(CUuserObject)) < 0 ||
-        rpc_write(0, &ptr, sizeof(void*)) < 0 ||
-        rpc_write(0, &destroy, sizeof(CUhostFn)) < 0 ||
-        rpc_write(0, &initialRefcount, sizeof(unsigned int)) < 0 ||
+CUresult cuGraphDebugDotPrint(CUgraph hGraph, const char* path, unsigned int flags)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuGraphDebugDotPrint) < 0 ||
+        rpc_write(0, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_write(0, &path, sizeof(const char*)) < 0 ||
         rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, object_out, sizeof(CUuserObject)) < 0 ||
-        rpc_read(0, ptr, sizeof(void*)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
@@ -7432,7 +7272,6 @@ CUresult cuUserObjectCreate(CUuserObject* object_out, void* ptr, CUhostFn destro
 CUresult cuUserObjectRetain(CUuserObject object, unsigned int count)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuUserObjectRetain) < 0 ||
         rpc_write(0, &object, sizeof(CUuserObject)) < 0 ||
         rpc_write(0, &count, sizeof(unsigned int)) < 0 ||
@@ -7445,7 +7284,6 @@ CUresult cuUserObjectRetain(CUuserObject object, unsigned int count)
 CUresult cuUserObjectRelease(CUuserObject object, unsigned int count)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuUserObjectRelease) < 0 ||
         rpc_write(0, &object, sizeof(CUuserObject)) < 0 ||
         rpc_write(0, &count, sizeof(unsigned int)) < 0 ||
@@ -7458,7 +7296,6 @@ CUresult cuUserObjectRelease(CUuserObject object, unsigned int count)
 CUresult cuGraphRetainUserObject(CUgraph graph, CUuserObject object, unsigned int count, unsigned int flags)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphRetainUserObject) < 0 ||
         rpc_write(0, &graph, sizeof(CUgraph)) < 0 ||
         rpc_write(0, &object, sizeof(CUuserObject)) < 0 ||
@@ -7473,7 +7310,6 @@ CUresult cuGraphRetainUserObject(CUgraph graph, CUuserObject object, unsigned in
 CUresult cuGraphReleaseUserObject(CUgraph graph, CUuserObject object, unsigned int count)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphReleaseUserObject) < 0 ||
         rpc_write(0, &graph, sizeof(CUgraph)) < 0 ||
         rpc_write(0, &object, sizeof(CUuserObject)) < 0 ||
@@ -7487,9 +7323,8 @@ CUresult cuGraphReleaseUserObject(CUgraph graph, CUuserObject object, unsigned i
 CUresult cuOccupancyMaxActiveBlocksPerMultiprocessor(int* numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuOccupancyMaxActiveBlocksPerMultiprocessor) < 0 ||
-        rpc_write(0, &numBlocks, sizeof(int)) < 0 ||
+        rpc_write(0, numBlocks, sizeof(int)) < 0 ||
         rpc_write(0, &func, sizeof(CUfunction)) < 0 ||
         rpc_write(0, &blockSize, sizeof(int)) < 0 ||
         rpc_write(0, &dynamicSMemSize, sizeof(size_t)) < 0 ||
@@ -7503,9 +7338,8 @@ CUresult cuOccupancyMaxActiveBlocksPerMultiprocessor(int* numBlocks, CUfunction 
 CUresult cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(int* numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize, unsigned int flags)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags) < 0 ||
-        rpc_write(0, &numBlocks, sizeof(int)) < 0 ||
+        rpc_write(0, numBlocks, sizeof(int)) < 0 ||
         rpc_write(0, &func, sizeof(CUfunction)) < 0 ||
         rpc_write(0, &blockSize, sizeof(int)) < 0 ||
         rpc_write(0, &dynamicSMemSize, sizeof(size_t)) < 0 ||
@@ -7520,9 +7354,8 @@ CUresult cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(int* numBlocks, CU
 CUresult cuOccupancyAvailableDynamicSMemPerBlock(size_t* dynamicSmemSize, CUfunction func, int numBlocks, int blockSize)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuOccupancyAvailableDynamicSMemPerBlock) < 0 ||
-        rpc_write(0, &dynamicSmemSize, sizeof(size_t)) < 0 ||
+        rpc_write(0, dynamicSmemSize, sizeof(size_t)) < 0 ||
         rpc_write(0, &func, sizeof(CUfunction)) < 0 ||
         rpc_write(0, &numBlocks, sizeof(int)) < 0 ||
         rpc_write(0, &blockSize, sizeof(int)) < 0 ||
@@ -7533,10 +7366,37 @@ CUresult cuOccupancyAvailableDynamicSMemPerBlock(size_t* dynamicSmemSize, CUfunc
     return return_value;
 }
 
+CUresult cuOccupancyMaxPotentialClusterSize(int* clusterSize, CUfunction func, const CUlaunchConfig* config)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuOccupancyMaxPotentialClusterSize) < 0 ||
+        rpc_write(0, clusterSize, sizeof(int)) < 0 ||
+        rpc_write(0, &func, sizeof(CUfunction)) < 0 ||
+        rpc_write(0, &config, sizeof(const CUlaunchConfig*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, clusterSize, sizeof(int)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
+CUresult cuOccupancyMaxActiveClusters(int* numClusters, CUfunction func, const CUlaunchConfig* config)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuOccupancyMaxActiveClusters) < 0 ||
+        rpc_write(0, numClusters, sizeof(int)) < 0 ||
+        rpc_write(0, &func, sizeof(CUfunction)) < 0 ||
+        rpc_write(0, &config, sizeof(const CUlaunchConfig*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, numClusters, sizeof(int)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
 CUresult cuTexRefSetArray(CUtexref hTexRef, CUarray hArray, unsigned int Flags)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuTexRefSetArray) < 0 ||
         rpc_write(0, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_write(0, &hArray, sizeof(CUarray)) < 0 ||
@@ -7550,7 +7410,6 @@ CUresult cuTexRefSetArray(CUtexref hTexRef, CUarray hArray, unsigned int Flags)
 CUresult cuTexRefSetMipmappedArray(CUtexref hTexRef, CUmipmappedArray hMipmappedArray, unsigned int Flags)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuTexRefSetMipmappedArray) < 0 ||
         rpc_write(0, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_write(0, &hMipmappedArray, sizeof(CUmipmappedArray)) < 0 ||
@@ -7564,9 +7423,8 @@ CUresult cuTexRefSetMipmappedArray(CUtexref hTexRef, CUmipmappedArray hMipmapped
 CUresult cuTexRefSetAddress_v2(size_t* ByteOffset, CUtexref hTexRef, CUdeviceptr dptr, size_t bytes)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuTexRefSetAddress_v2) < 0 ||
-        rpc_write(0, &ByteOffset, sizeof(size_t)) < 0 ||
+        rpc_write(0, ByteOffset, sizeof(size_t)) < 0 ||
         rpc_write(0, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_write(0, &dptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &bytes, sizeof(size_t)) < 0 ||
@@ -7577,10 +7435,23 @@ CUresult cuTexRefSetAddress_v2(size_t* ByteOffset, CUtexref hTexRef, CUdeviceptr
     return return_value;
 }
 
+CUresult cuTexRefSetAddress2D_v3(CUtexref hTexRef, const CUDA_ARRAY_DESCRIPTOR* desc, CUdeviceptr dptr, size_t Pitch)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuTexRefSetAddress2D_v3) < 0 ||
+        rpc_write(0, &hTexRef, sizeof(CUtexref)) < 0 ||
+        rpc_write(0, &desc, sizeof(const CUDA_ARRAY_DESCRIPTOR*)) < 0 ||
+        rpc_write(0, &dptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(0, &Pitch, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
 CUresult cuTexRefSetFormat(CUtexref hTexRef, CUarray_format fmt, int NumPackedComponents)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuTexRefSetFormat) < 0 ||
         rpc_write(0, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_write(0, &fmt, sizeof(CUarray_format)) < 0 ||
@@ -7594,7 +7465,6 @@ CUresult cuTexRefSetFormat(CUtexref hTexRef, CUarray_format fmt, int NumPackedCo
 CUresult cuTexRefSetAddressMode(CUtexref hTexRef, int dim, CUaddress_mode am)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuTexRefSetAddressMode) < 0 ||
         rpc_write(0, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_write(0, &dim, sizeof(int)) < 0 ||
@@ -7608,7 +7478,6 @@ CUresult cuTexRefSetAddressMode(CUtexref hTexRef, int dim, CUaddress_mode am)
 CUresult cuTexRefSetFilterMode(CUtexref hTexRef, CUfilter_mode fm)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuTexRefSetFilterMode) < 0 ||
         rpc_write(0, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_write(0, &fm, sizeof(CUfilter_mode)) < 0 ||
@@ -7621,7 +7490,6 @@ CUresult cuTexRefSetFilterMode(CUtexref hTexRef, CUfilter_mode fm)
 CUresult cuTexRefSetMipmapFilterMode(CUtexref hTexRef, CUfilter_mode fm)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuTexRefSetMipmapFilterMode) < 0 ||
         rpc_write(0, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_write(0, &fm, sizeof(CUfilter_mode)) < 0 ||
@@ -7634,7 +7502,6 @@ CUresult cuTexRefSetMipmapFilterMode(CUtexref hTexRef, CUfilter_mode fm)
 CUresult cuTexRefSetMipmapLevelBias(CUtexref hTexRef, float bias)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuTexRefSetMipmapLevelBias) < 0 ||
         rpc_write(0, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_write(0, &bias, sizeof(float)) < 0 ||
@@ -7647,7 +7514,6 @@ CUresult cuTexRefSetMipmapLevelBias(CUtexref hTexRef, float bias)
 CUresult cuTexRefSetMipmapLevelClamp(CUtexref hTexRef, float minMipmapLevelClamp, float maxMipmapLevelClamp)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuTexRefSetMipmapLevelClamp) < 0 ||
         rpc_write(0, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_write(0, &minMipmapLevelClamp, sizeof(float)) < 0 ||
@@ -7661,7 +7527,6 @@ CUresult cuTexRefSetMipmapLevelClamp(CUtexref hTexRef, float minMipmapLevelClamp
 CUresult cuTexRefSetMaxAnisotropy(CUtexref hTexRef, unsigned int maxAniso)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuTexRefSetMaxAnisotropy) < 0 ||
         rpc_write(0, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_write(0, &maxAniso, sizeof(unsigned int)) < 0 ||
@@ -7674,10 +7539,9 @@ CUresult cuTexRefSetMaxAnisotropy(CUtexref hTexRef, unsigned int maxAniso)
 CUresult cuTexRefSetBorderColor(CUtexref hTexRef, float* pBorderColor)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuTexRefSetBorderColor) < 0 ||
         rpc_write(0, &hTexRef, sizeof(CUtexref)) < 0 ||
-        rpc_write(0, &pBorderColor, sizeof(float)) < 0 ||
+        rpc_write(0, pBorderColor, sizeof(float)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pBorderColor, sizeof(float)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -7688,7 +7552,6 @@ CUresult cuTexRefSetBorderColor(CUtexref hTexRef, float* pBorderColor)
 CUresult cuTexRefSetFlags(CUtexref hTexRef, unsigned int Flags)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuTexRefSetFlags) < 0 ||
         rpc_write(0, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_write(0, &Flags, sizeof(unsigned int)) < 0 ||
@@ -7701,9 +7564,8 @@ CUresult cuTexRefSetFlags(CUtexref hTexRef, unsigned int Flags)
 CUresult cuTexRefGetAddress_v2(CUdeviceptr* pdptr, CUtexref hTexRef)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuTexRefGetAddress_v2) < 0 ||
-        rpc_write(0, &pdptr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(0, pdptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(0, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pdptr, sizeof(CUdeviceptr)) < 0 ||
@@ -7715,9 +7577,8 @@ CUresult cuTexRefGetAddress_v2(CUdeviceptr* pdptr, CUtexref hTexRef)
 CUresult cuTexRefGetArray(CUarray* phArray, CUtexref hTexRef)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuTexRefGetArray) < 0 ||
-        rpc_write(0, &phArray, sizeof(CUarray)) < 0 ||
+        rpc_write(0, phArray, sizeof(CUarray)) < 0 ||
         rpc_write(0, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, phArray, sizeof(CUarray)) < 0 ||
@@ -7729,9 +7590,8 @@ CUresult cuTexRefGetArray(CUarray* phArray, CUtexref hTexRef)
 CUresult cuTexRefGetMipmappedArray(CUmipmappedArray* phMipmappedArray, CUtexref hTexRef)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuTexRefGetMipmappedArray) < 0 ||
-        rpc_write(0, &phMipmappedArray, sizeof(CUmipmappedArray)) < 0 ||
+        rpc_write(0, phMipmappedArray, sizeof(CUmipmappedArray)) < 0 ||
         rpc_write(0, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, phMipmappedArray, sizeof(CUmipmappedArray)) < 0 ||
@@ -7743,9 +7603,8 @@ CUresult cuTexRefGetMipmappedArray(CUmipmappedArray* phMipmappedArray, CUtexref 
 CUresult cuTexRefGetAddressMode(CUaddress_mode* pam, CUtexref hTexRef, int dim)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuTexRefGetAddressMode) < 0 ||
-        rpc_write(0, &pam, sizeof(CUaddress_mode)) < 0 ||
+        rpc_write(0, pam, sizeof(CUaddress_mode)) < 0 ||
         rpc_write(0, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_write(0, &dim, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -7758,9 +7617,8 @@ CUresult cuTexRefGetAddressMode(CUaddress_mode* pam, CUtexref hTexRef, int dim)
 CUresult cuTexRefGetFilterMode(CUfilter_mode* pfm, CUtexref hTexRef)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuTexRefGetFilterMode) < 0 ||
-        rpc_write(0, &pfm, sizeof(CUfilter_mode)) < 0 ||
+        rpc_write(0, pfm, sizeof(CUfilter_mode)) < 0 ||
         rpc_write(0, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pfm, sizeof(CUfilter_mode)) < 0 ||
@@ -7772,10 +7630,9 @@ CUresult cuTexRefGetFilterMode(CUfilter_mode* pfm, CUtexref hTexRef)
 CUresult cuTexRefGetFormat(CUarray_format* pFormat, int* pNumChannels, CUtexref hTexRef)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuTexRefGetFormat) < 0 ||
-        rpc_write(0, &pFormat, sizeof(CUarray_format)) < 0 ||
-        rpc_write(0, &pNumChannels, sizeof(int)) < 0 ||
+        rpc_write(0, pFormat, sizeof(CUarray_format)) < 0 ||
+        rpc_write(0, pNumChannels, sizeof(int)) < 0 ||
         rpc_write(0, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pFormat, sizeof(CUarray_format)) < 0 ||
@@ -7788,9 +7645,8 @@ CUresult cuTexRefGetFormat(CUarray_format* pFormat, int* pNumChannels, CUtexref 
 CUresult cuTexRefGetMipmapFilterMode(CUfilter_mode* pfm, CUtexref hTexRef)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuTexRefGetMipmapFilterMode) < 0 ||
-        rpc_write(0, &pfm, sizeof(CUfilter_mode)) < 0 ||
+        rpc_write(0, pfm, sizeof(CUfilter_mode)) < 0 ||
         rpc_write(0, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pfm, sizeof(CUfilter_mode)) < 0 ||
@@ -7802,9 +7658,8 @@ CUresult cuTexRefGetMipmapFilterMode(CUfilter_mode* pfm, CUtexref hTexRef)
 CUresult cuTexRefGetMipmapLevelBias(float* pbias, CUtexref hTexRef)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuTexRefGetMipmapLevelBias) < 0 ||
-        rpc_write(0, &pbias, sizeof(float)) < 0 ||
+        rpc_write(0, pbias, sizeof(float)) < 0 ||
         rpc_write(0, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pbias, sizeof(float)) < 0 ||
@@ -7816,10 +7671,9 @@ CUresult cuTexRefGetMipmapLevelBias(float* pbias, CUtexref hTexRef)
 CUresult cuTexRefGetMipmapLevelClamp(float* pminMipmapLevelClamp, float* pmaxMipmapLevelClamp, CUtexref hTexRef)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuTexRefGetMipmapLevelClamp) < 0 ||
-        rpc_write(0, &pminMipmapLevelClamp, sizeof(float)) < 0 ||
-        rpc_write(0, &pmaxMipmapLevelClamp, sizeof(float)) < 0 ||
+        rpc_write(0, pminMipmapLevelClamp, sizeof(float)) < 0 ||
+        rpc_write(0, pmaxMipmapLevelClamp, sizeof(float)) < 0 ||
         rpc_write(0, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pminMipmapLevelClamp, sizeof(float)) < 0 ||
@@ -7832,9 +7686,8 @@ CUresult cuTexRefGetMipmapLevelClamp(float* pminMipmapLevelClamp, float* pmaxMip
 CUresult cuTexRefGetMaxAnisotropy(int* pmaxAniso, CUtexref hTexRef)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuTexRefGetMaxAnisotropy) < 0 ||
-        rpc_write(0, &pmaxAniso, sizeof(int)) < 0 ||
+        rpc_write(0, pmaxAniso, sizeof(int)) < 0 ||
         rpc_write(0, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pmaxAniso, sizeof(int)) < 0 ||
@@ -7846,9 +7699,8 @@ CUresult cuTexRefGetMaxAnisotropy(int* pmaxAniso, CUtexref hTexRef)
 CUresult cuTexRefGetBorderColor(float* pBorderColor, CUtexref hTexRef)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuTexRefGetBorderColor) < 0 ||
-        rpc_write(0, &pBorderColor, sizeof(float)) < 0 ||
+        rpc_write(0, pBorderColor, sizeof(float)) < 0 ||
         rpc_write(0, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pBorderColor, sizeof(float)) < 0 ||
@@ -7860,9 +7712,8 @@ CUresult cuTexRefGetBorderColor(float* pBorderColor, CUtexref hTexRef)
 CUresult cuTexRefGetFlags(unsigned int* pFlags, CUtexref hTexRef)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuTexRefGetFlags) < 0 ||
-        rpc_write(0, &pFlags, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, pFlags, sizeof(unsigned int)) < 0 ||
         rpc_write(0, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pFlags, sizeof(unsigned int)) < 0 ||
@@ -7874,9 +7725,8 @@ CUresult cuTexRefGetFlags(unsigned int* pFlags, CUtexref hTexRef)
 CUresult cuTexRefCreate(CUtexref* pTexRef)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuTexRefCreate) < 0 ||
-        rpc_write(0, &pTexRef, sizeof(CUtexref)) < 0 ||
+        rpc_write(0, pTexRef, sizeof(CUtexref)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pTexRef, sizeof(CUtexref)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -7887,7 +7737,6 @@ CUresult cuTexRefCreate(CUtexref* pTexRef)
 CUresult cuTexRefDestroy(CUtexref hTexRef)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuTexRefDestroy) < 0 ||
         rpc_write(0, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -7899,7 +7748,6 @@ CUresult cuTexRefDestroy(CUtexref hTexRef)
 CUresult cuSurfRefSetArray(CUsurfref hSurfRef, CUarray hArray, unsigned int Flags)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuSurfRefSetArray) < 0 ||
         rpc_write(0, &hSurfRef, sizeof(CUsurfref)) < 0 ||
         rpc_write(0, &hArray, sizeof(CUarray)) < 0 ||
@@ -7913,9 +7761,8 @@ CUresult cuSurfRefSetArray(CUsurfref hSurfRef, CUarray hArray, unsigned int Flag
 CUresult cuSurfRefGetArray(CUarray* phArray, CUsurfref hSurfRef)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuSurfRefGetArray) < 0 ||
-        rpc_write(0, &phArray, sizeof(CUarray)) < 0 ||
+        rpc_write(0, phArray, sizeof(CUarray)) < 0 ||
         rpc_write(0, &hSurfRef, sizeof(CUsurfref)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, phArray, sizeof(CUarray)) < 0 ||
@@ -7924,10 +7771,24 @@ CUresult cuSurfRefGetArray(CUarray* phArray, CUsurfref hSurfRef)
     return return_value;
 }
 
+CUresult cuTexObjectCreate(CUtexObject* pTexObject, const CUDA_RESOURCE_DESC* pResDesc, const CUDA_TEXTURE_DESC* pTexDesc, const CUDA_RESOURCE_VIEW_DESC* pResViewDesc)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuTexObjectCreate) < 0 ||
+        rpc_write(0, pTexObject, sizeof(CUtexObject)) < 0 ||
+        rpc_write(0, &pResDesc, sizeof(const CUDA_RESOURCE_DESC*)) < 0 ||
+        rpc_write(0, &pTexDesc, sizeof(const CUDA_TEXTURE_DESC*)) < 0 ||
+        rpc_write(0, &pResViewDesc, sizeof(const CUDA_RESOURCE_VIEW_DESC*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, pTexObject, sizeof(CUtexObject)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
 CUresult cuTexObjectDestroy(CUtexObject texObject)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuTexObjectDestroy) < 0 ||
         rpc_write(0, &texObject, sizeof(CUtexObject)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -7939,9 +7800,8 @@ CUresult cuTexObjectDestroy(CUtexObject texObject)
 CUresult cuTexObjectGetResourceDesc(CUDA_RESOURCE_DESC* pResDesc, CUtexObject texObject)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuTexObjectGetResourceDesc) < 0 ||
-        rpc_write(0, &pResDesc, sizeof(CUDA_RESOURCE_DESC)) < 0 ||
+        rpc_write(0, pResDesc, sizeof(CUDA_RESOURCE_DESC)) < 0 ||
         rpc_write(0, &texObject, sizeof(CUtexObject)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pResDesc, sizeof(CUDA_RESOURCE_DESC)) < 0 ||
@@ -7953,9 +7813,8 @@ CUresult cuTexObjectGetResourceDesc(CUDA_RESOURCE_DESC* pResDesc, CUtexObject te
 CUresult cuTexObjectGetTextureDesc(CUDA_TEXTURE_DESC* pTexDesc, CUtexObject texObject)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuTexObjectGetTextureDesc) < 0 ||
-        rpc_write(0, &pTexDesc, sizeof(CUDA_TEXTURE_DESC)) < 0 ||
+        rpc_write(0, pTexDesc, sizeof(CUDA_TEXTURE_DESC)) < 0 ||
         rpc_write(0, &texObject, sizeof(CUtexObject)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pTexDesc, sizeof(CUDA_TEXTURE_DESC)) < 0 ||
@@ -7967,9 +7826,8 @@ CUresult cuTexObjectGetTextureDesc(CUDA_TEXTURE_DESC* pTexDesc, CUtexObject texO
 CUresult cuTexObjectGetResourceViewDesc(CUDA_RESOURCE_VIEW_DESC* pResViewDesc, CUtexObject texObject)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuTexObjectGetResourceViewDesc) < 0 ||
-        rpc_write(0, &pResViewDesc, sizeof(CUDA_RESOURCE_VIEW_DESC)) < 0 ||
+        rpc_write(0, pResViewDesc, sizeof(CUDA_RESOURCE_VIEW_DESC)) < 0 ||
         rpc_write(0, &texObject, sizeof(CUtexObject)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pResViewDesc, sizeof(CUDA_RESOURCE_VIEW_DESC)) < 0 ||
@@ -7978,10 +7836,22 @@ CUresult cuTexObjectGetResourceViewDesc(CUDA_RESOURCE_VIEW_DESC* pResViewDesc, C
     return return_value;
 }
 
+CUresult cuSurfObjectCreate(CUsurfObject* pSurfObject, const CUDA_RESOURCE_DESC* pResDesc)
+{
+    CUresult return_value;
+    if (rpc_start_request(0, RPC_cuSurfObjectCreate) < 0 ||
+        rpc_write(0, pSurfObject, sizeof(CUsurfObject)) < 0 ||
+        rpc_write(0, &pResDesc, sizeof(const CUDA_RESOURCE_DESC*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, pSurfObject, sizeof(CUsurfObject)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
+}
+
 CUresult cuSurfObjectDestroy(CUsurfObject surfObject)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuSurfObjectDestroy) < 0 ||
         rpc_write(0, &surfObject, sizeof(CUsurfObject)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -7993,9 +7863,8 @@ CUresult cuSurfObjectDestroy(CUsurfObject surfObject)
 CUresult cuSurfObjectGetResourceDesc(CUDA_RESOURCE_DESC* pResDesc, CUsurfObject surfObject)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuSurfObjectGetResourceDesc) < 0 ||
-        rpc_write(0, &pResDesc, sizeof(CUDA_RESOURCE_DESC)) < 0 ||
+        rpc_write(0, pResDesc, sizeof(CUDA_RESOURCE_DESC)) < 0 ||
         rpc_write(0, &surfObject, sizeof(CUsurfObject)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pResDesc, sizeof(CUDA_RESOURCE_DESC)) < 0 ||
@@ -8004,27 +7873,11 @@ CUresult cuSurfObjectGetResourceDesc(CUDA_RESOURCE_DESC* pResDesc, CUsurfObject 
     return return_value;
 }
 
-CUresult cuTensorMapReplaceAddress(CUtensorMap* tensorMap, void* globalAddress)
-{
-    CUresult return_value;
-
-    if (rpc_start_request(0, RPC_cuTensorMapReplaceAddress) < 0 ||
-        rpc_write(0, &tensorMap, sizeof(CUtensorMap)) < 0 ||
-        rpc_write(0, &globalAddress, sizeof(void*)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, tensorMap, sizeof(CUtensorMap)) < 0 ||
-        rpc_read(0, globalAddress, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    return return_value;
-}
-
 CUresult cuDeviceCanAccessPeer(int* canAccessPeer, CUdevice dev, CUdevice peerDev)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuDeviceCanAccessPeer) < 0 ||
-        rpc_write(0, &canAccessPeer, sizeof(int)) < 0 ||
+        rpc_write(0, canAccessPeer, sizeof(int)) < 0 ||
         rpc_write(0, &dev, sizeof(CUdevice)) < 0 ||
         rpc_write(0, &peerDev, sizeof(CUdevice)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -8037,7 +7890,6 @@ CUresult cuDeviceCanAccessPeer(int* canAccessPeer, CUdevice dev, CUdevice peerDe
 CUresult cuCtxEnablePeerAccess(CUcontext peerContext, unsigned int Flags)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuCtxEnablePeerAccess) < 0 ||
         rpc_write(0, &peerContext, sizeof(CUcontext)) < 0 ||
         rpc_write(0, &Flags, sizeof(unsigned int)) < 0 ||
@@ -8050,7 +7902,6 @@ CUresult cuCtxEnablePeerAccess(CUcontext peerContext, unsigned int Flags)
 CUresult cuCtxDisablePeerAccess(CUcontext peerContext)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuCtxDisablePeerAccess) < 0 ||
         rpc_write(0, &peerContext, sizeof(CUcontext)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -8062,9 +7913,8 @@ CUresult cuCtxDisablePeerAccess(CUcontext peerContext)
 CUresult cuDeviceGetP2PAttribute(int* value, CUdevice_P2PAttribute attrib, CUdevice srcDevice, CUdevice dstDevice)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuDeviceGetP2PAttribute) < 0 ||
-        rpc_write(0, &value, sizeof(int)) < 0 ||
+        rpc_write(0, value, sizeof(int)) < 0 ||
         rpc_write(0, &attrib, sizeof(CUdevice_P2PAttribute)) < 0 ||
         rpc_write(0, &srcDevice, sizeof(CUdevice)) < 0 ||
         rpc_write(0, &dstDevice, sizeof(CUdevice)) < 0 ||
@@ -8078,7 +7928,6 @@ CUresult cuDeviceGetP2PAttribute(int* value, CUdevice_P2PAttribute attrib, CUdev
 CUresult cuGraphicsUnregisterResource(CUgraphicsResource resource)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphicsUnregisterResource) < 0 ||
         rpc_write(0, &resource, sizeof(CUgraphicsResource)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -8090,9 +7939,8 @@ CUresult cuGraphicsUnregisterResource(CUgraphicsResource resource)
 CUresult cuGraphicsSubResourceGetMappedArray(CUarray* pArray, CUgraphicsResource resource, unsigned int arrayIndex, unsigned int mipLevel)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphicsSubResourceGetMappedArray) < 0 ||
-        rpc_write(0, &pArray, sizeof(CUarray)) < 0 ||
+        rpc_write(0, pArray, sizeof(CUarray)) < 0 ||
         rpc_write(0, &resource, sizeof(CUgraphicsResource)) < 0 ||
         rpc_write(0, &arrayIndex, sizeof(unsigned int)) < 0 ||
         rpc_write(0, &mipLevel, sizeof(unsigned int)) < 0 ||
@@ -8106,9 +7954,8 @@ CUresult cuGraphicsSubResourceGetMappedArray(CUarray* pArray, CUgraphicsResource
 CUresult cuGraphicsResourceGetMappedMipmappedArray(CUmipmappedArray* pMipmappedArray, CUgraphicsResource resource)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphicsResourceGetMappedMipmappedArray) < 0 ||
-        rpc_write(0, &pMipmappedArray, sizeof(CUmipmappedArray)) < 0 ||
+        rpc_write(0, pMipmappedArray, sizeof(CUmipmappedArray)) < 0 ||
         rpc_write(0, &resource, sizeof(CUgraphicsResource)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pMipmappedArray, sizeof(CUmipmappedArray)) < 0 ||
@@ -8120,10 +7967,9 @@ CUresult cuGraphicsResourceGetMappedMipmappedArray(CUmipmappedArray* pMipmappedA
 CUresult cuGraphicsResourceGetMappedPointer_v2(CUdeviceptr* pDevPtr, size_t* pSize, CUgraphicsResource resource)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphicsResourceGetMappedPointer_v2) < 0 ||
-        rpc_write(0, &pDevPtr, sizeof(CUdeviceptr)) < 0 ||
-        rpc_write(0, &pSize, sizeof(size_t)) < 0 ||
+        rpc_write(0, pDevPtr, sizeof(CUdeviceptr)) < 0 ||
+        rpc_write(0, pSize, sizeof(size_t)) < 0 ||
         rpc_write(0, &resource, sizeof(CUgraphicsResource)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pDevPtr, sizeof(CUdeviceptr)) < 0 ||
@@ -8136,7 +7982,6 @@ CUresult cuGraphicsResourceGetMappedPointer_v2(CUdeviceptr* pDevPtr, size_t* pSi
 CUresult cuGraphicsResourceSetMapFlags_v2(CUgraphicsResource resource, unsigned int flags)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphicsResourceSetMapFlags_v2) < 0 ||
         rpc_write(0, &resource, sizeof(CUgraphicsResource)) < 0 ||
         rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
@@ -8149,10 +7994,9 @@ CUresult cuGraphicsResourceSetMapFlags_v2(CUgraphicsResource resource, unsigned 
 CUresult cuGraphicsMapResources(unsigned int count, CUgraphicsResource* resources, CUstream hStream)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphicsMapResources) < 0 ||
         rpc_write(0, &count, sizeof(unsigned int)) < 0 ||
-        rpc_write(0, &resources, sizeof(CUgraphicsResource)) < 0 ||
+        rpc_write(0, resources, sizeof(CUgraphicsResource)) < 0 ||
         rpc_write(0, &hStream, sizeof(CUstream)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, resources, sizeof(CUgraphicsResource)) < 0 ||
@@ -8164,10 +8008,9 @@ CUresult cuGraphicsMapResources(unsigned int count, CUgraphicsResource* resource
 CUresult cuGraphicsUnmapResources(unsigned int count, CUgraphicsResource* resources, CUstream hStream)
 {
     CUresult return_value;
-
     if (rpc_start_request(0, RPC_cuGraphicsUnmapResources) < 0 ||
         rpc_write(0, &count, sizeof(unsigned int)) < 0 ||
-        rpc_write(0, &resources, sizeof(CUgraphicsResource)) < 0 ||
+        rpc_write(0, resources, sizeof(CUgraphicsResource)) < 0 ||
         rpc_write(0, &hStream, sizeof(CUstream)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, resources, sizeof(CUgraphicsResource)) < 0 ||
@@ -8179,7 +8022,6 @@ CUresult cuGraphicsUnmapResources(unsigned int count, CUgraphicsResource* resour
 cudaError_t cudaDeviceReset()
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaDeviceReset) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -8190,7 +8032,6 @@ cudaError_t cudaDeviceReset()
 cudaError_t cudaDeviceSynchronize()
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaDeviceSynchronize) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -8201,7 +8042,6 @@ cudaError_t cudaDeviceSynchronize()
 cudaError_t cudaDeviceSetLimit(enum cudaLimit limit, size_t value)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaDeviceSetLimit) < 0 ||
         rpc_write(0, &limit, sizeof(enum cudaLimit)) < 0 ||
         rpc_write(0, &value, sizeof(size_t)) < 0 ||
@@ -8214,9 +8054,8 @@ cudaError_t cudaDeviceSetLimit(enum cudaLimit limit, size_t value)
 cudaError_t cudaDeviceGetLimit(size_t* pValue, enum cudaLimit limit)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaDeviceGetLimit) < 0 ||
-        rpc_write(0, &pValue, sizeof(size_t)) < 0 ||
+        rpc_write(0, pValue, sizeof(size_t)) < 0 ||
         rpc_write(0, &limit, sizeof(enum cudaLimit)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pValue, sizeof(size_t)) < 0 ||
@@ -8225,12 +8064,25 @@ cudaError_t cudaDeviceGetLimit(size_t* pValue, enum cudaLimit limit)
     return return_value;
 }
 
+cudaError_t cudaDeviceGetTexture1DLinearMaxWidth(size_t* maxWidthInElements, const struct cudaChannelFormatDesc* fmtDesc, int device)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaDeviceGetTexture1DLinearMaxWidth) < 0 ||
+        rpc_write(0, maxWidthInElements, sizeof(size_t)) < 0 ||
+        rpc_write(0, &fmtDesc, sizeof(const struct cudaChannelFormatDesc*)) < 0 ||
+        rpc_write(0, &device, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, maxWidthInElements, sizeof(size_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
 cudaError_t cudaDeviceGetCacheConfig(enum cudaFuncCache* pCacheConfig)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaDeviceGetCacheConfig) < 0 ||
-        rpc_write(0, &pCacheConfig, sizeof(enum cudaFuncCache)) < 0 ||
+        rpc_write(0, pCacheConfig, sizeof(enum cudaFuncCache)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pCacheConfig, sizeof(enum cudaFuncCache)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -8241,10 +8093,9 @@ cudaError_t cudaDeviceGetCacheConfig(enum cudaFuncCache* pCacheConfig)
 cudaError_t cudaDeviceGetStreamPriorityRange(int* leastPriority, int* greatestPriority)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaDeviceGetStreamPriorityRange) < 0 ||
-        rpc_write(0, &leastPriority, sizeof(int)) < 0 ||
-        rpc_write(0, &greatestPriority, sizeof(int)) < 0 ||
+        rpc_write(0, leastPriority, sizeof(int)) < 0 ||
+        rpc_write(0, greatestPriority, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, leastPriority, sizeof(int)) < 0 ||
         rpc_read(0, greatestPriority, sizeof(int)) < 0 ||
@@ -8256,7 +8107,6 @@ cudaError_t cudaDeviceGetStreamPriorityRange(int* leastPriority, int* greatestPr
 cudaError_t cudaDeviceSetCacheConfig(enum cudaFuncCache cacheConfig)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaDeviceSetCacheConfig) < 0 ||
         rpc_write(0, &cacheConfig, sizeof(enum cudaFuncCache)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -8268,9 +8118,8 @@ cudaError_t cudaDeviceSetCacheConfig(enum cudaFuncCache cacheConfig)
 cudaError_t cudaDeviceGetSharedMemConfig(enum cudaSharedMemConfig* pConfig)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaDeviceGetSharedMemConfig) < 0 ||
-        rpc_write(0, &pConfig, sizeof(enum cudaSharedMemConfig)) < 0 ||
+        rpc_write(0, pConfig, sizeof(enum cudaSharedMemConfig)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pConfig, sizeof(enum cudaSharedMemConfig)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -8281,7 +8130,6 @@ cudaError_t cudaDeviceGetSharedMemConfig(enum cudaSharedMemConfig* pConfig)
 cudaError_t cudaDeviceSetSharedMemConfig(enum cudaSharedMemConfig config)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaDeviceSetSharedMemConfig) < 0 ||
         rpc_write(0, &config, sizeof(enum cudaSharedMemConfig)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -8290,12 +8138,24 @@ cudaError_t cudaDeviceSetSharedMemConfig(enum cudaSharedMemConfig config)
     return return_value;
 }
 
+cudaError_t cudaDeviceGetByPCIBusId(int* device, const char* pciBusId)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaDeviceGetByPCIBusId) < 0 ||
+        rpc_write(0, device, sizeof(int)) < 0 ||
+        rpc_write(0, &pciBusId, sizeof(const char*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, device, sizeof(int)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
 cudaError_t cudaDeviceGetPCIBusId(char* pciBusId, int len, int device)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaDeviceGetPCIBusId) < 0 ||
-        rpc_write(0, &pciBusId, sizeof(char)) < 0 ||
+        rpc_write(0, pciBusId, sizeof(char)) < 0 ||
         rpc_write(0, &len, sizeof(int)) < 0 ||
         rpc_write(0, &device, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -8308,9 +8168,8 @@ cudaError_t cudaDeviceGetPCIBusId(char* pciBusId, int len, int device)
 cudaError_t cudaIpcGetEventHandle(cudaIpcEventHandle_t* handle, cudaEvent_t event)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaIpcGetEventHandle) < 0 ||
-        rpc_write(0, &handle, sizeof(cudaIpcEventHandle_t)) < 0 ||
+        rpc_write(0, handle, sizeof(cudaIpcEventHandle_t)) < 0 ||
         rpc_write(0, &event, sizeof(cudaEvent_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, handle, sizeof(cudaIpcEventHandle_t)) < 0 ||
@@ -8322,9 +8181,8 @@ cudaError_t cudaIpcGetEventHandle(cudaIpcEventHandle_t* handle, cudaEvent_t even
 cudaError_t cudaIpcOpenEventHandle(cudaEvent_t* event, cudaIpcEventHandle_t handle)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaIpcOpenEventHandle) < 0 ||
-        rpc_write(0, &event, sizeof(cudaEvent_t)) < 0 ||
+        rpc_write(0, event, sizeof(cudaEvent_t)) < 0 ||
         rpc_write(0, &handle, sizeof(cudaIpcEventHandle_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, event, sizeof(cudaEvent_t)) < 0 ||
@@ -8333,42 +8191,13 @@ cudaError_t cudaIpcOpenEventHandle(cudaEvent_t* event, cudaIpcEventHandle_t hand
     return return_value;
 }
 
-cudaError_t cudaIpcGetMemHandle(cudaIpcMemHandle_t* handle, void* devPtr)
-{
-    cudaError_t return_value;
-
-    if (rpc_start_request(0, RPC_cudaIpcGetMemHandle) < 0 ||
-        rpc_write(0, &handle, sizeof(cudaIpcMemHandle_t)) < 0 ||
-        rpc_write(0, &devPtr, sizeof(void*)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, handle, sizeof(cudaIpcMemHandle_t)) < 0 ||
-        rpc_read(0, devPtr, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return cudaErrorDevicesUnavailable;
-    return return_value;
-}
-
 cudaError_t cudaIpcOpenMemHandle(void** devPtr, cudaIpcMemHandle_t handle, unsigned int flags)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaIpcOpenMemHandle) < 0 ||
-        rpc_write(0, &devPtr, sizeof(void*)) < 0 ||
+        rpc_write(0, devPtr, sizeof(void*)) < 0 ||
         rpc_write(0, &handle, sizeof(cudaIpcMemHandle_t)) < 0 ||
         rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, devPtr, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return cudaErrorDevicesUnavailable;
-    return return_value;
-}
-
-cudaError_t cudaIpcCloseMemHandle(void* devPtr)
-{
-    cudaError_t return_value;
-
-    if (rpc_start_request(0, RPC_cudaIpcCloseMemHandle) < 0 ||
-        rpc_write(0, &devPtr, sizeof(void*)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, devPtr, sizeof(void*)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -8379,7 +8208,6 @@ cudaError_t cudaIpcCloseMemHandle(void* devPtr)
 cudaError_t cudaDeviceFlushGPUDirectRDMAWrites(enum cudaFlushGPUDirectRDMAWritesTarget target, enum cudaFlushGPUDirectRDMAWritesScope scope)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaDeviceFlushGPUDirectRDMAWrites) < 0 ||
         rpc_write(0, &target, sizeof(enum cudaFlushGPUDirectRDMAWritesTarget)) < 0 ||
         rpc_write(0, &scope, sizeof(enum cudaFlushGPUDirectRDMAWritesScope)) < 0 ||
@@ -8392,7 +8220,6 @@ cudaError_t cudaDeviceFlushGPUDirectRDMAWrites(enum cudaFlushGPUDirectRDMAWrites
 cudaError_t cudaThreadExit()
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaThreadExit) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -8403,7 +8230,6 @@ cudaError_t cudaThreadExit()
 cudaError_t cudaThreadSynchronize()
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaThreadSynchronize) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -8414,7 +8240,6 @@ cudaError_t cudaThreadSynchronize()
 cudaError_t cudaThreadSetLimit(enum cudaLimit limit, size_t value)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaThreadSetLimit) < 0 ||
         rpc_write(0, &limit, sizeof(enum cudaLimit)) < 0 ||
         rpc_write(0, &value, sizeof(size_t)) < 0 ||
@@ -8427,9 +8252,8 @@ cudaError_t cudaThreadSetLimit(enum cudaLimit limit, size_t value)
 cudaError_t cudaThreadGetLimit(size_t* pValue, enum cudaLimit limit)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaThreadGetLimit) < 0 ||
-        rpc_write(0, &pValue, sizeof(size_t)) < 0 ||
+        rpc_write(0, pValue, sizeof(size_t)) < 0 ||
         rpc_write(0, &limit, sizeof(enum cudaLimit)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pValue, sizeof(size_t)) < 0 ||
@@ -8441,9 +8265,8 @@ cudaError_t cudaThreadGetLimit(size_t* pValue, enum cudaLimit limit)
 cudaError_t cudaThreadGetCacheConfig(enum cudaFuncCache* pCacheConfig)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaThreadGetCacheConfig) < 0 ||
-        rpc_write(0, &pCacheConfig, sizeof(enum cudaFuncCache)) < 0 ||
+        rpc_write(0, pCacheConfig, sizeof(enum cudaFuncCache)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pCacheConfig, sizeof(enum cudaFuncCache)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -8454,7 +8277,6 @@ cudaError_t cudaThreadGetCacheConfig(enum cudaFuncCache* pCacheConfig)
 cudaError_t cudaThreadSetCacheConfig(enum cudaFuncCache cacheConfig)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaThreadSetCacheConfig) < 0 ||
         rpc_write(0, &cacheConfig, sizeof(enum cudaFuncCache)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -8466,7 +8288,6 @@ cudaError_t cudaThreadSetCacheConfig(enum cudaFuncCache cacheConfig)
 cudaError_t cudaGetLastError()
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGetLastError) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -8477,7 +8298,6 @@ cudaError_t cudaGetLastError()
 cudaError_t cudaPeekAtLastError()
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaPeekAtLastError) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -8488,7 +8308,6 @@ cudaError_t cudaPeekAtLastError()
 cudaError_t cudaGetDeviceCount(int* count)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGetDeviceCount) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, count, sizeof(int)) < 0 ||
@@ -8500,7 +8319,6 @@ cudaError_t cudaGetDeviceCount(int* count)
 cudaError_t cudaGetDeviceProperties_v2(struct cudaDeviceProp* prop, int device)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGetDeviceProperties_v2) < 0 ||
         rpc_write(0, &device, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -8513,9 +8331,8 @@ cudaError_t cudaGetDeviceProperties_v2(struct cudaDeviceProp* prop, int device)
 cudaError_t cudaDeviceGetAttribute(int* value, enum cudaDeviceAttr attr, int device)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaDeviceGetAttribute) < 0 ||
-        rpc_write(0, &value, sizeof(int)) < 0 ||
+        rpc_write(0, value, sizeof(int)) < 0 ||
         rpc_write(0, &attr, sizeof(enum cudaDeviceAttr)) < 0 ||
         rpc_write(0, &device, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -8528,9 +8345,8 @@ cudaError_t cudaDeviceGetAttribute(int* value, enum cudaDeviceAttr attr, int dev
 cudaError_t cudaDeviceGetDefaultMemPool(cudaMemPool_t* memPool, int device)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaDeviceGetDefaultMemPool) < 0 ||
-        rpc_write(0, &memPool, sizeof(cudaMemPool_t)) < 0 ||
+        rpc_write(0, memPool, sizeof(cudaMemPool_t)) < 0 ||
         rpc_write(0, &device, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, memPool, sizeof(cudaMemPool_t)) < 0 ||
@@ -8542,7 +8358,6 @@ cudaError_t cudaDeviceGetDefaultMemPool(cudaMemPool_t* memPool, int device)
 cudaError_t cudaDeviceSetMemPool(int device, cudaMemPool_t memPool)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaDeviceSetMemPool) < 0 ||
         rpc_write(0, &device, sizeof(int)) < 0 ||
         rpc_write(0, &memPool, sizeof(cudaMemPool_t)) < 0 ||
@@ -8555,9 +8370,8 @@ cudaError_t cudaDeviceSetMemPool(int device, cudaMemPool_t memPool)
 cudaError_t cudaDeviceGetMemPool(cudaMemPool_t* memPool, int device)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaDeviceGetMemPool) < 0 ||
-        rpc_write(0, &memPool, sizeof(cudaMemPool_t)) < 0 ||
+        rpc_write(0, memPool, sizeof(cudaMemPool_t)) < 0 ||
         rpc_write(0, &device, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, memPool, sizeof(cudaMemPool_t)) < 0 ||
@@ -8566,27 +8380,11 @@ cudaError_t cudaDeviceGetMemPool(cudaMemPool_t* memPool, int device)
     return return_value;
 }
 
-cudaError_t cudaDeviceGetNvSciSyncAttributes(void* nvSciSyncAttrList, int device, int flags)
-{
-    cudaError_t return_value;
-
-    if (rpc_start_request(0, RPC_cudaDeviceGetNvSciSyncAttributes) < 0 ||
-        rpc_write(0, &nvSciSyncAttrList, sizeof(void*)) < 0 ||
-        rpc_write(0, &device, sizeof(int)) < 0 ||
-        rpc_write(0, &flags, sizeof(int)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, nvSciSyncAttrList, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return cudaErrorDevicesUnavailable;
-    return return_value;
-}
-
 cudaError_t cudaDeviceGetP2PAttribute(int* value, enum cudaDeviceP2PAttr attr, int srcDevice, int dstDevice)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaDeviceGetP2PAttribute) < 0 ||
-        rpc_write(0, &value, sizeof(int)) < 0 ||
+        rpc_write(0, value, sizeof(int)) < 0 ||
         rpc_write(0, &attr, sizeof(enum cudaDeviceP2PAttr)) < 0 ||
         rpc_write(0, &srcDevice, sizeof(int)) < 0 ||
         rpc_write(0, &dstDevice, sizeof(int)) < 0 ||
@@ -8597,10 +8395,22 @@ cudaError_t cudaDeviceGetP2PAttribute(int* value, enum cudaDeviceP2PAttr attr, i
     return return_value;
 }
 
+cudaError_t cudaChooseDevice(int* device, const struct cudaDeviceProp* prop)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaChooseDevice) < 0 ||
+        rpc_write(0, device, sizeof(int)) < 0 ||
+        rpc_write(0, &prop, sizeof(const struct cudaDeviceProp*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, device, sizeof(int)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
 cudaError_t cudaInitDevice(int device, unsigned int deviceFlags, unsigned int flags)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaInitDevice) < 0 ||
         rpc_write(0, &device, sizeof(int)) < 0 ||
         rpc_write(0, &deviceFlags, sizeof(unsigned int)) < 0 ||
@@ -8614,7 +8424,6 @@ cudaError_t cudaInitDevice(int device, unsigned int deviceFlags, unsigned int fl
 cudaError_t cudaSetDevice(int device)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaSetDevice) < 0 ||
         rpc_write(0, &device, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -8626,9 +8435,8 @@ cudaError_t cudaSetDevice(int device)
 cudaError_t cudaGetDevice(int* device)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGetDevice) < 0 ||
-        rpc_write(0, &device, sizeof(int)) < 0 ||
+        rpc_write(0, device, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, device, sizeof(int)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -8639,9 +8447,8 @@ cudaError_t cudaGetDevice(int* device)
 cudaError_t cudaSetValidDevices(int* device_arr, int len)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaSetValidDevices) < 0 ||
-        rpc_write(0, &device_arr, sizeof(int)) < 0 ||
+        rpc_write(0, device_arr, sizeof(int)) < 0 ||
         rpc_write(0, &len, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, device_arr, sizeof(int)) < 0 ||
@@ -8653,7 +8460,6 @@ cudaError_t cudaSetValidDevices(int* device_arr, int len)
 cudaError_t cudaSetDeviceFlags(unsigned int flags)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaSetDeviceFlags) < 0 ||
         rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -8665,9 +8471,8 @@ cudaError_t cudaSetDeviceFlags(unsigned int flags)
 cudaError_t cudaGetDeviceFlags(unsigned int* flags)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGetDeviceFlags) < 0 ||
-        rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, flags, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, flags, sizeof(unsigned int)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -8678,9 +8483,8 @@ cudaError_t cudaGetDeviceFlags(unsigned int* flags)
 cudaError_t cudaStreamCreate(cudaStream_t* pStream)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaStreamCreate) < 0 ||
-        rpc_write(0, &pStream, sizeof(cudaStream_t)) < 0 ||
+        rpc_write(0, pStream, sizeof(cudaStream_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pStream, sizeof(cudaStream_t)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -8691,9 +8495,8 @@ cudaError_t cudaStreamCreate(cudaStream_t* pStream)
 cudaError_t cudaStreamCreateWithFlags(cudaStream_t* pStream, unsigned int flags)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaStreamCreateWithFlags) < 0 ||
-        rpc_write(0, &pStream, sizeof(cudaStream_t)) < 0 ||
+        rpc_write(0, pStream, sizeof(cudaStream_t)) < 0 ||
         rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pStream, sizeof(cudaStream_t)) < 0 ||
@@ -8705,9 +8508,8 @@ cudaError_t cudaStreamCreateWithFlags(cudaStream_t* pStream, unsigned int flags)
 cudaError_t cudaStreamCreateWithPriority(cudaStream_t* pStream, unsigned int flags, int priority)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaStreamCreateWithPriority) < 0 ||
-        rpc_write(0, &pStream, sizeof(cudaStream_t)) < 0 ||
+        rpc_write(0, pStream, sizeof(cudaStream_t)) < 0 ||
         rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
         rpc_write(0, &priority, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -8720,10 +8522,9 @@ cudaError_t cudaStreamCreateWithPriority(cudaStream_t* pStream, unsigned int fla
 cudaError_t cudaStreamGetPriority(cudaStream_t hStream, int* priority)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaStreamGetPriority) < 0 ||
         rpc_write(0, &hStream, sizeof(cudaStream_t)) < 0 ||
-        rpc_write(0, &priority, sizeof(int)) < 0 ||
+        rpc_write(0, priority, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, priority, sizeof(int)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -8734,10 +8535,9 @@ cudaError_t cudaStreamGetPriority(cudaStream_t hStream, int* priority)
 cudaError_t cudaStreamGetFlags(cudaStream_t hStream, unsigned int* flags)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaStreamGetFlags) < 0 ||
         rpc_write(0, &hStream, sizeof(cudaStream_t)) < 0 ||
-        rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, flags, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, flags, sizeof(unsigned int)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -8748,10 +8548,9 @@ cudaError_t cudaStreamGetFlags(cudaStream_t hStream, unsigned int* flags)
 cudaError_t cudaStreamGetId(cudaStream_t hStream, unsigned long long* streamId)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaStreamGetId) < 0 ||
         rpc_write(0, &hStream, sizeof(cudaStream_t)) < 0 ||
-        rpc_write(0, &streamId, sizeof(unsigned long long)) < 0 ||
+        rpc_write(0, streamId, sizeof(unsigned long long)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, streamId, sizeof(unsigned long long)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -8762,7 +8561,6 @@ cudaError_t cudaStreamGetId(cudaStream_t hStream, unsigned long long* streamId)
 cudaError_t cudaCtxResetPersistingL2Cache()
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaCtxResetPersistingL2Cache) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -8773,7 +8571,6 @@ cudaError_t cudaCtxResetPersistingL2Cache()
 cudaError_t cudaStreamCopyAttributes(cudaStream_t dst, cudaStream_t src)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaStreamCopyAttributes) < 0 ||
         rpc_write(0, &dst, sizeof(cudaStream_t)) < 0 ||
         rpc_write(0, &src, sizeof(cudaStream_t)) < 0 ||
@@ -8786,13 +8583,25 @@ cudaError_t cudaStreamCopyAttributes(cudaStream_t dst, cudaStream_t src)
 cudaError_t cudaStreamGetAttribute(cudaStream_t hStream, cudaLaunchAttributeID attr, cudaLaunchAttributeValue* value_out)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaStreamGetAttribute) < 0 ||
         rpc_write(0, &hStream, sizeof(cudaStream_t)) < 0 ||
         rpc_write(0, &attr, sizeof(cudaLaunchAttributeID)) < 0 ||
-        rpc_write(0, &value_out, sizeof(cudaLaunchAttributeValue)) < 0 ||
+        rpc_write(0, value_out, sizeof(cudaLaunchAttributeValue)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, value_out, sizeof(cudaLaunchAttributeValue)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaStreamSetAttribute(cudaStream_t hStream, cudaLaunchAttributeID attr, const cudaLaunchAttributeValue* value)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaStreamSetAttribute) < 0 ||
+        rpc_write(0, &hStream, sizeof(cudaStream_t)) < 0 ||
+        rpc_write(0, &attr, sizeof(cudaLaunchAttributeID)) < 0 ||
+        rpc_write(0, &value, sizeof(const cudaLaunchAttributeValue*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return cudaErrorDevicesUnavailable;
     return return_value;
@@ -8801,7 +8610,6 @@ cudaError_t cudaStreamGetAttribute(cudaStream_t hStream, cudaLaunchAttributeID a
 cudaError_t cudaStreamDestroy(cudaStream_t stream)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaStreamDestroy) < 0 ||
         rpc_write(0, &stream, sizeof(cudaStream_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -8813,7 +8621,6 @@ cudaError_t cudaStreamDestroy(cudaStream_t stream)
 cudaError_t cudaStreamWaitEvent(cudaStream_t stream, cudaEvent_t event, unsigned int flags)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaStreamWaitEvent) < 0 ||
         rpc_write(0, &stream, sizeof(cudaStream_t)) < 0 ||
         rpc_write(0, &event, sizeof(cudaEvent_t)) < 0 ||
@@ -8824,26 +8631,9 @@ cudaError_t cudaStreamWaitEvent(cudaStream_t stream, cudaEvent_t event, unsigned
     return return_value;
 }
 
-cudaError_t cudaStreamAddCallback(cudaStream_t stream, cudaStreamCallback_t callback, void* userData, unsigned int flags)
-{
-    cudaError_t return_value;
-
-    if (rpc_start_request(0, RPC_cudaStreamAddCallback) < 0 ||
-        rpc_write(0, &stream, sizeof(cudaStream_t)) < 0 ||
-        rpc_write(0, &callback, sizeof(cudaStreamCallback_t)) < 0 ||
-        rpc_write(0, &userData, sizeof(void*)) < 0 ||
-        rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, userData, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return cudaErrorDevicesUnavailable;
-    return return_value;
-}
-
 cudaError_t cudaStreamSynchronize(cudaStream_t stream)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaStreamSynchronize) < 0 ||
         rpc_write(0, &stream, sizeof(cudaStream_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -8855,7 +8645,6 @@ cudaError_t cudaStreamSynchronize(cudaStream_t stream)
 cudaError_t cudaStreamQuery(cudaStream_t stream)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaStreamQuery) < 0 ||
         rpc_write(0, &stream, sizeof(cudaStream_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -8864,26 +8653,9 @@ cudaError_t cudaStreamQuery(cudaStream_t stream)
     return return_value;
 }
 
-cudaError_t cudaStreamAttachMemAsync(cudaStream_t stream, void* devPtr, size_t length, unsigned int flags)
-{
-    cudaError_t return_value;
-
-    if (rpc_start_request(0, RPC_cudaStreamAttachMemAsync) < 0 ||
-        rpc_write(0, &stream, sizeof(cudaStream_t)) < 0 ||
-        rpc_write(0, &devPtr, sizeof(void*)) < 0 ||
-        rpc_write(0, &length, sizeof(size_t)) < 0 ||
-        rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, devPtr, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return cudaErrorDevicesUnavailable;
-    return return_value;
-}
-
 cudaError_t cudaStreamBeginCapture(cudaStream_t stream, enum cudaStreamCaptureMode mode)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaStreamBeginCapture) < 0 ||
         rpc_write(0, &stream, sizeof(cudaStream_t)) < 0 ||
         rpc_write(0, &mode, sizeof(enum cudaStreamCaptureMode)) < 0 ||
@@ -8896,9 +8668,8 @@ cudaError_t cudaStreamBeginCapture(cudaStream_t stream, enum cudaStreamCaptureMo
 cudaError_t cudaThreadExchangeStreamCaptureMode(enum cudaStreamCaptureMode* mode)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaThreadExchangeStreamCaptureMode) < 0 ||
-        rpc_write(0, &mode, sizeof(enum cudaStreamCaptureMode)) < 0 ||
+        rpc_write(0, mode, sizeof(enum cudaStreamCaptureMode)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, mode, sizeof(enum cudaStreamCaptureMode)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -8909,10 +8680,9 @@ cudaError_t cudaThreadExchangeStreamCaptureMode(enum cudaStreamCaptureMode* mode
 cudaError_t cudaStreamEndCapture(cudaStream_t stream, cudaGraph_t* pGraph)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaStreamEndCapture) < 0 ||
         rpc_write(0, &stream, sizeof(cudaStream_t)) < 0 ||
-        rpc_write(0, &pGraph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_write(0, pGraph, sizeof(cudaGraph_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pGraph, sizeof(cudaGraph_t)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -8923,10 +8693,9 @@ cudaError_t cudaStreamEndCapture(cudaStream_t stream, cudaGraph_t* pGraph)
 cudaError_t cudaStreamIsCapturing(cudaStream_t stream, enum cudaStreamCaptureStatus* pCaptureStatus)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaStreamIsCapturing) < 0 ||
         rpc_write(0, &stream, sizeof(cudaStream_t)) < 0 ||
-        rpc_write(0, &pCaptureStatus, sizeof(enum cudaStreamCaptureStatus)) < 0 ||
+        rpc_write(0, pCaptureStatus, sizeof(enum cudaStreamCaptureStatus)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pCaptureStatus, sizeof(enum cudaStreamCaptureStatus)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -8937,7 +8706,6 @@ cudaError_t cudaStreamIsCapturing(cudaStream_t stream, enum cudaStreamCaptureSta
 cudaError_t cudaStreamGetCaptureInfo_v2(cudaStream_t stream, enum cudaStreamCaptureStatus* captureStatus_out, unsigned long long* id_out, cudaGraph_t* graph_out, const cudaGraphNode_t** dependencies_out, size_t* numDependencies_out)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaStreamGetCaptureInfo_v2) < 0 ||
         rpc_write(0, &stream, sizeof(cudaStream_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -8954,7 +8722,6 @@ cudaError_t cudaStreamGetCaptureInfo_v2(cudaStream_t stream, enum cudaStreamCapt
 cudaError_t cudaStreamUpdateCaptureDependencies(cudaStream_t stream, cudaGraphNode_t* dependencies, size_t numDependencies, unsigned int flags)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaStreamUpdateCaptureDependencies) < 0 ||
         rpc_write(0, &stream, sizeof(cudaStream_t)) < 0 ||
         rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
@@ -8969,7 +8736,6 @@ cudaError_t cudaStreamUpdateCaptureDependencies(cudaStream_t stream, cudaGraphNo
 cudaError_t cudaEventCreate(cudaEvent_t* event)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaEventCreate) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, event, sizeof(cudaEvent_t)) < 0 ||
@@ -8981,7 +8747,6 @@ cudaError_t cudaEventCreate(cudaEvent_t* event)
 cudaError_t cudaEventCreateWithFlags(cudaEvent_t* event, unsigned int flags)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaEventCreateWithFlags) < 0 ||
         rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -8994,7 +8759,6 @@ cudaError_t cudaEventCreateWithFlags(cudaEvent_t* event, unsigned int flags)
 cudaError_t cudaEventRecord(cudaEvent_t event, cudaStream_t stream)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaEventRecord) < 0 ||
         rpc_write(0, &event, sizeof(cudaEvent_t)) < 0 ||
         rpc_write(0, &stream, sizeof(cudaStream_t)) < 0 ||
@@ -9007,7 +8771,6 @@ cudaError_t cudaEventRecord(cudaEvent_t event, cudaStream_t stream)
 cudaError_t cudaEventRecordWithFlags(cudaEvent_t event, cudaStream_t stream, unsigned int flags)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaEventRecordWithFlags) < 0 ||
         rpc_write(0, &event, sizeof(cudaEvent_t)) < 0 ||
         rpc_write(0, &stream, sizeof(cudaStream_t)) < 0 ||
@@ -9021,7 +8784,6 @@ cudaError_t cudaEventRecordWithFlags(cudaEvent_t event, cudaStream_t stream, uns
 cudaError_t cudaEventQuery(cudaEvent_t event)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaEventQuery) < 0 ||
         rpc_write(0, &event, sizeof(cudaEvent_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -9033,7 +8795,6 @@ cudaError_t cudaEventQuery(cudaEvent_t event)
 cudaError_t cudaEventSynchronize(cudaEvent_t event)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaEventSynchronize) < 0 ||
         rpc_write(0, &event, sizeof(cudaEvent_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -9045,7 +8806,6 @@ cudaError_t cudaEventSynchronize(cudaEvent_t event)
 cudaError_t cudaEventDestroy(cudaEvent_t event)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaEventDestroy) < 0 ||
         rpc_write(0, &event, sizeof(cudaEvent_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -9057,7 +8817,6 @@ cudaError_t cudaEventDestroy(cudaEvent_t event)
 cudaError_t cudaEventElapsedTime(float* ms, cudaEvent_t start, cudaEvent_t end)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaEventElapsedTime) < 0 ||
         rpc_write(0, &start, sizeof(cudaEvent_t)) < 0 ||
         rpc_write(0, &end, sizeof(cudaEvent_t)) < 0 ||
@@ -9068,12 +8827,80 @@ cudaError_t cudaEventElapsedTime(float* ms, cudaEvent_t start, cudaEvent_t end)
     return return_value;
 }
 
+cudaError_t cudaExternalMemoryGetMappedBuffer(void** devPtr, cudaExternalMemory_t extMem, const struct cudaExternalMemoryBufferDesc* bufferDesc)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaExternalMemoryGetMappedBuffer) < 0 ||
+        rpc_write(0, devPtr, sizeof(void*)) < 0 ||
+        rpc_write(0, &extMem, sizeof(cudaExternalMemory_t)) < 0 ||
+        rpc_write(0, &bufferDesc, sizeof(const struct cudaExternalMemoryBufferDesc*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, devPtr, sizeof(void*)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaExternalMemoryGetMappedMipmappedArray(cudaMipmappedArray_t* mipmap, cudaExternalMemory_t extMem, const struct cudaExternalMemoryMipmappedArrayDesc* mipmapDesc)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaExternalMemoryGetMappedMipmappedArray) < 0 ||
+        rpc_write(0, mipmap, sizeof(cudaMipmappedArray_t)) < 0 ||
+        rpc_write(0, &extMem, sizeof(cudaExternalMemory_t)) < 0 ||
+        rpc_write(0, &mipmapDesc, sizeof(const struct cudaExternalMemoryMipmappedArrayDesc*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, mipmap, sizeof(cudaMipmappedArray_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
 cudaError_t cudaDestroyExternalMemory(cudaExternalMemory_t extMem)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaDestroyExternalMemory) < 0 ||
         rpc_write(0, &extMem, sizeof(cudaExternalMemory_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaImportExternalSemaphore(cudaExternalSemaphore_t* extSem_out, const struct cudaExternalSemaphoreHandleDesc* semHandleDesc)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaImportExternalSemaphore) < 0 ||
+        rpc_write(0, extSem_out, sizeof(cudaExternalSemaphore_t)) < 0 ||
+        rpc_write(0, &semHandleDesc, sizeof(const struct cudaExternalSemaphoreHandleDesc*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, extSem_out, sizeof(cudaExternalSemaphore_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaSignalExternalSemaphoresAsync_v2(const cudaExternalSemaphore_t* extSemArray, const struct cudaExternalSemaphoreSignalParams* paramsArray, unsigned int numExtSems, cudaStream_t stream)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaSignalExternalSemaphoresAsync_v2) < 0 ||
+        rpc_write(0, &extSemArray, sizeof(const cudaExternalSemaphore_t*)) < 0 ||
+        rpc_write(0, &paramsArray, sizeof(const struct cudaExternalSemaphoreSignalParams*)) < 0 ||
+        rpc_write(0, &numExtSems, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, &stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaWaitExternalSemaphoresAsync_v2(const cudaExternalSemaphore_t* extSemArray, const struct cudaExternalSemaphoreWaitParams* paramsArray, unsigned int numExtSems, cudaStream_t stream)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaWaitExternalSemaphoresAsync_v2) < 0 ||
+        rpc_write(0, &extSemArray, sizeof(const cudaExternalSemaphore_t*)) < 0 ||
+        rpc_write(0, &paramsArray, sizeof(const struct cudaExternalSemaphoreWaitParams*)) < 0 ||
+        rpc_write(0, &numExtSems, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, &stream, sizeof(cudaStream_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return cudaErrorDevicesUnavailable;
@@ -9083,7 +8910,6 @@ cudaError_t cudaDestroyExternalMemory(cudaExternalMemory_t extMem)
 cudaError_t cudaDestroyExternalSemaphore(cudaExternalSemaphore_t extSem)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaDestroyExternalSemaphore) < 0 ||
         rpc_write(0, &extSem, sizeof(cudaExternalSemaphore_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -9092,12 +8918,42 @@ cudaError_t cudaDestroyExternalSemaphore(cudaExternalSemaphore_t extSem)
     return return_value;
 }
 
+cudaError_t cudaLaunchKernelExC(const cudaLaunchConfig_t* config, const void* func, void** args)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaLaunchKernelExC) < 0 ||
+        rpc_write(0, &config, sizeof(const cudaLaunchConfig_t*)) < 0 ||
+        rpc_write(0, &func, sizeof(const void*)) < 0 ||
+        rpc_write(0, args, sizeof(void*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, args, sizeof(void*)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaLaunchCooperativeKernel(const void* func, dim3 gridDim, dim3 blockDim, void** args, size_t sharedMem, cudaStream_t stream)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaLaunchCooperativeKernel) < 0 ||
+        rpc_write(0, &func, sizeof(const void*)) < 0 ||
+        rpc_write(0, &gridDim, sizeof(dim3)) < 0 ||
+        rpc_write(0, &blockDim, sizeof(dim3)) < 0 ||
+        rpc_write(0, args, sizeof(void*)) < 0 ||
+        rpc_write(0, &sharedMem, sizeof(size_t)) < 0 ||
+        rpc_write(0, &stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, args, sizeof(void*)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
 cudaError_t cudaLaunchCooperativeKernelMultiDevice(struct cudaLaunchParams* launchParamsList, unsigned int numDevices, unsigned int flags)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaLaunchCooperativeKernelMultiDevice) < 0 ||
-        rpc_write(0, &launchParamsList, sizeof(struct cudaLaunchParams)) < 0 ||
+        rpc_write(0, launchParamsList, sizeof(struct cudaLaunchParams)) < 0 ||
         rpc_write(0, &numDevices, sizeof(unsigned int)) < 0 ||
         rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -9107,12 +8963,61 @@ cudaError_t cudaLaunchCooperativeKernelMultiDevice(struct cudaLaunchParams* laun
     return return_value;
 }
 
+cudaError_t cudaFuncSetCacheConfig(const void* func, enum cudaFuncCache cacheConfig)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaFuncSetCacheConfig) < 0 ||
+        rpc_write(0, &func, sizeof(const void*)) < 0 ||
+        rpc_write(0, &cacheConfig, sizeof(enum cudaFuncCache)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaFuncSetSharedMemConfig(const void* func, enum cudaSharedMemConfig config)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaFuncSetSharedMemConfig) < 0 ||
+        rpc_write(0, &func, sizeof(const void*)) < 0 ||
+        rpc_write(0, &config, sizeof(enum cudaSharedMemConfig)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaFuncGetAttributes(struct cudaFuncAttributes* attr, const void* func)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaFuncGetAttributes) < 0 ||
+        rpc_write(0, attr, sizeof(struct cudaFuncAttributes)) < 0 ||
+        rpc_write(0, &func, sizeof(const void*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, attr, sizeof(struct cudaFuncAttributes)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaFuncSetAttribute(const void* func, enum cudaFuncAttribute attr, int value)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaFuncSetAttribute) < 0 ||
+        rpc_write(0, &func, sizeof(const void*)) < 0 ||
+        rpc_write(0, &attr, sizeof(enum cudaFuncAttribute)) < 0 ||
+        rpc_write(0, &value, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
 cudaError_t cudaSetDoubleForDevice(double* d)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaSetDoubleForDevice) < 0 ||
-        rpc_write(0, &d, sizeof(double)) < 0 ||
+        rpc_write(0, d, sizeof(double)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, d, sizeof(double)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -9123,9 +9028,8 @@ cudaError_t cudaSetDoubleForDevice(double* d)
 cudaError_t cudaSetDoubleForHost(double* d)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaSetDoubleForHost) < 0 ||
-        rpc_write(0, &d, sizeof(double)) < 0 ||
+        rpc_write(0, d, sizeof(double)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, d, sizeof(double)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -9133,16 +9037,75 @@ cudaError_t cudaSetDoubleForHost(double* d)
     return return_value;
 }
 
-cudaError_t cudaLaunchHostFunc(cudaStream_t stream, cudaHostFn_t fn, void* userData)
+cudaError_t cudaOccupancyMaxActiveBlocksPerMultiprocessor(int* numBlocks, const void* func, int blockSize, size_t dynamicSMemSize)
 {
     cudaError_t return_value;
-
-    if (rpc_start_request(0, RPC_cudaLaunchHostFunc) < 0 ||
-        rpc_write(0, &stream, sizeof(cudaStream_t)) < 0 ||
-        rpc_write(0, &fn, sizeof(cudaHostFn_t)) < 0 ||
-        rpc_write(0, &userData, sizeof(void*)) < 0 ||
+    if (rpc_start_request(0, RPC_cudaOccupancyMaxActiveBlocksPerMultiprocessor) < 0 ||
+        rpc_write(0, numBlocks, sizeof(int)) < 0 ||
+        rpc_write(0, &func, sizeof(const void*)) < 0 ||
+        rpc_write(0, &blockSize, sizeof(int)) < 0 ||
+        rpc_write(0, &dynamicSMemSize, sizeof(size_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, userData, sizeof(void*)) < 0 ||
+        rpc_read(0, numBlocks, sizeof(int)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaOccupancyAvailableDynamicSMemPerBlock(size_t* dynamicSmemSize, const void* func, int numBlocks, int blockSize)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaOccupancyAvailableDynamicSMemPerBlock) < 0 ||
+        rpc_write(0, dynamicSmemSize, sizeof(size_t)) < 0 ||
+        rpc_write(0, &func, sizeof(const void*)) < 0 ||
+        rpc_write(0, &numBlocks, sizeof(int)) < 0 ||
+        rpc_write(0, &blockSize, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, dynamicSmemSize, sizeof(size_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(int* numBlocks, const void* func, int blockSize, size_t dynamicSMemSize, unsigned int flags)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags) < 0 ||
+        rpc_write(0, numBlocks, sizeof(int)) < 0 ||
+        rpc_write(0, &func, sizeof(const void*)) < 0 ||
+        rpc_write(0, &blockSize, sizeof(int)) < 0 ||
+        rpc_write(0, &dynamicSMemSize, sizeof(size_t)) < 0 ||
+        rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, numBlocks, sizeof(int)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaOccupancyMaxPotentialClusterSize(int* clusterSize, const void* func, const cudaLaunchConfig_t* launchConfig)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaOccupancyMaxPotentialClusterSize) < 0 ||
+        rpc_write(0, clusterSize, sizeof(int)) < 0 ||
+        rpc_write(0, &func, sizeof(const void*)) < 0 ||
+        rpc_write(0, &launchConfig, sizeof(const cudaLaunchConfig_t*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, clusterSize, sizeof(int)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaOccupancyMaxActiveClusters(int* numClusters, const void* func, const cudaLaunchConfig_t* launchConfig)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaOccupancyMaxActiveClusters) < 0 ||
+        rpc_write(0, numClusters, sizeof(int)) < 0 ||
+        rpc_write(0, &func, sizeof(const void*)) < 0 ||
+        rpc_write(0, &launchConfig, sizeof(const cudaLaunchConfig_t*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, numClusters, sizeof(int)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return cudaErrorDevicesUnavailable;
     return return_value;
@@ -9151,9 +9114,8 @@ cudaError_t cudaLaunchHostFunc(cudaStream_t stream, cudaHostFn_t fn, void* userD
 cudaError_t cudaMallocManaged(void** devPtr, size_t size, unsigned int flags)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaMallocManaged) < 0 ||
-        rpc_write(0, &devPtr, sizeof(void*)) < 0 ||
+        rpc_write(0, devPtr, sizeof(void*)) < 0 ||
         rpc_write(0, &size, sizeof(size_t)) < 0 ||
         rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -9166,7 +9128,6 @@ cudaError_t cudaMallocManaged(void** devPtr, size_t size, unsigned int flags)
 cudaError_t cudaMalloc(void** devPtr, size_t size)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaMalloc) < 0 ||
         rpc_write(0, &size, sizeof(size_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -9179,9 +9140,8 @@ cudaError_t cudaMalloc(void** devPtr, size_t size)
 cudaError_t cudaMallocHost(void** ptr, size_t size)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaMallocHost) < 0 ||
-        rpc_write(0, &ptr, sizeof(void*)) < 0 ||
+        rpc_write(0, ptr, sizeof(void*)) < 0 ||
         rpc_write(0, &size, sizeof(size_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, ptr, sizeof(void*)) < 0 ||
@@ -9193,10 +9153,9 @@ cudaError_t cudaMallocHost(void** ptr, size_t size)
 cudaError_t cudaMallocPitch(void** devPtr, size_t* pitch, size_t width, size_t height)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaMallocPitch) < 0 ||
-        rpc_write(0, &devPtr, sizeof(void*)) < 0 ||
-        rpc_write(0, &pitch, sizeof(size_t)) < 0 ||
+        rpc_write(0, devPtr, sizeof(void*)) < 0 ||
+        rpc_write(0, pitch, sizeof(size_t)) < 0 ||
         rpc_write(0, &width, sizeof(size_t)) < 0 ||
         rpc_write(0, &height, sizeof(size_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -9207,10 +9166,25 @@ cudaError_t cudaMallocPitch(void** devPtr, size_t* pitch, size_t width, size_t h
     return return_value;
 }
 
+cudaError_t cudaMallocArray(cudaArray_t* array, const struct cudaChannelFormatDesc* desc, size_t width, size_t height, unsigned int flags)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaMallocArray) < 0 ||
+        rpc_write(0, array, sizeof(cudaArray_t)) < 0 ||
+        rpc_write(0, &desc, sizeof(const struct cudaChannelFormatDesc*)) < 0 ||
+        rpc_write(0, &width, sizeof(size_t)) < 0 ||
+        rpc_write(0, &height, sizeof(size_t)) < 0 ||
+        rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, array, sizeof(cudaArray_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
 cudaError_t cudaFree(void* devPtr)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaFree) < 0 ||
         rpc_write(0, &devPtr, sizeof(void*)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -9222,7 +9196,6 @@ cudaError_t cudaFree(void* devPtr)
 cudaError_t cudaFreeHost(void* ptr)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaFreeHost) < 0 ||
         rpc_write(0, &ptr, sizeof(void*)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -9234,7 +9207,6 @@ cudaError_t cudaFreeHost(void* ptr)
 cudaError_t cudaFreeArray(cudaArray_t array)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaFreeArray) < 0 ||
         rpc_write(0, &array, sizeof(cudaArray_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -9246,7 +9218,6 @@ cudaError_t cudaFreeArray(cudaArray_t array)
 cudaError_t cudaFreeMipmappedArray(cudaMipmappedArray_t mipmappedArray)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaFreeMipmappedArray) < 0 ||
         rpc_write(0, &mipmappedArray, sizeof(cudaMipmappedArray_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -9258,71 +9229,11 @@ cudaError_t cudaFreeMipmappedArray(cudaMipmappedArray_t mipmappedArray)
 cudaError_t cudaHostAlloc(void** pHost, size_t size, unsigned int flags)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaHostAlloc) < 0 ||
-        rpc_write(0, &pHost, sizeof(void*)) < 0 ||
+        rpc_write(0, pHost, sizeof(void*)) < 0 ||
         rpc_write(0, &size, sizeof(size_t)) < 0 ||
         rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, pHost, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return cudaErrorDevicesUnavailable;
-    return return_value;
-}
-
-cudaError_t cudaHostRegister(void* ptr, size_t size, unsigned int flags)
-{
-    cudaError_t return_value;
-
-    if (rpc_start_request(0, RPC_cudaHostRegister) < 0 ||
-        rpc_write(0, &ptr, sizeof(void*)) < 0 ||
-        rpc_write(0, &size, sizeof(size_t)) < 0 ||
-        rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, ptr, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return cudaErrorDevicesUnavailable;
-    return return_value;
-}
-
-cudaError_t cudaHostUnregister(void* ptr)
-{
-    cudaError_t return_value;
-
-    if (rpc_start_request(0, RPC_cudaHostUnregister) < 0 ||
-        rpc_write(0, &ptr, sizeof(void*)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, ptr, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return cudaErrorDevicesUnavailable;
-    return return_value;
-}
-
-cudaError_t cudaHostGetDevicePointer(void** pDevice, void* pHost, unsigned int flags)
-{
-    cudaError_t return_value;
-
-    if (rpc_start_request(0, RPC_cudaHostGetDevicePointer) < 0 ||
-        rpc_write(0, &pDevice, sizeof(void*)) < 0 ||
-        rpc_write(0, &pHost, sizeof(void*)) < 0 ||
-        rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, pDevice, sizeof(void*)) < 0 ||
-        rpc_read(0, pHost, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return cudaErrorDevicesUnavailable;
-    return return_value;
-}
-
-cudaError_t cudaHostGetFlags(unsigned int* pFlags, void* pHost)
-{
-    cudaError_t return_value;
-
-    if (rpc_start_request(0, RPC_cudaHostGetFlags) < 0 ||
-        rpc_write(0, &pFlags, sizeof(unsigned int)) < 0 ||
-        rpc_write(0, &pHost, sizeof(void*)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, pFlags, sizeof(unsigned int)) < 0 ||
         rpc_read(0, pHost, sizeof(void*)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return cudaErrorDevicesUnavailable;
@@ -9332,9 +9243,8 @@ cudaError_t cudaHostGetFlags(unsigned int* pFlags, void* pHost)
 cudaError_t cudaMalloc3D(struct cudaPitchedPtr* pitchedDevPtr, struct cudaExtent extent)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaMalloc3D) < 0 ||
-        rpc_write(0, &pitchedDevPtr, sizeof(struct cudaPitchedPtr)) < 0 ||
+        rpc_write(0, pitchedDevPtr, sizeof(struct cudaPitchedPtr)) < 0 ||
         rpc_write(0, &extent, sizeof(struct cudaExtent)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pitchedDevPtr, sizeof(struct cudaPitchedPtr)) < 0 ||
@@ -9343,12 +9253,42 @@ cudaError_t cudaMalloc3D(struct cudaPitchedPtr* pitchedDevPtr, struct cudaExtent
     return return_value;
 }
 
+cudaError_t cudaMalloc3DArray(cudaArray_t* array, const struct cudaChannelFormatDesc* desc, struct cudaExtent extent, unsigned int flags)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaMalloc3DArray) < 0 ||
+        rpc_write(0, array, sizeof(cudaArray_t)) < 0 ||
+        rpc_write(0, &desc, sizeof(const struct cudaChannelFormatDesc*)) < 0 ||
+        rpc_write(0, &extent, sizeof(struct cudaExtent)) < 0 ||
+        rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, array, sizeof(cudaArray_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMallocMipmappedArray(cudaMipmappedArray_t* mipmappedArray, const struct cudaChannelFormatDesc* desc, struct cudaExtent extent, unsigned int numLevels, unsigned int flags)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaMallocMipmappedArray) < 0 ||
+        rpc_write(0, mipmappedArray, sizeof(cudaMipmappedArray_t)) < 0 ||
+        rpc_write(0, &desc, sizeof(const struct cudaChannelFormatDesc*)) < 0 ||
+        rpc_write(0, &extent, sizeof(struct cudaExtent)) < 0 ||
+        rpc_write(0, &numLevels, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, mipmappedArray, sizeof(cudaMipmappedArray_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
 cudaError_t cudaGetMipmappedArrayLevel(cudaArray_t* levelArray, cudaMipmappedArray_const_t mipmappedArray, unsigned int level)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGetMipmappedArrayLevel) < 0 ||
-        rpc_write(0, &levelArray, sizeof(cudaArray_t)) < 0 ||
+        rpc_write(0, levelArray, sizeof(cudaArray_t)) < 0 ||
         rpc_write(0, &mipmappedArray, sizeof(cudaMipmappedArray_const_t)) < 0 ||
         rpc_write(0, &level, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -9358,13 +9298,58 @@ cudaError_t cudaGetMipmappedArrayLevel(cudaArray_t* levelArray, cudaMipmappedArr
     return return_value;
 }
 
+cudaError_t cudaMemcpy3D(const struct cudaMemcpy3DParms* p)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaMemcpy3D) < 0 ||
+        rpc_write(0, &p, sizeof(const struct cudaMemcpy3DParms*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMemcpy3DPeer(const struct cudaMemcpy3DPeerParms* p)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaMemcpy3DPeer) < 0 ||
+        rpc_write(0, &p, sizeof(const struct cudaMemcpy3DPeerParms*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMemcpy3DAsync(const struct cudaMemcpy3DParms* p, cudaStream_t stream)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaMemcpy3DAsync) < 0 ||
+        rpc_write(0, &p, sizeof(const struct cudaMemcpy3DParms*)) < 0 ||
+        rpc_write(0, &stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMemcpy3DPeerAsync(const struct cudaMemcpy3DPeerParms* p, cudaStream_t stream)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaMemcpy3DPeerAsync) < 0 ||
+        rpc_write(0, &p, sizeof(const struct cudaMemcpy3DPeerParms*)) < 0 ||
+        rpc_write(0, &stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
 cudaError_t cudaMemGetInfo(size_t* free, size_t* total)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaMemGetInfo) < 0 ||
-        rpc_write(0, &free, sizeof(size_t)) < 0 ||
-        rpc_write(0, &total, sizeof(size_t)) < 0 ||
+        rpc_write(0, free, sizeof(size_t)) < 0 ||
+        rpc_write(0, total, sizeof(size_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, free, sizeof(size_t)) < 0 ||
         rpc_read(0, total, sizeof(size_t)) < 0 ||
@@ -9376,11 +9361,10 @@ cudaError_t cudaMemGetInfo(size_t* free, size_t* total)
 cudaError_t cudaArrayGetInfo(struct cudaChannelFormatDesc* desc, struct cudaExtent* extent, unsigned int* flags, cudaArray_t array)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaArrayGetInfo) < 0 ||
-        rpc_write(0, &desc, sizeof(struct cudaChannelFormatDesc)) < 0 ||
-        rpc_write(0, &extent, sizeof(struct cudaExtent)) < 0 ||
-        rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, desc, sizeof(struct cudaChannelFormatDesc)) < 0 ||
+        rpc_write(0, extent, sizeof(struct cudaExtent)) < 0 ||
+        rpc_write(0, flags, sizeof(unsigned int)) < 0 ||
         rpc_write(0, &array, sizeof(cudaArray_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, desc, sizeof(struct cudaChannelFormatDesc)) < 0 ||
@@ -9394,9 +9378,8 @@ cudaError_t cudaArrayGetInfo(struct cudaChannelFormatDesc* desc, struct cudaExte
 cudaError_t cudaArrayGetPlane(cudaArray_t* pPlaneArray, cudaArray_t hArray, unsigned int planeIdx)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaArrayGetPlane) < 0 ||
-        rpc_write(0, &pPlaneArray, sizeof(cudaArray_t)) < 0 ||
+        rpc_write(0, pPlaneArray, sizeof(cudaArray_t)) < 0 ||
         rpc_write(0, &hArray, sizeof(cudaArray_t)) < 0 ||
         rpc_write(0, &planeIdx, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -9409,9 +9392,8 @@ cudaError_t cudaArrayGetPlane(cudaArray_t* pPlaneArray, cudaArray_t hArray, unsi
 cudaError_t cudaArrayGetMemoryRequirements(struct cudaArrayMemoryRequirements* memoryRequirements, cudaArray_t array, int device)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaArrayGetMemoryRequirements) < 0 ||
-        rpc_write(0, &memoryRequirements, sizeof(struct cudaArrayMemoryRequirements)) < 0 ||
+        rpc_write(0, memoryRequirements, sizeof(struct cudaArrayMemoryRequirements)) < 0 ||
         rpc_write(0, &array, sizeof(cudaArray_t)) < 0 ||
         rpc_write(0, &device, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -9424,9 +9406,8 @@ cudaError_t cudaArrayGetMemoryRequirements(struct cudaArrayMemoryRequirements* m
 cudaError_t cudaMipmappedArrayGetMemoryRequirements(struct cudaArrayMemoryRequirements* memoryRequirements, cudaMipmappedArray_t mipmap, int device)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaMipmappedArrayGetMemoryRequirements) < 0 ||
-        rpc_write(0, &memoryRequirements, sizeof(struct cudaArrayMemoryRequirements)) < 0 ||
+        rpc_write(0, memoryRequirements, sizeof(struct cudaArrayMemoryRequirements)) < 0 ||
         rpc_write(0, &mipmap, sizeof(cudaMipmappedArray_t)) < 0 ||
         rpc_write(0, &device, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -9439,9 +9420,8 @@ cudaError_t cudaMipmappedArrayGetMemoryRequirements(struct cudaArrayMemoryRequir
 cudaError_t cudaArrayGetSparseProperties(struct cudaArraySparseProperties* sparseProperties, cudaArray_t array)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaArrayGetSparseProperties) < 0 ||
-        rpc_write(0, &sparseProperties, sizeof(struct cudaArraySparseProperties)) < 0 ||
+        rpc_write(0, sparseProperties, sizeof(struct cudaArraySparseProperties)) < 0 ||
         rpc_write(0, &array, sizeof(cudaArray_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, sparseProperties, sizeof(struct cudaArraySparseProperties)) < 0 ||
@@ -9453,9 +9433,8 @@ cudaError_t cudaArrayGetSparseProperties(struct cudaArraySparseProperties* spars
 cudaError_t cudaMipmappedArrayGetSparseProperties(struct cudaArraySparseProperties* sparseProperties, cudaMipmappedArray_t mipmap)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaMipmappedArrayGetSparseProperties) < 0 ||
-        rpc_write(0, &sparseProperties, sizeof(struct cudaArraySparseProperties)) < 0 ||
+        rpc_write(0, sparseProperties, sizeof(struct cudaArraySparseProperties)) < 0 ||
         rpc_write(0, &mipmap, sizeof(cudaMipmappedArray_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, sparseProperties, sizeof(struct cudaArraySparseProperties)) < 0 ||
@@ -9464,21 +9443,19 @@ cudaError_t cudaMipmappedArrayGetSparseProperties(struct cudaArraySparseProperti
     return return_value;
 }
 
-cudaError_t cudaMemcpy2DFromArray(void* dst, size_t dpitch, cudaArray_const_t src, size_t wOffset, size_t hOffset, size_t width, size_t height, enum cudaMemcpyKind kind)
+cudaError_t cudaMemcpy2DToArray(cudaArray_t dst, size_t wOffset, size_t hOffset, const void* src, size_t spitch, size_t width, size_t height, enum cudaMemcpyKind kind)
 {
     cudaError_t return_value;
-
-    if (rpc_start_request(0, RPC_cudaMemcpy2DFromArray) < 0 ||
-        rpc_write(0, &dst, sizeof(void*)) < 0 ||
-        rpc_write(0, &dpitch, sizeof(size_t)) < 0 ||
-        rpc_write(0, &src, sizeof(cudaArray_const_t)) < 0 ||
+    if (rpc_start_request(0, RPC_cudaMemcpy2DToArray) < 0 ||
+        rpc_write(0, &dst, sizeof(cudaArray_t)) < 0 ||
         rpc_write(0, &wOffset, sizeof(size_t)) < 0 ||
         rpc_write(0, &hOffset, sizeof(size_t)) < 0 ||
+        rpc_write(0, &src, sizeof(const void*)) < 0 ||
+        rpc_write(0, &spitch, sizeof(size_t)) < 0 ||
         rpc_write(0, &width, sizeof(size_t)) < 0 ||
         rpc_write(0, &height, sizeof(size_t)) < 0 ||
         rpc_write(0, &kind, sizeof(enum cudaMemcpyKind)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, dst, sizeof(void*)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return cudaErrorDevicesUnavailable;
     return return_value;
@@ -9487,7 +9464,6 @@ cudaError_t cudaMemcpy2DFromArray(void* dst, size_t dpitch, cudaArray_const_t sr
 cudaError_t cudaMemcpy2DArrayToArray(cudaArray_t dst, size_t wOffsetDst, size_t hOffsetDst, cudaArray_const_t src, size_t wOffsetSrc, size_t hOffsetSrc, size_t width, size_t height, enum cudaMemcpyKind kind)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaMemcpy2DArrayToArray) < 0 ||
         rpc_write(0, &dst, sizeof(cudaArray_t)) < 0 ||
         rpc_write(0, &wOffsetDst, sizeof(size_t)) < 0 ||
@@ -9504,54 +9480,51 @@ cudaError_t cudaMemcpy2DArrayToArray(cudaArray_t dst, size_t wOffsetDst, size_t 
     return return_value;
 }
 
-cudaError_t cudaMemcpy2DFromArrayAsync(void* dst, size_t dpitch, cudaArray_const_t src, size_t wOffset, size_t hOffset, size_t width, size_t height, enum cudaMemcpyKind kind, cudaStream_t stream)
+cudaError_t cudaMemcpyToSymbol(const void* symbol, const void* src, size_t count, size_t offset, enum cudaMemcpyKind kind)
 {
     cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaMemcpyToSymbol) < 0 ||
+        rpc_write(0, &symbol, sizeof(const void*)) < 0 ||
+        rpc_write(0, &src, sizeof(const void*)) < 0 ||
+        rpc_write(0, &count, sizeof(size_t)) < 0 ||
+        rpc_write(0, &offset, sizeof(size_t)) < 0 ||
+        rpc_write(0, &kind, sizeof(enum cudaMemcpyKind)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
 
-    if (rpc_start_request(0, RPC_cudaMemcpy2DFromArrayAsync) < 0 ||
-        rpc_write(0, &dst, sizeof(void*)) < 0 ||
-        rpc_write(0, &dpitch, sizeof(size_t)) < 0 ||
-        rpc_write(0, &src, sizeof(cudaArray_const_t)) < 0 ||
+cudaError_t cudaMemcpy2DToArrayAsync(cudaArray_t dst, size_t wOffset, size_t hOffset, const void* src, size_t spitch, size_t width, size_t height, enum cudaMemcpyKind kind, cudaStream_t stream)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaMemcpy2DToArrayAsync) < 0 ||
+        rpc_write(0, &dst, sizeof(cudaArray_t)) < 0 ||
         rpc_write(0, &wOffset, sizeof(size_t)) < 0 ||
         rpc_write(0, &hOffset, sizeof(size_t)) < 0 ||
+        rpc_write(0, &src, sizeof(const void*)) < 0 ||
+        rpc_write(0, &spitch, sizeof(size_t)) < 0 ||
         rpc_write(0, &width, sizeof(size_t)) < 0 ||
         rpc_write(0, &height, sizeof(size_t)) < 0 ||
         rpc_write(0, &kind, sizeof(enum cudaMemcpyKind)) < 0 ||
         rpc_write(0, &stream, sizeof(cudaStream_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, dst, sizeof(void*)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return cudaErrorDevicesUnavailable;
     return return_value;
 }
 
-cudaError_t cudaMemset(void* devPtr, int value, size_t count)
+cudaError_t cudaMemcpyToSymbolAsync(const void* symbol, const void* src, size_t count, size_t offset, enum cudaMemcpyKind kind, cudaStream_t stream)
 {
     cudaError_t return_value;
-
-    if (rpc_start_request(0, RPC_cudaMemset) < 0 ||
-        rpc_write(0, &devPtr, sizeof(void*)) < 0 ||
-        rpc_write(0, &value, sizeof(int)) < 0 ||
+    if (rpc_start_request(0, RPC_cudaMemcpyToSymbolAsync) < 0 ||
+        rpc_write(0, &symbol, sizeof(const void*)) < 0 ||
+        rpc_write(0, &src, sizeof(const void*)) < 0 ||
         rpc_write(0, &count, sizeof(size_t)) < 0 ||
+        rpc_write(0, &offset, sizeof(size_t)) < 0 ||
+        rpc_write(0, &kind, sizeof(enum cudaMemcpyKind)) < 0 ||
+        rpc_write(0, &stream, sizeof(cudaStream_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, devPtr, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return cudaErrorDevicesUnavailable;
-    return return_value;
-}
-
-cudaError_t cudaMemset2D(void* devPtr, size_t pitch, int value, size_t width, size_t height)
-{
-    cudaError_t return_value;
-
-    if (rpc_start_request(0, RPC_cudaMemset2D) < 0 ||
-        rpc_write(0, &devPtr, sizeof(void*)) < 0 ||
-        rpc_write(0, &pitch, sizeof(size_t)) < 0 ||
-        rpc_write(0, &value, sizeof(int)) < 0 ||
-        rpc_write(0, &width, sizeof(size_t)) < 0 ||
-        rpc_write(0, &height, sizeof(size_t)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, devPtr, sizeof(void*)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return cudaErrorDevicesUnavailable;
     return return_value;
@@ -9560,7 +9533,6 @@ cudaError_t cudaMemset2D(void* devPtr, size_t pitch, int value, size_t width, si
 cudaError_t cudaMemset3D(struct cudaPitchedPtr pitchedDevPtr, int value, struct cudaExtent extent)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaMemset3D) < 0 ||
         rpc_write(0, &pitchedDevPtr, sizeof(struct cudaPitchedPtr)) < 0 ||
         rpc_write(0, &value, sizeof(int)) < 0 ||
@@ -9571,44 +9543,9 @@ cudaError_t cudaMemset3D(struct cudaPitchedPtr pitchedDevPtr, int value, struct 
     return return_value;
 }
 
-cudaError_t cudaMemsetAsync(void* devPtr, int value, size_t count, cudaStream_t stream)
-{
-    cudaError_t return_value;
-
-    if (rpc_start_request(0, RPC_cudaMemsetAsync) < 0 ||
-        rpc_write(0, &devPtr, sizeof(void*)) < 0 ||
-        rpc_write(0, &value, sizeof(int)) < 0 ||
-        rpc_write(0, &count, sizeof(size_t)) < 0 ||
-        rpc_write(0, &stream, sizeof(cudaStream_t)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, devPtr, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return cudaErrorDevicesUnavailable;
-    return return_value;
-}
-
-cudaError_t cudaMemset2DAsync(void* devPtr, size_t pitch, int value, size_t width, size_t height, cudaStream_t stream)
-{
-    cudaError_t return_value;
-
-    if (rpc_start_request(0, RPC_cudaMemset2DAsync) < 0 ||
-        rpc_write(0, &devPtr, sizeof(void*)) < 0 ||
-        rpc_write(0, &pitch, sizeof(size_t)) < 0 ||
-        rpc_write(0, &value, sizeof(int)) < 0 ||
-        rpc_write(0, &width, sizeof(size_t)) < 0 ||
-        rpc_write(0, &height, sizeof(size_t)) < 0 ||
-        rpc_write(0, &stream, sizeof(cudaStream_t)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, devPtr, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return cudaErrorDevicesUnavailable;
-    return return_value;
-}
-
 cudaError_t cudaMemset3DAsync(struct cudaPitchedPtr pitchedDevPtr, int value, struct cudaExtent extent, cudaStream_t stream)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaMemset3DAsync) < 0 ||
         rpc_write(0, &pitchedDevPtr, sizeof(struct cudaPitchedPtr)) < 0 ||
         rpc_write(0, &value, sizeof(int)) < 0 ||
@@ -9620,19 +9557,90 @@ cudaError_t cudaMemset3DAsync(struct cudaPitchedPtr pitchedDevPtr, int value, st
     return return_value;
 }
 
-cudaError_t cudaMemcpyFromArray(void* dst, cudaArray_const_t src, size_t wOffset, size_t hOffset, size_t count, enum cudaMemcpyKind kind)
+cudaError_t cudaGetSymbolAddress(void** devPtr, const void* symbol)
 {
     cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaGetSymbolAddress) < 0 ||
+        rpc_write(0, devPtr, sizeof(void*)) < 0 ||
+        rpc_write(0, &symbol, sizeof(const void*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, devPtr, sizeof(void*)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
 
-    if (rpc_start_request(0, RPC_cudaMemcpyFromArray) < 0 ||
-        rpc_write(0, &dst, sizeof(void*)) < 0 ||
-        rpc_write(0, &src, sizeof(cudaArray_const_t)) < 0 ||
+cudaError_t cudaGetSymbolSize(size_t* size, const void* symbol)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaGetSymbolSize) < 0 ||
+        rpc_write(0, size, sizeof(size_t)) < 0 ||
+        rpc_write(0, &symbol, sizeof(const void*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, size, sizeof(size_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMemPrefetchAsync(const void* devPtr, size_t count, int dstDevice, cudaStream_t stream)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaMemPrefetchAsync) < 0 ||
+        rpc_write(0, &devPtr, sizeof(const void*)) < 0 ||
+        rpc_write(0, &count, sizeof(size_t)) < 0 ||
+        rpc_write(0, &dstDevice, sizeof(int)) < 0 ||
+        rpc_write(0, &stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMemAdvise(const void* devPtr, size_t count, enum cudaMemoryAdvise advice, int device)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaMemAdvise) < 0 ||
+        rpc_write(0, &devPtr, sizeof(const void*)) < 0 ||
+        rpc_write(0, &count, sizeof(size_t)) < 0 ||
+        rpc_write(0, &advice, sizeof(enum cudaMemoryAdvise)) < 0 ||
+        rpc_write(0, &device, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMemRangeGetAttributes(void** data, size_t* dataSizes, enum cudaMemRangeAttribute* attributes, size_t numAttributes, const void* devPtr, size_t count)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaMemRangeGetAttributes) < 0 ||
+        rpc_write(0, data, sizeof(void*)) < 0 ||
+        rpc_write(0, dataSizes, sizeof(size_t)) < 0 ||
+        rpc_write(0, attributes, sizeof(enum cudaMemRangeAttribute)) < 0 ||
+        rpc_write(0, &numAttributes, sizeof(size_t)) < 0 ||
+        rpc_write(0, &devPtr, sizeof(const void*)) < 0 ||
+        rpc_write(0, &count, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, data, sizeof(void*)) < 0 ||
+        rpc_read(0, dataSizes, sizeof(size_t)) < 0 ||
+        rpc_read(0, attributes, sizeof(enum cudaMemRangeAttribute)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaMemcpyToArray(cudaArray_t dst, size_t wOffset, size_t hOffset, const void* src, size_t count, enum cudaMemcpyKind kind)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaMemcpyToArray) < 0 ||
+        rpc_write(0, &dst, sizeof(cudaArray_t)) < 0 ||
         rpc_write(0, &wOffset, sizeof(size_t)) < 0 ||
         rpc_write(0, &hOffset, sizeof(size_t)) < 0 ||
+        rpc_write(0, &src, sizeof(const void*)) < 0 ||
         rpc_write(0, &count, sizeof(size_t)) < 0 ||
         rpc_write(0, &kind, sizeof(enum cudaMemcpyKind)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, dst, sizeof(void*)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return cudaErrorDevicesUnavailable;
     return return_value;
@@ -9641,7 +9649,6 @@ cudaError_t cudaMemcpyFromArray(void* dst, cudaArray_const_t src, size_t wOffset
 cudaError_t cudaMemcpyArrayToArray(cudaArray_t dst, size_t wOffsetDst, size_t hOffsetDst, cudaArray_const_t src, size_t wOffsetSrc, size_t hOffsetSrc, size_t count, enum cudaMemcpyKind kind)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaMemcpyArrayToArray) < 0 ||
         rpc_write(0, &dst, sizeof(cudaArray_t)) < 0 ||
         rpc_write(0, &wOffsetDst, sizeof(size_t)) < 0 ||
@@ -9657,20 +9664,18 @@ cudaError_t cudaMemcpyArrayToArray(cudaArray_t dst, size_t wOffsetDst, size_t hO
     return return_value;
 }
 
-cudaError_t cudaMemcpyFromArrayAsync(void* dst, cudaArray_const_t src, size_t wOffset, size_t hOffset, size_t count, enum cudaMemcpyKind kind, cudaStream_t stream)
+cudaError_t cudaMemcpyToArrayAsync(cudaArray_t dst, size_t wOffset, size_t hOffset, const void* src, size_t count, enum cudaMemcpyKind kind, cudaStream_t stream)
 {
     cudaError_t return_value;
-
-    if (rpc_start_request(0, RPC_cudaMemcpyFromArrayAsync) < 0 ||
-        rpc_write(0, &dst, sizeof(void*)) < 0 ||
-        rpc_write(0, &src, sizeof(cudaArray_const_t)) < 0 ||
+    if (rpc_start_request(0, RPC_cudaMemcpyToArrayAsync) < 0 ||
+        rpc_write(0, &dst, sizeof(cudaArray_t)) < 0 ||
         rpc_write(0, &wOffset, sizeof(size_t)) < 0 ||
         rpc_write(0, &hOffset, sizeof(size_t)) < 0 ||
+        rpc_write(0, &src, sizeof(const void*)) < 0 ||
         rpc_write(0, &count, sizeof(size_t)) < 0 ||
         rpc_write(0, &kind, sizeof(enum cudaMemcpyKind)) < 0 ||
         rpc_write(0, &stream, sizeof(cudaStream_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, dst, sizeof(void*)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return cudaErrorDevicesUnavailable;
     return return_value;
@@ -9679,24 +9684,9 @@ cudaError_t cudaMemcpyFromArrayAsync(void* dst, cudaArray_const_t src, size_t wO
 cudaError_t cudaMallocAsync(void** devPtr, size_t size, cudaStream_t hStream)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaMallocAsync) < 0 ||
-        rpc_write(0, &devPtr, sizeof(void*)) < 0 ||
+        rpc_write(0, devPtr, sizeof(void*)) < 0 ||
         rpc_write(0, &size, sizeof(size_t)) < 0 ||
-        rpc_write(0, &hStream, sizeof(cudaStream_t)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, devPtr, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return cudaErrorDevicesUnavailable;
-    return return_value;
-}
-
-cudaError_t cudaFreeAsync(void* devPtr, cudaStream_t hStream)
-{
-    cudaError_t return_value;
-
-    if (rpc_start_request(0, RPC_cudaFreeAsync) < 0 ||
-        rpc_write(0, &devPtr, sizeof(void*)) < 0 ||
         rpc_write(0, &hStream, sizeof(cudaStream_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, devPtr, sizeof(void*)) < 0 ||
@@ -9708,7 +9698,6 @@ cudaError_t cudaFreeAsync(void* devPtr, cudaStream_t hStream)
 cudaError_t cudaMemPoolTrimTo(cudaMemPool_t memPool, size_t minBytesToKeep)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaMemPoolTrimTo) < 0 ||
         rpc_write(0, &memPool, sizeof(cudaMemPool_t)) < 0 ||
         rpc_write(0, &minBytesToKeep, sizeof(size_t)) < 0 ||
@@ -9718,31 +9707,14 @@ cudaError_t cudaMemPoolTrimTo(cudaMemPool_t memPool, size_t minBytesToKeep)
     return return_value;
 }
 
-cudaError_t cudaMemPoolSetAttribute(cudaMemPool_t memPool, enum cudaMemPoolAttr attr, void* value)
+cudaError_t cudaMemPoolSetAccess(cudaMemPool_t memPool, const struct cudaMemAccessDesc* descList, size_t count)
 {
     cudaError_t return_value;
-
-    if (rpc_start_request(0, RPC_cudaMemPoolSetAttribute) < 0 ||
+    if (rpc_start_request(0, RPC_cudaMemPoolSetAccess) < 0 ||
         rpc_write(0, &memPool, sizeof(cudaMemPool_t)) < 0 ||
-        rpc_write(0, &attr, sizeof(enum cudaMemPoolAttr)) < 0 ||
-        rpc_write(0, &value, sizeof(void*)) < 0 ||
+        rpc_write(0, &descList, sizeof(const struct cudaMemAccessDesc*)) < 0 ||
+        rpc_write(0, &count, sizeof(size_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, value, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return cudaErrorDevicesUnavailable;
-    return return_value;
-}
-
-cudaError_t cudaMemPoolGetAttribute(cudaMemPool_t memPool, enum cudaMemPoolAttr attr, void* value)
-{
-    cudaError_t return_value;
-
-    if (rpc_start_request(0, RPC_cudaMemPoolGetAttribute) < 0 ||
-        rpc_write(0, &memPool, sizeof(cudaMemPool_t)) < 0 ||
-        rpc_write(0, &attr, sizeof(enum cudaMemPoolAttr)) < 0 ||
-        rpc_write(0, &value, sizeof(void*)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, value, sizeof(void*)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return cudaErrorDevicesUnavailable;
     return return_value;
@@ -9751,11 +9723,10 @@ cudaError_t cudaMemPoolGetAttribute(cudaMemPool_t memPool, enum cudaMemPoolAttr 
 cudaError_t cudaMemPoolGetAccess(enum cudaMemAccessFlags* flags, cudaMemPool_t memPool, struct cudaMemLocation* location)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaMemPoolGetAccess) < 0 ||
-        rpc_write(0, &flags, sizeof(enum cudaMemAccessFlags)) < 0 ||
+        rpc_write(0, flags, sizeof(enum cudaMemAccessFlags)) < 0 ||
         rpc_write(0, &memPool, sizeof(cudaMemPool_t)) < 0 ||
-        rpc_write(0, &location, sizeof(struct cudaMemLocation)) < 0 ||
+        rpc_write(0, location, sizeof(struct cudaMemLocation)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, flags, sizeof(enum cudaMemAccessFlags)) < 0 ||
         rpc_read(0, location, sizeof(struct cudaMemLocation)) < 0 ||
@@ -9764,10 +9735,22 @@ cudaError_t cudaMemPoolGetAccess(enum cudaMemAccessFlags* flags, cudaMemPool_t m
     return return_value;
 }
 
+cudaError_t cudaMemPoolCreate(cudaMemPool_t* memPool, const struct cudaMemPoolProps* poolProps)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaMemPoolCreate) < 0 ||
+        rpc_write(0, memPool, sizeof(cudaMemPool_t)) < 0 ||
+        rpc_write(0, &poolProps, sizeof(const struct cudaMemPoolProps*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, memPool, sizeof(cudaMemPool_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
 cudaError_t cudaMemPoolDestroy(cudaMemPool_t memPool)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaMemPoolDestroy) < 0 ||
         rpc_write(0, &memPool, sizeof(cudaMemPool_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -9779,9 +9762,8 @@ cudaError_t cudaMemPoolDestroy(cudaMemPool_t memPool)
 cudaError_t cudaMallocFromPoolAsync(void** ptr, size_t size, cudaMemPool_t memPool, cudaStream_t stream)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaMallocFromPoolAsync) < 0 ||
-        rpc_write(0, &ptr, sizeof(void*)) < 0 ||
+        rpc_write(0, ptr, sizeof(void*)) < 0 ||
         rpc_write(0, &size, sizeof(size_t)) < 0 ||
         rpc_write(0, &memPool, sizeof(cudaMemPool_t)) < 0 ||
         rpc_write(0, &stream, sizeof(cudaStream_t)) < 0 ||
@@ -9792,65 +9774,29 @@ cudaError_t cudaMallocFromPoolAsync(void** ptr, size_t size, cudaMemPool_t memPo
     return return_value;
 }
 
-cudaError_t cudaMemPoolExportToShareableHandle(void* shareableHandle, cudaMemPool_t memPool, enum cudaMemAllocationHandleType handleType, unsigned int flags)
-{
-    cudaError_t return_value;
-
-    if (rpc_start_request(0, RPC_cudaMemPoolExportToShareableHandle) < 0 ||
-        rpc_write(0, &shareableHandle, sizeof(void*)) < 0 ||
-        rpc_write(0, &memPool, sizeof(cudaMemPool_t)) < 0 ||
-        rpc_write(0, &handleType, sizeof(enum cudaMemAllocationHandleType)) < 0 ||
-        rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, shareableHandle, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return cudaErrorDevicesUnavailable;
-    return return_value;
-}
-
-cudaError_t cudaMemPoolImportFromShareableHandle(cudaMemPool_t* memPool, void* shareableHandle, enum cudaMemAllocationHandleType handleType, unsigned int flags)
-{
-    cudaError_t return_value;
-
-    if (rpc_start_request(0, RPC_cudaMemPoolImportFromShareableHandle) < 0 ||
-        rpc_write(0, &memPool, sizeof(cudaMemPool_t)) < 0 ||
-        rpc_write(0, &shareableHandle, sizeof(void*)) < 0 ||
-        rpc_write(0, &handleType, sizeof(enum cudaMemAllocationHandleType)) < 0 ||
-        rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, memPool, sizeof(cudaMemPool_t)) < 0 ||
-        rpc_read(0, shareableHandle, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return cudaErrorDevicesUnavailable;
-    return return_value;
-}
-
-cudaError_t cudaMemPoolExportPointer(struct cudaMemPoolPtrExportData* exportData, void* ptr)
-{
-    cudaError_t return_value;
-
-    if (rpc_start_request(0, RPC_cudaMemPoolExportPointer) < 0 ||
-        rpc_write(0, &exportData, sizeof(struct cudaMemPoolPtrExportData)) < 0 ||
-        rpc_write(0, &ptr, sizeof(void*)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, exportData, sizeof(struct cudaMemPoolPtrExportData)) < 0 ||
-        rpc_read(0, ptr, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return cudaErrorDevicesUnavailable;
-    return return_value;
-}
-
 cudaError_t cudaMemPoolImportPointer(void** ptr, cudaMemPool_t memPool, struct cudaMemPoolPtrExportData* exportData)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaMemPoolImportPointer) < 0 ||
-        rpc_write(0, &ptr, sizeof(void*)) < 0 ||
+        rpc_write(0, ptr, sizeof(void*)) < 0 ||
         rpc_write(0, &memPool, sizeof(cudaMemPool_t)) < 0 ||
-        rpc_write(0, &exportData, sizeof(struct cudaMemPoolPtrExportData)) < 0 ||
+        rpc_write(0, exportData, sizeof(struct cudaMemPoolPtrExportData)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, ptr, sizeof(void*)) < 0 ||
         rpc_read(0, exportData, sizeof(struct cudaMemPoolPtrExportData)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaPointerGetAttributes(struct cudaPointerAttributes* attributes, const void* ptr)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaPointerGetAttributes) < 0 ||
+        rpc_write(0, attributes, sizeof(struct cudaPointerAttributes)) < 0 ||
+        rpc_write(0, &ptr, sizeof(const void*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, attributes, sizeof(struct cudaPointerAttributes)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return cudaErrorDevicesUnavailable;
     return return_value;
@@ -9859,9 +9805,8 @@ cudaError_t cudaMemPoolImportPointer(void** ptr, cudaMemPool_t memPool, struct c
 cudaError_t cudaDeviceCanAccessPeer(int* canAccessPeer, int device, int peerDevice)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaDeviceCanAccessPeer) < 0 ||
-        rpc_write(0, &canAccessPeer, sizeof(int)) < 0 ||
+        rpc_write(0, canAccessPeer, sizeof(int)) < 0 ||
         rpc_write(0, &device, sizeof(int)) < 0 ||
         rpc_write(0, &peerDevice, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -9874,7 +9819,6 @@ cudaError_t cudaDeviceCanAccessPeer(int* canAccessPeer, int device, int peerDevi
 cudaError_t cudaDeviceEnablePeerAccess(int peerDevice, unsigned int flags)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaDeviceEnablePeerAccess) < 0 ||
         rpc_write(0, &peerDevice, sizeof(int)) < 0 ||
         rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
@@ -9887,7 +9831,6 @@ cudaError_t cudaDeviceEnablePeerAccess(int peerDevice, unsigned int flags)
 cudaError_t cudaDeviceDisablePeerAccess(int peerDevice)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaDeviceDisablePeerAccess) < 0 ||
         rpc_write(0, &peerDevice, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -9899,7 +9842,6 @@ cudaError_t cudaDeviceDisablePeerAccess(int peerDevice)
 cudaError_t cudaGraphicsUnregisterResource(cudaGraphicsResource_t resource)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphicsUnregisterResource) < 0 ||
         rpc_write(0, &resource, sizeof(cudaGraphicsResource_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -9911,7 +9853,6 @@ cudaError_t cudaGraphicsUnregisterResource(cudaGraphicsResource_t resource)
 cudaError_t cudaGraphicsResourceSetMapFlags(cudaGraphicsResource_t resource, unsigned int flags)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphicsResourceSetMapFlags) < 0 ||
         rpc_write(0, &resource, sizeof(cudaGraphicsResource_t)) < 0 ||
         rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
@@ -9924,10 +9865,9 @@ cudaError_t cudaGraphicsResourceSetMapFlags(cudaGraphicsResource_t resource, uns
 cudaError_t cudaGraphicsMapResources(int count, cudaGraphicsResource_t* resources, cudaStream_t stream)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphicsMapResources) < 0 ||
         rpc_write(0, &count, sizeof(int)) < 0 ||
-        rpc_write(0, &resources, sizeof(cudaGraphicsResource_t)) < 0 ||
+        rpc_write(0, resources, sizeof(cudaGraphicsResource_t)) < 0 ||
         rpc_write(0, &stream, sizeof(cudaStream_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, resources, sizeof(cudaGraphicsResource_t)) < 0 ||
@@ -9939,10 +9879,9 @@ cudaError_t cudaGraphicsMapResources(int count, cudaGraphicsResource_t* resource
 cudaError_t cudaGraphicsUnmapResources(int count, cudaGraphicsResource_t* resources, cudaStream_t stream)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphicsUnmapResources) < 0 ||
         rpc_write(0, &count, sizeof(int)) < 0 ||
-        rpc_write(0, &resources, sizeof(cudaGraphicsResource_t)) < 0 ||
+        rpc_write(0, resources, sizeof(cudaGraphicsResource_t)) < 0 ||
         rpc_write(0, &stream, sizeof(cudaStream_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, resources, sizeof(cudaGraphicsResource_t)) < 0 ||
@@ -9954,10 +9893,9 @@ cudaError_t cudaGraphicsUnmapResources(int count, cudaGraphicsResource_t* resour
 cudaError_t cudaGraphicsResourceGetMappedPointer(void** devPtr, size_t* size, cudaGraphicsResource_t resource)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphicsResourceGetMappedPointer) < 0 ||
-        rpc_write(0, &devPtr, sizeof(void*)) < 0 ||
-        rpc_write(0, &size, sizeof(size_t)) < 0 ||
+        rpc_write(0, devPtr, sizeof(void*)) < 0 ||
+        rpc_write(0, size, sizeof(size_t)) < 0 ||
         rpc_write(0, &resource, sizeof(cudaGraphicsResource_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, devPtr, sizeof(void*)) < 0 ||
@@ -9970,9 +9908,8 @@ cudaError_t cudaGraphicsResourceGetMappedPointer(void** devPtr, size_t* size, cu
 cudaError_t cudaGraphicsSubResourceGetMappedArray(cudaArray_t* array, cudaGraphicsResource_t resource, unsigned int arrayIndex, unsigned int mipLevel)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphicsSubResourceGetMappedArray) < 0 ||
-        rpc_write(0, &array, sizeof(cudaArray_t)) < 0 ||
+        rpc_write(0, array, sizeof(cudaArray_t)) < 0 ||
         rpc_write(0, &resource, sizeof(cudaGraphicsResource_t)) < 0 ||
         rpc_write(0, &arrayIndex, sizeof(unsigned int)) < 0 ||
         rpc_write(0, &mipLevel, sizeof(unsigned int)) < 0 ||
@@ -9986,9 +9923,8 @@ cudaError_t cudaGraphicsSubResourceGetMappedArray(cudaArray_t* array, cudaGraphi
 cudaError_t cudaGraphicsResourceGetMappedMipmappedArray(cudaMipmappedArray_t* mipmappedArray, cudaGraphicsResource_t resource)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphicsResourceGetMappedMipmappedArray) < 0 ||
-        rpc_write(0, &mipmappedArray, sizeof(cudaMipmappedArray_t)) < 0 ||
+        rpc_write(0, mipmappedArray, sizeof(cudaMipmappedArray_t)) < 0 ||
         rpc_write(0, &resource, sizeof(cudaGraphicsResource_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, mipmappedArray, sizeof(cudaMipmappedArray_t)) < 0 ||
@@ -10000,9 +9936,8 @@ cudaError_t cudaGraphicsResourceGetMappedMipmappedArray(cudaMipmappedArray_t* mi
 cudaError_t cudaGetChannelDesc(struct cudaChannelFormatDesc* desc, cudaArray_const_t array)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGetChannelDesc) < 0 ||
-        rpc_write(0, &desc, sizeof(struct cudaChannelFormatDesc)) < 0 ||
+        rpc_write(0, desc, sizeof(struct cudaChannelFormatDesc)) < 0 ||
         rpc_write(0, &array, sizeof(cudaArray_const_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, desc, sizeof(struct cudaChannelFormatDesc)) < 0 ||
@@ -10011,10 +9946,24 @@ cudaError_t cudaGetChannelDesc(struct cudaChannelFormatDesc* desc, cudaArray_con
     return return_value;
 }
 
+cudaError_t cudaCreateTextureObject(cudaTextureObject_t* pTexObject, const struct cudaResourceDesc* pResDesc, const struct cudaTextureDesc* pTexDesc, const struct cudaResourceViewDesc* pResViewDesc)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaCreateTextureObject) < 0 ||
+        rpc_write(0, pTexObject, sizeof(cudaTextureObject_t)) < 0 ||
+        rpc_write(0, &pResDesc, sizeof(const struct cudaResourceDesc*)) < 0 ||
+        rpc_write(0, &pTexDesc, sizeof(const struct cudaTextureDesc*)) < 0 ||
+        rpc_write(0, &pResViewDesc, sizeof(const struct cudaResourceViewDesc*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, pTexObject, sizeof(cudaTextureObject_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
 cudaError_t cudaDestroyTextureObject(cudaTextureObject_t texObject)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaDestroyTextureObject) < 0 ||
         rpc_write(0, &texObject, sizeof(cudaTextureObject_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -10026,9 +9975,8 @@ cudaError_t cudaDestroyTextureObject(cudaTextureObject_t texObject)
 cudaError_t cudaGetTextureObjectResourceDesc(struct cudaResourceDesc* pResDesc, cudaTextureObject_t texObject)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGetTextureObjectResourceDesc) < 0 ||
-        rpc_write(0, &pResDesc, sizeof(struct cudaResourceDesc)) < 0 ||
+        rpc_write(0, pResDesc, sizeof(struct cudaResourceDesc)) < 0 ||
         rpc_write(0, &texObject, sizeof(cudaTextureObject_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pResDesc, sizeof(struct cudaResourceDesc)) < 0 ||
@@ -10040,9 +9988,8 @@ cudaError_t cudaGetTextureObjectResourceDesc(struct cudaResourceDesc* pResDesc, 
 cudaError_t cudaGetTextureObjectTextureDesc(struct cudaTextureDesc* pTexDesc, cudaTextureObject_t texObject)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGetTextureObjectTextureDesc) < 0 ||
-        rpc_write(0, &pTexDesc, sizeof(struct cudaTextureDesc)) < 0 ||
+        rpc_write(0, pTexDesc, sizeof(struct cudaTextureDesc)) < 0 ||
         rpc_write(0, &texObject, sizeof(cudaTextureObject_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pTexDesc, sizeof(struct cudaTextureDesc)) < 0 ||
@@ -10054,9 +10001,8 @@ cudaError_t cudaGetTextureObjectTextureDesc(struct cudaTextureDesc* pTexDesc, cu
 cudaError_t cudaGetTextureObjectResourceViewDesc(struct cudaResourceViewDesc* pResViewDesc, cudaTextureObject_t texObject)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGetTextureObjectResourceViewDesc) < 0 ||
-        rpc_write(0, &pResViewDesc, sizeof(struct cudaResourceViewDesc)) < 0 ||
+        rpc_write(0, pResViewDesc, sizeof(struct cudaResourceViewDesc)) < 0 ||
         rpc_write(0, &texObject, sizeof(cudaTextureObject_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pResViewDesc, sizeof(struct cudaResourceViewDesc)) < 0 ||
@@ -10065,10 +10011,22 @@ cudaError_t cudaGetTextureObjectResourceViewDesc(struct cudaResourceViewDesc* pR
     return return_value;
 }
 
+cudaError_t cudaCreateSurfaceObject(cudaSurfaceObject_t* pSurfObject, const struct cudaResourceDesc* pResDesc)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaCreateSurfaceObject) < 0 ||
+        rpc_write(0, pSurfObject, sizeof(cudaSurfaceObject_t)) < 0 ||
+        rpc_write(0, &pResDesc, sizeof(const struct cudaResourceDesc*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, pSurfObject, sizeof(cudaSurfaceObject_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
 cudaError_t cudaDestroySurfaceObject(cudaSurfaceObject_t surfObject)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaDestroySurfaceObject) < 0 ||
         rpc_write(0, &surfObject, sizeof(cudaSurfaceObject_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -10080,9 +10038,8 @@ cudaError_t cudaDestroySurfaceObject(cudaSurfaceObject_t surfObject)
 cudaError_t cudaGetSurfaceObjectResourceDesc(struct cudaResourceDesc* pResDesc, cudaSurfaceObject_t surfObject)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGetSurfaceObjectResourceDesc) < 0 ||
-        rpc_write(0, &pResDesc, sizeof(struct cudaResourceDesc)) < 0 ||
+        rpc_write(0, pResDesc, sizeof(struct cudaResourceDesc)) < 0 ||
         rpc_write(0, &surfObject, sizeof(cudaSurfaceObject_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pResDesc, sizeof(struct cudaResourceDesc)) < 0 ||
@@ -10094,9 +10051,8 @@ cudaError_t cudaGetSurfaceObjectResourceDesc(struct cudaResourceDesc* pResDesc, 
 cudaError_t cudaDriverGetVersion(int* driverVersion)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaDriverGetVersion) < 0 ||
-        rpc_write(0, &driverVersion, sizeof(int)) < 0 ||
+        rpc_write(0, driverVersion, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, driverVersion, sizeof(int)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -10107,9 +10063,8 @@ cudaError_t cudaDriverGetVersion(int* driverVersion)
 cudaError_t cudaRuntimeGetVersion(int* runtimeVersion)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaRuntimeGetVersion) < 0 ||
-        rpc_write(0, &runtimeVersion, sizeof(int)) < 0 ||
+        rpc_write(0, runtimeVersion, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, runtimeVersion, sizeof(int)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -10120,9 +10075,8 @@ cudaError_t cudaRuntimeGetVersion(int* runtimeVersion)
 cudaError_t cudaGraphCreate(cudaGraph_t* pGraph, unsigned int flags)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphCreate) < 0 ||
-        rpc_write(0, &pGraph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_write(0, pGraph, sizeof(cudaGraph_t)) < 0 ||
         rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pGraph, sizeof(cudaGraph_t)) < 0 ||
@@ -10131,15 +10085,42 @@ cudaError_t cudaGraphCreate(cudaGraph_t* pGraph, unsigned int flags)
     return return_value;
 }
 
+cudaError_t cudaGraphAddKernelNode(cudaGraphNode_t* pGraphNode, cudaGraph_t graph, const cudaGraphNode_t* pDependencies, size_t numDependencies, const struct cudaKernelNodeParams* pNodeParams)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaGraphAddKernelNode) < 0 ||
+        rpc_write(0, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(0, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_write(0, &pDependencies, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_write(0, &pNodeParams, sizeof(const struct cudaKernelNodeParams*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
 cudaError_t cudaGraphKernelNodeGetParams(cudaGraphNode_t node, struct cudaKernelNodeParams* pNodeParams)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphKernelNodeGetParams) < 0 ||
         rpc_write(0, &node, sizeof(cudaGraphNode_t)) < 0 ||
-        rpc_write(0, &pNodeParams, sizeof(struct cudaKernelNodeParams)) < 0 ||
+        rpc_write(0, pNodeParams, sizeof(struct cudaKernelNodeParams)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pNodeParams, sizeof(struct cudaKernelNodeParams)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphKernelNodeSetParams(cudaGraphNode_t node, const struct cudaKernelNodeParams* pNodeParams)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaGraphKernelNodeSetParams) < 0 ||
+        rpc_write(0, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(0, &pNodeParams, sizeof(const struct cudaKernelNodeParams*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return cudaErrorDevicesUnavailable;
     return return_value;
@@ -10148,7 +10129,6 @@ cudaError_t cudaGraphKernelNodeGetParams(cudaGraphNode_t node, struct cudaKernel
 cudaError_t cudaGraphKernelNodeCopyAttributes(cudaGraphNode_t hSrc, cudaGraphNode_t hDst)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphKernelNodeCopyAttributes) < 0 ||
         rpc_write(0, &hSrc, sizeof(cudaGraphNode_t)) < 0 ||
         rpc_write(0, &hDst, sizeof(cudaGraphNode_t)) < 0 ||
@@ -10161,13 +10141,61 @@ cudaError_t cudaGraphKernelNodeCopyAttributes(cudaGraphNode_t hSrc, cudaGraphNod
 cudaError_t cudaGraphKernelNodeGetAttribute(cudaGraphNode_t hNode, cudaLaunchAttributeID attr, cudaLaunchAttributeValue* value_out)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphKernelNodeGetAttribute) < 0 ||
         rpc_write(0, &hNode, sizeof(cudaGraphNode_t)) < 0 ||
         rpc_write(0, &attr, sizeof(cudaLaunchAttributeID)) < 0 ||
-        rpc_write(0, &value_out, sizeof(cudaLaunchAttributeValue)) < 0 ||
+        rpc_write(0, value_out, sizeof(cudaLaunchAttributeValue)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, value_out, sizeof(cudaLaunchAttributeValue)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphKernelNodeSetAttribute(cudaGraphNode_t hNode, cudaLaunchAttributeID attr, const cudaLaunchAttributeValue* value)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaGraphKernelNodeSetAttribute) < 0 ||
+        rpc_write(0, &hNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(0, &attr, sizeof(cudaLaunchAttributeID)) < 0 ||
+        rpc_write(0, &value, sizeof(const cudaLaunchAttributeValue*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphAddMemcpyNode(cudaGraphNode_t* pGraphNode, cudaGraph_t graph, const cudaGraphNode_t* pDependencies, size_t numDependencies, const struct cudaMemcpy3DParms* pCopyParams)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaGraphAddMemcpyNode) < 0 ||
+        rpc_write(0, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(0, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_write(0, &pDependencies, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_write(0, &pCopyParams, sizeof(const struct cudaMemcpy3DParms*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphAddMemcpyNodeToSymbol(cudaGraphNode_t* pGraphNode, cudaGraph_t graph, const cudaGraphNode_t* pDependencies, size_t numDependencies, const void* symbol, const void* src, size_t count, size_t offset, enum cudaMemcpyKind kind)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaGraphAddMemcpyNodeToSymbol) < 0 ||
+        rpc_write(0, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(0, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_write(0, &pDependencies, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_write(0, &symbol, sizeof(const void*)) < 0 ||
+        rpc_write(0, &src, sizeof(const void*)) < 0 ||
+        rpc_write(0, &count, sizeof(size_t)) < 0 ||
+        rpc_write(0, &offset, sizeof(size_t)) < 0 ||
+        rpc_write(0, &kind, sizeof(enum cudaMemcpyKind)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return cudaErrorDevicesUnavailable;
     return return_value;
@@ -10176,12 +10204,55 @@ cudaError_t cudaGraphKernelNodeGetAttribute(cudaGraphNode_t hNode, cudaLaunchAtt
 cudaError_t cudaGraphMemcpyNodeGetParams(cudaGraphNode_t node, struct cudaMemcpy3DParms* pNodeParams)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphMemcpyNodeGetParams) < 0 ||
         rpc_write(0, &node, sizeof(cudaGraphNode_t)) < 0 ||
-        rpc_write(0, &pNodeParams, sizeof(struct cudaMemcpy3DParms)) < 0 ||
+        rpc_write(0, pNodeParams, sizeof(struct cudaMemcpy3DParms)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pNodeParams, sizeof(struct cudaMemcpy3DParms)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphMemcpyNodeSetParams(cudaGraphNode_t node, const struct cudaMemcpy3DParms* pNodeParams)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaGraphMemcpyNodeSetParams) < 0 ||
+        rpc_write(0, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(0, &pNodeParams, sizeof(const struct cudaMemcpy3DParms*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphMemcpyNodeSetParamsToSymbol(cudaGraphNode_t node, const void* symbol, const void* src, size_t count, size_t offset, enum cudaMemcpyKind kind)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaGraphMemcpyNodeSetParamsToSymbol) < 0 ||
+        rpc_write(0, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(0, &symbol, sizeof(const void*)) < 0 ||
+        rpc_write(0, &src, sizeof(const void*)) < 0 ||
+        rpc_write(0, &count, sizeof(size_t)) < 0 ||
+        rpc_write(0, &offset, sizeof(size_t)) < 0 ||
+        rpc_write(0, &kind, sizeof(enum cudaMemcpyKind)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphAddMemsetNode(cudaGraphNode_t* pGraphNode, cudaGraph_t graph, const cudaGraphNode_t* pDependencies, size_t numDependencies, const struct cudaMemsetParams* pMemsetParams)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaGraphAddMemsetNode) < 0 ||
+        rpc_write(0, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(0, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_write(0, &pDependencies, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_write(0, &pMemsetParams, sizeof(const struct cudaMemsetParams*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return cudaErrorDevicesUnavailable;
     return return_value;
@@ -10190,12 +10261,39 @@ cudaError_t cudaGraphMemcpyNodeGetParams(cudaGraphNode_t node, struct cudaMemcpy
 cudaError_t cudaGraphMemsetNodeGetParams(cudaGraphNode_t node, struct cudaMemsetParams* pNodeParams)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphMemsetNodeGetParams) < 0 ||
         rpc_write(0, &node, sizeof(cudaGraphNode_t)) < 0 ||
-        rpc_write(0, &pNodeParams, sizeof(struct cudaMemsetParams)) < 0 ||
+        rpc_write(0, pNodeParams, sizeof(struct cudaMemsetParams)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pNodeParams, sizeof(struct cudaMemsetParams)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphMemsetNodeSetParams(cudaGraphNode_t node, const struct cudaMemsetParams* pNodeParams)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaGraphMemsetNodeSetParams) < 0 ||
+        rpc_write(0, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(0, &pNodeParams, sizeof(const struct cudaMemsetParams*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphAddHostNode(cudaGraphNode_t* pGraphNode, cudaGraph_t graph, const cudaGraphNode_t* pDependencies, size_t numDependencies, const struct cudaHostNodeParams* pNodeParams)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaGraphAddHostNode) < 0 ||
+        rpc_write(0, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(0, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_write(0, &pDependencies, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_write(0, &pNodeParams, sizeof(const struct cudaHostNodeParams*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return cudaErrorDevicesUnavailable;
     return return_value;
@@ -10204,12 +10302,39 @@ cudaError_t cudaGraphMemsetNodeGetParams(cudaGraphNode_t node, struct cudaMemset
 cudaError_t cudaGraphHostNodeGetParams(cudaGraphNode_t node, struct cudaHostNodeParams* pNodeParams)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphHostNodeGetParams) < 0 ||
         rpc_write(0, &node, sizeof(cudaGraphNode_t)) < 0 ||
-        rpc_write(0, &pNodeParams, sizeof(struct cudaHostNodeParams)) < 0 ||
+        rpc_write(0, pNodeParams, sizeof(struct cudaHostNodeParams)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pNodeParams, sizeof(struct cudaHostNodeParams)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphHostNodeSetParams(cudaGraphNode_t node, const struct cudaHostNodeParams* pNodeParams)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaGraphHostNodeSetParams) < 0 ||
+        rpc_write(0, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(0, &pNodeParams, sizeof(const struct cudaHostNodeParams*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphAddChildGraphNode(cudaGraphNode_t* pGraphNode, cudaGraph_t graph, const cudaGraphNode_t* pDependencies, size_t numDependencies, cudaGraph_t childGraph)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaGraphAddChildGraphNode) < 0 ||
+        rpc_write(0, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(0, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_write(0, &pDependencies, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_write(0, &childGraph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return cudaErrorDevicesUnavailable;
     return return_value;
@@ -10218,12 +10343,42 @@ cudaError_t cudaGraphHostNodeGetParams(cudaGraphNode_t node, struct cudaHostNode
 cudaError_t cudaGraphChildGraphNodeGetGraph(cudaGraphNode_t node, cudaGraph_t* pGraph)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphChildGraphNodeGetGraph) < 0 ||
         rpc_write(0, &node, sizeof(cudaGraphNode_t)) < 0 ||
-        rpc_write(0, &pGraph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_write(0, pGraph, sizeof(cudaGraph_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pGraph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphAddEmptyNode(cudaGraphNode_t* pGraphNode, cudaGraph_t graph, const cudaGraphNode_t* pDependencies, size_t numDependencies)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaGraphAddEmptyNode) < 0 ||
+        rpc_write(0, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(0, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_write(0, &pDependencies, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphAddEventRecordNode(cudaGraphNode_t* pGraphNode, cudaGraph_t graph, const cudaGraphNode_t* pDependencies, size_t numDependencies, cudaEvent_t event)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaGraphAddEventRecordNode) < 0 ||
+        rpc_write(0, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(0, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_write(0, &pDependencies, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_write(0, &event, sizeof(cudaEvent_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return cudaErrorDevicesUnavailable;
     return return_value;
@@ -10232,10 +10387,9 @@ cudaError_t cudaGraphChildGraphNodeGetGraph(cudaGraphNode_t node, cudaGraph_t* p
 cudaError_t cudaGraphEventRecordNodeGetEvent(cudaGraphNode_t node, cudaEvent_t* event_out)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphEventRecordNodeGetEvent) < 0 ||
         rpc_write(0, &node, sizeof(cudaGraphNode_t)) < 0 ||
-        rpc_write(0, &event_out, sizeof(cudaEvent_t)) < 0 ||
+        rpc_write(0, event_out, sizeof(cudaEvent_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, event_out, sizeof(cudaEvent_t)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -10246,7 +10400,6 @@ cudaError_t cudaGraphEventRecordNodeGetEvent(cudaGraphNode_t node, cudaEvent_t* 
 cudaError_t cudaGraphEventRecordNodeSetEvent(cudaGraphNode_t node, cudaEvent_t event)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphEventRecordNodeSetEvent) < 0 ||
         rpc_write(0, &node, sizeof(cudaGraphNode_t)) < 0 ||
         rpc_write(0, &event, sizeof(cudaEvent_t)) < 0 ||
@@ -10256,13 +10409,28 @@ cudaError_t cudaGraphEventRecordNodeSetEvent(cudaGraphNode_t node, cudaEvent_t e
     return return_value;
 }
 
+cudaError_t cudaGraphAddEventWaitNode(cudaGraphNode_t* pGraphNode, cudaGraph_t graph, const cudaGraphNode_t* pDependencies, size_t numDependencies, cudaEvent_t event)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaGraphAddEventWaitNode) < 0 ||
+        rpc_write(0, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(0, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_write(0, &pDependencies, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_write(0, &event, sizeof(cudaEvent_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
 cudaError_t cudaGraphEventWaitNodeGetEvent(cudaGraphNode_t node, cudaEvent_t* event_out)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphEventWaitNodeGetEvent) < 0 ||
         rpc_write(0, &node, sizeof(cudaGraphNode_t)) < 0 ||
-        rpc_write(0, &event_out, sizeof(cudaEvent_t)) < 0 ||
+        rpc_write(0, event_out, sizeof(cudaEvent_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, event_out, sizeof(cudaEvent_t)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -10273,7 +10441,6 @@ cudaError_t cudaGraphEventWaitNodeGetEvent(cudaGraphNode_t node, cudaEvent_t* ev
 cudaError_t cudaGraphEventWaitNodeSetEvent(cudaGraphNode_t node, cudaEvent_t event)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphEventWaitNodeSetEvent) < 0 ||
         rpc_write(0, &node, sizeof(cudaGraphNode_t)) < 0 ||
         rpc_write(0, &event, sizeof(cudaEvent_t)) < 0 ||
@@ -10283,15 +10450,58 @@ cudaError_t cudaGraphEventWaitNodeSetEvent(cudaGraphNode_t node, cudaEvent_t eve
     return return_value;
 }
 
+cudaError_t cudaGraphAddExternalSemaphoresSignalNode(cudaGraphNode_t* pGraphNode, cudaGraph_t graph, const cudaGraphNode_t* pDependencies, size_t numDependencies, const struct cudaExternalSemaphoreSignalNodeParams* nodeParams)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaGraphAddExternalSemaphoresSignalNode) < 0 ||
+        rpc_write(0, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(0, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_write(0, &pDependencies, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_write(0, &nodeParams, sizeof(const struct cudaExternalSemaphoreSignalNodeParams*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
 cudaError_t cudaGraphExternalSemaphoresSignalNodeGetParams(cudaGraphNode_t hNode, struct cudaExternalSemaphoreSignalNodeParams* params_out)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphExternalSemaphoresSignalNodeGetParams) < 0 ||
         rpc_write(0, &hNode, sizeof(cudaGraphNode_t)) < 0 ||
-        rpc_write(0, &params_out, sizeof(struct cudaExternalSemaphoreSignalNodeParams)) < 0 ||
+        rpc_write(0, params_out, sizeof(struct cudaExternalSemaphoreSignalNodeParams)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, params_out, sizeof(struct cudaExternalSemaphoreSignalNodeParams)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphExternalSemaphoresSignalNodeSetParams(cudaGraphNode_t hNode, const struct cudaExternalSemaphoreSignalNodeParams* nodeParams)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaGraphExternalSemaphoresSignalNodeSetParams) < 0 ||
+        rpc_write(0, &hNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(0, &nodeParams, sizeof(const struct cudaExternalSemaphoreSignalNodeParams*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphAddExternalSemaphoresWaitNode(cudaGraphNode_t* pGraphNode, cudaGraph_t graph, const cudaGraphNode_t* pDependencies, size_t numDependencies, const struct cudaExternalSemaphoreWaitNodeParams* nodeParams)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaGraphAddExternalSemaphoresWaitNode) < 0 ||
+        rpc_write(0, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(0, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_write(0, &pDependencies, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_write(0, &nodeParams, sizeof(const struct cudaExternalSemaphoreWaitNodeParams*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return cudaErrorDevicesUnavailable;
     return return_value;
@@ -10300,12 +10510,40 @@ cudaError_t cudaGraphExternalSemaphoresSignalNodeGetParams(cudaGraphNode_t hNode
 cudaError_t cudaGraphExternalSemaphoresWaitNodeGetParams(cudaGraphNode_t hNode, struct cudaExternalSemaphoreWaitNodeParams* params_out)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphExternalSemaphoresWaitNodeGetParams) < 0 ||
         rpc_write(0, &hNode, sizeof(cudaGraphNode_t)) < 0 ||
-        rpc_write(0, &params_out, sizeof(struct cudaExternalSemaphoreWaitNodeParams)) < 0 ||
+        rpc_write(0, params_out, sizeof(struct cudaExternalSemaphoreWaitNodeParams)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, params_out, sizeof(struct cudaExternalSemaphoreWaitNodeParams)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphExternalSemaphoresWaitNodeSetParams(cudaGraphNode_t hNode, const struct cudaExternalSemaphoreWaitNodeParams* nodeParams)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaGraphExternalSemaphoresWaitNodeSetParams) < 0 ||
+        rpc_write(0, &hNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(0, &nodeParams, sizeof(const struct cudaExternalSemaphoreWaitNodeParams*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphAddMemAllocNode(cudaGraphNode_t* pGraphNode, cudaGraph_t graph, const cudaGraphNode_t* pDependencies, size_t numDependencies, struct cudaMemAllocNodeParams* nodeParams)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaGraphAddMemAllocNode) < 0 ||
+        rpc_write(0, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(0, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_write(0, &pDependencies, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_write(0, nodeParams, sizeof(struct cudaMemAllocNodeParams)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(0, nodeParams, sizeof(struct cudaMemAllocNodeParams)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return cudaErrorDevicesUnavailable;
     return return_value;
@@ -10314,26 +10552,11 @@ cudaError_t cudaGraphExternalSemaphoresWaitNodeGetParams(cudaGraphNode_t hNode, 
 cudaError_t cudaGraphMemAllocNodeGetParams(cudaGraphNode_t node, struct cudaMemAllocNodeParams* params_out)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphMemAllocNodeGetParams) < 0 ||
         rpc_write(0, &node, sizeof(cudaGraphNode_t)) < 0 ||
-        rpc_write(0, &params_out, sizeof(struct cudaMemAllocNodeParams)) < 0 ||
+        rpc_write(0, params_out, sizeof(struct cudaMemAllocNodeParams)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, params_out, sizeof(struct cudaMemAllocNodeParams)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return cudaErrorDevicesUnavailable;
-    return return_value;
-}
-
-cudaError_t cudaGraphMemFreeNodeGetParams(cudaGraphNode_t node, void* dptr_out)
-{
-    cudaError_t return_value;
-
-    if (rpc_start_request(0, RPC_cudaGraphMemFreeNodeGetParams) < 0 ||
-        rpc_write(0, &node, sizeof(cudaGraphNode_t)) < 0 ||
-        rpc_write(0, &dptr_out, sizeof(void*)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, dptr_out, sizeof(void*)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return cudaErrorDevicesUnavailable;
     return return_value;
@@ -10342,7 +10565,6 @@ cudaError_t cudaGraphMemFreeNodeGetParams(cudaGraphNode_t node, void* dptr_out)
 cudaError_t cudaDeviceGraphMemTrim(int device)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaDeviceGraphMemTrim) < 0 ||
         rpc_write(0, &device, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -10351,42 +10573,11 @@ cudaError_t cudaDeviceGraphMemTrim(int device)
     return return_value;
 }
 
-cudaError_t cudaDeviceGetGraphMemAttribute(int device, enum cudaGraphMemAttributeType attr, void* value)
-{
-    cudaError_t return_value;
-
-    if (rpc_start_request(0, RPC_cudaDeviceGetGraphMemAttribute) < 0 ||
-        rpc_write(0, &device, sizeof(int)) < 0 ||
-        rpc_write(0, &attr, sizeof(enum cudaGraphMemAttributeType)) < 0 ||
-        rpc_write(0, &value, sizeof(void*)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, value, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return cudaErrorDevicesUnavailable;
-    return return_value;
-}
-
-cudaError_t cudaDeviceSetGraphMemAttribute(int device, enum cudaGraphMemAttributeType attr, void* value)
-{
-    cudaError_t return_value;
-
-    if (rpc_start_request(0, RPC_cudaDeviceSetGraphMemAttribute) < 0 ||
-        rpc_write(0, &device, sizeof(int)) < 0 ||
-        rpc_write(0, &attr, sizeof(enum cudaGraphMemAttributeType)) < 0 ||
-        rpc_write(0, &value, sizeof(void*)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, value, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return cudaErrorDevicesUnavailable;
-    return return_value;
-}
-
 cudaError_t cudaGraphClone(cudaGraph_t* pGraphClone, cudaGraph_t originalGraph)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphClone) < 0 ||
-        rpc_write(0, &pGraphClone, sizeof(cudaGraph_t)) < 0 ||
+        rpc_write(0, pGraphClone, sizeof(cudaGraph_t)) < 0 ||
         rpc_write(0, &originalGraph, sizeof(cudaGraph_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pGraphClone, sizeof(cudaGraph_t)) < 0 ||
@@ -10398,9 +10589,8 @@ cudaError_t cudaGraphClone(cudaGraph_t* pGraphClone, cudaGraph_t originalGraph)
 cudaError_t cudaGraphNodeFindInClone(cudaGraphNode_t* pNode, cudaGraphNode_t originalNode, cudaGraph_t clonedGraph)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphNodeFindInClone) < 0 ||
-        rpc_write(0, &pNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(0, pNode, sizeof(cudaGraphNode_t)) < 0 ||
         rpc_write(0, &originalNode, sizeof(cudaGraphNode_t)) < 0 ||
         rpc_write(0, &clonedGraph, sizeof(cudaGraph_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -10413,10 +10603,9 @@ cudaError_t cudaGraphNodeFindInClone(cudaGraphNode_t* pNode, cudaGraphNode_t ori
 cudaError_t cudaGraphNodeGetType(cudaGraphNode_t node, enum cudaGraphNodeType* pType)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphNodeGetType) < 0 ||
         rpc_write(0, &node, sizeof(cudaGraphNode_t)) < 0 ||
-        rpc_write(0, &pType, sizeof(enum cudaGraphNodeType)) < 0 ||
+        rpc_write(0, pType, sizeof(enum cudaGraphNodeType)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pType, sizeof(enum cudaGraphNodeType)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -10427,11 +10616,10 @@ cudaError_t cudaGraphNodeGetType(cudaGraphNode_t node, enum cudaGraphNodeType* p
 cudaError_t cudaGraphGetNodes(cudaGraph_t graph, cudaGraphNode_t* nodes, size_t* numNodes)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphGetNodes) < 0 ||
         rpc_write(0, &graph, sizeof(cudaGraph_t)) < 0 ||
-        rpc_write(0, &nodes, sizeof(cudaGraphNode_t)) < 0 ||
-        rpc_write(0, &numNodes, sizeof(size_t)) < 0 ||
+        rpc_write(0, nodes, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(0, numNodes, sizeof(size_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, nodes, sizeof(cudaGraphNode_t)) < 0 ||
         rpc_read(0, numNodes, sizeof(size_t)) < 0 ||
@@ -10443,11 +10631,10 @@ cudaError_t cudaGraphGetNodes(cudaGraph_t graph, cudaGraphNode_t* nodes, size_t*
 cudaError_t cudaGraphGetRootNodes(cudaGraph_t graph, cudaGraphNode_t* pRootNodes, size_t* pNumRootNodes)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphGetRootNodes) < 0 ||
         rpc_write(0, &graph, sizeof(cudaGraph_t)) < 0 ||
-        rpc_write(0, &pRootNodes, sizeof(cudaGraphNode_t)) < 0 ||
-        rpc_write(0, &pNumRootNodes, sizeof(size_t)) < 0 ||
+        rpc_write(0, pRootNodes, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(0, pNumRootNodes, sizeof(size_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pRootNodes, sizeof(cudaGraphNode_t)) < 0 ||
         rpc_read(0, pNumRootNodes, sizeof(size_t)) < 0 ||
@@ -10459,12 +10646,11 @@ cudaError_t cudaGraphGetRootNodes(cudaGraph_t graph, cudaGraphNode_t* pRootNodes
 cudaError_t cudaGraphGetEdges(cudaGraph_t graph, cudaGraphNode_t* from, cudaGraphNode_t* to, size_t* numEdges)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphGetEdges) < 0 ||
         rpc_write(0, &graph, sizeof(cudaGraph_t)) < 0 ||
-        rpc_write(0, &from, sizeof(cudaGraphNode_t)) < 0 ||
-        rpc_write(0, &to, sizeof(cudaGraphNode_t)) < 0 ||
-        rpc_write(0, &numEdges, sizeof(size_t)) < 0 ||
+        rpc_write(0, from, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(0, to, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(0, numEdges, sizeof(size_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, from, sizeof(cudaGraphNode_t)) < 0 ||
         rpc_read(0, to, sizeof(cudaGraphNode_t)) < 0 ||
@@ -10477,11 +10663,10 @@ cudaError_t cudaGraphGetEdges(cudaGraph_t graph, cudaGraphNode_t* from, cudaGrap
 cudaError_t cudaGraphNodeGetDependencies(cudaGraphNode_t node, cudaGraphNode_t* pDependencies, size_t* pNumDependencies)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphNodeGetDependencies) < 0 ||
         rpc_write(0, &node, sizeof(cudaGraphNode_t)) < 0 ||
-        rpc_write(0, &pDependencies, sizeof(cudaGraphNode_t)) < 0 ||
-        rpc_write(0, &pNumDependencies, sizeof(size_t)) < 0 ||
+        rpc_write(0, pDependencies, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(0, pNumDependencies, sizeof(size_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pDependencies, sizeof(cudaGraphNode_t)) < 0 ||
         rpc_read(0, pNumDependencies, sizeof(size_t)) < 0 ||
@@ -10493,11 +10678,10 @@ cudaError_t cudaGraphNodeGetDependencies(cudaGraphNode_t node, cudaGraphNode_t* 
 cudaError_t cudaGraphNodeGetDependentNodes(cudaGraphNode_t node, cudaGraphNode_t* pDependentNodes, size_t* pNumDependentNodes)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphNodeGetDependentNodes) < 0 ||
         rpc_write(0, &node, sizeof(cudaGraphNode_t)) < 0 ||
-        rpc_write(0, &pDependentNodes, sizeof(cudaGraphNode_t)) < 0 ||
-        rpc_write(0, &pNumDependentNodes, sizeof(size_t)) < 0 ||
+        rpc_write(0, pDependentNodes, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(0, pNumDependentNodes, sizeof(size_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pDependentNodes, sizeof(cudaGraphNode_t)) < 0 ||
         rpc_read(0, pNumDependentNodes, sizeof(size_t)) < 0 ||
@@ -10506,10 +10690,37 @@ cudaError_t cudaGraphNodeGetDependentNodes(cudaGraphNode_t node, cudaGraphNode_t
     return return_value;
 }
 
+cudaError_t cudaGraphAddDependencies(cudaGraph_t graph, const cudaGraphNode_t* from, const cudaGraphNode_t* to, size_t numDependencies)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaGraphAddDependencies) < 0 ||
+        rpc_write(0, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_write(0, &from, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_write(0, &to, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphRemoveDependencies(cudaGraph_t graph, const cudaGraphNode_t* from, const cudaGraphNode_t* to, size_t numDependencies)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaGraphRemoveDependencies) < 0 ||
+        rpc_write(0, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_write(0, &from, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_write(0, &to, sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
 cudaError_t cudaGraphDestroyNode(cudaGraphNode_t node)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphDestroyNode) < 0 ||
         rpc_write(0, &node, sizeof(cudaGraphNode_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -10521,9 +10732,8 @@ cudaError_t cudaGraphDestroyNode(cudaGraphNode_t node)
 cudaError_t cudaGraphInstantiate(cudaGraphExec_t* pGraphExec, cudaGraph_t graph, unsigned long long flags)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphInstantiate) < 0 ||
-        rpc_write(0, &pGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_write(0, pGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
         rpc_write(0, &graph, sizeof(cudaGraph_t)) < 0 ||
         rpc_write(0, &flags, sizeof(unsigned long long)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -10536,9 +10746,8 @@ cudaError_t cudaGraphInstantiate(cudaGraphExec_t* pGraphExec, cudaGraph_t graph,
 cudaError_t cudaGraphInstantiateWithFlags(cudaGraphExec_t* pGraphExec, cudaGraph_t graph, unsigned long long flags)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphInstantiateWithFlags) < 0 ||
-        rpc_write(0, &pGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_write(0, pGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
         rpc_write(0, &graph, sizeof(cudaGraph_t)) < 0 ||
         rpc_write(0, &flags, sizeof(unsigned long long)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -10551,11 +10760,10 @@ cudaError_t cudaGraphInstantiateWithFlags(cudaGraphExec_t* pGraphExec, cudaGraph
 cudaError_t cudaGraphInstantiateWithParams(cudaGraphExec_t* pGraphExec, cudaGraph_t graph, cudaGraphInstantiateParams* instantiateParams)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphInstantiateWithParams) < 0 ||
-        rpc_write(0, &pGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_write(0, pGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
         rpc_write(0, &graph, sizeof(cudaGraph_t)) < 0 ||
-        rpc_write(0, &instantiateParams, sizeof(cudaGraphInstantiateParams)) < 0 ||
+        rpc_write(0, instantiateParams, sizeof(cudaGraphInstantiateParams)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, pGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
         rpc_read(0, instantiateParams, sizeof(cudaGraphInstantiateParams)) < 0 ||
@@ -10567,12 +10775,80 @@ cudaError_t cudaGraphInstantiateWithParams(cudaGraphExec_t* pGraphExec, cudaGrap
 cudaError_t cudaGraphExecGetFlags(cudaGraphExec_t graphExec, unsigned long long* flags)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphExecGetFlags) < 0 ||
         rpc_write(0, &graphExec, sizeof(cudaGraphExec_t)) < 0 ||
-        rpc_write(0, &flags, sizeof(unsigned long long)) < 0 ||
+        rpc_write(0, flags, sizeof(unsigned long long)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, flags, sizeof(unsigned long long)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphExecKernelNodeSetParams(cudaGraphExec_t hGraphExec, cudaGraphNode_t node, const struct cudaKernelNodeParams* pNodeParams)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaGraphExecKernelNodeSetParams) < 0 ||
+        rpc_write(0, &hGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_write(0, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(0, &pNodeParams, sizeof(const struct cudaKernelNodeParams*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphExecMemcpyNodeSetParams(cudaGraphExec_t hGraphExec, cudaGraphNode_t node, const struct cudaMemcpy3DParms* pNodeParams)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaGraphExecMemcpyNodeSetParams) < 0 ||
+        rpc_write(0, &hGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_write(0, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(0, &pNodeParams, sizeof(const struct cudaMemcpy3DParms*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphExecMemcpyNodeSetParamsToSymbol(cudaGraphExec_t hGraphExec, cudaGraphNode_t node, const void* symbol, const void* src, size_t count, size_t offset, enum cudaMemcpyKind kind)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaGraphExecMemcpyNodeSetParamsToSymbol) < 0 ||
+        rpc_write(0, &hGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_write(0, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(0, &symbol, sizeof(const void*)) < 0 ||
+        rpc_write(0, &src, sizeof(const void*)) < 0 ||
+        rpc_write(0, &count, sizeof(size_t)) < 0 ||
+        rpc_write(0, &offset, sizeof(size_t)) < 0 ||
+        rpc_write(0, &kind, sizeof(enum cudaMemcpyKind)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphExecMemsetNodeSetParams(cudaGraphExec_t hGraphExec, cudaGraphNode_t node, const struct cudaMemsetParams* pNodeParams)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaGraphExecMemsetNodeSetParams) < 0 ||
+        rpc_write(0, &hGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_write(0, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(0, &pNodeParams, sizeof(const struct cudaMemsetParams*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphExecHostNodeSetParams(cudaGraphExec_t hGraphExec, cudaGraphNode_t node, const struct cudaHostNodeParams* pNodeParams)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaGraphExecHostNodeSetParams) < 0 ||
+        rpc_write(0, &hGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_write(0, &node, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(0, &pNodeParams, sizeof(const struct cudaHostNodeParams*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return cudaErrorDevicesUnavailable;
     return return_value;
@@ -10581,7 +10857,6 @@ cudaError_t cudaGraphExecGetFlags(cudaGraphExec_t graphExec, unsigned long long*
 cudaError_t cudaGraphExecChildGraphNodeSetParams(cudaGraphExec_t hGraphExec, cudaGraphNode_t node, cudaGraph_t childGraph)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphExecChildGraphNodeSetParams) < 0 ||
         rpc_write(0, &hGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
         rpc_write(0, &node, sizeof(cudaGraphNode_t)) < 0 ||
@@ -10595,7 +10870,6 @@ cudaError_t cudaGraphExecChildGraphNodeSetParams(cudaGraphExec_t hGraphExec, cud
 cudaError_t cudaGraphExecEventRecordNodeSetEvent(cudaGraphExec_t hGraphExec, cudaGraphNode_t hNode, cudaEvent_t event)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphExecEventRecordNodeSetEvent) < 0 ||
         rpc_write(0, &hGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
         rpc_write(0, &hNode, sizeof(cudaGraphNode_t)) < 0 ||
@@ -10609,7 +10883,6 @@ cudaError_t cudaGraphExecEventRecordNodeSetEvent(cudaGraphExec_t hGraphExec, cud
 cudaError_t cudaGraphExecEventWaitNodeSetEvent(cudaGraphExec_t hGraphExec, cudaGraphNode_t hNode, cudaEvent_t event)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphExecEventWaitNodeSetEvent) < 0 ||
         rpc_write(0, &hGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
         rpc_write(0, &hNode, sizeof(cudaGraphNode_t)) < 0 ||
@@ -10620,10 +10893,35 @@ cudaError_t cudaGraphExecEventWaitNodeSetEvent(cudaGraphExec_t hGraphExec, cudaG
     return return_value;
 }
 
+cudaError_t cudaGraphExecExternalSemaphoresSignalNodeSetParams(cudaGraphExec_t hGraphExec, cudaGraphNode_t hNode, const struct cudaExternalSemaphoreSignalNodeParams* nodeParams)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaGraphExecExternalSemaphoresSignalNodeSetParams) < 0 ||
+        rpc_write(0, &hGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_write(0, &hNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(0, &nodeParams, sizeof(const struct cudaExternalSemaphoreSignalNodeParams*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGraphExecExternalSemaphoresWaitNodeSetParams(cudaGraphExec_t hGraphExec, cudaGraphNode_t hNode, const struct cudaExternalSemaphoreWaitNodeParams* nodeParams)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaGraphExecExternalSemaphoresWaitNodeSetParams) < 0 ||
+        rpc_write(0, &hGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
+        rpc_write(0, &hNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(0, &nodeParams, sizeof(const struct cudaExternalSemaphoreWaitNodeParams*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
 cudaError_t cudaGraphNodeSetEnabled(cudaGraphExec_t hGraphExec, cudaGraphNode_t hNode, unsigned int isEnabled)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphNodeSetEnabled) < 0 ||
         rpc_write(0, &hGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
         rpc_write(0, &hNode, sizeof(cudaGraphNode_t)) < 0 ||
@@ -10637,11 +10935,10 @@ cudaError_t cudaGraphNodeSetEnabled(cudaGraphExec_t hGraphExec, cudaGraphNode_t 
 cudaError_t cudaGraphNodeGetEnabled(cudaGraphExec_t hGraphExec, cudaGraphNode_t hNode, unsigned int* isEnabled)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphNodeGetEnabled) < 0 ||
         rpc_write(0, &hGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
         rpc_write(0, &hNode, sizeof(cudaGraphNode_t)) < 0 ||
-        rpc_write(0, &isEnabled, sizeof(unsigned int)) < 0 ||
+        rpc_write(0, isEnabled, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, isEnabled, sizeof(unsigned int)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -10652,11 +10949,10 @@ cudaError_t cudaGraphNodeGetEnabled(cudaGraphExec_t hGraphExec, cudaGraphNode_t 
 cudaError_t cudaGraphExecUpdate(cudaGraphExec_t hGraphExec, cudaGraph_t hGraph, cudaGraphExecUpdateResultInfo* resultInfo)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphExecUpdate) < 0 ||
         rpc_write(0, &hGraphExec, sizeof(cudaGraphExec_t)) < 0 ||
         rpc_write(0, &hGraph, sizeof(cudaGraph_t)) < 0 ||
-        rpc_write(0, &resultInfo, sizeof(cudaGraphExecUpdateResultInfo)) < 0 ||
+        rpc_write(0, resultInfo, sizeof(cudaGraphExecUpdateResultInfo)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, resultInfo, sizeof(cudaGraphExecUpdateResultInfo)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -10667,7 +10963,6 @@ cudaError_t cudaGraphExecUpdate(cudaGraphExec_t hGraphExec, cudaGraph_t hGraph, 
 cudaError_t cudaGraphUpload(cudaGraphExec_t graphExec, cudaStream_t stream)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphUpload) < 0 ||
         rpc_write(0, &graphExec, sizeof(cudaGraphExec_t)) < 0 ||
         rpc_write(0, &stream, sizeof(cudaStream_t)) < 0 ||
@@ -10680,7 +10975,6 @@ cudaError_t cudaGraphUpload(cudaGraphExec_t graphExec, cudaStream_t stream)
 cudaError_t cudaGraphLaunch(cudaGraphExec_t graphExec, cudaStream_t stream)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphLaunch) < 0 ||
         rpc_write(0, &graphExec, sizeof(cudaGraphExec_t)) < 0 ||
         rpc_write(0, &stream, sizeof(cudaStream_t)) < 0 ||
@@ -10693,7 +10987,6 @@ cudaError_t cudaGraphLaunch(cudaGraphExec_t graphExec, cudaStream_t stream)
 cudaError_t cudaGraphExecDestroy(cudaGraphExec_t graphExec)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphExecDestroy) < 0 ||
         rpc_write(0, &graphExec, sizeof(cudaGraphExec_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -10705,7 +10998,6 @@ cudaError_t cudaGraphExecDestroy(cudaGraphExec_t graphExec)
 cudaError_t cudaGraphDestroy(cudaGraph_t graph)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphDestroy) < 0 ||
         rpc_write(0, &graph, sizeof(cudaGraph_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -10714,19 +11006,14 @@ cudaError_t cudaGraphDestroy(cudaGraph_t graph)
     return return_value;
 }
 
-cudaError_t cudaUserObjectCreate(cudaUserObject_t* object_out, void* ptr, cudaHostFn_t destroy, unsigned int initialRefcount, unsigned int flags)
+cudaError_t cudaGraphDebugDotPrint(cudaGraph_t graph, const char* path, unsigned int flags)
 {
     cudaError_t return_value;
-
-    if (rpc_start_request(0, RPC_cudaUserObjectCreate) < 0 ||
-        rpc_write(0, &object_out, sizeof(cudaUserObject_t)) < 0 ||
-        rpc_write(0, &ptr, sizeof(void*)) < 0 ||
-        rpc_write(0, &destroy, sizeof(cudaHostFn_t)) < 0 ||
-        rpc_write(0, &initialRefcount, sizeof(unsigned int)) < 0 ||
+    if (rpc_start_request(0, RPC_cudaGraphDebugDotPrint) < 0 ||
+        rpc_write(0, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_write(0, &path, sizeof(const char*)) < 0 ||
         rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, object_out, sizeof(cudaUserObject_t)) < 0 ||
-        rpc_read(0, ptr, sizeof(void*)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return cudaErrorDevicesUnavailable;
     return return_value;
@@ -10735,7 +11022,6 @@ cudaError_t cudaUserObjectCreate(cudaUserObject_t* object_out, void* ptr, cudaHo
 cudaError_t cudaUserObjectRetain(cudaUserObject_t object, unsigned int count)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaUserObjectRetain) < 0 ||
         rpc_write(0, &object, sizeof(cudaUserObject_t)) < 0 ||
         rpc_write(0, &count, sizeof(unsigned int)) < 0 ||
@@ -10748,7 +11034,6 @@ cudaError_t cudaUserObjectRetain(cudaUserObject_t object, unsigned int count)
 cudaError_t cudaUserObjectRelease(cudaUserObject_t object, unsigned int count)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaUserObjectRelease) < 0 ||
         rpc_write(0, &object, sizeof(cudaUserObject_t)) < 0 ||
         rpc_write(0, &count, sizeof(unsigned int)) < 0 ||
@@ -10761,7 +11046,6 @@ cudaError_t cudaUserObjectRelease(cudaUserObject_t object, unsigned int count)
 cudaError_t cudaGraphRetainUserObject(cudaGraph_t graph, cudaUserObject_t object, unsigned int count, unsigned int flags)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphRetainUserObject) < 0 ||
         rpc_write(0, &graph, sizeof(cudaGraph_t)) < 0 ||
         rpc_write(0, &object, sizeof(cudaUserObject_t)) < 0 ||
@@ -10776,7 +11060,6 @@ cudaError_t cudaGraphRetainUserObject(cudaGraph_t graph, cudaUserObject_t object
 cudaError_t cudaGraphReleaseUserObject(cudaGraph_t graph, cudaUserObject_t object, unsigned int count)
 {
     cudaError_t return_value;
-
     if (rpc_start_request(0, RPC_cudaGraphReleaseUserObject) < 0 ||
         rpc_write(0, &graph, sizeof(cudaGraph_t)) < 0 ||
         rpc_write(0, &object, sizeof(cudaUserObject_t)) < 0 ||
@@ -10784,6 +11067,96 @@ cudaError_t cudaGraphReleaseUserObject(cudaGraph_t graph, cudaUserObject_t objec
         rpc_wait_for_response(0) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGetDriverEntryPoint(const char* symbol, void** funcPtr, unsigned long long flags, enum cudaDriverEntryPointQueryResult* driverStatus)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaGetDriverEntryPoint) < 0 ||
+        rpc_write(0, &symbol, sizeof(const char*)) < 0 ||
+        rpc_write(0, funcPtr, sizeof(void*)) < 0 ||
+        rpc_write(0, &flags, sizeof(unsigned long long)) < 0 ||
+        rpc_write(0, driverStatus, sizeof(enum cudaDriverEntryPointQueryResult)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, funcPtr, sizeof(void*)) < 0 ||
+        rpc_read(0, driverStatus, sizeof(enum cudaDriverEntryPointQueryResult)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGetExportTable(const void** ppExportTable, const cudaUUID_t* pExportTableId)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaGetExportTable) < 0 ||
+        rpc_write(0, ppExportTable, sizeof(const void*)) < 0 ||
+        rpc_write(0, &pExportTableId, sizeof(const cudaUUID_t*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, ppExportTable, sizeof(const void*)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cudaError_t cudaGetFuncBySymbol(cudaFunction_t* functionPtr, const void* symbolPtr)
+{
+    cudaError_t return_value;
+    if (rpc_start_request(0, RPC_cudaGetFuncBySymbol) < 0 ||
+        rpc_write(0, functionPtr, sizeof(cudaFunction_t)) < 0 ||
+        rpc_write(0, &symbolPtr, sizeof(const void*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, functionPtr, sizeof(cudaFunction_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
+cublasStatus_t cublasCreate_v2(cublasHandle_t* handle)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCreate_v2) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDestroy_v2(cublasHandle_t handle)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDestroy_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSgemm_v2(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const float* alpha, const float* A, int lda, const float* B, int ldb, const float* beta, float* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSgemm_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const float)) < 0) ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &B, sizeof(const float*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        (beta != nullptr && rpc_write(0, beta, sizeof(const float)) < 0) ||
+        rpc_write(0, &C, sizeof(float*)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
     return return_value;
 }
 
@@ -11128,7 +11501,6 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cuModuleGetFunction", (void *)cuModuleGetFunction},
     {"cuModuleGetGlobal_v2", (void *)cuModuleGetGlobal_v2},
     {"cuLinkCreate_v2", (void *)cuLinkCreate_v2},
-    {"cuLinkAddData_v2", (void *)cuLinkAddData_v2},
     {"cuLinkAddFile_v2", (void *)cuLinkAddFile_v2},
     {"cuLinkComplete", (void *)cuLinkComplete},
     {"cuLinkDestroy", (void *)cuLinkDestroy},
@@ -11163,11 +11535,9 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cuIpcGetMemHandle", (void *)cuIpcGetMemHandle},
     {"cuIpcOpenMemHandle_v2", (void *)cuIpcOpenMemHandle_v2},
     {"cuIpcCloseMemHandle", (void *)cuIpcCloseMemHandle},
-    {"cuMemHostRegister_v2", (void *)cuMemHostRegister_v2},
-    {"cuMemHostUnregister", (void *)cuMemHostUnregister},
     {"cuMemcpy", (void *)cuMemcpy},
     {"cuMemcpyPeer", (void *)cuMemcpyPeer},
-    {"cuMemcpyDtoH_v2", (void *)cuMemcpyDtoH_v2},
+    {"cuMemcpyHtoD_v2", (void *)cuMemcpyHtoD_v2},
     {"cuMemcpyDtoD_v2", (void *)cuMemcpyDtoD_v2},
     {"cuMemcpyDtoA_v2", (void *)cuMemcpyDtoA_v2},
     {"cuMemcpyAtoD_v2", (void *)cuMemcpyAtoD_v2},
@@ -11175,9 +11545,8 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cuMemcpyAtoA_v2", (void *)cuMemcpyAtoA_v2},
     {"cuMemcpyAsync", (void *)cuMemcpyAsync},
     {"cuMemcpyPeerAsync", (void *)cuMemcpyPeerAsync},
-    {"cuMemcpyDtoHAsync_v2", (void *)cuMemcpyDtoHAsync_v2},
+    {"cuMemcpyHtoDAsync_v2", (void *)cuMemcpyHtoDAsync_v2},
     {"cuMemcpyDtoDAsync_v2", (void *)cuMemcpyDtoDAsync_v2},
-    {"cuMemcpyAtoHAsync_v2", (void *)cuMemcpyAtoHAsync_v2},
     {"cuMemsetD8_v2", (void *)cuMemsetD8_v2},
     {"cuMemsetD16_v2", (void *)cuMemsetD16_v2},
     {"cuMemsetD32_v2", (void *)cuMemsetD32_v2},
@@ -11190,6 +11559,7 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cuMemsetD2D8Async", (void *)cuMemsetD2D8Async},
     {"cuMemsetD2D16Async", (void *)cuMemsetD2D16Async},
     {"cuMemsetD2D32Async", (void *)cuMemsetD2D32Async},
+    {"cuArrayCreate_v2", (void *)cuArrayCreate_v2},
     {"cuArrayGetDescriptor_v2", (void *)cuArrayGetDescriptor_v2},
     {"cuArrayGetSparseProperties", (void *)cuArrayGetSparseProperties},
     {"cuMipmappedArrayGetSparseProperties", (void *)cuMipmappedArrayGetSparseProperties},
@@ -11197,37 +11567,36 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cuMipmappedArrayGetMemoryRequirements", (void *)cuMipmappedArrayGetMemoryRequirements},
     {"cuArrayGetPlane", (void *)cuArrayGetPlane},
     {"cuArrayDestroy", (void *)cuArrayDestroy},
+    {"cuArray3DCreate_v2", (void *)cuArray3DCreate_v2},
     {"cuArray3DGetDescriptor_v2", (void *)cuArray3DGetDescriptor_v2},
+    {"cuMipmappedArrayCreate", (void *)cuMipmappedArrayCreate},
     {"cuMipmappedArrayGetLevel", (void *)cuMipmappedArrayGetLevel},
     {"cuMipmappedArrayDestroy", (void *)cuMipmappedArrayDestroy},
-    {"cuMemGetHandleForAddressRange", (void *)cuMemGetHandleForAddressRange},
     {"cuMemAddressReserve", (void *)cuMemAddressReserve},
     {"cuMemAddressFree", (void *)cuMemAddressFree},
+    {"cuMemCreate", (void *)cuMemCreate},
     {"cuMemRelease", (void *)cuMemRelease},
     {"cuMemMap", (void *)cuMemMap},
     {"cuMemMapArrayAsync", (void *)cuMemMapArrayAsync},
     {"cuMemUnmap", (void *)cuMemUnmap},
-    {"cuMemExportToShareableHandle", (void *)cuMemExportToShareableHandle},
-    {"cuMemImportFromShareableHandle", (void *)cuMemImportFromShareableHandle},
+    {"cuMemSetAccess", (void *)cuMemSetAccess},
+    {"cuMemGetAccess", (void *)cuMemGetAccess},
+    {"cuMemGetAllocationGranularity", (void *)cuMemGetAllocationGranularity},
     {"cuMemGetAllocationPropertiesFromHandle", (void *)cuMemGetAllocationPropertiesFromHandle},
-    {"cuMemRetainAllocationHandle", (void *)cuMemRetainAllocationHandle},
     {"cuMemFreeAsync", (void *)cuMemFreeAsync},
     {"cuMemAllocAsync", (void *)cuMemAllocAsync},
     {"cuMemPoolTrimTo", (void *)cuMemPoolTrimTo},
-    {"cuMemPoolSetAttribute", (void *)cuMemPoolSetAttribute},
-    {"cuMemPoolGetAttribute", (void *)cuMemPoolGetAttribute},
+    {"cuMemPoolSetAccess", (void *)cuMemPoolSetAccess},
     {"cuMemPoolGetAccess", (void *)cuMemPoolGetAccess},
+    {"cuMemPoolCreate", (void *)cuMemPoolCreate},
     {"cuMemPoolDestroy", (void *)cuMemPoolDestroy},
     {"cuMemAllocFromPoolAsync", (void *)cuMemAllocFromPoolAsync},
-    {"cuMemPoolExportToShareableHandle", (void *)cuMemPoolExportToShareableHandle},
-    {"cuMemPoolImportFromShareableHandle", (void *)cuMemPoolImportFromShareableHandle},
     {"cuMemPoolExportPointer", (void *)cuMemPoolExportPointer},
     {"cuMemPoolImportPointer", (void *)cuMemPoolImportPointer},
-    {"cuPointerGetAttribute", (void *)cuPointerGetAttribute},
     {"cuMemPrefetchAsync", (void *)cuMemPrefetchAsync},
     {"cuMemAdvise", (void *)cuMemAdvise},
-    {"cuMemRangeGetAttribute", (void *)cuMemRangeGetAttribute},
     {"cuMemRangeGetAttributes", (void *)cuMemRangeGetAttributes},
+    {"cuPointerSetAttribute", (void *)cuPointerSetAttribute},
     {"cuPointerGetAttributes", (void *)cuPointerGetAttributes},
     {"cuStreamCreate", (void *)cuStreamCreate},
     {"cuStreamCreateWithPriority", (void *)cuStreamCreateWithPriority},
@@ -11236,7 +11605,6 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cuStreamGetId", (void *)cuStreamGetId},
     {"cuStreamGetCtx", (void *)cuStreamGetCtx},
     {"cuStreamWaitEvent", (void *)cuStreamWaitEvent},
-    {"cuStreamAddCallback", (void *)cuStreamAddCallback},
     {"cuStreamBeginCapture_v2", (void *)cuStreamBeginCapture_v2},
     {"cuThreadExchangeStreamCaptureMode", (void *)cuThreadExchangeStreamCaptureMode},
     {"cuStreamEndCapture", (void *)cuStreamEndCapture},
@@ -11248,6 +11616,7 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cuStreamDestroy_v2", (void *)cuStreamDestroy_v2},
     {"cuStreamCopyAttributes", (void *)cuStreamCopyAttributes},
     {"cuStreamGetAttribute", (void *)cuStreamGetAttribute},
+    {"cuStreamSetAttribute", (void *)cuStreamSetAttribute},
     {"cuEventCreate", (void *)cuEventCreate},
     {"cuEventRecord", (void *)cuEventRecord},
     {"cuEventRecordWithFlags", (void *)cuEventRecordWithFlags},
@@ -11255,7 +11624,13 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cuEventSynchronize", (void *)cuEventSynchronize},
     {"cuEventDestroy_v2", (void *)cuEventDestroy_v2},
     {"cuEventElapsedTime", (void *)cuEventElapsedTime},
+    {"cuImportExternalMemory", (void *)cuImportExternalMemory},
+    {"cuExternalMemoryGetMappedBuffer", (void *)cuExternalMemoryGetMappedBuffer},
+    {"cuExternalMemoryGetMappedMipmappedArray", (void *)cuExternalMemoryGetMappedMipmappedArray},
     {"cuDestroyExternalMemory", (void *)cuDestroyExternalMemory},
+    {"cuImportExternalSemaphore", (void *)cuImportExternalSemaphore},
+    {"cuSignalExternalSemaphoresAsync", (void *)cuSignalExternalSemaphoresAsync},
+    {"cuWaitExternalSemaphoresAsync", (void *)cuWaitExternalSemaphoresAsync},
     {"cuDestroyExternalSemaphore", (void *)cuDestroyExternalSemaphore},
     {"cuStreamWaitValue32_v2", (void *)cuStreamWaitValue32_v2},
     {"cuStreamWaitValue64_v2", (void *)cuStreamWaitValue64_v2},
@@ -11270,35 +11645,52 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cuLaunchKernel", (void *)cuLaunchKernel},
     {"cuLaunchCooperativeKernel", (void *)cuLaunchCooperativeKernel},
     {"cuLaunchCooperativeKernelMultiDevice", (void *)cuLaunchCooperativeKernelMultiDevice},
-    {"cuLaunchHostFunc", (void *)cuLaunchHostFunc},
     {"cuFuncSetBlockShape", (void *)cuFuncSetBlockShape},
     {"cuFuncSetSharedSize", (void *)cuFuncSetSharedSize},
     {"cuParamSetSize", (void *)cuParamSetSize},
     {"cuParamSeti", (void *)cuParamSeti},
     {"cuParamSetf", (void *)cuParamSetf},
-    {"cuParamSetv", (void *)cuParamSetv},
     {"cuLaunch", (void *)cuLaunch},
     {"cuLaunchGrid", (void *)cuLaunchGrid},
     {"cuLaunchGridAsync", (void *)cuLaunchGridAsync},
     {"cuParamSetTexRef", (void *)cuParamSetTexRef},
     {"cuGraphCreate", (void *)cuGraphCreate},
+    {"cuGraphAddKernelNode_v2", (void *)cuGraphAddKernelNode_v2},
     {"cuGraphKernelNodeGetParams_v2", (void *)cuGraphKernelNodeGetParams_v2},
+    {"cuGraphKernelNodeSetParams_v2", (void *)cuGraphKernelNodeSetParams_v2},
+    {"cuGraphAddMemcpyNode", (void *)cuGraphAddMemcpyNode},
     {"cuGraphMemcpyNodeGetParams", (void *)cuGraphMemcpyNodeGetParams},
+    {"cuGraphMemcpyNodeSetParams", (void *)cuGraphMemcpyNodeSetParams},
+    {"cuGraphAddMemsetNode", (void *)cuGraphAddMemsetNode},
     {"cuGraphMemsetNodeGetParams", (void *)cuGraphMemsetNodeGetParams},
+    {"cuGraphMemsetNodeSetParams", (void *)cuGraphMemsetNodeSetParams},
+    {"cuGraphAddHostNode", (void *)cuGraphAddHostNode},
     {"cuGraphHostNodeGetParams", (void *)cuGraphHostNodeGetParams},
+    {"cuGraphHostNodeSetParams", (void *)cuGraphHostNodeSetParams},
+    {"cuGraphAddChildGraphNode", (void *)cuGraphAddChildGraphNode},
     {"cuGraphChildGraphNodeGetGraph", (void *)cuGraphChildGraphNodeGetGraph},
+    {"cuGraphAddEmptyNode", (void *)cuGraphAddEmptyNode},
+    {"cuGraphAddEventRecordNode", (void *)cuGraphAddEventRecordNode},
     {"cuGraphEventRecordNodeGetEvent", (void *)cuGraphEventRecordNodeGetEvent},
     {"cuGraphEventRecordNodeSetEvent", (void *)cuGraphEventRecordNodeSetEvent},
+    {"cuGraphAddEventWaitNode", (void *)cuGraphAddEventWaitNode},
     {"cuGraphEventWaitNodeGetEvent", (void *)cuGraphEventWaitNodeGetEvent},
     {"cuGraphEventWaitNodeSetEvent", (void *)cuGraphEventWaitNodeSetEvent},
+    {"cuGraphAddExternalSemaphoresSignalNode", (void *)cuGraphAddExternalSemaphoresSignalNode},
     {"cuGraphExternalSemaphoresSignalNodeGetParams", (void *)cuGraphExternalSemaphoresSignalNodeGetParams},
+    {"cuGraphExternalSemaphoresSignalNodeSetParams", (void *)cuGraphExternalSemaphoresSignalNodeSetParams},
+    {"cuGraphAddExternalSemaphoresWaitNode", (void *)cuGraphAddExternalSemaphoresWaitNode},
     {"cuGraphExternalSemaphoresWaitNodeGetParams", (void *)cuGraphExternalSemaphoresWaitNodeGetParams},
+    {"cuGraphExternalSemaphoresWaitNodeSetParams", (void *)cuGraphExternalSemaphoresWaitNodeSetParams},
+    {"cuGraphAddBatchMemOpNode", (void *)cuGraphAddBatchMemOpNode},
     {"cuGraphBatchMemOpNodeGetParams", (void *)cuGraphBatchMemOpNodeGetParams},
+    {"cuGraphBatchMemOpNodeSetParams", (void *)cuGraphBatchMemOpNodeSetParams},
+    {"cuGraphExecBatchMemOpNodeSetParams", (void *)cuGraphExecBatchMemOpNodeSetParams},
+    {"cuGraphAddMemAllocNode", (void *)cuGraphAddMemAllocNode},
     {"cuGraphMemAllocNodeGetParams", (void *)cuGraphMemAllocNodeGetParams},
+    {"cuGraphAddMemFreeNode", (void *)cuGraphAddMemFreeNode},
     {"cuGraphMemFreeNodeGetParams", (void *)cuGraphMemFreeNodeGetParams},
     {"cuDeviceGraphMemTrim", (void *)cuDeviceGraphMemTrim},
-    {"cuDeviceGetGraphMemAttribute", (void *)cuDeviceGetGraphMemAttribute},
-    {"cuDeviceSetGraphMemAttribute", (void *)cuDeviceSetGraphMemAttribute},
     {"cuGraphClone", (void *)cuGraphClone},
     {"cuGraphNodeFindInClone", (void *)cuGraphNodeFindInClone},
     {"cuGraphNodeGetType", (void *)cuGraphNodeGetType},
@@ -11307,13 +11699,21 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cuGraphGetEdges", (void *)cuGraphGetEdges},
     {"cuGraphNodeGetDependencies", (void *)cuGraphNodeGetDependencies},
     {"cuGraphNodeGetDependentNodes", (void *)cuGraphNodeGetDependentNodes},
+    {"cuGraphAddDependencies", (void *)cuGraphAddDependencies},
+    {"cuGraphRemoveDependencies", (void *)cuGraphRemoveDependencies},
     {"cuGraphDestroyNode", (void *)cuGraphDestroyNode},
     {"cuGraphInstantiateWithFlags", (void *)cuGraphInstantiateWithFlags},
     {"cuGraphInstantiateWithParams", (void *)cuGraphInstantiateWithParams},
     {"cuGraphExecGetFlags", (void *)cuGraphExecGetFlags},
+    {"cuGraphExecKernelNodeSetParams_v2", (void *)cuGraphExecKernelNodeSetParams_v2},
+    {"cuGraphExecMemcpyNodeSetParams", (void *)cuGraphExecMemcpyNodeSetParams},
+    {"cuGraphExecMemsetNodeSetParams", (void *)cuGraphExecMemsetNodeSetParams},
+    {"cuGraphExecHostNodeSetParams", (void *)cuGraphExecHostNodeSetParams},
     {"cuGraphExecChildGraphNodeSetParams", (void *)cuGraphExecChildGraphNodeSetParams},
     {"cuGraphExecEventRecordNodeSetEvent", (void *)cuGraphExecEventRecordNodeSetEvent},
     {"cuGraphExecEventWaitNodeSetEvent", (void *)cuGraphExecEventWaitNodeSetEvent},
+    {"cuGraphExecExternalSemaphoresSignalNodeSetParams", (void *)cuGraphExecExternalSemaphoresSignalNodeSetParams},
+    {"cuGraphExecExternalSemaphoresWaitNodeSetParams", (void *)cuGraphExecExternalSemaphoresWaitNodeSetParams},
     {"cuGraphNodeSetEnabled", (void *)cuGraphNodeSetEnabled},
     {"cuGraphNodeGetEnabled", (void *)cuGraphNodeGetEnabled},
     {"cuGraphUpload", (void *)cuGraphUpload},
@@ -11323,7 +11723,8 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cuGraphExecUpdate_v2", (void *)cuGraphExecUpdate_v2},
     {"cuGraphKernelNodeCopyAttributes", (void *)cuGraphKernelNodeCopyAttributes},
     {"cuGraphKernelNodeGetAttribute", (void *)cuGraphKernelNodeGetAttribute},
-    {"cuUserObjectCreate", (void *)cuUserObjectCreate},
+    {"cuGraphKernelNodeSetAttribute", (void *)cuGraphKernelNodeSetAttribute},
+    {"cuGraphDebugDotPrint", (void *)cuGraphDebugDotPrint},
     {"cuUserObjectRetain", (void *)cuUserObjectRetain},
     {"cuUserObjectRelease", (void *)cuUserObjectRelease},
     {"cuGraphRetainUserObject", (void *)cuGraphRetainUserObject},
@@ -11331,9 +11732,12 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cuOccupancyMaxActiveBlocksPerMultiprocessor", (void *)cuOccupancyMaxActiveBlocksPerMultiprocessor},
     {"cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags", (void *)cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags},
     {"cuOccupancyAvailableDynamicSMemPerBlock", (void *)cuOccupancyAvailableDynamicSMemPerBlock},
+    {"cuOccupancyMaxPotentialClusterSize", (void *)cuOccupancyMaxPotentialClusterSize},
+    {"cuOccupancyMaxActiveClusters", (void *)cuOccupancyMaxActiveClusters},
     {"cuTexRefSetArray", (void *)cuTexRefSetArray},
     {"cuTexRefSetMipmappedArray", (void *)cuTexRefSetMipmappedArray},
     {"cuTexRefSetAddress_v2", (void *)cuTexRefSetAddress_v2},
+    {"cuTexRefSetAddress2D_v3", (void *)cuTexRefSetAddress2D_v3},
     {"cuTexRefSetFormat", (void *)cuTexRefSetFormat},
     {"cuTexRefSetAddressMode", (void *)cuTexRefSetAddressMode},
     {"cuTexRefSetFilterMode", (void *)cuTexRefSetFilterMode},
@@ -11359,13 +11763,14 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cuTexRefDestroy", (void *)cuTexRefDestroy},
     {"cuSurfRefSetArray", (void *)cuSurfRefSetArray},
     {"cuSurfRefGetArray", (void *)cuSurfRefGetArray},
+    {"cuTexObjectCreate", (void *)cuTexObjectCreate},
     {"cuTexObjectDestroy", (void *)cuTexObjectDestroy},
     {"cuTexObjectGetResourceDesc", (void *)cuTexObjectGetResourceDesc},
     {"cuTexObjectGetTextureDesc", (void *)cuTexObjectGetTextureDesc},
     {"cuTexObjectGetResourceViewDesc", (void *)cuTexObjectGetResourceViewDesc},
+    {"cuSurfObjectCreate", (void *)cuSurfObjectCreate},
     {"cuSurfObjectDestroy", (void *)cuSurfObjectDestroy},
     {"cuSurfObjectGetResourceDesc", (void *)cuSurfObjectGetResourceDesc},
-    {"cuTensorMapReplaceAddress", (void *)cuTensorMapReplaceAddress},
     {"cuDeviceCanAccessPeer", (void *)cuDeviceCanAccessPeer},
     {"cuCtxEnablePeerAccess", (void *)cuCtxEnablePeerAccess},
     {"cuCtxDisablePeerAccess", (void *)cuCtxDisablePeerAccess},
@@ -11381,17 +11786,17 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cudaDeviceSynchronize", (void *)cudaDeviceSynchronize},
     {"cudaDeviceSetLimit", (void *)cudaDeviceSetLimit},
     {"cudaDeviceGetLimit", (void *)cudaDeviceGetLimit},
+    {"cudaDeviceGetTexture1DLinearMaxWidth", (void *)cudaDeviceGetTexture1DLinearMaxWidth},
     {"cudaDeviceGetCacheConfig", (void *)cudaDeviceGetCacheConfig},
     {"cudaDeviceGetStreamPriorityRange", (void *)cudaDeviceGetStreamPriorityRange},
     {"cudaDeviceSetCacheConfig", (void *)cudaDeviceSetCacheConfig},
     {"cudaDeviceGetSharedMemConfig", (void *)cudaDeviceGetSharedMemConfig},
     {"cudaDeviceSetSharedMemConfig", (void *)cudaDeviceSetSharedMemConfig},
+    {"cudaDeviceGetByPCIBusId", (void *)cudaDeviceGetByPCIBusId},
     {"cudaDeviceGetPCIBusId", (void *)cudaDeviceGetPCIBusId},
     {"cudaIpcGetEventHandle", (void *)cudaIpcGetEventHandle},
     {"cudaIpcOpenEventHandle", (void *)cudaIpcOpenEventHandle},
-    {"cudaIpcGetMemHandle", (void *)cudaIpcGetMemHandle},
     {"cudaIpcOpenMemHandle", (void *)cudaIpcOpenMemHandle},
-    {"cudaIpcCloseMemHandle", (void *)cudaIpcCloseMemHandle},
     {"cudaDeviceFlushGPUDirectRDMAWrites", (void *)cudaDeviceFlushGPUDirectRDMAWrites},
     {"cudaThreadExit", (void *)cudaThreadExit},
     {"cudaThreadSynchronize", (void *)cudaThreadSynchronize},
@@ -11407,8 +11812,8 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cudaDeviceGetDefaultMemPool", (void *)cudaDeviceGetDefaultMemPool},
     {"cudaDeviceSetMemPool", (void *)cudaDeviceSetMemPool},
     {"cudaDeviceGetMemPool", (void *)cudaDeviceGetMemPool},
-    {"cudaDeviceGetNvSciSyncAttributes", (void *)cudaDeviceGetNvSciSyncAttributes},
     {"cudaDeviceGetP2PAttribute", (void *)cudaDeviceGetP2PAttribute},
+    {"cudaChooseDevice", (void *)cudaChooseDevice},
     {"cudaInitDevice", (void *)cudaInitDevice},
     {"cudaSetDevice", (void *)cudaSetDevice},
     {"cudaGetDevice", (void *)cudaGetDevice},
@@ -11424,12 +11829,11 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cudaCtxResetPersistingL2Cache", (void *)cudaCtxResetPersistingL2Cache},
     {"cudaStreamCopyAttributes", (void *)cudaStreamCopyAttributes},
     {"cudaStreamGetAttribute", (void *)cudaStreamGetAttribute},
+    {"cudaStreamSetAttribute", (void *)cudaStreamSetAttribute},
     {"cudaStreamDestroy", (void *)cudaStreamDestroy},
     {"cudaStreamWaitEvent", (void *)cudaStreamWaitEvent},
-    {"cudaStreamAddCallback", (void *)cudaStreamAddCallback},
     {"cudaStreamSynchronize", (void *)cudaStreamSynchronize},
     {"cudaStreamQuery", (void *)cudaStreamQuery},
-    {"cudaStreamAttachMemAsync", (void *)cudaStreamAttachMemAsync},
     {"cudaStreamBeginCapture", (void *)cudaStreamBeginCapture},
     {"cudaThreadExchangeStreamCaptureMode", (void *)cudaThreadExchangeStreamCaptureMode},
     {"cudaStreamEndCapture", (void *)cudaStreamEndCapture},
@@ -11444,27 +11848,45 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cudaEventSynchronize", (void *)cudaEventSynchronize},
     {"cudaEventDestroy", (void *)cudaEventDestroy},
     {"cudaEventElapsedTime", (void *)cudaEventElapsedTime},
+    {"cudaExternalMemoryGetMappedBuffer", (void *)cudaExternalMemoryGetMappedBuffer},
+    {"cudaExternalMemoryGetMappedMipmappedArray", (void *)cudaExternalMemoryGetMappedMipmappedArray},
     {"cudaDestroyExternalMemory", (void *)cudaDestroyExternalMemory},
+    {"cudaImportExternalSemaphore", (void *)cudaImportExternalSemaphore},
+    {"cudaSignalExternalSemaphoresAsync_v2", (void *)cudaSignalExternalSemaphoresAsync_v2},
+    {"cudaWaitExternalSemaphoresAsync_v2", (void *)cudaWaitExternalSemaphoresAsync_v2},
     {"cudaDestroyExternalSemaphore", (void *)cudaDestroyExternalSemaphore},
+    {"cudaLaunchKernelExC", (void *)cudaLaunchKernelExC},
+    {"cudaLaunchCooperativeKernel", (void *)cudaLaunchCooperativeKernel},
     {"cudaLaunchCooperativeKernelMultiDevice", (void *)cudaLaunchCooperativeKernelMultiDevice},
+    {"cudaFuncSetCacheConfig", (void *)cudaFuncSetCacheConfig},
+    {"cudaFuncSetSharedMemConfig", (void *)cudaFuncSetSharedMemConfig},
+    {"cudaFuncGetAttributes", (void *)cudaFuncGetAttributes},
+    {"cudaFuncSetAttribute", (void *)cudaFuncSetAttribute},
     {"cudaSetDoubleForDevice", (void *)cudaSetDoubleForDevice},
     {"cudaSetDoubleForHost", (void *)cudaSetDoubleForHost},
-    {"cudaLaunchHostFunc", (void *)cudaLaunchHostFunc},
+    {"cudaOccupancyMaxActiveBlocksPerMultiprocessor", (void *)cudaOccupancyMaxActiveBlocksPerMultiprocessor},
+    {"cudaOccupancyAvailableDynamicSMemPerBlock", (void *)cudaOccupancyAvailableDynamicSMemPerBlock},
+    {"cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags", (void *)cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags},
+    {"cudaOccupancyMaxPotentialClusterSize", (void *)cudaOccupancyMaxPotentialClusterSize},
+    {"cudaOccupancyMaxActiveClusters", (void *)cudaOccupancyMaxActiveClusters},
     {"cudaMallocManaged", (void *)cudaMallocManaged},
     {"cudaMalloc", (void *)cudaMalloc},
     {"cudaMallocHost", (void *)cudaMallocHost},
     {"cudaMallocPitch", (void *)cudaMallocPitch},
+    {"cudaMallocArray", (void *)cudaMallocArray},
     {"cudaFree", (void *)cudaFree},
     {"cudaFreeHost", (void *)cudaFreeHost},
     {"cudaFreeArray", (void *)cudaFreeArray},
     {"cudaFreeMipmappedArray", (void *)cudaFreeMipmappedArray},
     {"cudaHostAlloc", (void *)cudaHostAlloc},
-    {"cudaHostRegister", (void *)cudaHostRegister},
-    {"cudaHostUnregister", (void *)cudaHostUnregister},
-    {"cudaHostGetDevicePointer", (void *)cudaHostGetDevicePointer},
-    {"cudaHostGetFlags", (void *)cudaHostGetFlags},
     {"cudaMalloc3D", (void *)cudaMalloc3D},
+    {"cudaMalloc3DArray", (void *)cudaMalloc3DArray},
+    {"cudaMallocMipmappedArray", (void *)cudaMallocMipmappedArray},
     {"cudaGetMipmappedArrayLevel", (void *)cudaGetMipmappedArrayLevel},
+    {"cudaMemcpy3D", (void *)cudaMemcpy3D},
+    {"cudaMemcpy3DPeer", (void *)cudaMemcpy3DPeer},
+    {"cudaMemcpy3DAsync", (void *)cudaMemcpy3DAsync},
+    {"cudaMemcpy3DPeerAsync", (void *)cudaMemcpy3DPeerAsync},
     {"cudaMemGetInfo", (void *)cudaMemGetInfo},
     {"cudaArrayGetInfo", (void *)cudaArrayGetInfo},
     {"cudaArrayGetPlane", (void *)cudaArrayGetPlane},
@@ -11472,30 +11894,30 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cudaMipmappedArrayGetMemoryRequirements", (void *)cudaMipmappedArrayGetMemoryRequirements},
     {"cudaArrayGetSparseProperties", (void *)cudaArrayGetSparseProperties},
     {"cudaMipmappedArrayGetSparseProperties", (void *)cudaMipmappedArrayGetSparseProperties},
-    {"cudaMemcpy2DFromArray", (void *)cudaMemcpy2DFromArray},
+    {"cudaMemcpy2DToArray", (void *)cudaMemcpy2DToArray},
     {"cudaMemcpy2DArrayToArray", (void *)cudaMemcpy2DArrayToArray},
-    {"cudaMemcpy2DFromArrayAsync", (void *)cudaMemcpy2DFromArrayAsync},
-    {"cudaMemset", (void *)cudaMemset},
-    {"cudaMemset2D", (void *)cudaMemset2D},
+    {"cudaMemcpyToSymbol", (void *)cudaMemcpyToSymbol},
+    {"cudaMemcpy2DToArrayAsync", (void *)cudaMemcpy2DToArrayAsync},
+    {"cudaMemcpyToSymbolAsync", (void *)cudaMemcpyToSymbolAsync},
     {"cudaMemset3D", (void *)cudaMemset3D},
-    {"cudaMemsetAsync", (void *)cudaMemsetAsync},
-    {"cudaMemset2DAsync", (void *)cudaMemset2DAsync},
     {"cudaMemset3DAsync", (void *)cudaMemset3DAsync},
-    {"cudaMemcpyFromArray", (void *)cudaMemcpyFromArray},
+    {"cudaGetSymbolAddress", (void *)cudaGetSymbolAddress},
+    {"cudaGetSymbolSize", (void *)cudaGetSymbolSize},
+    {"cudaMemPrefetchAsync", (void *)cudaMemPrefetchAsync},
+    {"cudaMemAdvise", (void *)cudaMemAdvise},
+    {"cudaMemRangeGetAttributes", (void *)cudaMemRangeGetAttributes},
+    {"cudaMemcpyToArray", (void *)cudaMemcpyToArray},
     {"cudaMemcpyArrayToArray", (void *)cudaMemcpyArrayToArray},
-    {"cudaMemcpyFromArrayAsync", (void *)cudaMemcpyFromArrayAsync},
+    {"cudaMemcpyToArrayAsync", (void *)cudaMemcpyToArrayAsync},
     {"cudaMallocAsync", (void *)cudaMallocAsync},
-    {"cudaFreeAsync", (void *)cudaFreeAsync},
     {"cudaMemPoolTrimTo", (void *)cudaMemPoolTrimTo},
-    {"cudaMemPoolSetAttribute", (void *)cudaMemPoolSetAttribute},
-    {"cudaMemPoolGetAttribute", (void *)cudaMemPoolGetAttribute},
+    {"cudaMemPoolSetAccess", (void *)cudaMemPoolSetAccess},
     {"cudaMemPoolGetAccess", (void *)cudaMemPoolGetAccess},
+    {"cudaMemPoolCreate", (void *)cudaMemPoolCreate},
     {"cudaMemPoolDestroy", (void *)cudaMemPoolDestroy},
     {"cudaMallocFromPoolAsync", (void *)cudaMallocFromPoolAsync},
-    {"cudaMemPoolExportToShareableHandle", (void *)cudaMemPoolExportToShareableHandle},
-    {"cudaMemPoolImportFromShareableHandle", (void *)cudaMemPoolImportFromShareableHandle},
-    {"cudaMemPoolExportPointer", (void *)cudaMemPoolExportPointer},
     {"cudaMemPoolImportPointer", (void *)cudaMemPoolImportPointer},
+    {"cudaPointerGetAttributes", (void *)cudaPointerGetAttributes},
     {"cudaDeviceCanAccessPeer", (void *)cudaDeviceCanAccessPeer},
     {"cudaDeviceEnablePeerAccess", (void *)cudaDeviceEnablePeerAccess},
     {"cudaDeviceDisablePeerAccess", (void *)cudaDeviceDisablePeerAccess},
@@ -11507,33 +11929,52 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cudaGraphicsSubResourceGetMappedArray", (void *)cudaGraphicsSubResourceGetMappedArray},
     {"cudaGraphicsResourceGetMappedMipmappedArray", (void *)cudaGraphicsResourceGetMappedMipmappedArray},
     {"cudaGetChannelDesc", (void *)cudaGetChannelDesc},
+    {"cudaCreateTextureObject", (void *)cudaCreateTextureObject},
     {"cudaDestroyTextureObject", (void *)cudaDestroyTextureObject},
     {"cudaGetTextureObjectResourceDesc", (void *)cudaGetTextureObjectResourceDesc},
     {"cudaGetTextureObjectTextureDesc", (void *)cudaGetTextureObjectTextureDesc},
     {"cudaGetTextureObjectResourceViewDesc", (void *)cudaGetTextureObjectResourceViewDesc},
+    {"cudaCreateSurfaceObject", (void *)cudaCreateSurfaceObject},
     {"cudaDestroySurfaceObject", (void *)cudaDestroySurfaceObject},
     {"cudaGetSurfaceObjectResourceDesc", (void *)cudaGetSurfaceObjectResourceDesc},
     {"cudaDriverGetVersion", (void *)cudaDriverGetVersion},
     {"cudaRuntimeGetVersion", (void *)cudaRuntimeGetVersion},
     {"cudaGraphCreate", (void *)cudaGraphCreate},
+    {"cudaGraphAddKernelNode", (void *)cudaGraphAddKernelNode},
     {"cudaGraphKernelNodeGetParams", (void *)cudaGraphKernelNodeGetParams},
+    {"cudaGraphKernelNodeSetParams", (void *)cudaGraphKernelNodeSetParams},
     {"cudaGraphKernelNodeCopyAttributes", (void *)cudaGraphKernelNodeCopyAttributes},
     {"cudaGraphKernelNodeGetAttribute", (void *)cudaGraphKernelNodeGetAttribute},
+    {"cudaGraphKernelNodeSetAttribute", (void *)cudaGraphKernelNodeSetAttribute},
+    {"cudaGraphAddMemcpyNode", (void *)cudaGraphAddMemcpyNode},
+    {"cudaGraphAddMemcpyNodeToSymbol", (void *)cudaGraphAddMemcpyNodeToSymbol},
     {"cudaGraphMemcpyNodeGetParams", (void *)cudaGraphMemcpyNodeGetParams},
+    {"cudaGraphMemcpyNodeSetParams", (void *)cudaGraphMemcpyNodeSetParams},
+    {"cudaGraphMemcpyNodeSetParamsToSymbol", (void *)cudaGraphMemcpyNodeSetParamsToSymbol},
+    {"cudaGraphAddMemsetNode", (void *)cudaGraphAddMemsetNode},
     {"cudaGraphMemsetNodeGetParams", (void *)cudaGraphMemsetNodeGetParams},
+    {"cudaGraphMemsetNodeSetParams", (void *)cudaGraphMemsetNodeSetParams},
+    {"cudaGraphAddHostNode", (void *)cudaGraphAddHostNode},
     {"cudaGraphHostNodeGetParams", (void *)cudaGraphHostNodeGetParams},
+    {"cudaGraphHostNodeSetParams", (void *)cudaGraphHostNodeSetParams},
+    {"cudaGraphAddChildGraphNode", (void *)cudaGraphAddChildGraphNode},
     {"cudaGraphChildGraphNodeGetGraph", (void *)cudaGraphChildGraphNodeGetGraph},
+    {"cudaGraphAddEmptyNode", (void *)cudaGraphAddEmptyNode},
+    {"cudaGraphAddEventRecordNode", (void *)cudaGraphAddEventRecordNode},
     {"cudaGraphEventRecordNodeGetEvent", (void *)cudaGraphEventRecordNodeGetEvent},
     {"cudaGraphEventRecordNodeSetEvent", (void *)cudaGraphEventRecordNodeSetEvent},
+    {"cudaGraphAddEventWaitNode", (void *)cudaGraphAddEventWaitNode},
     {"cudaGraphEventWaitNodeGetEvent", (void *)cudaGraphEventWaitNodeGetEvent},
     {"cudaGraphEventWaitNodeSetEvent", (void *)cudaGraphEventWaitNodeSetEvent},
+    {"cudaGraphAddExternalSemaphoresSignalNode", (void *)cudaGraphAddExternalSemaphoresSignalNode},
     {"cudaGraphExternalSemaphoresSignalNodeGetParams", (void *)cudaGraphExternalSemaphoresSignalNodeGetParams},
+    {"cudaGraphExternalSemaphoresSignalNodeSetParams", (void *)cudaGraphExternalSemaphoresSignalNodeSetParams},
+    {"cudaGraphAddExternalSemaphoresWaitNode", (void *)cudaGraphAddExternalSemaphoresWaitNode},
     {"cudaGraphExternalSemaphoresWaitNodeGetParams", (void *)cudaGraphExternalSemaphoresWaitNodeGetParams},
+    {"cudaGraphExternalSemaphoresWaitNodeSetParams", (void *)cudaGraphExternalSemaphoresWaitNodeSetParams},
+    {"cudaGraphAddMemAllocNode", (void *)cudaGraphAddMemAllocNode},
     {"cudaGraphMemAllocNodeGetParams", (void *)cudaGraphMemAllocNodeGetParams},
-    {"cudaGraphMemFreeNodeGetParams", (void *)cudaGraphMemFreeNodeGetParams},
     {"cudaDeviceGraphMemTrim", (void *)cudaDeviceGraphMemTrim},
-    {"cudaDeviceGetGraphMemAttribute", (void *)cudaDeviceGetGraphMemAttribute},
-    {"cudaDeviceSetGraphMemAttribute", (void *)cudaDeviceSetGraphMemAttribute},
     {"cudaGraphClone", (void *)cudaGraphClone},
     {"cudaGraphNodeFindInClone", (void *)cudaGraphNodeFindInClone},
     {"cudaGraphNodeGetType", (void *)cudaGraphNodeGetType},
@@ -11542,14 +11983,23 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cudaGraphGetEdges", (void *)cudaGraphGetEdges},
     {"cudaGraphNodeGetDependencies", (void *)cudaGraphNodeGetDependencies},
     {"cudaGraphNodeGetDependentNodes", (void *)cudaGraphNodeGetDependentNodes},
+    {"cudaGraphAddDependencies", (void *)cudaGraphAddDependencies},
+    {"cudaGraphRemoveDependencies", (void *)cudaGraphRemoveDependencies},
     {"cudaGraphDestroyNode", (void *)cudaGraphDestroyNode},
     {"cudaGraphInstantiate", (void *)cudaGraphInstantiate},
     {"cudaGraphInstantiateWithFlags", (void *)cudaGraphInstantiateWithFlags},
     {"cudaGraphInstantiateWithParams", (void *)cudaGraphInstantiateWithParams},
     {"cudaGraphExecGetFlags", (void *)cudaGraphExecGetFlags},
+    {"cudaGraphExecKernelNodeSetParams", (void *)cudaGraphExecKernelNodeSetParams},
+    {"cudaGraphExecMemcpyNodeSetParams", (void *)cudaGraphExecMemcpyNodeSetParams},
+    {"cudaGraphExecMemcpyNodeSetParamsToSymbol", (void *)cudaGraphExecMemcpyNodeSetParamsToSymbol},
+    {"cudaGraphExecMemsetNodeSetParams", (void *)cudaGraphExecMemsetNodeSetParams},
+    {"cudaGraphExecHostNodeSetParams", (void *)cudaGraphExecHostNodeSetParams},
     {"cudaGraphExecChildGraphNodeSetParams", (void *)cudaGraphExecChildGraphNodeSetParams},
     {"cudaGraphExecEventRecordNodeSetEvent", (void *)cudaGraphExecEventRecordNodeSetEvent},
     {"cudaGraphExecEventWaitNodeSetEvent", (void *)cudaGraphExecEventWaitNodeSetEvent},
+    {"cudaGraphExecExternalSemaphoresSignalNodeSetParams", (void *)cudaGraphExecExternalSemaphoresSignalNodeSetParams},
+    {"cudaGraphExecExternalSemaphoresWaitNodeSetParams", (void *)cudaGraphExecExternalSemaphoresWaitNodeSetParams},
     {"cudaGraphNodeSetEnabled", (void *)cudaGraphNodeSetEnabled},
     {"cudaGraphNodeGetEnabled", (void *)cudaGraphNodeGetEnabled},
     {"cudaGraphExecUpdate", (void *)cudaGraphExecUpdate},
@@ -11557,11 +12007,17 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cudaGraphLaunch", (void *)cudaGraphLaunch},
     {"cudaGraphExecDestroy", (void *)cudaGraphExecDestroy},
     {"cudaGraphDestroy", (void *)cudaGraphDestroy},
-    {"cudaUserObjectCreate", (void *)cudaUserObjectCreate},
+    {"cudaGraphDebugDotPrint", (void *)cudaGraphDebugDotPrint},
     {"cudaUserObjectRetain", (void *)cudaUserObjectRetain},
     {"cudaUserObjectRelease", (void *)cudaUserObjectRelease},
     {"cudaGraphRetainUserObject", (void *)cudaGraphRetainUserObject},
     {"cudaGraphReleaseUserObject", (void *)cudaGraphReleaseUserObject},
+    {"cudaGetDriverEntryPoint", (void *)cudaGetDriverEntryPoint},
+    {"cudaGetExportTable", (void *)cudaGetExportTable},
+    {"cudaGetFuncBySymbol", (void *)cudaGetFuncBySymbol},
+    {"cublasCreate_v2", (void *)cublasCreate_v2},
+    {"cublasDestroy_v2", (void *)cublasDestroy_v2},
+    {"cublasSgemm_v2", (void *)cublasSgemm_v2},
     {"cuMemcpy_ptds", (void *)cuMemcpy},
     {"cuMemcpyAsync_ptsz", (void *)cuMemcpyAsync},
     {"cuMemcpyPeer_ptds", (void *)cuMemcpyPeer},
@@ -11581,22 +12037,23 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cuStreamEndCapture_ptsz", (void *)cuStreamEndCapture},
     {"cuStreamIsCapturing_ptsz", (void *)cuStreamIsCapturing},
     {"cuStreamUpdateCaptureDependencies_ptsz", (void *)cuStreamUpdateCaptureDependencies},
-    {"cuStreamAddCallback_ptsz", (void *)cuStreamAddCallback},
     {"cuStreamAttachMemAsync_ptsz", (void *)cuStreamAttachMemAsync},
     {"cuStreamQuery_ptsz", (void *)cuStreamQuery},
     {"cuStreamSynchronize_ptsz", (void *)cuStreamSynchronize},
     {"cuEventRecord_ptsz", (void *)cuEventRecord},
     {"cuEventRecordWithFlags_ptsz", (void *)cuEventRecordWithFlags},
     {"cuLaunchKernel_ptsz", (void *)cuLaunchKernel},
-    {"cuLaunchHostFunc_ptsz", (void *)cuLaunchHostFunc},
     {"cuGraphicsMapResources_ptsz", (void *)cuGraphicsMapResources},
     {"cuGraphicsUnmapResources_ptsz", (void *)cuGraphicsUnmapResources},
     {"cuLaunchCooperativeKernel_ptsz", (void *)cuLaunchCooperativeKernel},
+    {"cuSignalExternalSemaphoresAsync_ptsz", (void *)cuSignalExternalSemaphoresAsync},
+    {"cuWaitExternalSemaphoresAsync_ptsz", (void *)cuWaitExternalSemaphoresAsync},
     {"cuGraphInstantiateWithParams_ptsz", (void *)cuGraphInstantiateWithParams},
     {"cuGraphUpload_ptsz", (void *)cuGraphUpload},
     {"cuGraphLaunch_ptsz", (void *)cuGraphLaunch},
     {"cuStreamCopyAttributes_ptsz", (void *)cuStreamCopyAttributes},
     {"cuStreamGetAttribute_ptsz", (void *)cuStreamGetAttribute},
+    {"cuStreamSetAttribute_ptsz", (void *)cuStreamSetAttribute},
     {"cuMemMapArrayAsync_ptsz", (void *)cuMemMapArrayAsync},
     {"cuMemFreeAsync_ptsz", (void *)cuMemFreeAsync},
     {"cuMemAllocAsync_ptsz", (void *)cuMemAllocAsync},
