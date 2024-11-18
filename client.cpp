@@ -162,6 +162,8 @@ int rpc_end_request(const int index)
 int rpc_wait_for_response(const int index)
 {
     int wait_for_request_id = rpc_end_request(index);
+    if (wait_for_request_id < 0)
+        return -1;
 
     if (pthread_mutex_lock(&conns[index].read_mutex) < 0)
         return -1;
