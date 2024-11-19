@@ -72,6 +72,8 @@ MANUAL_IMPLEMENTATIONS = [
     "cudaMemcpy",
     "cudaMemcpyAsync",
     "cudaLaunchKernel",
+    "cudaHostRegister",
+    "cudaHostUnregister",
 ]
 
 @dataclass

@@ -9137,19 +9137,6 @@ cudaError_t cudaMalloc(void** devPtr, size_t size)
     return return_value;
 }
 
-cudaError_t cudaMallocHost(void** ptr, size_t size)
-{
-    cudaError_t return_value;
-    if (rpc_start_request(0, RPC_cudaMallocHost) < 0 ||
-        rpc_write(0, ptr, sizeof(void*)) < 0 ||
-        rpc_write(0, &size, sizeof(size_t)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, ptr, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return cudaErrorDevicesUnavailable;
-    return return_value;
-}
-
 cudaError_t cudaMallocPitch(void** devPtr, size_t* pitch, size_t width, size_t height)
 {
     cudaError_t return_value;
@@ -9187,17 +9174,6 @@ cudaError_t cudaFree(void* devPtr)
     cudaError_t return_value;
     if (rpc_start_request(0, RPC_cudaFree) < 0 ||
         rpc_write(0, &devPtr, sizeof(void*)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return cudaErrorDevicesUnavailable;
-    return return_value;
-}
-
-cudaError_t cudaFreeHost(void* ptr)
-{
-    cudaError_t return_value;
-    if (rpc_start_request(0, RPC_cudaFreeHost) < 0 ||
-        rpc_write(0, &ptr, sizeof(void*)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return cudaErrorDevicesUnavailable;
@@ -11871,11 +11847,9 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cudaOccupancyMaxActiveClusters", (void *)cudaOccupancyMaxActiveClusters},
     {"cudaMallocManaged", (void *)cudaMallocManaged},
     {"cudaMalloc", (void *)cudaMalloc},
-    {"cudaMallocHost", (void *)cudaMallocHost},
     {"cudaMallocPitch", (void *)cudaMallocPitch},
     {"cudaMallocArray", (void *)cudaMallocArray},
     {"cudaFree", (void *)cudaFree},
-    {"cudaFreeHost", (void *)cudaFreeHost},
     {"cudaFreeArray", (void *)cudaFreeArray},
     {"cudaFreeMipmappedArray", (void *)cudaFreeMipmappedArray},
     {"cudaHostAlloc", (void *)cudaHostAlloc},
@@ -12061,6 +12035,8 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cudaMemcpy", (void *)cudaMemcpy},
     {"cudaMemcpyAsync", (void *)cudaMemcpyAsync},
     {"cudaLaunchKernel", (void *)cudaLaunchKernel},
+    {"cudaHostRegister", (void *)cudaHostRegister},
+    {"cudaHostUnregister", (void *)cudaHostUnregister},
 };
 
 void *get_function_pointer(const char *name)
