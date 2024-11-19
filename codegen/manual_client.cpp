@@ -165,6 +165,63 @@ struct Function
 
 std::vector<Function> functions;
 
+cudaError_t cudaMallocHost(void **ptr, size_t size)
+{
+    // do this manually as we want to call malloc locally.
+    *ptr = malloc(size);
+    if (*ptr == NULL)
+        return cudaErrorMemoryAllocation;
+
+    // then invoke cudaHostRegister
+    cudaError_t returnValue = cudaHostRegister(*ptr, size, cudaHostRegisterDefault);
+
+    printf("cudaMallocHost: %p (%d)\n", *ptr, returnValue);
+    if (returnValue != cudaSuccess)
+        free(*ptr);
+    printf("done\n");
+    return returnValue;
+}
+
+cudaError_t cudaFreeHost(void *ptr)
+{
+    // do this manually as we want to call free locally.
+    cudaError_t returnValue = cudaHostUnregister(ptr);
+    if (returnValue != cudaSuccess)
+        return returnValue;
+    free(ptr);
+    return cudaSuccess;
+}
+
+cudaError_t cudaHostRegister(void *ptr, size_t size, unsigned int flags)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(0, RPC_cudaHostRegister);
+    if (request_id < 0 ||
+        rpc_write(0, &ptr, sizeof(void *)) < 0 ||
+        rpc_write(0, &size, sizeof(size_t)) < 0 ||
+        rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+
+    return return_value;
+}
+
+cudaError_t cudaHostUnregister(void *ptr)
+{
+    cudaError_t return_value;
+
+    int request_id = rpc_start_request(0, RPC_cudaHostUnregister);
+    if (request_id < 0 ||
+        rpc_write(0, &ptr, sizeof(void *)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+
+    return return_value;
+}
+
 cudaError_t cudaMemcpy(void *dst, const void *src, size_t count, enum cudaMemcpyKind kind)
 {
     cudaError_t return_value;

@@ -14,8 +14,11 @@
 #include <unordered_map>
 #include <pthread.h>
 #include <sys/uio.h>
+#include <signal.h>
 
 #include "codegen/gen_server.h"
+
+std::unordered_map<void *, void *> registered_pointers;
 
 #define DEFAULT_PORT 14833
 #define MAX_CLIENTS 10
@@ -37,6 +40,8 @@ int request_handler(const conn_t *conn)
     // Attempt to read the operation code from the client
     if (read(conn->connfd, &op, sizeof(unsigned int)) < 0)
         return -1;
+
+    printf("op: %d\n", op);
 
     auto opHandler = get_handler(op);
 
@@ -136,6 +141,31 @@ int rpc_end_response(const void *conn, void *result)
     return 0;
 }
 
+static void sigsegv_handler(int signum, siginfo_t *info, void *context)
+{
+    printf("Caught segfault at address %p\n", info->si_addr);
+    auto resolved = registered_pointers.find(info->si_addr);
+    if (resolved == registered_pointers.end())
+    {
+        // reraise the signal if the address is not in the map
+        struct sigaction act;
+        sigemptyset(&act.sa_mask);
+        act.sa_handler = SIG_DFL;
+        act.sa_flags = 0;
+        if (sigaction(SIGSEGV, &act, NULL) == 0)
+            raise(SIGSEGV);
+        else
+            raise(SIGKILL);
+    }
+    // request the page from the client
+    auto conn = resolved->second;
+    if (rpc_start_response(conn, 0) < 0)
+    {
+        std::cerr << "Error starting response." << std::endl;
+        return;
+    }
+}
+
 int main()
 {
     int port = DEFAULT_PORT;
@@ -184,6 +214,13 @@ int main()
     }
 
     printf("Server listening on port %d...\n", port);
+
+    struct sigaction act;
+    sigemptyset(&act.sa_mask);
+    act.sa_flags = SA_NODEFER;
+    act.sa_sigaction = sigsegv_handler;
+    if (sigaction(SIGSEGV, &act, NULL) == -1)
+        return errno;
 
     // Server loop
     while (1)
