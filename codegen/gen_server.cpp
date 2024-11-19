@@ -1,5 +1,7 @@
 #include <nvml.h>
+#include <iostream>
 #include <cuda.h>
+#include <cudnn.h>
 #include <cublas_v2.h>
 #include <cuda_runtime_api.h>
 
@@ -19392,6 +19394,9 @@ int handle_cudaMallocManaged(void *conn)
     unsigned int flags;
     int request_id;
     cudaError_t result;
+
+    std::cout << "Calling handle_cudaMallocManaged" << std::endl;
+
     if (
         rpc_read(conn, &devPtr, sizeof(void*)) < 0 ||
         rpc_read(conn, &size, sizeof(size_t)) < 0 ||
@@ -19403,6 +19408,8 @@ int handle_cudaMallocManaged(void *conn)
     if (request_id < 0)
         goto ERROR_0;
     result = cudaMallocManaged(&devPtr, size, flags);
+
+    std::cout << "Calling result:: " << result << std::endl;
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &devPtr, sizeof(void*)) < 0 ||
@@ -23682,6 +23689,30 @@ ERROR_0:
     return -1;
 }
 
+int handle_cudnnCreate(void *conn)
+{
+    cudnnHandle_t handle;
+    int request_id;
+    cudnnStatus_t result;
+    if (
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudnnCreate(&handle);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &handle, sizeof(cudnnHandle_t)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 static RequestHandler opHandlers[] = {
     handle___cudaRegisterVar,
     handle___cudaRegisterFunction,
@@ -24573,6 +24604,7 @@ static RequestHandler opHandlers[] = {
     handle_cublasCreate_v2,
     handle_cublasDestroy_v2,
     handle_cublasSgemm_v2,
+    handle_cudnnCreate,
 };
 
 RequestHandler get_handler(const int op)

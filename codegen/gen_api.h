@@ -888,3 +888,4 @@
 #define RPC_cublasCreate_v2 887
 #define RPC_cublasDestroy_v2 888
 #define RPC_cublasSgemm_v2 889
+#define RPC_cudnnCreate 890

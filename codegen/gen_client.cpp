@@ -1,5 +1,7 @@
 #include <nvml.h>
 #include <cuda.h>
+#include <cudnn.h>
+#include <iostream>
 #include <cublas_v2.h>
 #include <cuda_runtime_api.h>
 
@@ -9113,6 +9115,8 @@ cudaError_t cudaOccupancyMaxActiveClusters(int* numClusters, const void* func, c
 
 cudaError_t cudaMallocManaged(void** devPtr, size_t size, unsigned int flags)
 {
+    std::cout << "calling cudaMallocManaged" << std::endl;
+
     cudaError_t return_value;
     if (rpc_start_request(0, RPC_cudaMallocManaged) < 0 ||
         rpc_write(0, devPtr, sizeof(void*)) < 0 ||
@@ -11160,6 +11164,17 @@ cublasStatus_t cublasSgemm_v2(cublasHandle_t handle, cublasOperation_t transa, c
     return return_value;
 }
 
+cudnnStatus_t cudnnCreate(cudnnHandle_t* handle)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnCreate) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, handle, sizeof(cudnnHandle_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
 std::unordered_map<std::string, void *> functionMap = {
     {"__cudaRegisterVar", (void *)__cudaRegisterVar},
     {"__cudaRegisterFunction", (void *)__cudaRegisterFunction},
@@ -12018,6 +12033,7 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cublasCreate_v2", (void *)cublasCreate_v2},
     {"cublasDestroy_v2", (void *)cublasDestroy_v2},
     {"cublasSgemm_v2", (void *)cublasSgemm_v2},
+    {"cudnnCreate", (void *)cudnnCreate},
     {"cuMemcpy_ptds", (void *)cuMemcpy},
     {"cuMemcpyAsync_ptsz", (void *)cuMemcpyAsync},
     {"cuMemcpyPeer_ptds", (void *)cuMemcpyPeer},

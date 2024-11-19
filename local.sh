@@ -25,6 +25,7 @@ build() {
   echo "building vector file for test..."
 
   nvcc --cudart=shared -lnvidia-ml -lcuda ./test/vector_add.cu -o vector.o
+  nvcc --cudart=shared -lnvidia-ml -lcuda -lcudnn ./test/cudnn.cu -o cudnn.o
 
   if [ ! -f "$libscuda_path" ]; then
     echo "libscuda.so not found. build may have failed."
@@ -36,7 +37,7 @@ server() {
   echo "building server..." 
 
   if [[ "$(uname)" == "Linux" ]]; then
-    nvcc --compiler-options -g,-Wno-deprecated-declarations -o $server_out_path $server_path -lnvidia-ml -lcuda -lcublas --cudart=shared
+    nvcc --compiler-options -g,-Wno-deprecated-declarations -o $server_out_path $server_path -lnvidia-ml -lcuda -lcublas -lcudnn --cudart=shared
   else
     echo "No compiler options set for os "$(uname)""
   fi

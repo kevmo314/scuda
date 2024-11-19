@@ -1,5 +1,6 @@
 #include <nvml.h>
 #include <cuda.h>
+#include <cudnn.h>
 #include <cublas_v2.h>
 #include <cuda_runtime.h>
 
@@ -5545,6 +5546,10 @@ cudaError_t cudaGetExportTable(const void **ppExportTable, const cudaUUID_t *pEx
  * @param symbolPtr SEND_RECV
  */
 cudaError_t cudaGetFuncBySymbol(cudaFunction_t *functionPtr, const void *symbolPtr);
+/**
+ * @param handle RECV_ONLY
+ */
+cudnnStatus_t cudnnCreate(cudnnHandle_t *handle);
 /**
  * @param handle RECV_ONLY
  */

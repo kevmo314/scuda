@@ -605,6 +605,8 @@ def error_const(return_type: str) -> str:
         return "cudaErrorDevicesUnavailable"
     if return_type == "cublasStatus_t":
         return "CUBLAS_STATUS_NOT_INITIALIZED"
+    if return_type == "cudnnStatus_t":
+        return "CUDNN_STATUS_NOT_INITIALIZED"
     raise NotImplementedError("Unknown return type: %s" % return_type)
 
 
@@ -618,6 +620,7 @@ def main():
     options = ParserOptions(preprocessor=make_gcc_preprocessor(defines=["CUBLASAPI="]))
 
     nvml_ast: ParsedData = parse_file("/usr/include/nvml.h", options=options)
+    cudnn_graph_ast: ParsedData = parse_file("/usr/include/cudnn_graph.h", options=options)
     cuda_ast: ParsedData = parse_file("/usr/include/cuda.h", options=options)
     cublas_ast: ParsedData = parse_file("/usr/include/cublas_api.h", options=options)
     cudart_ast: ParsedData = parse_file(
@@ -632,6 +635,7 @@ def main():
         + cuda_ast.namespace.functions
         + cudart_ast.namespace.functions
         + cublas_ast.namespace.functions
+        + cudnn_graph_ast.namespace.functions
     )
 
     functions_with_annotations: list[tuple[Function, Function, list[Operation]]] = []
@@ -675,6 +679,7 @@ def main():
         f.write(
             "#include <nvml.h>\n"
             "#include <cuda.h>\n"
+            "#include <cudnn.h>\n"
             "#include <cublas_v2.h>\n"
             "#include <cuda_runtime_api.h>\n\n"
             "#include <cstring>\n"
@@ -816,6 +821,7 @@ def main():
         f.write(
             "#include <nvml.h>\n"
             "#include <cuda.h>\n"
+            "#include <cudnn.h>\n"
             "#include <cublas_v2.h>\n"
             "#include <cuda_runtime_api.h>\n\n"
             "#include <cstring>\n"
