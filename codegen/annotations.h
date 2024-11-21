@@ -5582,3 +5582,65 @@ cublasStatus_t cublasSgemm_v2(cublasHandle_t handle,
                               const float *B, int ldb,
                               const float *beta,
                               float *C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param activationDesc SEND_ONLY
+ * @param alpha SEND_ONLY
+ * @param xDesc SEND_ONLY
+ * @param x SEND_ONLY
+ * @param beta SEND_ONLY
+ * @param yDesc SEND_ONLY
+ * @param y SEND_ONLY
+ */
+cudnnStatus_t cudnnActivationForward(
+    cudnnHandle_t handle,
+    cudnnActivationDescriptor_t     activationDesc,
+    const void                     *alpha,
+    const cudnnTensorDescriptor_t   *xDesc,
+    const void                     *x,
+    const void                     *beta,
+    const cudnnTensorDescriptor_t   *yDesc,
+    void                           *y);
+
+/**
+ * @param tensorDesc SEND_ONLY
+ * @param format SEND_ONLY
+ * @param dataType SEND_ONLY
+ * @param n SEND_ONLY
+ * @param c SEND_ONLY
+ * @param h SEND_ONLY
+ * @param w SEND_ONLY
+ */
+cudnnStatus_t cudnnSetTensor4dDescriptor(
+    cudnnTensorDescriptor_t tensorDesc,
+    cudnnTensorFormat_t     format,
+    cudnnDataType_t         dataType,
+    int                     n,
+    int                     c,
+    int                     h,
+    int                     w);
+
+/**
+ * @param tensorDesc SEND_RECV
+ */
+cudnnStatus_t cudnnCreateTensorDescriptor(
+    cudnnTensorDescriptor_t *tensorDesc);
+
+/**
+ * @param activationDesc SEND_RECV
+ */
+cudnnStatus_t cudnnCreateActivationDescriptor(
+        cudnnActivationDescriptor_t   *activationDesc);
+
+/**
+ * @param activationDesc SEND_RECV
+ * @param mode SEND_ONLY
+ * @param reluNanOpt SEND_ONLY
+ * @param coef SEND_ONLY
+ */
+cudnnStatus_t cudnnSetActivationDescriptor(
+    cudnnActivationDescriptor_t         activationDesc,
+    cudnnActivationMode_t               mode,
+    cudnnNanPropagation_t               reluNanOpt,
+    double                              coef);
+

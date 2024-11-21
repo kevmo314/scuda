@@ -1,7 +1,6 @@
 #include <nvml.h>
 #include <cuda.h>
 #include <cudnn.h>
-#include <iostream>
 #include <cublas_v2.h>
 #include <cuda_runtime_api.h>
 
@@ -9115,8 +9114,6 @@ cudaError_t cudaOccupancyMaxActiveClusters(int* numClusters, const void* func, c
 
 cudaError_t cudaMallocManaged(void** devPtr, size_t size, unsigned int flags)
 {
-    std::cout << "calling cudaMallocManaged" << std::endl;
-
     cudaError_t return_value;
     if (rpc_start_request(0, RPC_cudaMallocManaged) < 0 ||
         rpc_write(0, devPtr, sizeof(void*)) < 0 ||
@@ -11175,6 +11172,80 @@ cudnnStatus_t cudnnCreate(cudnnHandle_t* handle)
     return return_value;
 }
 
+cudnnStatus_t cudnnCreateTensorDescriptor(cudnnTensorDescriptor_t* tensorDesc)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnCreateTensorDescriptor) < 0 ||
+        rpc_write(0, tensorDesc, sizeof(cudnnTensorDescriptor_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, tensorDesc, sizeof(cudnnTensorDescriptor_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnSetTensor4dDescriptor(cudnnTensorDescriptor_t tensorDesc, cudnnTensorFormat_t format, cudnnDataType_t dataType, int n, int c, int h, int w)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnSetTensor4dDescriptor) < 0 ||
+        rpc_write(0, &tensorDesc, sizeof(cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &format, sizeof(cudnnTensorFormat_t)) < 0 ||
+        rpc_write(0, &dataType, sizeof(cudnnDataType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &c, sizeof(int)) < 0 ||
+        rpc_write(0, &h, sizeof(int)) < 0 ||
+        rpc_write(0, &w, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnCreateActivationDescriptor(cudnnActivationDescriptor_t* activationDesc)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnCreateActivationDescriptor) < 0 ||
+        rpc_write(0, activationDesc, sizeof(cudnnActivationDescriptor_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, activationDesc, sizeof(cudnnActivationDescriptor_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnSetActivationDescriptor(cudnnActivationDescriptor_t activationDesc, cudnnActivationMode_t mode, cudnnNanPropagation_t reluNanOpt, double coef)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnSetActivationDescriptor) < 0 ||
+        rpc_write(0, &activationDesc, sizeof(cudnnActivationDescriptor_t)) < 0 ||
+        rpc_write(0, &mode, sizeof(cudnnActivationMode_t)) < 0 ||
+        rpc_write(0, &reluNanOpt, sizeof(cudnnNanPropagation_t)) < 0 ||
+        rpc_write(0, &coef, sizeof(double)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, &activationDesc, sizeof(cudnnActivationDescriptor_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnActivationForward(cudnnHandle_t handle, cudnnActivationDescriptor_t activationDesc, const void* alpha, const cudnnTensorDescriptor_t xDesc, const void* x, const void* beta, const cudnnTensorDescriptor_t yDesc, void* y)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnActivationForward) < 0 ||
+        rpc_write(0, &handle, sizeof(cudnnHandle_t)) < 0 ||
+        rpc_write(0, &activationDesc, sizeof(cudnnActivationDescriptor_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const void*)) < 0 ||
+        rpc_write(0, &xDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const void*)) < 0 ||
+        rpc_write(0, &beta, sizeof(const void*)) < 0 ||
+        rpc_write(0, &yDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &y, sizeof(void*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
 std::unordered_map<std::string, void *> functionMap = {
     {"__cudaRegisterVar", (void *)__cudaRegisterVar},
     {"__cudaRegisterFunction", (void *)__cudaRegisterFunction},
@@ -12034,6 +12105,11 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cublasDestroy_v2", (void *)cublasDestroy_v2},
     {"cublasSgemm_v2", (void *)cublasSgemm_v2},
     {"cudnnCreate", (void *)cudnnCreate},
+    {"cudnnCreateTensorDescriptor", (void *)cudnnCreateTensorDescriptor},
+    {"cudnnSetTensor4dDescriptor", (void *)cudnnSetTensor4dDescriptor},
+    {"cudnnCreateActivationDescriptor", (void *)cudnnCreateActivationDescriptor},
+    {"cudnnSetActivationDescriptor", (void *)cudnnSetActivationDescriptor},
+    {"cudnnActivationForward", (void *)cudnnActivationForward},
     {"cuMemcpy_ptds", (void *)cuMemcpy},
     {"cuMemcpyAsync_ptsz", (void *)cuMemcpyAsync},
     {"cuMemcpyPeer_ptds", (void *)cuMemcpyPeer},

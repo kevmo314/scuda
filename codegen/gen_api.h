@@ -889,3 +889,8 @@
 #define RPC_cublasDestroy_v2 888
 #define RPC_cublasSgemm_v2 889
 #define RPC_cudnnCreate 890
+#define RPC_cudnnCreateTensorDescriptor 891
+#define RPC_cudnnSetTensor4dDescriptor 892
+#define RPC_cudnnCreateActivationDescriptor 893
+#define RPC_cudnnSetActivationDescriptor 894
+#define RPC_cudnnActivationForward 895

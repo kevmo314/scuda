@@ -621,6 +621,7 @@ def main():
 
     nvml_ast: ParsedData = parse_file("/usr/include/nvml.h", options=options)
     cudnn_graph_ast: ParsedData = parse_file("/usr/include/cudnn_graph.h", options=options)
+    cudnn_ops_ast: ParsedData = parse_file("/usr/include/cudnn_ops.h", options=options)
     cuda_ast: ParsedData = parse_file("/usr/include/cuda.h", options=options)
     cublas_ast: ParsedData = parse_file("/usr/include/cublas_api.h", options=options)
     cudart_ast: ParsedData = parse_file(
@@ -636,6 +637,7 @@ def main():
         + cudart_ast.namespace.functions
         + cublas_ast.namespace.functions
         + cudnn_graph_ast.namespace.functions
+        + cudnn_ops_ast.namespace.functions
     )
 
     functions_with_annotations: list[tuple[Function, Function, list[Operation]]] = []
@@ -820,6 +822,7 @@ def main():
     with open("gen_server.cpp", "w") as f:
         f.write(
             "#include <nvml.h>\n"
+            "#include <iostream>\n"
             "#include <cuda.h>\n"
             "#include <cudnn.h>\n"
             "#include <cublas_v2.h>\n"

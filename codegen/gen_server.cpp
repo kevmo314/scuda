@@ -19394,9 +19394,6 @@ int handle_cudaMallocManaged(void *conn)
     unsigned int flags;
     int request_id;
     cudaError_t result;
-
-    std::cout << "Calling handle_cudaMallocManaged" << std::endl;
-
     if (
         rpc_read(conn, &devPtr, sizeof(void*)) < 0 ||
         rpc_read(conn, &size, sizeof(size_t)) < 0 ||
@@ -19408,8 +19405,6 @@ int handle_cudaMallocManaged(void *conn)
     if (request_id < 0)
         goto ERROR_0;
     result = cudaMallocManaged(&devPtr, size, flags);
-
-    std::cout << "Calling result:: " << result << std::endl;
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &devPtr, sizeof(void*)) < 0 ||
@@ -23713,6 +23708,171 @@ ERROR_0:
     return -1;
 }
 
+int handle_cudnnCreateTensorDescriptor(void *conn)
+{
+    cudnnTensorDescriptor_t tensorDesc;
+    int request_id;
+    cudnnStatus_t result;
+    if (
+        rpc_read(conn, &tensorDesc, sizeof(cudnnTensorDescriptor_t)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudnnCreateTensorDescriptor(&tensorDesc);
+
+    std::cout << "done cudnnCreateTensorDescriptor" << std::endl;
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &tensorDesc, sizeof(cudnnTensorDescriptor_t)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudnnSetTensor4dDescriptor(void *conn)
+{
+    cudnnTensorDescriptor_t tensorDesc;
+    cudnnTensorFormat_t format;
+    cudnnDataType_t dataType;
+    int n;
+    int c;
+    int h;
+    int w;
+    int request_id;
+    cudnnStatus_t result;
+    if (
+        rpc_read(conn, &tensorDesc, sizeof(cudnnTensorDescriptor_t)) < 0 ||
+        rpc_read(conn, &format, sizeof(cudnnTensorFormat_t)) < 0 ||
+        rpc_read(conn, &dataType, sizeof(cudnnDataType_t)) < 0 ||
+        rpc_read(conn, &n, sizeof(int)) < 0 ||
+        rpc_read(conn, &c, sizeof(int)) < 0 ||
+        rpc_read(conn, &h, sizeof(int)) < 0 ||
+        rpc_read(conn, &w, sizeof(int)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudnnSetTensor4dDescriptor(tensorDesc, format, dataType, n, c, h, w);
+
+    std::cout << "done cudnnSetTensor4dDescriptor" << std::endl;
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudnnCreateActivationDescriptor(void *conn)
+{
+    cudnnActivationDescriptor_t activationDesc;
+    int request_id;
+    cudnnStatus_t result;
+    if (
+        rpc_read(conn, &activationDesc, sizeof(cudnnActivationDescriptor_t)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudnnCreateActivationDescriptor(&activationDesc);
+
+    std::cout << "done cudnnCreateActivationDescriptor" << std::endl;
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &activationDesc, sizeof(cudnnActivationDescriptor_t)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudnnSetActivationDescriptor(void *conn)
+{
+    cudnnActivationDescriptor_t activationDesc;
+    cudnnActivationMode_t mode;
+    cudnnNanPropagation_t reluNanOpt;
+    double coef;
+    int request_id;
+    cudnnStatus_t result;
+    if (
+        rpc_read(conn, &activationDesc, sizeof(cudnnActivationDescriptor_t)) < 0 ||
+        rpc_read(conn, &mode, sizeof(cudnnActivationMode_t)) < 0 ||
+        rpc_read(conn, &reluNanOpt, sizeof(cudnnNanPropagation_t)) < 0 ||
+        rpc_read(conn, &coef, sizeof(double)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudnnSetActivationDescriptor(activationDesc, mode, reluNanOpt, coef);
+
+    std::cout << "done cudnnSetActivationDescriptor" << std::endl;
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &activationDesc, sizeof(cudnnActivationDescriptor_t)) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudnnActivationForward(void *conn)
+{
+    cudnnHandle_t handle;
+    cudnnActivationDescriptor_t activationDesc;
+    const void* alpha;
+    cudnnTensorDescriptor_t xDesc;
+    const void* x;
+    const void* beta;
+    cudnnTensorDescriptor_t yDesc;
+    void* y;
+    int request_id;
+    cudnnStatus_t result;
+    if (
+        rpc_read(conn, &handle, sizeof(cudnnHandle_t)) < 0 ||
+        rpc_read(conn, &activationDesc, sizeof(cudnnActivationDescriptor_t)) < 0 ||
+        rpc_read(conn, &alpha, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &xDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_read(conn, &x, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &beta, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &yDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_read(conn, &y, sizeof(void*)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    result = cudnnActivationForward(handle, activationDesc, alpha, xDesc, x, beta, yDesc, y);
+
+    std::cout << "done cudnnActivationForward" << std::endl;
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
 static RequestHandler opHandlers[] = {
     handle___cudaRegisterVar,
     handle___cudaRegisterFunction,
@@ -24605,6 +24765,11 @@ static RequestHandler opHandlers[] = {
     handle_cublasDestroy_v2,
     handle_cublasSgemm_v2,
     handle_cudnnCreate,
+    handle_cudnnCreateTensorDescriptor,
+    handle_cudnnSetTensor4dDescriptor,
+    handle_cudnnCreateActivationDescriptor,
+    handle_cudnnSetActivationDescriptor,
+    handle_cudnnActivationForward,
 };
 
 RequestHandler get_handler(const int op)
