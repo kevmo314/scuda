@@ -4,7 +4,7 @@
 
 /**
  * Minimal example to apply sigmoid activation on a tensor 
- * using cuDNN.
+ * using cuDNN with cudaMalloc instead of cudaMallocManaged.
  **/
 int main(int argc, char** argv)
 {    
@@ -27,18 +27,23 @@ int main(int argc, char** argv)
     cudnnTensorFormat_t format = CUDNN_TENSOR_NCHW;
 
     int n = 1, c = 1, h = 1, w = 10;
-    int NUM_ELEMENTS = n*c*h*w;
+    int NUM_ELEMENTS = n * c * h * w;
     cudnnTensorDescriptor_t x_desc;
 
     cudnnCreateTensorDescriptor(&x_desc);
     cudnnSetTensor4dDescriptor(x_desc, format, dtype, n, c, h, w);
 
-    // create the tensor
-    float *x;
-    cudaMallocManaged(&x, NUM_ELEMENTS * sizeof(float));
-    for(int i=0;i<NUM_ELEMENTS;i++) x[i] = i * 1.00f;
+    // create and initialize the tensor
+    float *h_x = new float[NUM_ELEMENTS];
+    for (int i = 0; i < NUM_ELEMENTS; i++) h_x[i] = i * 1.00f;
+    
+    float *d_x; // device mem
+    cudaMalloc(&d_x, NUM_ELEMENTS * sizeof(float));
+    cudaMemcpy(d_x, h_x, NUM_ELEMENTS * sizeof(float), cudaMemcpyHostToDevice);
+
     std::cout << "Original array: "; 
-    for(int i=0;i<NUM_ELEMENTS;i++) std::cout << x[i] << " ";
+    for (int i = 0; i < NUM_ELEMENTS; i++) std::cout << h_x[i] << " ";
+    std::cout << std::endl;
 
     // create activation function descriptor
     float alpha[1] = {1};
@@ -54,17 +59,23 @@ int main(int argc, char** argv)
         sigmoid_activation,
         alpha,
         x_desc,
-        x,
+        d_x,
         beta,
         x_desc,
-        x
+        d_x
     );
 
+    // copy mem back to host
+    cudaMemcpy(h_x, d_x, NUM_ELEMENTS * sizeof(float), cudaMemcpyDeviceToHost);
+
     cudnnDestroy(handle_);
-    std::cout << std::endl << "Destroyed cuDNN handle." << std::endl;
+    std::cout << "Destroyed cuDNN handle." << std::endl;
+
     std::cout << "New array: ";
-    for(int i=0;i<NUM_ELEMENTS;i++) std::cout << x[i] << " ";
+    for (int i = 0; i < NUM_ELEMENTS; i++) std::cout << h_x[i] << " ";
     std::cout << std::endl;
-    cudaFree(x);
+
+    cudaFree(d_x);
+
     return 0;
 }
