@@ -5644,3 +5644,7 @@ cudnnStatus_t cudnnSetActivationDescriptor(
     cudnnNanPropagation_t               reluNanOpt,
     double                              coef);
 
+/**
+ * @param handle SEND_ONLY
+ */
+cudnnStatus_t cudnnDestroy(cudnnHandle_t handle);

@@ -11172,6 +11172,17 @@ cudnnStatus_t cudnnCreate(cudnnHandle_t* handle)
     return return_value;
 }
 
+cudnnStatus_t cudnnDestroy(cudnnHandle_t handle)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnDestroy) < 0 ||
+        rpc_write(0, &handle, sizeof(cudnnHandle_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
 cudnnStatus_t cudnnCreateTensorDescriptor(cudnnTensorDescriptor_t* tensorDesc)
 {
     cudnnStatus_t return_value;
@@ -11235,10 +11246,10 @@ cudnnStatus_t cudnnActivationForward(cudnnHandle_t handle, cudnnActivationDescri
         rpc_write(0, &handle, sizeof(cudnnHandle_t)) < 0 ||
         rpc_write(0, &activationDesc, sizeof(cudnnActivationDescriptor_t)) < 0 ||
         rpc_write(0, &alpha, sizeof(const void*)) < 0 ||
-        rpc_write(0, &xDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &xDesc, sizeof(cudnnTensorDescriptor_t)) < 0 ||
         rpc_write(0, &x, sizeof(const void*)) < 0 ||
         rpc_write(0, &beta, sizeof(const void*)) < 0 ||
-        rpc_write(0, &yDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &yDesc, sizeof(cudnnTensorDescriptor_t)) < 0 ||
         rpc_write(0, &y, sizeof(void*)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_end_response(0, &return_value) < 0)
@@ -12105,6 +12116,7 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cublasDestroy_v2", (void *)cublasDestroy_v2},
     {"cublasSgemm_v2", (void *)cublasSgemm_v2},
     {"cudnnCreate", (void *)cudnnCreate},
+    {"cudnnDestroy", (void *)cudnnDestroy},
     {"cudnnCreateTensorDescriptor", (void *)cudnnCreateTensorDescriptor},
     {"cudnnSetTensor4dDescriptor", (void *)cudnnSetTensor4dDescriptor},
     {"cudnnCreateActivationDescriptor", (void *)cudnnCreateActivationDescriptor},
