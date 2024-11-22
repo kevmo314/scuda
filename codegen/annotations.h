@@ -5585,21 +5585,21 @@ cublasStatus_t cublasSgemm_v2(cublasHandle_t handle,
 /**
  * @param handle SEND_ONLY
  * @param activationDesc SEND_ONLY
- * @param alpha SEND_ONLY
+ * @param alpha SEND_ONLY NULLABLE
  * @param xDesc SEND_ONLY
  * @param x SEND_ONLY
- * @param beta SEND_ONLY
+ * @param beta SEND_ONLY NULLABLE
  * @param yDesc SEND_ONLY
  * @param y SEND_ONLY
  */
 cudnnStatus_t cudnnActivationForward(
-    cudnnHandle_t handle,
-    cudnnActivationDescriptor_t     activationDesc,
+    cudnnHandle_t                  handle,
+    cudnnActivationDescriptor_t    activationDesc,
     const void                     *alpha,
-    const cudnnTensorDescriptor_t   *xDesc,
+    const cudnnTensorDescriptor_t  *xDesc,
     const void                     *x,
     const void                     *beta,
-    const cudnnTensorDescriptor_t   *yDesc,
+    const cudnnTensorDescriptor_t  *yDesc,
     void                           *y);
 
 /**
@@ -5633,7 +5633,7 @@ cudnnStatus_t cudnnCreateActivationDescriptor(
         cudnnActivationDescriptor_t   *activationDesc);
 
 /**
- * @param activationDesc SEND_RECV
+ * @param activationDesc SEND_ONLY NULLABLE
  * @param mode SEND_ONLY
  * @param reluNanOpt SEND_ONLY
  * @param coef SEND_ONLY

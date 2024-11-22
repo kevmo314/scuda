@@ -23782,16 +23782,6 @@ int handle_cudnnSetTensor4dDescriptor(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-
-    std::cout << "cudnnSetTensor4dDescriptor Parameters:" << std::endl;
-    std::cout << "tensorDesc: " << tensorDesc << std::endl;
-    std::cout << "format: " << format << std::endl;
-    std::cout << "dataType: " << dataType << std::endl;
-    std::cout << "n: " << n << std::endl;
-    std::cout << "c " << c << std::endl;
-    std::cout << "h " << h << std::endl;
-    std::cout << "w " << w << std::endl;
-    
     result = cudnnSetTensor4dDescriptor(tensorDesc, format, dataType, n, c, h, w);
 
     if (rpc_start_response(conn, request_id) < 0 ||
@@ -23847,18 +23837,9 @@ int handle_cudnnSetActivationDescriptor(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    
-
-    std::cout << "cudnnSetActivationDescriptor Parameters:" << std::endl;
-    std::cout << "Wtfff " << coef << std::endl;
-    std::cout << "activationDesc: " << activationDesc << std::endl;
-    std::cout << "mode: " << mode << std::endl;
-    std::cout << "reluNanOpt: " << reluNanOpt << std::endl;
-    std::cout << "coef: " << coef << std::endl;
     result = cudnnSetActivationDescriptor(activationDesc, mode, reluNanOpt, coef);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &activationDesc, sizeof(cudnnActivationDescriptor_t)) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_0;
 
@@ -23871,10 +23852,12 @@ int handle_cudnnActivationForward(void *conn)
 {
     cudnnHandle_t handle;
     cudnnActivationDescriptor_t activationDesc;
-    const void* alpha;
+    void* alpha_null_check;
+    void* alpha;
     cudnnTensorDescriptor_t xDesc;
     const void* x;
-    const void* beta;
+    void* beta_null_check;
+    void* beta;
     cudnnTensorDescriptor_t yDesc;
     void* y;
     int request_id;
@@ -23882,11 +23865,13 @@ int handle_cudnnActivationForward(void *conn)
     if (
         rpc_read(conn, &handle, sizeof(cudnnHandle_t)) < 0 ||
         rpc_read(conn, &activationDesc, sizeof(cudnnActivationDescriptor_t)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const void*)) < 0 ||
-        rpc_read(conn, &xDesc, sizeof(cudnnTensorDescriptor_t)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const void*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const void*)) < 0) ||
+        rpc_read(conn, &xDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
         rpc_read(conn, &x, sizeof(const void*)) < 0 ||
-        rpc_read(conn, &beta, sizeof(const void*)) < 0 ||
-        rpc_read(conn, &yDesc, sizeof(cudnnTensorDescriptor_t)) < 0 ||
+        rpc_read(conn, &beta_null_check, sizeof(const void*)) < 0 ||
+        (beta_null_check && rpc_read(conn, &beta, sizeof(const void*)) < 0) ||
+        rpc_read(conn, &yDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
         rpc_read(conn, &y, sizeof(void*)) < 0 ||
         false)
         goto ERROR_0;

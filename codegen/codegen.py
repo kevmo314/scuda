@@ -93,10 +93,12 @@ class NullableOperation:
                 server_type=self.ptr.format(),
             )
         )
+
         f.write(
             "        ({param_name} != nullptr && rpc_write(0, {param_name}, sizeof({base_type})) < 0) ||\n".format(
                 param_name=self.parameter.name,
-                base_type=self.ptr.ptr_to.format(),
+                # void is treated differently from non void pointer types
+                base_type=(self.ptr.format() if self.ptr.ptr_to.format() == "const void" else self.ptr.ptr_to.format()),
             )
         )
 
@@ -104,8 +106,9 @@ class NullableOperation:
     def server_declaration(self) -> str:
         c = self.ptr.ptr_to.const
         self.ptr.ptr_to.const = False
+        # void is treated differently from non void pointer types
         s = f"    {self.ptr.format()} {self.parameter.name}_null_check;\n" + \
-            f"    {self.ptr.ptr_to.format()} {self.parameter.name};\n"
+            f"    {self.ptr.format() if self.ptr.ptr_to.format() == "void" else self.ptr.ptr_to.format()} {self.parameter.name};\n"
         self.ptr.ptr_to.const = c
         return s
     
@@ -121,7 +124,8 @@ class NullableOperation:
         f.write(
             "        ({param_name}_null_check && rpc_read(conn, &{param_name}, sizeof({base_type})) < 0) ||\n".format(
                 param_name=self.parameter.name,
-                base_type=self.ptr.ptr_to.format(),
+                # void is treated differently from non void pointer types
+                base_type=(self.ptr.format() if self.ptr.ptr_to.format() == "const void" else self.ptr.ptr_to.format()),
             )
         )
 

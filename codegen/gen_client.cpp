@@ -11233,7 +11233,6 @@ cudnnStatus_t cudnnSetActivationDescriptor(cudnnActivationDescriptor_t activatio
         rpc_write(0, &reluNanOpt, sizeof(cudnnNanPropagation_t)) < 0 ||
         rpc_write(0, &coef, sizeof(double)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, &activationDesc, sizeof(cudnnActivationDescriptor_t)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return CUDNN_STATUS_NOT_INITIALIZED;
     return return_value;
@@ -11246,10 +11245,12 @@ cudnnStatus_t cudnnActivationForward(cudnnHandle_t handle, cudnnActivationDescri
         rpc_write(0, &handle, sizeof(cudnnHandle_t)) < 0 ||
         rpc_write(0, &activationDesc, sizeof(cudnnActivationDescriptor_t)) < 0 ||
         rpc_write(0, &alpha, sizeof(const void*)) < 0 ||
-        rpc_write(0, &xDesc, sizeof(cudnnTensorDescriptor_t)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const void*)) < 0) ||
+        rpc_write(0, &xDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
         rpc_write(0, &x, sizeof(const void*)) < 0 ||
         rpc_write(0, &beta, sizeof(const void*)) < 0 ||
-        rpc_write(0, &yDesc, sizeof(cudnnTensorDescriptor_t)) < 0 ||
+        (beta != nullptr && rpc_write(0, beta, sizeof(const void*)) < 0) ||
+        rpc_write(0, &yDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
         rpc_write(0, &y, sizeof(void*)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_end_response(0, &return_value) < 0)
