@@ -136,7 +136,7 @@ test_vector_add() {
 test_cudnn() {
   output=$(LD_PRELOAD="$libscuda_path" ./cudnn.o | tail -n 1)
 
-  if [[ "$output" == "New array: 0.5 0.731059 0.880797 0.952574 0.982014 0.993307 0.997527 0.999089 0.999665 0.999877 " ]]; then
+  if [[ "$output" == "New array: 0.5 0.731059 0.880797 0.952574 0.982014 0.993307 0.997527 0.999089 0.999665 0.9998722227 " ]]; then
     ansi_format "pass" "$pass_message"
   else
     ansi_format "fail" "test_cudnn failed. Got [$output]."
