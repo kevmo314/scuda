@@ -5633,7 +5633,7 @@ cudnnStatus_t cudnnCreateActivationDescriptor(
         cudnnActivationDescriptor_t   *activationDesc);
 
 /**
- * @param activationDesc SEND_ONLY NULLABLE
+ * @param activationDesc SEND_ONLY
  * @param mode SEND_ONLY
  * @param reluNanOpt SEND_ONLY
  * @param coef SEND_ONLY

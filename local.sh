@@ -133,6 +133,17 @@ test_vector_add() {
   fi
 }
 
+test_cudnn() {
+  output=$(LD_PRELOAD="$libscuda_path" ./cudnn.o | tail -n 1)
+
+  if [[ "$output" == "New array: 0.5 0.731059 0.880797 0.952574 0.982014 0.993307 0.997527 0.999089 0.999665 0.999877 " ]]; then
+    ansi_format "pass" "$pass_message"
+  else
+    ansi_format "fail" "test_cudnn failed. Got [$output]."
+    return 1
+  fi
+}
+
 #---- declare test cases ----#
 declare -A test_cuda_avail=(
   ["function"]="test_cuda_available"
@@ -154,8 +165,13 @@ declare -A test_vector_add=(
   ["pass"]="CUDA vector_add example works."
 )
 
+declare -A test_cudnn=(
+  ["function"]="test_cudnn"
+  ["pass"]="cuDNN correctly applies sigmoid activation on a tensor."
+)
+
 #---- assign them to our associative array ----#
-tests=("test_cuda_avail" "test_tensor_to_cuda" "test_tensor_to_cuda_to_cpu" "test_vector_add")
+tests=("test_cuda_avail" "test_tensor_to_cuda" "test_tensor_to_cuda_to_cpu" "test_vector_add" "test_cudnn")
 
 test() {
   build

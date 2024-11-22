@@ -383,7 +383,11 @@ class OpaqueTypeOperation:
     def server_declaration(self) -> str:
         if isinstance(self.type_, Pointer) and self.recv:
             return f"    {self.type_.ptr_to.format()} {self.parameter.name};\n"
-        return f"    {self.type_.format()} {self.parameter.name};\n"
+        # ensure we don't have a const struct, otherwise we can't initialise it properly; ex: "const cudnnTensorDescriptor_t xDesc;" is invalid...
+        # but "const cudnnTensorDescriptor_t *xDesc" IS valid. This subtle change carries reprecussions.
+        elif "const " in self.type_.format() and not "void" in self.type_.format() and not "*" in self.type_.format():
+            return f"   {self.type_.format().replace("const", "")} {self.parameter.name};\n"
+        else: return f"    {self.type_.format()} {self.parameter.name};\n"
 
     def server_rpc_read(self, f):
         if not self.send:
