@@ -17,7 +17,15 @@
 #include <vector>
 #include <cuda.h>
 #include <sys/uio.h>
+#include <setjmp.h>
+#include <signal.h>
 #include <netinet/tcp.h>
+
+#include <iostream>
+#include <csignal>
+#include <cstdlib>
+#include <cstring>
+#include <sys/mman.h>
 
 #include <unordered_map>
 
@@ -41,9 +49,53 @@ conn_t conns[16];
 int nconns = 0;
 
 const char *DEFAULT_PORT = "14833";
+static int init = 0;
+static jmp_buf catch_segfault;
+static void* faulting_address = nullptr;
+
+static void segfault(int sig, siginfo_t* info, void* unused)
+{
+    faulting_address = info->si_addr; 
+    std::cout << "Caught segfault at address: " << faulting_address << std::endl;
+
+    size_t page_size = sysconf(_SC_PAGESIZE);
+    void* aligned_address = (void*)((uintptr_t)faulting_address & ~(page_size - 1));
+
+    void* allocated = mmap(aligned_address, page_size, PROT_READ | PROT_WRITE, MAP_FIXED | MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    if (allocated == MAP_FAILED) {
+        perror("Failed to allocate memory at faulting address");
+        _exit(1); 
+    }
+
+    std::cout << "Allocated memory at address: " << allocated << std::endl;
+}
+
+static void set_segfault_handlers() {
+    if (init > 0) {
+        return;
+    }
+
+    struct sigaction sa;
+    memset(&sa, 0, sizeof(sa));
+    sa.sa_flags = SA_SIGINFO;
+    sa.sa_sigaction = segfault;
+
+    if (sigaction(SIGSEGV, &sa, NULL) == -1) {
+        perror("sigaction");
+        exit(EXIT_FAILURE);
+    }
+
+    std::cout << "Segfault handler installed." << std::endl;
+
+    init = 1;
+}
 
 int rpc_open()
 {
+    set_segfault_handlers();
+
+    sigsetjmp(catch_segfault, 1);
+
     if (pthread_mutex_lock(&conn_mutex) < 0)
         return -1;
 

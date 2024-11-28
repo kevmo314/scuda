@@ -4368,6 +4368,7 @@ cudaError_t cudaMallocManaged(void **devPtr, size_t size, unsigned int flags);
  */
 cudaError_t cudaMalloc(void **devPtr, size_t size);
 /**
+ * @disabled
  * @param ptr SEND_RECV
  * @param size SEND_ONLY
  */
@@ -4392,6 +4393,7 @@ cudaError_t cudaMallocArray(cudaArray_t *array, const struct cudaChannelFormatDe
  */
 cudaError_t cudaFree(void *devPtr);
 /**
+ * @disabled
  * @param ptr SEND_ONLY
  */
 cudaError_t cudaFreeHost(void *ptr);
@@ -4410,12 +4412,14 @@ cudaError_t cudaFreeMipmappedArray(cudaMipmappedArray_t mipmappedArray);
  */
 cudaError_t cudaHostAlloc(void **pHost, size_t size, unsigned int flags);
 /**
+ * @disabled
  * @param ptr SEND_RECV
  * @param size SEND_ONLY
  * @param flags SEND_ONLY
  */
 cudaError_t cudaHostRegister(void *ptr, size_t size, unsigned int flags);
 /**
+ * @disabled
  * @param ptr SEND_RECV
  */
 cudaError_t cudaHostUnregister(void *ptr);

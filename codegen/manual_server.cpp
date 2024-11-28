@@ -594,3 +594,63 @@ int handle___cudaRegisterVar(void *conn)
 
     return 0;
 }
+
+int handle_cudaHostRegister(void *conn)
+{
+    cudaError_t result;
+    int request_id;
+    void *ptr;
+    std::size_t size;
+    unsigned int flags;
+
+    printf("got request\n");
+
+    if (rpc_read(conn, &ptr, sizeof(void *)) < 0 ||
+        rpc_read(conn, &size, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+
+    printf("registering %p %zu %u\n", ptr, size, flags);
+
+    result = cudaHostRegister(ptr, size, flags);
+
+    printf("request_id: %d\n", request_id);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    printf("registered %p\n", ptr);
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+int handle_cudaHostUnregister(void *conn)
+{
+    cudaError_t result;
+    int request_id;
+    void *ptr;
+
+    if (rpc_read(conn, &ptr, sizeof(void *)) < 0)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+
+    result = cudaHostUnregister(ptr);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_end_response(conn, &result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
