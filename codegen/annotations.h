@@ -1,5 +1,6 @@
 #include <nvml.h>
 #include <cuda.h>
+#include <cudnn.h>
 #include <cublas_v2.h>
 #include <cuda_runtime.h>
 
@@ -5548,6 +5549,10 @@ cudaError_t cudaGetFuncBySymbol(cudaFunction_t *functionPtr, const void *symbolP
 /**
  * @param handle RECV_ONLY
  */
+cudnnStatus_t cudnnCreate(cudnnHandle_t *handle);
+/**
+ * @param handle RECV_ONLY
+ */
 cublasStatus_t cublasCreate_v2(cublasHandle_t *handle);
 /**
  * @param handle SEND_ONLY
@@ -5577,3 +5582,69 @@ cublasStatus_t cublasSgemm_v2(cublasHandle_t handle,
                               const float *B, int ldb,
                               const float *beta,
                               float *C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param activationDesc SEND_ONLY
+ * @param alpha SEND_ONLY NULLABLE
+ * @param xDesc SEND_ONLY
+ * @param x SEND_ONLY
+ * @param beta SEND_ONLY NULLABLE
+ * @param yDesc SEND_ONLY
+ * @param y SEND_ONLY
+ */
+cudnnStatus_t cudnnActivationForward(
+    cudnnHandle_t                  handle,
+    cudnnActivationDescriptor_t    activationDesc,
+    const void                     *alpha,
+    const cudnnTensorDescriptor_t  *xDesc,
+    const void                     *x,
+    const void                     *beta,
+    const cudnnTensorDescriptor_t  *yDesc,
+    void                           *y);
+
+/**
+ * @param tensorDesc SEND_ONLY
+ * @param format SEND_ONLY
+ * @param dataType SEND_ONLY
+ * @param n SEND_ONLY
+ * @param c SEND_ONLY
+ * @param h SEND_ONLY
+ * @param w SEND_ONLY
+ */
+cudnnStatus_t cudnnSetTensor4dDescriptor(
+    cudnnTensorDescriptor_t tensorDesc,
+    cudnnTensorFormat_t     format,
+    cudnnDataType_t         dataType,
+    int                     n,
+    int                     c,
+    int                     h,
+    int                     w);
+
+/**
+ * @param tensorDesc SEND_RECV
+ */
+cudnnStatus_t cudnnCreateTensorDescriptor(
+    cudnnTensorDescriptor_t *tensorDesc);
+
+/**
+ * @param activationDesc SEND_RECV
+ */
+cudnnStatus_t cudnnCreateActivationDescriptor(
+        cudnnActivationDescriptor_t   *activationDesc);
+
+/**
+ * @param activationDesc SEND_ONLY
+ * @param mode SEND_ONLY
+ * @param reluNanOpt SEND_ONLY
+ * @param coef SEND_ONLY
+ */
+cudnnStatus_t cudnnSetActivationDescriptor(
+    cudnnActivationDescriptor_t         activationDesc,
+    cudnnActivationMode_t               mode,
+    cudnnNanPropagation_t               reluNanOpt,
+    double                              coef);
+
+/**
+ * @param handle SEND_ONLY
+ */
+cudnnStatus_t cudnnDestroy(cudnnHandle_t handle);
