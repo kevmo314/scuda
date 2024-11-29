@@ -5648,3 +5648,7698 @@ cudnnStatus_t cudnnSetActivationDescriptor(
  * @param handle SEND_ONLY
  */
 cudnnStatus_t cudnnDestroy(cudnnHandle_t handle);
+/**
+ */
+size_t cudnnGetVersion();
+/**
+ */
+size_t cudnnGetMaxDeviceVersion();
+/**
+ */
+size_t cudnnGetCudartVersion();
+/**
+ * @param status SEND_ONLY
+ */
+const char* cudnnGetErrorString(cudnnStatus_t status);
+/**
+ * @param message SEND_RECV
+ * @param max_size SEND_ONLY
+ */
+void cudnnGetLastErrorString(char* message, size_t max_size);
+/**
+ * @param handle SEND_ONLY
+ * @param rstatus SEND_RECV
+ * @param mode SEND_ONLY
+ * @param tag SEND_RECV
+ */
+cudnnStatus_t cudnnQueryRuntimeError(cudnnHandle_t handle, cudnnStatus_t* rstatus, cudnnErrQueryMode_t mode, cudnnRuntimeTag_t* tag);
+/**
+ * @param type SEND_ONLY
+ * @param value SEND_RECV
+ */
+cudnnStatus_t cudnnGetProperty(libraryPropertyType type, int* value);
+/**
+ * @param handle SEND_ONLY
+ * @param streamId SEND_ONLY
+ */
+cudnnStatus_t cudnnSetStream(cudnnHandle_t handle, cudaStream_t streamId);
+/**
+ * @param handle SEND_ONLY
+ * @param streamId SEND_RECV
+ */
+cudnnStatus_t cudnnGetStream(cudnnHandle_t handle, cudaStream_t* streamId);
+/**
+ * @param mask SEND_ONLY
+ * @param udata SEND_RECV
+ * @param fptr SEND_ONLY
+ */
+cudnnStatus_t cudnnSetCallback(unsigned mask, void* udata, cudnnCallback_t fptr);
+/**
+ * @param mask SEND_RECV
+ * @param udata SEND_RECV
+ * @param fptr SEND_RECV
+ */
+cudnnStatus_t cudnnGetCallback(unsigned* mask, void** udata, cudnnCallback_t* fptr);
+/**
+ */
+cudnnStatus_t cudnnGraphVersionCheck();
+/**
+ * @param descriptorType SEND_ONLY
+ * @param descriptor SEND_RECV
+ */
+cudnnStatus_t cudnnBackendCreateDescriptor(cudnnBackendDescriptorType_t descriptorType, cudnnBackendDescriptor_t* descriptor);
+/**
+ * @param descriptor SEND_ONLY
+ */
+cudnnStatus_t cudnnBackendDestroyDescriptor(cudnnBackendDescriptor_t descriptor);
+/**
+ * @param descriptor SEND_ONLY
+ */
+cudnnStatus_t cudnnBackendInitialize(cudnnBackendDescriptor_t descriptor);
+/**
+ * @param descriptor SEND_ONLY
+ */
+cudnnStatus_t cudnnBackendFinalize(cudnnBackendDescriptor_t descriptor);
+/**
+ * @param descriptor SEND_ONLY
+ * @param attributeName SEND_ONLY
+ * @param attributeType SEND_ONLY
+ * @param elementCount SEND_ONLY
+ * @param arrayOfElements SEND_RECV
+ */
+cudnnStatus_t cudnnBackendSetAttribute(cudnnBackendDescriptor_t descriptor, cudnnBackendAttributeName_t attributeName, cudnnBackendAttributeType_t attributeType, int64_t elementCount, const void* arrayOfElements);
+/**
+ * @param descriptor SEND_ONLY
+ * @param attributeName SEND_ONLY
+ * @param attributeType SEND_ONLY
+ * @param requestedElementCount SEND_ONLY
+ * @param elementCount SEND_RECV
+ * @param arrayOfElements SEND_RECV
+ */
+cudnnStatus_t cudnnBackendGetAttribute(const cudnnBackendDescriptor_t descriptor, cudnnBackendAttributeName_t attributeName, cudnnBackendAttributeType_t attributeType, int64_t requestedElementCount, int64_t* elementCount, void* arrayOfElements);
+/**
+ * @param handle SEND_ONLY
+ * @param executionPlan SEND_ONLY
+ * @param variantPack SEND_ONLY
+ */
+cudnnStatus_t cudnnBackendExecute(cudnnHandle_t handle, cudnnBackendDescriptor_t executionPlan, cudnnBackendDescriptor_t variantPack);
+/**
+ * @param handle SEND_ONLY
+ * @param executionPlan SEND_ONLY
+ * @param variantPack SEND_ONLY
+ * @param graph SEND_ONLY
+ */
+cudnnStatus_t cudnnBackendPopulateCudaGraph(cudnnHandle_t handle, cudnnBackendDescriptor_t executionPlan, cudnnBackendDescriptor_t variantPack, cudaGraph_t graph);
+/**
+ * @param handle SEND_ONLY
+ * @param executionPlan SEND_ONLY
+ * @param variantPack SEND_ONLY
+ * @param graph SEND_ONLY
+ */
+cudnnStatus_t cudnnBackendUpdateCudaGraph(cudnnHandle_t handle, cudnnBackendDescriptor_t executionPlan, cudnnBackendDescriptor_t variantPack, cudaGraph_t graph);
+/**
+ * @param tensorDesc SEND_ONLY
+ * @param dataType SEND_ONLY
+ * @param n SEND_ONLY
+ * @param c SEND_ONLY
+ * @param h SEND_ONLY
+ * @param w SEND_ONLY
+ * @param nStride SEND_ONLY
+ * @param cStride SEND_ONLY
+ * @param hStride SEND_ONLY
+ * @param wStride SEND_ONLY
+ */
+cudnnStatus_t cudnnSetTensor4dDescriptorEx(cudnnTensorDescriptor_t tensorDesc, cudnnDataType_t dataType, int n, int c, int h, int w, int nStride, int cStride, int hStride, int wStride);
+/**
+ * @param tensorDesc SEND_ONLY
+ * @param dataType SEND_RECV
+ * @param n SEND_RECV
+ * @param c SEND_RECV
+ * @param h SEND_RECV
+ * @param w SEND_RECV
+ * @param nStride SEND_RECV
+ * @param cStride SEND_RECV
+ * @param hStride SEND_RECV
+ * @param wStride SEND_RECV
+ */
+cudnnStatus_t cudnnGetTensor4dDescriptor(const cudnnTensorDescriptor_t tensorDesc, cudnnDataType_t* dataType, int* n, int* c, int* h, int* w, int* nStride, int* cStride, int* hStride, int* wStride);
+/**
+ * @param tensorDesc SEND_ONLY
+ * @param dataType SEND_ONLY
+ * @param nbDims SEND_ONLY
+ */
+cudnnStatus_t cudnnSetTensorNdDescriptor(cudnnTensorDescriptor_t tensorDesc, cudnnDataType_t dataType, int nbDims, const int dimA[], const int strideA[]);
+/**
+ * @param tensorDesc SEND_ONLY
+ * @param format SEND_ONLY
+ * @param dataType SEND_ONLY
+ * @param nbDims SEND_ONLY
+ */
+cudnnStatus_t cudnnSetTensorNdDescriptorEx(cudnnTensorDescriptor_t tensorDesc, cudnnTensorFormat_t format, cudnnDataType_t dataType, int nbDims, const int dimA[]);
+/**
+ * @param tensorDesc SEND_ONLY
+ * @param nbDimsRequested SEND_ONLY
+ * @param dataType SEND_RECV
+ * @param nbDims SEND_RECV
+ */
+cudnnStatus_t cudnnGetTensorNdDescriptor(const cudnnTensorDescriptor_t tensorDesc, int nbDimsRequested, cudnnDataType_t* dataType, int* nbDims, int dimA[], int strideA[]);
+/**
+ * @param tensorDesc SEND_ONLY
+ * @param size SEND_RECV
+ */
+cudnnStatus_t cudnnGetTensorSizeInBytes(const cudnnTensorDescriptor_t tensorDesc, size_t* size);
+/**
+ * @param tensorDesc SEND_ONLY
+ */
+cudnnStatus_t cudnnDestroyTensorDescriptor(cudnnTensorDescriptor_t tensorDesc);
+/**
+ * @param transformDesc SEND_ONLY
+ * @param srcDesc SEND_ONLY
+ * @param destDesc SEND_ONLY
+ * @param destSizeInBytes SEND_RECV
+ */
+cudnnStatus_t cudnnInitTransformDest(const cudnnTensorTransformDescriptor_t transformDesc, const cudnnTensorDescriptor_t srcDesc, cudnnTensorDescriptor_t destDesc, size_t* destSizeInBytes);
+/**
+ * @param transformDesc SEND_RECV
+ */
+cudnnStatus_t cudnnCreateTensorTransformDescriptor(cudnnTensorTransformDescriptor_t* transformDesc);
+/**
+ * @param transformDesc SEND_ONLY
+ * @param nbDims SEND_ONLY
+ * @param destFormat SEND_ONLY
+ * @param direction SEND_ONLY
+ */
+cudnnStatus_t cudnnSetTensorTransformDescriptor(cudnnTensorTransformDescriptor_t transformDesc, const uint32_t nbDims, const cudnnTensorFormat_t destFormat, const int32_t padBeforeA[], const int32_t padAfterA[], const uint32_t foldA[], const cudnnFoldingDirection_t direction);
+/**
+ * @param transformDesc SEND_ONLY
+ * @param nbDimsRequested SEND_ONLY
+ * @param destFormat SEND_RECV
+ * @param direction SEND_RECV
+ */
+cudnnStatus_t cudnnGetTensorTransformDescriptor(cudnnTensorTransformDescriptor_t transformDesc, uint32_t nbDimsRequested, cudnnTensorFormat_t* destFormat, int32_t padBeforeA[], int32_t padAfterA[], uint32_t foldA[], cudnnFoldingDirection_t* direction);
+/**
+ * @param transformDesc SEND_ONLY
+ */
+cudnnStatus_t cudnnDestroyTensorTransformDescriptor(cudnnTensorTransformDescriptor_t transformDesc);
+/**
+ * @param handle SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param xDesc SEND_ONLY
+ * @param x SEND_RECV
+ * @param beta SEND_RECV
+ * @param yDesc SEND_ONLY
+ * @param y SEND_RECV
+ */
+cudnnStatus_t cudnnTransformTensor(cudnnHandle_t handle, const void* alpha, const cudnnTensorDescriptor_t xDesc, const void* x, const void* beta, const cudnnTensorDescriptor_t yDesc, void* y);
+/**
+ * @param handle SEND_ONLY
+ * @param transDesc SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param srcDesc SEND_ONLY
+ * @param srcData SEND_RECV
+ * @param beta SEND_RECV
+ * @param destDesc SEND_ONLY
+ * @param destData SEND_RECV
+ */
+cudnnStatus_t cudnnTransformTensorEx(cudnnHandle_t handle, const cudnnTensorTransformDescriptor_t transDesc, const void* alpha, const cudnnTensorDescriptor_t srcDesc, const void* srcData, const void* beta, const cudnnTensorDescriptor_t destDesc, void* destData);
+/**
+ * @param handle SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param aDesc SEND_ONLY
+ * @param A SEND_RECV
+ * @param beta SEND_RECV
+ * @param cDesc SEND_ONLY
+ * @param C SEND_RECV
+ */
+cudnnStatus_t cudnnAddTensor(cudnnHandle_t handle, const void* alpha, const cudnnTensorDescriptor_t aDesc, const void* A, const void* beta, const cudnnTensorDescriptor_t cDesc, void* C);
+/**
+ * @param opTensorDesc SEND_RECV
+ */
+cudnnStatus_t cudnnCreateOpTensorDescriptor(cudnnOpTensorDescriptor_t* opTensorDesc);
+/**
+ * @param opTensorDesc SEND_ONLY
+ * @param opTensorOp SEND_ONLY
+ * @param opTensorCompType SEND_ONLY
+ * @param opTensorNanOpt SEND_ONLY
+ */
+cudnnStatus_t cudnnSetOpTensorDescriptor(cudnnOpTensorDescriptor_t opTensorDesc, cudnnOpTensorOp_t opTensorOp, cudnnDataType_t opTensorCompType, cudnnNanPropagation_t opTensorNanOpt);
+/**
+ * @param opTensorDesc SEND_ONLY
+ * @param opTensorOp SEND_RECV
+ * @param opTensorCompType SEND_RECV
+ * @param opTensorNanOpt SEND_RECV
+ */
+cudnnStatus_t cudnnGetOpTensorDescriptor(const cudnnOpTensorDescriptor_t opTensorDesc, cudnnOpTensorOp_t* opTensorOp, cudnnDataType_t* opTensorCompType, cudnnNanPropagation_t* opTensorNanOpt);
+/**
+ * @param opTensorDesc SEND_ONLY
+ */
+cudnnStatus_t cudnnDestroyOpTensorDescriptor(cudnnOpTensorDescriptor_t opTensorDesc);
+/**
+ * @param handle SEND_ONLY
+ * @param opTensorDesc SEND_ONLY
+ * @param alpha1 SEND_RECV
+ * @param aDesc SEND_ONLY
+ * @param A SEND_RECV
+ * @param alpha2 SEND_RECV
+ * @param bDesc SEND_ONLY
+ * @param B SEND_RECV
+ * @param beta SEND_RECV
+ * @param cDesc SEND_ONLY
+ * @param C SEND_RECV
+ */
+cudnnStatus_t cudnnOpTensor(cudnnHandle_t handle, const cudnnOpTensorDescriptor_t opTensorDesc, const void* alpha1, const cudnnTensorDescriptor_t aDesc, const void* A, const void* alpha2, const cudnnTensorDescriptor_t bDesc, const void* B, const void* beta, const cudnnTensorDescriptor_t cDesc, void* C);
+/**
+ * @param reduceTensorDesc SEND_RECV
+ */
+cudnnStatus_t cudnnCreateReduceTensorDescriptor(cudnnReduceTensorDescriptor_t* reduceTensorDesc);
+/**
+ * @param reduceTensorDesc SEND_ONLY
+ * @param reduceTensorOp SEND_ONLY
+ * @param reduceTensorCompType SEND_ONLY
+ * @param reduceTensorNanOpt SEND_ONLY
+ * @param reduceTensorIndices SEND_ONLY
+ * @param reduceTensorIndicesType SEND_ONLY
+ */
+cudnnStatus_t cudnnSetReduceTensorDescriptor(cudnnReduceTensorDescriptor_t reduceTensorDesc, cudnnReduceTensorOp_t reduceTensorOp, cudnnDataType_t reduceTensorCompType, cudnnNanPropagation_t reduceTensorNanOpt, cudnnReduceTensorIndices_t reduceTensorIndices, cudnnIndicesType_t reduceTensorIndicesType);
+/**
+ * @param reduceTensorDesc SEND_ONLY
+ * @param reduceTensorOp SEND_RECV
+ * @param reduceTensorCompType SEND_RECV
+ * @param reduceTensorNanOpt SEND_RECV
+ * @param reduceTensorIndices SEND_RECV
+ * @param reduceTensorIndicesType SEND_RECV
+ */
+cudnnStatus_t cudnnGetReduceTensorDescriptor(const cudnnReduceTensorDescriptor_t reduceTensorDesc, cudnnReduceTensorOp_t* reduceTensorOp, cudnnDataType_t* reduceTensorCompType, cudnnNanPropagation_t* reduceTensorNanOpt, cudnnReduceTensorIndices_t* reduceTensorIndices, cudnnIndicesType_t* reduceTensorIndicesType);
+/**
+ * @param reduceTensorDesc SEND_ONLY
+ */
+cudnnStatus_t cudnnDestroyReduceTensorDescriptor(cudnnReduceTensorDescriptor_t reduceTensorDesc);
+/**
+ * @param handle SEND_ONLY
+ * @param reduceTensorDesc SEND_ONLY
+ * @param aDesc SEND_ONLY
+ * @param cDesc SEND_ONLY
+ * @param sizeInBytes SEND_RECV
+ */
+cudnnStatus_t cudnnGetReductionIndicesSize(cudnnHandle_t handle, const cudnnReduceTensorDescriptor_t reduceTensorDesc, const cudnnTensorDescriptor_t aDesc, const cudnnTensorDescriptor_t cDesc, size_t* sizeInBytes);
+/**
+ * @param handle SEND_ONLY
+ * @param reduceTensorDesc SEND_ONLY
+ * @param aDesc SEND_ONLY
+ * @param cDesc SEND_ONLY
+ * @param sizeInBytes SEND_RECV
+ */
+cudnnStatus_t cudnnGetReductionWorkspaceSize(cudnnHandle_t handle, const cudnnReduceTensorDescriptor_t reduceTensorDesc, const cudnnTensorDescriptor_t aDesc, const cudnnTensorDescriptor_t cDesc, size_t* sizeInBytes);
+/**
+ * @param handle SEND_ONLY
+ * @param reduceTensorDesc SEND_ONLY
+ * @param indices SEND_RECV
+ * @param indicesSizeInBytes SEND_ONLY
+ * @param workspace SEND_RECV
+ * @param workspaceSizeInBytes SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param aDesc SEND_ONLY
+ * @param A SEND_RECV
+ * @param beta SEND_RECV
+ * @param cDesc SEND_ONLY
+ * @param C SEND_RECV
+ */
+cudnnStatus_t cudnnReduceTensor(cudnnHandle_t handle, const cudnnReduceTensorDescriptor_t reduceTensorDesc, void* indices, size_t indicesSizeInBytes, void* workspace, size_t workspaceSizeInBytes, const void* alpha, const cudnnTensorDescriptor_t aDesc, const void* A, const void* beta, const cudnnTensorDescriptor_t cDesc, void* C);
+/**
+ * @param handle SEND_ONLY
+ * @param yDesc SEND_ONLY
+ * @param y SEND_RECV
+ * @param valuePtr SEND_RECV
+ */
+cudnnStatus_t cudnnSetTensor(cudnnHandle_t handle, const cudnnTensorDescriptor_t yDesc, void* y, const void* valuePtr);
+/**
+ * @param handle SEND_ONLY
+ * @param yDesc SEND_ONLY
+ * @param y SEND_RECV
+ * @param alpha SEND_RECV
+ */
+cudnnStatus_t cudnnScaleTensor(cudnnHandle_t handle, const cudnnTensorDescriptor_t yDesc, void* y, const void* alpha);
+/**
+ * @param filterDesc SEND_RECV
+ */
+cudnnStatus_t cudnnCreateFilterDescriptor(cudnnFilterDescriptor_t* filterDesc);
+/**
+ * @param filterDesc SEND_ONLY
+ * @param dataType SEND_ONLY
+ * @param format SEND_ONLY
+ * @param k SEND_ONLY
+ * @param c SEND_ONLY
+ * @param h SEND_ONLY
+ * @param w SEND_ONLY
+ */
+cudnnStatus_t cudnnSetFilter4dDescriptor(cudnnFilterDescriptor_t filterDesc, cudnnDataType_t dataType, cudnnTensorFormat_t format, int k, int c, int h, int w);
+/**
+ * @param filterDesc SEND_ONLY
+ * @param dataType SEND_RECV
+ * @param format SEND_RECV
+ * @param k SEND_RECV
+ * @param c SEND_RECV
+ * @param h SEND_RECV
+ * @param w SEND_RECV
+ */
+cudnnStatus_t cudnnGetFilter4dDescriptor(const cudnnFilterDescriptor_t filterDesc, cudnnDataType_t* dataType, cudnnTensorFormat_t* format, int* k, int* c, int* h, int* w);
+/**
+ * @param filterDesc SEND_ONLY
+ * @param dataType SEND_ONLY
+ * @param format SEND_ONLY
+ * @param nbDims SEND_ONLY
+ */
+cudnnStatus_t cudnnSetFilterNdDescriptor(cudnnFilterDescriptor_t filterDesc, cudnnDataType_t dataType, cudnnTensorFormat_t format, int nbDims, const int filterDimA[]);
+/**
+ * @param filterDesc SEND_ONLY
+ * @param nbDimsRequested SEND_ONLY
+ * @param dataType SEND_RECV
+ * @param format SEND_RECV
+ * @param nbDims SEND_RECV
+ */
+cudnnStatus_t cudnnGetFilterNdDescriptor(const cudnnFilterDescriptor_t filterDesc, int nbDimsRequested, cudnnDataType_t* dataType, cudnnTensorFormat_t* format, int* nbDims, int filterDimA[]);
+/**
+ * @param filterDesc SEND_ONLY
+ * @param size SEND_RECV
+ */
+cudnnStatus_t cudnnGetFilterSizeInBytes(const cudnnFilterDescriptor_t filterDesc, size_t* size);
+/**
+ * @param handle SEND_ONLY
+ * @param transDesc SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param srcDesc SEND_ONLY
+ * @param srcData SEND_RECV
+ * @param beta SEND_RECV
+ * @param destDesc SEND_ONLY
+ * @param destData SEND_RECV
+ */
+cudnnStatus_t cudnnTransformFilter(cudnnHandle_t handle, const cudnnTensorTransformDescriptor_t transDesc, const void* alpha, const cudnnFilterDescriptor_t srcDesc, const void* srcData, const void* beta, const cudnnFilterDescriptor_t destDesc, void* destData);
+/**
+ * @param filterDesc SEND_ONLY
+ */
+cudnnStatus_t cudnnDestroyFilterDescriptor(cudnnFilterDescriptor_t filterDesc);
+/**
+ * @param handle SEND_ONLY
+ * @param algo SEND_ONLY
+ * @param mode SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param xDesc SEND_ONLY
+ * @param x SEND_RECV
+ * @param beta SEND_RECV
+ * @param yDesc SEND_ONLY
+ * @param y SEND_RECV
+ */
+cudnnStatus_t cudnnSoftmaxForward(cudnnHandle_t handle, cudnnSoftmaxAlgorithm_t algo, cudnnSoftmaxMode_t mode, const void* alpha, const cudnnTensorDescriptor_t xDesc, const void* x, const void* beta, const cudnnTensorDescriptor_t yDesc, void* y);
+/**
+ * @param poolingDesc SEND_RECV
+ */
+cudnnStatus_t cudnnCreatePoolingDescriptor(cudnnPoolingDescriptor_t* poolingDesc);
+/**
+ * @param poolingDesc SEND_ONLY
+ * @param mode SEND_ONLY
+ * @param maxpoolingNanOpt SEND_ONLY
+ * @param windowHeight SEND_ONLY
+ * @param windowWidth SEND_ONLY
+ * @param verticalPadding SEND_ONLY
+ * @param horizontalPadding SEND_ONLY
+ * @param verticalStride SEND_ONLY
+ * @param horizontalStride SEND_ONLY
+ */
+cudnnStatus_t cudnnSetPooling2dDescriptor(cudnnPoolingDescriptor_t poolingDesc, cudnnPoolingMode_t mode, cudnnNanPropagation_t maxpoolingNanOpt, int windowHeight, int windowWidth, int verticalPadding, int horizontalPadding, int verticalStride, int horizontalStride);
+/**
+ * @param poolingDesc SEND_ONLY
+ * @param mode SEND_RECV
+ * @param maxpoolingNanOpt SEND_RECV
+ * @param windowHeight SEND_RECV
+ * @param windowWidth SEND_RECV
+ * @param verticalPadding SEND_RECV
+ * @param horizontalPadding SEND_RECV
+ * @param verticalStride SEND_RECV
+ * @param horizontalStride SEND_RECV
+ */
+cudnnStatus_t cudnnGetPooling2dDescriptor(const cudnnPoolingDescriptor_t poolingDesc, cudnnPoolingMode_t* mode, cudnnNanPropagation_t* maxpoolingNanOpt, int* windowHeight, int* windowWidth, int* verticalPadding, int* horizontalPadding, int* verticalStride, int* horizontalStride);
+/**
+ * @param poolingDesc SEND_ONLY
+ * @param mode SEND_ONLY
+ * @param maxpoolingNanOpt SEND_ONLY
+ * @param nbDims SEND_ONLY
+ */
+cudnnStatus_t cudnnSetPoolingNdDescriptor(cudnnPoolingDescriptor_t poolingDesc, const cudnnPoolingMode_t mode, const cudnnNanPropagation_t maxpoolingNanOpt, int nbDims, const int windowDimA[], const int paddingA[], const int strideA[]);
+/**
+ * @param poolingDesc SEND_ONLY
+ * @param nbDimsRequested SEND_ONLY
+ * @param mode SEND_RECV
+ * @param maxpoolingNanOpt SEND_RECV
+ * @param nbDims SEND_RECV
+ */
+cudnnStatus_t cudnnGetPoolingNdDescriptor(const cudnnPoolingDescriptor_t poolingDesc, int nbDimsRequested, cudnnPoolingMode_t* mode, cudnnNanPropagation_t* maxpoolingNanOpt, int* nbDims, int windowDimA[], int paddingA[], int strideA[]);
+/**
+ * @param poolingDesc SEND_ONLY
+ * @param inputTensorDesc SEND_ONLY
+ * @param nbDims SEND_ONLY
+ */
+cudnnStatus_t cudnnGetPoolingNdForwardOutputDim(const cudnnPoolingDescriptor_t poolingDesc, const cudnnTensorDescriptor_t inputTensorDesc, int nbDims, int outputTensorDimA[]);
+/**
+ * @param poolingDesc SEND_ONLY
+ * @param inputTensorDesc SEND_ONLY
+ * @param n SEND_RECV
+ * @param c SEND_RECV
+ * @param h SEND_RECV
+ * @param w SEND_RECV
+ */
+cudnnStatus_t cudnnGetPooling2dForwardOutputDim(const cudnnPoolingDescriptor_t poolingDesc, const cudnnTensorDescriptor_t inputTensorDesc, int* n, int* c, int* h, int* w);
+/**
+ * @param poolingDesc SEND_ONLY
+ */
+cudnnStatus_t cudnnDestroyPoolingDescriptor(cudnnPoolingDescriptor_t poolingDesc);
+/**
+ * @param handle SEND_ONLY
+ * @param poolingDesc SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param xDesc SEND_ONLY
+ * @param x SEND_RECV
+ * @param beta SEND_RECV
+ * @param yDesc SEND_ONLY
+ * @param y SEND_RECV
+ */
+cudnnStatus_t cudnnPoolingForward(cudnnHandle_t handle, const cudnnPoolingDescriptor_t poolingDesc, const void* alpha, const cudnnTensorDescriptor_t xDesc, const void* x, const void* beta, const cudnnTensorDescriptor_t yDesc, void* y);
+/**
+ * @param activationDesc SEND_ONLY
+ * @param mode SEND_RECV
+ * @param reluNanOpt SEND_RECV
+ * @param coef SEND_RECV
+ */
+cudnnStatus_t cudnnGetActivationDescriptor(const cudnnActivationDescriptor_t activationDesc, cudnnActivationMode_t* mode, cudnnNanPropagation_t* reluNanOpt, double* coef);
+/**
+ * @param activationDesc SEND_ONLY
+ * @param swish_beta SEND_ONLY
+ */
+cudnnStatus_t cudnnSetActivationDescriptorSwishBeta(cudnnActivationDescriptor_t activationDesc, double swish_beta);
+/**
+ * @param activationDesc SEND_ONLY
+ * @param swish_beta SEND_RECV
+ */
+cudnnStatus_t cudnnGetActivationDescriptorSwishBeta(cudnnActivationDescriptor_t activationDesc, double* swish_beta);
+/**
+ * @param activationDesc SEND_ONLY
+ */
+cudnnStatus_t cudnnDestroyActivationDescriptor(cudnnActivationDescriptor_t activationDesc);
+/**
+ * @param normDesc SEND_RECV
+ */
+cudnnStatus_t cudnnCreateLRNDescriptor(cudnnLRNDescriptor_t* normDesc);
+/**
+ * @param normDesc SEND_ONLY
+ * @param lrnN SEND_ONLY
+ * @param lrnAlpha SEND_ONLY
+ * @param lrnBeta SEND_ONLY
+ * @param lrnK SEND_ONLY
+ */
+cudnnStatus_t cudnnSetLRNDescriptor(cudnnLRNDescriptor_t normDesc, unsigned lrnN, double lrnAlpha, double lrnBeta, double lrnK);
+/**
+ * @param normDesc SEND_ONLY
+ * @param lrnN SEND_RECV
+ * @param lrnAlpha SEND_RECV
+ * @param lrnBeta SEND_RECV
+ * @param lrnK SEND_RECV
+ */
+cudnnStatus_t cudnnGetLRNDescriptor(cudnnLRNDescriptor_t normDesc, unsigned* lrnN, double* lrnAlpha, double* lrnBeta, double* lrnK);
+/**
+ * @param lrnDesc SEND_ONLY
+ */
+cudnnStatus_t cudnnDestroyLRNDescriptor(cudnnLRNDescriptor_t lrnDesc);
+/**
+ * @param handle SEND_ONLY
+ * @param normDesc SEND_ONLY
+ * @param lrnMode SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param xDesc SEND_ONLY
+ * @param x SEND_RECV
+ * @param beta SEND_RECV
+ * @param yDesc SEND_ONLY
+ * @param y SEND_RECV
+ */
+cudnnStatus_t cudnnLRNCrossChannelForward(cudnnHandle_t handle, cudnnLRNDescriptor_t normDesc, cudnnLRNMode_t lrnMode, const void* alpha, const cudnnTensorDescriptor_t xDesc, const void* x, const void* beta, const cudnnTensorDescriptor_t yDesc, void* y);
+/**
+ * @param handle SEND_ONLY
+ * @param normDesc SEND_ONLY
+ * @param mode SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param xDesc SEND_ONLY
+ * @param x SEND_RECV
+ * @param means SEND_RECV
+ * @param temp SEND_RECV
+ * @param temp2 SEND_RECV
+ * @param beta SEND_RECV
+ * @param yDesc SEND_ONLY
+ * @param y SEND_RECV
+ */
+cudnnStatus_t cudnnDivisiveNormalizationForward(cudnnHandle_t handle, cudnnLRNDescriptor_t normDesc, cudnnDivNormMode_t mode, const void* alpha, const cudnnTensorDescriptor_t xDesc, const void* x, const void* means, void* temp, void* temp2, const void* beta, const cudnnTensorDescriptor_t yDesc, void* y);
+/**
+ * @param derivedBnDesc SEND_ONLY
+ * @param xDesc SEND_ONLY
+ * @param mode SEND_ONLY
+ */
+cudnnStatus_t cudnnDeriveBNTensorDescriptor(cudnnTensorDescriptor_t derivedBnDesc, const cudnnTensorDescriptor_t xDesc, cudnnBatchNormMode_t mode);
+/**
+ * @param handle SEND_ONLY
+ * @param mode SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param beta SEND_RECV
+ * @param xDesc SEND_ONLY
+ * @param x SEND_RECV
+ * @param yDesc SEND_ONLY
+ * @param y SEND_RECV
+ * @param bnScaleBiasMeanVarDesc SEND_ONLY
+ * @param bnScale SEND_RECV
+ * @param bnBias SEND_RECV
+ * @param estimatedMean SEND_RECV
+ * @param estimatedVariance SEND_RECV
+ * @param epsilon SEND_ONLY
+ */
+cudnnStatus_t cudnnBatchNormalizationForwardInference(cudnnHandle_t handle, cudnnBatchNormMode_t mode, const void* alpha, const void* beta, const cudnnTensorDescriptor_t xDesc, const void* x, const cudnnTensorDescriptor_t yDesc, void* y, const cudnnTensorDescriptor_t bnScaleBiasMeanVarDesc, const void* bnScale, const void* bnBias, const void* estimatedMean, const void* estimatedVariance, double epsilon);
+/**
+ * @param derivedNormScaleBiasDesc SEND_ONLY
+ * @param derivedNormMeanVarDesc SEND_ONLY
+ * @param xDesc SEND_ONLY
+ * @param mode SEND_ONLY
+ * @param groupCnt SEND_ONLY
+ */
+cudnnStatus_t cudnnDeriveNormTensorDescriptor(cudnnTensorDescriptor_t derivedNormScaleBiasDesc, cudnnTensorDescriptor_t derivedNormMeanVarDesc, const cudnnTensorDescriptor_t xDesc, cudnnNormMode_t mode, int groupCnt);
+/**
+ * @param handle SEND_ONLY
+ * @param mode SEND_ONLY
+ * @param normOps SEND_ONLY
+ * @param algo SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param beta SEND_RECV
+ * @param xDesc SEND_ONLY
+ * @param x SEND_RECV
+ * @param normScaleBiasDesc SEND_ONLY
+ * @param normScale SEND_RECV
+ * @param normBias SEND_RECV
+ * @param normMeanVarDesc SEND_ONLY
+ * @param estimatedMean SEND_RECV
+ * @param estimatedVariance SEND_RECV
+ * @param zDesc SEND_ONLY
+ * @param z SEND_RECV
+ * @param activationDesc SEND_ONLY
+ * @param yDesc SEND_ONLY
+ * @param y SEND_RECV
+ * @param epsilon SEND_ONLY
+ * @param groupCnt SEND_ONLY
+ */
+cudnnStatus_t cudnnNormalizationForwardInference(cudnnHandle_t handle, cudnnNormMode_t mode, cudnnNormOps_t normOps, cudnnNormAlgo_t algo, const void* alpha, const void* beta, const cudnnTensorDescriptor_t xDesc, const void* x, const cudnnTensorDescriptor_t normScaleBiasDesc, const void* normScale, const void* normBias, const cudnnTensorDescriptor_t normMeanVarDesc, const void* estimatedMean, const void* estimatedVariance, const cudnnTensorDescriptor_t zDesc, const void* z, cudnnActivationDescriptor_t activationDesc, const cudnnTensorDescriptor_t yDesc, void* y, double epsilon, int groupCnt);
+/**
+ * @param stDesc SEND_RECV
+ */
+cudnnStatus_t cudnnCreateSpatialTransformerDescriptor(cudnnSpatialTransformerDescriptor_t* stDesc);
+/**
+ * @param stDesc SEND_ONLY
+ * @param samplerType SEND_ONLY
+ * @param dataType SEND_ONLY
+ * @param nbDims SEND_ONLY
+ */
+cudnnStatus_t cudnnSetSpatialTransformerNdDescriptor(cudnnSpatialTransformerDescriptor_t stDesc, cudnnSamplerType_t samplerType, cudnnDataType_t dataType, const int nbDims, const int dimA[]);
+/**
+ * @param stDesc SEND_ONLY
+ */
+cudnnStatus_t cudnnDestroySpatialTransformerDescriptor(cudnnSpatialTransformerDescriptor_t stDesc);
+/**
+ * @param handle SEND_ONLY
+ * @param stDesc SEND_ONLY
+ * @param theta SEND_RECV
+ * @param grid SEND_RECV
+ */
+cudnnStatus_t cudnnSpatialTfGridGeneratorForward(cudnnHandle_t handle, const cudnnSpatialTransformerDescriptor_t stDesc, const void* theta, void* grid);
+/**
+ * @param handle SEND_ONLY
+ * @param stDesc SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param xDesc SEND_ONLY
+ * @param x SEND_RECV
+ * @param grid SEND_RECV
+ * @param beta SEND_RECV
+ * @param yDesc SEND_ONLY
+ * @param y SEND_RECV
+ */
+cudnnStatus_t cudnnSpatialTfSamplerForward(cudnnHandle_t handle, cudnnSpatialTransformerDescriptor_t stDesc, const void* alpha, const cudnnTensorDescriptor_t xDesc, const void* x, const void* grid, const void* beta, cudnnTensorDescriptor_t yDesc, void* y);
+/**
+ * @param dropoutDesc SEND_RECV
+ */
+cudnnStatus_t cudnnCreateDropoutDescriptor(cudnnDropoutDescriptor_t* dropoutDesc);
+/**
+ * @param dropoutDesc SEND_ONLY
+ */
+cudnnStatus_t cudnnDestroyDropoutDescriptor(cudnnDropoutDescriptor_t dropoutDesc);
+/**
+ * @param handle SEND_ONLY
+ * @param sizeInBytes SEND_RECV
+ */
+cudnnStatus_t cudnnDropoutGetStatesSize(cudnnHandle_t handle, size_t* sizeInBytes);
+/**
+ * @param xdesc SEND_ONLY
+ * @param sizeInBytes SEND_RECV
+ */
+cudnnStatus_t cudnnDropoutGetReserveSpaceSize(cudnnTensorDescriptor_t xdesc, size_t* sizeInBytes);
+/**
+ * @param dropoutDesc SEND_ONLY
+ * @param handle SEND_ONLY
+ * @param dropout SEND_ONLY
+ * @param states SEND_RECV
+ * @param stateSizeInBytes SEND_ONLY
+ * @param seed SEND_ONLY
+ */
+cudnnStatus_t cudnnSetDropoutDescriptor(cudnnDropoutDescriptor_t dropoutDesc, cudnnHandle_t handle, float dropout, void* states, size_t stateSizeInBytes, unsigned long long seed);
+/**
+ * @param dropoutDesc SEND_ONLY
+ * @param handle SEND_ONLY
+ * @param dropout SEND_ONLY
+ * @param states SEND_RECV
+ * @param stateSizeInBytes SEND_ONLY
+ * @param seed SEND_ONLY
+ */
+cudnnStatus_t cudnnRestoreDropoutDescriptor(cudnnDropoutDescriptor_t dropoutDesc, cudnnHandle_t handle, float dropout, void* states, size_t stateSizeInBytes, unsigned long long seed);
+/**
+ * @param dropoutDesc SEND_ONLY
+ * @param handle SEND_ONLY
+ * @param dropout SEND_RECV
+ * @param states SEND_RECV
+ * @param seed SEND_RECV
+ */
+cudnnStatus_t cudnnGetDropoutDescriptor(cudnnDropoutDescriptor_t dropoutDesc, cudnnHandle_t handle, float* dropout, void** states, unsigned long long* seed);
+/**
+ * @param handle SEND_ONLY
+ * @param dropoutDesc SEND_ONLY
+ * @param xdesc SEND_ONLY
+ * @param x SEND_RECV
+ * @param ydesc SEND_ONLY
+ * @param y SEND_RECV
+ * @param reserveSpace SEND_RECV
+ * @param reserveSpaceSizeInBytes SEND_ONLY
+ */
+cudnnStatus_t cudnnDropoutForward(cudnnHandle_t handle, const cudnnDropoutDescriptor_t dropoutDesc, const cudnnTensorDescriptor_t xdesc, const void* x, const cudnnTensorDescriptor_t ydesc, void* y, void* reserveSpace, size_t reserveSpaceSizeInBytes);
+/**
+ */
+cudnnStatus_t cudnnOpsVersionCheck();
+/**
+ * @param handle SEND_ONLY
+ * @param algo SEND_ONLY
+ * @param mode SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param yDesc SEND_ONLY
+ * @param y SEND_RECV
+ * @param dyDesc SEND_ONLY
+ * @param dy SEND_RECV
+ * @param beta SEND_RECV
+ * @param dxDesc SEND_ONLY
+ * @param dx SEND_RECV
+ */
+cudnnStatus_t cudnnSoftmaxBackward(cudnnHandle_t handle, cudnnSoftmaxAlgorithm_t algo, cudnnSoftmaxMode_t mode, const void* alpha, const cudnnTensorDescriptor_t yDesc, const void* y, const cudnnTensorDescriptor_t dyDesc, const void* dy, const void* beta, const cudnnTensorDescriptor_t dxDesc, void* dx);
+/**
+ * @param handle SEND_ONLY
+ * @param poolingDesc SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param yDesc SEND_ONLY
+ * @param y SEND_RECV
+ * @param dyDesc SEND_ONLY
+ * @param dy SEND_RECV
+ * @param xDesc SEND_ONLY
+ * @param x SEND_RECV
+ * @param beta SEND_RECV
+ * @param dxDesc SEND_ONLY
+ * @param dx SEND_RECV
+ */
+cudnnStatus_t cudnnPoolingBackward(cudnnHandle_t handle, const cudnnPoolingDescriptor_t poolingDesc, const void* alpha, const cudnnTensorDescriptor_t yDesc, const void* y, const cudnnTensorDescriptor_t dyDesc, const void* dy, const cudnnTensorDescriptor_t xDesc, const void* x, const void* beta, const cudnnTensorDescriptor_t dxDesc, void* dx);
+/**
+ * @param handle SEND_ONLY
+ * @param activationDesc SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param yDesc SEND_ONLY
+ * @param y SEND_RECV
+ * @param dyDesc SEND_ONLY
+ * @param dy SEND_RECV
+ * @param xDesc SEND_ONLY
+ * @param x SEND_RECV
+ * @param beta SEND_RECV
+ * @param dxDesc SEND_ONLY
+ * @param dx SEND_RECV
+ */
+cudnnStatus_t cudnnActivationBackward(cudnnHandle_t handle, cudnnActivationDescriptor_t activationDesc, const void* alpha, const cudnnTensorDescriptor_t yDesc, const void* y, const cudnnTensorDescriptor_t dyDesc, const void* dy, const cudnnTensorDescriptor_t xDesc, const void* x, const void* beta, const cudnnTensorDescriptor_t dxDesc, void* dx);
+/**
+ * @param handle SEND_ONLY
+ * @param normDesc SEND_ONLY
+ * @param lrnMode SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param yDesc SEND_ONLY
+ * @param y SEND_RECV
+ * @param dyDesc SEND_ONLY
+ * @param dy SEND_RECV
+ * @param xDesc SEND_ONLY
+ * @param x SEND_RECV
+ * @param beta SEND_RECV
+ * @param dxDesc SEND_ONLY
+ * @param dx SEND_RECV
+ */
+cudnnStatus_t cudnnLRNCrossChannelBackward(cudnnHandle_t handle, cudnnLRNDescriptor_t normDesc, cudnnLRNMode_t lrnMode, const void* alpha, const cudnnTensorDescriptor_t yDesc, const void* y, const cudnnTensorDescriptor_t dyDesc, const void* dy, const cudnnTensorDescriptor_t xDesc, const void* x, const void* beta, const cudnnTensorDescriptor_t dxDesc, void* dx);
+/**
+ * @param handle SEND_ONLY
+ * @param normDesc SEND_ONLY
+ * @param mode SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param xDesc SEND_ONLY
+ * @param x SEND_RECV
+ * @param means SEND_RECV
+ * @param dy SEND_RECV
+ * @param temp SEND_RECV
+ * @param temp2 SEND_RECV
+ * @param beta SEND_RECV
+ * @param dXdMeansDesc SEND_ONLY
+ * @param dx SEND_RECV
+ * @param dMeans SEND_RECV
+ */
+cudnnStatus_t cudnnDivisiveNormalizationBackward(cudnnHandle_t handle, cudnnLRNDescriptor_t normDesc, cudnnDivNormMode_t mode, const void* alpha, const cudnnTensorDescriptor_t xDesc, const void* x, const void* means, const void* dy, void* temp, void* temp2, const void* beta, const cudnnTensorDescriptor_t dXdMeansDesc, void* dx, void* dMeans);
+/**
+ * @param handle SEND_ONLY
+ * @param mode SEND_ONLY
+ * @param bnOps SEND_ONLY
+ * @param xDesc SEND_ONLY
+ * @param zDesc SEND_ONLY
+ * @param yDesc SEND_ONLY
+ * @param bnScaleBiasMeanVarDesc SEND_ONLY
+ * @param activationDesc SEND_ONLY
+ * @param sizeInBytes SEND_RECV
+ */
+cudnnStatus_t cudnnGetBatchNormalizationForwardTrainingExWorkspaceSize(cudnnHandle_t handle, cudnnBatchNormMode_t mode, cudnnBatchNormOps_t bnOps, const cudnnTensorDescriptor_t xDesc, const cudnnTensorDescriptor_t zDesc, const cudnnTensorDescriptor_t yDesc, const cudnnTensorDescriptor_t bnScaleBiasMeanVarDesc, const cudnnActivationDescriptor_t activationDesc, size_t* sizeInBytes);
+/**
+ * @param handle SEND_ONLY
+ * @param mode SEND_ONLY
+ * @param bnOps SEND_ONLY
+ * @param xDesc SEND_ONLY
+ * @param yDesc SEND_ONLY
+ * @param dyDesc SEND_ONLY
+ * @param dzDesc SEND_ONLY
+ * @param dxDesc SEND_ONLY
+ * @param dBnScaleBiasDesc SEND_ONLY
+ * @param activationDesc SEND_ONLY
+ * @param sizeInBytes SEND_RECV
+ */
+cudnnStatus_t cudnnGetBatchNormalizationBackwardExWorkspaceSize(cudnnHandle_t handle, cudnnBatchNormMode_t mode, cudnnBatchNormOps_t bnOps, const cudnnTensorDescriptor_t xDesc, const cudnnTensorDescriptor_t yDesc, const cudnnTensorDescriptor_t dyDesc, const cudnnTensorDescriptor_t dzDesc, const cudnnTensorDescriptor_t dxDesc, const cudnnTensorDescriptor_t dBnScaleBiasDesc, const cudnnActivationDescriptor_t activationDesc, size_t* sizeInBytes);
+/**
+ * @param handle SEND_ONLY
+ * @param mode SEND_ONLY
+ * @param bnOps SEND_ONLY
+ * @param activationDesc SEND_ONLY
+ * @param xDesc SEND_ONLY
+ * @param sizeInBytes SEND_RECV
+ */
+cudnnStatus_t cudnnGetBatchNormalizationTrainingExReserveSpaceSize(cudnnHandle_t handle, cudnnBatchNormMode_t mode, cudnnBatchNormOps_t bnOps, const cudnnActivationDescriptor_t activationDesc, const cudnnTensorDescriptor_t xDesc, size_t* sizeInBytes);
+/**
+ * @param handle SEND_ONLY
+ * @param mode SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param beta SEND_RECV
+ * @param xDesc SEND_ONLY
+ * @param x SEND_RECV
+ * @param yDesc SEND_ONLY
+ * @param y SEND_RECV
+ * @param bnScaleBiasMeanVarDesc SEND_ONLY
+ * @param bnScale SEND_RECV
+ * @param bnBias SEND_RECV
+ * @param exponentialAverageFactor SEND_ONLY
+ * @param resultRunningMean SEND_RECV
+ * @param resultRunningVariance SEND_RECV
+ * @param epsilon SEND_ONLY
+ * @param resultSaveMean SEND_RECV
+ * @param resultSaveInvVariance SEND_RECV
+ */
+cudnnStatus_t cudnnBatchNormalizationForwardTraining(cudnnHandle_t handle, cudnnBatchNormMode_t mode, const void* alpha, const void* beta, const cudnnTensorDescriptor_t xDesc, const void* x, const cudnnTensorDescriptor_t yDesc, void* y, const cudnnTensorDescriptor_t bnScaleBiasMeanVarDesc, const void* bnScale, const void* bnBias, double exponentialAverageFactor, void* resultRunningMean, void* resultRunningVariance, double epsilon, void* resultSaveMean, void* resultSaveInvVariance);
+/**
+ * @param handle SEND_ONLY
+ * @param mode SEND_ONLY
+ * @param bnOps SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param beta SEND_RECV
+ * @param xDesc SEND_ONLY
+ * @param xData SEND_RECV
+ * @param zDesc SEND_ONLY
+ * @param zData SEND_RECV
+ * @param yDesc SEND_ONLY
+ * @param yData SEND_RECV
+ * @param bnScaleBiasMeanVarDesc SEND_ONLY
+ * @param bnScale SEND_RECV
+ * @param bnBias SEND_RECV
+ * @param exponentialAverageFactor SEND_ONLY
+ * @param resultRunningMean SEND_RECV
+ * @param resultRunningVariance SEND_RECV
+ * @param epsilon SEND_ONLY
+ * @param resultSaveMean SEND_RECV
+ * @param resultSaveInvVariance SEND_RECV
+ * @param activationDesc SEND_ONLY
+ * @param workspace SEND_RECV
+ * @param workSpaceSizeInBytes SEND_ONLY
+ * @param reserveSpace SEND_RECV
+ * @param reserveSpaceSizeInBytes SEND_ONLY
+ */
+cudnnStatus_t cudnnBatchNormalizationForwardTrainingEx(cudnnHandle_t handle, cudnnBatchNormMode_t mode, cudnnBatchNormOps_t bnOps, const void* alpha, const void* beta, const cudnnTensorDescriptor_t xDesc, const void* xData, const cudnnTensorDescriptor_t zDesc, const void* zData, const cudnnTensorDescriptor_t yDesc, void* yData, const cudnnTensorDescriptor_t bnScaleBiasMeanVarDesc, const void* bnScale, const void* bnBias, double exponentialAverageFactor, void* resultRunningMean, void* resultRunningVariance, double epsilon, void* resultSaveMean, void* resultSaveInvVariance, cudnnActivationDescriptor_t activationDesc, void* workspace, size_t workSpaceSizeInBytes, void* reserveSpace, size_t reserveSpaceSizeInBytes);
+/**
+ * @param handle SEND_ONLY
+ * @param mode SEND_ONLY
+ * @param alphaDataDiff SEND_RECV
+ * @param betaDataDiff SEND_RECV
+ * @param alphaParamDiff SEND_RECV
+ * @param betaParamDiff SEND_RECV
+ * @param xDesc SEND_ONLY
+ * @param x SEND_RECV
+ * @param dyDesc SEND_ONLY
+ * @param dy SEND_RECV
+ * @param dxDesc SEND_ONLY
+ * @param dx SEND_RECV
+ * @param dBnScaleBiasDesc SEND_ONLY
+ * @param bnScale SEND_RECV
+ * @param dBnScaleResult SEND_RECV
+ * @param dBnBiasResult SEND_RECV
+ * @param epsilon SEND_ONLY
+ * @param savedMean SEND_RECV
+ * @param savedInvVariance SEND_RECV
+ */
+cudnnStatus_t cudnnBatchNormalizationBackward(cudnnHandle_t handle, cudnnBatchNormMode_t mode, const void* alphaDataDiff, const void* betaDataDiff, const void* alphaParamDiff, const void* betaParamDiff, const cudnnTensorDescriptor_t xDesc, const void* x, const cudnnTensorDescriptor_t dyDesc, const void* dy, const cudnnTensorDescriptor_t dxDesc, void* dx, const cudnnTensorDescriptor_t dBnScaleBiasDesc, const void* bnScale, void* dBnScaleResult, void* dBnBiasResult, double epsilon, const void* savedMean, const void* savedInvVariance);
+/**
+ * @param handle SEND_ONLY
+ * @param mode SEND_ONLY
+ * @param bnOps SEND_ONLY
+ * @param alphaDataDiff SEND_RECV
+ * @param betaDataDiff SEND_RECV
+ * @param alphaParamDiff SEND_RECV
+ * @param betaParamDiff SEND_RECV
+ * @param xDesc SEND_ONLY
+ * @param xData SEND_RECV
+ * @param yDesc SEND_ONLY
+ * @param yData SEND_RECV
+ * @param dyDesc SEND_ONLY
+ * @param dyData SEND_RECV
+ * @param dzDesc SEND_ONLY
+ * @param dzData SEND_RECV
+ * @param dxDesc SEND_ONLY
+ * @param dxData SEND_RECV
+ * @param dBnScaleBiasDesc SEND_ONLY
+ * @param bnScaleData SEND_RECV
+ * @param bnBiasData SEND_RECV
+ * @param dBnScaleData SEND_RECV
+ * @param dBnBiasData SEND_RECV
+ * @param epsilon SEND_ONLY
+ * @param savedMean SEND_RECV
+ * @param savedInvVariance SEND_RECV
+ * @param activationDesc SEND_ONLY
+ * @param workSpace SEND_RECV
+ * @param workSpaceSizeInBytes SEND_ONLY
+ * @param reserveSpace SEND_RECV
+ * @param reserveSpaceSizeInBytes SEND_ONLY
+ */
+cudnnStatus_t cudnnBatchNormalizationBackwardEx(cudnnHandle_t handle, cudnnBatchNormMode_t mode, cudnnBatchNormOps_t bnOps, const void* alphaDataDiff, const void* betaDataDiff, const void* alphaParamDiff, const void* betaParamDiff, const cudnnTensorDescriptor_t xDesc, const void* xData, const cudnnTensorDescriptor_t yDesc, const void* yData, const cudnnTensorDescriptor_t dyDesc, const void* dyData, const cudnnTensorDescriptor_t dzDesc, void* dzData, const cudnnTensorDescriptor_t dxDesc, void* dxData, const cudnnTensorDescriptor_t dBnScaleBiasDesc, const void* bnScaleData, const void* bnBiasData, void* dBnScaleData, void* dBnBiasData, double epsilon, const void* savedMean, const void* savedInvVariance, cudnnActivationDescriptor_t activationDesc, void* workSpace, size_t workSpaceSizeInBytes, void* reserveSpace, size_t reserveSpaceSizeInBytes);
+/**
+ * @param handle SEND_ONLY
+ * @param mode SEND_ONLY
+ * @param normOps SEND_ONLY
+ * @param algo SEND_ONLY
+ * @param xDesc SEND_ONLY
+ * @param zDesc SEND_ONLY
+ * @param yDesc SEND_ONLY
+ * @param normScaleBiasDesc SEND_ONLY
+ * @param activationDesc SEND_ONLY
+ * @param normMeanVarDesc SEND_ONLY
+ * @param sizeInBytes SEND_RECV
+ * @param groupCnt SEND_ONLY
+ */
+cudnnStatus_t cudnnGetNormalizationForwardTrainingWorkspaceSize(cudnnHandle_t handle, cudnnNormMode_t mode, cudnnNormOps_t normOps, cudnnNormAlgo_t algo, const cudnnTensorDescriptor_t xDesc, const cudnnTensorDescriptor_t zDesc, const cudnnTensorDescriptor_t yDesc, const cudnnTensorDescriptor_t normScaleBiasDesc, const cudnnActivationDescriptor_t activationDesc, const cudnnTensorDescriptor_t normMeanVarDesc, size_t* sizeInBytes, int groupCnt);
+/**
+ * @param handle SEND_ONLY
+ * @param mode SEND_ONLY
+ * @param normOps SEND_ONLY
+ * @param algo SEND_ONLY
+ * @param xDesc SEND_ONLY
+ * @param yDesc SEND_ONLY
+ * @param dyDesc SEND_ONLY
+ * @param dzDesc SEND_ONLY
+ * @param dxDesc SEND_ONLY
+ * @param dNormScaleBiasDesc SEND_ONLY
+ * @param activationDesc SEND_ONLY
+ * @param normMeanVarDesc SEND_ONLY
+ * @param sizeInBytes SEND_RECV
+ * @param groupCnt SEND_ONLY
+ */
+cudnnStatus_t cudnnGetNormalizationBackwardWorkspaceSize(cudnnHandle_t handle, cudnnNormMode_t mode, cudnnNormOps_t normOps, cudnnNormAlgo_t algo, const cudnnTensorDescriptor_t xDesc, const cudnnTensorDescriptor_t yDesc, const cudnnTensorDescriptor_t dyDesc, const cudnnTensorDescriptor_t dzDesc, const cudnnTensorDescriptor_t dxDesc, const cudnnTensorDescriptor_t dNormScaleBiasDesc, const cudnnActivationDescriptor_t activationDesc, const cudnnTensorDescriptor_t normMeanVarDesc, size_t* sizeInBytes, int groupCnt);
+/**
+ * @param handle SEND_ONLY
+ * @param mode SEND_ONLY
+ * @param normOps SEND_ONLY
+ * @param algo SEND_ONLY
+ * @param activationDesc SEND_ONLY
+ * @param xDesc SEND_ONLY
+ * @param sizeInBytes SEND_RECV
+ * @param groupCnt SEND_ONLY
+ */
+cudnnStatus_t cudnnGetNormalizationTrainingReserveSpaceSize(cudnnHandle_t handle, cudnnNormMode_t mode, cudnnNormOps_t normOps, cudnnNormAlgo_t algo, const cudnnActivationDescriptor_t activationDesc, const cudnnTensorDescriptor_t xDesc, size_t* sizeInBytes, int groupCnt);
+/**
+ * @param handle SEND_ONLY
+ * @param mode SEND_ONLY
+ * @param normOps SEND_ONLY
+ * @param algo SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param beta SEND_RECV
+ * @param xDesc SEND_ONLY
+ * @param xData SEND_RECV
+ * @param normScaleBiasDesc SEND_ONLY
+ * @param normScale SEND_RECV
+ * @param normBias SEND_RECV
+ * @param exponentialAverageFactor SEND_ONLY
+ * @param normMeanVarDesc SEND_ONLY
+ * @param resultRunningMean SEND_RECV
+ * @param resultRunningVariance SEND_RECV
+ * @param epsilon SEND_ONLY
+ * @param resultSaveMean SEND_RECV
+ * @param resultSaveInvVariance SEND_RECV
+ * @param activationDesc SEND_ONLY
+ * @param zDesc SEND_ONLY
+ * @param zData SEND_RECV
+ * @param yDesc SEND_ONLY
+ * @param yData SEND_RECV
+ * @param workspace SEND_RECV
+ * @param workSpaceSizeInBytes SEND_ONLY
+ * @param reserveSpace SEND_RECV
+ * @param reserveSpaceSizeInBytes SEND_ONLY
+ * @param groupCnt SEND_ONLY
+ */
+cudnnStatus_t cudnnNormalizationForwardTraining(cudnnHandle_t handle, cudnnNormMode_t mode, cudnnNormOps_t normOps, cudnnNormAlgo_t algo, const void* alpha, const void* beta, const cudnnTensorDescriptor_t xDesc, const void* xData, const cudnnTensorDescriptor_t normScaleBiasDesc, const void* normScale, const void* normBias, double exponentialAverageFactor, const cudnnTensorDescriptor_t normMeanVarDesc, void* resultRunningMean, void* resultRunningVariance, double epsilon, void* resultSaveMean, void* resultSaveInvVariance, cudnnActivationDescriptor_t activationDesc, const cudnnTensorDescriptor_t zDesc, const void* zData, const cudnnTensorDescriptor_t yDesc, void* yData, void* workspace, size_t workSpaceSizeInBytes, void* reserveSpace, size_t reserveSpaceSizeInBytes, int groupCnt);
+/**
+ * @param handle SEND_ONLY
+ * @param mode SEND_ONLY
+ * @param normOps SEND_ONLY
+ * @param algo SEND_ONLY
+ * @param alphaDataDiff SEND_RECV
+ * @param betaDataDiff SEND_RECV
+ * @param alphaParamDiff SEND_RECV
+ * @param betaParamDiff SEND_RECV
+ * @param xDesc SEND_ONLY
+ * @param xData SEND_RECV
+ * @param yDesc SEND_ONLY
+ * @param yData SEND_RECV
+ * @param dyDesc SEND_ONLY
+ * @param dyData SEND_RECV
+ * @param dzDesc SEND_ONLY
+ * @param dzData SEND_RECV
+ * @param dxDesc SEND_ONLY
+ * @param dxData SEND_RECV
+ * @param dNormScaleBiasDesc SEND_ONLY
+ * @param normScaleData SEND_RECV
+ * @param normBiasData SEND_RECV
+ * @param dNormScaleData SEND_RECV
+ * @param dNormBiasData SEND_RECV
+ * @param epsilon SEND_ONLY
+ * @param normMeanVarDesc SEND_ONLY
+ * @param savedMean SEND_RECV
+ * @param savedInvVariance SEND_RECV
+ * @param activationDesc SEND_ONLY
+ * @param workSpace SEND_RECV
+ * @param workSpaceSizeInBytes SEND_ONLY
+ * @param reserveSpace SEND_RECV
+ * @param reserveSpaceSizeInBytes SEND_ONLY
+ * @param groupCnt SEND_ONLY
+ */
+cudnnStatus_t cudnnNormalizationBackward(cudnnHandle_t handle, cudnnNormMode_t mode, cudnnNormOps_t normOps, cudnnNormAlgo_t algo, const void* alphaDataDiff, const void* betaDataDiff, const void* alphaParamDiff, const void* betaParamDiff, const cudnnTensorDescriptor_t xDesc, const void* xData, const cudnnTensorDescriptor_t yDesc, const void* yData, const cudnnTensorDescriptor_t dyDesc, const void* dyData, const cudnnTensorDescriptor_t dzDesc, void* dzData, const cudnnTensorDescriptor_t dxDesc, void* dxData, const cudnnTensorDescriptor_t dNormScaleBiasDesc, const void* normScaleData, const void* normBiasData, void* dNormScaleData, void* dNormBiasData, double epsilon, const cudnnTensorDescriptor_t normMeanVarDesc, const void* savedMean, const void* savedInvVariance, cudnnActivationDescriptor_t activationDesc, void* workSpace, size_t workSpaceSizeInBytes, void* reserveSpace, size_t reserveSpaceSizeInBytes, int groupCnt);
+/**
+ * @param handle SEND_ONLY
+ * @param stDesc SEND_ONLY
+ * @param dgrid SEND_RECV
+ * @param dtheta SEND_RECV
+ */
+cudnnStatus_t cudnnSpatialTfGridGeneratorBackward(cudnnHandle_t handle, const cudnnSpatialTransformerDescriptor_t stDesc, const void* dgrid, void* dtheta);
+/**
+ * @param handle SEND_ONLY
+ * @param stDesc SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param xDesc SEND_ONLY
+ * @param x SEND_RECV
+ * @param beta SEND_RECV
+ * @param dxDesc SEND_ONLY
+ * @param dx SEND_RECV
+ * @param alphaDgrid SEND_RECV
+ * @param dyDesc SEND_ONLY
+ * @param dy SEND_RECV
+ * @param grid SEND_RECV
+ * @param betaDgrid SEND_RECV
+ * @param dgrid SEND_RECV
+ */
+cudnnStatus_t cudnnSpatialTfSamplerBackward(cudnnHandle_t handle, cudnnSpatialTransformerDescriptor_t stDesc, const void* alpha, const cudnnTensorDescriptor_t xDesc, const void* x, const void* beta, const cudnnTensorDescriptor_t dxDesc, void* dx, const void* alphaDgrid, const cudnnTensorDescriptor_t dyDesc, const void* dy, const void* grid, const void* betaDgrid, void* dgrid);
+/**
+ * @param handle SEND_ONLY
+ * @param dropoutDesc SEND_ONLY
+ * @param dydesc SEND_ONLY
+ * @param dy SEND_RECV
+ * @param dxdesc SEND_ONLY
+ * @param dx SEND_RECV
+ * @param reserveSpace SEND_RECV
+ * @param reserveSpaceSizeInBytes SEND_ONLY
+ */
+cudnnStatus_t cudnnDropoutBackward(cudnnHandle_t handle, const cudnnDropoutDescriptor_t dropoutDesc, const cudnnTensorDescriptor_t dydesc, const void* dy, const cudnnTensorDescriptor_t dxdesc, void* dx, void* reserveSpace, size_t reserveSpaceSizeInBytes);
+/**
+ * @param handle SEND_ONLY
+ * @param version SEND_RECV
+ */
+cublasStatus_t cublasGetVersion_v2(cublasHandle_t handle, int* version);
+/**
+ * @param type SEND_ONLY
+ * @param value SEND_RECV
+ */
+cublasStatus_t cublasGetProperty(libraryPropertyType type, int* value);
+/**
+ */
+size_t cublasGetCudartVersion();
+/**
+ * @param handle SEND_ONLY
+ * @param workspace SEND_RECV
+ * @param workspaceSizeInBytes SEND_ONLY
+ */
+cublasStatus_t cublasSetWorkspace_v2(cublasHandle_t handle, void* workspace, size_t workspaceSizeInBytes);
+/**
+ * @param handle SEND_ONLY
+ * @param streamId SEND_ONLY
+ */
+cublasStatus_t cublasSetStream_v2(cublasHandle_t handle, cudaStream_t streamId);
+/**
+ * @param handle SEND_ONLY
+ * @param streamId SEND_RECV
+ */
+cublasStatus_t cublasGetStream_v2(cublasHandle_t handle, cudaStream_t* streamId);
+/**
+ * @param handle SEND_ONLY
+ * @param mode SEND_RECV
+ */
+cublasStatus_t cublasGetPointerMode_v2(cublasHandle_t handle, cublasPointerMode_t* mode);
+/**
+ * @param handle SEND_ONLY
+ * @param mode SEND_ONLY
+ */
+cublasStatus_t cublasSetPointerMode_v2(cublasHandle_t handle, cublasPointerMode_t mode);
+/**
+ * @param handle SEND_ONLY
+ * @param mode SEND_RECV
+ */
+cublasStatus_t cublasGetAtomicsMode(cublasHandle_t handle, cublasAtomicsMode_t* mode);
+/**
+ * @param handle SEND_ONLY
+ * @param mode SEND_ONLY
+ */
+cublasStatus_t cublasSetAtomicsMode(cublasHandle_t handle, cublasAtomicsMode_t mode);
+/**
+ * @param handle SEND_ONLY
+ * @param mode SEND_RECV
+ */
+cublasStatus_t cublasGetMathMode(cublasHandle_t handle, cublasMath_t* mode);
+/**
+ * @param handle SEND_ONLY
+ * @param mode SEND_ONLY
+ */
+cublasStatus_t cublasSetMathMode(cublasHandle_t handle, cublasMath_t mode);
+/**
+ * @param handle SEND_ONLY
+ * @param smCountTarget SEND_RECV
+ */
+cublasStatus_t cublasGetSmCountTarget(cublasHandle_t handle, int* smCountTarget);
+/**
+ * @param handle SEND_ONLY
+ * @param smCountTarget SEND_ONLY
+ */
+cublasStatus_t cublasSetSmCountTarget(cublasHandle_t handle, int smCountTarget);
+/**
+ * @param status SEND_ONLY
+ */
+const char* cublasGetStatusName(cublasStatus_t status);
+/**
+ * @param status SEND_ONLY
+ */
+const char* cublasGetStatusString(cublasStatus_t status);
+/**
+ * @param logIsOn SEND_ONLY
+ * @param logToStdOut SEND_ONLY
+ * @param logToStdErr SEND_ONLY
+ * @param logFileName SEND_RECV
+ */
+cublasStatus_t cublasLoggerConfigure(int logIsOn, int logToStdOut, int logToStdErr, const char* logFileName);
+/**
+ * @param userCallback SEND_ONLY
+ */
+cublasStatus_t cublasSetLoggerCallback(cublasLogCallback userCallback);
+/**
+ * @param userCallback SEND_RECV
+ */
+cublasStatus_t cublasGetLoggerCallback(cublasLogCallback* userCallback);
+/**
+ * @param n SEND_ONLY
+ * @param elemSize SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param devicePtr SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasSetVector(int n, int elemSize, const void* x, int incx, void* devicePtr, int incy);
+/**
+ * @param n SEND_ONLY
+ * @param elemSize SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param devicePtr SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasSetVector_64(int64_t n, int64_t elemSize, const void* x, int64_t incx, void* devicePtr, int64_t incy);
+/**
+ * @param n SEND_ONLY
+ * @param elemSize SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasGetVector(int n, int elemSize, const void* x, int incx, void* y, int incy);
+/**
+ * @param n SEND_ONLY
+ * @param elemSize SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasGetVector_64(int64_t n, int64_t elemSize, const void* x, int64_t incx, void* y, int64_t incy);
+/**
+ * @param rows SEND_ONLY
+ * @param cols SEND_ONLY
+ * @param elemSize SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ */
+cublasStatus_t cublasSetMatrix(int rows, int cols, int elemSize, const void* A, int lda, void* B, int ldb);
+/**
+ * @param rows SEND_ONLY
+ * @param cols SEND_ONLY
+ * @param elemSize SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ */
+cublasStatus_t cublasSetMatrix_64(int64_t rows, int64_t cols, int64_t elemSize, const void* A, int64_t lda, void* B, int64_t ldb);
+/**
+ * @param rows SEND_ONLY
+ * @param cols SEND_ONLY
+ * @param elemSize SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ */
+cublasStatus_t cublasGetMatrix(int rows, int cols, int elemSize, const void* A, int lda, void* B, int ldb);
+/**
+ * @param rows SEND_ONLY
+ * @param cols SEND_ONLY
+ * @param elemSize SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ */
+cublasStatus_t cublasGetMatrix_64(int64_t rows, int64_t cols, int64_t elemSize, const void* A, int64_t lda, void* B, int64_t ldb);
+/**
+ * @param n SEND_ONLY
+ * @param elemSize SEND_ONLY
+ * @param hostPtr SEND_RECV
+ * @param incx SEND_ONLY
+ * @param devicePtr SEND_RECV
+ * @param incy SEND_ONLY
+ * @param stream SEND_ONLY
+ */
+cublasStatus_t cublasSetVectorAsync(int n, int elemSize, const void* hostPtr, int incx, void* devicePtr, int incy, cudaStream_t stream);
+/**
+ * @param n SEND_ONLY
+ * @param elemSize SEND_ONLY
+ * @param hostPtr SEND_RECV
+ * @param incx SEND_ONLY
+ * @param devicePtr SEND_RECV
+ * @param incy SEND_ONLY
+ * @param stream SEND_ONLY
+ */
+cublasStatus_t cublasSetVectorAsync_64(int64_t n, int64_t elemSize, const void* hostPtr, int64_t incx, void* devicePtr, int64_t incy, cudaStream_t stream);
+/**
+ * @param n SEND_ONLY
+ * @param elemSize SEND_ONLY
+ * @param devicePtr SEND_RECV
+ * @param incx SEND_ONLY
+ * @param hostPtr SEND_RECV
+ * @param incy SEND_ONLY
+ * @param stream SEND_ONLY
+ */
+cublasStatus_t cublasGetVectorAsync(int n, int elemSize, const void* devicePtr, int incx, void* hostPtr, int incy, cudaStream_t stream);
+/**
+ * @param n SEND_ONLY
+ * @param elemSize SEND_ONLY
+ * @param devicePtr SEND_RECV
+ * @param incx SEND_ONLY
+ * @param hostPtr SEND_RECV
+ * @param incy SEND_ONLY
+ * @param stream SEND_ONLY
+ */
+cublasStatus_t cublasGetVectorAsync_64(int64_t n, int64_t elemSize, const void* devicePtr, int64_t incx, void* hostPtr, int64_t incy, cudaStream_t stream);
+/**
+ * @param rows SEND_ONLY
+ * @param cols SEND_ONLY
+ * @param elemSize SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param stream SEND_ONLY
+ */
+cublasStatus_t cublasSetMatrixAsync(int rows, int cols, int elemSize, const void* A, int lda, void* B, int ldb, cudaStream_t stream);
+/**
+ * @param rows SEND_ONLY
+ * @param cols SEND_ONLY
+ * @param elemSize SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param stream SEND_ONLY
+ */
+cublasStatus_t cublasSetMatrixAsync_64(int64_t rows, int64_t cols, int64_t elemSize, const void* A, int64_t lda, void* B, int64_t ldb, cudaStream_t stream);
+/**
+ * @param rows SEND_ONLY
+ * @param cols SEND_ONLY
+ * @param elemSize SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param stream SEND_ONLY
+ */
+cublasStatus_t cublasGetMatrixAsync(int rows, int cols, int elemSize, const void* A, int lda, void* B, int ldb, cudaStream_t stream);
+/**
+ * @param rows SEND_ONLY
+ * @param cols SEND_ONLY
+ * @param elemSize SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param stream SEND_ONLY
+ */
+cublasStatus_t cublasGetMatrixAsync_64(int64_t rows, int64_t cols, int64_t elemSize, const void* A, int64_t lda, void* B, int64_t ldb, cudaStream_t stream);
+/**
+ * @param srName SEND_RECV
+ * @param info SEND_ONLY
+ */
+void cublasXerbla(const char* srName, int info);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param xType SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ * @param resultType SEND_ONLY
+ * @param executionType SEND_ONLY
+ */
+cublasStatus_t cublasNrm2Ex(cublasHandle_t handle, int n, const void* x, cudaDataType xType, int incx, void* result, cudaDataType resultType, cudaDataType executionType);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param xType SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ * @param resultType SEND_ONLY
+ * @param executionType SEND_ONLY
+ */
+cublasStatus_t cublasNrm2Ex_64(cublasHandle_t handle, int64_t n, const void* x, cudaDataType xType, int64_t incx, void* result, cudaDataType resultType, cudaDataType executionType);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasSnrm2_v2(cublasHandle_t handle, int n, const float* x, int incx, float* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasSnrm2_v2_64(cublasHandle_t handle, int64_t n, const float* x, int64_t incx, float* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasDnrm2_v2(cublasHandle_t handle, int n, const double* x, int incx, double* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasDnrm2_v2_64(cublasHandle_t handle, int64_t n, const double* x, int64_t incx, double* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasScnrm2_v2(cublasHandle_t handle, int n, const cuComplex* x, int incx, float* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasScnrm2_v2_64(cublasHandle_t handle, int64_t n, const cuComplex* x, int64_t incx, float* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasDznrm2_v2(cublasHandle_t handle, int n, const cuDoubleComplex* x, int incx, double* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasDznrm2_v2_64(cublasHandle_t handle, int64_t n, const cuDoubleComplex* x, int64_t incx, double* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param xType SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param yType SEND_ONLY
+ * @param incy SEND_ONLY
+ * @param result SEND_RECV
+ * @param resultType SEND_ONLY
+ * @param executionType SEND_ONLY
+ */
+cublasStatus_t cublasDotEx(cublasHandle_t handle, int n, const void* x, cudaDataType xType, int incx, const void* y, cudaDataType yType, int incy, void* result, cudaDataType resultType, cudaDataType executionType);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param xType SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param yType SEND_ONLY
+ * @param incy SEND_ONLY
+ * @param result SEND_RECV
+ * @param resultType SEND_ONLY
+ * @param executionType SEND_ONLY
+ */
+cublasStatus_t cublasDotEx_64(cublasHandle_t handle, int64_t n, const void* x, cudaDataType xType, int64_t incx, const void* y, cudaDataType yType, int64_t incy, void* result, cudaDataType resultType, cudaDataType executionType);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param xType SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param yType SEND_ONLY
+ * @param incy SEND_ONLY
+ * @param result SEND_RECV
+ * @param resultType SEND_ONLY
+ * @param executionType SEND_ONLY
+ */
+cublasStatus_t cublasDotcEx(cublasHandle_t handle, int n, const void* x, cudaDataType xType, int incx, const void* y, cudaDataType yType, int incy, void* result, cudaDataType resultType, cudaDataType executionType);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param xType SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param yType SEND_ONLY
+ * @param incy SEND_ONLY
+ * @param result SEND_RECV
+ * @param resultType SEND_ONLY
+ * @param executionType SEND_ONLY
+ */
+cublasStatus_t cublasDotcEx_64(cublasHandle_t handle, int64_t n, const void* x, cudaDataType xType, int64_t incx, const void* y, cudaDataType yType, int64_t incy, void* result, cudaDataType resultType, cudaDataType executionType);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasSdot_v2(cublasHandle_t handle, int n, const float* x, int incx, const float* y, int incy, float* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasSdot_v2_64(cublasHandle_t handle, int64_t n, const float* x, int64_t incx, const float* y, int64_t incy, float* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasDdot_v2(cublasHandle_t handle, int n, const double* x, int incx, const double* y, int incy, double* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasDdot_v2_64(cublasHandle_t handle, int64_t n, const double* x, int64_t incx, const double* y, int64_t incy, double* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasCdotu_v2(cublasHandle_t handle, int n, const cuComplex* x, int incx, const cuComplex* y, int incy, cuComplex* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasCdotu_v2_64(cublasHandle_t handle, int64_t n, const cuComplex* x, int64_t incx, const cuComplex* y, int64_t incy, cuComplex* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasCdotc_v2(cublasHandle_t handle, int n, const cuComplex* x, int incx, const cuComplex* y, int incy, cuComplex* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasCdotc_v2_64(cublasHandle_t handle, int64_t n, const cuComplex* x, int64_t incx, const cuComplex* y, int64_t incy, cuComplex* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasZdotu_v2(cublasHandle_t handle, int n, const cuDoubleComplex* x, int incx, const cuDoubleComplex* y, int incy, cuDoubleComplex* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasZdotu_v2_64(cublasHandle_t handle, int64_t n, const cuDoubleComplex* x, int64_t incx, const cuDoubleComplex* y, int64_t incy, cuDoubleComplex* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasZdotc_v2(cublasHandle_t handle, int n, const cuDoubleComplex* x, int incx, const cuDoubleComplex* y, int incy, cuDoubleComplex* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasZdotc_v2_64(cublasHandle_t handle, int64_t n, const cuDoubleComplex* x, int64_t incx, const cuDoubleComplex* y, int64_t incy, cuDoubleComplex* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param alphaType SEND_ONLY
+ * @param x SEND_RECV
+ * @param xType SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param executionType SEND_ONLY
+ */
+cublasStatus_t cublasScalEx(cublasHandle_t handle, int n, const void* alpha, cudaDataType alphaType, void* x, cudaDataType xType, int incx, cudaDataType executionType);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param alphaType SEND_ONLY
+ * @param x SEND_RECV
+ * @param xType SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param executionType SEND_ONLY
+ */
+cublasStatus_t cublasScalEx_64(cublasHandle_t handle, int64_t n, const void* alpha, cudaDataType alphaType, void* x, cudaDataType xType, int64_t incx, cudaDataType executionType);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasSscal_v2(cublasHandle_t handle, int n, const float* alpha, float* x, int incx);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasSscal_v2_64(cublasHandle_t handle, int64_t n, const float* alpha, float* x, int64_t incx);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasDscal_v2(cublasHandle_t handle, int n, const double* alpha, double* x, int incx);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasDscal_v2_64(cublasHandle_t handle, int64_t n, const double* alpha, double* x, int64_t incx);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasCscal_v2(cublasHandle_t handle, int n, const cuComplex* alpha, cuComplex* x, int incx);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasCscal_v2_64(cublasHandle_t handle, int64_t n, const cuComplex* alpha, cuComplex* x, int64_t incx);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasCsscal_v2(cublasHandle_t handle, int n, const float* alpha, cuComplex* x, int incx);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasCsscal_v2_64(cublasHandle_t handle, int64_t n, const float* alpha, cuComplex* x, int64_t incx);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasZscal_v2(cublasHandle_t handle, int n, const cuDoubleComplex* alpha, cuDoubleComplex* x, int incx);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasZscal_v2_64(cublasHandle_t handle, int64_t n, const cuDoubleComplex* alpha, cuDoubleComplex* x, int64_t incx);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasZdscal_v2(cublasHandle_t handle, int n, const double* alpha, cuDoubleComplex* x, int incx);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasZdscal_v2_64(cublasHandle_t handle, int64_t n, const double* alpha, cuDoubleComplex* x, int64_t incx);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param alphaType SEND_ONLY
+ * @param x SEND_RECV
+ * @param xType SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param yType SEND_ONLY
+ * @param incy SEND_ONLY
+ * @param executiontype SEND_ONLY
+ */
+cublasStatus_t cublasAxpyEx(cublasHandle_t handle, int n, const void* alpha, cudaDataType alphaType, const void* x, cudaDataType xType, int incx, void* y, cudaDataType yType, int incy, cudaDataType executiontype);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param alphaType SEND_ONLY
+ * @param x SEND_RECV
+ * @param xType SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param yType SEND_ONLY
+ * @param incy SEND_ONLY
+ * @param executiontype SEND_ONLY
+ */
+cublasStatus_t cublasAxpyEx_64(cublasHandle_t handle, int64_t n, const void* alpha, cudaDataType alphaType, const void* x, cudaDataType xType, int64_t incx, void* y, cudaDataType yType, int64_t incy, cudaDataType executiontype);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasSaxpy_v2(cublasHandle_t handle, int n, const float* alpha, const float* x, int incx, float* y, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasSaxpy_v2_64(cublasHandle_t handle, int64_t n, const float* alpha, const float* x, int64_t incx, float* y, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasDaxpy_v2(cublasHandle_t handle, int n, const double* alpha, const double* x, int incx, double* y, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasDaxpy_v2_64(cublasHandle_t handle, int64_t n, const double* alpha, const double* x, int64_t incx, double* y, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasCaxpy_v2(cublasHandle_t handle, int n, const cuComplex* alpha, const cuComplex* x, int incx, cuComplex* y, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasCaxpy_v2_64(cublasHandle_t handle, int64_t n, const cuComplex* alpha, const cuComplex* x, int64_t incx, cuComplex* y, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasZaxpy_v2(cublasHandle_t handle, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* x, int incx, cuDoubleComplex* y, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasZaxpy_v2_64(cublasHandle_t handle, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* x, int64_t incx, cuDoubleComplex* y, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param xType SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param yType SEND_ONLY
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasCopyEx(cublasHandle_t handle, int n, const void* x, cudaDataType xType, int incx, void* y, cudaDataType yType, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param xType SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param yType SEND_ONLY
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasCopyEx_64(cublasHandle_t handle, int64_t n, const void* x, cudaDataType xType, int64_t incx, void* y, cudaDataType yType, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasScopy_v2(cublasHandle_t handle, int n, const float* x, int incx, float* y, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasScopy_v2_64(cublasHandle_t handle, int64_t n, const float* x, int64_t incx, float* y, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasDcopy_v2(cublasHandle_t handle, int n, const double* x, int incx, double* y, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasDcopy_v2_64(cublasHandle_t handle, int64_t n, const double* x, int64_t incx, double* y, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasCcopy_v2(cublasHandle_t handle, int n, const cuComplex* x, int incx, cuComplex* y, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasCcopy_v2_64(cublasHandle_t handle, int64_t n, const cuComplex* x, int64_t incx, cuComplex* y, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasZcopy_v2(cublasHandle_t handle, int n, const cuDoubleComplex* x, int incx, cuDoubleComplex* y, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasZcopy_v2_64(cublasHandle_t handle, int64_t n, const cuDoubleComplex* x, int64_t incx, cuDoubleComplex* y, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasSswap_v2(cublasHandle_t handle, int n, float* x, int incx, float* y, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasSswap_v2_64(cublasHandle_t handle, int64_t n, float* x, int64_t incx, float* y, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasDswap_v2(cublasHandle_t handle, int n, double* x, int incx, double* y, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasDswap_v2_64(cublasHandle_t handle, int64_t n, double* x, int64_t incx, double* y, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasCswap_v2(cublasHandle_t handle, int n, cuComplex* x, int incx, cuComplex* y, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasCswap_v2_64(cublasHandle_t handle, int64_t n, cuComplex* x, int64_t incx, cuComplex* y, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasZswap_v2(cublasHandle_t handle, int n, cuDoubleComplex* x, int incx, cuDoubleComplex* y, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasZswap_v2_64(cublasHandle_t handle, int64_t n, cuDoubleComplex* x, int64_t incx, cuDoubleComplex* y, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param xType SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param yType SEND_ONLY
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasSwapEx(cublasHandle_t handle, int n, void* x, cudaDataType xType, int incx, void* y, cudaDataType yType, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param xType SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param yType SEND_ONLY
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasSwapEx_64(cublasHandle_t handle, int64_t n, void* x, cudaDataType xType, int64_t incx, void* y, cudaDataType yType, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasIsamax_v2(cublasHandle_t handle, int n, const float* x, int incx, int* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasIsamax_v2_64(cublasHandle_t handle, int64_t n, const float* x, int64_t incx, int64_t* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasIdamax_v2(cublasHandle_t handle, int n, const double* x, int incx, int* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasIdamax_v2_64(cublasHandle_t handle, int64_t n, const double* x, int64_t incx, int64_t* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasIcamax_v2(cublasHandle_t handle, int n, const cuComplex* x, int incx, int* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasIcamax_v2_64(cublasHandle_t handle, int64_t n, const cuComplex* x, int64_t incx, int64_t* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasIzamax_v2(cublasHandle_t handle, int n, const cuDoubleComplex* x, int incx, int* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasIzamax_v2_64(cublasHandle_t handle, int64_t n, const cuDoubleComplex* x, int64_t incx, int64_t* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param xType SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasIamaxEx(cublasHandle_t handle, int n, const void* x, cudaDataType xType, int incx, int* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param xType SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasIamaxEx_64(cublasHandle_t handle, int64_t n, const void* x, cudaDataType xType, int64_t incx, int64_t* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasIsamin_v2(cublasHandle_t handle, int n, const float* x, int incx, int* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasIsamin_v2_64(cublasHandle_t handle, int64_t n, const float* x, int64_t incx, int64_t* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasIdamin_v2(cublasHandle_t handle, int n, const double* x, int incx, int* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasIdamin_v2_64(cublasHandle_t handle, int64_t n, const double* x, int64_t incx, int64_t* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasIcamin_v2(cublasHandle_t handle, int n, const cuComplex* x, int incx, int* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasIcamin_v2_64(cublasHandle_t handle, int64_t n, const cuComplex* x, int64_t incx, int64_t* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasIzamin_v2(cublasHandle_t handle, int n, const cuDoubleComplex* x, int incx, int* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasIzamin_v2_64(cublasHandle_t handle, int64_t n, const cuDoubleComplex* x, int64_t incx, int64_t* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param xType SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasIaminEx(cublasHandle_t handle, int n, const void* x, cudaDataType xType, int incx, int* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param xType SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasIaminEx_64(cublasHandle_t handle, int64_t n, const void* x, cudaDataType xType, int64_t incx, int64_t* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param xType SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ * @param resultType SEND_ONLY
+ * @param executiontype SEND_ONLY
+ */
+cublasStatus_t cublasAsumEx(cublasHandle_t handle, int n, const void* x, cudaDataType xType, int incx, void* result, cudaDataType resultType, cudaDataType executiontype);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param xType SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ * @param resultType SEND_ONLY
+ * @param executiontype SEND_ONLY
+ */
+cublasStatus_t cublasAsumEx_64(cublasHandle_t handle, int64_t n, const void* x, cudaDataType xType, int64_t incx, void* result, cudaDataType resultType, cudaDataType executiontype);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasSasum_v2(cublasHandle_t handle, int n, const float* x, int incx, float* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasSasum_v2_64(cublasHandle_t handle, int64_t n, const float* x, int64_t incx, float* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasDasum_v2(cublasHandle_t handle, int n, const double* x, int incx, double* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasDasum_v2_64(cublasHandle_t handle, int64_t n, const double* x, int64_t incx, double* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasScasum_v2(cublasHandle_t handle, int n, const cuComplex* x, int incx, float* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasScasum_v2_64(cublasHandle_t handle, int64_t n, const cuComplex* x, int64_t incx, float* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasDzasum_v2(cublasHandle_t handle, int n, const cuDoubleComplex* x, int incx, double* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param result SEND_RECV
+ */
+cublasStatus_t cublasDzasum_v2_64(cublasHandle_t handle, int64_t n, const cuDoubleComplex* x, int64_t incx, double* result);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param c SEND_RECV
+ * @param s SEND_RECV
+ */
+cublasStatus_t cublasSrot_v2(cublasHandle_t handle, int n, float* x, int incx, float* y, int incy, const float* c, const float* s);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param c SEND_RECV
+ * @param s SEND_RECV
+ */
+cublasStatus_t cublasSrot_v2_64(cublasHandle_t handle, int64_t n, float* x, int64_t incx, float* y, int64_t incy, const float* c, const float* s);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param c SEND_RECV
+ * @param s SEND_RECV
+ */
+cublasStatus_t cublasDrot_v2(cublasHandle_t handle, int n, double* x, int incx, double* y, int incy, const double* c, const double* s);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param c SEND_RECV
+ * @param s SEND_RECV
+ */
+cublasStatus_t cublasDrot_v2_64(cublasHandle_t handle, int64_t n, double* x, int64_t incx, double* y, int64_t incy, const double* c, const double* s);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param c SEND_RECV
+ * @param s SEND_RECV
+ */
+cublasStatus_t cublasCrot_v2(cublasHandle_t handle, int n, cuComplex* x, int incx, cuComplex* y, int incy, const float* c, const cuComplex* s);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param c SEND_RECV
+ * @param s SEND_RECV
+ */
+cublasStatus_t cublasCrot_v2_64(cublasHandle_t handle, int64_t n, cuComplex* x, int64_t incx, cuComplex* y, int64_t incy, const float* c, const cuComplex* s);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param c SEND_RECV
+ * @param s SEND_RECV
+ */
+cublasStatus_t cublasCsrot_v2(cublasHandle_t handle, int n, cuComplex* x, int incx, cuComplex* y, int incy, const float* c, const float* s);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param c SEND_RECV
+ * @param s SEND_RECV
+ */
+cublasStatus_t cublasCsrot_v2_64(cublasHandle_t handle, int64_t n, cuComplex* x, int64_t incx, cuComplex* y, int64_t incy, const float* c, const float* s);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param c SEND_RECV
+ * @param s SEND_RECV
+ */
+cublasStatus_t cublasZrot_v2(cublasHandle_t handle, int n, cuDoubleComplex* x, int incx, cuDoubleComplex* y, int incy, const double* c, const cuDoubleComplex* s);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param c SEND_RECV
+ * @param s SEND_RECV
+ */
+cublasStatus_t cublasZrot_v2_64(cublasHandle_t handle, int64_t n, cuDoubleComplex* x, int64_t incx, cuDoubleComplex* y, int64_t incy, const double* c, const cuDoubleComplex* s);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param c SEND_RECV
+ * @param s SEND_RECV
+ */
+cublasStatus_t cublasZdrot_v2(cublasHandle_t handle, int n, cuDoubleComplex* x, int incx, cuDoubleComplex* y, int incy, const double* c, const double* s);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param c SEND_RECV
+ * @param s SEND_RECV
+ */
+cublasStatus_t cublasZdrot_v2_64(cublasHandle_t handle, int64_t n, cuDoubleComplex* x, int64_t incx, cuDoubleComplex* y, int64_t incy, const double* c, const double* s);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param xType SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param yType SEND_ONLY
+ * @param incy SEND_ONLY
+ * @param c SEND_RECV
+ * @param s SEND_RECV
+ * @param csType SEND_ONLY
+ * @param executiontype SEND_ONLY
+ */
+cublasStatus_t cublasRotEx(cublasHandle_t handle, int n, void* x, cudaDataType xType, int incx, void* y, cudaDataType yType, int incy, const void* c, const void* s, cudaDataType csType, cudaDataType executiontype);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param xType SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param yType SEND_ONLY
+ * @param incy SEND_ONLY
+ * @param c SEND_RECV
+ * @param s SEND_RECV
+ * @param csType SEND_ONLY
+ * @param executiontype SEND_ONLY
+ */
+cublasStatus_t cublasRotEx_64(cublasHandle_t handle, int64_t n, void* x, cudaDataType xType, int64_t incx, void* y, cudaDataType yType, int64_t incy, const void* c, const void* s, cudaDataType csType, cudaDataType executiontype);
+/**
+ * @param handle SEND_ONLY
+ * @param a SEND_RECV
+ * @param b SEND_RECV
+ * @param c SEND_RECV
+ * @param s SEND_RECV
+ */
+cublasStatus_t cublasSrotg_v2(cublasHandle_t handle, float* a, float* b, float* c, float* s);
+/**
+ * @param handle SEND_ONLY
+ * @param a SEND_RECV
+ * @param b SEND_RECV
+ * @param c SEND_RECV
+ * @param s SEND_RECV
+ */
+cublasStatus_t cublasDrotg_v2(cublasHandle_t handle, double* a, double* b, double* c, double* s);
+/**
+ * @param handle SEND_ONLY
+ * @param a SEND_RECV
+ * @param b SEND_RECV
+ * @param c SEND_RECV
+ * @param s SEND_RECV
+ */
+cublasStatus_t cublasCrotg_v2(cublasHandle_t handle, cuComplex* a, cuComplex* b, float* c, cuComplex* s);
+/**
+ * @param handle SEND_ONLY
+ * @param a SEND_RECV
+ * @param b SEND_RECV
+ * @param c SEND_RECV
+ * @param s SEND_RECV
+ */
+cublasStatus_t cublasZrotg_v2(cublasHandle_t handle, cuDoubleComplex* a, cuDoubleComplex* b, double* c, cuDoubleComplex* s);
+/**
+ * @param handle SEND_ONLY
+ * @param a SEND_RECV
+ * @param b SEND_RECV
+ * @param abType SEND_ONLY
+ * @param c SEND_RECV
+ * @param s SEND_RECV
+ * @param csType SEND_ONLY
+ * @param executiontype SEND_ONLY
+ */
+cublasStatus_t cublasRotgEx(cublasHandle_t handle, void* a, void* b, cudaDataType abType, void* c, void* s, cudaDataType csType, cudaDataType executiontype);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param param SEND_RECV
+ */
+cublasStatus_t cublasSrotm_v2(cublasHandle_t handle, int n, float* x, int incx, float* y, int incy, const float* param);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param param SEND_RECV
+ */
+cublasStatus_t cublasSrotm_v2_64(cublasHandle_t handle, int64_t n, float* x, int64_t incx, float* y, int64_t incy, const float* param);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param param SEND_RECV
+ */
+cublasStatus_t cublasDrotm_v2(cublasHandle_t handle, int n, double* x, int incx, double* y, int incy, const double* param);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param param SEND_RECV
+ */
+cublasStatus_t cublasDrotm_v2_64(cublasHandle_t handle, int64_t n, double* x, int64_t incx, double* y, int64_t incy, const double* param);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param xType SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param yType SEND_ONLY
+ * @param incy SEND_ONLY
+ * @param param SEND_RECV
+ * @param paramType SEND_ONLY
+ * @param executiontype SEND_ONLY
+ */
+cublasStatus_t cublasRotmEx(cublasHandle_t handle, int n, void* x, cudaDataType xType, int incx, void* y, cudaDataType yType, int incy, const void* param, cudaDataType paramType, cudaDataType executiontype);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param x SEND_RECV
+ * @param xType SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param yType SEND_ONLY
+ * @param incy SEND_ONLY
+ * @param param SEND_RECV
+ * @param paramType SEND_ONLY
+ * @param executiontype SEND_ONLY
+ */
+cublasStatus_t cublasRotmEx_64(cublasHandle_t handle, int64_t n, void* x, cudaDataType xType, int64_t incx, void* y, cudaDataType yType, int64_t incy, const void* param, cudaDataType paramType, cudaDataType executiontype);
+/**
+ * @param handle SEND_ONLY
+ * @param d1 SEND_RECV
+ * @param d2 SEND_RECV
+ * @param x1 SEND_RECV
+ * @param y1 SEND_RECV
+ * @param param SEND_RECV
+ */
+cublasStatus_t cublasSrotmg_v2(cublasHandle_t handle, float* d1, float* d2, float* x1, const float* y1, float* param);
+/**
+ * @param handle SEND_ONLY
+ * @param d1 SEND_RECV
+ * @param d2 SEND_RECV
+ * @param x1 SEND_RECV
+ * @param y1 SEND_RECV
+ * @param param SEND_RECV
+ */
+cublasStatus_t cublasDrotmg_v2(cublasHandle_t handle, double* d1, double* d2, double* x1, const double* y1, double* param);
+/**
+ * @param handle SEND_ONLY
+ * @param d1 SEND_RECV
+ * @param d1Type SEND_ONLY
+ * @param d2 SEND_RECV
+ * @param d2Type SEND_ONLY
+ * @param x1 SEND_RECV
+ * @param x1Type SEND_ONLY
+ * @param y1 SEND_RECV
+ * @param y1Type SEND_ONLY
+ * @param param SEND_RECV
+ * @param paramType SEND_ONLY
+ * @param executiontype SEND_ONLY
+ */
+cublasStatus_t cublasRotmgEx(cublasHandle_t handle, void* d1, cudaDataType d1Type, void* d2, cudaDataType d2Type, void* x1, cudaDataType x1Type, const void* y1, cudaDataType y1Type, void* param, cudaDataType paramType, cudaDataType executiontype);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasSgemv_v2(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const float* alpha, const float* A, int lda, const float* x, int incx, const float* beta, float* y, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasSgemv_v2_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, const float* alpha, const float* A, int64_t lda, const float* x, int64_t incx, const float* beta, float* y, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasDgemv_v2(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const double* alpha, const double* A, int lda, const double* x, int incx, const double* beta, double* y, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasDgemv_v2_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, const double* alpha, const double* A, int64_t lda, const double* x, int64_t incx, const double* beta, double* y, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasCgemv_v2(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const cuComplex* alpha, const cuComplex* A, int lda, const cuComplex* x, int incx, const cuComplex* beta, cuComplex* y, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasCgemv_v2_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, const cuComplex* alpha, const cuComplex* A, int64_t lda, const cuComplex* x, int64_t incx, const cuComplex* beta, cuComplex* y, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasZgemv_v2(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, const cuDoubleComplex* x, int incx, const cuDoubleComplex* beta, cuDoubleComplex* y, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasZgemv_v2_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, const cuDoubleComplex* x, int64_t incx, const cuDoubleComplex* beta, cuDoubleComplex* y, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param kl SEND_ONLY
+ * @param ku SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasSgbmv_v2(cublasHandle_t handle, cublasOperation_t trans, int m, int n, int kl, int ku, const float* alpha, const float* A, int lda, const float* x, int incx, const float* beta, float* y, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param kl SEND_ONLY
+ * @param ku SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasSgbmv_v2_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, int64_t kl, int64_t ku, const float* alpha, const float* A, int64_t lda, const float* x, int64_t incx, const float* beta, float* y, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param kl SEND_ONLY
+ * @param ku SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasDgbmv_v2(cublasHandle_t handle, cublasOperation_t trans, int m, int n, int kl, int ku, const double* alpha, const double* A, int lda, const double* x, int incx, const double* beta, double* y, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param kl SEND_ONLY
+ * @param ku SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasDgbmv_v2_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, int64_t kl, int64_t ku, const double* alpha, const double* A, int64_t lda, const double* x, int64_t incx, const double* beta, double* y, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param kl SEND_ONLY
+ * @param ku SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasCgbmv_v2(cublasHandle_t handle, cublasOperation_t trans, int m, int n, int kl, int ku, const cuComplex* alpha, const cuComplex* A, int lda, const cuComplex* x, int incx, const cuComplex* beta, cuComplex* y, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param kl SEND_ONLY
+ * @param ku SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasCgbmv_v2_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, int64_t kl, int64_t ku, const cuComplex* alpha, const cuComplex* A, int64_t lda, const cuComplex* x, int64_t incx, const cuComplex* beta, cuComplex* y, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param kl SEND_ONLY
+ * @param ku SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasZgbmv_v2(cublasHandle_t handle, cublasOperation_t trans, int m, int n, int kl, int ku, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, const cuDoubleComplex* x, int incx, const cuDoubleComplex* beta, cuDoubleComplex* y, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param kl SEND_ONLY
+ * @param ku SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasZgbmv_v2_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, int64_t kl, int64_t ku, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, const cuDoubleComplex* x, int64_t incx, const cuDoubleComplex* beta, cuDoubleComplex* y, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasStrmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const float* A, int lda, float* x, int incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasStrmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, const float* A, int64_t lda, float* x, int64_t incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasDtrmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const double* A, int lda, double* x, int incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasDtrmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, const double* A, int64_t lda, double* x, int64_t incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasCtrmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const cuComplex* A, int lda, cuComplex* x, int incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasCtrmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, const cuComplex* A, int64_t lda, cuComplex* x, int64_t incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasZtrmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const cuDoubleComplex* A, int lda, cuDoubleComplex* x, int incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasZtrmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, const cuDoubleComplex* A, int64_t lda, cuDoubleComplex* x, int64_t incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasStbmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, int k, const float* A, int lda, float* x, int incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasStbmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, int64_t k, const float* A, int64_t lda, float* x, int64_t incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasDtbmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, int k, const double* A, int lda, double* x, int incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasDtbmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, int64_t k, const double* A, int64_t lda, double* x, int64_t incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasCtbmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, int k, const cuComplex* A, int lda, cuComplex* x, int incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasCtbmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, int64_t k, const cuComplex* A, int64_t lda, cuComplex* x, int64_t incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasZtbmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, int k, const cuDoubleComplex* A, int lda, cuDoubleComplex* x, int incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasZtbmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, int64_t k, const cuDoubleComplex* A, int64_t lda, cuDoubleComplex* x, int64_t incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param AP SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasStpmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const float* AP, float* x, int incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param AP SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasStpmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, const float* AP, float* x, int64_t incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param AP SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasDtpmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const double* AP, double* x, int incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param AP SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasDtpmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, const double* AP, double* x, int64_t incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param AP SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasCtpmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const cuComplex* AP, cuComplex* x, int incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param AP SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasCtpmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, const cuComplex* AP, cuComplex* x, int64_t incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param AP SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasZtpmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const cuDoubleComplex* AP, cuDoubleComplex* x, int incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param AP SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasZtpmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, const cuDoubleComplex* AP, cuDoubleComplex* x, int64_t incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasStrsv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const float* A, int lda, float* x, int incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasStrsv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, const float* A, int64_t lda, float* x, int64_t incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasDtrsv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const double* A, int lda, double* x, int incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasDtrsv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, const double* A, int64_t lda, double* x, int64_t incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasCtrsv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const cuComplex* A, int lda, cuComplex* x, int incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasCtrsv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, const cuComplex* A, int64_t lda, cuComplex* x, int64_t incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasZtrsv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const cuDoubleComplex* A, int lda, cuDoubleComplex* x, int incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasZtrsv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, const cuDoubleComplex* A, int64_t lda, cuDoubleComplex* x, int64_t incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param AP SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasStpsv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const float* AP, float* x, int incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param AP SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasStpsv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, const float* AP, float* x, int64_t incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param AP SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasDtpsv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const double* AP, double* x, int incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param AP SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasDtpsv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, const double* AP, double* x, int64_t incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param AP SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasCtpsv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const cuComplex* AP, cuComplex* x, int incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param AP SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasCtpsv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, const cuComplex* AP, cuComplex* x, int64_t incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param AP SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasZtpsv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const cuDoubleComplex* AP, cuDoubleComplex* x, int incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param AP SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasZtpsv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, const cuDoubleComplex* AP, cuDoubleComplex* x, int64_t incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasStbsv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, int k, const float* A, int lda, float* x, int incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasStbsv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, int64_t k, const float* A, int64_t lda, float* x, int64_t incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasDtbsv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, int k, const double* A, int lda, double* x, int incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasDtbsv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, int64_t k, const double* A, int64_t lda, double* x, int64_t incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasCtbsv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, int k, const cuComplex* A, int lda, cuComplex* x, int incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasCtbsv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, int64_t k, const cuComplex* A, int64_t lda, cuComplex* x, int64_t incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasZtbsv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, int k, const cuDoubleComplex* A, int lda, cuDoubleComplex* x, int incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ */
+cublasStatus_t cublasZtbsv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, int64_t k, const cuDoubleComplex* A, int64_t lda, cuDoubleComplex* x, int64_t incx);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasSsymv_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const float* alpha, const float* A, int lda, const float* x, int incx, const float* beta, float* y, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasSsymv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const float* alpha, const float* A, int64_t lda, const float* x, int64_t incx, const float* beta, float* y, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasDsymv_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const double* alpha, const double* A, int lda, const double* x, int incx, const double* beta, double* y, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasDsymv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const double* alpha, const double* A, int64_t lda, const double* x, int64_t incx, const double* beta, double* y, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasCsymv_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuComplex* alpha, const cuComplex* A, int lda, const cuComplex* x, int incx, const cuComplex* beta, cuComplex* y, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasCsymv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const cuComplex* alpha, const cuComplex* A, int64_t lda, const cuComplex* x, int64_t incx, const cuComplex* beta, cuComplex* y, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasZsymv_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, const cuDoubleComplex* x, int incx, const cuDoubleComplex* beta, cuDoubleComplex* y, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasZsymv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, const cuDoubleComplex* x, int64_t incx, const cuDoubleComplex* beta, cuDoubleComplex* y, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasChemv_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuComplex* alpha, const cuComplex* A, int lda, const cuComplex* x, int incx, const cuComplex* beta, cuComplex* y, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasChemv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const cuComplex* alpha, const cuComplex* A, int64_t lda, const cuComplex* x, int64_t incx, const cuComplex* beta, cuComplex* y, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasZhemv_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, const cuDoubleComplex* x, int incx, const cuDoubleComplex* beta, cuDoubleComplex* y, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasZhemv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, const cuDoubleComplex* x, int64_t incx, const cuDoubleComplex* beta, cuDoubleComplex* y, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasSsbmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, int k, const float* alpha, const float* A, int lda, const float* x, int incx, const float* beta, float* y, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasSsbmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, int64_t k, const float* alpha, const float* A, int64_t lda, const float* x, int64_t incx, const float* beta, float* y, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasDsbmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, int k, const double* alpha, const double* A, int lda, const double* x, int incx, const double* beta, double* y, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasDsbmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, int64_t k, const double* alpha, const double* A, int64_t lda, const double* x, int64_t incx, const double* beta, double* y, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasChbmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, int k, const cuComplex* alpha, const cuComplex* A, int lda, const cuComplex* x, int incx, const cuComplex* beta, cuComplex* y, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasChbmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, int64_t k, const cuComplex* alpha, const cuComplex* A, int64_t lda, const cuComplex* x, int64_t incx, const cuComplex* beta, cuComplex* y, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasZhbmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, int k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, const cuDoubleComplex* x, int incx, const cuDoubleComplex* beta, cuDoubleComplex* y, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasZhbmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, int64_t k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, const cuDoubleComplex* x, int64_t incx, const cuDoubleComplex* beta, cuDoubleComplex* y, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param AP SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasSspmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const float* alpha, const float* AP, const float* x, int incx, const float* beta, float* y, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param AP SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasSspmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const float* alpha, const float* AP, const float* x, int64_t incx, const float* beta, float* y, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param AP SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasDspmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const double* alpha, const double* AP, const double* x, int incx, const double* beta, double* y, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param AP SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasDspmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const double* alpha, const double* AP, const double* x, int64_t incx, const double* beta, double* y, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param AP SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasChpmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuComplex* alpha, const cuComplex* AP, const cuComplex* x, int incx, const cuComplex* beta, cuComplex* y, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param AP SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasChpmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const cuComplex* alpha, const cuComplex* AP, const cuComplex* x, int64_t incx, const cuComplex* beta, cuComplex* y, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param AP SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasZhpmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* AP, const cuDoubleComplex* x, int incx, const cuDoubleComplex* beta, cuDoubleComplex* y, int incy);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param AP SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ */
+cublasStatus_t cublasZhpmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* AP, const cuDoubleComplex* x, int64_t incx, const cuDoubleComplex* beta, cuDoubleComplex* y, int64_t incy);
+/**
+ * @param handle SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasSger_v2(cublasHandle_t handle, int m, int n, const float* alpha, const float* x, int incx, const float* y, int incy, float* A, int lda);
+/**
+ * @param handle SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasSger_v2_64(cublasHandle_t handle, int64_t m, int64_t n, const float* alpha, const float* x, int64_t incx, const float* y, int64_t incy, float* A, int64_t lda);
+/**
+ * @param handle SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasDger_v2(cublasHandle_t handle, int m, int n, const double* alpha, const double* x, int incx, const double* y, int incy, double* A, int lda);
+/**
+ * @param handle SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasDger_v2_64(cublasHandle_t handle, int64_t m, int64_t n, const double* alpha, const double* x, int64_t incx, const double* y, int64_t incy, double* A, int64_t lda);
+/**
+ * @param handle SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasCgeru_v2(cublasHandle_t handle, int m, int n, const cuComplex* alpha, const cuComplex* x, int incx, const cuComplex* y, int incy, cuComplex* A, int lda);
+/**
+ * @param handle SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasCgeru_v2_64(cublasHandle_t handle, int64_t m, int64_t n, const cuComplex* alpha, const cuComplex* x, int64_t incx, const cuComplex* y, int64_t incy, cuComplex* A, int64_t lda);
+/**
+ * @param handle SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasCgerc_v2(cublasHandle_t handle, int m, int n, const cuComplex* alpha, const cuComplex* x, int incx, const cuComplex* y, int incy, cuComplex* A, int lda);
+/**
+ * @param handle SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasCgerc_v2_64(cublasHandle_t handle, int64_t m, int64_t n, const cuComplex* alpha, const cuComplex* x, int64_t incx, const cuComplex* y, int64_t incy, cuComplex* A, int64_t lda);
+/**
+ * @param handle SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasZgeru_v2(cublasHandle_t handle, int m, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* x, int incx, const cuDoubleComplex* y, int incy, cuDoubleComplex* A, int lda);
+/**
+ * @param handle SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasZgeru_v2_64(cublasHandle_t handle, int64_t m, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* x, int64_t incx, const cuDoubleComplex* y, int64_t incy, cuDoubleComplex* A, int64_t lda);
+/**
+ * @param handle SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasZgerc_v2(cublasHandle_t handle, int m, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* x, int incx, const cuDoubleComplex* y, int incy, cuDoubleComplex* A, int lda);
+/**
+ * @param handle SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasZgerc_v2_64(cublasHandle_t handle, int64_t m, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* x, int64_t incx, const cuDoubleComplex* y, int64_t incy, cuDoubleComplex* A, int64_t lda);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasSsyr_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const float* alpha, const float* x, int incx, float* A, int lda);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasSsyr_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const float* alpha, const float* x, int64_t incx, float* A, int64_t lda);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasDsyr_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const double* alpha, const double* x, int incx, double* A, int lda);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasDsyr_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const double* alpha, const double* x, int64_t incx, double* A, int64_t lda);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasCsyr_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuComplex* alpha, const cuComplex* x, int incx, cuComplex* A, int lda);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasCsyr_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const cuComplex* alpha, const cuComplex* x, int64_t incx, cuComplex* A, int64_t lda);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasZsyr_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* x, int incx, cuDoubleComplex* A, int lda);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasZsyr_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* x, int64_t incx, cuDoubleComplex* A, int64_t lda);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasCher_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const float* alpha, const cuComplex* x, int incx, cuComplex* A, int lda);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasCher_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const float* alpha, const cuComplex* x, int64_t incx, cuComplex* A, int64_t lda);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasZher_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const double* alpha, const cuDoubleComplex* x, int incx, cuDoubleComplex* A, int lda);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasZher_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const double* alpha, const cuDoubleComplex* x, int64_t incx, cuDoubleComplex* A, int64_t lda);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param AP SEND_RECV
+ */
+cublasStatus_t cublasSspr_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const float* alpha, const float* x, int incx, float* AP);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param AP SEND_RECV
+ */
+cublasStatus_t cublasSspr_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const float* alpha, const float* x, int64_t incx, float* AP);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param AP SEND_RECV
+ */
+cublasStatus_t cublasDspr_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const double* alpha, const double* x, int incx, double* AP);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param AP SEND_RECV
+ */
+cublasStatus_t cublasDspr_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const double* alpha, const double* x, int64_t incx, double* AP);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param AP SEND_RECV
+ */
+cublasStatus_t cublasChpr_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const float* alpha, const cuComplex* x, int incx, cuComplex* AP);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param AP SEND_RECV
+ */
+cublasStatus_t cublasChpr_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const float* alpha, const cuComplex* x, int64_t incx, cuComplex* AP);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param AP SEND_RECV
+ */
+cublasStatus_t cublasZhpr_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const double* alpha, const cuDoubleComplex* x, int incx, cuDoubleComplex* AP);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param AP SEND_RECV
+ */
+cublasStatus_t cublasZhpr_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const double* alpha, const cuDoubleComplex* x, int64_t incx, cuDoubleComplex* AP);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasSsyr2_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const float* alpha, const float* x, int incx, const float* y, int incy, float* A, int lda);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasSsyr2_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const float* alpha, const float* x, int64_t incx, const float* y, int64_t incy, float* A, int64_t lda);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasDsyr2_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const double* alpha, const double* x, int incx, const double* y, int incy, double* A, int lda);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasDsyr2_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const double* alpha, const double* x, int64_t incx, const double* y, int64_t incy, double* A, int64_t lda);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasCsyr2_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuComplex* alpha, const cuComplex* x, int incx, const cuComplex* y, int incy, cuComplex* A, int lda);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasCsyr2_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const cuComplex* alpha, const cuComplex* x, int64_t incx, const cuComplex* y, int64_t incy, cuComplex* A, int64_t lda);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasZsyr2_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* x, int incx, const cuDoubleComplex* y, int incy, cuDoubleComplex* A, int lda);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasZsyr2_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* x, int64_t incx, const cuDoubleComplex* y, int64_t incy, cuDoubleComplex* A, int64_t lda);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasCher2_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuComplex* alpha, const cuComplex* x, int incx, const cuComplex* y, int incy, cuComplex* A, int lda);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasCher2_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const cuComplex* alpha, const cuComplex* x, int64_t incx, const cuComplex* y, int64_t incy, cuComplex* A, int64_t lda);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasZher2_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* x, int incx, const cuDoubleComplex* y, int incy, cuDoubleComplex* A, int lda);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasZher2_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* x, int64_t incx, const cuDoubleComplex* y, int64_t incy, cuDoubleComplex* A, int64_t lda);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param AP SEND_RECV
+ */
+cublasStatus_t cublasSspr2_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const float* alpha, const float* x, int incx, const float* y, int incy, float* AP);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param AP SEND_RECV
+ */
+cublasStatus_t cublasSspr2_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const float* alpha, const float* x, int64_t incx, const float* y, int64_t incy, float* AP);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param AP SEND_RECV
+ */
+cublasStatus_t cublasDspr2_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const double* alpha, const double* x, int incx, const double* y, int incy, double* AP);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param AP SEND_RECV
+ */
+cublasStatus_t cublasDspr2_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const double* alpha, const double* x, int64_t incx, const double* y, int64_t incy, double* AP);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param AP SEND_RECV
+ */
+cublasStatus_t cublasChpr2_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuComplex* alpha, const cuComplex* x, int incx, const cuComplex* y, int incy, cuComplex* AP);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param AP SEND_RECV
+ */
+cublasStatus_t cublasChpr2_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const cuComplex* alpha, const cuComplex* x, int64_t incx, const cuComplex* y, int64_t incy, cuComplex* AP);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param AP SEND_RECV
+ */
+cublasStatus_t cublasZhpr2_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* x, int incx, const cuDoubleComplex* y, int incy, cuDoubleComplex* AP);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param AP SEND_RECV
+ */
+cublasStatus_t cublasZhpr2_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* x, int64_t incx, const cuDoubleComplex* y, int64_t incy, cuDoubleComplex* AP);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param incy SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasSgemvBatched(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const float* alpha, const float* const Aarray[], int lda, const float* const xarray[], int incx, const float* beta, float* const yarray[], int incy, int batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param incy SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasSgemvBatched_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, const float* alpha, const float* const Aarray[], int64_t lda, const float* const xarray[], int64_t incx, const float* beta, float* const yarray[], int64_t incy, int64_t batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param incy SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasDgemvBatched(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const double* alpha, const double* const Aarray[], int lda, const double* const xarray[], int incx, const double* beta, double* const yarray[], int incy, int batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param incy SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasDgemvBatched_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, const double* alpha, const double* const Aarray[], int64_t lda, const double* const xarray[], int64_t incx, const double* beta, double* const yarray[], int64_t incy, int64_t batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param incy SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasCgemvBatched(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const cuComplex* alpha, const cuComplex* const Aarray[], int lda, const cuComplex* const xarray[], int incx, const cuComplex* beta, cuComplex* const yarray[], int incy, int batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param incy SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasCgemvBatched_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, const cuComplex* alpha, const cuComplex* const Aarray[], int64_t lda, const cuComplex* const xarray[], int64_t incx, const cuComplex* beta, cuComplex* const yarray[], int64_t incy, int64_t batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param incy SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasZgemvBatched(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* const Aarray[], int lda, const cuDoubleComplex* const xarray[], int incx, const cuDoubleComplex* beta, cuDoubleComplex* const yarray[], int incy, int batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param incy SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasZgemvBatched_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* const Aarray[], int64_t lda, const cuDoubleComplex* const xarray[], int64_t incx, const cuDoubleComplex* beta, cuDoubleComplex* const yarray[], int64_t incy, int64_t batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param incy SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasHSHgemvBatched(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const float* alpha, const __half* const Aarray[], int lda, const __half* const xarray[], int incx, const float* beta, __half* const yarray[], int incy, int batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param incy SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasHSHgemvBatched_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, const float* alpha, const __half* const Aarray[], int64_t lda, const __half* const xarray[], int64_t incx, const float* beta, __half* const yarray[], int64_t incy, int64_t batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param incy SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasHSSgemvBatched(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const float* alpha, const __half* const Aarray[], int lda, const __half* const xarray[], int incx, const float* beta, float* const yarray[], int incy, int batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param incy SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasHSSgemvBatched_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, const float* alpha, const __half* const Aarray[], int64_t lda, const __half* const xarray[], int64_t incx, const float* beta, float* const yarray[], int64_t incy, int64_t batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param incy SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasTSTgemvBatched(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const float* alpha, const __nv_bfloat16* const Aarray[], int lda, const __nv_bfloat16* const xarray[], int incx, const float* beta, __nv_bfloat16* const yarray[], int incy, int batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param incy SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasTSTgemvBatched_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, const float* alpha, const __nv_bfloat16* const Aarray[], int64_t lda, const __nv_bfloat16* const xarray[], int64_t incx, const float* beta, __nv_bfloat16* const yarray[], int64_t incy, int64_t batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param incy SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasTSSgemvBatched(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const float* alpha, const __nv_bfloat16* const Aarray[], int lda, const __nv_bfloat16* const xarray[], int incx, const float* beta, float* const yarray[], int incy, int batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param incx SEND_ONLY
+ * @param beta SEND_RECV
+ * @param incy SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasTSSgemvBatched_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, const float* alpha, const __nv_bfloat16* const Aarray[], int64_t lda, const __nv_bfloat16* const xarray[], int64_t incx, const float* beta, float* const yarray[], int64_t incy, int64_t batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param strideA SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param stridex SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param stridey SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasSgemvStridedBatched(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const float* alpha, const float* A, int lda, long long int strideA, const float* x, int incx, long long int stridex, const float* beta, float* y, int incy, long long int stridey, int batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param strideA SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param stridex SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param stridey SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasSgemvStridedBatched_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, const float* alpha, const float* A, int64_t lda, long long int strideA, const float* x, int64_t incx, long long int stridex, const float* beta, float* y, int64_t incy, long long int stridey, int64_t batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param strideA SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param stridex SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param stridey SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasDgemvStridedBatched(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const double* alpha, const double* A, int lda, long long int strideA, const double* x, int incx, long long int stridex, const double* beta, double* y, int incy, long long int stridey, int batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param strideA SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param stridex SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param stridey SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasDgemvStridedBatched_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, const double* alpha, const double* A, int64_t lda, long long int strideA, const double* x, int64_t incx, long long int stridex, const double* beta, double* y, int64_t incy, long long int stridey, int64_t batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param strideA SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param stridex SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param stridey SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasCgemvStridedBatched(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const cuComplex* alpha, const cuComplex* A, int lda, long long int strideA, const cuComplex* x, int incx, long long int stridex, const cuComplex* beta, cuComplex* y, int incy, long long int stridey, int batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param strideA SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param stridex SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param stridey SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasCgemvStridedBatched_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, const cuComplex* alpha, const cuComplex* A, int64_t lda, long long int strideA, const cuComplex* x, int64_t incx, long long int stridex, const cuComplex* beta, cuComplex* y, int64_t incy, long long int stridey, int64_t batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param strideA SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param stridex SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param stridey SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasZgemvStridedBatched(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, long long int strideA, const cuDoubleComplex* x, int incx, long long int stridex, const cuDoubleComplex* beta, cuDoubleComplex* y, int incy, long long int stridey, int batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param strideA SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param stridex SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param stridey SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasZgemvStridedBatched_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, long long int strideA, const cuDoubleComplex* x, int64_t incx, long long int stridex, const cuDoubleComplex* beta, cuDoubleComplex* y, int64_t incy, long long int stridey, int64_t batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param strideA SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param stridex SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param stridey SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasHSHgemvStridedBatched(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const float* alpha, const __half* A, int lda, long long int strideA, const __half* x, int incx, long long int stridex, const float* beta, __half* y, int incy, long long int stridey, int batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param strideA SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param stridex SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param stridey SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasHSHgemvStridedBatched_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, const float* alpha, const __half* A, int64_t lda, long long int strideA, const __half* x, int64_t incx, long long int stridex, const float* beta, __half* y, int64_t incy, long long int stridey, int64_t batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param strideA SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param stridex SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param stridey SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasHSSgemvStridedBatched(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const float* alpha, const __half* A, int lda, long long int strideA, const __half* x, int incx, long long int stridex, const float* beta, float* y, int incy, long long int stridey, int batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param strideA SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param stridex SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param stridey SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasHSSgemvStridedBatched_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, const float* alpha, const __half* A, int64_t lda, long long int strideA, const __half* x, int64_t incx, long long int stridex, const float* beta, float* y, int64_t incy, long long int stridey, int64_t batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param strideA SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param stridex SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param stridey SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasTSTgemvStridedBatched(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const float* alpha, const __nv_bfloat16* A, int lda, long long int strideA, const __nv_bfloat16* x, int incx, long long int stridex, const float* beta, __nv_bfloat16* y, int incy, long long int stridey, int batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param strideA SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param stridex SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param stridey SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasTSTgemvStridedBatched_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, const float* alpha, const __nv_bfloat16* A, int64_t lda, long long int strideA, const __nv_bfloat16* x, int64_t incx, long long int stridex, const float* beta, __nv_bfloat16* y, int64_t incy, long long int stridey, int64_t batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param strideA SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param stridex SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param stridey SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasTSSgemvStridedBatched(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const float* alpha, const __nv_bfloat16* A, int lda, long long int strideA, const __nv_bfloat16* x, int incx, long long int stridex, const float* beta, float* y, int incy, long long int stridey, int batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param strideA SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param stridex SEND_ONLY
+ * @param beta SEND_RECV
+ * @param y SEND_RECV
+ * @param incy SEND_ONLY
+ * @param stridey SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasTSSgemvStridedBatched_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, const float* alpha, const __nv_bfloat16* A, int64_t lda, long long int strideA, const __nv_bfloat16* x, int64_t incx, long long int stridex, const float* beta, float* y, int64_t incy, long long int stridey, int64_t batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasSgemm_v2_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const float* alpha, const float* A, int64_t lda, const float* B, int64_t ldb, const float* beta, float* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasDgemm_v2(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const double* alpha, const double* A, int lda, const double* B, int ldb, const double* beta, double* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasDgemm_v2_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const double* alpha, const double* A, int64_t lda, const double* B, int64_t ldb, const double* beta, double* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCgemm_v2(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const cuComplex* alpha, const cuComplex* A, int lda, const cuComplex* B, int ldb, const cuComplex* beta, cuComplex* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCgemm_v2_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const cuComplex* alpha, const cuComplex* A, int64_t lda, const cuComplex* B, int64_t ldb, const cuComplex* beta, cuComplex* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCgemm3m(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const cuComplex* alpha, const cuComplex* A, int lda, const cuComplex* B, int ldb, const cuComplex* beta, cuComplex* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCgemm3m_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const cuComplex* alpha, const cuComplex* A, int64_t lda, const cuComplex* B, int64_t ldb, const cuComplex* beta, cuComplex* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param Atype SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param Btype SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param Ctype SEND_ONLY
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCgemm3mEx(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const cuComplex* alpha, const void* A, cudaDataType Atype, int lda, const void* B, cudaDataType Btype, int ldb, const cuComplex* beta, void* C, cudaDataType Ctype, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param Atype SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param Btype SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param Ctype SEND_ONLY
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCgemm3mEx_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const cuComplex* alpha, const void* A, cudaDataType Atype, int64_t lda, const void* B, cudaDataType Btype, int64_t ldb, const cuComplex* beta, void* C, cudaDataType Ctype, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasZgemm_v2(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, const cuDoubleComplex* B, int ldb, const cuDoubleComplex* beta, cuDoubleComplex* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasZgemm_v2_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, const cuDoubleComplex* B, int64_t ldb, const cuDoubleComplex* beta, cuDoubleComplex* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasZgemm3m(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, const cuDoubleComplex* B, int ldb, const cuDoubleComplex* beta, cuDoubleComplex* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasZgemm3m_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, const cuDoubleComplex* B, int64_t ldb, const cuDoubleComplex* beta, cuDoubleComplex* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasHgemm(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const __half* alpha, const __half* A, int lda, const __half* B, int ldb, const __half* beta, __half* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasHgemm_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const __half* alpha, const __half* A, int64_t lda, const __half* B, int64_t ldb, const __half* beta, __half* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param Atype SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param Btype SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param Ctype SEND_ONLY
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasSgemmEx(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const float* alpha, const void* A, cudaDataType Atype, int lda, const void* B, cudaDataType Btype, int ldb, const float* beta, void* C, cudaDataType Ctype, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param Atype SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param Btype SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param Ctype SEND_ONLY
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasSgemmEx_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const float* alpha, const void* A, cudaDataType Atype, int64_t lda, const void* B, cudaDataType Btype, int64_t ldb, const float* beta, void* C, cudaDataType Ctype, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param Atype SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param Btype SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param Ctype SEND_ONLY
+ * @param ldc SEND_ONLY
+ * @param computeType SEND_ONLY
+ * @param algo SEND_ONLY
+ */
+cublasStatus_t cublasGemmEx(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const void* alpha, const void* A, cudaDataType Atype, int lda, const void* B, cudaDataType Btype, int ldb, const void* beta, void* C, cudaDataType Ctype, int ldc, cublasComputeType_t computeType, cublasGemmAlgo_t algo);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param Atype SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param Btype SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param Ctype SEND_ONLY
+ * @param ldc SEND_ONLY
+ * @param computeType SEND_ONLY
+ * @param algo SEND_ONLY
+ */
+cublasStatus_t cublasGemmEx_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const void* alpha, const void* A, cudaDataType Atype, int64_t lda, const void* B, cudaDataType Btype, int64_t ldb, const void* beta, void* C, cudaDataType Ctype, int64_t ldc, cublasComputeType_t computeType, cublasGemmAlgo_t algo);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param Atype SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param Btype SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param Ctype SEND_ONLY
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCgemmEx(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const cuComplex* alpha, const void* A, cudaDataType Atype, int lda, const void* B, cudaDataType Btype, int ldb, const cuComplex* beta, void* C, cudaDataType Ctype, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param Atype SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param Btype SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param Ctype SEND_ONLY
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCgemmEx_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const cuComplex* alpha, const void* A, cudaDataType Atype, int64_t lda, const void* B, cudaDataType Btype, int64_t ldb, const cuComplex* beta, void* C, cudaDataType Ctype, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasSsyrk_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const float* alpha, const float* A, int lda, const float* beta, float* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasSsyrk_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const float* alpha, const float* A, int64_t lda, const float* beta, float* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasDsyrk_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const double* alpha, const double* A, int lda, const double* beta, double* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasDsyrk_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const double* alpha, const double* A, int64_t lda, const double* beta, double* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCsyrk_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const cuComplex* alpha, const cuComplex* A, int lda, const cuComplex* beta, cuComplex* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCsyrk_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const cuComplex* alpha, const cuComplex* A, int64_t lda, const cuComplex* beta, cuComplex* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasZsyrk_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, const cuDoubleComplex* beta, cuDoubleComplex* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasZsyrk_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, const cuDoubleComplex* beta, cuDoubleComplex* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param Atype SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param Ctype SEND_ONLY
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCsyrkEx(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const cuComplex* alpha, const void* A, cudaDataType Atype, int lda, const cuComplex* beta, void* C, cudaDataType Ctype, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param Atype SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param Ctype SEND_ONLY
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCsyrkEx_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const cuComplex* alpha, const void* A, cudaDataType Atype, int64_t lda, const cuComplex* beta, void* C, cudaDataType Ctype, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param Atype SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param Ctype SEND_ONLY
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCsyrk3mEx(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const cuComplex* alpha, const void* A, cudaDataType Atype, int lda, const cuComplex* beta, void* C, cudaDataType Ctype, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param Atype SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param Ctype SEND_ONLY
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCsyrk3mEx_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const cuComplex* alpha, const void* A, cudaDataType Atype, int64_t lda, const cuComplex* beta, void* C, cudaDataType Ctype, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCherk_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const float* alpha, const cuComplex* A, int lda, const float* beta, cuComplex* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCherk_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const float* alpha, const cuComplex* A, int64_t lda, const float* beta, cuComplex* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasZherk_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const double* alpha, const cuDoubleComplex* A, int lda, const double* beta, cuDoubleComplex* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasZherk_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const double* alpha, const cuDoubleComplex* A, int64_t lda, const double* beta, cuDoubleComplex* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param Atype SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param Ctype SEND_ONLY
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCherkEx(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const float* alpha, const void* A, cudaDataType Atype, int lda, const float* beta, void* C, cudaDataType Ctype, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param Atype SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param Ctype SEND_ONLY
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCherkEx_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const float* alpha, const void* A, cudaDataType Atype, int64_t lda, const float* beta, void* C, cudaDataType Ctype, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param Atype SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param Ctype SEND_ONLY
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCherk3mEx(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const float* alpha, const void* A, cudaDataType Atype, int lda, const float* beta, void* C, cudaDataType Ctype, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param Atype SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param Ctype SEND_ONLY
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCherk3mEx_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const float* alpha, const void* A, cudaDataType Atype, int64_t lda, const float* beta, void* C, cudaDataType Ctype, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasSsyr2k_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const float* alpha, const float* A, int lda, const float* B, int ldb, const float* beta, float* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasSsyr2k_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const float* alpha, const float* A, int64_t lda, const float* B, int64_t ldb, const float* beta, float* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasDsyr2k_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const double* alpha, const double* A, int lda, const double* B, int ldb, const double* beta, double* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasDsyr2k_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const double* alpha, const double* A, int64_t lda, const double* B, int64_t ldb, const double* beta, double* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCsyr2k_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const cuComplex* alpha, const cuComplex* A, int lda, const cuComplex* B, int ldb, const cuComplex* beta, cuComplex* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCsyr2k_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const cuComplex* alpha, const cuComplex* A, int64_t lda, const cuComplex* B, int64_t ldb, const cuComplex* beta, cuComplex* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasZsyr2k_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, const cuDoubleComplex* B, int ldb, const cuDoubleComplex* beta, cuDoubleComplex* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasZsyr2k_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, const cuDoubleComplex* B, int64_t ldb, const cuDoubleComplex* beta, cuDoubleComplex* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCher2k_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const cuComplex* alpha, const cuComplex* A, int lda, const cuComplex* B, int ldb, const float* beta, cuComplex* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCher2k_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const cuComplex* alpha, const cuComplex* A, int64_t lda, const cuComplex* B, int64_t ldb, const float* beta, cuComplex* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasZher2k_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, const cuDoubleComplex* B, int ldb, const double* beta, cuDoubleComplex* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasZher2k_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, const cuDoubleComplex* B, int64_t ldb, const double* beta, cuDoubleComplex* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasSsyrkx(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const float* alpha, const float* A, int lda, const float* B, int ldb, const float* beta, float* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasSsyrkx_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const float* alpha, const float* A, int64_t lda, const float* B, int64_t ldb, const float* beta, float* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasDsyrkx(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const double* alpha, const double* A, int lda, const double* B, int ldb, const double* beta, double* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasDsyrkx_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const double* alpha, const double* A, int64_t lda, const double* B, int64_t ldb, const double* beta, double* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCsyrkx(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const cuComplex* alpha, const cuComplex* A, int lda, const cuComplex* B, int ldb, const cuComplex* beta, cuComplex* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCsyrkx_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const cuComplex* alpha, const cuComplex* A, int64_t lda, const cuComplex* B, int64_t ldb, const cuComplex* beta, cuComplex* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasZsyrkx(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, const cuDoubleComplex* B, int ldb, const cuDoubleComplex* beta, cuDoubleComplex* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasZsyrkx_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, const cuDoubleComplex* B, int64_t ldb, const cuDoubleComplex* beta, cuDoubleComplex* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCherkx(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const cuComplex* alpha, const cuComplex* A, int lda, const cuComplex* B, int ldb, const float* beta, cuComplex* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCherkx_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const cuComplex* alpha, const cuComplex* A, int64_t lda, const cuComplex* B, int64_t ldb, const float* beta, cuComplex* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasZherkx(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, const cuDoubleComplex* B, int ldb, const double* beta, cuDoubleComplex* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasZherkx_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, const cuDoubleComplex* B, int64_t ldb, const double* beta, cuDoubleComplex* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasSsymm_v2(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, int m, int n, const float* alpha, const float* A, int lda, const float* B, int ldb, const float* beta, float* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasSsymm_v2_64(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, int64_t m, int64_t n, const float* alpha, const float* A, int64_t lda, const float* B, int64_t ldb, const float* beta, float* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasDsymm_v2(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, int m, int n, const double* alpha, const double* A, int lda, const double* B, int ldb, const double* beta, double* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasDsymm_v2_64(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, int64_t m, int64_t n, const double* alpha, const double* A, int64_t lda, const double* B, int64_t ldb, const double* beta, double* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCsymm_v2(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, int m, int n, const cuComplex* alpha, const cuComplex* A, int lda, const cuComplex* B, int ldb, const cuComplex* beta, cuComplex* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCsymm_v2_64(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, int64_t m, int64_t n, const cuComplex* alpha, const cuComplex* A, int64_t lda, const cuComplex* B, int64_t ldb, const cuComplex* beta, cuComplex* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasZsymm_v2(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, int m, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, const cuDoubleComplex* B, int ldb, const cuDoubleComplex* beta, cuDoubleComplex* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasZsymm_v2_64(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, int64_t m, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, const cuDoubleComplex* B, int64_t ldb, const cuDoubleComplex* beta, cuDoubleComplex* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasChemm_v2(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, int m, int n, const cuComplex* alpha, const cuComplex* A, int lda, const cuComplex* B, int ldb, const cuComplex* beta, cuComplex* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasChemm_v2_64(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, int64_t m, int64_t n, const cuComplex* alpha, const cuComplex* A, int64_t lda, const cuComplex* B, int64_t ldb, const cuComplex* beta, cuComplex* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasZhemm_v2(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, int m, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, const cuDoubleComplex* B, int ldb, const cuDoubleComplex* beta, cuDoubleComplex* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasZhemm_v2_64(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, int64_t m, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, const cuDoubleComplex* B, int64_t ldb, const cuDoubleComplex* beta, cuDoubleComplex* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ */
+cublasStatus_t cublasStrsm_v2(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int m, int n, const float* alpha, const float* A, int lda, float* B, int ldb);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ */
+cublasStatus_t cublasStrsm_v2_64(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t m, int64_t n, const float* alpha, const float* A, int64_t lda, float* B, int64_t ldb);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ */
+cublasStatus_t cublasDtrsm_v2(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int m, int n, const double* alpha, const double* A, int lda, double* B, int ldb);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ */
+cublasStatus_t cublasDtrsm_v2_64(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t m, int64_t n, const double* alpha, const double* A, int64_t lda, double* B, int64_t ldb);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ */
+cublasStatus_t cublasCtrsm_v2(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int m, int n, const cuComplex* alpha, const cuComplex* A, int lda, cuComplex* B, int ldb);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ */
+cublasStatus_t cublasCtrsm_v2_64(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t m, int64_t n, const cuComplex* alpha, const cuComplex* A, int64_t lda, cuComplex* B, int64_t ldb);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ */
+cublasStatus_t cublasZtrsm_v2(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int m, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, cuDoubleComplex* B, int ldb);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ */
+cublasStatus_t cublasZtrsm_v2_64(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t m, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, cuDoubleComplex* B, int64_t ldb);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasStrmm_v2(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int m, int n, const float* alpha, const float* A, int lda, const float* B, int ldb, float* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasStrmm_v2_64(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t m, int64_t n, const float* alpha, const float* A, int64_t lda, const float* B, int64_t ldb, float* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasDtrmm_v2(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int m, int n, const double* alpha, const double* A, int lda, const double* B, int ldb, double* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasDtrmm_v2_64(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t m, int64_t n, const double* alpha, const double* A, int64_t lda, const double* B, int64_t ldb, double* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCtrmm_v2(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int m, int n, const cuComplex* alpha, const cuComplex* A, int lda, const cuComplex* B, int ldb, cuComplex* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCtrmm_v2_64(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t m, int64_t n, const cuComplex* alpha, const cuComplex* A, int64_t lda, const cuComplex* B, int64_t ldb, cuComplex* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasZtrmm_v2(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int m, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, const cuDoubleComplex* B, int ldb, cuDoubleComplex* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasZtrmm_v2_64(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t m, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, const cuDoubleComplex* B, int64_t ldb, cuDoubleComplex* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param ldc SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasHgemmBatched(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const __half* alpha, const __half* const Aarray[], int lda, const __half* const Barray[], int ldb, const __half* beta, __half* const Carray[], int ldc, int batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param ldc SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasHgemmBatched_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const __half* alpha, const __half* const Aarray[], int64_t lda, const __half* const Barray[], int64_t ldb, const __half* beta, __half* const Carray[], int64_t ldc, int64_t batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param ldc SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasSgemmBatched(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const float* alpha, const float* const Aarray[], int lda, const float* const Barray[], int ldb, const float* beta, float* const Carray[], int ldc, int batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param ldc SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasSgemmBatched_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const float* alpha, const float* const Aarray[], int64_t lda, const float* const Barray[], int64_t ldb, const float* beta, float* const Carray[], int64_t ldc, int64_t batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param ldc SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasDgemmBatched(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const double* alpha, const double* const Aarray[], int lda, const double* const Barray[], int ldb, const double* beta, double* const Carray[], int ldc, int batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param ldc SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasDgemmBatched_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const double* alpha, const double* const Aarray[], int64_t lda, const double* const Barray[], int64_t ldb, const double* beta, double* const Carray[], int64_t ldc, int64_t batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param ldc SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasCgemmBatched(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const cuComplex* alpha, const cuComplex* const Aarray[], int lda, const cuComplex* const Barray[], int ldb, const cuComplex* beta, cuComplex* const Carray[], int ldc, int batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param ldc SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasCgemmBatched_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const cuComplex* alpha, const cuComplex* const Aarray[], int64_t lda, const cuComplex* const Barray[], int64_t ldb, const cuComplex* beta, cuComplex* const Carray[], int64_t ldc, int64_t batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param ldc SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasCgemm3mBatched(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const cuComplex* alpha, const cuComplex* const Aarray[], int lda, const cuComplex* const Barray[], int ldb, const cuComplex* beta, cuComplex* const Carray[], int ldc, int batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param ldc SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasCgemm3mBatched_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const cuComplex* alpha, const cuComplex* const Aarray[], int64_t lda, const cuComplex* const Barray[], int64_t ldb, const cuComplex* beta, cuComplex* const Carray[], int64_t ldc, int64_t batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param ldc SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasZgemmBatched(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const cuDoubleComplex* alpha, const cuDoubleComplex* const Aarray[], int lda, const cuDoubleComplex* const Barray[], int ldb, const cuDoubleComplex* beta, cuDoubleComplex* const Carray[], int ldc, int batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param ldc SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasZgemmBatched_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const cuDoubleComplex* alpha, const cuDoubleComplex* const Aarray[], int64_t lda, const cuDoubleComplex* const Barray[], int64_t ldb, const cuDoubleComplex* beta, cuDoubleComplex* const Carray[], int64_t ldc, int64_t batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param strideA SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param strideB SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ * @param strideC SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasHgemmStridedBatched(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const __half* alpha, const __half* A, int lda, long long int strideA, const __half* B, int ldb, long long int strideB, const __half* beta, __half* C, int ldc, long long int strideC, int batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param strideA SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param strideB SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ * @param strideC SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasHgemmStridedBatched_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const __half* alpha, const __half* A, int64_t lda, long long int strideA, const __half* B, int64_t ldb, long long int strideB, const __half* beta, __half* C, int64_t ldc, long long int strideC, int64_t batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param strideA SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param strideB SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ * @param strideC SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasSgemmStridedBatched(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const float* alpha, const float* A, int lda, long long int strideA, const float* B, int ldb, long long int strideB, const float* beta, float* C, int ldc, long long int strideC, int batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param strideA SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param strideB SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ * @param strideC SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasSgemmStridedBatched_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const float* alpha, const float* A, int64_t lda, long long int strideA, const float* B, int64_t ldb, long long int strideB, const float* beta, float* C, int64_t ldc, long long int strideC, int64_t batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param strideA SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param strideB SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ * @param strideC SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasDgemmStridedBatched(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const double* alpha, const double* A, int lda, long long int strideA, const double* B, int ldb, long long int strideB, const double* beta, double* C, int ldc, long long int strideC, int batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param strideA SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param strideB SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ * @param strideC SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasDgemmStridedBatched_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const double* alpha, const double* A, int64_t lda, long long int strideA, const double* B, int64_t ldb, long long int strideB, const double* beta, double* C, int64_t ldc, long long int strideC, int64_t batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param strideA SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param strideB SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ * @param strideC SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasCgemmStridedBatched(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const cuComplex* alpha, const cuComplex* A, int lda, long long int strideA, const cuComplex* B, int ldb, long long int strideB, const cuComplex* beta, cuComplex* C, int ldc, long long int strideC, int batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param strideA SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param strideB SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ * @param strideC SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasCgemmStridedBatched_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const cuComplex* alpha, const cuComplex* A, int64_t lda, long long int strideA, const cuComplex* B, int64_t ldb, long long int strideB, const cuComplex* beta, cuComplex* C, int64_t ldc, long long int strideC, int64_t batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param strideA SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param strideB SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ * @param strideC SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasCgemm3mStridedBatched(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const cuComplex* alpha, const cuComplex* A, int lda, long long int strideA, const cuComplex* B, int ldb, long long int strideB, const cuComplex* beta, cuComplex* C, int ldc, long long int strideC, int batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param strideA SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param strideB SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ * @param strideC SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasCgemm3mStridedBatched_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const cuComplex* alpha, const cuComplex* A, int64_t lda, long long int strideA, const cuComplex* B, int64_t ldb, long long int strideB, const cuComplex* beta, cuComplex* C, int64_t ldc, long long int strideC, int64_t batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param strideA SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param strideB SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ * @param strideC SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasZgemmStridedBatched(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, long long int strideA, const cuDoubleComplex* B, int ldb, long long int strideB, const cuDoubleComplex* beta, cuDoubleComplex* C, int ldc, long long int strideC, int batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param strideA SEND_ONLY
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param strideB SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ * @param strideC SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasZgemmStridedBatched_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, long long int strideA, const cuDoubleComplex* B, int64_t ldb, long long int strideB, const cuDoubleComplex* beta, cuDoubleComplex* C, int64_t ldc, long long int strideC, int64_t batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param Atype SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param Btype SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param Ctype SEND_ONLY
+ * @param ldc SEND_ONLY
+ * @param batchCount SEND_ONLY
+ * @param computeType SEND_ONLY
+ * @param algo SEND_ONLY
+ */
+cublasStatus_t cublasGemmBatchedEx(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const void* alpha, const void* const Aarray[], cudaDataType Atype, int lda, const void* const Barray[], cudaDataType Btype, int ldb, const void* beta, void* const Carray[], cudaDataType Ctype, int ldc, int batchCount, cublasComputeType_t computeType, cublasGemmAlgo_t algo);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param Atype SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param Btype SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param Ctype SEND_ONLY
+ * @param ldc SEND_ONLY
+ * @param batchCount SEND_ONLY
+ * @param computeType SEND_ONLY
+ * @param algo SEND_ONLY
+ */
+cublasStatus_t cublasGemmBatchedEx_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const void* alpha, const void* const Aarray[], cudaDataType Atype, int64_t lda, const void* const Barray[], cudaDataType Btype, int64_t ldb, const void* beta, void* const Carray[], cudaDataType Ctype, int64_t ldc, int64_t batchCount, cublasComputeType_t computeType, cublasGemmAlgo_t algo);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param Atype SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param strideA SEND_ONLY
+ * @param B SEND_RECV
+ * @param Btype SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param strideB SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param Ctype SEND_ONLY
+ * @param ldc SEND_ONLY
+ * @param strideC SEND_ONLY
+ * @param batchCount SEND_ONLY
+ * @param computeType SEND_ONLY
+ * @param algo SEND_ONLY
+ */
+cublasStatus_t cublasGemmStridedBatchedEx(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const void* alpha, const void* A, cudaDataType Atype, int lda, long long int strideA, const void* B, cudaDataType Btype, int ldb, long long int strideB, const void* beta, void* C, cudaDataType Ctype, int ldc, long long int strideC, int batchCount, cublasComputeType_t computeType, cublasGemmAlgo_t algo);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param Atype SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param strideA SEND_ONLY
+ * @param B SEND_RECV
+ * @param Btype SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param strideB SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param Ctype SEND_ONLY
+ * @param ldc SEND_ONLY
+ * @param strideC SEND_ONLY
+ * @param batchCount SEND_ONLY
+ * @param computeType SEND_ONLY
+ * @param algo SEND_ONLY
+ */
+cublasStatus_t cublasGemmStridedBatchedEx_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const void* alpha, const void* A, cudaDataType Atype, int64_t lda, long long int strideA, const void* B, cudaDataType Btype, int64_t ldb, long long int strideB, const void* beta, void* C, cudaDataType Ctype, int64_t ldc, long long int strideC, int64_t batchCount, cublasComputeType_t computeType, cublasGemmAlgo_t algo);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param beta SEND_RECV
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasSgeam(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, const float* alpha, const float* A, int lda, const float* beta, const float* B, int ldb, float* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param beta SEND_RECV
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasSgeam_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, const float* alpha, const float* A, int64_t lda, const float* beta, const float* B, int64_t ldb, float* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param beta SEND_RECV
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasDgeam(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, const double* alpha, const double* A, int lda, const double* beta, const double* B, int ldb, double* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param beta SEND_RECV
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasDgeam_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, const double* alpha, const double* A, int64_t lda, const double* beta, const double* B, int64_t ldb, double* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param beta SEND_RECV
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCgeam(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, const cuComplex* alpha, const cuComplex* A, int lda, const cuComplex* beta, const cuComplex* B, int ldb, cuComplex* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param beta SEND_RECV
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCgeam_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, const cuComplex* alpha, const cuComplex* A, int64_t lda, const cuComplex* beta, const cuComplex* B, int64_t ldb, cuComplex* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param beta SEND_RECV
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasZgeam(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, const cuDoubleComplex* beta, const cuDoubleComplex* B, int ldb, cuDoubleComplex* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param beta SEND_RECV
+ * @param B SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasZgeam_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, const cuDoubleComplex* beta, const cuDoubleComplex* B, int64_t ldb, cuDoubleComplex* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasStrsmBatched(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int m, int n, const float* alpha, const float* const A[], int lda, float* const B[], int ldb, int batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasStrsmBatched_64(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t m, int64_t n, const float* alpha, const float* const A[], int64_t lda, float* const B[], int64_t ldb, int64_t batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasDtrsmBatched(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int m, int n, const double* alpha, const double* const A[], int lda, double* const B[], int ldb, int batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasDtrsmBatched_64(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t m, int64_t n, const double* alpha, const double* const A[], int64_t lda, double* const B[], int64_t ldb, int64_t batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasCtrsmBatched(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int m, int n, const cuComplex* alpha, const cuComplex* const A[], int lda, cuComplex* const B[], int ldb, int batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasCtrsmBatched_64(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t m, int64_t n, const cuComplex* alpha, const cuComplex* const A[], int64_t lda, cuComplex* const B[], int64_t ldb, int64_t batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasZtrsmBatched(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int m, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* const A[], int lda, cuDoubleComplex* const B[], int ldb, int batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param side SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param diag SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param lda SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param batchCount SEND_ONLY
+ */
+cublasStatus_t cublasZtrsmBatched_64(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t m, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* const A[], int64_t lda, cuDoubleComplex* const B[], int64_t ldb, int64_t batchCount);
+/**
+ * @param handle SEND_ONLY
+ * @param mode SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasSdgmm(cublasHandle_t handle, cublasSideMode_t mode, int m, int n, const float* A, int lda, const float* x, int incx, float* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param mode SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasSdgmm_64(cublasHandle_t handle, cublasSideMode_t mode, int64_t m, int64_t n, const float* A, int64_t lda, const float* x, int64_t incx, float* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param mode SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasDdgmm(cublasHandle_t handle, cublasSideMode_t mode, int m, int n, const double* A, int lda, const double* x, int incx, double* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param mode SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasDdgmm_64(cublasHandle_t handle, cublasSideMode_t mode, int64_t m, int64_t n, const double* A, int64_t lda, const double* x, int64_t incx, double* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param mode SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCdgmm(cublasHandle_t handle, cublasSideMode_t mode, int m, int n, const cuComplex* A, int lda, const cuComplex* x, int incx, cuComplex* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param mode SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasCdgmm_64(cublasHandle_t handle, cublasSideMode_t mode, int64_t m, int64_t n, const cuComplex* A, int64_t lda, const cuComplex* x, int64_t incx, cuComplex* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param mode SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasZdgmm(cublasHandle_t handle, cublasSideMode_t mode, int m, int n, const cuDoubleComplex* A, int lda, const cuDoubleComplex* x, int incx, cuDoubleComplex* C, int ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param mode SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param x SEND_RECV
+ * @param incx SEND_ONLY
+ * @param C SEND_RECV
+ * @param ldc SEND_ONLY
+ */
+cublasStatus_t cublasZdgmm_64(cublasHandle_t handle, cublasSideMode_t mode, int64_t m, int64_t n, const cuDoubleComplex* A, int64_t lda, const cuDoubleComplex* x, int64_t incx, cuDoubleComplex* C, int64_t ldc);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param lda_inv SEND_ONLY
+ * @param info SEND_RECV
+ * @param batchSize SEND_ONLY
+ */
+cublasStatus_t cublasSmatinvBatched(cublasHandle_t handle, int n, const float* const A[], int lda, float* const Ainv[], int lda_inv, int* info, int batchSize);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param lda_inv SEND_ONLY
+ * @param info SEND_RECV
+ * @param batchSize SEND_ONLY
+ */
+cublasStatus_t cublasDmatinvBatched(cublasHandle_t handle, int n, const double* const A[], int lda, double* const Ainv[], int lda_inv, int* info, int batchSize);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param lda_inv SEND_ONLY
+ * @param info SEND_RECV
+ * @param batchSize SEND_ONLY
+ */
+cublasStatus_t cublasCmatinvBatched(cublasHandle_t handle, int n, const cuComplex* const A[], int lda, cuComplex* const Ainv[], int lda_inv, int* info, int batchSize);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param lda_inv SEND_ONLY
+ * @param info SEND_RECV
+ * @param batchSize SEND_ONLY
+ */
+cublasStatus_t cublasZmatinvBatched(cublasHandle_t handle, int n, const cuDoubleComplex* const A[], int lda, cuDoubleComplex* const Ainv[], int lda_inv, int* info, int batchSize);
+/**
+ * @param handle SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param info SEND_RECV
+ * @param batchSize SEND_ONLY
+ */
+cublasStatus_t cublasSgeqrfBatched(cublasHandle_t handle, int m, int n, float* const Aarray[], int lda, float* const TauArray[], int* info, int batchSize);
+/**
+ * @param handle SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param info SEND_RECV
+ * @param batchSize SEND_ONLY
+ */
+cublasStatus_t cublasDgeqrfBatched(cublasHandle_t handle, int m, int n, double* const Aarray[], int lda, double* const TauArray[], int* info, int batchSize);
+/**
+ * @param handle SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param info SEND_RECV
+ * @param batchSize SEND_ONLY
+ */
+cublasStatus_t cublasCgeqrfBatched(cublasHandle_t handle, int m, int n, cuComplex* const Aarray[], int lda, cuComplex* const TauArray[], int* info, int batchSize);
+/**
+ * @param handle SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param info SEND_RECV
+ * @param batchSize SEND_ONLY
+ */
+cublasStatus_t cublasZgeqrfBatched(cublasHandle_t handle, int m, int n, cuDoubleComplex* const Aarray[], int lda, cuDoubleComplex* const TauArray[], int* info, int batchSize);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param nrhs SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param ldc SEND_ONLY
+ * @param info SEND_RECV
+ * @param devInfoArray SEND_RECV
+ * @param batchSize SEND_ONLY
+ */
+cublasStatus_t cublasSgelsBatched(cublasHandle_t handle, cublasOperation_t trans, int m, int n, int nrhs, float* const Aarray[], int lda, float* const Carray[], int ldc, int* info, int* devInfoArray, int batchSize);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param nrhs SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param ldc SEND_ONLY
+ * @param info SEND_RECV
+ * @param devInfoArray SEND_RECV
+ * @param batchSize SEND_ONLY
+ */
+cublasStatus_t cublasDgelsBatched(cublasHandle_t handle, cublasOperation_t trans, int m, int n, int nrhs, double* const Aarray[], int lda, double* const Carray[], int ldc, int* info, int* devInfoArray, int batchSize);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param nrhs SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param ldc SEND_ONLY
+ * @param info SEND_RECV
+ * @param devInfoArray SEND_RECV
+ * @param batchSize SEND_ONLY
+ */
+cublasStatus_t cublasCgelsBatched(cublasHandle_t handle, cublasOperation_t trans, int m, int n, int nrhs, cuComplex* const Aarray[], int lda, cuComplex* const Carray[], int ldc, int* info, int* devInfoArray, int batchSize);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param nrhs SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param ldc SEND_ONLY
+ * @param info SEND_RECV
+ * @param devInfoArray SEND_RECV
+ * @param batchSize SEND_ONLY
+ */
+cublasStatus_t cublasZgelsBatched(cublasHandle_t handle, cublasOperation_t trans, int m, int n, int nrhs, cuDoubleComplex* const Aarray[], int lda, cuDoubleComplex* const Carray[], int ldc, int* info, int* devInfoArray, int batchSize);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param AP SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasStpttr(cublasHandle_t handle, cublasFillMode_t uplo, int n, const float* AP, float* A, int lda);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param AP SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasDtpttr(cublasHandle_t handle, cublasFillMode_t uplo, int n, const double* AP, double* A, int lda);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param AP SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasCtpttr(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuComplex* AP, cuComplex* A, int lda);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param AP SEND_RECV
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ */
+cublasStatus_t cublasZtpttr(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuDoubleComplex* AP, cuDoubleComplex* A, int lda);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param AP SEND_RECV
+ */
+cublasStatus_t cublasStrttp(cublasHandle_t handle, cublasFillMode_t uplo, int n, const float* A, int lda, float* AP);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param AP SEND_RECV
+ */
+cublasStatus_t cublasDtrttp(cublasHandle_t handle, cublasFillMode_t uplo, int n, const double* A, int lda, double* AP);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param AP SEND_RECV
+ */
+cublasStatus_t cublasCtrttp(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuComplex* A, int lda, cuComplex* AP);
+/**
+ * @param handle SEND_ONLY
+ * @param uplo SEND_ONLY
+ * @param n SEND_ONLY
+ * @param A SEND_RECV
+ * @param lda SEND_ONLY
+ * @param AP SEND_RECV
+ */
+cublasStatus_t cublasZtrttp(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuDoubleComplex* A, int lda, cuDoubleComplex* AP);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param P SEND_RECV
+ * @param info SEND_RECV
+ * @param batchSize SEND_ONLY
+ */
+cublasStatus_t cublasSgetrfBatched(cublasHandle_t handle, int n, float* const A[], int lda, int* P, int* info, int batchSize);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param P SEND_RECV
+ * @param info SEND_RECV
+ * @param batchSize SEND_ONLY
+ */
+cublasStatus_t cublasDgetrfBatched(cublasHandle_t handle, int n, double* const A[], int lda, int* P, int* info, int batchSize);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param P SEND_RECV
+ * @param info SEND_RECV
+ * @param batchSize SEND_ONLY
+ */
+cublasStatus_t cublasCgetrfBatched(cublasHandle_t handle, int n, cuComplex* const A[], int lda, int* P, int* info, int batchSize);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param P SEND_RECV
+ * @param info SEND_RECV
+ * @param batchSize SEND_ONLY
+ */
+cublasStatus_t cublasZgetrfBatched(cublasHandle_t handle, int n, cuDoubleComplex* const A[], int lda, int* P, int* info, int batchSize);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param P SEND_RECV
+ * @param ldc SEND_ONLY
+ * @param info SEND_RECV
+ * @param batchSize SEND_ONLY
+ */
+cublasStatus_t cublasSgetriBatched(cublasHandle_t handle, int n, const float* const A[], int lda, const int* P, float* const C[], int ldc, int* info, int batchSize);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param P SEND_RECV
+ * @param ldc SEND_ONLY
+ * @param info SEND_RECV
+ * @param batchSize SEND_ONLY
+ */
+cublasStatus_t cublasDgetriBatched(cublasHandle_t handle, int n, const double* const A[], int lda, const int* P, double* const C[], int ldc, int* info, int batchSize);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param P SEND_RECV
+ * @param ldc SEND_ONLY
+ * @param info SEND_RECV
+ * @param batchSize SEND_ONLY
+ */
+cublasStatus_t cublasCgetriBatched(cublasHandle_t handle, int n, const cuComplex* const A[], int lda, const int* P, cuComplex* const C[], int ldc, int* info, int batchSize);
+/**
+ * @param handle SEND_ONLY
+ * @param n SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param P SEND_RECV
+ * @param ldc SEND_ONLY
+ * @param info SEND_RECV
+ * @param batchSize SEND_ONLY
+ */
+cublasStatus_t cublasZgetriBatched(cublasHandle_t handle, int n, const cuDoubleComplex* const A[], int lda, const int* P, cuDoubleComplex* const C[], int ldc, int* info, int batchSize);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param nrhs SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param devIpiv SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param info SEND_RECV
+ * @param batchSize SEND_ONLY
+ */
+cublasStatus_t cublasSgetrsBatched(cublasHandle_t handle, cublasOperation_t trans, int n, int nrhs, const float* const Aarray[], int lda, const int* devIpiv, float* const Barray[], int ldb, int* info, int batchSize);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param nrhs SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param devIpiv SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param info SEND_RECV
+ * @param batchSize SEND_ONLY
+ */
+cublasStatus_t cublasDgetrsBatched(cublasHandle_t handle, cublasOperation_t trans, int n, int nrhs, const double* const Aarray[], int lda, const int* devIpiv, double* const Barray[], int ldb, int* info, int batchSize);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param nrhs SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param devIpiv SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param info SEND_RECV
+ * @param batchSize SEND_ONLY
+ */
+cublasStatus_t cublasCgetrsBatched(cublasHandle_t handle, cublasOperation_t trans, int n, int nrhs, const cuComplex* const Aarray[], int lda, const int* devIpiv, cuComplex* const Barray[], int ldb, int* info, int batchSize);
+/**
+ * @param handle SEND_ONLY
+ * @param trans SEND_ONLY
+ * @param n SEND_ONLY
+ * @param nrhs SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param devIpiv SEND_RECV
+ * @param ldb SEND_ONLY
+ * @param info SEND_RECV
+ * @param batchSize SEND_ONLY
+ */
+cublasStatus_t cublasZgetrsBatched(cublasHandle_t handle, cublasOperation_t trans, int n, int nrhs, const cuDoubleComplex* const Aarray[], int lda, const int* devIpiv, cuDoubleComplex* const Barray[], int ldb, int* info, int batchSize);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param transc SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param A SEND_RECV
+ * @param A_bias SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param B_bias SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param C SEND_RECV
+ * @param C_bias SEND_ONLY
+ * @param ldc SEND_ONLY
+ * @param C_mult SEND_ONLY
+ * @param C_shift SEND_ONLY
+ */
+cublasStatus_t cublasUint8gemmBias(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, cublasOperation_t transc, int m, int n, int k, const unsigned char* A, int A_bias, int lda, const unsigned char* B, int B_bias, int ldb, unsigned char* C, int C_bias, int ldc, int C_mult, int C_shift);
+/**
+ * @param handle SEND_ONLY
+ * @param dataType SEND_ONLY
+ * @param computeType SEND_RECV
+ */
+cublasStatus_t cublasMigrateComputeType(cublasHandle_t handle, cudaDataType_t dataType, cublasComputeType_t* computeType);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param Atype SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param B SEND_RECV
+ * @param Btype SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param Ctype SEND_ONLY
+ * @param ldc SEND_ONLY
+ * @param computeType SEND_ONLY
+ * @param algo SEND_ONLY
+ */
+cublasStatus_t cublasGemmEx(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const void* alpha, const void* A, cudaDataType Atype, int lda, const void* B, cudaDataType Btype, int ldb, const void* beta, void* C, cudaDataType Ctype, int ldc, cudaDataType computeType, cublasGemmAlgo_t algo);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param Atype SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param Btype SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param beta SEND_RECV
+ * @param Ctype SEND_ONLY
+ * @param ldc SEND_ONLY
+ * @param batchCount SEND_ONLY
+ * @param computeType SEND_ONLY
+ * @param algo SEND_ONLY
+ */
+cublasStatus_t cublasGemmBatchedEx(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const void* alpha, const void* const Aarray[], cudaDataType Atype, int lda, const void* const Barray[], cudaDataType Btype, int ldb, const void* beta, void* const Carray[], cudaDataType Ctype, int ldc, int batchCount, cudaDataType computeType, cublasGemmAlgo_t algo);
+/**
+ * @param handle SEND_ONLY
+ * @param transa SEND_ONLY
+ * @param transb SEND_ONLY
+ * @param m SEND_ONLY
+ * @param n SEND_ONLY
+ * @param k SEND_ONLY
+ * @param alpha SEND_RECV
+ * @param A SEND_RECV
+ * @param Atype SEND_ONLY
+ * @param lda SEND_ONLY
+ * @param strideA SEND_ONLY
+ * @param B SEND_RECV
+ * @param Btype SEND_ONLY
+ * @param ldb SEND_ONLY
+ * @param strideB SEND_ONLY
+ * @param beta SEND_RECV
+ * @param C SEND_RECV
+ * @param Ctype SEND_ONLY
+ * @param ldc SEND_ONLY
+ * @param strideC SEND_ONLY
+ * @param batchCount SEND_ONLY
+ * @param computeType SEND_ONLY
+ * @param algo SEND_ONLY
+ */
+cublasStatus_t cublasGemmStridedBatchedEx(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const void* alpha, const void* A, cudaDataType Atype, int lda, long long int strideA, const void* B, cudaDataType Btype, int ldb, long long int strideB, const void* beta, void* C, cudaDataType Ctype, int ldc, long long int strideC, int batchCount, cudaDataType computeType, cublasGemmAlgo_t algo);
