@@ -1,6 +1,6 @@
 from cxxheaderparser.simple import parse_file, ParsedData, ParserOptions
 from cxxheaderparser.preprocessor import make_gcc_preprocessor
-from cxxheaderparser.types import Type, Pointer
+from cxxheaderparser.types import Type, Pointer, Array
 
 
 def main():
@@ -41,6 +41,12 @@ def main():
                 elif isinstance(param.type, Pointer):
                     f.write(
                         " * @param {name} SEND_RECV\n".format(
+                            name=param.name, type=param.type.format()
+                        )
+                    )
+                elif isinstance(param.type, Array):
+                    f.write(
+                        " * @param {name} SEND_ONLY\n".format(
                             name=param.name, type=param.type.format()
                         )
                     )
