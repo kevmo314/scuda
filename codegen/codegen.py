@@ -215,7 +215,8 @@ class ArrayOperation:
         if isinstance(self.ptr, Array):
             c = self.ptr.const
             self.ptr.const = False
-            s = f"    {self.ptr.format()} {self.parameter.name};\n"
+            # const[] isn't a valid part of a variable declaration
+            s = f"    {self.ptr.format().replace("const[]", "")}* {self.parameter.name} = new {self.ptr.format().replace("const[]", "")}[{self.length.name}];\n"
             self.ptr.const = c
         else:
             c = self.ptr.ptr_to.const
@@ -255,6 +256,12 @@ class ArrayOperation:
                         length=length,
                     )
                 )
+
+    def server_len_rpc_read(self, f):
+        f.write("   if (rpc_read(conn, &{length_param}, sizeof(int)) < 0)\n".format(
+                        length_param=self.length.name,
+                ))
+        f.write("       return -1;\n")
 
     @property
     def server_reference(self) -> str:
@@ -908,6 +915,12 @@ def main():
         for function, annotation, operations, disabled in functions_with_annotations:
             if function.name.format() in MANUAL_IMPLEMENTATIONS or disabled: continue
 
+            batched = False
+
+            # not a fan of this, but the batched functions are pretty standard with the flow below
+            if "Batched" in function.name.format():
+                batched = True
+
             # parse the annotation doxygen
             f.write(
                 "int handle_{name}(void *conn)\n".format(
@@ -917,29 +930,72 @@ def main():
             f.write("{\n")
 
             defers = []
-            # write the variable declarations first.
-            for operation in operations:
-                f.write(operation.server_declaration)
 
-            f.write("    int request_id;\n")
+            if batched:
+                array_batches = []
+                non_array_batches = []
 
-            # we only generate return from non-void types
-            if function.return_type.format() != "void":
-                f.write("    {return_type} scuda_intercept_result;\n".format(return_type=function.return_type.format()))
-            else:
-                f.write("    void* scuda_intercept_result;\n".format(return_type=function.return_type.format()))                
+                for operation in operations:
+                    if isinstance(operation, NullTerminatedOperation):
+                        if error := operation.server_rpc_read(f, len(defers)):
+                            defers.append(error)
+                    if isinstance(operation, ArrayOperation):
+                        array_batches.append(operation)
+                    if not isinstance(operation, ArrayOperation):
+                        non_array_batches.append(operation)
 
-            f.write("    if (\n")
-            for operation in operations:
-                if isinstance(operation, NullTerminatedOperation):
-                    if error := operation.server_rpc_read(f, len(defers)):
-                        defers.append(error)
+                # print our normal operations the same
+                for operation in operations:
+                    if operation not in array_batches:
+                        f.write(operation.server_declaration)
+
+                # do something with array batches
+                if len(array_batches) > 0 and hasattr(array_batches[0], "server_len_rpc_read"):
+                    array_batches[0].server_len_rpc_read(f)
+
+                    # pop here, because we already accounted for the batchCount integer
+                    non_array_batches.pop(0)
+
+                for op in array_batches:
+                    f.write(op.server_declaration)
+
+                f.write("    int request_id;\n")
+                if function.return_type.format() != "void":
+                    f.write("    {return_type} scuda_intercept_result;\n".format(return_type=function.return_type.format()))
                 else:
-                    operation.server_rpc_read(f)
-            f.write("        false)\n")
-            f.write("        goto ERROR_{index};\n".format(index=len(defers)))
+                    f.write("    void* scuda_intercept_result;\n".format(return_type=function.return_type.format()))
 
-            f.write("\n")
+                f.write("    if (\n")
+                for operation in operations:
+                    operation.server_rpc_read(f)
+                f.write("        false)\n")
+                f.write("        goto ERROR_{index};\n".format(index=len(defers)))
+
+                f.write("\n")
+            else:
+                for operation in operations:
+                    f.write(operation.server_declaration)
+
+                f.write("    int request_id;\n")
+
+                # we only generate return from non-void types
+                if function.return_type.format() != "void":
+                    f.write("    {return_type} scuda_intercept_result;\n".format(return_type=function.return_type.format()))
+                else:
+                    f.write("    void* scuda_intercept_result;\n".format(return_type=function.return_type.format()))
+
+                f.write("    if (\n")
+                for operation in operations:
+                    if isinstance(operation, NullTerminatedOperation):
+                        if error := operation.server_rpc_read(f, len(defers)):
+                            defers.append(error)
+                    else:
+                        operation.server_rpc_read(f)
+                f.write("        false)\n")
+                f.write("        goto ERROR_{index};\n".format(index=len(defers)))
+
+                f.write("\n")
+
             f.write(
                 "    request_id = rpc_end_request(conn);\n".format(
                     name=function.name.format()

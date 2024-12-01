@@ -10068,19 +10068,19 @@ cublasStatus_t cublasZhpr2_v2(cublasHandle_t handle, cublasFillMode_t uplo, int 
  */
 cublasStatus_t cublasZhpr2_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* x, int64_t incx, const cuDoubleComplex* y, int64_t incy, cuDoubleComplex* AP);
 /**
+ * @param batchCount SEND_ONLY
  * @param handle SEND_ONLY
  * @param trans SEND_ONLY
  * @param m SEND_ONLY
  * @param n SEND_ONLY
  * @param alpha SEND_RECV
- * @param Aarray SEND_ONLY LENGTH:lda
+ * @param Aarray SEND_ONLY LENGTH:batchCount
  * @param lda SEND_ONLY
- * @param xarray SEND_ONLY LENGTH:incx
+ * @param xarray SEND_ONLY LENGTH:batchCount
  * @param incx SEND_ONLY 
  * @param beta SEND_RECV
- * @param yarray SEND_ONLY LENGTH:incy
+ * @param yarray SEND_ONLY LENGTH:batchCount
  * @param incy SEND_ONLY
- * @param batchCount SEND_ONLY
  */
 cublasStatus_t cublasSgemvBatched(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const float* alpha, const float* const Aarray[], int lda, const float* const xarray[], int incx, const float* beta, float* const yarray[], int incy, int batchCount);
 /**
@@ -10260,19 +10260,19 @@ cublasStatus_t cublasHSSgemvBatched(cublasHandle_t handle, cublasOperation_t tra
  */
 cublasStatus_t cublasHSSgemvBatched_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, const float* alpha, const __half* const Aarray[], int64_t lda, const __half* const xarray[], int64_t incx, const float* beta, float* const yarray[], int64_t incy, int64_t batchCount);
 /**
+ * @param batchCount SEND_ONLY
  * @param handle SEND_ONLY
  * @param trans SEND_ONLY
  * @param m SEND_ONLY
  * @param n SEND_ONLY
  * @param alpha SEND_RECV
- * @param Aarray SEND_ONLY
+ * @param Aarray SEND_ONLY LENGTH:batchCount
  * @param lda SEND_ONLY
- * @param xarray SEND_ONLY
+ * @param xarray SEND_ONLY LENGTH:batchCount
  * @param incx SEND_ONLY
  * @param beta SEND_RECV
- * @param yarray SEND_ONLY
+ * @param yarray SEND_ONLY LENGTH:batchCount
  * @param incy SEND_ONLY
- * @param batchCount SEND_ONLY
  */
 cublasStatus_t cublasTSTgemvBatched(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const float* alpha, const __nv_bfloat16* const Aarray[], int lda, const __nv_bfloat16* const xarray[], int incx, const float* beta, __nv_bfloat16* const yarray[], int incy, int batchCount);
 /**
