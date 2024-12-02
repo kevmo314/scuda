@@ -11,3 +11,5 @@ int handle___cudaRegisterFatBinary(void *conn);
 int handle___cudaRegisterFatBinaryEnd(void *conn);
 int handle___cudaPushCallConfiguration(void *conn);
 int handle___cudaPopCallConfiguration(void *conn);
+int handle_cudaHostRegister(void *conn);
+int handle_cudaHostUnregister(void *conn);

@@ -9,9 +9,9 @@ build() {
   echo "building client..."
 
   if [[ "$(uname)" == "Linux" ]]; then
-    nvcc --cudart=shared -Xcompiler -fPIC -I/usr/local/cuda/include -o "$(pwd)/client.o" -c "$(pwd)/client.cpp"
-    nvcc --cudart=shared -Xcompiler -fPIC -I/usr/local/cuda/include -o "$(pwd)/codegen/gen_client.o" -c "$(pwd)/codegen/gen_client.cpp"
-    nvcc --cudart=shared -Xcompiler -fPIC -I/usr/local/cuda/include -o "$(pwd)/codegen/manual_client.o" -c "$(pwd)/codegen/manual_client.cpp"
+    nvcc --cudart=shared -Xcompiler -fPIC -Xcompiler -fno-stack-protector -I/usr/local/cuda/include -o "$(pwd)/client.o" -c "$(pwd)/client.cpp"
+    nvcc --cudart=shared -Xcompiler -fPIC -Xcompiler -fno-stack-protector -I/usr/local/cuda/include -o "$(pwd)/codegen/gen_client.o" -c "$(pwd)/codegen/gen_client.cpp"
+    nvcc --cudart=shared -Xcompiler -fPIC -Xcompiler -fno-stack-protector -I/usr/local/cuda/include -o "$(pwd)/codegen/manual_client.o" -c "$(pwd)/codegen/manual_client.cpp"
 
     echo "linking client files..."
 
