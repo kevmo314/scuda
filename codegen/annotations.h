@@ -13452,6 +13452,7 @@ cublasStatus_t cublasZgetrsBatched(cublasHandle_t handle, cublasOperation_t tran
  */
 cublasStatus_t cublasUint8gemmBias(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, cublasOperation_t transc, int m, int n, int k, const unsigned char* A, int A_bias, int lda, const unsigned char* B, int B_bias, int ldb, unsigned char* C, int C_bias, int ldc, int C_mult, int C_shift);
 /**
+ * @disabled
  * @param handle SEND_ONLY
  * @param dataType SEND_ONLY
  * @param computeType SEND_RECV

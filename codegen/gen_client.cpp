@@ -1,6 +1,5 @@
 #include <nvml.h>
 #include <cuda.h>
-#include <iostream>
 #include <cudnn.h>
 #include <cublas_v2.h>
 #include <cuda_runtime_api.h>
@@ -19378,20 +19377,6 @@ cublasStatus_t cublasUint8gemmBias(cublasHandle_t handle, cublasOperation_t tran
     return return_value;
 }
 
-cublasStatus_t cublasMigrateComputeType(cublasHandle_t handle, cudaDataType_t dataType, cublasComputeType_t* computeType)
-{
-    cublasStatus_t return_value;
-    if (rpc_start_request(0, RPC_cublasMigrateComputeType) < 0 ||
-        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
-        rpc_write(0, &dataType, sizeof(cudaDataType_t)) < 0 ||
-        rpc_write(0, computeType, sizeof(cublasComputeType_t)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, computeType, sizeof(cublasComputeType_t)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return CUBLAS_STATUS_NOT_INITIALIZED;
-    return return_value;
-}
-
 cudnnStatus_t cudnnGetProperty(libraryPropertyType type, int* value)
 {
     cudnnStatus_t return_value;
@@ -19407,7 +19392,6 @@ cudnnStatus_t cudnnGetProperty(libraryPropertyType type, int* value)
 
 cudnnStatus_t cudnnCreate(cudnnHandle_t* handle)
 {
-    std::cout << "asdf" << std::endl;
     cudnnStatus_t return_value;
     if (rpc_start_request(0, RPC_cudnnCreate) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -21697,7 +21681,6 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cublasCtrttp", (void *)cublasCtrttp},
     {"cublasZtrttp", (void *)cublasZtrttp},
     {"cublasUint8gemmBias", (void *)cublasUint8gemmBias},
-    {"cublasMigrateComputeType", (void *)cublasMigrateComputeType},
     {"cudnnGetProperty", (void *)cudnnGetProperty},
     {"cudnnCreate", (void *)cudnnCreate},
     {"cudnnDestroy", (void *)cudnnDestroy},

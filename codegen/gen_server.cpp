@@ -40484,35 +40484,6 @@ ERROR_0:
     return -1;
 }
 
-int handle_cublasMigrateComputeType(void *conn)
-{
-    cublasHandle_t handle;
-    cudaDataType_t dataType;
-    cublasComputeType_t computeType;
-    int request_id;
-    cublasStatus_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &handle, sizeof(cublasHandle_t)) < 0 ||
-        rpc_read(conn, &dataType, sizeof(cudaDataType_t)) < 0 ||
-        rpc_read(conn, &computeType, sizeof(cublasComputeType_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = cublasMigrateComputeType(handle, dataType, &computeType);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &computeType, sizeof(cublasComputeType_t)) < 0 ||
-        rpc_end_response(conn, &scuda_intercept_result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
 int handle_cudnnGetProperty(void *conn)
 {
     libraryPropertyType type;
@@ -40545,8 +40516,6 @@ int handle_cudnnCreate(void *conn)
     cudnnHandle_t handle;
     int request_id;
     cudnnStatus_t scuda_intercept_result;
-
-    std::cout << "asdf" << std::endl;
     if (
         false)
         goto ERROR_0;
@@ -43972,7 +43941,7 @@ static RequestHandler opHandlers[] = {
     handle_cublasCtrttp,
     handle_cublasZtrttp,
     handle_cublasUint8gemmBias,
-    handle_cublasMigrateComputeType,
+    nullptr,
     nullptr,
     nullptr,
     nullptr,
