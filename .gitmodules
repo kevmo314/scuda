@@ -1,0 +1,3 @@
+[submodule "test/cuda-samples"]
+	path = test/cuda-samples
+	url = https://github.com/NVIDIA/cuda-samples
