@@ -1,6 +1,6 @@
 from cxxheaderparser.simple import parse_file, ParsedData, ParserOptions
 from cxxheaderparser.preprocessor import make_gcc_preprocessor
-from cxxheaderparser.types import Type, Pointer, Parameter, Function
+from cxxheaderparser.types import Type, Pointer, Parameter, Function, Array
 from typing import Optional
 from dataclasses import dataclass
 import copy
@@ -180,11 +180,20 @@ class ArrayOperation:
     def client_rpc_write(self, f):
         if not self.send:
             return
-        if isinstance(self.length, int):
+        elif isinstance(self.length, int):
             f.write(
                 "        rpc_write(0, {param_name}, {size}) < 0 ||\n".format(
                     param_name=self.parameter.name,
                     size=self.length,
+                )
+            )
+        # array length operations are handled differently than char
+        elif isinstance(self.ptr, Array):
+            f.write(
+                "        rpc_write(0, {param_name}, sizeof({param_type}[{length}])) < 0 ||\n".format(
+                    param_name=self.parameter.name,
+                    param_type=self.ptr.format().replace("[]", ""),
+                    length=self.length.name,
                 )
             )
         else:
@@ -199,23 +208,39 @@ class ArrayOperation:
                     length=length,
                 )
             )
+            
 
     @property
     def server_declaration(self) -> str:
-        c = self.ptr.ptr_to.const
-        self.ptr.ptr_to.const = False
-        s = f"    {self.ptr.format()} {self.parameter.name};\n"
-        self.ptr.ptr_to.const = c
+        if isinstance(self.ptr, Array):
+            c = self.ptr.const
+            self.ptr.const = False
+            # const[] isn't a valid part of a variable declaration
+            s = f"    {self.ptr.format().replace("const[]", "")}* {self.parameter.name} = new {self.ptr.format().replace("const[]", "")}[{self.length.name}];\n"
+            self.ptr.const = c
+        else:
+            c = self.ptr.ptr_to.const
+            self.ptr.ptr_to.const = False
+            s = f"    {self.ptr.format()} {self.parameter.name};\n"
+            self.ptr.ptr_to.const = c
         return s
         
     def server_rpc_read(self, f):
         if not self.send:
             return
-        if isinstance(self.length, int):
+        elif isinstance(self.length, int):
             f.write(
                 "        rpc_read(conn, {param_name}, {size}) < 0 ||\n".format(
                     param_name=self.parameter.name,
                     size=self.length,
+                )
+            )
+        elif isinstance(self.ptr, Array):
+            f.write(
+                "        rpc_read(conn, {param_name}, sizeof({param_type}[{length}])) < 0 ||\n".format(
+                    param_name=self.parameter.name,
+                    param_type=self.ptr.format().replace("[]", ""),
+                    length=self.length.name,
                 )
             )
         else:
@@ -230,6 +255,12 @@ class ArrayOperation:
                     length=length,
                 )
             )
+
+    def server_len_rpc_read(self, f):
+        f.write("   if (rpc_read(conn, &{length_param}, sizeof(int)) < 0)\n".format(
+                        length_param=self.length.name,
+                ))
+        f.write("       return -1;\n")
 
     @property
     def server_reference(self) -> str:
@@ -487,7 +518,8 @@ class DereferenceOperation:
 
 Operation = NullableOperation | ArrayOperation | NullTerminatedOperation | OpaqueTypeOperation | DereferenceOperation
 
-def parse_annotation(annotation: str, params: list[Parameter]) -> list[Operation]:
+# parses a function annotation. if disabled is encountered, returns True for short circuiting.
+def parse_annotation(annotation: str, params: list[Parameter]) -> list[tuple[Operation, bool]]:
     operations: list[Operation] = []
     
     if not annotation:
@@ -518,13 +550,15 @@ def parse_annotation(annotation: str, params: list[Parameter]) -> list[Operation
             send = parts[2] == "SEND_ONLY" or parts[2] == "SEND_RECV"
             recv = (parts[2] == "RECV_ONLY" or parts[2] == "SEND_RECV")
 
+            # if there's a length or size arg, use the type, otherwise use the ptr_to type
+            length_arg = next(
+                (arg for arg in args if arg.startswith("LENGTH:")), None
+            )
+
             if isinstance(param.type, Pointer):
                 if param.type.ptr_to.const:
                     recv = False
-                # if there's a length or size arg, use the type, otherwise use the ptr_to type
-                length_arg = next(
-                    (arg for arg in args if arg.startswith("LENGTH:")), None
-                )
+                
                 size_arg = next((arg for arg in args if arg.startswith("SIZE:")), None)
                 null_terminated = "NULL_TERMINATED" in args
                 nullable = "NULLABLE" in args
@@ -599,6 +633,17 @@ def parse_annotation(annotation: str, params: list[Parameter]) -> list[Operation
                     parameter=param,
                     type_=param.type,
                 ))
+            elif isinstance(param.type, Array):
+                length_param = next(p for p in params if p.name == length_arg.split(":")[1])
+                if param.type.const:
+                    recv = False
+                operations.append(ArrayOperation(
+                    send=send,
+                    recv=recv,
+                    parameter=param,
+                    ptr=param.type,
+                    length=length_param,
+                ))
             else:
                 raise NotImplementedError("Unknown type")
     return operations, False
@@ -615,6 +660,14 @@ def error_const(return_type: str) -> str:
         return "CUBLAS_STATUS_NOT_INITIALIZED"
     if return_type == "cudnnStatus_t":
         return "CUDNN_STATUS_NOT_INITIALIZED"
+    if return_type == "size_t":
+        return "size_t"
+    if return_type == "const char*":
+        return "const char*"
+    if return_type == "void":
+        return "void"
+    if return_type == "struct cudaChannelFormatDesc":
+        return "struct cudaChannelFormatDesc"
     raise NotImplementedError("Unknown return type: %s" % return_type)
 
 
@@ -710,21 +763,33 @@ def main():
             # we don't generate client function definitions for disabled functions; only the RPC definitions.
             if disabled: continue
 
+            params = []
+
+            for param in function.parameters:
+                if param.name and "[]" in param.type.format():
+                    params.append(
+                        "{type} {name}".format(
+                            type=param.type.format().replace("[]", ""),
+                            name=param.name + "[]",
+                        )
+                    )
+                elif param.name:
+                    params.append(
+                        "{type} {name}".format(
+                            type=param.type.format(),
+                            name=param.name,
+                        )
+                    )
+                else:
+                    params.append(param.type.format())
+
+            joined_params = ", ".join(params)
+
             f.write(
                 "{return_type} {name}({params})\n".format(
                     return_type=function.return_type.format(),
                     name=function.name.format(),
-                    params=", ".join(
-                        (
-                            "{type} {name}".format(
-                                type=param.type.format(),
-                                name=param.name,
-                            )
-                            if param.name
-                            else param.type.format()
-                        )
-                        for param in function.parameters
-                    ),
+                    params=joined_params
                 )
             )
             f.write("{\n")
@@ -850,6 +915,14 @@ def main():
         for function, annotation, operations, disabled in functions_with_annotations:
             if function.name.format() in MANUAL_IMPLEMENTATIONS or disabled: continue
 
+            batched = False
+
+            # not a fan of this, but the batched functions are pretty standard with the flow below.
+            # batched functions are cublas functions that send pointer arrays where batchCount describes...
+            # the number of pointers in the arrays. This is non-trivial to generate.
+            if "Batched" in function.name.format():
+                batched = True
+
             # parse the annotation doxygen
             f.write(
                 "int handle_{name}(void *conn)\n".format(
@@ -859,24 +932,72 @@ def main():
             f.write("{\n")
 
             defers = []
-            # write the variable declarations first.
-            for operation in operations:
-                f.write(operation.server_declaration)
 
-            f.write("    int request_id;\n")
-            f.write("    {return_type} result;\n".format(return_type=function.return_type.format()))
+            if batched:
+                array_batches = []
+                non_array_batches = []
 
-            f.write("    if (\n")
-            for operation in operations:
-                if isinstance(operation, NullTerminatedOperation):
-                    if error := operation.server_rpc_read(f, len(defers)):
-                        defers.append(error)
+                for operation in operations:
+                    if isinstance(operation, NullTerminatedOperation):
+                        if error := operation.server_rpc_read(f, len(defers)):
+                            defers.append(error)
+                    if isinstance(operation, ArrayOperation):
+                        array_batches.append(operation)
+                    if not isinstance(operation, ArrayOperation):
+                        non_array_batches.append(operation)
+
+                # print our normal operations the same
+                for operation in operations:
+                    if operation not in array_batches:
+                        f.write(operation.server_declaration)
+
+                # do something with array batches
+                if len(array_batches) > 0 and hasattr(array_batches[0], "server_len_rpc_read"):
+                    array_batches[0].server_len_rpc_read(f)
+
+                    # pop here, because we already accounted for the batchCount integer
+                    non_array_batches.pop(0)
+
+                for op in array_batches:
+                    f.write(op.server_declaration)
+
+                f.write("    int request_id;\n")
+                if function.return_type.format() != "void":
+                    f.write("    {return_type} scuda_intercept_result;\n".format(return_type=function.return_type.format()))
                 else:
-                    operation.server_rpc_read(f)
-            f.write("        false)\n")
-            f.write("        goto ERROR_{index};\n".format(index=len(defers)))
+                    f.write("    void* scuda_intercept_result;\n".format(return_type=function.return_type.format()))
 
-            f.write("\n")
+                f.write("    if (\n")
+                for operation in operations:
+                    operation.server_rpc_read(f)
+                f.write("        false)\n")
+                f.write("        goto ERROR_{index};\n".format(index=len(defers)))
+
+                f.write("\n")
+            else:
+                for operation in operations:
+                    f.write(operation.server_declaration)
+
+                f.write("    int request_id;\n")
+
+                # we only generate return from non-void types
+                if function.return_type.format() != "void":
+                    f.write("    {return_type} scuda_intercept_result;\n".format(return_type=function.return_type.format()))
+                else:
+                    f.write("    void* scuda_intercept_result;\n".format(return_type=function.return_type.format()))
+
+                f.write("    if (\n")
+                for operation in operations:
+                    if isinstance(operation, NullTerminatedOperation):
+                        if error := operation.server_rpc_read(f, len(defers)):
+                            defers.append(error)
+                    else:
+                        operation.server_rpc_read(f)
+                f.write("        false)\n")
+                f.write("        goto ERROR_{index};\n".format(index=len(defers)))
+
+                f.write("\n")
+
             f.write(
                 "    request_id = rpc_end_request(conn);\n".format(
                     name=function.name.format()
@@ -888,24 +1009,31 @@ def main():
             params: list[str] = []
             # these need to be in function param order, not operation order.
             for param in function.parameters:
-                operation = next(
-                    op for op in operations if op.parameter.name == param.name
-                )
-                params.append(operation.server_reference)
+                for op in operations:
+                    if op.parameter.name == param.name:
+                        params.append(op.server_reference)
 
-            f.write(
-                "    result = {name}({params});\n\n".format(
-                    name=function.name.format(),
-                    params=", ".join(params),
+            if function.return_type.format() != "void":
+                f.write(
+                    "    scuda_intercept_result = {name}({params});\n\n".format(
+                        name=function.name.format(),
+                        params=", ".join(params),
+                    )
                 )
-            )
+            else:
+                f.write(
+                    "    {name}({params});\n\n".format(
+                        name=function.name.format(),
+                        params=", ".join(params),
+                    )
+                )
 
             f.write("    if (rpc_start_response(conn, request_id) < 0 ||\n")
 
             for operation in operations:
                 operation.server_rpc_write(f)
             
-            f.write("        rpc_end_response(conn, &result) < 0)\n")
+            f.write("        rpc_end_response(conn, &scuda_intercept_result) < 0)\n")
             f.write("        goto ERROR_{index};\n".format(index=len(defers)))
             f.write("\n")
             f.write("    return 0;\n")
