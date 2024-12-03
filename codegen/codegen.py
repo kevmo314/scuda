@@ -519,7 +519,7 @@ class DereferenceOperation:
 Operation = NullableOperation | ArrayOperation | NullTerminatedOperation | OpaqueTypeOperation | DereferenceOperation
 
 # parses a function annotation. if disabled is encountered, returns True for short circuiting.
-def parse_annotation(annotation: str, params: list[Parameter]) -> list[Operation, bool]:
+def parse_annotation(annotation: str, params: list[Parameter]) -> list[tuple[Operation, bool]]:
     operations: list[Operation] = []
     
     if not annotation:
