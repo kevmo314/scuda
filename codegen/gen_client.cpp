@@ -11135,6 +11135,5512 @@ cublasStatus_t cublasDestroy_v2(cublasHandle_t handle)
     return return_value;
 }
 
+cublasStatus_t cublasGetVersion_v2(cublasHandle_t handle, int* version)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasGetVersion_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, version, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, version, sizeof(int)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasGetProperty(libraryPropertyType type, int* value)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasGetProperty) < 0 ||
+        rpc_write(0, &type, sizeof(libraryPropertyType)) < 0 ||
+        rpc_write(0, value, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, value, sizeof(int)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSetStream_v2(cublasHandle_t handle, cudaStream_t streamId)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSetStream_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &streamId, sizeof(cudaStream_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasGetStream_v2(cublasHandle_t handle, cudaStream_t* streamId)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasGetStream_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, streamId, sizeof(cudaStream_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, streamId, sizeof(cudaStream_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasGetPointerMode_v2(cublasHandle_t handle, cublasPointerMode_t* mode)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasGetPointerMode_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, mode, sizeof(cublasPointerMode_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, mode, sizeof(cublasPointerMode_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSetPointerMode_v2(cublasHandle_t handle, cublasPointerMode_t mode)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSetPointerMode_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &mode, sizeof(cublasPointerMode_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasGetAtomicsMode(cublasHandle_t handle, cublasAtomicsMode_t* mode)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasGetAtomicsMode) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, mode, sizeof(cublasAtomicsMode_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, mode, sizeof(cublasAtomicsMode_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSetAtomicsMode(cublasHandle_t handle, cublasAtomicsMode_t mode)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSetAtomicsMode) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &mode, sizeof(cublasAtomicsMode_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasGetMathMode(cublasHandle_t handle, cublasMath_t* mode)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasGetMathMode) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, mode, sizeof(cublasMath_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, mode, sizeof(cublasMath_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSetMathMode(cublasHandle_t handle, cublasMath_t mode)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSetMathMode) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &mode, sizeof(cublasMath_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasGetSmCountTarget(cublasHandle_t handle, int* smCountTarget)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasGetSmCountTarget) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, smCountTarget, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, smCountTarget, sizeof(int)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSetSmCountTarget(cublasHandle_t handle, int smCountTarget)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSetSmCountTarget) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &smCountTarget, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasLoggerConfigure(int logIsOn, int logToStdOut, int logToStdErr, const char* logFileName)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasLoggerConfigure) < 0 ||
+        rpc_write(0, &logIsOn, sizeof(int)) < 0 ||
+        rpc_write(0, &logToStdOut, sizeof(int)) < 0 ||
+        rpc_write(0, &logToStdErr, sizeof(int)) < 0 ||
+        rpc_write(0, &logFileName, sizeof(const char*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSetLoggerCallback(cublasLogCallback userCallback)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSetLoggerCallback) < 0 ||
+        rpc_write(0, &userCallback, sizeof(cublasLogCallback)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasGetLoggerCallback(cublasLogCallback* userCallback)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasGetLoggerCallback) < 0 ||
+        rpc_write(0, userCallback, sizeof(cublasLogCallback)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, userCallback, sizeof(cublasLogCallback)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSnrm2_v2(cublasHandle_t handle, int n, const float* x, int incx, float* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSnrm2_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, result, sizeof(float)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSnrm2_v2_64(cublasHandle_t handle, int64_t n, const float* x, int64_t incx, float* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSnrm2_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, result, sizeof(float)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDnrm2_v2(cublasHandle_t handle, int n, const double* x, int incx, double* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDnrm2_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, result, sizeof(double)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDnrm2_v2_64(cublasHandle_t handle, int64_t n, const double* x, int64_t incx, double* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDnrm2_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, result, sizeof(double)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasScnrm2_v2(cublasHandle_t handle, int n, const cuComplex* x, int incx, float* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasScnrm2_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, result, sizeof(float)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasScnrm2_v2_64(cublasHandle_t handle, int64_t n, const cuComplex* x, int64_t incx, float* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasScnrm2_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, result, sizeof(float)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDznrm2_v2(cublasHandle_t handle, int n, const cuDoubleComplex* x, int incx, double* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDznrm2_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, result, sizeof(double)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDznrm2_v2_64(cublasHandle_t handle, int64_t n, const cuDoubleComplex* x, int64_t incx, double* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDznrm2_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, result, sizeof(double)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSdot_v2(cublasHandle_t handle, int n, const float* x, int incx, const float* y, int incy, float* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSdot_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &y, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, result, sizeof(float)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSdot_v2_64(cublasHandle_t handle, int64_t n, const float* x, int64_t incx, const float* y, int64_t incy, float* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSdot_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &y, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, result, sizeof(float)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDdot_v2(cublasHandle_t handle, int n, const double* x, int incx, const double* y, int incy, double* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDdot_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &y, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, result, sizeof(double)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDdot_v2_64(cublasHandle_t handle, int64_t n, const double* x, int64_t incx, const double* y, int64_t incy, double* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDdot_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &y, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, result, sizeof(double)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCdotu_v2(cublasHandle_t handle, int n, const cuComplex* x, int incx, const cuComplex* y, int incy, cuComplex* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCdotu_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &y, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, result, sizeof(cuComplex)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCdotu_v2_64(cublasHandle_t handle, int64_t n, const cuComplex* x, int64_t incx, const cuComplex* y, int64_t incy, cuComplex* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCdotu_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &y, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, result, sizeof(cuComplex)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCdotc_v2(cublasHandle_t handle, int n, const cuComplex* x, int incx, const cuComplex* y, int incy, cuComplex* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCdotc_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &y, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, result, sizeof(cuComplex)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCdotc_v2_64(cublasHandle_t handle, int64_t n, const cuComplex* x, int64_t incx, const cuComplex* y, int64_t incy, cuComplex* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCdotc_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &y, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, result, sizeof(cuComplex)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZdotu_v2(cublasHandle_t handle, int n, const cuDoubleComplex* x, int incx, const cuDoubleComplex* y, int incy, cuDoubleComplex* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZdotu_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &y, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, result, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZdotu_v2_64(cublasHandle_t handle, int64_t n, const cuDoubleComplex* x, int64_t incx, const cuDoubleComplex* y, int64_t incy, cuDoubleComplex* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZdotu_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &y, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, result, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZdotc_v2(cublasHandle_t handle, int n, const cuDoubleComplex* x, int incx, const cuDoubleComplex* y, int incy, cuDoubleComplex* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZdotc_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &y, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, result, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZdotc_v2_64(cublasHandle_t handle, int64_t n, const cuDoubleComplex* x, int64_t incx, const cuDoubleComplex* y, int64_t incy, cuDoubleComplex* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZdotc_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &y, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, result, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSscal_v2(cublasHandle_t handle, int n, const float* alpha, float* x, int incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSscal_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, x, sizeof(float)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSscal_v2_64(cublasHandle_t handle, int64_t n, const float* alpha, float* x, int64_t incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSscal_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, x, sizeof(float)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDscal_v2(cublasHandle_t handle, int n, const double* alpha, double* x, int incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDscal_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, x, sizeof(double)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDscal_v2_64(cublasHandle_t handle, int64_t n, const double* alpha, double* x, int64_t incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDscal_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, x, sizeof(double)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCscal_v2(cublasHandle_t handle, int n, const cuComplex* alpha, cuComplex* x, int incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCscal_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCscal_v2_64(cublasHandle_t handle, int64_t n, const cuComplex* alpha, cuComplex* x, int64_t incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCscal_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCsscal_v2(cublasHandle_t handle, int n, const float* alpha, cuComplex* x, int incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCsscal_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCsscal_v2_64(cublasHandle_t handle, int64_t n, const float* alpha, cuComplex* x, int64_t incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCsscal_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZscal_v2(cublasHandle_t handle, int n, const cuDoubleComplex* alpha, cuDoubleComplex* x, int incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZscal_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZscal_v2_64(cublasHandle_t handle, int64_t n, const cuDoubleComplex* alpha, cuDoubleComplex* x, int64_t incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZscal_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZdscal_v2(cublasHandle_t handle, int n, const double* alpha, cuDoubleComplex* x, int incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZdscal_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZdscal_v2_64(cublasHandle_t handle, int64_t n, const double* alpha, cuDoubleComplex* x, int64_t incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZdscal_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSaxpy_v2(cublasHandle_t handle, int n, const float* alpha, const float* x, int incx, float* y, int incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSaxpy_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, y, sizeof(float)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSaxpy_v2_64(cublasHandle_t handle, int64_t n, const float* alpha, const float* x, int64_t incx, float* y, int64_t incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSaxpy_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, y, sizeof(float)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDaxpy_v2(cublasHandle_t handle, int n, const double* alpha, const double* x, int incx, double* y, int incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDaxpy_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, y, sizeof(double)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDaxpy_v2_64(cublasHandle_t handle, int64_t n, const double* alpha, const double* x, int64_t incx, double* y, int64_t incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDaxpy_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, y, sizeof(double)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCaxpy_v2(cublasHandle_t handle, int n, const cuComplex* alpha, const cuComplex* x, int incx, cuComplex* y, int incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCaxpy_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCaxpy_v2_64(cublasHandle_t handle, int64_t n, const cuComplex* alpha, const cuComplex* x, int64_t incx, cuComplex* y, int64_t incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCaxpy_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZaxpy_v2(cublasHandle_t handle, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* x, int incx, cuDoubleComplex* y, int incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZaxpy_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZaxpy_v2_64(cublasHandle_t handle, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* x, int64_t incx, cuDoubleComplex* y, int64_t incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZaxpy_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasScopy_v2(cublasHandle_t handle, int n, const float* x, int incx, float* y, int incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasScopy_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, y, sizeof(float)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasScopy_v2_64(cublasHandle_t handle, int64_t n, const float* x, int64_t incx, float* y, int64_t incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasScopy_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, y, sizeof(float)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDcopy_v2(cublasHandle_t handle, int n, const double* x, int incx, double* y, int incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDcopy_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, y, sizeof(double)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDcopy_v2_64(cublasHandle_t handle, int64_t n, const double* x, int64_t incx, double* y, int64_t incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDcopy_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, y, sizeof(double)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCcopy_v2(cublasHandle_t handle, int n, const cuComplex* x, int incx, cuComplex* y, int incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCcopy_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCcopy_v2_64(cublasHandle_t handle, int64_t n, const cuComplex* x, int64_t incx, cuComplex* y, int64_t incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCcopy_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZcopy_v2(cublasHandle_t handle, int n, const cuDoubleComplex* x, int incx, cuDoubleComplex* y, int incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZcopy_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZcopy_v2_64(cublasHandle_t handle, int64_t n, const cuDoubleComplex* x, int64_t incx, cuDoubleComplex* y, int64_t incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZcopy_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSswap_v2(cublasHandle_t handle, int n, float* x, int incx, float* y, int incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSswap_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, x, sizeof(float)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, y, sizeof(float)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(float)) < 0 ||
+        rpc_read(0, y, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSswap_v2_64(cublasHandle_t handle, int64_t n, float* x, int64_t incx, float* y, int64_t incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSswap_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, x, sizeof(float)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, y, sizeof(float)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(float)) < 0 ||
+        rpc_read(0, y, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDswap_v2(cublasHandle_t handle, int n, double* x, int incx, double* y, int incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDswap_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, x, sizeof(double)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, y, sizeof(double)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(double)) < 0 ||
+        rpc_read(0, y, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDswap_v2_64(cublasHandle_t handle, int64_t n, double* x, int64_t incx, double* y, int64_t incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDswap_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, x, sizeof(double)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, y, sizeof(double)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(double)) < 0 ||
+        rpc_read(0, y, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCswap_v2(cublasHandle_t handle, int n, cuComplex* x, int incx, cuComplex* y, int incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCswap_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_read(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCswap_v2_64(cublasHandle_t handle, int64_t n, cuComplex* x, int64_t incx, cuComplex* y, int64_t incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCswap_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_read(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZswap_v2(cublasHandle_t handle, int n, cuDoubleComplex* x, int incx, cuDoubleComplex* y, int incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZswap_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_read(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZswap_v2_64(cublasHandle_t handle, int64_t n, cuDoubleComplex* x, int64_t incx, cuDoubleComplex* y, int64_t incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZswap_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_read(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasIsamax_v2(cublasHandle_t handle, int n, const float* x, int incx, int* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasIsamax_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, result, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(int)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasIsamax_v2_64(cublasHandle_t handle, int64_t n, const float* x, int64_t incx, int64_t* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasIsamax_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, result, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(int64_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasIdamax_v2(cublasHandle_t handle, int n, const double* x, int incx, int* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasIdamax_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, result, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(int)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasIdamax_v2_64(cublasHandle_t handle, int64_t n, const double* x, int64_t incx, int64_t* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasIdamax_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, result, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(int64_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasIcamax_v2(cublasHandle_t handle, int n, const cuComplex* x, int incx, int* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasIcamax_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, result, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(int)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasIcamax_v2_64(cublasHandle_t handle, int64_t n, const cuComplex* x, int64_t incx, int64_t* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasIcamax_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, result, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(int64_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasIzamax_v2(cublasHandle_t handle, int n, const cuDoubleComplex* x, int incx, int* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasIzamax_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, result, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(int)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasIzamax_v2_64(cublasHandle_t handle, int64_t n, const cuDoubleComplex* x, int64_t incx, int64_t* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasIzamax_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, result, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(int64_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasIamaxEx(cublasHandle_t handle, int n, const void* x, cudaDataType xType, int incx, int* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasIamaxEx) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const void*)) < 0 ||
+        rpc_write(0, &xType, sizeof(cudaDataType)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, result, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(int)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasIamaxEx_64(cublasHandle_t handle, int64_t n, const void* x, cudaDataType xType, int64_t incx, int64_t* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasIamaxEx_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const void*)) < 0 ||
+        rpc_write(0, &xType, sizeof(cudaDataType)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, result, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(int64_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasIsamin_v2(cublasHandle_t handle, int n, const float* x, int incx, int* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasIsamin_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, result, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(int)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasIsamin_v2_64(cublasHandle_t handle, int64_t n, const float* x, int64_t incx, int64_t* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasIsamin_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, result, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(int64_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasIdamin_v2(cublasHandle_t handle, int n, const double* x, int incx, int* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasIdamin_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, result, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(int)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasIdamin_v2_64(cublasHandle_t handle, int64_t n, const double* x, int64_t incx, int64_t* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasIdamin_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, result, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(int64_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasIcamin_v2(cublasHandle_t handle, int n, const cuComplex* x, int incx, int* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasIcamin_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, result, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(int)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasIcamin_v2_64(cublasHandle_t handle, int64_t n, const cuComplex* x, int64_t incx, int64_t* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasIcamin_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, result, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(int64_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasIzamin_v2(cublasHandle_t handle, int n, const cuDoubleComplex* x, int incx, int* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasIzamin_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, result, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(int)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasIzamin_v2_64(cublasHandle_t handle, int64_t n, const cuDoubleComplex* x, int64_t incx, int64_t* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasIzamin_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, result, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(int64_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasIaminEx(cublasHandle_t handle, int n, const void* x, cudaDataType xType, int incx, int* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasIaminEx) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const void*)) < 0 ||
+        rpc_write(0, &xType, sizeof(cudaDataType)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, result, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(int)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasIaminEx_64(cublasHandle_t handle, int64_t n, const void* x, cudaDataType xType, int64_t incx, int64_t* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasIaminEx_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const void*)) < 0 ||
+        rpc_write(0, &xType, sizeof(cudaDataType)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, result, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(int64_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSasum_v2(cublasHandle_t handle, int n, const float* x, int incx, float* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSasum_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, result, sizeof(float)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSasum_v2_64(cublasHandle_t handle, int64_t n, const float* x, int64_t incx, float* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSasum_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, result, sizeof(float)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDasum_v2(cublasHandle_t handle, int n, const double* x, int incx, double* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDasum_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, result, sizeof(double)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDasum_v2_64(cublasHandle_t handle, int64_t n, const double* x, int64_t incx, double* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDasum_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, result, sizeof(double)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasScasum_v2(cublasHandle_t handle, int n, const cuComplex* x, int incx, float* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasScasum_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, result, sizeof(float)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasScasum_v2_64(cublasHandle_t handle, int64_t n, const cuComplex* x, int64_t incx, float* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasScasum_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, result, sizeof(float)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDzasum_v2(cublasHandle_t handle, int n, const cuDoubleComplex* x, int incx, double* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDzasum_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, result, sizeof(double)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDzasum_v2_64(cublasHandle_t handle, int64_t n, const cuDoubleComplex* x, int64_t incx, double* result)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDzasum_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, result, sizeof(double)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, result, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSrot_v2(cublasHandle_t handle, int n, float* x, int incx, float* y, int incy, const float* c, const float* s)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSrot_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, x, sizeof(float)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, y, sizeof(float)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, &c, sizeof(const float*)) < 0 ||
+        rpc_write(0, &s, sizeof(const float*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(float)) < 0 ||
+        rpc_read(0, y, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSrot_v2_64(cublasHandle_t handle, int64_t n, float* x, int64_t incx, float* y, int64_t incy, const float* c, const float* s)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSrot_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, x, sizeof(float)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, y, sizeof(float)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &c, sizeof(const float*)) < 0 ||
+        rpc_write(0, &s, sizeof(const float*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(float)) < 0 ||
+        rpc_read(0, y, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDrot_v2(cublasHandle_t handle, int n, double* x, int incx, double* y, int incy, const double* c, const double* s)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDrot_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, x, sizeof(double)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, y, sizeof(double)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, &c, sizeof(const double*)) < 0 ||
+        rpc_write(0, &s, sizeof(const double*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(double)) < 0 ||
+        rpc_read(0, y, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDrot_v2_64(cublasHandle_t handle, int64_t n, double* x, int64_t incx, double* y, int64_t incy, const double* c, const double* s)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDrot_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, x, sizeof(double)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, y, sizeof(double)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &c, sizeof(const double*)) < 0 ||
+        rpc_write(0, &s, sizeof(const double*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(double)) < 0 ||
+        rpc_read(0, y, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCrot_v2(cublasHandle_t handle, int n, cuComplex* x, int incx, cuComplex* y, int incy, const float* c, const cuComplex* s)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCrot_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, &c, sizeof(const float*)) < 0 ||
+        rpc_write(0, &s, sizeof(const cuComplex*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_read(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCrot_v2_64(cublasHandle_t handle, int64_t n, cuComplex* x, int64_t incx, cuComplex* y, int64_t incy, const float* c, const cuComplex* s)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCrot_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &c, sizeof(const float*)) < 0 ||
+        rpc_write(0, &s, sizeof(const cuComplex*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_read(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCsrot_v2(cublasHandle_t handle, int n, cuComplex* x, int incx, cuComplex* y, int incy, const float* c, const float* s)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCsrot_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, &c, sizeof(const float*)) < 0 ||
+        rpc_write(0, &s, sizeof(const float*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_read(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCsrot_v2_64(cublasHandle_t handle, int64_t n, cuComplex* x, int64_t incx, cuComplex* y, int64_t incy, const float* c, const float* s)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCsrot_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &c, sizeof(const float*)) < 0 ||
+        rpc_write(0, &s, sizeof(const float*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_read(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZrot_v2(cublasHandle_t handle, int n, cuDoubleComplex* x, int incx, cuDoubleComplex* y, int incy, const double* c, const cuDoubleComplex* s)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZrot_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, &c, sizeof(const double*)) < 0 ||
+        rpc_write(0, &s, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_read(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZrot_v2_64(cublasHandle_t handle, int64_t n, cuDoubleComplex* x, int64_t incx, cuDoubleComplex* y, int64_t incy, const double* c, const cuDoubleComplex* s)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZrot_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &c, sizeof(const double*)) < 0 ||
+        rpc_write(0, &s, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_read(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZdrot_v2(cublasHandle_t handle, int n, cuDoubleComplex* x, int incx, cuDoubleComplex* y, int incy, const double* c, const double* s)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZdrot_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, &c, sizeof(const double*)) < 0 ||
+        rpc_write(0, &s, sizeof(const double*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_read(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZdrot_v2_64(cublasHandle_t handle, int64_t n, cuDoubleComplex* x, int64_t incx, cuDoubleComplex* y, int64_t incy, const double* c, const double* s)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZdrot_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &c, sizeof(const double*)) < 0 ||
+        rpc_write(0, &s, sizeof(const double*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_read(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSrotg_v2(cublasHandle_t handle, float* a, float* b, float* c, float* s)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSrotg_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, a, sizeof(float)) < 0 ||
+        rpc_write(0, b, sizeof(float)) < 0 ||
+        rpc_write(0, c, sizeof(float)) < 0 ||
+        rpc_write(0, s, sizeof(float)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, a, sizeof(float)) < 0 ||
+        rpc_read(0, b, sizeof(float)) < 0 ||
+        rpc_read(0, c, sizeof(float)) < 0 ||
+        rpc_read(0, s, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDrotg_v2(cublasHandle_t handle, double* a, double* b, double* c, double* s)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDrotg_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, a, sizeof(double)) < 0 ||
+        rpc_write(0, b, sizeof(double)) < 0 ||
+        rpc_write(0, c, sizeof(double)) < 0 ||
+        rpc_write(0, s, sizeof(double)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, a, sizeof(double)) < 0 ||
+        rpc_read(0, b, sizeof(double)) < 0 ||
+        rpc_read(0, c, sizeof(double)) < 0 ||
+        rpc_read(0, s, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCrotg_v2(cublasHandle_t handle, cuComplex* a, cuComplex* b, float* c, cuComplex* s)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCrotg_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, a, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, b, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, c, sizeof(float)) < 0 ||
+        rpc_write(0, s, sizeof(cuComplex)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, a, sizeof(cuComplex)) < 0 ||
+        rpc_read(0, b, sizeof(cuComplex)) < 0 ||
+        rpc_read(0, c, sizeof(float)) < 0 ||
+        rpc_read(0, s, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZrotg_v2(cublasHandle_t handle, cuDoubleComplex* a, cuDoubleComplex* b, double* c, cuDoubleComplex* s)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZrotg_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, a, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, b, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, c, sizeof(double)) < 0 ||
+        rpc_write(0, s, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, a, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_read(0, b, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_read(0, c, sizeof(double)) < 0 ||
+        rpc_read(0, s, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSrotm_v2(cublasHandle_t handle, int n, float* x, int incx, float* y, int incy, const float* param)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSrotm_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, x, sizeof(float)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, y, sizeof(float)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, &param, sizeof(const float*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(float)) < 0 ||
+        rpc_read(0, y, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSrotm_v2_64(cublasHandle_t handle, int64_t n, float* x, int64_t incx, float* y, int64_t incy, const float* param)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSrotm_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, x, sizeof(float)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, y, sizeof(float)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &param, sizeof(const float*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(float)) < 0 ||
+        rpc_read(0, y, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDrotm_v2(cublasHandle_t handle, int n, double* x, int incx, double* y, int incy, const double* param)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDrotm_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, x, sizeof(double)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, y, sizeof(double)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, &param, sizeof(const double*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(double)) < 0 ||
+        rpc_read(0, y, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDrotm_v2_64(cublasHandle_t handle, int64_t n, double* x, int64_t incx, double* y, int64_t incy, const double* param)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDrotm_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, x, sizeof(double)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, y, sizeof(double)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &param, sizeof(const double*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(double)) < 0 ||
+        rpc_read(0, y, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSrotmg_v2(cublasHandle_t handle, float* d1, float* d2, float* x1, const float* y1, float* param)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSrotmg_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, d1, sizeof(float)) < 0 ||
+        rpc_write(0, d2, sizeof(float)) < 0 ||
+        rpc_write(0, x1, sizeof(float)) < 0 ||
+        rpc_write(0, &y1, sizeof(const float*)) < 0 ||
+        rpc_write(0, param, sizeof(float)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, d1, sizeof(float)) < 0 ||
+        rpc_read(0, d2, sizeof(float)) < 0 ||
+        rpc_read(0, x1, sizeof(float)) < 0 ||
+        rpc_read(0, param, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDrotmg_v2(cublasHandle_t handle, double* d1, double* d2, double* x1, const double* y1, double* param)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDrotmg_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, d1, sizeof(double)) < 0 ||
+        rpc_write(0, d2, sizeof(double)) < 0 ||
+        rpc_write(0, x1, sizeof(double)) < 0 ||
+        rpc_write(0, &y1, sizeof(const double*)) < 0 ||
+        rpc_write(0, param, sizeof(double)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, d1, sizeof(double)) < 0 ||
+        rpc_read(0, d2, sizeof(double)) < 0 ||
+        rpc_read(0, x1, sizeof(double)) < 0 ||
+        rpc_read(0, param, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSgemv_v2(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const float* alpha, const float* A, int lda, const float* x, int incx, const float* beta, float* y, int incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSgemv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, y, sizeof(float)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSgemv_v2_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, const float* alpha, const float* A, int64_t lda, const float* x, int64_t incx, const float* beta, float* y, int64_t incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSgemv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, y, sizeof(float)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDgemv_v2(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const double* alpha, const double* A, int lda, const double* x, int incx, const double* beta, double* y, int incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDgemv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, y, sizeof(double)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDgemv_v2_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, const double* alpha, const double* A, int64_t lda, const double* x, int64_t incx, const double* beta, double* y, int64_t incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDgemv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, y, sizeof(double)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCgemv_v2(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const cuComplex* alpha, const cuComplex* A, int lda, const cuComplex* x, int incx, const cuComplex* beta, cuComplex* y, int incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCgemv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCgemv_v2_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, const cuComplex* alpha, const cuComplex* A, int64_t lda, const cuComplex* x, int64_t incx, const cuComplex* beta, cuComplex* y, int64_t incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCgemv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZgemv_v2(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, const cuDoubleComplex* x, int incx, const cuDoubleComplex* beta, cuDoubleComplex* y, int incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZgemv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZgemv_v2_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, const cuDoubleComplex* x, int64_t incx, const cuDoubleComplex* beta, cuDoubleComplex* y, int64_t incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZgemv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSgbmv_v2(cublasHandle_t handle, cublasOperation_t trans, int m, int n, int kl, int ku, const float* alpha, const float* A, int lda, const float* x, int incx, const float* beta, float* y, int incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSgbmv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &kl, sizeof(int)) < 0 ||
+        rpc_write(0, &ku, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, y, sizeof(float)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSgbmv_v2_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, int64_t kl, int64_t ku, const float* alpha, const float* A, int64_t lda, const float* x, int64_t incx, const float* beta, float* y, int64_t incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSgbmv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &kl, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &ku, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, y, sizeof(float)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDgbmv_v2(cublasHandle_t handle, cublasOperation_t trans, int m, int n, int kl, int ku, const double* alpha, const double* A, int lda, const double* x, int incx, const double* beta, double* y, int incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDgbmv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &kl, sizeof(int)) < 0 ||
+        rpc_write(0, &ku, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, y, sizeof(double)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDgbmv_v2_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, int64_t kl, int64_t ku, const double* alpha, const double* A, int64_t lda, const double* x, int64_t incx, const double* beta, double* y, int64_t incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDgbmv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &kl, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &ku, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, y, sizeof(double)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCgbmv_v2(cublasHandle_t handle, cublasOperation_t trans, int m, int n, int kl, int ku, const cuComplex* alpha, const cuComplex* A, int lda, const cuComplex* x, int incx, const cuComplex* beta, cuComplex* y, int incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCgbmv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &kl, sizeof(int)) < 0 ||
+        rpc_write(0, &ku, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCgbmv_v2_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, int64_t kl, int64_t ku, const cuComplex* alpha, const cuComplex* A, int64_t lda, const cuComplex* x, int64_t incx, const cuComplex* beta, cuComplex* y, int64_t incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCgbmv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &kl, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &ku, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZgbmv_v2(cublasHandle_t handle, cublasOperation_t trans, int m, int n, int kl, int ku, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, const cuDoubleComplex* x, int incx, const cuDoubleComplex* beta, cuDoubleComplex* y, int incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZgbmv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &kl, sizeof(int)) < 0 ||
+        rpc_write(0, &ku, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZgbmv_v2_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, int64_t kl, int64_t ku, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, const cuDoubleComplex* x, int64_t incx, const cuDoubleComplex* beta, cuDoubleComplex* y, int64_t incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZgbmv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &kl, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &ku, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasStrmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const float* A, int lda, float* x, int incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasStrmv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, x, sizeof(float)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasStrmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, const float* A, int64_t lda, float* x, int64_t incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasStrmv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, x, sizeof(float)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDtrmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const double* A, int lda, double* x, int incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDtrmv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, x, sizeof(double)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDtrmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, const double* A, int64_t lda, double* x, int64_t incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDtrmv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, x, sizeof(double)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCtrmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const cuComplex* A, int lda, cuComplex* x, int incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCtrmv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCtrmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, const cuComplex* A, int64_t lda, cuComplex* x, int64_t incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCtrmv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZtrmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const cuDoubleComplex* A, int lda, cuDoubleComplex* x, int incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZtrmv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZtrmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, const cuDoubleComplex* A, int64_t lda, cuDoubleComplex* x, int64_t incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZtrmv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasStbmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, int k, const float* A, int lda, float* x, int incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasStbmv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, x, sizeof(float)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasStbmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, int64_t k, const float* A, int64_t lda, float* x, int64_t incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasStbmv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, x, sizeof(float)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDtbmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, int k, const double* A, int lda, double* x, int incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDtbmv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, x, sizeof(double)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDtbmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, int64_t k, const double* A, int64_t lda, double* x, int64_t incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDtbmv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, x, sizeof(double)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCtbmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, int k, const cuComplex* A, int lda, cuComplex* x, int incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCtbmv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCtbmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, int64_t k, const cuComplex* A, int64_t lda, cuComplex* x, int64_t incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCtbmv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZtbmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, int k, const cuDoubleComplex* A, int lda, cuDoubleComplex* x, int incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZtbmv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZtbmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, int64_t k, const cuDoubleComplex* A, int64_t lda, cuDoubleComplex* x, int64_t incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZtbmv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasStpmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const float* AP, float* x, int incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasStpmv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &AP, sizeof(const float*)) < 0 ||
+        rpc_write(0, x, sizeof(float)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasStpmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, const float* AP, float* x, int64_t incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasStpmv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &AP, sizeof(const float*)) < 0 ||
+        rpc_write(0, x, sizeof(float)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDtpmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const double* AP, double* x, int incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDtpmv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &AP, sizeof(const double*)) < 0 ||
+        rpc_write(0, x, sizeof(double)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDtpmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, const double* AP, double* x, int64_t incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDtpmv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &AP, sizeof(const double*)) < 0 ||
+        rpc_write(0, x, sizeof(double)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCtpmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const cuComplex* AP, cuComplex* x, int incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCtpmv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &AP, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCtpmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, const cuComplex* AP, cuComplex* x, int64_t incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCtpmv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &AP, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZtpmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const cuDoubleComplex* AP, cuDoubleComplex* x, int incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZtpmv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &AP, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZtpmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, const cuDoubleComplex* AP, cuDoubleComplex* x, int64_t incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZtpmv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &AP, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasStrsv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const float* A, int lda, float* x, int incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasStrsv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, x, sizeof(float)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasStrsv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, const float* A, int64_t lda, float* x, int64_t incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasStrsv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, x, sizeof(float)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDtrsv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const double* A, int lda, double* x, int incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDtrsv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, x, sizeof(double)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDtrsv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, const double* A, int64_t lda, double* x, int64_t incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDtrsv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, x, sizeof(double)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCtrsv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const cuComplex* A, int lda, cuComplex* x, int incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCtrsv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCtrsv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, const cuComplex* A, int64_t lda, cuComplex* x, int64_t incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCtrsv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZtrsv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const cuDoubleComplex* A, int lda, cuDoubleComplex* x, int incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZtrsv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZtrsv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, const cuDoubleComplex* A, int64_t lda, cuDoubleComplex* x, int64_t incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZtrsv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasStpsv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const float* AP, float* x, int incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasStpsv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &AP, sizeof(const float*)) < 0 ||
+        rpc_write(0, x, sizeof(float)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasStpsv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, const float* AP, float* x, int64_t incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasStpsv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &AP, sizeof(const float*)) < 0 ||
+        rpc_write(0, x, sizeof(float)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDtpsv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const double* AP, double* x, int incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDtpsv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &AP, sizeof(const double*)) < 0 ||
+        rpc_write(0, x, sizeof(double)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDtpsv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, const double* AP, double* x, int64_t incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDtpsv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &AP, sizeof(const double*)) < 0 ||
+        rpc_write(0, x, sizeof(double)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCtpsv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const cuComplex* AP, cuComplex* x, int incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCtpsv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &AP, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCtpsv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, const cuComplex* AP, cuComplex* x, int64_t incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCtpsv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &AP, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZtpsv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, const cuDoubleComplex* AP, cuDoubleComplex* x, int incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZtpsv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &AP, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZtpsv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, const cuDoubleComplex* AP, cuDoubleComplex* x, int64_t incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZtpsv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &AP, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasStbsv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, int k, const float* A, int lda, float* x, int incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasStbsv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, x, sizeof(float)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasStbsv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, int64_t k, const float* A, int64_t lda, float* x, int64_t incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasStbsv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, x, sizeof(float)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDtbsv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, int k, const double* A, int lda, double* x, int incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDtbsv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, x, sizeof(double)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDtbsv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, int64_t k, const double* A, int64_t lda, double* x, int64_t incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDtbsv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, x, sizeof(double)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCtbsv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, int k, const cuComplex* A, int lda, cuComplex* x, int incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCtbsv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCtbsv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, int64_t k, const cuComplex* A, int64_t lda, cuComplex* x, int64_t incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCtbsv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZtbsv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int n, int k, const cuDoubleComplex* A, int lda, cuDoubleComplex* x, int incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZtbsv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZtbsv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t n, int64_t k, const cuDoubleComplex* A, int64_t lda, cuDoubleComplex* x, int64_t incx)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZtbsv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, x, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSsymv_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const float* alpha, const float* A, int lda, const float* x, int incx, const float* beta, float* y, int incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSsymv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, y, sizeof(float)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSsymv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const float* alpha, const float* A, int64_t lda, const float* x, int64_t incx, const float* beta, float* y, int64_t incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSsymv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, y, sizeof(float)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDsymv_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const double* alpha, const double* A, int lda, const double* x, int incx, const double* beta, double* y, int incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDsymv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, y, sizeof(double)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDsymv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const double* alpha, const double* A, int64_t lda, const double* x, int64_t incx, const double* beta, double* y, int64_t incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDsymv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, y, sizeof(double)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCsymv_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuComplex* alpha, const cuComplex* A, int lda, const cuComplex* x, int incx, const cuComplex* beta, cuComplex* y, int incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCsymv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCsymv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const cuComplex* alpha, const cuComplex* A, int64_t lda, const cuComplex* x, int64_t incx, const cuComplex* beta, cuComplex* y, int64_t incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCsymv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZsymv_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, const cuDoubleComplex* x, int incx, const cuDoubleComplex* beta, cuDoubleComplex* y, int incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZsymv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZsymv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, const cuDoubleComplex* x, int64_t incx, const cuDoubleComplex* beta, cuDoubleComplex* y, int64_t incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZsymv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasChemv_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuComplex* alpha, const cuComplex* A, int lda, const cuComplex* x, int incx, const cuComplex* beta, cuComplex* y, int incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasChemv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasChemv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const cuComplex* alpha, const cuComplex* A, int64_t lda, const cuComplex* x, int64_t incx, const cuComplex* beta, cuComplex* y, int64_t incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasChemv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZhemv_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, const cuDoubleComplex* x, int incx, const cuDoubleComplex* beta, cuDoubleComplex* y, int incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZhemv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZhemv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, const cuDoubleComplex* x, int64_t incx, const cuDoubleComplex* beta, cuDoubleComplex* y, int64_t incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZhemv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSsbmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, int k, const float* alpha, const float* A, int lda, const float* x, int incx, const float* beta, float* y, int incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSsbmv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, y, sizeof(float)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSsbmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, int64_t k, const float* alpha, const float* A, int64_t lda, const float* x, int64_t incx, const float* beta, float* y, int64_t incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSsbmv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, y, sizeof(float)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDsbmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, int k, const double* alpha, const double* A, int lda, const double* x, int incx, const double* beta, double* y, int incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDsbmv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, y, sizeof(double)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDsbmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, int64_t k, const double* alpha, const double* A, int64_t lda, const double* x, int64_t incx, const double* beta, double* y, int64_t incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDsbmv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, y, sizeof(double)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasChbmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, int k, const cuComplex* alpha, const cuComplex* A, int lda, const cuComplex* x, int incx, const cuComplex* beta, cuComplex* y, int incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasChbmv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasChbmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, int64_t k, const cuComplex* alpha, const cuComplex* A, int64_t lda, const cuComplex* x, int64_t incx, const cuComplex* beta, cuComplex* y, int64_t incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasChbmv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZhbmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, int k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, const cuDoubleComplex* x, int incx, const cuDoubleComplex* beta, cuDoubleComplex* y, int incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZhbmv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZhbmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, int64_t k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, const cuDoubleComplex* x, int64_t incx, const cuDoubleComplex* beta, cuDoubleComplex* y, int64_t incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZhbmv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSspmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const float* alpha, const float* AP, const float* x, int incx, const float* beta, float* y, int incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSspmv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &AP, sizeof(const float*)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, y, sizeof(float)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSspmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const float* alpha, const float* AP, const float* x, int64_t incx, const float* beta, float* y, int64_t incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSspmv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &AP, sizeof(const float*)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, y, sizeof(float)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDspmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const double* alpha, const double* AP, const double* x, int incx, const double* beta, double* y, int incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDspmv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &AP, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, y, sizeof(double)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDspmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const double* alpha, const double* AP, const double* x, int64_t incx, const double* beta, double* y, int64_t incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDspmv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &AP, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, y, sizeof(double)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasChpmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuComplex* alpha, const cuComplex* AP, const cuComplex* x, int incx, const cuComplex* beta, cuComplex* y, int incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasChpmv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &AP, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasChpmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const cuComplex* alpha, const cuComplex* AP, const cuComplex* x, int64_t incx, const cuComplex* beta, cuComplex* y, int64_t incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasChpmv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &AP, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZhpmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* AP, const cuDoubleComplex* x, int incx, const cuDoubleComplex* beta, cuDoubleComplex* y, int incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZhpmv_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &AP, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZhpmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* AP, const cuDoubleComplex* x, int64_t incx, const cuDoubleComplex* beta, cuDoubleComplex* y, int64_t incy)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZhpmv_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &AP, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSger_v2(cublasHandle_t handle, int m, int n, const float* alpha, const float* x, int incx, const float* y, int incy, float* A, int lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSger_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &y, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, A, sizeof(float)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSger_v2_64(cublasHandle_t handle, int64_t m, int64_t n, const float* alpha, const float* x, int64_t incx, const float* y, int64_t incy, float* A, int64_t lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSger_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &y, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, A, sizeof(float)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDger_v2(cublasHandle_t handle, int m, int n, const double* alpha, const double* x, int incx, const double* y, int incy, double* A, int lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDger_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &y, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, A, sizeof(double)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDger_v2_64(cublasHandle_t handle, int64_t m, int64_t n, const double* alpha, const double* x, int64_t incx, const double* y, int64_t incy, double* A, int64_t lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDger_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &y, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, A, sizeof(double)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCgeru_v2(cublasHandle_t handle, int m, int n, const cuComplex* alpha, const cuComplex* x, int incx, const cuComplex* y, int incy, cuComplex* A, int lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCgeru_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &y, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, A, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCgeru_v2_64(cublasHandle_t handle, int64_t m, int64_t n, const cuComplex* alpha, const cuComplex* x, int64_t incx, const cuComplex* y, int64_t incy, cuComplex* A, int64_t lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCgeru_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &y, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, A, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCgerc_v2(cublasHandle_t handle, int m, int n, const cuComplex* alpha, const cuComplex* x, int incx, const cuComplex* y, int incy, cuComplex* A, int lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCgerc_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &y, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, A, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCgerc_v2_64(cublasHandle_t handle, int64_t m, int64_t n, const cuComplex* alpha, const cuComplex* x, int64_t incx, const cuComplex* y, int64_t incy, cuComplex* A, int64_t lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCgerc_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &y, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, A, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZgeru_v2(cublasHandle_t handle, int m, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* x, int incx, const cuDoubleComplex* y, int incy, cuDoubleComplex* A, int lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZgeru_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &y, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, A, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZgeru_v2_64(cublasHandle_t handle, int64_t m, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* x, int64_t incx, const cuDoubleComplex* y, int64_t incy, cuDoubleComplex* A, int64_t lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZgeru_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &y, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, A, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZgerc_v2(cublasHandle_t handle, int m, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* x, int incx, const cuDoubleComplex* y, int incy, cuDoubleComplex* A, int lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZgerc_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &y, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, A, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZgerc_v2_64(cublasHandle_t handle, int64_t m, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* x, int64_t incx, const cuDoubleComplex* y, int64_t incy, cuDoubleComplex* A, int64_t lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZgerc_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &y, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, A, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSsyr_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const float* alpha, const float* x, int incx, float* A, int lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSsyr_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, A, sizeof(float)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSsyr_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const float* alpha, const float* x, int64_t incx, float* A, int64_t lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSsyr_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, A, sizeof(float)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDsyr_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const double* alpha, const double* x, int incx, double* A, int lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDsyr_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, A, sizeof(double)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDsyr_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const double* alpha, const double* x, int64_t incx, double* A, int64_t lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDsyr_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, A, sizeof(double)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCsyr_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuComplex* alpha, const cuComplex* x, int incx, cuComplex* A, int lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCsyr_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, A, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCsyr_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const cuComplex* alpha, const cuComplex* x, int64_t incx, cuComplex* A, int64_t lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCsyr_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, A, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZsyr_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* x, int incx, cuDoubleComplex* A, int lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZsyr_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, A, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZsyr_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* x, int64_t incx, cuDoubleComplex* A, int64_t lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZsyr_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, A, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCher_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const float* alpha, const cuComplex* x, int incx, cuComplex* A, int lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCher_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, A, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCher_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const float* alpha, const cuComplex* x, int64_t incx, cuComplex* A, int64_t lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCher_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, A, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZher_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const double* alpha, const cuDoubleComplex* x, int incx, cuDoubleComplex* A, int lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZher_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, A, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZher_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const double* alpha, const cuDoubleComplex* x, int64_t incx, cuDoubleComplex* A, int64_t lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZher_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, A, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSspr_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const float* alpha, const float* x, int incx, float* AP)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSspr_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, AP, sizeof(float)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, AP, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSspr_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const float* alpha, const float* x, int64_t incx, float* AP)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSspr_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, AP, sizeof(float)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, AP, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDspr_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const double* alpha, const double* x, int incx, double* AP)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDspr_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, AP, sizeof(double)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, AP, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDspr_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const double* alpha, const double* x, int64_t incx, double* AP)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDspr_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, AP, sizeof(double)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, AP, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasChpr_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const float* alpha, const cuComplex* x, int incx, cuComplex* AP)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasChpr_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, AP, sizeof(cuComplex)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, AP, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasChpr_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const float* alpha, const cuComplex* x, int64_t incx, cuComplex* AP)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasChpr_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, AP, sizeof(cuComplex)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, AP, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZhpr_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const double* alpha, const cuDoubleComplex* x, int incx, cuDoubleComplex* AP)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZhpr_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, AP, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, AP, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZhpr_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const double* alpha, const cuDoubleComplex* x, int64_t incx, cuDoubleComplex* AP)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZhpr_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, AP, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, AP, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSsyr2_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const float* alpha, const float* x, int incx, const float* y, int incy, float* A, int lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSsyr2_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &y, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, A, sizeof(float)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSsyr2_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const float* alpha, const float* x, int64_t incx, const float* y, int64_t incy, float* A, int64_t lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSsyr2_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &y, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, A, sizeof(float)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDsyr2_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const double* alpha, const double* x, int incx, const double* y, int incy, double* A, int lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDsyr2_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &y, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, A, sizeof(double)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDsyr2_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const double* alpha, const double* x, int64_t incx, const double* y, int64_t incy, double* A, int64_t lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDsyr2_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &y, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, A, sizeof(double)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCsyr2_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuComplex* alpha, const cuComplex* x, int incx, const cuComplex* y, int incy, cuComplex* A, int lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCsyr2_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &y, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, A, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCsyr2_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const cuComplex* alpha, const cuComplex* x, int64_t incx, const cuComplex* y, int64_t incy, cuComplex* A, int64_t lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCsyr2_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &y, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, A, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZsyr2_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* x, int incx, const cuDoubleComplex* y, int incy, cuDoubleComplex* A, int lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZsyr2_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &y, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, A, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZsyr2_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* x, int64_t incx, const cuDoubleComplex* y, int64_t incy, cuDoubleComplex* A, int64_t lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZsyr2_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &y, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, A, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCher2_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuComplex* alpha, const cuComplex* x, int incx, const cuComplex* y, int incy, cuComplex* A, int lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCher2_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &y, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, A, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCher2_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const cuComplex* alpha, const cuComplex* x, int64_t incx, const cuComplex* y, int64_t incy, cuComplex* A, int64_t lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCher2_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &y, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, A, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZher2_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* x, int incx, const cuDoubleComplex* y, int incy, cuDoubleComplex* A, int lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZher2_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &y, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, A, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZher2_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* x, int64_t incx, const cuDoubleComplex* y, int64_t incy, cuDoubleComplex* A, int64_t lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZher2_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &y, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, A, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSspr2_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const float* alpha, const float* x, int incx, const float* y, int incy, float* AP)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSspr2_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &y, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, AP, sizeof(float)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, AP, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSspr2_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const float* alpha, const float* x, int64_t incx, const float* y, int64_t incy, float* AP)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSspr2_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &y, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, AP, sizeof(float)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, AP, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDspr2_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const double* alpha, const double* x, int incx, const double* y, int incy, double* AP)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDspr2_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &y, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, AP, sizeof(double)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, AP, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDspr2_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const double* alpha, const double* x, int64_t incx, const double* y, int64_t incy, double* AP)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDspr2_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &y, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, AP, sizeof(double)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, AP, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasChpr2_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuComplex* alpha, const cuComplex* x, int incx, const cuComplex* y, int incy, cuComplex* AP)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasChpr2_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &y, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, AP, sizeof(cuComplex)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, AP, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasChpr2_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const cuComplex* alpha, const cuComplex* x, int64_t incx, const cuComplex* y, int64_t incy, cuComplex* AP)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasChpr2_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &y, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, AP, sizeof(cuComplex)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, AP, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZhpr2_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* x, int incx, const cuDoubleComplex* y, int incy, cuDoubleComplex* AP)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZhpr2_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &y, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, AP, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, AP, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZhpr2_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* x, int64_t incx, const cuDoubleComplex* y, int64_t incy, cuDoubleComplex* AP)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZhpr2_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &y, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, AP, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, AP, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSgemvBatched(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const float* alpha, const float* const Aarray[], int lda, const float* const xarray[], int incx, const float* beta, float* const yarray[], int incy, int batchCount)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSgemvBatched) < 0 ||
+        rpc_write(0, &batchCount, sizeof(int)) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, Aarray, sizeof(const float* const[batchCount])) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, xarray, sizeof(const float* const[batchCount])) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, yarray, sizeof(float* const[batchCount])) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasTSTgemvBatched(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const float* alpha, const __nv_bfloat16* const Aarray[], int lda, const __nv_bfloat16* const xarray[], int incx, const float* beta, __nv_bfloat16* const yarray[], int incy, int batchCount)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasTSTgemvBatched) < 0 ||
+        rpc_write(0, &batchCount, sizeof(int)) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, Aarray, sizeof(const __nv_bfloat16* const[batchCount])) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, xarray, sizeof(const __nv_bfloat16* const[batchCount])) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, yarray, sizeof(__nv_bfloat16* const[batchCount])) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSgemvStridedBatched(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const float* alpha, const float* A, int lda, long long int strideA, const float* x, int incx, long long int stridex, const float* beta, float* y, int incy, long long int stridey, int batchCount)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSgemvStridedBatched) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &stridex, sizeof(long long int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, y, sizeof(float)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, &stridey, sizeof(long long int)) < 0 ||
+        rpc_write(0, &batchCount, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSgemvStridedBatched_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, const float* alpha, const float* A, int64_t lda, long long int strideA, const float* x, int64_t incx, long long int stridex, const float* beta, float* y, int64_t incy, long long int stridey, int64_t batchCount)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSgemvStridedBatched_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &stridex, sizeof(long long int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, y, sizeof(float)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &stridey, sizeof(long long int)) < 0 ||
+        rpc_write(0, &batchCount, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDgemvStridedBatched(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const double* alpha, const double* A, int lda, long long int strideA, const double* x, int incx, long long int stridex, const double* beta, double* y, int incy, long long int stridey, int batchCount)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDgemvStridedBatched) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &stridex, sizeof(long long int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, y, sizeof(double)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, &stridey, sizeof(long long int)) < 0 ||
+        rpc_write(0, &batchCount, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDgemvStridedBatched_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, const double* alpha, const double* A, int64_t lda, long long int strideA, const double* x, int64_t incx, long long int stridex, const double* beta, double* y, int64_t incy, long long int stridey, int64_t batchCount)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDgemvStridedBatched_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &stridex, sizeof(long long int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, y, sizeof(double)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &stridey, sizeof(long long int)) < 0 ||
+        rpc_write(0, &batchCount, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCgemvStridedBatched(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const cuComplex* alpha, const cuComplex* A, int lda, long long int strideA, const cuComplex* x, int incx, long long int stridex, const cuComplex* beta, cuComplex* y, int incy, long long int stridey, int batchCount)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCgemvStridedBatched) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &stridex, sizeof(long long int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, &stridey, sizeof(long long int)) < 0 ||
+        rpc_write(0, &batchCount, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCgemvStridedBatched_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, const cuComplex* alpha, const cuComplex* A, int64_t lda, long long int strideA, const cuComplex* x, int64_t incx, long long int stridex, const cuComplex* beta, cuComplex* y, int64_t incy, long long int stridey, int64_t batchCount)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCgemvStridedBatched_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &stridex, sizeof(long long int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &stridey, sizeof(long long int)) < 0 ||
+        rpc_write(0, &batchCount, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZgemvStridedBatched(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, long long int strideA, const cuDoubleComplex* x, int incx, long long int stridex, const cuDoubleComplex* beta, cuDoubleComplex* y, int incy, long long int stridey, int batchCount)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZgemvStridedBatched) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &stridex, sizeof(long long int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, &stridey, sizeof(long long int)) < 0 ||
+        rpc_write(0, &batchCount, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZgemvStridedBatched_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, long long int strideA, const cuDoubleComplex* x, int64_t incx, long long int stridex, const cuDoubleComplex* beta, cuDoubleComplex* y, int64_t incy, long long int stridey, int64_t batchCount)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZgemvStridedBatched_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &stridex, sizeof(long long int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &stridey, sizeof(long long int)) < 0 ||
+        rpc_write(0, &batchCount, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasHSHgemvStridedBatched(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const float* alpha, const __half* A, int lda, long long int strideA, const __half* x, int incx, long long int stridex, const float* beta, __half* y, int incy, long long int stridey, int batchCount)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasHSHgemvStridedBatched) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const __half*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
+        rpc_write(0, &x, sizeof(const __half*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &stridex, sizeof(long long int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, y, sizeof(__half)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, &stridey, sizeof(long long int)) < 0 ||
+        rpc_write(0, &batchCount, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(__half)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasHSHgemvStridedBatched_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, const float* alpha, const __half* A, int64_t lda, long long int strideA, const __half* x, int64_t incx, long long int stridex, const float* beta, __half* y, int64_t incy, long long int stridey, int64_t batchCount)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasHSHgemvStridedBatched_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const __half*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
+        rpc_write(0, &x, sizeof(const __half*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &stridex, sizeof(long long int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, y, sizeof(__half)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &stridey, sizeof(long long int)) < 0 ||
+        rpc_write(0, &batchCount, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(__half)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasHSSgemvStridedBatched(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const float* alpha, const __half* A, int lda, long long int strideA, const __half* x, int incx, long long int stridex, const float* beta, float* y, int incy, long long int stridey, int batchCount)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasHSSgemvStridedBatched) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const __half*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
+        rpc_write(0, &x, sizeof(const __half*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &stridex, sizeof(long long int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, y, sizeof(float)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, &stridey, sizeof(long long int)) < 0 ||
+        rpc_write(0, &batchCount, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasHSSgemvStridedBatched_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, const float* alpha, const __half* A, int64_t lda, long long int strideA, const __half* x, int64_t incx, long long int stridex, const float* beta, float* y, int64_t incy, long long int stridey, int64_t batchCount)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasHSSgemvStridedBatched_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const __half*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
+        rpc_write(0, &x, sizeof(const __half*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &stridex, sizeof(long long int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, y, sizeof(float)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &stridey, sizeof(long long int)) < 0 ||
+        rpc_write(0, &batchCount, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasTSTgemvStridedBatched(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const float* alpha, const __nv_bfloat16* A, int lda, long long int strideA, const __nv_bfloat16* x, int incx, long long int stridex, const float* beta, __nv_bfloat16* y, int incy, long long int stridey, int batchCount)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasTSTgemvStridedBatched) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const __nv_bfloat16*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
+        rpc_write(0, &x, sizeof(const __nv_bfloat16*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &stridex, sizeof(long long int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, y, sizeof(__nv_bfloat16)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, &stridey, sizeof(long long int)) < 0 ||
+        rpc_write(0, &batchCount, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(__nv_bfloat16)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasTSTgemvStridedBatched_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, const float* alpha, const __nv_bfloat16* A, int64_t lda, long long int strideA, const __nv_bfloat16* x, int64_t incx, long long int stridex, const float* beta, __nv_bfloat16* y, int64_t incy, long long int stridey, int64_t batchCount)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasTSTgemvStridedBatched_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const __nv_bfloat16*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
+        rpc_write(0, &x, sizeof(const __nv_bfloat16*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &stridex, sizeof(long long int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, y, sizeof(__nv_bfloat16)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &stridey, sizeof(long long int)) < 0 ||
+        rpc_write(0, &batchCount, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(__nv_bfloat16)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasTSSgemvStridedBatched(cublasHandle_t handle, cublasOperation_t trans, int m, int n, const float* alpha, const __nv_bfloat16* A, int lda, long long int strideA, const __nv_bfloat16* x, int incx, long long int stridex, const float* beta, float* y, int incy, long long int stridey, int batchCount)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasTSSgemvStridedBatched) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const __nv_bfloat16*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
+        rpc_write(0, &x, sizeof(const __nv_bfloat16*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, &stridex, sizeof(long long int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, y, sizeof(float)) < 0 ||
+        rpc_write(0, &incy, sizeof(int)) < 0 ||
+        rpc_write(0, &stridey, sizeof(long long int)) < 0 ||
+        rpc_write(0, &batchCount, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasTSSgemvStridedBatched_64(cublasHandle_t handle, cublasOperation_t trans, int64_t m, int64_t n, const float* alpha, const __nv_bfloat16* A, int64_t lda, long long int strideA, const __nv_bfloat16* x, int64_t incx, long long int stridex, const float* beta, float* y, int64_t incy, long long int stridey, int64_t batchCount)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasTSSgemvStridedBatched_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const __nv_bfloat16*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
+        rpc_write(0, &x, sizeof(const __nv_bfloat16*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &stridex, sizeof(long long int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, y, sizeof(float)) < 0 ||
+        rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &stridey, sizeof(long long int)) < 0 ||
+        rpc_write(0, &batchCount, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, y, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
 cublasStatus_t cublasSgemm_v2(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const float* alpha, const float* A, int lda, const float* B, int ldb, const float* beta, float* C, int ldc)
 {
     cublasStatus_t return_value;
@@ -11161,6 +16667,2729 @@ cublasStatus_t cublasSgemm_v2(cublasHandle_t handle, cublasOperation_t transa, c
     return return_value;
 }
 
+cublasStatus_t cublasSgemm_v2_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const float* alpha, const float* A, int64_t lda, const float* B, int64_t ldb, const float* beta, float* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSgemm_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &B, sizeof(const float*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, C, sizeof(float)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDgemm_v2(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const double* alpha, const double* A, int lda, const double* B, int ldb, const double* beta, double* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDgemm_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &B, sizeof(const double*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, C, sizeof(double)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDgemm_v2_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const double* alpha, const double* A, int64_t lda, const double* B, int64_t ldb, const double* beta, double* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDgemm_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &B, sizeof(const double*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, C, sizeof(double)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCgemm_v2(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const cuComplex* alpha, const cuComplex* A, int lda, const cuComplex* B, int ldb, const cuComplex* beta, cuComplex* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCgemm_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCgemm_v2_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const cuComplex* alpha, const cuComplex* A, int64_t lda, const cuComplex* B, int64_t ldb, const cuComplex* beta, cuComplex* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCgemm_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCgemm3m(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const cuComplex* alpha, const cuComplex* A, int lda, const cuComplex* B, int ldb, const cuComplex* beta, cuComplex* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCgemm3m) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCgemm3m_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const cuComplex* alpha, const cuComplex* A, int64_t lda, const cuComplex* B, int64_t ldb, const cuComplex* beta, cuComplex* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCgemm3m_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZgemm_v2(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, const cuDoubleComplex* B, int ldb, const cuDoubleComplex* beta, cuDoubleComplex* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZgemm_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZgemm_v2_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, const cuDoubleComplex* B, int64_t ldb, const cuDoubleComplex* beta, cuDoubleComplex* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZgemm_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZgemm3m(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, const cuDoubleComplex* B, int ldb, const cuDoubleComplex* beta, cuDoubleComplex* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZgemm3m) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZgemm3m_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, const cuDoubleComplex* B, int64_t ldb, const cuDoubleComplex* beta, cuDoubleComplex* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZgemm3m_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasHgemm(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const __half* alpha, const __half* A, int lda, const __half* B, int ldb, const __half* beta, __half* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasHgemm) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const __half*)) < 0 ||
+        rpc_write(0, &A, sizeof(const __half*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &B, sizeof(const __half*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const __half*)) < 0 ||
+        rpc_write(0, C, sizeof(__half)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(__half)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasHgemm_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const __half* alpha, const __half* A, int64_t lda, const __half* B, int64_t ldb, const __half* beta, __half* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasHgemm_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const __half*)) < 0 ||
+        rpc_write(0, &A, sizeof(const __half*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &B, sizeof(const __half*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const __half*)) < 0 ||
+        rpc_write(0, C, sizeof(__half)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(__half)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSsyrk_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const float* alpha, const float* A, int lda, const float* beta, float* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSsyrk_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, C, sizeof(float)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSsyrk_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const float* alpha, const float* A, int64_t lda, const float* beta, float* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSsyrk_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, C, sizeof(float)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDsyrk_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const double* alpha, const double* A, int lda, const double* beta, double* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDsyrk_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, C, sizeof(double)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDsyrk_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const double* alpha, const double* A, int64_t lda, const double* beta, double* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDsyrk_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, C, sizeof(double)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCsyrk_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const cuComplex* alpha, const cuComplex* A, int lda, const cuComplex* beta, cuComplex* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCsyrk_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCsyrk_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const cuComplex* alpha, const cuComplex* A, int64_t lda, const cuComplex* beta, cuComplex* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCsyrk_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZsyrk_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, const cuDoubleComplex* beta, cuDoubleComplex* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZsyrk_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZsyrk_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, const cuDoubleComplex* beta, cuDoubleComplex* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZsyrk_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCherk_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const float* alpha, const cuComplex* A, int lda, const float* beta, cuComplex* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCherk_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCherk_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const float* alpha, const cuComplex* A, int64_t lda, const float* beta, cuComplex* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCherk_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZherk_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const double* alpha, const cuDoubleComplex* A, int lda, const double* beta, cuDoubleComplex* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZherk_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZherk_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const double* alpha, const cuDoubleComplex* A, int64_t lda, const double* beta, cuDoubleComplex* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZherk_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSsyr2k_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const float* alpha, const float* A, int lda, const float* B, int ldb, const float* beta, float* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSsyr2k_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &B, sizeof(const float*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, C, sizeof(float)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSsyr2k_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const float* alpha, const float* A, int64_t lda, const float* B, int64_t ldb, const float* beta, float* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSsyr2k_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &B, sizeof(const float*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, C, sizeof(float)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDsyr2k_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const double* alpha, const double* A, int lda, const double* B, int ldb, const double* beta, double* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDsyr2k_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &B, sizeof(const double*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, C, sizeof(double)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDsyr2k_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const double* alpha, const double* A, int64_t lda, const double* B, int64_t ldb, const double* beta, double* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDsyr2k_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &B, sizeof(const double*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, C, sizeof(double)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCsyr2k_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const cuComplex* alpha, const cuComplex* A, int lda, const cuComplex* B, int ldb, const cuComplex* beta, cuComplex* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCsyr2k_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCsyr2k_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const cuComplex* alpha, const cuComplex* A, int64_t lda, const cuComplex* B, int64_t ldb, const cuComplex* beta, cuComplex* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCsyr2k_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZsyr2k_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, const cuDoubleComplex* B, int ldb, const cuDoubleComplex* beta, cuDoubleComplex* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZsyr2k_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZsyr2k_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, const cuDoubleComplex* B, int64_t ldb, const cuDoubleComplex* beta, cuDoubleComplex* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZsyr2k_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCher2k_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const cuComplex* alpha, const cuComplex* A, int lda, const cuComplex* B, int ldb, const float* beta, cuComplex* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCher2k_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCher2k_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const cuComplex* alpha, const cuComplex* A, int64_t lda, const cuComplex* B, int64_t ldb, const float* beta, cuComplex* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCher2k_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZher2k_v2(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, const cuDoubleComplex* B, int ldb, const double* beta, cuDoubleComplex* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZher2k_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZher2k_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, const cuDoubleComplex* B, int64_t ldb, const double* beta, cuDoubleComplex* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZher2k_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSsyrkx(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const float* alpha, const float* A, int lda, const float* B, int ldb, const float* beta, float* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSsyrkx) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &B, sizeof(const float*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, C, sizeof(float)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSsyrkx_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const float* alpha, const float* A, int64_t lda, const float* B, int64_t ldb, const float* beta, float* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSsyrkx_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &B, sizeof(const float*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, C, sizeof(float)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDsyrkx(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const double* alpha, const double* A, int lda, const double* B, int ldb, const double* beta, double* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDsyrkx) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &B, sizeof(const double*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, C, sizeof(double)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDsyrkx_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const double* alpha, const double* A, int64_t lda, const double* B, int64_t ldb, const double* beta, double* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDsyrkx_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &B, sizeof(const double*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, C, sizeof(double)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCsyrkx(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const cuComplex* alpha, const cuComplex* A, int lda, const cuComplex* B, int ldb, const cuComplex* beta, cuComplex* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCsyrkx) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCsyrkx_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const cuComplex* alpha, const cuComplex* A, int64_t lda, const cuComplex* B, int64_t ldb, const cuComplex* beta, cuComplex* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCsyrkx_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZsyrkx(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, const cuDoubleComplex* B, int ldb, const cuDoubleComplex* beta, cuDoubleComplex* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZsyrkx) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZsyrkx_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, const cuDoubleComplex* B, int64_t ldb, const cuDoubleComplex* beta, cuDoubleComplex* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZsyrkx_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCherkx(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const cuComplex* alpha, const cuComplex* A, int lda, const cuComplex* B, int ldb, const float* beta, cuComplex* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCherkx) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCherkx_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const cuComplex* alpha, const cuComplex* A, int64_t lda, const cuComplex* B, int64_t ldb, const float* beta, cuComplex* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCherkx_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZherkx(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int n, int k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, const cuDoubleComplex* B, int ldb, const double* beta, cuDoubleComplex* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZherkx) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZherkx_64(cublasHandle_t handle, cublasFillMode_t uplo, cublasOperation_t trans, int64_t n, int64_t k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, const cuDoubleComplex* B, int64_t ldb, const double* beta, cuDoubleComplex* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZherkx_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSsymm_v2(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, int m, int n, const float* alpha, const float* A, int lda, const float* B, int ldb, const float* beta, float* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSsymm_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &side, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &B, sizeof(const float*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, C, sizeof(float)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSsymm_v2_64(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, int64_t m, int64_t n, const float* alpha, const float* A, int64_t lda, const float* B, int64_t ldb, const float* beta, float* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSsymm_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &side, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &B, sizeof(const float*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, C, sizeof(float)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDsymm_v2(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, int m, int n, const double* alpha, const double* A, int lda, const double* B, int ldb, const double* beta, double* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDsymm_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &side, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &B, sizeof(const double*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, C, sizeof(double)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDsymm_v2_64(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, int64_t m, int64_t n, const double* alpha, const double* A, int64_t lda, const double* B, int64_t ldb, const double* beta, double* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDsymm_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &side, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &B, sizeof(const double*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, C, sizeof(double)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCsymm_v2(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, int m, int n, const cuComplex* alpha, const cuComplex* A, int lda, const cuComplex* B, int ldb, const cuComplex* beta, cuComplex* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCsymm_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &side, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCsymm_v2_64(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, int64_t m, int64_t n, const cuComplex* alpha, const cuComplex* A, int64_t lda, const cuComplex* B, int64_t ldb, const cuComplex* beta, cuComplex* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCsymm_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &side, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZsymm_v2(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, int m, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, const cuDoubleComplex* B, int ldb, const cuDoubleComplex* beta, cuDoubleComplex* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZsymm_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &side, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZsymm_v2_64(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, int64_t m, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, const cuDoubleComplex* B, int64_t ldb, const cuDoubleComplex* beta, cuDoubleComplex* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZsymm_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &side, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasChemm_v2(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, int m, int n, const cuComplex* alpha, const cuComplex* A, int lda, const cuComplex* B, int ldb, const cuComplex* beta, cuComplex* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasChemm_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &side, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasChemm_v2_64(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, int64_t m, int64_t n, const cuComplex* alpha, const cuComplex* A, int64_t lda, const cuComplex* B, int64_t ldb, const cuComplex* beta, cuComplex* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasChemm_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &side, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZhemm_v2(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, int m, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, const cuDoubleComplex* B, int ldb, const cuDoubleComplex* beta, cuDoubleComplex* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZhemm_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &side, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZhemm_v2_64(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, int64_t m, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, const cuDoubleComplex* B, int64_t ldb, const cuDoubleComplex* beta, cuDoubleComplex* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZhemm_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &side, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasStrsm_v2(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int m, int n, const float* alpha, const float* A, int lda, float* B, int ldb)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasStrsm_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &side, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, B, sizeof(float)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, B, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasStrsm_v2_64(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t m, int64_t n, const float* alpha, const float* A, int64_t lda, float* B, int64_t ldb)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasStrsm_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &side, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, B, sizeof(float)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, B, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDtrsm_v2(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int m, int n, const double* alpha, const double* A, int lda, double* B, int ldb)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDtrsm_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &side, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, B, sizeof(double)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, B, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDtrsm_v2_64(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t m, int64_t n, const double* alpha, const double* A, int64_t lda, double* B, int64_t ldb)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDtrsm_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &side, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, B, sizeof(double)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, B, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCtrsm_v2(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int m, int n, const cuComplex* alpha, const cuComplex* A, int lda, cuComplex* B, int ldb)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCtrsm_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &side, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, B, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, B, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCtrsm_v2_64(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t m, int64_t n, const cuComplex* alpha, const cuComplex* A, int64_t lda, cuComplex* B, int64_t ldb)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCtrsm_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &side, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, B, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, B, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZtrsm_v2(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int m, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, cuDoubleComplex* B, int ldb)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZtrsm_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &side, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, B, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, B, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZtrsm_v2_64(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t m, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, cuDoubleComplex* B, int64_t ldb)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZtrsm_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &side, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, B, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, B, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasStrmm_v2(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int m, int n, const float* alpha, const float* A, int lda, const float* B, int ldb, float* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasStrmm_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &side, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &B, sizeof(const float*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, C, sizeof(float)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasStrmm_v2_64(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t m, int64_t n, const float* alpha, const float* A, int64_t lda, const float* B, int64_t ldb, float* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasStrmm_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &side, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &B, sizeof(const float*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, C, sizeof(float)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDtrmm_v2(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int m, int n, const double* alpha, const double* A, int lda, const double* B, int ldb, double* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDtrmm_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &side, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &B, sizeof(const double*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, C, sizeof(double)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDtrmm_v2_64(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t m, int64_t n, const double* alpha, const double* A, int64_t lda, const double* B, int64_t ldb, double* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDtrmm_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &side, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &B, sizeof(const double*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, C, sizeof(double)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCtrmm_v2(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int m, int n, const cuComplex* alpha, const cuComplex* A, int lda, const cuComplex* B, int ldb, cuComplex* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCtrmm_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &side, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCtrmm_v2_64(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t m, int64_t n, const cuComplex* alpha, const cuComplex* A, int64_t lda, const cuComplex* B, int64_t ldb, cuComplex* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCtrmm_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &side, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZtrmm_v2(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int m, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, const cuDoubleComplex* B, int ldb, cuDoubleComplex* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZtrmm_v2) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &side, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZtrmm_v2_64(cublasHandle_t handle, cublasSideMode_t side, cublasFillMode_t uplo, cublasOperation_t trans, cublasDiagType_t diag, int64_t m, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, const cuDoubleComplex* B, int64_t ldb, cuDoubleComplex* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZtrmm_v2_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &side, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasHgemmStridedBatched(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const __half* alpha, const __half* A, int lda, long long int strideA, const __half* B, int ldb, long long int strideB, const __half* beta, __half* C, int ldc, long long int strideC, int batchCount)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasHgemmStridedBatched) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const __half*)) < 0 ||
+        rpc_write(0, &A, sizeof(const __half*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
+        rpc_write(0, &B, sizeof(const __half*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, &strideB, sizeof(long long int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const __half*)) < 0 ||
+        rpc_write(0, C, sizeof(__half)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_write(0, &strideC, sizeof(long long int)) < 0 ||
+        rpc_write(0, &batchCount, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(__half)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasHgemmStridedBatched_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const __half* alpha, const __half* A, int64_t lda, long long int strideA, const __half* B, int64_t ldb, long long int strideB, const __half* beta, __half* C, int64_t ldc, long long int strideC, int64_t batchCount)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasHgemmStridedBatched_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const __half*)) < 0 ||
+        rpc_write(0, &A, sizeof(const __half*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
+        rpc_write(0, &B, sizeof(const __half*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &strideB, sizeof(long long int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const __half*)) < 0 ||
+        rpc_write(0, C, sizeof(__half)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &strideC, sizeof(long long int)) < 0 ||
+        rpc_write(0, &batchCount, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(__half)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSgemmStridedBatched(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const float* alpha, const float* A, int lda, long long int strideA, const float* B, int ldb, long long int strideB, const float* beta, float* C, int ldc, long long int strideC, int batchCount)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSgemmStridedBatched) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
+        rpc_write(0, &B, sizeof(const float*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, &strideB, sizeof(long long int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, C, sizeof(float)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_write(0, &strideC, sizeof(long long int)) < 0 ||
+        rpc_write(0, &batchCount, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSgemmStridedBatched_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const float* alpha, const float* A, int64_t lda, long long int strideA, const float* B, int64_t ldb, long long int strideB, const float* beta, float* C, int64_t ldc, long long int strideC, int64_t batchCount)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSgemmStridedBatched_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
+        rpc_write(0, &B, sizeof(const float*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &strideB, sizeof(long long int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, C, sizeof(float)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &strideC, sizeof(long long int)) < 0 ||
+        rpc_write(0, &batchCount, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDgemmStridedBatched(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const double* alpha, const double* A, int lda, long long int strideA, const double* B, int ldb, long long int strideB, const double* beta, double* C, int ldc, long long int strideC, int batchCount)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDgemmStridedBatched) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
+        rpc_write(0, &B, sizeof(const double*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, &strideB, sizeof(long long int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, C, sizeof(double)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_write(0, &strideC, sizeof(long long int)) < 0 ||
+        rpc_write(0, &batchCount, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDgemmStridedBatched_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const double* alpha, const double* A, int64_t lda, long long int strideA, const double* B, int64_t ldb, long long int strideB, const double* beta, double* C, int64_t ldc, long long int strideC, int64_t batchCount)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDgemmStridedBatched_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
+        rpc_write(0, &B, sizeof(const double*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &strideB, sizeof(long long int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, C, sizeof(double)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &strideC, sizeof(long long int)) < 0 ||
+        rpc_write(0, &batchCount, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCgemmStridedBatched(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const cuComplex* alpha, const cuComplex* A, int lda, long long int strideA, const cuComplex* B, int ldb, long long int strideB, const cuComplex* beta, cuComplex* C, int ldc, long long int strideC, int batchCount)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCgemmStridedBatched) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, &strideB, sizeof(long long int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_write(0, &strideC, sizeof(long long int)) < 0 ||
+        rpc_write(0, &batchCount, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCgemmStridedBatched_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const cuComplex* alpha, const cuComplex* A, int64_t lda, long long int strideA, const cuComplex* B, int64_t ldb, long long int strideB, const cuComplex* beta, cuComplex* C, int64_t ldc, long long int strideC, int64_t batchCount)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCgemmStridedBatched_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &strideB, sizeof(long long int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &strideC, sizeof(long long int)) < 0 ||
+        rpc_write(0, &batchCount, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCgemm3mStridedBatched(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const cuComplex* alpha, const cuComplex* A, int lda, long long int strideA, const cuComplex* B, int ldb, long long int strideB, const cuComplex* beta, cuComplex* C, int ldc, long long int strideC, int batchCount)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCgemm3mStridedBatched) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, &strideB, sizeof(long long int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_write(0, &strideC, sizeof(long long int)) < 0 ||
+        rpc_write(0, &batchCount, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCgemm3mStridedBatched_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const cuComplex* alpha, const cuComplex* A, int64_t lda, long long int strideA, const cuComplex* B, int64_t ldb, long long int strideB, const cuComplex* beta, cuComplex* C, int64_t ldc, long long int strideC, int64_t batchCount)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCgemm3mStridedBatched_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &strideB, sizeof(long long int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &strideC, sizeof(long long int)) < 0 ||
+        rpc_write(0, &batchCount, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZgemmStridedBatched(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, long long int strideA, const cuDoubleComplex* B, int ldb, long long int strideB, const cuDoubleComplex* beta, cuDoubleComplex* C, int ldc, long long int strideC, int batchCount)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZgemmStridedBatched) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, &strideB, sizeof(long long int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_write(0, &strideC, sizeof(long long int)) < 0 ||
+        rpc_write(0, &batchCount, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZgemmStridedBatched_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, int64_t k, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, long long int strideA, const cuDoubleComplex* B, int64_t ldb, long long int strideB, const cuDoubleComplex* beta, cuDoubleComplex* C, int64_t ldc, long long int strideC, int64_t batchCount)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZgemmStridedBatched_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &strideB, sizeof(long long int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &strideC, sizeof(long long int)) < 0 ||
+        rpc_write(0, &batchCount, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSgeam(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, const float* alpha, const float* A, int lda, const float* beta, const float* B, int ldb, float* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSgeam) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, &B, sizeof(const float*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, C, sizeof(float)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSgeam_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, const float* alpha, const float* A, int64_t lda, const float* beta, const float* B, int64_t ldb, float* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSgeam_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        rpc_write(0, &B, sizeof(const float*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, C, sizeof(float)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDgeam(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, const double* alpha, const double* A, int lda, const double* beta, const double* B, int ldb, double* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDgeam) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, &B, sizeof(const double*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, C, sizeof(double)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDgeam_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, const double* alpha, const double* A, int64_t lda, const double* beta, const double* B, int64_t ldb, double* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDgeam_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, &B, sizeof(const double*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, C, sizeof(double)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCgeam(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, const cuComplex* alpha, const cuComplex* A, int lda, const cuComplex* beta, const cuComplex* B, int ldb, cuComplex* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCgeam) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCgeam_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, const cuComplex* alpha, const cuComplex* A, int64_t lda, const cuComplex* beta, const cuComplex* B, int64_t ldb, cuComplex* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCgeam_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZgeam(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int lda, const cuDoubleComplex* beta, const cuDoubleComplex* B, int ldb, cuDoubleComplex* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZgeam) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZgeam_64(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int64_t m, int64_t n, const cuDoubleComplex* alpha, const cuDoubleComplex* A, int64_t lda, const cuDoubleComplex* beta, const cuDoubleComplex* B, int64_t ldb, cuDoubleComplex* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZgeam_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &B, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
+        rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSdgmm(cublasHandle_t handle, cublasSideMode_t mode, int m, int n, const float* A, int lda, const float* x, int incx, float* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSdgmm) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &mode, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, C, sizeof(float)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasSdgmm_64(cublasHandle_t handle, cublasSideMode_t mode, int64_t m, int64_t n, const float* A, int64_t lda, const float* x, int64_t incx, float* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasSdgmm_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &mode, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, C, sizeof(float)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDdgmm(cublasHandle_t handle, cublasSideMode_t mode, int m, int n, const double* A, int lda, const double* x, int incx, double* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDdgmm) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &mode, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, C, sizeof(double)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDdgmm_64(cublasHandle_t handle, cublasSideMode_t mode, int64_t m, int64_t n, const double* A, int64_t lda, const double* x, int64_t incx, double* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDdgmm_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &mode, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, C, sizeof(double)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCdgmm(cublasHandle_t handle, cublasSideMode_t mode, int m, int n, const cuComplex* A, int lda, const cuComplex* x, int incx, cuComplex* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCdgmm) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &mode, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCdgmm_64(cublasHandle_t handle, cublasSideMode_t mode, int64_t m, int64_t n, const cuComplex* A, int64_t lda, const cuComplex* x, int64_t incx, cuComplex* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCdgmm_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &mode, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZdgmm(cublasHandle_t handle, cublasSideMode_t mode, int m, int n, const cuDoubleComplex* A, int lda, const cuDoubleComplex* x, int incx, cuDoubleComplex* C, int ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZdgmm) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &mode, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int)) < 0 ||
+        rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZdgmm_64(cublasHandle_t handle, cublasSideMode_t mode, int64_t m, int64_t n, const cuDoubleComplex* A, int64_t lda, const cuDoubleComplex* x, int64_t incx, cuDoubleComplex* C, int64_t ldc)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZdgmm_64) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &mode, sizeof(cublasSideMode_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
+        rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasStpttr(cublasHandle_t handle, cublasFillMode_t uplo, int n, const float* AP, float* A, int lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasStpttr) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &AP, sizeof(const float*)) < 0 ||
+        rpc_write(0, A, sizeof(float)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDtpttr(cublasHandle_t handle, cublasFillMode_t uplo, int n, const double* AP, double* A, int lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDtpttr) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &AP, sizeof(const double*)) < 0 ||
+        rpc_write(0, A, sizeof(double)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCtpttr(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuComplex* AP, cuComplex* A, int lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCtpttr) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &AP, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, A, sizeof(cuComplex)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZtpttr(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuDoubleComplex* AP, cuDoubleComplex* A, int lda)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZtpttr) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &AP, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, A, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, A, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasStrttp(cublasHandle_t handle, cublasFillMode_t uplo, int n, const float* A, int lda, float* AP)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasStrttp) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, AP, sizeof(float)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, AP, sizeof(float)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasDtrttp(cublasHandle_t handle, cublasFillMode_t uplo, int n, const double* A, int lda, double* AP)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasDtrttp) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, AP, sizeof(double)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, AP, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasCtrttp(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuComplex* A, int lda, cuComplex* AP)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasCtrttp) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, AP, sizeof(cuComplex)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, AP, sizeof(cuComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasZtrttp(cublasHandle_t handle, cublasFillMode_t uplo, int n, const cuDoubleComplex* A, int lda, cuDoubleComplex* AP)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasZtrttp) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, AP, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, AP, sizeof(cuDoubleComplex)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cublasStatus_t cublasUint8gemmBias(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, cublasOperation_t transc, int m, int n, int k, const unsigned char* A, int A_bias, int lda, const unsigned char* B, int B_bias, int ldb, unsigned char* C, int C_bias, int ldc, int C_mult, int C_shift)
+{
+    cublasStatus_t return_value;
+    if (rpc_start_request(0, RPC_cublasUint8gemmBias) < 0 ||
+        rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
+        rpc_write(0, &transa, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &transc, sizeof(cublasOperation_t)) < 0 ||
+        rpc_write(0, &m, sizeof(int)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &A, sizeof(const unsigned char*)) < 0 ||
+        rpc_write(0, &A_bias, sizeof(int)) < 0 ||
+        rpc_write(0, &lda, sizeof(int)) < 0 ||
+        rpc_write(0, &B, sizeof(const unsigned char*)) < 0 ||
+        rpc_write(0, &B_bias, sizeof(int)) < 0 ||
+        rpc_write(0, &ldb, sizeof(int)) < 0 ||
+        rpc_write(0, C, sizeof(unsigned char)) < 0 ||
+        rpc_write(0, &C_bias, sizeof(int)) < 0 ||
+        rpc_write(0, &ldc, sizeof(int)) < 0 ||
+        rpc_write(0, &C_mult, sizeof(int)) < 0 ||
+        rpc_write(0, &C_shift, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, C, sizeof(unsigned char)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUBLAS_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnGetProperty(libraryPropertyType type, int* value)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnGetProperty) < 0 ||
+        rpc_write(0, &type, sizeof(libraryPropertyType)) < 0 ||
+        rpc_write(0, value, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, value, sizeof(int)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
 cudnnStatus_t cudnnCreate(cudnnHandle_t* handle)
 {
     cudnnStatus_t return_value;
@@ -11177,6 +19406,159 @@ cudnnStatus_t cudnnDestroy(cudnnHandle_t handle)
     cudnnStatus_t return_value;
     if (rpc_start_request(0, RPC_cudnnDestroy) < 0 ||
         rpc_write(0, &handle, sizeof(cudnnHandle_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnSetStream(cudnnHandle_t handle, cudaStream_t streamId)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnSetStream) < 0 ||
+        rpc_write(0, &handle, sizeof(cudnnHandle_t)) < 0 ||
+        rpc_write(0, &streamId, sizeof(cudaStream_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnGetStream(cudnnHandle_t handle, cudaStream_t* streamId)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnGetStream) < 0 ||
+        rpc_write(0, &handle, sizeof(cudnnHandle_t)) < 0 ||
+        rpc_write(0, streamId, sizeof(cudaStream_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, streamId, sizeof(cudaStream_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnGetCallback(unsigned* mask, void** udata, cudnnCallback_t* fptr)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnGetCallback) < 0 ||
+        rpc_write(0, mask, sizeof(unsigned)) < 0 ||
+        rpc_write(0, udata, sizeof(void*)) < 0 ||
+        rpc_write(0, fptr, sizeof(cudnnCallback_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, mask, sizeof(unsigned)) < 0 ||
+        rpc_read(0, udata, sizeof(void*)) < 0 ||
+        rpc_read(0, fptr, sizeof(cudnnCallback_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnGraphVersionCheck()
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnGraphVersionCheck) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnBackendCreateDescriptor(cudnnBackendDescriptorType_t descriptorType, cudnnBackendDescriptor_t* descriptor)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnBackendCreateDescriptor) < 0 ||
+        rpc_write(0, &descriptorType, sizeof(cudnnBackendDescriptorType_t)) < 0 ||
+        rpc_write(0, descriptor, sizeof(cudnnBackendDescriptor_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, descriptor, sizeof(cudnnBackendDescriptor_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnBackendDestroyDescriptor(cudnnBackendDescriptor_t descriptor)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnBackendDestroyDescriptor) < 0 ||
+        rpc_write(0, &descriptor, sizeof(cudnnBackendDescriptor_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnBackendInitialize(cudnnBackendDescriptor_t descriptor)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnBackendInitialize) < 0 ||
+        rpc_write(0, &descriptor, sizeof(cudnnBackendDescriptor_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnBackendFinalize(cudnnBackendDescriptor_t descriptor)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnBackendFinalize) < 0 ||
+        rpc_write(0, &descriptor, sizeof(cudnnBackendDescriptor_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnBackendSetAttribute(cudnnBackendDescriptor_t descriptor, cudnnBackendAttributeName_t attributeName, cudnnBackendAttributeType_t attributeType, int64_t elementCount, const void* arrayOfElements)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnBackendSetAttribute) < 0 ||
+        rpc_write(0, &descriptor, sizeof(cudnnBackendDescriptor_t)) < 0 ||
+        rpc_write(0, &attributeName, sizeof(cudnnBackendAttributeName_t)) < 0 ||
+        rpc_write(0, &attributeType, sizeof(cudnnBackendAttributeType_t)) < 0 ||
+        rpc_write(0, &elementCount, sizeof(int64_t)) < 0 ||
+        rpc_write(0, &arrayOfElements, sizeof(const void*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnBackendExecute(cudnnHandle_t handle, cudnnBackendDescriptor_t executionPlan, cudnnBackendDescriptor_t variantPack)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnBackendExecute) < 0 ||
+        rpc_write(0, &handle, sizeof(cudnnHandle_t)) < 0 ||
+        rpc_write(0, &executionPlan, sizeof(cudnnBackendDescriptor_t)) < 0 ||
+        rpc_write(0, &variantPack, sizeof(cudnnBackendDescriptor_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnBackendPopulateCudaGraph(cudnnHandle_t handle, cudnnBackendDescriptor_t executionPlan, cudnnBackendDescriptor_t variantPack, cudaGraph_t graph)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnBackendPopulateCudaGraph) < 0 ||
+        rpc_write(0, &handle, sizeof(cudnnHandle_t)) < 0 ||
+        rpc_write(0, &executionPlan, sizeof(cudnnBackendDescriptor_t)) < 0 ||
+        rpc_write(0, &variantPack, sizeof(cudnnBackendDescriptor_t)) < 0 ||
+        rpc_write(0, &graph, sizeof(cudaGraph_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnBackendUpdateCudaGraph(cudnnHandle_t handle, cudnnBackendDescriptor_t executionPlan, cudnnBackendDescriptor_t variantPack, cudaGraph_t graph)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnBackendUpdateCudaGraph) < 0 ||
+        rpc_write(0, &handle, sizeof(cudnnHandle_t)) < 0 ||
+        rpc_write(0, &executionPlan, sizeof(cudnnBackendDescriptor_t)) < 0 ||
+        rpc_write(0, &variantPack, sizeof(cudnnBackendDescriptor_t)) < 0 ||
+        rpc_write(0, &graph, sizeof(cudaGraph_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return CUDNN_STATUS_NOT_INITIALIZED;
@@ -11212,6 +19594,428 @@ cudnnStatus_t cudnnSetTensor4dDescriptor(cudnnTensorDescriptor_t tensorDesc, cud
     return return_value;
 }
 
+cudnnStatus_t cudnnSetTensor4dDescriptorEx(cudnnTensorDescriptor_t tensorDesc, cudnnDataType_t dataType, int n, int c, int h, int w, int nStride, int cStride, int hStride, int wStride)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnSetTensor4dDescriptorEx) < 0 ||
+        rpc_write(0, &tensorDesc, sizeof(cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &dataType, sizeof(cudnnDataType_t)) < 0 ||
+        rpc_write(0, &n, sizeof(int)) < 0 ||
+        rpc_write(0, &c, sizeof(int)) < 0 ||
+        rpc_write(0, &h, sizeof(int)) < 0 ||
+        rpc_write(0, &w, sizeof(int)) < 0 ||
+        rpc_write(0, &nStride, sizeof(int)) < 0 ||
+        rpc_write(0, &cStride, sizeof(int)) < 0 ||
+        rpc_write(0, &hStride, sizeof(int)) < 0 ||
+        rpc_write(0, &wStride, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnGetTensor4dDescriptor(const cudnnTensorDescriptor_t tensorDesc, cudnnDataType_t* dataType, int* n, int* c, int* h, int* w, int* nStride, int* cStride, int* hStride, int* wStride)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnGetTensor4dDescriptor) < 0 ||
+        rpc_write(0, &tensorDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, dataType, sizeof(cudnnDataType_t)) < 0 ||
+        rpc_write(0, n, sizeof(int)) < 0 ||
+        rpc_write(0, c, sizeof(int)) < 0 ||
+        rpc_write(0, h, sizeof(int)) < 0 ||
+        rpc_write(0, w, sizeof(int)) < 0 ||
+        rpc_write(0, nStride, sizeof(int)) < 0 ||
+        rpc_write(0, cStride, sizeof(int)) < 0 ||
+        rpc_write(0, hStride, sizeof(int)) < 0 ||
+        rpc_write(0, wStride, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, dataType, sizeof(cudnnDataType_t)) < 0 ||
+        rpc_read(0, n, sizeof(int)) < 0 ||
+        rpc_read(0, c, sizeof(int)) < 0 ||
+        rpc_read(0, h, sizeof(int)) < 0 ||
+        rpc_read(0, w, sizeof(int)) < 0 ||
+        rpc_read(0, nStride, sizeof(int)) < 0 ||
+        rpc_read(0, cStride, sizeof(int)) < 0 ||
+        rpc_read(0, hStride, sizeof(int)) < 0 ||
+        rpc_read(0, wStride, sizeof(int)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnGetTensorSizeInBytes(const cudnnTensorDescriptor_t tensorDesc, size_t* size)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnGetTensorSizeInBytes) < 0 ||
+        rpc_write(0, &tensorDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, size, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, size, sizeof(size_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnDestroyTensorDescriptor(cudnnTensorDescriptor_t tensorDesc)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnDestroyTensorDescriptor) < 0 ||
+        rpc_write(0, &tensorDesc, sizeof(cudnnTensorDescriptor_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnInitTransformDest(const cudnnTensorTransformDescriptor_t transformDesc, const cudnnTensorDescriptor_t srcDesc, cudnnTensorDescriptor_t destDesc, size_t* destSizeInBytes)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnInitTransformDest) < 0 ||
+        rpc_write(0, &transformDesc, sizeof(const cudnnTensorTransformDescriptor_t)) < 0 ||
+        rpc_write(0, &srcDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &destDesc, sizeof(cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, destSizeInBytes, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, destSizeInBytes, sizeof(size_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnCreateTensorTransformDescriptor(cudnnTensorTransformDescriptor_t* transformDesc)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnCreateTensorTransformDescriptor) < 0 ||
+        rpc_write(0, transformDesc, sizeof(cudnnTensorTransformDescriptor_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, transformDesc, sizeof(cudnnTensorTransformDescriptor_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnDestroyTensorTransformDescriptor(cudnnTensorTransformDescriptor_t transformDesc)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnDestroyTensorTransformDescriptor) < 0 ||
+        rpc_write(0, &transformDesc, sizeof(cudnnTensorTransformDescriptor_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnCreateOpTensorDescriptor(cudnnOpTensorDescriptor_t* opTensorDesc)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnCreateOpTensorDescriptor) < 0 ||
+        rpc_write(0, opTensorDesc, sizeof(cudnnOpTensorDescriptor_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, opTensorDesc, sizeof(cudnnOpTensorDescriptor_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnSetOpTensorDescriptor(cudnnOpTensorDescriptor_t opTensorDesc, cudnnOpTensorOp_t opTensorOp, cudnnDataType_t opTensorCompType, cudnnNanPropagation_t opTensorNanOpt)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnSetOpTensorDescriptor) < 0 ||
+        rpc_write(0, &opTensorDesc, sizeof(cudnnOpTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &opTensorOp, sizeof(cudnnOpTensorOp_t)) < 0 ||
+        rpc_write(0, &opTensorCompType, sizeof(cudnnDataType_t)) < 0 ||
+        rpc_write(0, &opTensorNanOpt, sizeof(cudnnNanPropagation_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnGetOpTensorDescriptor(const cudnnOpTensorDescriptor_t opTensorDesc, cudnnOpTensorOp_t* opTensorOp, cudnnDataType_t* opTensorCompType, cudnnNanPropagation_t* opTensorNanOpt)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnGetOpTensorDescriptor) < 0 ||
+        rpc_write(0, &opTensorDesc, sizeof(const cudnnOpTensorDescriptor_t)) < 0 ||
+        rpc_write(0, opTensorOp, sizeof(cudnnOpTensorOp_t)) < 0 ||
+        rpc_write(0, opTensorCompType, sizeof(cudnnDataType_t)) < 0 ||
+        rpc_write(0, opTensorNanOpt, sizeof(cudnnNanPropagation_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, opTensorOp, sizeof(cudnnOpTensorOp_t)) < 0 ||
+        rpc_read(0, opTensorCompType, sizeof(cudnnDataType_t)) < 0 ||
+        rpc_read(0, opTensorNanOpt, sizeof(cudnnNanPropagation_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnDestroyOpTensorDescriptor(cudnnOpTensorDescriptor_t opTensorDesc)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnDestroyOpTensorDescriptor) < 0 ||
+        rpc_write(0, &opTensorDesc, sizeof(cudnnOpTensorDescriptor_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnCreateReduceTensorDescriptor(cudnnReduceTensorDescriptor_t* reduceTensorDesc)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnCreateReduceTensorDescriptor) < 0 ||
+        rpc_write(0, reduceTensorDesc, sizeof(cudnnReduceTensorDescriptor_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, reduceTensorDesc, sizeof(cudnnReduceTensorDescriptor_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnSetReduceTensorDescriptor(cudnnReduceTensorDescriptor_t reduceTensorDesc, cudnnReduceTensorOp_t reduceTensorOp, cudnnDataType_t reduceTensorCompType, cudnnNanPropagation_t reduceTensorNanOpt, cudnnReduceTensorIndices_t reduceTensorIndices, cudnnIndicesType_t reduceTensorIndicesType)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnSetReduceTensorDescriptor) < 0 ||
+        rpc_write(0, &reduceTensorDesc, sizeof(cudnnReduceTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &reduceTensorOp, sizeof(cudnnReduceTensorOp_t)) < 0 ||
+        rpc_write(0, &reduceTensorCompType, sizeof(cudnnDataType_t)) < 0 ||
+        rpc_write(0, &reduceTensorNanOpt, sizeof(cudnnNanPropagation_t)) < 0 ||
+        rpc_write(0, &reduceTensorIndices, sizeof(cudnnReduceTensorIndices_t)) < 0 ||
+        rpc_write(0, &reduceTensorIndicesType, sizeof(cudnnIndicesType_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnGetReduceTensorDescriptor(const cudnnReduceTensorDescriptor_t reduceTensorDesc, cudnnReduceTensorOp_t* reduceTensorOp, cudnnDataType_t* reduceTensorCompType, cudnnNanPropagation_t* reduceTensorNanOpt, cudnnReduceTensorIndices_t* reduceTensorIndices, cudnnIndicesType_t* reduceTensorIndicesType)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnGetReduceTensorDescriptor) < 0 ||
+        rpc_write(0, &reduceTensorDesc, sizeof(const cudnnReduceTensorDescriptor_t)) < 0 ||
+        rpc_write(0, reduceTensorOp, sizeof(cudnnReduceTensorOp_t)) < 0 ||
+        rpc_write(0, reduceTensorCompType, sizeof(cudnnDataType_t)) < 0 ||
+        rpc_write(0, reduceTensorNanOpt, sizeof(cudnnNanPropagation_t)) < 0 ||
+        rpc_write(0, reduceTensorIndices, sizeof(cudnnReduceTensorIndices_t)) < 0 ||
+        rpc_write(0, reduceTensorIndicesType, sizeof(cudnnIndicesType_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, reduceTensorOp, sizeof(cudnnReduceTensorOp_t)) < 0 ||
+        rpc_read(0, reduceTensorCompType, sizeof(cudnnDataType_t)) < 0 ||
+        rpc_read(0, reduceTensorNanOpt, sizeof(cudnnNanPropagation_t)) < 0 ||
+        rpc_read(0, reduceTensorIndices, sizeof(cudnnReduceTensorIndices_t)) < 0 ||
+        rpc_read(0, reduceTensorIndicesType, sizeof(cudnnIndicesType_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnDestroyReduceTensorDescriptor(cudnnReduceTensorDescriptor_t reduceTensorDesc)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnDestroyReduceTensorDescriptor) < 0 ||
+        rpc_write(0, &reduceTensorDesc, sizeof(cudnnReduceTensorDescriptor_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnGetReductionIndicesSize(cudnnHandle_t handle, const cudnnReduceTensorDescriptor_t reduceTensorDesc, const cudnnTensorDescriptor_t aDesc, const cudnnTensorDescriptor_t cDesc, size_t* sizeInBytes)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnGetReductionIndicesSize) < 0 ||
+        rpc_write(0, &handle, sizeof(cudnnHandle_t)) < 0 ||
+        rpc_write(0, &reduceTensorDesc, sizeof(const cudnnReduceTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &aDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &cDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, sizeInBytes, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, sizeInBytes, sizeof(size_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnGetReductionWorkspaceSize(cudnnHandle_t handle, const cudnnReduceTensorDescriptor_t reduceTensorDesc, const cudnnTensorDescriptor_t aDesc, const cudnnTensorDescriptor_t cDesc, size_t* sizeInBytes)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnGetReductionWorkspaceSize) < 0 ||
+        rpc_write(0, &handle, sizeof(cudnnHandle_t)) < 0 ||
+        rpc_write(0, &reduceTensorDesc, sizeof(const cudnnReduceTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &aDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &cDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, sizeInBytes, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, sizeInBytes, sizeof(size_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnCreateFilterDescriptor(cudnnFilterDescriptor_t* filterDesc)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnCreateFilterDescriptor) < 0 ||
+        rpc_write(0, filterDesc, sizeof(cudnnFilterDescriptor_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, filterDesc, sizeof(cudnnFilterDescriptor_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnSetFilter4dDescriptor(cudnnFilterDescriptor_t filterDesc, cudnnDataType_t dataType, cudnnTensorFormat_t format, int k, int c, int h, int w)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnSetFilter4dDescriptor) < 0 ||
+        rpc_write(0, &filterDesc, sizeof(cudnnFilterDescriptor_t)) < 0 ||
+        rpc_write(0, &dataType, sizeof(cudnnDataType_t)) < 0 ||
+        rpc_write(0, &format, sizeof(cudnnTensorFormat_t)) < 0 ||
+        rpc_write(0, &k, sizeof(int)) < 0 ||
+        rpc_write(0, &c, sizeof(int)) < 0 ||
+        rpc_write(0, &h, sizeof(int)) < 0 ||
+        rpc_write(0, &w, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnGetFilter4dDescriptor(const cudnnFilterDescriptor_t filterDesc, cudnnDataType_t* dataType, cudnnTensorFormat_t* format, int* k, int* c, int* h, int* w)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnGetFilter4dDescriptor) < 0 ||
+        rpc_write(0, &filterDesc, sizeof(const cudnnFilterDescriptor_t)) < 0 ||
+        rpc_write(0, dataType, sizeof(cudnnDataType_t)) < 0 ||
+        rpc_write(0, format, sizeof(cudnnTensorFormat_t)) < 0 ||
+        rpc_write(0, k, sizeof(int)) < 0 ||
+        rpc_write(0, c, sizeof(int)) < 0 ||
+        rpc_write(0, h, sizeof(int)) < 0 ||
+        rpc_write(0, w, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, dataType, sizeof(cudnnDataType_t)) < 0 ||
+        rpc_read(0, format, sizeof(cudnnTensorFormat_t)) < 0 ||
+        rpc_read(0, k, sizeof(int)) < 0 ||
+        rpc_read(0, c, sizeof(int)) < 0 ||
+        rpc_read(0, h, sizeof(int)) < 0 ||
+        rpc_read(0, w, sizeof(int)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnGetFilterSizeInBytes(const cudnnFilterDescriptor_t filterDesc, size_t* size)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnGetFilterSizeInBytes) < 0 ||
+        rpc_write(0, &filterDesc, sizeof(const cudnnFilterDescriptor_t)) < 0 ||
+        rpc_write(0, size, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, size, sizeof(size_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnDestroyFilterDescriptor(cudnnFilterDescriptor_t filterDesc)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnDestroyFilterDescriptor) < 0 ||
+        rpc_write(0, &filterDesc, sizeof(cudnnFilterDescriptor_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnCreatePoolingDescriptor(cudnnPoolingDescriptor_t* poolingDesc)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnCreatePoolingDescriptor) < 0 ||
+        rpc_write(0, poolingDesc, sizeof(cudnnPoolingDescriptor_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, poolingDesc, sizeof(cudnnPoolingDescriptor_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnSetPooling2dDescriptor(cudnnPoolingDescriptor_t poolingDesc, cudnnPoolingMode_t mode, cudnnNanPropagation_t maxpoolingNanOpt, int windowHeight, int windowWidth, int verticalPadding, int horizontalPadding, int verticalStride, int horizontalStride)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnSetPooling2dDescriptor) < 0 ||
+        rpc_write(0, &poolingDesc, sizeof(cudnnPoolingDescriptor_t)) < 0 ||
+        rpc_write(0, &mode, sizeof(cudnnPoolingMode_t)) < 0 ||
+        rpc_write(0, &maxpoolingNanOpt, sizeof(cudnnNanPropagation_t)) < 0 ||
+        rpc_write(0, &windowHeight, sizeof(int)) < 0 ||
+        rpc_write(0, &windowWidth, sizeof(int)) < 0 ||
+        rpc_write(0, &verticalPadding, sizeof(int)) < 0 ||
+        rpc_write(0, &horizontalPadding, sizeof(int)) < 0 ||
+        rpc_write(0, &verticalStride, sizeof(int)) < 0 ||
+        rpc_write(0, &horizontalStride, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnGetPooling2dDescriptor(const cudnnPoolingDescriptor_t poolingDesc, cudnnPoolingMode_t* mode, cudnnNanPropagation_t* maxpoolingNanOpt, int* windowHeight, int* windowWidth, int* verticalPadding, int* horizontalPadding, int* verticalStride, int* horizontalStride)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnGetPooling2dDescriptor) < 0 ||
+        rpc_write(0, &poolingDesc, sizeof(const cudnnPoolingDescriptor_t)) < 0 ||
+        rpc_write(0, mode, sizeof(cudnnPoolingMode_t)) < 0 ||
+        rpc_write(0, maxpoolingNanOpt, sizeof(cudnnNanPropagation_t)) < 0 ||
+        rpc_write(0, windowHeight, sizeof(int)) < 0 ||
+        rpc_write(0, windowWidth, sizeof(int)) < 0 ||
+        rpc_write(0, verticalPadding, sizeof(int)) < 0 ||
+        rpc_write(0, horizontalPadding, sizeof(int)) < 0 ||
+        rpc_write(0, verticalStride, sizeof(int)) < 0 ||
+        rpc_write(0, horizontalStride, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, mode, sizeof(cudnnPoolingMode_t)) < 0 ||
+        rpc_read(0, maxpoolingNanOpt, sizeof(cudnnNanPropagation_t)) < 0 ||
+        rpc_read(0, windowHeight, sizeof(int)) < 0 ||
+        rpc_read(0, windowWidth, sizeof(int)) < 0 ||
+        rpc_read(0, verticalPadding, sizeof(int)) < 0 ||
+        rpc_read(0, horizontalPadding, sizeof(int)) < 0 ||
+        rpc_read(0, verticalStride, sizeof(int)) < 0 ||
+        rpc_read(0, horizontalStride, sizeof(int)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnGetPooling2dForwardOutputDim(const cudnnPoolingDescriptor_t poolingDesc, const cudnnTensorDescriptor_t inputTensorDesc, int* n, int* c, int* h, int* w)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnGetPooling2dForwardOutputDim) < 0 ||
+        rpc_write(0, &poolingDesc, sizeof(const cudnnPoolingDescriptor_t)) < 0 ||
+        rpc_write(0, &inputTensorDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, n, sizeof(int)) < 0 ||
+        rpc_write(0, c, sizeof(int)) < 0 ||
+        rpc_write(0, h, sizeof(int)) < 0 ||
+        rpc_write(0, w, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, n, sizeof(int)) < 0 ||
+        rpc_read(0, c, sizeof(int)) < 0 ||
+        rpc_read(0, h, sizeof(int)) < 0 ||
+        rpc_read(0, w, sizeof(int)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnDestroyPoolingDescriptor(cudnnPoolingDescriptor_t poolingDesc)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnDestroyPoolingDescriptor) < 0 ||
+        rpc_write(0, &poolingDesc, sizeof(cudnnPoolingDescriptor_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
 cudnnStatus_t cudnnCreateActivationDescriptor(cudnnActivationDescriptor_t* activationDesc)
 {
     cudnnStatus_t return_value;
@@ -11238,6 +20042,59 @@ cudnnStatus_t cudnnSetActivationDescriptor(cudnnActivationDescriptor_t activatio
     return return_value;
 }
 
+cudnnStatus_t cudnnGetActivationDescriptor(const cudnnActivationDescriptor_t activationDesc, cudnnActivationMode_t* mode, cudnnNanPropagation_t* reluNanOpt, double* coef)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnGetActivationDescriptor) < 0 ||
+        rpc_write(0, &activationDesc, sizeof(const cudnnActivationDescriptor_t)) < 0 ||
+        rpc_write(0, mode, sizeof(cudnnActivationMode_t)) < 0 ||
+        rpc_write(0, reluNanOpt, sizeof(cudnnNanPropagation_t)) < 0 ||
+        rpc_write(0, coef, sizeof(double)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, mode, sizeof(cudnnActivationMode_t)) < 0 ||
+        rpc_read(0, reluNanOpt, sizeof(cudnnNanPropagation_t)) < 0 ||
+        rpc_read(0, coef, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnSetActivationDescriptorSwishBeta(cudnnActivationDescriptor_t activationDesc, double swish_beta)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnSetActivationDescriptorSwishBeta) < 0 ||
+        rpc_write(0, &activationDesc, sizeof(cudnnActivationDescriptor_t)) < 0 ||
+        rpc_write(0, &swish_beta, sizeof(double)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnGetActivationDescriptorSwishBeta(cudnnActivationDescriptor_t activationDesc, double* swish_beta)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnGetActivationDescriptorSwishBeta) < 0 ||
+        rpc_write(0, &activationDesc, sizeof(cudnnActivationDescriptor_t)) < 0 ||
+        rpc_write(0, swish_beta, sizeof(double)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, swish_beta, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnDestroyActivationDescriptor(cudnnActivationDescriptor_t activationDesc)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnDestroyActivationDescriptor) < 0 ||
+        rpc_write(0, &activationDesc, sizeof(cudnnActivationDescriptor_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
 cudnnStatus_t cudnnActivationForward(cudnnHandle_t handle, cudnnActivationDescriptor_t activationDesc, const void* alpha, const cudnnTensorDescriptor_t xDesc, const void* x, const void* beta, const cudnnTensorDescriptor_t yDesc, void* y)
 {
     cudnnStatus_t return_value;
@@ -11253,6 +20110,317 @@ cudnnStatus_t cudnnActivationForward(cudnnHandle_t handle, cudnnActivationDescri
         rpc_write(0, &yDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
         rpc_write(0, &y, sizeof(void*)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnCreateLRNDescriptor(cudnnLRNDescriptor_t* normDesc)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnCreateLRNDescriptor) < 0 ||
+        rpc_write(0, normDesc, sizeof(cudnnLRNDescriptor_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, normDesc, sizeof(cudnnLRNDescriptor_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnSetLRNDescriptor(cudnnLRNDescriptor_t normDesc, unsigned lrnN, double lrnAlpha, double lrnBeta, double lrnK)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnSetLRNDescriptor) < 0 ||
+        rpc_write(0, &normDesc, sizeof(cudnnLRNDescriptor_t)) < 0 ||
+        rpc_write(0, &lrnN, sizeof(unsigned)) < 0 ||
+        rpc_write(0, &lrnAlpha, sizeof(double)) < 0 ||
+        rpc_write(0, &lrnBeta, sizeof(double)) < 0 ||
+        rpc_write(0, &lrnK, sizeof(double)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnGetLRNDescriptor(cudnnLRNDescriptor_t normDesc, unsigned* lrnN, double* lrnAlpha, double* lrnBeta, double* lrnK)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnGetLRNDescriptor) < 0 ||
+        rpc_write(0, &normDesc, sizeof(cudnnLRNDescriptor_t)) < 0 ||
+        rpc_write(0, lrnN, sizeof(unsigned)) < 0 ||
+        rpc_write(0, lrnAlpha, sizeof(double)) < 0 ||
+        rpc_write(0, lrnBeta, sizeof(double)) < 0 ||
+        rpc_write(0, lrnK, sizeof(double)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, lrnN, sizeof(unsigned)) < 0 ||
+        rpc_read(0, lrnAlpha, sizeof(double)) < 0 ||
+        rpc_read(0, lrnBeta, sizeof(double)) < 0 ||
+        rpc_read(0, lrnK, sizeof(double)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnDestroyLRNDescriptor(cudnnLRNDescriptor_t lrnDesc)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnDestroyLRNDescriptor) < 0 ||
+        rpc_write(0, &lrnDesc, sizeof(cudnnLRNDescriptor_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnDeriveBNTensorDescriptor(cudnnTensorDescriptor_t derivedBnDesc, const cudnnTensorDescriptor_t xDesc, cudnnBatchNormMode_t mode)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnDeriveBNTensorDescriptor) < 0 ||
+        rpc_write(0, &derivedBnDesc, sizeof(cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &xDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &mode, sizeof(cudnnBatchNormMode_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnDeriveNormTensorDescriptor(cudnnTensorDescriptor_t derivedNormScaleBiasDesc, cudnnTensorDescriptor_t derivedNormMeanVarDesc, const cudnnTensorDescriptor_t xDesc, cudnnNormMode_t mode, int groupCnt)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnDeriveNormTensorDescriptor) < 0 ||
+        rpc_write(0, &derivedNormScaleBiasDesc, sizeof(cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &derivedNormMeanVarDesc, sizeof(cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &xDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &mode, sizeof(cudnnNormMode_t)) < 0 ||
+        rpc_write(0, &groupCnt, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnCreateSpatialTransformerDescriptor(cudnnSpatialTransformerDescriptor_t* stDesc)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnCreateSpatialTransformerDescriptor) < 0 ||
+        rpc_write(0, stDesc, sizeof(cudnnSpatialTransformerDescriptor_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, stDesc, sizeof(cudnnSpatialTransformerDescriptor_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnDestroySpatialTransformerDescriptor(cudnnSpatialTransformerDescriptor_t stDesc)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnDestroySpatialTransformerDescriptor) < 0 ||
+        rpc_write(0, &stDesc, sizeof(cudnnSpatialTransformerDescriptor_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnCreateDropoutDescriptor(cudnnDropoutDescriptor_t* dropoutDesc)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnCreateDropoutDescriptor) < 0 ||
+        rpc_write(0, dropoutDesc, sizeof(cudnnDropoutDescriptor_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, dropoutDesc, sizeof(cudnnDropoutDescriptor_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnDestroyDropoutDescriptor(cudnnDropoutDescriptor_t dropoutDesc)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnDestroyDropoutDescriptor) < 0 ||
+        rpc_write(0, &dropoutDesc, sizeof(cudnnDropoutDescriptor_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnDropoutGetStatesSize(cudnnHandle_t handle, size_t* sizeInBytes)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnDropoutGetStatesSize) < 0 ||
+        rpc_write(0, &handle, sizeof(cudnnHandle_t)) < 0 ||
+        rpc_write(0, sizeInBytes, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, sizeInBytes, sizeof(size_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnDropoutGetReserveSpaceSize(cudnnTensorDescriptor_t xdesc, size_t* sizeInBytes)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnDropoutGetReserveSpaceSize) < 0 ||
+        rpc_write(0, &xdesc, sizeof(cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, sizeInBytes, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, sizeInBytes, sizeof(size_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnGetDropoutDescriptor(cudnnDropoutDescriptor_t dropoutDesc, cudnnHandle_t handle, float* dropout, void** states, unsigned long long* seed)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnGetDropoutDescriptor) < 0 ||
+        rpc_write(0, &dropoutDesc, sizeof(cudnnDropoutDescriptor_t)) < 0 ||
+        rpc_write(0, &handle, sizeof(cudnnHandle_t)) < 0 ||
+        rpc_write(0, dropout, sizeof(float)) < 0 ||
+        rpc_write(0, states, sizeof(void*)) < 0 ||
+        rpc_write(0, seed, sizeof(unsigned long long)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, dropout, sizeof(float)) < 0 ||
+        rpc_read(0, states, sizeof(void*)) < 0 ||
+        rpc_read(0, seed, sizeof(unsigned long long)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnOpsVersionCheck()
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnOpsVersionCheck) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnGetBatchNormalizationForwardTrainingExWorkspaceSize(cudnnHandle_t handle, cudnnBatchNormMode_t mode, cudnnBatchNormOps_t bnOps, const cudnnTensorDescriptor_t xDesc, const cudnnTensorDescriptor_t zDesc, const cudnnTensorDescriptor_t yDesc, const cudnnTensorDescriptor_t bnScaleBiasMeanVarDesc, const cudnnActivationDescriptor_t activationDesc, size_t* sizeInBytes)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnGetBatchNormalizationForwardTrainingExWorkspaceSize) < 0 ||
+        rpc_write(0, &handle, sizeof(cudnnHandle_t)) < 0 ||
+        rpc_write(0, &mode, sizeof(cudnnBatchNormMode_t)) < 0 ||
+        rpc_write(0, &bnOps, sizeof(cudnnBatchNormOps_t)) < 0 ||
+        rpc_write(0, &xDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &zDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &yDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &bnScaleBiasMeanVarDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &activationDesc, sizeof(const cudnnActivationDescriptor_t)) < 0 ||
+        rpc_write(0, sizeInBytes, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, sizeInBytes, sizeof(size_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnGetBatchNormalizationBackwardExWorkspaceSize(cudnnHandle_t handle, cudnnBatchNormMode_t mode, cudnnBatchNormOps_t bnOps, const cudnnTensorDescriptor_t xDesc, const cudnnTensorDescriptor_t yDesc, const cudnnTensorDescriptor_t dyDesc, const cudnnTensorDescriptor_t dzDesc, const cudnnTensorDescriptor_t dxDesc, const cudnnTensorDescriptor_t dBnScaleBiasDesc, const cudnnActivationDescriptor_t activationDesc, size_t* sizeInBytes)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnGetBatchNormalizationBackwardExWorkspaceSize) < 0 ||
+        rpc_write(0, &handle, sizeof(cudnnHandle_t)) < 0 ||
+        rpc_write(0, &mode, sizeof(cudnnBatchNormMode_t)) < 0 ||
+        rpc_write(0, &bnOps, sizeof(cudnnBatchNormOps_t)) < 0 ||
+        rpc_write(0, &xDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &yDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &dyDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &dzDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &dxDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &dBnScaleBiasDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &activationDesc, sizeof(const cudnnActivationDescriptor_t)) < 0 ||
+        rpc_write(0, sizeInBytes, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, sizeInBytes, sizeof(size_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnGetBatchNormalizationTrainingExReserveSpaceSize(cudnnHandle_t handle, cudnnBatchNormMode_t mode, cudnnBatchNormOps_t bnOps, const cudnnActivationDescriptor_t activationDesc, const cudnnTensorDescriptor_t xDesc, size_t* sizeInBytes)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnGetBatchNormalizationTrainingExReserveSpaceSize) < 0 ||
+        rpc_write(0, &handle, sizeof(cudnnHandle_t)) < 0 ||
+        rpc_write(0, &mode, sizeof(cudnnBatchNormMode_t)) < 0 ||
+        rpc_write(0, &bnOps, sizeof(cudnnBatchNormOps_t)) < 0 ||
+        rpc_write(0, &activationDesc, sizeof(const cudnnActivationDescriptor_t)) < 0 ||
+        rpc_write(0, &xDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, sizeInBytes, sizeof(size_t)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, sizeInBytes, sizeof(size_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnGetNormalizationForwardTrainingWorkspaceSize(cudnnHandle_t handle, cudnnNormMode_t mode, cudnnNormOps_t normOps, cudnnNormAlgo_t algo, const cudnnTensorDescriptor_t xDesc, const cudnnTensorDescriptor_t zDesc, const cudnnTensorDescriptor_t yDesc, const cudnnTensorDescriptor_t normScaleBiasDesc, const cudnnActivationDescriptor_t activationDesc, const cudnnTensorDescriptor_t normMeanVarDesc, size_t* sizeInBytes, int groupCnt)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnGetNormalizationForwardTrainingWorkspaceSize) < 0 ||
+        rpc_write(0, &handle, sizeof(cudnnHandle_t)) < 0 ||
+        rpc_write(0, &mode, sizeof(cudnnNormMode_t)) < 0 ||
+        rpc_write(0, &normOps, sizeof(cudnnNormOps_t)) < 0 ||
+        rpc_write(0, &algo, sizeof(cudnnNormAlgo_t)) < 0 ||
+        rpc_write(0, &xDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &zDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &yDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &normScaleBiasDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &activationDesc, sizeof(const cudnnActivationDescriptor_t)) < 0 ||
+        rpc_write(0, &normMeanVarDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, sizeInBytes, sizeof(size_t)) < 0 ||
+        rpc_write(0, &groupCnt, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, sizeInBytes, sizeof(size_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnGetNormalizationBackwardWorkspaceSize(cudnnHandle_t handle, cudnnNormMode_t mode, cudnnNormOps_t normOps, cudnnNormAlgo_t algo, const cudnnTensorDescriptor_t xDesc, const cudnnTensorDescriptor_t yDesc, const cudnnTensorDescriptor_t dyDesc, const cudnnTensorDescriptor_t dzDesc, const cudnnTensorDescriptor_t dxDesc, const cudnnTensorDescriptor_t dNormScaleBiasDesc, const cudnnActivationDescriptor_t activationDesc, const cudnnTensorDescriptor_t normMeanVarDesc, size_t* sizeInBytes, int groupCnt)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnGetNormalizationBackwardWorkspaceSize) < 0 ||
+        rpc_write(0, &handle, sizeof(cudnnHandle_t)) < 0 ||
+        rpc_write(0, &mode, sizeof(cudnnNormMode_t)) < 0 ||
+        rpc_write(0, &normOps, sizeof(cudnnNormOps_t)) < 0 ||
+        rpc_write(0, &algo, sizeof(cudnnNormAlgo_t)) < 0 ||
+        rpc_write(0, &xDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &yDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &dyDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &dzDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &dxDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &dNormScaleBiasDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, &activationDesc, sizeof(const cudnnActivationDescriptor_t)) < 0 ||
+        rpc_write(0, &normMeanVarDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, sizeInBytes, sizeof(size_t)) < 0 ||
+        rpc_write(0, &groupCnt, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, sizeInBytes, sizeof(size_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return CUDNN_STATUS_NOT_INITIALIZED;
+    return return_value;
+}
+
+cudnnStatus_t cudnnGetNormalizationTrainingReserveSpaceSize(cudnnHandle_t handle, cudnnNormMode_t mode, cudnnNormOps_t normOps, cudnnNormAlgo_t algo, const cudnnActivationDescriptor_t activationDesc, const cudnnTensorDescriptor_t xDesc, size_t* sizeInBytes, int groupCnt)
+{
+    cudnnStatus_t return_value;
+    if (rpc_start_request(0, RPC_cudnnGetNormalizationTrainingReserveSpaceSize) < 0 ||
+        rpc_write(0, &handle, sizeof(cudnnHandle_t)) < 0 ||
+        rpc_write(0, &mode, sizeof(cudnnNormMode_t)) < 0 ||
+        rpc_write(0, &normOps, sizeof(cudnnNormOps_t)) < 0 ||
+        rpc_write(0, &algo, sizeof(cudnnNormAlgo_t)) < 0 ||
+        rpc_write(0, &activationDesc, sizeof(const cudnnActivationDescriptor_t)) < 0 ||
+        rpc_write(0, &xDesc, sizeof(const cudnnTensorDescriptor_t)) < 0 ||
+        rpc_write(0, sizeInBytes, sizeof(size_t)) < 0 ||
+        rpc_write(0, &groupCnt, sizeof(int)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, sizeInBytes, sizeof(size_t)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return CUDNN_STATUS_NOT_INITIALIZED;
     return return_value;
@@ -12115,14 +21283,475 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cudaGetFuncBySymbol", (void *)cudaGetFuncBySymbol},
     {"cublasCreate_v2", (void *)cublasCreate_v2},
     {"cublasDestroy_v2", (void *)cublasDestroy_v2},
+    {"cublasGetVersion_v2", (void *)cublasGetVersion_v2},
+    {"cublasGetProperty", (void *)cublasGetProperty},
+    {"cublasSetStream_v2", (void *)cublasSetStream_v2},
+    {"cublasGetStream_v2", (void *)cublasGetStream_v2},
+    {"cublasGetPointerMode_v2", (void *)cublasGetPointerMode_v2},
+    {"cublasSetPointerMode_v2", (void *)cublasSetPointerMode_v2},
+    {"cublasGetAtomicsMode", (void *)cublasGetAtomicsMode},
+    {"cublasSetAtomicsMode", (void *)cublasSetAtomicsMode},
+    {"cublasGetMathMode", (void *)cublasGetMathMode},
+    {"cublasSetMathMode", (void *)cublasSetMathMode},
+    {"cublasGetSmCountTarget", (void *)cublasGetSmCountTarget},
+    {"cublasSetSmCountTarget", (void *)cublasSetSmCountTarget},
+    {"cublasLoggerConfigure", (void *)cublasLoggerConfigure},
+    {"cublasSetLoggerCallback", (void *)cublasSetLoggerCallback},
+    {"cublasGetLoggerCallback", (void *)cublasGetLoggerCallback},
+    {"cublasSnrm2_v2", (void *)cublasSnrm2_v2},
+    {"cublasSnrm2_v2_64", (void *)cublasSnrm2_v2_64},
+    {"cublasDnrm2_v2", (void *)cublasDnrm2_v2},
+    {"cublasDnrm2_v2_64", (void *)cublasDnrm2_v2_64},
+    {"cublasScnrm2_v2", (void *)cublasScnrm2_v2},
+    {"cublasScnrm2_v2_64", (void *)cublasScnrm2_v2_64},
+    {"cublasDznrm2_v2", (void *)cublasDznrm2_v2},
+    {"cublasDznrm2_v2_64", (void *)cublasDznrm2_v2_64},
+    {"cublasSdot_v2", (void *)cublasSdot_v2},
+    {"cublasSdot_v2_64", (void *)cublasSdot_v2_64},
+    {"cublasDdot_v2", (void *)cublasDdot_v2},
+    {"cublasDdot_v2_64", (void *)cublasDdot_v2_64},
+    {"cublasCdotu_v2", (void *)cublasCdotu_v2},
+    {"cublasCdotu_v2_64", (void *)cublasCdotu_v2_64},
+    {"cublasCdotc_v2", (void *)cublasCdotc_v2},
+    {"cublasCdotc_v2_64", (void *)cublasCdotc_v2_64},
+    {"cublasZdotu_v2", (void *)cublasZdotu_v2},
+    {"cublasZdotu_v2_64", (void *)cublasZdotu_v2_64},
+    {"cublasZdotc_v2", (void *)cublasZdotc_v2},
+    {"cublasZdotc_v2_64", (void *)cublasZdotc_v2_64},
+    {"cublasSscal_v2", (void *)cublasSscal_v2},
+    {"cublasSscal_v2_64", (void *)cublasSscal_v2_64},
+    {"cublasDscal_v2", (void *)cublasDscal_v2},
+    {"cublasDscal_v2_64", (void *)cublasDscal_v2_64},
+    {"cublasCscal_v2", (void *)cublasCscal_v2},
+    {"cublasCscal_v2_64", (void *)cublasCscal_v2_64},
+    {"cublasCsscal_v2", (void *)cublasCsscal_v2},
+    {"cublasCsscal_v2_64", (void *)cublasCsscal_v2_64},
+    {"cublasZscal_v2", (void *)cublasZscal_v2},
+    {"cublasZscal_v2_64", (void *)cublasZscal_v2_64},
+    {"cublasZdscal_v2", (void *)cublasZdscal_v2},
+    {"cublasZdscal_v2_64", (void *)cublasZdscal_v2_64},
+    {"cublasSaxpy_v2", (void *)cublasSaxpy_v2},
+    {"cublasSaxpy_v2_64", (void *)cublasSaxpy_v2_64},
+    {"cublasDaxpy_v2", (void *)cublasDaxpy_v2},
+    {"cublasDaxpy_v2_64", (void *)cublasDaxpy_v2_64},
+    {"cublasCaxpy_v2", (void *)cublasCaxpy_v2},
+    {"cublasCaxpy_v2_64", (void *)cublasCaxpy_v2_64},
+    {"cublasZaxpy_v2", (void *)cublasZaxpy_v2},
+    {"cublasZaxpy_v2_64", (void *)cublasZaxpy_v2_64},
+    {"cublasScopy_v2", (void *)cublasScopy_v2},
+    {"cublasScopy_v2_64", (void *)cublasScopy_v2_64},
+    {"cublasDcopy_v2", (void *)cublasDcopy_v2},
+    {"cublasDcopy_v2_64", (void *)cublasDcopy_v2_64},
+    {"cublasCcopy_v2", (void *)cublasCcopy_v2},
+    {"cublasCcopy_v2_64", (void *)cublasCcopy_v2_64},
+    {"cublasZcopy_v2", (void *)cublasZcopy_v2},
+    {"cublasZcopy_v2_64", (void *)cublasZcopy_v2_64},
+    {"cublasSswap_v2", (void *)cublasSswap_v2},
+    {"cublasSswap_v2_64", (void *)cublasSswap_v2_64},
+    {"cublasDswap_v2", (void *)cublasDswap_v2},
+    {"cublasDswap_v2_64", (void *)cublasDswap_v2_64},
+    {"cublasCswap_v2", (void *)cublasCswap_v2},
+    {"cublasCswap_v2_64", (void *)cublasCswap_v2_64},
+    {"cublasZswap_v2", (void *)cublasZswap_v2},
+    {"cublasZswap_v2_64", (void *)cublasZswap_v2_64},
+    {"cublasIsamax_v2", (void *)cublasIsamax_v2},
+    {"cublasIsamax_v2_64", (void *)cublasIsamax_v2_64},
+    {"cublasIdamax_v2", (void *)cublasIdamax_v2},
+    {"cublasIdamax_v2_64", (void *)cublasIdamax_v2_64},
+    {"cublasIcamax_v2", (void *)cublasIcamax_v2},
+    {"cublasIcamax_v2_64", (void *)cublasIcamax_v2_64},
+    {"cublasIzamax_v2", (void *)cublasIzamax_v2},
+    {"cublasIzamax_v2_64", (void *)cublasIzamax_v2_64},
+    {"cublasIamaxEx", (void *)cublasIamaxEx},
+    {"cublasIamaxEx_64", (void *)cublasIamaxEx_64},
+    {"cublasIsamin_v2", (void *)cublasIsamin_v2},
+    {"cublasIsamin_v2_64", (void *)cublasIsamin_v2_64},
+    {"cublasIdamin_v2", (void *)cublasIdamin_v2},
+    {"cublasIdamin_v2_64", (void *)cublasIdamin_v2_64},
+    {"cublasIcamin_v2", (void *)cublasIcamin_v2},
+    {"cublasIcamin_v2_64", (void *)cublasIcamin_v2_64},
+    {"cublasIzamin_v2", (void *)cublasIzamin_v2},
+    {"cublasIzamin_v2_64", (void *)cublasIzamin_v2_64},
+    {"cublasIaminEx", (void *)cublasIaminEx},
+    {"cublasIaminEx_64", (void *)cublasIaminEx_64},
+    {"cublasSasum_v2", (void *)cublasSasum_v2},
+    {"cublasSasum_v2_64", (void *)cublasSasum_v2_64},
+    {"cublasDasum_v2", (void *)cublasDasum_v2},
+    {"cublasDasum_v2_64", (void *)cublasDasum_v2_64},
+    {"cublasScasum_v2", (void *)cublasScasum_v2},
+    {"cublasScasum_v2_64", (void *)cublasScasum_v2_64},
+    {"cublasDzasum_v2", (void *)cublasDzasum_v2},
+    {"cublasDzasum_v2_64", (void *)cublasDzasum_v2_64},
+    {"cublasSrot_v2", (void *)cublasSrot_v2},
+    {"cublasSrot_v2_64", (void *)cublasSrot_v2_64},
+    {"cublasDrot_v2", (void *)cublasDrot_v2},
+    {"cublasDrot_v2_64", (void *)cublasDrot_v2_64},
+    {"cublasCrot_v2", (void *)cublasCrot_v2},
+    {"cublasCrot_v2_64", (void *)cublasCrot_v2_64},
+    {"cublasCsrot_v2", (void *)cublasCsrot_v2},
+    {"cublasCsrot_v2_64", (void *)cublasCsrot_v2_64},
+    {"cublasZrot_v2", (void *)cublasZrot_v2},
+    {"cublasZrot_v2_64", (void *)cublasZrot_v2_64},
+    {"cublasZdrot_v2", (void *)cublasZdrot_v2},
+    {"cublasZdrot_v2_64", (void *)cublasZdrot_v2_64},
+    {"cublasSrotg_v2", (void *)cublasSrotg_v2},
+    {"cublasDrotg_v2", (void *)cublasDrotg_v2},
+    {"cublasCrotg_v2", (void *)cublasCrotg_v2},
+    {"cublasZrotg_v2", (void *)cublasZrotg_v2},
+    {"cublasSrotm_v2", (void *)cublasSrotm_v2},
+    {"cublasSrotm_v2_64", (void *)cublasSrotm_v2_64},
+    {"cublasDrotm_v2", (void *)cublasDrotm_v2},
+    {"cublasDrotm_v2_64", (void *)cublasDrotm_v2_64},
+    {"cublasSrotmg_v2", (void *)cublasSrotmg_v2},
+    {"cublasDrotmg_v2", (void *)cublasDrotmg_v2},
+    {"cublasSgemv_v2", (void *)cublasSgemv_v2},
+    {"cublasSgemv_v2_64", (void *)cublasSgemv_v2_64},
+    {"cublasDgemv_v2", (void *)cublasDgemv_v2},
+    {"cublasDgemv_v2_64", (void *)cublasDgemv_v2_64},
+    {"cublasCgemv_v2", (void *)cublasCgemv_v2},
+    {"cublasCgemv_v2_64", (void *)cublasCgemv_v2_64},
+    {"cublasZgemv_v2", (void *)cublasZgemv_v2},
+    {"cublasZgemv_v2_64", (void *)cublasZgemv_v2_64},
+    {"cublasSgbmv_v2", (void *)cublasSgbmv_v2},
+    {"cublasSgbmv_v2_64", (void *)cublasSgbmv_v2_64},
+    {"cublasDgbmv_v2", (void *)cublasDgbmv_v2},
+    {"cublasDgbmv_v2_64", (void *)cublasDgbmv_v2_64},
+    {"cublasCgbmv_v2", (void *)cublasCgbmv_v2},
+    {"cublasCgbmv_v2_64", (void *)cublasCgbmv_v2_64},
+    {"cublasZgbmv_v2", (void *)cublasZgbmv_v2},
+    {"cublasZgbmv_v2_64", (void *)cublasZgbmv_v2_64},
+    {"cublasStrmv_v2", (void *)cublasStrmv_v2},
+    {"cublasStrmv_v2_64", (void *)cublasStrmv_v2_64},
+    {"cublasDtrmv_v2", (void *)cublasDtrmv_v2},
+    {"cublasDtrmv_v2_64", (void *)cublasDtrmv_v2_64},
+    {"cublasCtrmv_v2", (void *)cublasCtrmv_v2},
+    {"cublasCtrmv_v2_64", (void *)cublasCtrmv_v2_64},
+    {"cublasZtrmv_v2", (void *)cublasZtrmv_v2},
+    {"cublasZtrmv_v2_64", (void *)cublasZtrmv_v2_64},
+    {"cublasStbmv_v2", (void *)cublasStbmv_v2},
+    {"cublasStbmv_v2_64", (void *)cublasStbmv_v2_64},
+    {"cublasDtbmv_v2", (void *)cublasDtbmv_v2},
+    {"cublasDtbmv_v2_64", (void *)cublasDtbmv_v2_64},
+    {"cublasCtbmv_v2", (void *)cublasCtbmv_v2},
+    {"cublasCtbmv_v2_64", (void *)cublasCtbmv_v2_64},
+    {"cublasZtbmv_v2", (void *)cublasZtbmv_v2},
+    {"cublasZtbmv_v2_64", (void *)cublasZtbmv_v2_64},
+    {"cublasStpmv_v2", (void *)cublasStpmv_v2},
+    {"cublasStpmv_v2_64", (void *)cublasStpmv_v2_64},
+    {"cublasDtpmv_v2", (void *)cublasDtpmv_v2},
+    {"cublasDtpmv_v2_64", (void *)cublasDtpmv_v2_64},
+    {"cublasCtpmv_v2", (void *)cublasCtpmv_v2},
+    {"cublasCtpmv_v2_64", (void *)cublasCtpmv_v2_64},
+    {"cublasZtpmv_v2", (void *)cublasZtpmv_v2},
+    {"cublasZtpmv_v2_64", (void *)cublasZtpmv_v2_64},
+    {"cublasStrsv_v2", (void *)cublasStrsv_v2},
+    {"cublasStrsv_v2_64", (void *)cublasStrsv_v2_64},
+    {"cublasDtrsv_v2", (void *)cublasDtrsv_v2},
+    {"cublasDtrsv_v2_64", (void *)cublasDtrsv_v2_64},
+    {"cublasCtrsv_v2", (void *)cublasCtrsv_v2},
+    {"cublasCtrsv_v2_64", (void *)cublasCtrsv_v2_64},
+    {"cublasZtrsv_v2", (void *)cublasZtrsv_v2},
+    {"cublasZtrsv_v2_64", (void *)cublasZtrsv_v2_64},
+    {"cublasStpsv_v2", (void *)cublasStpsv_v2},
+    {"cublasStpsv_v2_64", (void *)cublasStpsv_v2_64},
+    {"cublasDtpsv_v2", (void *)cublasDtpsv_v2},
+    {"cublasDtpsv_v2_64", (void *)cublasDtpsv_v2_64},
+    {"cublasCtpsv_v2", (void *)cublasCtpsv_v2},
+    {"cublasCtpsv_v2_64", (void *)cublasCtpsv_v2_64},
+    {"cublasZtpsv_v2", (void *)cublasZtpsv_v2},
+    {"cublasZtpsv_v2_64", (void *)cublasZtpsv_v2_64},
+    {"cublasStbsv_v2", (void *)cublasStbsv_v2},
+    {"cublasStbsv_v2_64", (void *)cublasStbsv_v2_64},
+    {"cublasDtbsv_v2", (void *)cublasDtbsv_v2},
+    {"cublasDtbsv_v2_64", (void *)cublasDtbsv_v2_64},
+    {"cublasCtbsv_v2", (void *)cublasCtbsv_v2},
+    {"cublasCtbsv_v2_64", (void *)cublasCtbsv_v2_64},
+    {"cublasZtbsv_v2", (void *)cublasZtbsv_v2},
+    {"cublasZtbsv_v2_64", (void *)cublasZtbsv_v2_64},
+    {"cublasSsymv_v2", (void *)cublasSsymv_v2},
+    {"cublasSsymv_v2_64", (void *)cublasSsymv_v2_64},
+    {"cublasDsymv_v2", (void *)cublasDsymv_v2},
+    {"cublasDsymv_v2_64", (void *)cublasDsymv_v2_64},
+    {"cublasCsymv_v2", (void *)cublasCsymv_v2},
+    {"cublasCsymv_v2_64", (void *)cublasCsymv_v2_64},
+    {"cublasZsymv_v2", (void *)cublasZsymv_v2},
+    {"cublasZsymv_v2_64", (void *)cublasZsymv_v2_64},
+    {"cublasChemv_v2", (void *)cublasChemv_v2},
+    {"cublasChemv_v2_64", (void *)cublasChemv_v2_64},
+    {"cublasZhemv_v2", (void *)cublasZhemv_v2},
+    {"cublasZhemv_v2_64", (void *)cublasZhemv_v2_64},
+    {"cublasSsbmv_v2", (void *)cublasSsbmv_v2},
+    {"cublasSsbmv_v2_64", (void *)cublasSsbmv_v2_64},
+    {"cublasDsbmv_v2", (void *)cublasDsbmv_v2},
+    {"cublasDsbmv_v2_64", (void *)cublasDsbmv_v2_64},
+    {"cublasChbmv_v2", (void *)cublasChbmv_v2},
+    {"cublasChbmv_v2_64", (void *)cublasChbmv_v2_64},
+    {"cublasZhbmv_v2", (void *)cublasZhbmv_v2},
+    {"cublasZhbmv_v2_64", (void *)cublasZhbmv_v2_64},
+    {"cublasSspmv_v2", (void *)cublasSspmv_v2},
+    {"cublasSspmv_v2_64", (void *)cublasSspmv_v2_64},
+    {"cublasDspmv_v2", (void *)cublasDspmv_v2},
+    {"cublasDspmv_v2_64", (void *)cublasDspmv_v2_64},
+    {"cublasChpmv_v2", (void *)cublasChpmv_v2},
+    {"cublasChpmv_v2_64", (void *)cublasChpmv_v2_64},
+    {"cublasZhpmv_v2", (void *)cublasZhpmv_v2},
+    {"cublasZhpmv_v2_64", (void *)cublasZhpmv_v2_64},
+    {"cublasSger_v2", (void *)cublasSger_v2},
+    {"cublasSger_v2_64", (void *)cublasSger_v2_64},
+    {"cublasDger_v2", (void *)cublasDger_v2},
+    {"cublasDger_v2_64", (void *)cublasDger_v2_64},
+    {"cublasCgeru_v2", (void *)cublasCgeru_v2},
+    {"cublasCgeru_v2_64", (void *)cublasCgeru_v2_64},
+    {"cublasCgerc_v2", (void *)cublasCgerc_v2},
+    {"cublasCgerc_v2_64", (void *)cublasCgerc_v2_64},
+    {"cublasZgeru_v2", (void *)cublasZgeru_v2},
+    {"cublasZgeru_v2_64", (void *)cublasZgeru_v2_64},
+    {"cublasZgerc_v2", (void *)cublasZgerc_v2},
+    {"cublasZgerc_v2_64", (void *)cublasZgerc_v2_64},
+    {"cublasSsyr_v2", (void *)cublasSsyr_v2},
+    {"cublasSsyr_v2_64", (void *)cublasSsyr_v2_64},
+    {"cublasDsyr_v2", (void *)cublasDsyr_v2},
+    {"cublasDsyr_v2_64", (void *)cublasDsyr_v2_64},
+    {"cublasCsyr_v2", (void *)cublasCsyr_v2},
+    {"cublasCsyr_v2_64", (void *)cublasCsyr_v2_64},
+    {"cublasZsyr_v2", (void *)cublasZsyr_v2},
+    {"cublasZsyr_v2_64", (void *)cublasZsyr_v2_64},
+    {"cublasCher_v2", (void *)cublasCher_v2},
+    {"cublasCher_v2_64", (void *)cublasCher_v2_64},
+    {"cublasZher_v2", (void *)cublasZher_v2},
+    {"cublasZher_v2_64", (void *)cublasZher_v2_64},
+    {"cublasSspr_v2", (void *)cublasSspr_v2},
+    {"cublasSspr_v2_64", (void *)cublasSspr_v2_64},
+    {"cublasDspr_v2", (void *)cublasDspr_v2},
+    {"cublasDspr_v2_64", (void *)cublasDspr_v2_64},
+    {"cublasChpr_v2", (void *)cublasChpr_v2},
+    {"cublasChpr_v2_64", (void *)cublasChpr_v2_64},
+    {"cublasZhpr_v2", (void *)cublasZhpr_v2},
+    {"cublasZhpr_v2_64", (void *)cublasZhpr_v2_64},
+    {"cublasSsyr2_v2", (void *)cublasSsyr2_v2},
+    {"cublasSsyr2_v2_64", (void *)cublasSsyr2_v2_64},
+    {"cublasDsyr2_v2", (void *)cublasDsyr2_v2},
+    {"cublasDsyr2_v2_64", (void *)cublasDsyr2_v2_64},
+    {"cublasCsyr2_v2", (void *)cublasCsyr2_v2},
+    {"cublasCsyr2_v2_64", (void *)cublasCsyr2_v2_64},
+    {"cublasZsyr2_v2", (void *)cublasZsyr2_v2},
+    {"cublasZsyr2_v2_64", (void *)cublasZsyr2_v2_64},
+    {"cublasCher2_v2", (void *)cublasCher2_v2},
+    {"cublasCher2_v2_64", (void *)cublasCher2_v2_64},
+    {"cublasZher2_v2", (void *)cublasZher2_v2},
+    {"cublasZher2_v2_64", (void *)cublasZher2_v2_64},
+    {"cublasSspr2_v2", (void *)cublasSspr2_v2},
+    {"cublasSspr2_v2_64", (void *)cublasSspr2_v2_64},
+    {"cublasDspr2_v2", (void *)cublasDspr2_v2},
+    {"cublasDspr2_v2_64", (void *)cublasDspr2_v2_64},
+    {"cublasChpr2_v2", (void *)cublasChpr2_v2},
+    {"cublasChpr2_v2_64", (void *)cublasChpr2_v2_64},
+    {"cublasZhpr2_v2", (void *)cublasZhpr2_v2},
+    {"cublasZhpr2_v2_64", (void *)cublasZhpr2_v2_64},
+    {"cublasSgemvBatched", (void *)cublasSgemvBatched},
+    {"cublasTSTgemvBatched", (void *)cublasTSTgemvBatched},
+    {"cublasSgemvStridedBatched", (void *)cublasSgemvStridedBatched},
+    {"cublasSgemvStridedBatched_64", (void *)cublasSgemvStridedBatched_64},
+    {"cublasDgemvStridedBatched", (void *)cublasDgemvStridedBatched},
+    {"cublasDgemvStridedBatched_64", (void *)cublasDgemvStridedBatched_64},
+    {"cublasCgemvStridedBatched", (void *)cublasCgemvStridedBatched},
+    {"cublasCgemvStridedBatched_64", (void *)cublasCgemvStridedBatched_64},
+    {"cublasZgemvStridedBatched", (void *)cublasZgemvStridedBatched},
+    {"cublasZgemvStridedBatched_64", (void *)cublasZgemvStridedBatched_64},
+    {"cublasHSHgemvStridedBatched", (void *)cublasHSHgemvStridedBatched},
+    {"cublasHSHgemvStridedBatched_64", (void *)cublasHSHgemvStridedBatched_64},
+    {"cublasHSSgemvStridedBatched", (void *)cublasHSSgemvStridedBatched},
+    {"cublasHSSgemvStridedBatched_64", (void *)cublasHSSgemvStridedBatched_64},
+    {"cublasTSTgemvStridedBatched", (void *)cublasTSTgemvStridedBatched},
+    {"cublasTSTgemvStridedBatched_64", (void *)cublasTSTgemvStridedBatched_64},
+    {"cublasTSSgemvStridedBatched", (void *)cublasTSSgemvStridedBatched},
+    {"cublasTSSgemvStridedBatched_64", (void *)cublasTSSgemvStridedBatched_64},
     {"cublasSgemm_v2", (void *)cublasSgemm_v2},
+    {"cublasSgemm_v2_64", (void *)cublasSgemm_v2_64},
+    {"cublasDgemm_v2", (void *)cublasDgemm_v2},
+    {"cublasDgemm_v2_64", (void *)cublasDgemm_v2_64},
+    {"cublasCgemm_v2", (void *)cublasCgemm_v2},
+    {"cublasCgemm_v2_64", (void *)cublasCgemm_v2_64},
+    {"cublasCgemm3m", (void *)cublasCgemm3m},
+    {"cublasCgemm3m_64", (void *)cublasCgemm3m_64},
+    {"cublasZgemm_v2", (void *)cublasZgemm_v2},
+    {"cublasZgemm_v2_64", (void *)cublasZgemm_v2_64},
+    {"cublasZgemm3m", (void *)cublasZgemm3m},
+    {"cublasZgemm3m_64", (void *)cublasZgemm3m_64},
+    {"cublasHgemm", (void *)cublasHgemm},
+    {"cublasHgemm_64", (void *)cublasHgemm_64},
+    {"cublasSsyrk_v2", (void *)cublasSsyrk_v2},
+    {"cublasSsyrk_v2_64", (void *)cublasSsyrk_v2_64},
+    {"cublasDsyrk_v2", (void *)cublasDsyrk_v2},
+    {"cublasDsyrk_v2_64", (void *)cublasDsyrk_v2_64},
+    {"cublasCsyrk_v2", (void *)cublasCsyrk_v2},
+    {"cublasCsyrk_v2_64", (void *)cublasCsyrk_v2_64},
+    {"cublasZsyrk_v2", (void *)cublasZsyrk_v2},
+    {"cublasZsyrk_v2_64", (void *)cublasZsyrk_v2_64},
+    {"cublasCherk_v2", (void *)cublasCherk_v2},
+    {"cublasCherk_v2_64", (void *)cublasCherk_v2_64},
+    {"cublasZherk_v2", (void *)cublasZherk_v2},
+    {"cublasZherk_v2_64", (void *)cublasZherk_v2_64},
+    {"cublasSsyr2k_v2", (void *)cublasSsyr2k_v2},
+    {"cublasSsyr2k_v2_64", (void *)cublasSsyr2k_v2_64},
+    {"cublasDsyr2k_v2", (void *)cublasDsyr2k_v2},
+    {"cublasDsyr2k_v2_64", (void *)cublasDsyr2k_v2_64},
+    {"cublasCsyr2k_v2", (void *)cublasCsyr2k_v2},
+    {"cublasCsyr2k_v2_64", (void *)cublasCsyr2k_v2_64},
+    {"cublasZsyr2k_v2", (void *)cublasZsyr2k_v2},
+    {"cublasZsyr2k_v2_64", (void *)cublasZsyr2k_v2_64},
+    {"cublasCher2k_v2", (void *)cublasCher2k_v2},
+    {"cublasCher2k_v2_64", (void *)cublasCher2k_v2_64},
+    {"cublasZher2k_v2", (void *)cublasZher2k_v2},
+    {"cublasZher2k_v2_64", (void *)cublasZher2k_v2_64},
+    {"cublasSsyrkx", (void *)cublasSsyrkx},
+    {"cublasSsyrkx_64", (void *)cublasSsyrkx_64},
+    {"cublasDsyrkx", (void *)cublasDsyrkx},
+    {"cublasDsyrkx_64", (void *)cublasDsyrkx_64},
+    {"cublasCsyrkx", (void *)cublasCsyrkx},
+    {"cublasCsyrkx_64", (void *)cublasCsyrkx_64},
+    {"cublasZsyrkx", (void *)cublasZsyrkx},
+    {"cublasZsyrkx_64", (void *)cublasZsyrkx_64},
+    {"cublasCherkx", (void *)cublasCherkx},
+    {"cublasCherkx_64", (void *)cublasCherkx_64},
+    {"cublasZherkx", (void *)cublasZherkx},
+    {"cublasZherkx_64", (void *)cublasZherkx_64},
+    {"cublasSsymm_v2", (void *)cublasSsymm_v2},
+    {"cublasSsymm_v2_64", (void *)cublasSsymm_v2_64},
+    {"cublasDsymm_v2", (void *)cublasDsymm_v2},
+    {"cublasDsymm_v2_64", (void *)cublasDsymm_v2_64},
+    {"cublasCsymm_v2", (void *)cublasCsymm_v2},
+    {"cublasCsymm_v2_64", (void *)cublasCsymm_v2_64},
+    {"cublasZsymm_v2", (void *)cublasZsymm_v2},
+    {"cublasZsymm_v2_64", (void *)cublasZsymm_v2_64},
+    {"cublasChemm_v2", (void *)cublasChemm_v2},
+    {"cublasChemm_v2_64", (void *)cublasChemm_v2_64},
+    {"cublasZhemm_v2", (void *)cublasZhemm_v2},
+    {"cublasZhemm_v2_64", (void *)cublasZhemm_v2_64},
+    {"cublasStrsm_v2", (void *)cublasStrsm_v2},
+    {"cublasStrsm_v2_64", (void *)cublasStrsm_v2_64},
+    {"cublasDtrsm_v2", (void *)cublasDtrsm_v2},
+    {"cublasDtrsm_v2_64", (void *)cublasDtrsm_v2_64},
+    {"cublasCtrsm_v2", (void *)cublasCtrsm_v2},
+    {"cublasCtrsm_v2_64", (void *)cublasCtrsm_v2_64},
+    {"cublasZtrsm_v2", (void *)cublasZtrsm_v2},
+    {"cublasZtrsm_v2_64", (void *)cublasZtrsm_v2_64},
+    {"cublasStrmm_v2", (void *)cublasStrmm_v2},
+    {"cublasStrmm_v2_64", (void *)cublasStrmm_v2_64},
+    {"cublasDtrmm_v2", (void *)cublasDtrmm_v2},
+    {"cublasDtrmm_v2_64", (void *)cublasDtrmm_v2_64},
+    {"cublasCtrmm_v2", (void *)cublasCtrmm_v2},
+    {"cublasCtrmm_v2_64", (void *)cublasCtrmm_v2_64},
+    {"cublasZtrmm_v2", (void *)cublasZtrmm_v2},
+    {"cublasZtrmm_v2_64", (void *)cublasZtrmm_v2_64},
+    {"cublasHgemmStridedBatched", (void *)cublasHgemmStridedBatched},
+    {"cublasHgemmStridedBatched_64", (void *)cublasHgemmStridedBatched_64},
+    {"cublasSgemmStridedBatched", (void *)cublasSgemmStridedBatched},
+    {"cublasSgemmStridedBatched_64", (void *)cublasSgemmStridedBatched_64},
+    {"cublasDgemmStridedBatched", (void *)cublasDgemmStridedBatched},
+    {"cublasDgemmStridedBatched_64", (void *)cublasDgemmStridedBatched_64},
+    {"cublasCgemmStridedBatched", (void *)cublasCgemmStridedBatched},
+    {"cublasCgemmStridedBatched_64", (void *)cublasCgemmStridedBatched_64},
+    {"cublasCgemm3mStridedBatched", (void *)cublasCgemm3mStridedBatched},
+    {"cublasCgemm3mStridedBatched_64", (void *)cublasCgemm3mStridedBatched_64},
+    {"cublasZgemmStridedBatched", (void *)cublasZgemmStridedBatched},
+    {"cublasZgemmStridedBatched_64", (void *)cublasZgemmStridedBatched_64},
+    {"cublasSgeam", (void *)cublasSgeam},
+    {"cublasSgeam_64", (void *)cublasSgeam_64},
+    {"cublasDgeam", (void *)cublasDgeam},
+    {"cublasDgeam_64", (void *)cublasDgeam_64},
+    {"cublasCgeam", (void *)cublasCgeam},
+    {"cublasCgeam_64", (void *)cublasCgeam_64},
+    {"cublasZgeam", (void *)cublasZgeam},
+    {"cublasZgeam_64", (void *)cublasZgeam_64},
+    {"cublasSdgmm", (void *)cublasSdgmm},
+    {"cublasSdgmm_64", (void *)cublasSdgmm_64},
+    {"cublasDdgmm", (void *)cublasDdgmm},
+    {"cublasDdgmm_64", (void *)cublasDdgmm_64},
+    {"cublasCdgmm", (void *)cublasCdgmm},
+    {"cublasCdgmm_64", (void *)cublasCdgmm_64},
+    {"cublasZdgmm", (void *)cublasZdgmm},
+    {"cublasZdgmm_64", (void *)cublasZdgmm_64},
+    {"cublasStpttr", (void *)cublasStpttr},
+    {"cublasDtpttr", (void *)cublasDtpttr},
+    {"cublasCtpttr", (void *)cublasCtpttr},
+    {"cublasZtpttr", (void *)cublasZtpttr},
+    {"cublasStrttp", (void *)cublasStrttp},
+    {"cublasDtrttp", (void *)cublasDtrttp},
+    {"cublasCtrttp", (void *)cublasCtrttp},
+    {"cublasZtrttp", (void *)cublasZtrttp},
+    {"cublasUint8gemmBias", (void *)cublasUint8gemmBias},
+    {"cudnnGetProperty", (void *)cudnnGetProperty},
     {"cudnnCreate", (void *)cudnnCreate},
     {"cudnnDestroy", (void *)cudnnDestroy},
+    {"cudnnSetStream", (void *)cudnnSetStream},
+    {"cudnnGetStream", (void *)cudnnGetStream},
+    {"cudnnGetCallback", (void *)cudnnGetCallback},
+    {"cudnnGraphVersionCheck", (void *)cudnnGraphVersionCheck},
+    {"cudnnBackendCreateDescriptor", (void *)cudnnBackendCreateDescriptor},
+    {"cudnnBackendDestroyDescriptor", (void *)cudnnBackendDestroyDescriptor},
+    {"cudnnBackendInitialize", (void *)cudnnBackendInitialize},
+    {"cudnnBackendFinalize", (void *)cudnnBackendFinalize},
+    {"cudnnBackendSetAttribute", (void *)cudnnBackendSetAttribute},
+    {"cudnnBackendExecute", (void *)cudnnBackendExecute},
+    {"cudnnBackendPopulateCudaGraph", (void *)cudnnBackendPopulateCudaGraph},
+    {"cudnnBackendUpdateCudaGraph", (void *)cudnnBackendUpdateCudaGraph},
     {"cudnnCreateTensorDescriptor", (void *)cudnnCreateTensorDescriptor},
     {"cudnnSetTensor4dDescriptor", (void *)cudnnSetTensor4dDescriptor},
+    {"cudnnSetTensor4dDescriptorEx", (void *)cudnnSetTensor4dDescriptorEx},
+    {"cudnnGetTensor4dDescriptor", (void *)cudnnGetTensor4dDescriptor},
+    {"cudnnGetTensorSizeInBytes", (void *)cudnnGetTensorSizeInBytes},
+    {"cudnnDestroyTensorDescriptor", (void *)cudnnDestroyTensorDescriptor},
+    {"cudnnInitTransformDest", (void *)cudnnInitTransformDest},
+    {"cudnnCreateTensorTransformDescriptor", (void *)cudnnCreateTensorTransformDescriptor},
+    {"cudnnDestroyTensorTransformDescriptor", (void *)cudnnDestroyTensorTransformDescriptor},
+    {"cudnnCreateOpTensorDescriptor", (void *)cudnnCreateOpTensorDescriptor},
+    {"cudnnSetOpTensorDescriptor", (void *)cudnnSetOpTensorDescriptor},
+    {"cudnnGetOpTensorDescriptor", (void *)cudnnGetOpTensorDescriptor},
+    {"cudnnDestroyOpTensorDescriptor", (void *)cudnnDestroyOpTensorDescriptor},
+    {"cudnnCreateReduceTensorDescriptor", (void *)cudnnCreateReduceTensorDescriptor},
+    {"cudnnSetReduceTensorDescriptor", (void *)cudnnSetReduceTensorDescriptor},
+    {"cudnnGetReduceTensorDescriptor", (void *)cudnnGetReduceTensorDescriptor},
+    {"cudnnDestroyReduceTensorDescriptor", (void *)cudnnDestroyReduceTensorDescriptor},
+    {"cudnnGetReductionIndicesSize", (void *)cudnnGetReductionIndicesSize},
+    {"cudnnGetReductionWorkspaceSize", (void *)cudnnGetReductionWorkspaceSize},
+    {"cudnnCreateFilterDescriptor", (void *)cudnnCreateFilterDescriptor},
+    {"cudnnSetFilter4dDescriptor", (void *)cudnnSetFilter4dDescriptor},
+    {"cudnnGetFilter4dDescriptor", (void *)cudnnGetFilter4dDescriptor},
+    {"cudnnGetFilterSizeInBytes", (void *)cudnnGetFilterSizeInBytes},
+    {"cudnnDestroyFilterDescriptor", (void *)cudnnDestroyFilterDescriptor},
+    {"cudnnCreatePoolingDescriptor", (void *)cudnnCreatePoolingDescriptor},
+    {"cudnnSetPooling2dDescriptor", (void *)cudnnSetPooling2dDescriptor},
+    {"cudnnGetPooling2dDescriptor", (void *)cudnnGetPooling2dDescriptor},
+    {"cudnnGetPooling2dForwardOutputDim", (void *)cudnnGetPooling2dForwardOutputDim},
+    {"cudnnDestroyPoolingDescriptor", (void *)cudnnDestroyPoolingDescriptor},
     {"cudnnCreateActivationDescriptor", (void *)cudnnCreateActivationDescriptor},
     {"cudnnSetActivationDescriptor", (void *)cudnnSetActivationDescriptor},
+    {"cudnnGetActivationDescriptor", (void *)cudnnGetActivationDescriptor},
+    {"cudnnSetActivationDescriptorSwishBeta", (void *)cudnnSetActivationDescriptorSwishBeta},
+    {"cudnnGetActivationDescriptorSwishBeta", (void *)cudnnGetActivationDescriptorSwishBeta},
+    {"cudnnDestroyActivationDescriptor", (void *)cudnnDestroyActivationDescriptor},
     {"cudnnActivationForward", (void *)cudnnActivationForward},
+    {"cudnnCreateLRNDescriptor", (void *)cudnnCreateLRNDescriptor},
+    {"cudnnSetLRNDescriptor", (void *)cudnnSetLRNDescriptor},
+    {"cudnnGetLRNDescriptor", (void *)cudnnGetLRNDescriptor},
+    {"cudnnDestroyLRNDescriptor", (void *)cudnnDestroyLRNDescriptor},
+    {"cudnnDeriveBNTensorDescriptor", (void *)cudnnDeriveBNTensorDescriptor},
+    {"cudnnDeriveNormTensorDescriptor", (void *)cudnnDeriveNormTensorDescriptor},
+    {"cudnnCreateSpatialTransformerDescriptor", (void *)cudnnCreateSpatialTransformerDescriptor},
+    {"cudnnDestroySpatialTransformerDescriptor", (void *)cudnnDestroySpatialTransformerDescriptor},
+    {"cudnnCreateDropoutDescriptor", (void *)cudnnCreateDropoutDescriptor},
+    {"cudnnDestroyDropoutDescriptor", (void *)cudnnDestroyDropoutDescriptor},
+    {"cudnnDropoutGetStatesSize", (void *)cudnnDropoutGetStatesSize},
+    {"cudnnDropoutGetReserveSpaceSize", (void *)cudnnDropoutGetReserveSpaceSize},
+    {"cudnnGetDropoutDescriptor", (void *)cudnnGetDropoutDescriptor},
+    {"cudnnOpsVersionCheck", (void *)cudnnOpsVersionCheck},
+    {"cudnnGetBatchNormalizationForwardTrainingExWorkspaceSize", (void *)cudnnGetBatchNormalizationForwardTrainingExWorkspaceSize},
+    {"cudnnGetBatchNormalizationBackwardExWorkspaceSize", (void *)cudnnGetBatchNormalizationBackwardExWorkspaceSize},
+    {"cudnnGetBatchNormalizationTrainingExReserveSpaceSize", (void *)cudnnGetBatchNormalizationTrainingExReserveSpaceSize},
+    {"cudnnGetNormalizationForwardTrainingWorkspaceSize", (void *)cudnnGetNormalizationForwardTrainingWorkspaceSize},
+    {"cudnnGetNormalizationBackwardWorkspaceSize", (void *)cudnnGetNormalizationBackwardWorkspaceSize},
+    {"cudnnGetNormalizationTrainingReserveSpaceSize", (void *)cudnnGetNormalizationTrainingReserveSpaceSize},
     {"cuMemcpy_ptds", (void *)cuMemcpy},
     {"cuMemcpyAsync_ptsz", (void *)cuMemcpyAsync},
     {"cuMemcpyPeer_ptds", (void *)cuMemcpyPeer},
