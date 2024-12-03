@@ -180,35 +180,35 @@ class ArrayOperation:
     def client_rpc_write(self, f):
         if not self.send:
             return
-        if isinstance(self.length, int):
+        elif isinstance(self.length, int):
             f.write(
                 "        rpc_write(0, {param_name}, {size}) < 0 ||\n".format(
                     param_name=self.parameter.name,
                     size=self.length,
                 )
             )
+        # array length operations are handled differently than char
+        elif isinstance(self.ptr, Array):
+            f.write(
+                "        rpc_write(0, {param_name}, sizeof({param_type}[{length}])) < 0 ||\n".format(
+                    param_name=self.parameter.name,
+                    param_type=self.ptr.format().replace("[]", ""),
+                    length=self.length.name,
+                )
+            )
         else:
-            # array length operations are handled differently than char
-            if isinstance(self.ptr, Array):
-                f.write(
-                    "        rpc_write(0, {param_name}, sizeof({param_type}[{length}])) < 0 ||\n".format(
-                        param_name=self.parameter.name,
-                        param_type=self.ptr.format().replace("[]", ""),
-                        length=self.length.name,
-                    )
-                )
+            if isinstance(self.length.type, Pointer):
+                length = "*" + self.length.name
             else:
-                if isinstance(self.length.type, Pointer):
-                    length = "*" + self.length.name
-                else:
-                    length = self.length.name
-                f.write(
-                    "        rpc_write(0, {param_name}, {length} * sizeof({param_type})) < 0 ||\n".format(
-                        param_name=self.parameter.name,
-                        param_type=self.ptr.ptr_to.format(),
-                        length=length,
-                    )
+                length = self.length.name
+            f.write(
+                "        rpc_write(0, {param_name}, {length} * sizeof({param_type})) < 0 ||\n".format(
+                    param_name=self.parameter.name,
+                    param_type=self.ptr.ptr_to.format(),
+                    length=length,
                 )
+            )
+            
 
     @property
     def server_declaration(self) -> str:
@@ -228,34 +228,33 @@ class ArrayOperation:
     def server_rpc_read(self, f):
         if not self.send:
             return
-        if isinstance(self.length, int):
+        elif isinstance(self.length, int):
             f.write(
                 "        rpc_read(conn, {param_name}, {size}) < 0 ||\n".format(
                     param_name=self.parameter.name,
                     size=self.length,
                 )
             )
+        elif isinstance(self.ptr, Array):
+            f.write(
+                "        rpc_read(conn, {param_name}, sizeof({param_type}[{length}])) < 0 ||\n".format(
+                    param_name=self.parameter.name,
+                    param_type=self.ptr.format().replace("[]", ""),
+                    length=self.length.name,
+                )
+            )
         else:
-            if isinstance(self.ptr, Array):
-                f.write(
-                    "        rpc_read(conn, {param_name}, sizeof({param_type}[{length}])) < 0 ||\n".format(
-                        param_name=self.parameter.name,
-                        param_type=self.ptr.format().replace("[]", ""),
-                        length=self.length.name,
-                    )
-                )
+            if isinstance(self.length.type, Pointer):
+                length = "*" + self.length.name
             else:
-                if isinstance(self.length.type, Pointer):
-                    length = "*" + self.length.name
-                else:
-                    length = self.length.name
-                f.write(
-                    "        rpc_read(conn, {param_name}, {length} * sizeof({param_type})) < 0 ||\n".format(
-                        param_name=self.parameter.name,
-                        param_type=self.ptr.ptr_to.format(),
-                        length=length,
-                    )
+                length = self.length.name
+            f.write(
+                "        rpc_read(conn, {param_name}, {length} * sizeof({param_type})) < 0 ||\n".format(
+                    param_name=self.parameter.name,
+                    param_type=self.ptr.ptr_to.format(),
+                    length=length,
                 )
+            )
 
     def server_len_rpc_read(self, f):
         f.write("   if (rpc_read(conn, &{length_param}, sizeof(int)) < 0)\n".format(
@@ -519,6 +518,7 @@ class DereferenceOperation:
 
 Operation = NullableOperation | ArrayOperation | NullTerminatedOperation | OpaqueTypeOperation | DereferenceOperation
 
+# parses a function annotation. if disabled is encountered, returns True for short circuiting.
 def parse_annotation(annotation: str, params: list[Parameter]) -> list[Operation, bool]:
     operations: list[Operation] = []
     
@@ -917,7 +917,9 @@ def main():
 
             batched = False
 
-            # not a fan of this, but the batched functions are pretty standard with the flow below
+            # not a fan of this, but the batched functions are pretty standard with the flow below.
+            # batched functions are cublas functions that send pointer arrays where batchCount describes...
+            # the number of pointers in the arrays. This is non-trivial to generate.
             if "Batched" in function.name.format():
                 batched = True
 
