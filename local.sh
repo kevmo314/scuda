@@ -146,6 +146,23 @@ test_cudnn() {
   fi
 }
 
+test_cublas_batched() {
+  output=$(LD_PRELOAD="$libscuda_path" ./cublas_batched.o | tail -n 5)
+
+  expected_output=$'=====\nC[1]\n111.00 122.00\n151.00 166.00\n====='
+
+  # trim ugly output from the file
+  output=$(echo "$output" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+  expected_output=$(echo "$expected_output" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+
+  if [[ "$output" == "$expected_output" ]]; then
+    ansi_format "pass" "$pass_message"
+  else
+    ansi_format "fail" "test_cublas_batched failed. Got [$output]."
+    return 1
+  fi
+}
+
 #---- declare test cases ----#
 declare -A test_cuda_avail=(
   ["function"]="test_cuda_available"
@@ -172,8 +189,13 @@ declare -A test_cudnn=(
   ["pass"]="cuDNN correctly applies sigmoid activation on a tensor."
 )
 
+declare -A test_cublas_batched=(
+  ["function"]="test_cublas_batched"
+  ["pass"]="Batched cublas works via test/cublas_batched.cu."
+)
+
 #---- assign them to our associative array ----#
-tests=("test_cuda_avail" "test_tensor_to_cuda" "test_tensor_to_cuda_to_cpu" "test_vector_add" "test_cudnn")
+tests=("test_cuda_avail" "test_tensor_to_cuda" "test_tensor_to_cuda_to_cpu" "test_vector_add" "test_cudnn" "test_cublas_batched")
 
 test() {
   build
