@@ -395,13 +395,6 @@ class OpaqueTypeOperation:
     def client_rpc_write(self, f):
         if not self.send:
             return
-        elif "const double*" in self.type_.format():
-            f.write(
-                "        rpc_write(0, {param_name}, sizeof({param_type})) < 0 ||\n".format(
-                    param_name=self.parameter.name,
-                    param_type=self.type_.format(),
-                )
-            ) 
         else:
             f.write(
                 "        rpc_write(0, &{param_name}, sizeof({param_type})) < 0 ||\n".format(
@@ -418,8 +411,6 @@ class OpaqueTypeOperation:
         # but "const cudnnTensorDescriptor_t *xDesc" IS valid. This subtle change carries reprecussions.
         elif "const " in self.type_.format() and not "void" in self.type_.format() and not "*" in self.type_.format():
             return f"   {self.type_.format().replace("const", "")} {self.parameter.name};\n"
-        elif "const double*" in self.type_.format():
-            return f"    double {self.parameter.name};\n"
         else:
             return f"    {self.type_.format()} {self.parameter.name};\n"
 
@@ -436,8 +427,6 @@ class OpaqueTypeOperation:
     @property
     def server_reference(self) -> str:
         if self.recv:
-            return f"&{self.parameter.name}"
-        if "const double*" in self.type_.format():
             return f"&{self.parameter.name}"
         return self.parameter.name
 

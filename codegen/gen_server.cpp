@@ -24098,7 +24098,7 @@ int handle_cublasDnrm2_v2(void *conn)
 {
     cublasHandle_t handle;
     int n;
-    double x;
+    const double* x;
     int incx;
     double result;
     int request_id;
@@ -24115,7 +24115,7 @@ int handle_cublasDnrm2_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDnrm2_v2(handle, n, &x, incx, &result);
+    scuda_intercept_result = cublasDnrm2_v2(handle, n, x, incx, &result);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &result, sizeof(double)) < 0 ||
@@ -24131,7 +24131,7 @@ int handle_cublasDnrm2_v2_64(void *conn)
 {
     cublasHandle_t handle;
     int64_t n;
-    double x;
+    const double* x;
     int64_t incx;
     double result;
     int request_id;
@@ -24148,7 +24148,7 @@ int handle_cublasDnrm2_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDnrm2_v2_64(handle, n, &x, incx, &result);
+    scuda_intercept_result = cublasDnrm2_v2_64(handle, n, x, incx, &result);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &result, sizeof(double)) < 0 ||
@@ -24370,9 +24370,9 @@ int handle_cublasDdot_v2(void *conn)
 {
     cublasHandle_t handle;
     int n;
-    double x;
+    const double* x;
     int incx;
-    double y;
+    const double* y;
     int incy;
     double result;
     int request_id;
@@ -24391,7 +24391,7 @@ int handle_cublasDdot_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDdot_v2(handle, n, &x, incx, &y, incy, &result);
+    scuda_intercept_result = cublasDdot_v2(handle, n, x, incx, y, incy, &result);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &result, sizeof(double)) < 0 ||
@@ -24407,9 +24407,9 @@ int handle_cublasDdot_v2_64(void *conn)
 {
     cublasHandle_t handle;
     int64_t n;
-    double x;
+    const double* x;
     int64_t incx;
-    double y;
+    const double* y;
     int64_t incy;
     double result;
     int request_id;
@@ -24428,7 +24428,7 @@ int handle_cublasDdot_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDdot_v2_64(handle, n, &x, incx, &y, incy, &result);
+    scuda_intercept_result = cublasDdot_v2_64(handle, n, x, incx, y, incy, &result);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &result, sizeof(double)) < 0 ||
@@ -24806,7 +24806,7 @@ int handle_cublasDscal_v2(void *conn)
 {
     cublasHandle_t handle;
     int n;
-    double alpha;
+    const double* alpha;
     double x;
     int incx;
     int request_id;
@@ -24823,7 +24823,7 @@ int handle_cublasDscal_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDscal_v2(handle, n, &alpha, &x, incx);
+    scuda_intercept_result = cublasDscal_v2(handle, n, alpha, &x, incx);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &x, sizeof(double)) < 0 ||
@@ -24839,7 +24839,7 @@ int handle_cublasDscal_v2_64(void *conn)
 {
     cublasHandle_t handle;
     int64_t n;
-    double alpha;
+    const double* alpha;
     double x;
     int64_t incx;
     int request_id;
@@ -24856,7 +24856,7 @@ int handle_cublasDscal_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDscal_v2_64(handle, n, &alpha, &x, incx);
+    scuda_intercept_result = cublasDscal_v2_64(handle, n, alpha, &x, incx);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &x, sizeof(double)) < 0 ||
@@ -25070,7 +25070,7 @@ int handle_cublasZdscal_v2(void *conn)
 {
     cublasHandle_t handle;
     int n;
-    double alpha;
+    const double* alpha;
     cuDoubleComplex x;
     int incx;
     int request_id;
@@ -25087,7 +25087,7 @@ int handle_cublasZdscal_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasZdscal_v2(handle, n, &alpha, &x, incx);
+    scuda_intercept_result = cublasZdscal_v2(handle, n, alpha, &x, incx);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &x, sizeof(cuDoubleComplex)) < 0 ||
@@ -25103,7 +25103,7 @@ int handle_cublasZdscal_v2_64(void *conn)
 {
     cublasHandle_t handle;
     int64_t n;
-    double alpha;
+    const double* alpha;
     cuDoubleComplex x;
     int64_t incx;
     int request_id;
@@ -25120,7 +25120,7 @@ int handle_cublasZdscal_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasZdscal_v2_64(handle, n, &alpha, &x, incx);
+    scuda_intercept_result = cublasZdscal_v2_64(handle, n, alpha, &x, incx);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &x, sizeof(cuDoubleComplex)) < 0 ||
@@ -25210,8 +25210,8 @@ int handle_cublasDaxpy_v2(void *conn)
 {
     cublasHandle_t handle;
     int n;
-    double alpha;
-    double x;
+    const double* alpha;
+    const double* x;
     int incx;
     double y;
     int incy;
@@ -25231,7 +25231,7 @@ int handle_cublasDaxpy_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDaxpy_v2(handle, n, &alpha, &x, incx, &y, incy);
+    scuda_intercept_result = cublasDaxpy_v2(handle, n, alpha, x, incx, &y, incy);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &y, sizeof(double)) < 0 ||
@@ -25247,8 +25247,8 @@ int handle_cublasDaxpy_v2_64(void *conn)
 {
     cublasHandle_t handle;
     int64_t n;
-    double alpha;
-    double x;
+    const double* alpha;
+    const double* x;
     int64_t incx;
     double y;
     int64_t incy;
@@ -25268,7 +25268,7 @@ int handle_cublasDaxpy_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDaxpy_v2_64(handle, n, &alpha, &x, incx, &y, incy);
+    scuda_intercept_result = cublasDaxpy_v2_64(handle, n, alpha, x, incx, &y, incy);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &y, sizeof(double)) < 0 ||
@@ -25502,7 +25502,7 @@ int handle_cublasDcopy_v2(void *conn)
 {
     cublasHandle_t handle;
     int n;
-    double x;
+    const double* x;
     int incx;
     double y;
     int incy;
@@ -25521,7 +25521,7 @@ int handle_cublasDcopy_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDcopy_v2(handle, n, &x, incx, &y, incy);
+    scuda_intercept_result = cublasDcopy_v2(handle, n, x, incx, &y, incy);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &y, sizeof(double)) < 0 ||
@@ -25537,7 +25537,7 @@ int handle_cublasDcopy_v2_64(void *conn)
 {
     cublasHandle_t handle;
     int64_t n;
-    double x;
+    const double* x;
     int64_t incx;
     double y;
     int64_t incy;
@@ -25556,7 +25556,7 @@ int handle_cublasDcopy_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDcopy_v2_64(handle, n, &x, incx, &y, incy);
+    scuda_intercept_result = cublasDcopy_v2_64(handle, n, x, incx, &y, incy);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &y, sizeof(double)) < 0 ||
@@ -26066,7 +26066,7 @@ int handle_cublasIdamax_v2(void *conn)
 {
     cublasHandle_t handle;
     int n;
-    double x;
+    const double* x;
     int incx;
     int result;
     int request_id;
@@ -26083,7 +26083,7 @@ int handle_cublasIdamax_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasIdamax_v2(handle, n, &x, incx, &result);
+    scuda_intercept_result = cublasIdamax_v2(handle, n, x, incx, &result);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &result, sizeof(int)) < 0 ||
@@ -26099,7 +26099,7 @@ int handle_cublasIdamax_v2_64(void *conn)
 {
     cublasHandle_t handle;
     int64_t n;
-    double x;
+    const double* x;
     int64_t incx;
     int64_t result;
     int request_id;
@@ -26116,7 +26116,7 @@ int handle_cublasIdamax_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasIdamax_v2_64(handle, n, &x, incx, &result);
+    scuda_intercept_result = cublasIdamax_v2_64(handle, n, x, incx, &result);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &result, sizeof(int64_t)) < 0 ||
@@ -26400,7 +26400,7 @@ int handle_cublasIdamin_v2(void *conn)
 {
     cublasHandle_t handle;
     int n;
-    double x;
+    const double* x;
     int incx;
     int result;
     int request_id;
@@ -26417,7 +26417,7 @@ int handle_cublasIdamin_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasIdamin_v2(handle, n, &x, incx, &result);
+    scuda_intercept_result = cublasIdamin_v2(handle, n, x, incx, &result);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &result, sizeof(int)) < 0 ||
@@ -26433,7 +26433,7 @@ int handle_cublasIdamin_v2_64(void *conn)
 {
     cublasHandle_t handle;
     int64_t n;
-    double x;
+    const double* x;
     int64_t incx;
     int64_t result;
     int request_id;
@@ -26450,7 +26450,7 @@ int handle_cublasIdamin_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasIdamin_v2_64(handle, n, &x, incx, &result);
+    scuda_intercept_result = cublasIdamin_v2_64(handle, n, x, incx, &result);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &result, sizeof(int64_t)) < 0 ||
@@ -26734,7 +26734,7 @@ int handle_cublasDasum_v2(void *conn)
 {
     cublasHandle_t handle;
     int n;
-    double x;
+    const double* x;
     int incx;
     double result;
     int request_id;
@@ -26751,7 +26751,7 @@ int handle_cublasDasum_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDasum_v2(handle, n, &x, incx, &result);
+    scuda_intercept_result = cublasDasum_v2(handle, n, x, incx, &result);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &result, sizeof(double)) < 0 ||
@@ -26767,7 +26767,7 @@ int handle_cublasDasum_v2_64(void *conn)
 {
     cublasHandle_t handle;
     int64_t n;
-    double x;
+    const double* x;
     int64_t incx;
     double result;
     int request_id;
@@ -26784,7 +26784,7 @@ int handle_cublasDasum_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDasum_v2_64(handle, n, &x, incx, &result);
+    scuda_intercept_result = cublasDasum_v2_64(handle, n, x, incx, &result);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &result, sizeof(double)) < 0 ||
@@ -27016,8 +27016,8 @@ int handle_cublasDrot_v2(void *conn)
     int incx;
     double y;
     int incy;
-    double c;
-    double s;
+    const double* c;
+    const double* s;
     int request_id;
     cublasStatus_t scuda_intercept_result;
     if (
@@ -27035,7 +27035,7 @@ int handle_cublasDrot_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDrot_v2(handle, n, &x, incx, &y, incy, &c, &s);
+    scuda_intercept_result = cublasDrot_v2(handle, n, &x, incx, &y, incy, c, s);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &x, sizeof(double)) < 0 ||
@@ -27056,8 +27056,8 @@ int handle_cublasDrot_v2_64(void *conn)
     int64_t incx;
     double y;
     int64_t incy;
-    double c;
-    double s;
+    const double* c;
+    const double* s;
     int request_id;
     cublasStatus_t scuda_intercept_result;
     if (
@@ -27075,7 +27075,7 @@ int handle_cublasDrot_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDrot_v2_64(handle, n, &x, incx, &y, incy, &c, &s);
+    scuda_intercept_result = cublasDrot_v2_64(handle, n, &x, incx, &y, incy, c, s);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &x, sizeof(double)) < 0 ||
@@ -27256,7 +27256,7 @@ int handle_cublasZrot_v2(void *conn)
     int incx;
     cuDoubleComplex y;
     int incy;
-    double c;
+    const double* c;
     const cuDoubleComplex* s;
     int request_id;
     cublasStatus_t scuda_intercept_result;
@@ -27275,7 +27275,7 @@ int handle_cublasZrot_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasZrot_v2(handle, n, &x, incx, &y, incy, &c, s);
+    scuda_intercept_result = cublasZrot_v2(handle, n, &x, incx, &y, incy, c, s);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &x, sizeof(cuDoubleComplex)) < 0 ||
@@ -27296,7 +27296,7 @@ int handle_cublasZrot_v2_64(void *conn)
     int64_t incx;
     cuDoubleComplex y;
     int64_t incy;
-    double c;
+    const double* c;
     const cuDoubleComplex* s;
     int request_id;
     cublasStatus_t scuda_intercept_result;
@@ -27315,7 +27315,7 @@ int handle_cublasZrot_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasZrot_v2_64(handle, n, &x, incx, &y, incy, &c, s);
+    scuda_intercept_result = cublasZrot_v2_64(handle, n, &x, incx, &y, incy, c, s);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &x, sizeof(cuDoubleComplex)) < 0 ||
@@ -27336,8 +27336,8 @@ int handle_cublasZdrot_v2(void *conn)
     int incx;
     cuDoubleComplex y;
     int incy;
-    double c;
-    double s;
+    const double* c;
+    const double* s;
     int request_id;
     cublasStatus_t scuda_intercept_result;
     if (
@@ -27355,7 +27355,7 @@ int handle_cublasZdrot_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasZdrot_v2(handle, n, &x, incx, &y, incy, &c, &s);
+    scuda_intercept_result = cublasZdrot_v2(handle, n, &x, incx, &y, incy, c, s);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &x, sizeof(cuDoubleComplex)) < 0 ||
@@ -27376,8 +27376,8 @@ int handle_cublasZdrot_v2_64(void *conn)
     int64_t incx;
     cuDoubleComplex y;
     int64_t incy;
-    double c;
-    double s;
+    const double* c;
+    const double* s;
     int request_id;
     cublasStatus_t scuda_intercept_result;
     if (
@@ -27395,7 +27395,7 @@ int handle_cublasZdrot_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasZdrot_v2_64(handle, n, &x, incx, &y, incy, &c, &s);
+    scuda_intercept_result = cublasZdrot_v2_64(handle, n, &x, incx, &y, incy, c, s);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &x, sizeof(cuDoubleComplex)) < 0 ||
@@ -27636,7 +27636,7 @@ int handle_cublasDrotm_v2(void *conn)
     int incx;
     double y;
     int incy;
-    double param;
+    const double* param;
     int request_id;
     cublasStatus_t scuda_intercept_result;
     if (
@@ -27653,7 +27653,7 @@ int handle_cublasDrotm_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDrotm_v2(handle, n, &x, incx, &y, incy, &param);
+    scuda_intercept_result = cublasDrotm_v2(handle, n, &x, incx, &y, incy, param);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &x, sizeof(double)) < 0 ||
@@ -27674,7 +27674,7 @@ int handle_cublasDrotm_v2_64(void *conn)
     int64_t incx;
     double y;
     int64_t incy;
-    double param;
+    const double* param;
     int request_id;
     cublasStatus_t scuda_intercept_result;
     if (
@@ -27691,7 +27691,7 @@ int handle_cublasDrotm_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDrotm_v2_64(handle, n, &x, incx, &y, incy, &param);
+    scuda_intercept_result = cublasDrotm_v2_64(handle, n, &x, incx, &y, incy, param);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &x, sizeof(double)) < 0 ||
@@ -27748,7 +27748,7 @@ int handle_cublasDrotmg_v2(void *conn)
     double d1;
     double d2;
     double x1;
-    double y1;
+    const double* y1;
     double param;
     int request_id;
     cublasStatus_t scuda_intercept_result;
@@ -27765,7 +27765,7 @@ int handle_cublasDrotmg_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDrotmg_v2(handle, &d1, &d2, &x1, &y1, &param);
+    scuda_intercept_result = cublasDrotmg_v2(handle, &d1, &d2, &x1, y1, &param);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &d1, sizeof(double)) < 0 ||
@@ -27880,12 +27880,12 @@ int handle_cublasDgemv_v2(void *conn)
     cublasOperation_t trans;
     int m;
     int n;
-    double alpha;
-    double A;
+    const double* alpha;
+    const double* A;
     int lda;
-    double x;
+    const double* x;
     int incx;
-    double beta;
+    const double* beta;
     double y;
     int incy;
     int request_id;
@@ -27909,7 +27909,7 @@ int handle_cublasDgemv_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDgemv_v2(handle, trans, m, n, &alpha, &A, lda, &x, incx, &beta, &y, incy);
+    scuda_intercept_result = cublasDgemv_v2(handle, trans, m, n, alpha, A, lda, x, incx, beta, &y, incy);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &y, sizeof(double)) < 0 ||
@@ -27927,12 +27927,12 @@ int handle_cublasDgemv_v2_64(void *conn)
     cublasOperation_t trans;
     int64_t m;
     int64_t n;
-    double alpha;
-    double A;
+    const double* alpha;
+    const double* A;
     int64_t lda;
-    double x;
+    const double* x;
     int64_t incx;
-    double beta;
+    const double* beta;
     double y;
     int64_t incy;
     int request_id;
@@ -27956,7 +27956,7 @@ int handle_cublasDgemv_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDgemv_v2_64(handle, trans, m, n, &alpha, &A, lda, &x, incx, &beta, &y, incy);
+    scuda_intercept_result = cublasDgemv_v2_64(handle, trans, m, n, alpha, A, lda, x, incx, beta, &y, incy);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &y, sizeof(double)) < 0 ||
@@ -28266,12 +28266,12 @@ int handle_cublasDgbmv_v2(void *conn)
     int n;
     int kl;
     int ku;
-    double alpha;
-    double A;
+    const double* alpha;
+    const double* A;
     int lda;
-    double x;
+    const double* x;
     int incx;
-    double beta;
+    const double* beta;
     double y;
     int incy;
     int request_id;
@@ -28297,7 +28297,7 @@ int handle_cublasDgbmv_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDgbmv_v2(handle, trans, m, n, kl, ku, &alpha, &A, lda, &x, incx, &beta, &y, incy);
+    scuda_intercept_result = cublasDgbmv_v2(handle, trans, m, n, kl, ku, alpha, A, lda, x, incx, beta, &y, incy);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &y, sizeof(double)) < 0 ||
@@ -28317,12 +28317,12 @@ int handle_cublasDgbmv_v2_64(void *conn)
     int64_t n;
     int64_t kl;
     int64_t ku;
-    double alpha;
-    double A;
+    const double* alpha;
+    const double* A;
     int64_t lda;
-    double x;
+    const double* x;
     int64_t incx;
-    double beta;
+    const double* beta;
     double y;
     int64_t incy;
     int request_id;
@@ -28348,7 +28348,7 @@ int handle_cublasDgbmv_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDgbmv_v2_64(handle, trans, m, n, kl, ku, &alpha, &A, lda, &x, incx, &beta, &y, incy);
+    scuda_intercept_result = cublasDgbmv_v2_64(handle, trans, m, n, kl, ku, alpha, A, lda, x, incx, beta, &y, incy);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &y, sizeof(double)) < 0 ||
@@ -28653,7 +28653,7 @@ int handle_cublasDtrmv_v2(void *conn)
     cublasOperation_t trans;
     cublasDiagType_t diag;
     int n;
-    double A;
+    const double* A;
     int lda;
     double x;
     int incx;
@@ -28675,7 +28675,7 @@ int handle_cublasDtrmv_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDtrmv_v2(handle, uplo, trans, diag, n, &A, lda, &x, incx);
+    scuda_intercept_result = cublasDtrmv_v2(handle, uplo, trans, diag, n, A, lda, &x, incx);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &x, sizeof(double)) < 0 ||
@@ -28694,7 +28694,7 @@ int handle_cublasDtrmv_v2_64(void *conn)
     cublasOperation_t trans;
     cublasDiagType_t diag;
     int64_t n;
-    double A;
+    const double* A;
     int64_t lda;
     double x;
     int64_t incx;
@@ -28716,7 +28716,7 @@ int handle_cublasDtrmv_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDtrmv_v2_64(handle, uplo, trans, diag, n, &A, lda, &x, incx);
+    scuda_intercept_result = cublasDtrmv_v2_64(handle, uplo, trans, diag, n, A, lda, &x, incx);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &x, sizeof(double)) < 0 ||
@@ -28986,7 +28986,7 @@ int handle_cublasDtbmv_v2(void *conn)
     cublasDiagType_t diag;
     int n;
     int k;
-    double A;
+    const double* A;
     int lda;
     double x;
     int incx;
@@ -29009,7 +29009,7 @@ int handle_cublasDtbmv_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDtbmv_v2(handle, uplo, trans, diag, n, k, &A, lda, &x, incx);
+    scuda_intercept_result = cublasDtbmv_v2(handle, uplo, trans, diag, n, k, A, lda, &x, incx);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &x, sizeof(double)) < 0 ||
@@ -29029,7 +29029,7 @@ int handle_cublasDtbmv_v2_64(void *conn)
     cublasDiagType_t diag;
     int64_t n;
     int64_t k;
-    double A;
+    const double* A;
     int64_t lda;
     double x;
     int64_t incx;
@@ -29052,7 +29052,7 @@ int handle_cublasDtbmv_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDtbmv_v2_64(handle, uplo, trans, diag, n, k, &A, lda, &x, incx);
+    scuda_intercept_result = cublasDtbmv_v2_64(handle, uplo, trans, diag, n, k, A, lda, &x, incx);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &x, sizeof(double)) < 0 ||
@@ -29321,7 +29321,7 @@ int handle_cublasDtpmv_v2(void *conn)
     cublasOperation_t trans;
     cublasDiagType_t diag;
     int n;
-    double AP;
+    const double* AP;
     double x;
     int incx;
     int request_id;
@@ -29341,7 +29341,7 @@ int handle_cublasDtpmv_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDtpmv_v2(handle, uplo, trans, diag, n, &AP, &x, incx);
+    scuda_intercept_result = cublasDtpmv_v2(handle, uplo, trans, diag, n, AP, &x, incx);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &x, sizeof(double)) < 0 ||
@@ -29360,7 +29360,7 @@ int handle_cublasDtpmv_v2_64(void *conn)
     cublasOperation_t trans;
     cublasDiagType_t diag;
     int64_t n;
-    double AP;
+    const double* AP;
     double x;
     int64_t incx;
     int request_id;
@@ -29380,7 +29380,7 @@ int handle_cublasDtpmv_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDtpmv_v2_64(handle, uplo, trans, diag, n, &AP, &x, incx);
+    scuda_intercept_result = cublasDtpmv_v2_64(handle, uplo, trans, diag, n, AP, &x, incx);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &x, sizeof(double)) < 0 ||
@@ -29637,7 +29637,7 @@ int handle_cublasDtrsv_v2(void *conn)
     cublasOperation_t trans;
     cublasDiagType_t diag;
     int n;
-    double A;
+    const double* A;
     int lda;
     double x;
     int incx;
@@ -29659,7 +29659,7 @@ int handle_cublasDtrsv_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDtrsv_v2(handle, uplo, trans, diag, n, &A, lda, &x, incx);
+    scuda_intercept_result = cublasDtrsv_v2(handle, uplo, trans, diag, n, A, lda, &x, incx);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &x, sizeof(double)) < 0 ||
@@ -29678,7 +29678,7 @@ int handle_cublasDtrsv_v2_64(void *conn)
     cublasOperation_t trans;
     cublasDiagType_t diag;
     int64_t n;
-    double A;
+    const double* A;
     int64_t lda;
     double x;
     int64_t incx;
@@ -29700,7 +29700,7 @@ int handle_cublasDtrsv_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDtrsv_v2_64(handle, uplo, trans, diag, n, &A, lda, &x, incx);
+    scuda_intercept_result = cublasDtrsv_v2_64(handle, uplo, trans, diag, n, A, lda, &x, incx);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &x, sizeof(double)) < 0 ||
@@ -29961,7 +29961,7 @@ int handle_cublasDtpsv_v2(void *conn)
     cublasOperation_t trans;
     cublasDiagType_t diag;
     int n;
-    double AP;
+    const double* AP;
     double x;
     int incx;
     int request_id;
@@ -29981,7 +29981,7 @@ int handle_cublasDtpsv_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDtpsv_v2(handle, uplo, trans, diag, n, &AP, &x, incx);
+    scuda_intercept_result = cublasDtpsv_v2(handle, uplo, trans, diag, n, AP, &x, incx);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &x, sizeof(double)) < 0 ||
@@ -30000,7 +30000,7 @@ int handle_cublasDtpsv_v2_64(void *conn)
     cublasOperation_t trans;
     cublasDiagType_t diag;
     int64_t n;
-    double AP;
+    const double* AP;
     double x;
     int64_t incx;
     int request_id;
@@ -30020,7 +30020,7 @@ int handle_cublasDtpsv_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDtpsv_v2_64(handle, uplo, trans, diag, n, &AP, &x, incx);
+    scuda_intercept_result = cublasDtpsv_v2_64(handle, uplo, trans, diag, n, AP, &x, incx);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &x, sizeof(double)) < 0 ||
@@ -30282,7 +30282,7 @@ int handle_cublasDtbsv_v2(void *conn)
     cublasDiagType_t diag;
     int n;
     int k;
-    double A;
+    const double* A;
     int lda;
     double x;
     int incx;
@@ -30305,7 +30305,7 @@ int handle_cublasDtbsv_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDtbsv_v2(handle, uplo, trans, diag, n, k, &A, lda, &x, incx);
+    scuda_intercept_result = cublasDtbsv_v2(handle, uplo, trans, diag, n, k, A, lda, &x, incx);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &x, sizeof(double)) < 0 ||
@@ -30325,7 +30325,7 @@ int handle_cublasDtbsv_v2_64(void *conn)
     cublasDiagType_t diag;
     int64_t n;
     int64_t k;
-    double A;
+    const double* A;
     int64_t lda;
     double x;
     int64_t incx;
@@ -30348,7 +30348,7 @@ int handle_cublasDtbsv_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDtbsv_v2_64(handle, uplo, trans, diag, n, k, &A, lda, &x, incx);
+    scuda_intercept_result = cublasDtbsv_v2_64(handle, uplo, trans, diag, n, k, A, lda, &x, incx);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &x, sizeof(double)) < 0 ||
@@ -30627,12 +30627,12 @@ int handle_cublasDsymv_v2(void *conn)
     cublasHandle_t handle;
     cublasFillMode_t uplo;
     int n;
-    double alpha;
-    double A;
+    const double* alpha;
+    const double* A;
     int lda;
-    double x;
+    const double* x;
     int incx;
-    double beta;
+    const double* beta;
     double y;
     int incy;
     int request_id;
@@ -30655,7 +30655,7 @@ int handle_cublasDsymv_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDsymv_v2(handle, uplo, n, &alpha, &A, lda, &x, incx, &beta, &y, incy);
+    scuda_intercept_result = cublasDsymv_v2(handle, uplo, n, alpha, A, lda, x, incx, beta, &y, incy);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &y, sizeof(double)) < 0 ||
@@ -30672,12 +30672,12 @@ int handle_cublasDsymv_v2_64(void *conn)
     cublasHandle_t handle;
     cublasFillMode_t uplo;
     int64_t n;
-    double alpha;
-    double A;
+    const double* alpha;
+    const double* A;
     int64_t lda;
-    double x;
+    const double* x;
     int64_t incx;
-    double beta;
+    const double* beta;
     double y;
     int64_t incy;
     int request_id;
@@ -30700,7 +30700,7 @@ int handle_cublasDsymv_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDsymv_v2_64(handle, uplo, n, &alpha, &A, lda, &x, incx, &beta, &y, incy);
+    scuda_intercept_result = cublasDsymv_v2_64(handle, uplo, n, alpha, A, lda, x, incx, beta, &y, incy);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &y, sizeof(double)) < 0 ||
@@ -31172,12 +31172,12 @@ int handle_cublasDsbmv_v2(void *conn)
     cublasFillMode_t uplo;
     int n;
     int k;
-    double alpha;
-    double A;
+    const double* alpha;
+    const double* A;
     int lda;
-    double x;
+    const double* x;
     int incx;
-    double beta;
+    const double* beta;
     double y;
     int incy;
     int request_id;
@@ -31201,7 +31201,7 @@ int handle_cublasDsbmv_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDsbmv_v2(handle, uplo, n, k, &alpha, &A, lda, &x, incx, &beta, &y, incy);
+    scuda_intercept_result = cublasDsbmv_v2(handle, uplo, n, k, alpha, A, lda, x, incx, beta, &y, incy);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &y, sizeof(double)) < 0 ||
@@ -31219,12 +31219,12 @@ int handle_cublasDsbmv_v2_64(void *conn)
     cublasFillMode_t uplo;
     int64_t n;
     int64_t k;
-    double alpha;
-    double A;
+    const double* alpha;
+    const double* A;
     int64_t lda;
-    double x;
+    const double* x;
     int64_t incx;
-    double beta;
+    const double* beta;
     double y;
     int64_t incy;
     int request_id;
@@ -31248,7 +31248,7 @@ int handle_cublasDsbmv_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDsbmv_v2_64(handle, uplo, n, k, &alpha, &A, lda, &x, incx, &beta, &y, incy);
+    scuda_intercept_result = cublasDsbmv_v2_64(handle, uplo, n, k, alpha, A, lda, x, incx, beta, &y, incy);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &y, sizeof(double)) < 0 ||
@@ -31539,11 +31539,11 @@ int handle_cublasDspmv_v2(void *conn)
     cublasHandle_t handle;
     cublasFillMode_t uplo;
     int n;
-    double alpha;
-    double AP;
-    double x;
+    const double* alpha;
+    const double* AP;
+    const double* x;
     int incx;
-    double beta;
+    const double* beta;
     double y;
     int incy;
     int request_id;
@@ -31565,7 +31565,7 @@ int handle_cublasDspmv_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDspmv_v2(handle, uplo, n, &alpha, &AP, &x, incx, &beta, &y, incy);
+    scuda_intercept_result = cublasDspmv_v2(handle, uplo, n, alpha, AP, x, incx, beta, &y, incy);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &y, sizeof(double)) < 0 ||
@@ -31582,11 +31582,11 @@ int handle_cublasDspmv_v2_64(void *conn)
     cublasHandle_t handle;
     cublasFillMode_t uplo;
     int64_t n;
-    double alpha;
-    double AP;
-    double x;
+    const double* alpha;
+    const double* AP;
+    const double* x;
     int64_t incx;
-    double beta;
+    const double* beta;
     double y;
     int64_t incy;
     int request_id;
@@ -31608,7 +31608,7 @@ int handle_cublasDspmv_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDspmv_v2_64(handle, uplo, n, &alpha, &AP, &x, incx, &beta, &y, incy);
+    scuda_intercept_result = cublasDspmv_v2_64(handle, uplo, n, alpha, AP, x, incx, beta, &y, incy);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &y, sizeof(double)) < 0 ||
@@ -31883,10 +31883,10 @@ int handle_cublasDger_v2(void *conn)
     cublasHandle_t handle;
     int m;
     int n;
-    double alpha;
-    double x;
+    const double* alpha;
+    const double* x;
     int incx;
-    double y;
+    const double* y;
     int incy;
     double A;
     int lda;
@@ -31909,7 +31909,7 @@ int handle_cublasDger_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDger_v2(handle, m, n, &alpha, &x, incx, &y, incy, &A, lda);
+    scuda_intercept_result = cublasDger_v2(handle, m, n, alpha, x, incx, y, incy, &A, lda);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &A, sizeof(double)) < 0 ||
@@ -31926,10 +31926,10 @@ int handle_cublasDger_v2_64(void *conn)
     cublasHandle_t handle;
     int64_t m;
     int64_t n;
-    double alpha;
-    double x;
+    const double* alpha;
+    const double* x;
     int64_t incx;
-    double y;
+    const double* y;
     int64_t incy;
     double A;
     int64_t lda;
@@ -31952,7 +31952,7 @@ int handle_cublasDger_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDger_v2_64(handle, m, n, &alpha, &x, incx, &y, incy, &A, lda);
+    scuda_intercept_result = cublasDger_v2_64(handle, m, n, alpha, x, incx, y, incy, &A, lda);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &A, sizeof(double)) < 0 ||
@@ -32391,8 +32391,8 @@ int handle_cublasDsyr_v2(void *conn)
     cublasHandle_t handle;
     cublasFillMode_t uplo;
     int n;
-    double alpha;
-    double x;
+    const double* alpha;
+    const double* x;
     int incx;
     double A;
     int lda;
@@ -32413,7 +32413,7 @@ int handle_cublasDsyr_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDsyr_v2(handle, uplo, n, &alpha, &x, incx, &A, lda);
+    scuda_intercept_result = cublasDsyr_v2(handle, uplo, n, alpha, x, incx, &A, lda);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &A, sizeof(double)) < 0 ||
@@ -32430,8 +32430,8 @@ int handle_cublasDsyr_v2_64(void *conn)
     cublasHandle_t handle;
     cublasFillMode_t uplo;
     int64_t n;
-    double alpha;
-    double x;
+    const double* alpha;
+    const double* x;
     int64_t incx;
     double A;
     int64_t lda;
@@ -32452,7 +32452,7 @@ int handle_cublasDsyr_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDsyr_v2_64(handle, uplo, n, &alpha, &x, incx, &A, lda);
+    scuda_intercept_result = cublasDsyr_v2_64(handle, uplo, n, alpha, x, incx, &A, lda);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &A, sizeof(double)) < 0 ||
@@ -32703,7 +32703,7 @@ int handle_cublasZher_v2(void *conn)
     cublasHandle_t handle;
     cublasFillMode_t uplo;
     int n;
-    double alpha;
+    const double* alpha;
     const cuDoubleComplex* x;
     int incx;
     cuDoubleComplex A;
@@ -32725,7 +32725,7 @@ int handle_cublasZher_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasZher_v2(handle, uplo, n, &alpha, x, incx, &A, lda);
+    scuda_intercept_result = cublasZher_v2(handle, uplo, n, alpha, x, incx, &A, lda);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &A, sizeof(cuDoubleComplex)) < 0 ||
@@ -32742,7 +32742,7 @@ int handle_cublasZher_v2_64(void *conn)
     cublasHandle_t handle;
     cublasFillMode_t uplo;
     int64_t n;
-    double alpha;
+    const double* alpha;
     const cuDoubleComplex* x;
     int64_t incx;
     cuDoubleComplex A;
@@ -32764,7 +32764,7 @@ int handle_cublasZher_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasZher_v2_64(handle, uplo, n, &alpha, x, incx, &A, lda);
+    scuda_intercept_result = cublasZher_v2_64(handle, uplo, n, alpha, x, incx, &A, lda);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &A, sizeof(cuDoubleComplex)) < 0 ||
@@ -32855,8 +32855,8 @@ int handle_cublasDspr_v2(void *conn)
     cublasHandle_t handle;
     cublasFillMode_t uplo;
     int n;
-    double alpha;
-    double x;
+    const double* alpha;
+    const double* x;
     int incx;
     double AP;
     int request_id;
@@ -32875,7 +32875,7 @@ int handle_cublasDspr_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDspr_v2(handle, uplo, n, &alpha, &x, incx, &AP);
+    scuda_intercept_result = cublasDspr_v2(handle, uplo, n, alpha, x, incx, &AP);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &AP, sizeof(double)) < 0 ||
@@ -32892,8 +32892,8 @@ int handle_cublasDspr_v2_64(void *conn)
     cublasHandle_t handle;
     cublasFillMode_t uplo;
     int64_t n;
-    double alpha;
-    double x;
+    const double* alpha;
+    const double* x;
     int64_t incx;
     double AP;
     int request_id;
@@ -32912,7 +32912,7 @@ int handle_cublasDspr_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDspr_v2_64(handle, uplo, n, &alpha, &x, incx, &AP);
+    scuda_intercept_result = cublasDspr_v2_64(handle, uplo, n, alpha, x, incx, &AP);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &AP, sizeof(double)) < 0 ||
@@ -33003,7 +33003,7 @@ int handle_cublasZhpr_v2(void *conn)
     cublasHandle_t handle;
     cublasFillMode_t uplo;
     int n;
-    double alpha;
+    const double* alpha;
     const cuDoubleComplex* x;
     int incx;
     cuDoubleComplex AP;
@@ -33023,7 +33023,7 @@ int handle_cublasZhpr_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasZhpr_v2(handle, uplo, n, &alpha, x, incx, &AP);
+    scuda_intercept_result = cublasZhpr_v2(handle, uplo, n, alpha, x, incx, &AP);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &AP, sizeof(cuDoubleComplex)) < 0 ||
@@ -33040,7 +33040,7 @@ int handle_cublasZhpr_v2_64(void *conn)
     cublasHandle_t handle;
     cublasFillMode_t uplo;
     int64_t n;
-    double alpha;
+    const double* alpha;
     const cuDoubleComplex* x;
     int64_t incx;
     cuDoubleComplex AP;
@@ -33060,7 +33060,7 @@ int handle_cublasZhpr_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasZhpr_v2_64(handle, uplo, n, &alpha, x, incx, &AP);
+    scuda_intercept_result = cublasZhpr_v2_64(handle, uplo, n, alpha, x, incx, &AP);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &AP, sizeof(cuDoubleComplex)) < 0 ||
@@ -33163,10 +33163,10 @@ int handle_cublasDsyr2_v2(void *conn)
     cublasHandle_t handle;
     cublasFillMode_t uplo;
     int n;
-    double alpha;
-    double x;
+    const double* alpha;
+    const double* x;
     int incx;
-    double y;
+    const double* y;
     int incy;
     double A;
     int lda;
@@ -33189,7 +33189,7 @@ int handle_cublasDsyr2_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDsyr2_v2(handle, uplo, n, &alpha, &x, incx, &y, incy, &A, lda);
+    scuda_intercept_result = cublasDsyr2_v2(handle, uplo, n, alpha, x, incx, y, incy, &A, lda);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &A, sizeof(double)) < 0 ||
@@ -33206,10 +33206,10 @@ int handle_cublasDsyr2_v2_64(void *conn)
     cublasHandle_t handle;
     cublasFillMode_t uplo;
     int64_t n;
-    double alpha;
-    double x;
+    const double* alpha;
+    const double* x;
     int64_t incx;
-    double y;
+    const double* y;
     int64_t incy;
     double A;
     int64_t lda;
@@ -33232,7 +33232,7 @@ int handle_cublasDsyr2_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDsyr2_v2_64(handle, uplo, n, &alpha, &x, incx, &y, incy, &A, lda);
+    scuda_intercept_result = cublasDsyr2_v2_64(handle, uplo, n, alpha, x, incx, y, incy, &A, lda);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &A, sizeof(double)) < 0 ||
@@ -33675,10 +33675,10 @@ int handle_cublasDspr2_v2(void *conn)
     cublasHandle_t handle;
     cublasFillMode_t uplo;
     int n;
-    double alpha;
-    double x;
+    const double* alpha;
+    const double* x;
     int incx;
-    double y;
+    const double* y;
     int incy;
     double AP;
     int request_id;
@@ -33699,7 +33699,7 @@ int handle_cublasDspr2_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDspr2_v2(handle, uplo, n, &alpha, &x, incx, &y, incy, &AP);
+    scuda_intercept_result = cublasDspr2_v2(handle, uplo, n, alpha, x, incx, y, incy, &AP);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &AP, sizeof(double)) < 0 ||
@@ -33716,10 +33716,10 @@ int handle_cublasDspr2_v2_64(void *conn)
     cublasHandle_t handle;
     cublasFillMode_t uplo;
     int64_t n;
-    double alpha;
-    double x;
+    const double* alpha;
+    const double* x;
     int64_t incx;
-    double y;
+    const double* y;
     int64_t incy;
     double AP;
     int request_id;
@@ -33740,7 +33740,7 @@ int handle_cublasDspr2_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDspr2_v2_64(handle, uplo, n, &alpha, &x, incx, &y, incy, &AP);
+    scuda_intercept_result = cublasDspr2_v2_64(handle, uplo, n, alpha, x, incx, y, incy, &AP);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &AP, sizeof(double)) < 0 ||
@@ -34128,14 +34128,14 @@ int handle_cublasDgemvStridedBatched(void *conn)
     cublasOperation_t trans;
     int m;
     int n;
-    double alpha;
-    double A;
+    const double* alpha;
+    const double* A;
     int lda;
     long long int strideA;
-    double x;
+    const double* x;
     int incx;
     long long int stridex;
-    double beta;
+    const double* beta;
     double y;
     int incy;
     long long int stridey;
@@ -34165,7 +34165,7 @@ int handle_cublasDgemvStridedBatched(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDgemvStridedBatched(handle, trans, m, n, &alpha, &A, lda, strideA, &x, incx, stridex, &beta, &y, incy, stridey, batchCount);
+    scuda_intercept_result = cublasDgemvStridedBatched(handle, trans, m, n, alpha, A, lda, strideA, x, incx, stridex, beta, &y, incy, stridey, batchCount);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &y, sizeof(double)) < 0 ||
@@ -34183,14 +34183,14 @@ int handle_cublasDgemvStridedBatched_64(void *conn)
     cublasOperation_t trans;
     int64_t m;
     int64_t n;
-    double alpha;
-    double A;
+    const double* alpha;
+    const double* A;
     int64_t lda;
     long long int strideA;
-    double x;
+    const double* x;
     int64_t incx;
     long long int stridex;
-    double beta;
+    const double* beta;
     double y;
     int64_t incy;
     long long int stridey;
@@ -34220,7 +34220,7 @@ int handle_cublasDgemvStridedBatched_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDgemvStridedBatched_64(handle, trans, m, n, &alpha, &A, lda, strideA, &x, incx, stridex, &beta, &y, incy, stridey, batchCount);
+    scuda_intercept_result = cublasDgemvStridedBatched_64(handle, trans, m, n, alpha, A, lda, strideA, x, incx, stridex, beta, &y, incy, stridey, batchCount);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &y, sizeof(double)) < 0 ||
@@ -35005,12 +35005,12 @@ int handle_cublasDgemm_v2(void *conn)
     int m;
     int n;
     int k;
-    double alpha;
-    double A;
+    const double* alpha;
+    const double* A;
     int lda;
-    double B;
+    const double* B;
     int ldb;
-    double beta;
+    const double* beta;
     double C;
     int ldc;
     int request_id;
@@ -35036,7 +35036,7 @@ int handle_cublasDgemm_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDgemm_v2(handle, transa, transb, m, n, k, &alpha, &A, lda, &B, ldb, &beta, &C, ldc);
+    scuda_intercept_result = cublasDgemm_v2(handle, transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, &C, ldc);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(double)) < 0 ||
@@ -35056,12 +35056,12 @@ int handle_cublasDgemm_v2_64(void *conn)
     int64_t m;
     int64_t n;
     int64_t k;
-    double alpha;
-    double A;
+    const double* alpha;
+    const double* A;
     int64_t lda;
-    double B;
+    const double* B;
     int64_t ldb;
-    double beta;
+    const double* beta;
     double C;
     int64_t ldc;
     int request_id;
@@ -35087,7 +35087,7 @@ int handle_cublasDgemm_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDgemm_v2_64(handle, transa, transb, m, n, k, &alpha, &A, lda, &B, ldb, &beta, &C, ldc);
+    scuda_intercept_result = cublasDgemm_v2_64(handle, transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, &C, ldc);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(double)) < 0 ||
@@ -35706,10 +35706,10 @@ int handle_cublasDsyrk_v2(void *conn)
     cublasOperation_t trans;
     int n;
     int k;
-    double alpha;
-    double A;
+    const double* alpha;
+    const double* A;
     int lda;
-    double beta;
+    const double* beta;
     double C;
     int ldc;
     int request_id;
@@ -35732,7 +35732,7 @@ int handle_cublasDsyrk_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDsyrk_v2(handle, uplo, trans, n, k, &alpha, &A, lda, &beta, &C, ldc);
+    scuda_intercept_result = cublasDsyrk_v2(handle, uplo, trans, n, k, alpha, A, lda, beta, &C, ldc);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(double)) < 0 ||
@@ -35751,10 +35751,10 @@ int handle_cublasDsyrk_v2_64(void *conn)
     cublasOperation_t trans;
     int64_t n;
     int64_t k;
-    double alpha;
-    double A;
+    const double* alpha;
+    const double* A;
     int64_t lda;
-    double beta;
+    const double* beta;
     double C;
     int64_t ldc;
     int request_id;
@@ -35777,7 +35777,7 @@ int handle_cublasDsyrk_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDsyrk_v2_64(handle, uplo, trans, n, k, &alpha, &A, lda, &beta, &C, ldc);
+    scuda_intercept_result = cublasDsyrk_v2_64(handle, uplo, trans, n, k, alpha, A, lda, beta, &C, ldc);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(double)) < 0 ||
@@ -36066,10 +36066,10 @@ int handle_cublasZherk_v2(void *conn)
     cublasOperation_t trans;
     int n;
     int k;
-    double alpha;
+    const double* alpha;
     const cuDoubleComplex* A;
     int lda;
-    double beta;
+    const double* beta;
     cuDoubleComplex C;
     int ldc;
     int request_id;
@@ -36092,7 +36092,7 @@ int handle_cublasZherk_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasZherk_v2(handle, uplo, trans, n, k, &alpha, A, lda, &beta, &C, ldc);
+    scuda_intercept_result = cublasZherk_v2(handle, uplo, trans, n, k, alpha, A, lda, beta, &C, ldc);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(cuDoubleComplex)) < 0 ||
@@ -36111,10 +36111,10 @@ int handle_cublasZherk_v2_64(void *conn)
     cublasOperation_t trans;
     int64_t n;
     int64_t k;
-    double alpha;
+    const double* alpha;
     const cuDoubleComplex* A;
     int64_t lda;
-    double beta;
+    const double* beta;
     cuDoubleComplex C;
     int64_t ldc;
     int request_id;
@@ -36137,7 +36137,7 @@ int handle_cublasZherk_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasZherk_v2_64(handle, uplo, trans, n, k, &alpha, A, lda, &beta, &C, ldc);
+    scuda_intercept_result = cublasZherk_v2_64(handle, uplo, trans, n, k, alpha, A, lda, beta, &C, ldc);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(cuDoubleComplex)) < 0 ||
@@ -36254,12 +36254,12 @@ int handle_cublasDsyr2k_v2(void *conn)
     cublasOperation_t trans;
     int n;
     int k;
-    double alpha;
-    double A;
+    const double* alpha;
+    const double* A;
     int lda;
-    double B;
+    const double* B;
     int ldb;
-    double beta;
+    const double* beta;
     double C;
     int ldc;
     int request_id;
@@ -36284,7 +36284,7 @@ int handle_cublasDsyr2k_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDsyr2k_v2(handle, uplo, trans, n, k, &alpha, &A, lda, &B, ldb, &beta, &C, ldc);
+    scuda_intercept_result = cublasDsyr2k_v2(handle, uplo, trans, n, k, alpha, A, lda, B, ldb, beta, &C, ldc);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(double)) < 0 ||
@@ -36303,12 +36303,12 @@ int handle_cublasDsyr2k_v2_64(void *conn)
     cublasOperation_t trans;
     int64_t n;
     int64_t k;
-    double alpha;
-    double A;
+    const double* alpha;
+    const double* A;
     int64_t lda;
-    double B;
+    const double* B;
     int64_t ldb;
-    double beta;
+    const double* beta;
     double C;
     int64_t ldc;
     int request_id;
@@ -36333,7 +36333,7 @@ int handle_cublasDsyr2k_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDsyr2k_v2_64(handle, uplo, trans, n, k, &alpha, &A, lda, &B, ldb, &beta, &C, ldc);
+    scuda_intercept_result = cublasDsyr2k_v2_64(handle, uplo, trans, n, k, alpha, A, lda, B, ldb, beta, &C, ldc);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(double)) < 0 ||
@@ -36651,7 +36651,7 @@ int handle_cublasZher2k_v2(void *conn)
     int lda;
     const cuDoubleComplex* B;
     int ldb;
-    double beta;
+    const double* beta;
     cuDoubleComplex C;
     int ldc;
     int request_id;
@@ -36676,7 +36676,7 @@ int handle_cublasZher2k_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasZher2k_v2(handle, uplo, trans, n, k, alpha, A, lda, B, ldb, &beta, &C, ldc);
+    scuda_intercept_result = cublasZher2k_v2(handle, uplo, trans, n, k, alpha, A, lda, B, ldb, beta, &C, ldc);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(cuDoubleComplex)) < 0 ||
@@ -36700,7 +36700,7 @@ int handle_cublasZher2k_v2_64(void *conn)
     int64_t lda;
     const cuDoubleComplex* B;
     int64_t ldb;
-    double beta;
+    const double* beta;
     cuDoubleComplex C;
     int64_t ldc;
     int request_id;
@@ -36725,7 +36725,7 @@ int handle_cublasZher2k_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasZher2k_v2_64(handle, uplo, trans, n, k, alpha, A, lda, B, ldb, &beta, &C, ldc);
+    scuda_intercept_result = cublasZher2k_v2_64(handle, uplo, trans, n, k, alpha, A, lda, B, ldb, beta, &C, ldc);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(cuDoubleComplex)) < 0 ||
@@ -36842,12 +36842,12 @@ int handle_cublasDsyrkx(void *conn)
     cublasOperation_t trans;
     int n;
     int k;
-    double alpha;
-    double A;
+    const double* alpha;
+    const double* A;
     int lda;
-    double B;
+    const double* B;
     int ldb;
-    double beta;
+    const double* beta;
     double C;
     int ldc;
     int request_id;
@@ -36872,7 +36872,7 @@ int handle_cublasDsyrkx(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDsyrkx(handle, uplo, trans, n, k, &alpha, &A, lda, &B, ldb, &beta, &C, ldc);
+    scuda_intercept_result = cublasDsyrkx(handle, uplo, trans, n, k, alpha, A, lda, B, ldb, beta, &C, ldc);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(double)) < 0 ||
@@ -36891,12 +36891,12 @@ int handle_cublasDsyrkx_64(void *conn)
     cublasOperation_t trans;
     int64_t n;
     int64_t k;
-    double alpha;
-    double A;
+    const double* alpha;
+    const double* A;
     int64_t lda;
-    double B;
+    const double* B;
     int64_t ldb;
-    double beta;
+    const double* beta;
     double C;
     int64_t ldc;
     int request_id;
@@ -36921,7 +36921,7 @@ int handle_cublasDsyrkx_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDsyrkx_64(handle, uplo, trans, n, k, &alpha, &A, lda, &B, ldb, &beta, &C, ldc);
+    scuda_intercept_result = cublasDsyrkx_64(handle, uplo, trans, n, k, alpha, A, lda, B, ldb, beta, &C, ldc);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(double)) < 0 ||
@@ -37239,7 +37239,7 @@ int handle_cublasZherkx(void *conn)
     int lda;
     const cuDoubleComplex* B;
     int ldb;
-    double beta;
+    const double* beta;
     cuDoubleComplex C;
     int ldc;
     int request_id;
@@ -37264,7 +37264,7 @@ int handle_cublasZherkx(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasZherkx(handle, uplo, trans, n, k, alpha, A, lda, B, ldb, &beta, &C, ldc);
+    scuda_intercept_result = cublasZherkx(handle, uplo, trans, n, k, alpha, A, lda, B, ldb, beta, &C, ldc);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(cuDoubleComplex)) < 0 ||
@@ -37288,7 +37288,7 @@ int handle_cublasZherkx_64(void *conn)
     int64_t lda;
     const cuDoubleComplex* B;
     int64_t ldb;
-    double beta;
+    const double* beta;
     cuDoubleComplex C;
     int64_t ldc;
     int request_id;
@@ -37313,7 +37313,7 @@ int handle_cublasZherkx_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasZherkx_64(handle, uplo, trans, n, k, alpha, A, lda, B, ldb, &beta, &C, ldc);
+    scuda_intercept_result = cublasZherkx_64(handle, uplo, trans, n, k, alpha, A, lda, B, ldb, beta, &C, ldc);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(cuDoubleComplex)) < 0 ||
@@ -37430,12 +37430,12 @@ int handle_cublasDsymm_v2(void *conn)
     cublasFillMode_t uplo;
     int m;
     int n;
-    double alpha;
-    double A;
+    const double* alpha;
+    const double* A;
     int lda;
-    double B;
+    const double* B;
     int ldb;
-    double beta;
+    const double* beta;
     double C;
     int ldc;
     int request_id;
@@ -37460,7 +37460,7 @@ int handle_cublasDsymm_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDsymm_v2(handle, side, uplo, m, n, &alpha, &A, lda, &B, ldb, &beta, &C, ldc);
+    scuda_intercept_result = cublasDsymm_v2(handle, side, uplo, m, n, alpha, A, lda, B, ldb, beta, &C, ldc);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(double)) < 0 ||
@@ -37479,12 +37479,12 @@ int handle_cublasDsymm_v2_64(void *conn)
     cublasFillMode_t uplo;
     int64_t m;
     int64_t n;
-    double alpha;
-    double A;
+    const double* alpha;
+    const double* A;
     int64_t lda;
-    double B;
+    const double* B;
     int64_t ldb;
-    double beta;
+    const double* beta;
     double C;
     int64_t ldc;
     int request_id;
@@ -37509,7 +37509,7 @@ int handle_cublasDsymm_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDsymm_v2_64(handle, side, uplo, m, n, &alpha, &A, lda, &B, ldb, &beta, &C, ldc);
+    scuda_intercept_result = cublasDsymm_v2_64(handle, side, uplo, m, n, alpha, A, lda, B, ldb, beta, &C, ldc);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(double)) < 0 ||
@@ -38016,8 +38016,8 @@ int handle_cublasDtrsm_v2(void *conn)
     cublasDiagType_t diag;
     int m;
     int n;
-    double alpha;
-    double A;
+    const double* alpha;
+    const double* A;
     int lda;
     double B;
     int ldb;
@@ -38042,7 +38042,7 @@ int handle_cublasDtrsm_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDtrsm_v2(handle, side, uplo, trans, diag, m, n, &alpha, &A, lda, &B, ldb);
+    scuda_intercept_result = cublasDtrsm_v2(handle, side, uplo, trans, diag, m, n, alpha, A, lda, &B, ldb);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &B, sizeof(double)) < 0 ||
@@ -38063,8 +38063,8 @@ int handle_cublasDtrsm_v2_64(void *conn)
     cublasDiagType_t diag;
     int64_t m;
     int64_t n;
-    double alpha;
-    double A;
+    const double* alpha;
+    const double* A;
     int64_t lda;
     double B;
     int64_t ldb;
@@ -38089,7 +38089,7 @@ int handle_cublasDtrsm_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDtrsm_v2_64(handle, side, uplo, trans, diag, m, n, &alpha, &A, lda, &B, ldb);
+    scuda_intercept_result = cublasDtrsm_v2_64(handle, side, uplo, trans, diag, m, n, alpha, A, lda, &B, ldb);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &B, sizeof(double)) < 0 ||
@@ -38400,10 +38400,10 @@ int handle_cublasDtrmm_v2(void *conn)
     cublasDiagType_t diag;
     int m;
     int n;
-    double alpha;
-    double A;
+    const double* alpha;
+    const double* A;
     int lda;
-    double B;
+    const double* B;
     int ldb;
     double C;
     int ldc;
@@ -38430,7 +38430,7 @@ int handle_cublasDtrmm_v2(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDtrmm_v2(handle, side, uplo, trans, diag, m, n, &alpha, &A, lda, &B, ldb, &C, ldc);
+    scuda_intercept_result = cublasDtrmm_v2(handle, side, uplo, trans, diag, m, n, alpha, A, lda, B, ldb, &C, ldc);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(double)) < 0 ||
@@ -38451,10 +38451,10 @@ int handle_cublasDtrmm_v2_64(void *conn)
     cublasDiagType_t diag;
     int64_t m;
     int64_t n;
-    double alpha;
-    double A;
+    const double* alpha;
+    const double* A;
     int64_t lda;
-    double B;
+    const double* B;
     int64_t ldb;
     double C;
     int64_t ldc;
@@ -38481,7 +38481,7 @@ int handle_cublasDtrmm_v2_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDtrmm_v2_64(handle, side, uplo, trans, diag, m, n, &alpha, &A, lda, &B, ldb, &C, ldc);
+    scuda_intercept_result = cublasDtrmm_v2_64(handle, side, uplo, trans, diag, m, n, alpha, A, lda, B, ldb, &C, ldc);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(double)) < 0 ||
@@ -38914,11 +38914,13 @@ int handle_cublasDgemmBatched(void *conn)
     int m;
     int n;
     int k;
+    double* alpha_null_check;
     double alpha;
     const double* * Aarray = nullptr;
     int lda;
     const double* * Barray = nullptr;
     int ldb;
+    double* beta_null_check;
     double beta;
     double* * Carray = nullptr;
     int ldc;
@@ -38932,12 +38934,14 @@ int handle_cublasDgemmBatched(void *conn)
         rpc_read(conn, &m, sizeof(int)) < 0 ||
         rpc_read(conn, &n, sizeof(int)) < 0 ||
         rpc_read(conn, &k, sizeof(int)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const double*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const double*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const double)) < 0) ||
         rpc_read(conn, &Aarray, sizeof(const double* const)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
         rpc_read(conn, &Barray, sizeof(const double* const)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int)) < 0 ||
-        rpc_read(conn, &beta, sizeof(const double*)) < 0 ||
+        rpc_read(conn, &beta_null_check, sizeof(const double*)) < 0 ||
+        (beta_null_check && rpc_read(conn, &beta, sizeof(const double)) < 0) ||
         rpc_read(conn, &Carray, sizeof(double* const)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int)) < 0 ||
         false)
@@ -38966,11 +38970,13 @@ int handle_cublasDgemmBatched_64(void *conn)
     int64_t m;
     int64_t n;
     int64_t k;
+    double* alpha_null_check;
     double alpha;
     const double* * Aarray = nullptr;
     int64_t lda;
     const double* * Barray = nullptr;
     int64_t ldb;
+    double* beta_null_check;
     double beta;
     double* * Carray = nullptr;
     int64_t ldc;
@@ -38984,12 +38990,14 @@ int handle_cublasDgemmBatched_64(void *conn)
         rpc_read(conn, &m, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &k, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const double*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const double*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const double)) < 0) ||
         rpc_read(conn, &Aarray, sizeof(const double* const)) < 0 ||
         rpc_read(conn, &lda, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &Barray, sizeof(const double* const)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &beta, sizeof(const double*)) < 0 ||
+        rpc_read(conn, &beta_null_check, sizeof(const double*)) < 0 ||
+        (beta_null_check && rpc_read(conn, &beta, sizeof(const double)) < 0) ||
         rpc_read(conn, &Carray, sizeof(double* const)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int64_t)) < 0 ||
         false)
@@ -39018,12 +39026,14 @@ int handle_cublasCgemmBatched(void *conn)
     int m;
     int n;
     int k;
-    const cuComplex* alpha;
+    cuComplex* alpha_null_check;
+    cuComplex alpha;
     const cuComplex* * Aarray = nullptr;
     int lda;
     const cuComplex* * Barray = nullptr;
     int ldb;
-    const cuComplex* beta;
+    cuComplex* beta_null_check;
+    cuComplex beta;
     cuComplex* * Carray = nullptr;
     int ldc;
     int request_id;
@@ -39036,12 +39046,14 @@ int handle_cublasCgemmBatched(void *conn)
         rpc_read(conn, &m, sizeof(int)) < 0 ||
         rpc_read(conn, &n, sizeof(int)) < 0 ||
         rpc_read(conn, &k, sizeof(int)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const cuComplex*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const cuComplex)) < 0) ||
         rpc_read(conn, &Aarray, sizeof(const cuComplex* const)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
         rpc_read(conn, &Barray, sizeof(const cuComplex* const)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int)) < 0 ||
-        rpc_read(conn, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_read(conn, &beta_null_check, sizeof(const cuComplex*)) < 0 ||
+        (beta_null_check && rpc_read(conn, &beta, sizeof(const cuComplex)) < 0) ||
         rpc_read(conn, &Carray, sizeof(cuComplex* const)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int)) < 0 ||
         false)
@@ -39050,7 +39062,7 @@ int handle_cublasCgemmBatched(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasCgemmBatched(handle, transa, transb, m, n, k, alpha, Aarray, lda, Barray, ldb, beta, Carray, ldc, batchCount);
+    scuda_intercept_result = cublasCgemmBatched(handle, transa, transb, m, n, k, &alpha, Aarray, lda, Barray, ldb, &beta, Carray, ldc, batchCount);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_end_response(conn, &scuda_intercept_result) < 0)
@@ -39070,12 +39082,14 @@ int handle_cublasCgemmBatched_64(void *conn)
     int64_t m;
     int64_t n;
     int64_t k;
-    const cuComplex* alpha;
+    cuComplex* alpha_null_check;
+    cuComplex alpha;
     const cuComplex* * Aarray = nullptr;
     int64_t lda;
     const cuComplex* * Barray = nullptr;
     int64_t ldb;
-    const cuComplex* beta;
+    cuComplex* beta_null_check;
+    cuComplex beta;
     cuComplex* * Carray = nullptr;
     int64_t ldc;
     int request_id;
@@ -39088,12 +39102,14 @@ int handle_cublasCgemmBatched_64(void *conn)
         rpc_read(conn, &m, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &k, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const cuComplex*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const cuComplex)) < 0) ||
         rpc_read(conn, &Aarray, sizeof(const cuComplex* const)) < 0 ||
         rpc_read(conn, &lda, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &Barray, sizeof(const cuComplex* const)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_read(conn, &beta_null_check, sizeof(const cuComplex*)) < 0 ||
+        (beta_null_check && rpc_read(conn, &beta, sizeof(const cuComplex)) < 0) ||
         rpc_read(conn, &Carray, sizeof(cuComplex* const)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int64_t)) < 0 ||
         false)
@@ -39102,7 +39118,7 @@ int handle_cublasCgemmBatched_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasCgemmBatched_64(handle, transa, transb, m, n, k, alpha, Aarray, lda, Barray, ldb, beta, Carray, ldc, batchCount);
+    scuda_intercept_result = cublasCgemmBatched_64(handle, transa, transb, m, n, k, &alpha, Aarray, lda, Barray, ldb, &beta, Carray, ldc, batchCount);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_end_response(conn, &scuda_intercept_result) < 0)
@@ -39122,12 +39138,14 @@ int handle_cublasCgemm3mBatched(void *conn)
     int m;
     int n;
     int k;
-    const cuComplex* alpha;
+    cuComplex* alpha_null_check;
+    cuComplex alpha;
     const cuComplex* * Aarray = nullptr;
     int lda;
     const cuComplex* * Barray = nullptr;
     int ldb;
-    const cuComplex* beta;
+    cuComplex* beta_null_check;
+    cuComplex beta;
     cuComplex* * Carray = nullptr;
     int ldc;
     int request_id;
@@ -39140,12 +39158,14 @@ int handle_cublasCgemm3mBatched(void *conn)
         rpc_read(conn, &m, sizeof(int)) < 0 ||
         rpc_read(conn, &n, sizeof(int)) < 0 ||
         rpc_read(conn, &k, sizeof(int)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const cuComplex*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const cuComplex)) < 0) ||
         rpc_read(conn, &Aarray, sizeof(const cuComplex* const)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
         rpc_read(conn, &Barray, sizeof(const cuComplex* const)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int)) < 0 ||
-        rpc_read(conn, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_read(conn, &beta_null_check, sizeof(const cuComplex*)) < 0 ||
+        (beta_null_check && rpc_read(conn, &beta, sizeof(const cuComplex)) < 0) ||
         rpc_read(conn, &Carray, sizeof(cuComplex* const)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int)) < 0 ||
         false)
@@ -39154,7 +39174,7 @@ int handle_cublasCgemm3mBatched(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasCgemm3mBatched(handle, transa, transb, m, n, k, alpha, Aarray, lda, Barray, ldb, beta, Carray, ldc, batchCount);
+    scuda_intercept_result = cublasCgemm3mBatched(handle, transa, transb, m, n, k, &alpha, Aarray, lda, Barray, ldb, &beta, Carray, ldc, batchCount);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_end_response(conn, &scuda_intercept_result) < 0)
@@ -39174,12 +39194,14 @@ int handle_cublasCgemm3mBatched_64(void *conn)
     int64_t m;
     int64_t n;
     int64_t k;
-    const cuComplex* alpha;
+    cuComplex* alpha_null_check;
+    cuComplex alpha;
     const cuComplex* * Aarray = nullptr;
     int64_t lda;
     const cuComplex* * Barray = nullptr;
     int64_t ldb;
-    const cuComplex* beta;
+    cuComplex* beta_null_check;
+    cuComplex beta;
     cuComplex* * Carray = nullptr;
     int64_t ldc;
     int request_id;
@@ -39192,12 +39214,14 @@ int handle_cublasCgemm3mBatched_64(void *conn)
         rpc_read(conn, &m, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &k, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const cuComplex*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const cuComplex)) < 0) ||
         rpc_read(conn, &Aarray, sizeof(const cuComplex* const)) < 0 ||
         rpc_read(conn, &lda, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &Barray, sizeof(const cuComplex* const)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_read(conn, &beta_null_check, sizeof(const cuComplex*)) < 0 ||
+        (beta_null_check && rpc_read(conn, &beta, sizeof(const cuComplex)) < 0) ||
         rpc_read(conn, &Carray, sizeof(cuComplex* const)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int64_t)) < 0 ||
         false)
@@ -39206,7 +39230,7 @@ int handle_cublasCgemm3mBatched_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasCgemm3mBatched_64(handle, transa, transb, m, n, k, alpha, Aarray, lda, Barray, ldb, beta, Carray, ldc, batchCount);
+    scuda_intercept_result = cublasCgemm3mBatched_64(handle, transa, transb, m, n, k, &alpha, Aarray, lda, Barray, ldb, &beta, Carray, ldc, batchCount);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_end_response(conn, &scuda_intercept_result) < 0)
@@ -39226,12 +39250,14 @@ int handle_cublasZgemmBatched(void *conn)
     int m;
     int n;
     int k;
-    const cuDoubleComplex* alpha;
+    cuDoubleComplex* alpha_null_check;
+    cuDoubleComplex alpha;
     const cuDoubleComplex* * Aarray = nullptr;
     int lda;
     const cuDoubleComplex* * Barray = nullptr;
     int ldb;
-    const cuDoubleComplex* beta;
+    cuDoubleComplex* beta_null_check;
+    cuDoubleComplex beta;
     cuDoubleComplex* * Carray = nullptr;
     int ldc;
     int request_id;
@@ -39244,12 +39270,14 @@ int handle_cublasZgemmBatched(void *conn)
         rpc_read(conn, &m, sizeof(int)) < 0 ||
         rpc_read(conn, &n, sizeof(int)) < 0 ||
         rpc_read(conn, &k, sizeof(int)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const cuDoubleComplex*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_read(conn, &Aarray, sizeof(const cuDoubleComplex* const)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
         rpc_read(conn, &Barray, sizeof(const cuDoubleComplex* const)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int)) < 0 ||
-        rpc_read(conn, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_read(conn, &beta_null_check, sizeof(const cuDoubleComplex*)) < 0 ||
+        (beta_null_check && rpc_read(conn, &beta, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_read(conn, &Carray, sizeof(cuDoubleComplex* const)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int)) < 0 ||
         false)
@@ -39258,7 +39286,7 @@ int handle_cublasZgemmBatched(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasZgemmBatched(handle, transa, transb, m, n, k, alpha, Aarray, lda, Barray, ldb, beta, Carray, ldc, batchCount);
+    scuda_intercept_result = cublasZgemmBatched(handle, transa, transb, m, n, k, &alpha, Aarray, lda, Barray, ldb, &beta, Carray, ldc, batchCount);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_end_response(conn, &scuda_intercept_result) < 0)
@@ -39278,12 +39306,14 @@ int handle_cublasZgemmBatched_64(void *conn)
     int64_t m;
     int64_t n;
     int64_t k;
-    const cuDoubleComplex* alpha;
+    cuDoubleComplex* alpha_null_check;
+    cuDoubleComplex alpha;
     const cuDoubleComplex* * Aarray = nullptr;
     int64_t lda;
     const cuDoubleComplex* * Barray = nullptr;
     int64_t ldb;
-    const cuDoubleComplex* beta;
+    cuDoubleComplex* beta_null_check;
+    cuDoubleComplex beta;
     cuDoubleComplex* * Carray = nullptr;
     int64_t ldc;
     int request_id;
@@ -39296,12 +39326,14 @@ int handle_cublasZgemmBatched_64(void *conn)
         rpc_read(conn, &m, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &k, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const cuDoubleComplex*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_read(conn, &Aarray, sizeof(const cuDoubleComplex* const)) < 0 ||
         rpc_read(conn, &lda, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &Barray, sizeof(const cuDoubleComplex* const)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_read(conn, &beta_null_check, sizeof(const cuDoubleComplex*)) < 0 ||
+        (beta_null_check && rpc_read(conn, &beta, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_read(conn, &Carray, sizeof(cuDoubleComplex* const)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int64_t)) < 0 ||
         false)
@@ -39310,7 +39342,7 @@ int handle_cublasZgemmBatched_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasZgemmBatched_64(handle, transa, transb, m, n, k, alpha, Aarray, lda, Barray, ldb, beta, Carray, ldc, batchCount);
+    scuda_intercept_result = cublasZgemmBatched_64(handle, transa, transb, m, n, k, &alpha, Aarray, lda, Barray, ldb, &beta, Carray, ldc, batchCount);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_end_response(conn, &scuda_intercept_result) < 0)
@@ -39329,14 +39361,16 @@ int handle_cublasHgemmStridedBatched(void *conn)
     int m;
     int n;
     int k;
-    const __half* alpha;
+    __half* alpha_null_check;
+    __half alpha;
     const __half* A;
     int lda;
     long long int strideA;
     const __half* B;
     int ldb;
     long long int strideB;
-    const __half* beta;
+    __half* beta_null_check;
+    __half beta;
     __half C;
     int ldc;
     long long int strideC;
@@ -39350,14 +39384,16 @@ int handle_cublasHgemmStridedBatched(void *conn)
         rpc_read(conn, &m, sizeof(int)) < 0 ||
         rpc_read(conn, &n, sizeof(int)) < 0 ||
         rpc_read(conn, &k, sizeof(int)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const __half*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const __half*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const __half)) < 0) ||
         rpc_read(conn, &A, sizeof(const __half*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
         rpc_read(conn, &strideA, sizeof(long long int)) < 0 ||
         rpc_read(conn, &B, sizeof(const __half*)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int)) < 0 ||
         rpc_read(conn, &strideB, sizeof(long long int)) < 0 ||
-        rpc_read(conn, &beta, sizeof(const __half*)) < 0 ||
+        rpc_read(conn, &beta_null_check, sizeof(const __half*)) < 0 ||
+        (beta_null_check && rpc_read(conn, &beta, sizeof(const __half)) < 0) ||
         rpc_read(conn, &C, sizeof(__half)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int)) < 0 ||
         rpc_read(conn, &strideC, sizeof(long long int)) < 0 ||
@@ -39368,7 +39404,7 @@ int handle_cublasHgemmStridedBatched(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasHgemmStridedBatched(handle, transa, transb, m, n, k, alpha, A, lda, strideA, B, ldb, strideB, beta, &C, ldc, strideC, batchCount);
+    scuda_intercept_result = cublasHgemmStridedBatched(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, &C, ldc, strideC, batchCount);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(__half)) < 0 ||
@@ -39388,14 +39424,16 @@ int handle_cublasHgemmStridedBatched_64(void *conn)
     int64_t m;
     int64_t n;
     int64_t k;
-    const __half* alpha;
+    __half* alpha_null_check;
+    __half alpha;
     const __half* A;
     int64_t lda;
     long long int strideA;
     const __half* B;
     int64_t ldb;
     long long int strideB;
-    const __half* beta;
+    __half* beta_null_check;
+    __half beta;
     __half C;
     int64_t ldc;
     long long int strideC;
@@ -39409,14 +39447,16 @@ int handle_cublasHgemmStridedBatched_64(void *conn)
         rpc_read(conn, &m, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &k, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const __half*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const __half*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const __half)) < 0) ||
         rpc_read(conn, &A, sizeof(const __half*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &strideA, sizeof(long long int)) < 0 ||
         rpc_read(conn, &B, sizeof(const __half*)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &strideB, sizeof(long long int)) < 0 ||
-        rpc_read(conn, &beta, sizeof(const __half*)) < 0 ||
+        rpc_read(conn, &beta_null_check, sizeof(const __half*)) < 0 ||
+        (beta_null_check && rpc_read(conn, &beta, sizeof(const __half)) < 0) ||
         rpc_read(conn, &C, sizeof(__half)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &strideC, sizeof(long long int)) < 0 ||
@@ -39427,7 +39467,7 @@ int handle_cublasHgemmStridedBatched_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasHgemmStridedBatched_64(handle, transa, transb, m, n, k, alpha, A, lda, strideA, B, ldb, strideB, beta, &C, ldc, strideC, batchCount);
+    scuda_intercept_result = cublasHgemmStridedBatched_64(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, &C, ldc, strideC, batchCount);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(__half)) < 0 ||
@@ -39447,14 +39487,16 @@ int handle_cublasSgemmStridedBatched(void *conn)
     int m;
     int n;
     int k;
-    const float* alpha;
+    float* alpha_null_check;
+    float alpha;
     const float* A;
     int lda;
     long long int strideA;
     const float* B;
     int ldb;
     long long int strideB;
-    const float* beta;
+    float* beta_null_check;
+    float beta;
     float C;
     int ldc;
     long long int strideC;
@@ -39468,14 +39510,16 @@ int handle_cublasSgemmStridedBatched(void *conn)
         rpc_read(conn, &m, sizeof(int)) < 0 ||
         rpc_read(conn, &n, sizeof(int)) < 0 ||
         rpc_read(conn, &k, sizeof(int)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const float*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const float*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const float)) < 0) ||
         rpc_read(conn, &A, sizeof(const float*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
         rpc_read(conn, &strideA, sizeof(long long int)) < 0 ||
         rpc_read(conn, &B, sizeof(const float*)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int)) < 0 ||
         rpc_read(conn, &strideB, sizeof(long long int)) < 0 ||
-        rpc_read(conn, &beta, sizeof(const float*)) < 0 ||
+        rpc_read(conn, &beta_null_check, sizeof(const float*)) < 0 ||
+        (beta_null_check && rpc_read(conn, &beta, sizeof(const float)) < 0) ||
         rpc_read(conn, &C, sizeof(float)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int)) < 0 ||
         rpc_read(conn, &strideC, sizeof(long long int)) < 0 ||
@@ -39486,7 +39530,7 @@ int handle_cublasSgemmStridedBatched(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasSgemmStridedBatched(handle, transa, transb, m, n, k, alpha, A, lda, strideA, B, ldb, strideB, beta, &C, ldc, strideC, batchCount);
+    scuda_intercept_result = cublasSgemmStridedBatched(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, &C, ldc, strideC, batchCount);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(float)) < 0 ||
@@ -39506,14 +39550,16 @@ int handle_cublasSgemmStridedBatched_64(void *conn)
     int64_t m;
     int64_t n;
     int64_t k;
-    const float* alpha;
+    float* alpha_null_check;
+    float alpha;
     const float* A;
     int64_t lda;
     long long int strideA;
     const float* B;
     int64_t ldb;
     long long int strideB;
-    const float* beta;
+    float* beta_null_check;
+    float beta;
     float C;
     int64_t ldc;
     long long int strideC;
@@ -39527,14 +39573,16 @@ int handle_cublasSgemmStridedBatched_64(void *conn)
         rpc_read(conn, &m, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &k, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const float*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const float*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const float)) < 0) ||
         rpc_read(conn, &A, sizeof(const float*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &strideA, sizeof(long long int)) < 0 ||
         rpc_read(conn, &B, sizeof(const float*)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &strideB, sizeof(long long int)) < 0 ||
-        rpc_read(conn, &beta, sizeof(const float*)) < 0 ||
+        rpc_read(conn, &beta_null_check, sizeof(const float*)) < 0 ||
+        (beta_null_check && rpc_read(conn, &beta, sizeof(const float)) < 0) ||
         rpc_read(conn, &C, sizeof(float)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &strideC, sizeof(long long int)) < 0 ||
@@ -39545,7 +39593,7 @@ int handle_cublasSgemmStridedBatched_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasSgemmStridedBatched_64(handle, transa, transb, m, n, k, alpha, A, lda, strideA, B, ldb, strideB, beta, &C, ldc, strideC, batchCount);
+    scuda_intercept_result = cublasSgemmStridedBatched_64(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, &C, ldc, strideC, batchCount);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(float)) < 0 ||
@@ -39565,13 +39613,15 @@ int handle_cublasDgemmStridedBatched(void *conn)
     int m;
     int n;
     int k;
+    double* alpha_null_check;
     double alpha;
-    double A;
+    const double* A;
     int lda;
     long long int strideA;
-    double B;
+    const double* B;
     int ldb;
     long long int strideB;
+    double* beta_null_check;
     double beta;
     double C;
     int ldc;
@@ -39586,14 +39636,16 @@ int handle_cublasDgemmStridedBatched(void *conn)
         rpc_read(conn, &m, sizeof(int)) < 0 ||
         rpc_read(conn, &n, sizeof(int)) < 0 ||
         rpc_read(conn, &k, sizeof(int)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const double*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const double*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const double)) < 0) ||
         rpc_read(conn, &A, sizeof(const double*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
         rpc_read(conn, &strideA, sizeof(long long int)) < 0 ||
         rpc_read(conn, &B, sizeof(const double*)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int)) < 0 ||
         rpc_read(conn, &strideB, sizeof(long long int)) < 0 ||
-        rpc_read(conn, &beta, sizeof(const double*)) < 0 ||
+        rpc_read(conn, &beta_null_check, sizeof(const double*)) < 0 ||
+        (beta_null_check && rpc_read(conn, &beta, sizeof(const double)) < 0) ||
         rpc_read(conn, &C, sizeof(double)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int)) < 0 ||
         rpc_read(conn, &strideC, sizeof(long long int)) < 0 ||
@@ -39604,7 +39656,7 @@ int handle_cublasDgemmStridedBatched(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDgemmStridedBatched(handle, transa, transb, m, n, k, &alpha, &A, lda, strideA, &B, ldb, strideB, &beta, &C, ldc, strideC, batchCount);
+    scuda_intercept_result = cublasDgemmStridedBatched(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, &C, ldc, strideC, batchCount);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(double)) < 0 ||
@@ -39624,13 +39676,15 @@ int handle_cublasDgemmStridedBatched_64(void *conn)
     int64_t m;
     int64_t n;
     int64_t k;
+    double* alpha_null_check;
     double alpha;
-    double A;
+    const double* A;
     int64_t lda;
     long long int strideA;
-    double B;
+    const double* B;
     int64_t ldb;
     long long int strideB;
+    double* beta_null_check;
     double beta;
     double C;
     int64_t ldc;
@@ -39645,14 +39699,16 @@ int handle_cublasDgemmStridedBatched_64(void *conn)
         rpc_read(conn, &m, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &k, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const double*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const double*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const double)) < 0) ||
         rpc_read(conn, &A, sizeof(const double*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &strideA, sizeof(long long int)) < 0 ||
         rpc_read(conn, &B, sizeof(const double*)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &strideB, sizeof(long long int)) < 0 ||
-        rpc_read(conn, &beta, sizeof(const double*)) < 0 ||
+        rpc_read(conn, &beta_null_check, sizeof(const double*)) < 0 ||
+        (beta_null_check && rpc_read(conn, &beta, sizeof(const double)) < 0) ||
         rpc_read(conn, &C, sizeof(double)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &strideC, sizeof(long long int)) < 0 ||
@@ -39663,7 +39719,7 @@ int handle_cublasDgemmStridedBatched_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDgemmStridedBatched_64(handle, transa, transb, m, n, k, &alpha, &A, lda, strideA, &B, ldb, strideB, &beta, &C, ldc, strideC, batchCount);
+    scuda_intercept_result = cublasDgemmStridedBatched_64(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, &C, ldc, strideC, batchCount);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(double)) < 0 ||
@@ -39683,14 +39739,16 @@ int handle_cublasCgemmStridedBatched(void *conn)
     int m;
     int n;
     int k;
-    const cuComplex* alpha;
+    cuComplex* alpha_null_check;
+    cuComplex alpha;
     const cuComplex* A;
     int lda;
     long long int strideA;
     const cuComplex* B;
     int ldb;
     long long int strideB;
-    const cuComplex* beta;
+    cuComplex* beta_null_check;
+    cuComplex beta;
     cuComplex C;
     int ldc;
     long long int strideC;
@@ -39704,14 +39762,16 @@ int handle_cublasCgemmStridedBatched(void *conn)
         rpc_read(conn, &m, sizeof(int)) < 0 ||
         rpc_read(conn, &n, sizeof(int)) < 0 ||
         rpc_read(conn, &k, sizeof(int)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const cuComplex*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const cuComplex)) < 0) ||
         rpc_read(conn, &A, sizeof(const cuComplex*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
         rpc_read(conn, &strideA, sizeof(long long int)) < 0 ||
         rpc_read(conn, &B, sizeof(const cuComplex*)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int)) < 0 ||
         rpc_read(conn, &strideB, sizeof(long long int)) < 0 ||
-        rpc_read(conn, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_read(conn, &beta_null_check, sizeof(const cuComplex*)) < 0 ||
+        (beta_null_check && rpc_read(conn, &beta, sizeof(const cuComplex)) < 0) ||
         rpc_read(conn, &C, sizeof(cuComplex)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int)) < 0 ||
         rpc_read(conn, &strideC, sizeof(long long int)) < 0 ||
@@ -39722,7 +39782,7 @@ int handle_cublasCgemmStridedBatched(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasCgemmStridedBatched(handle, transa, transb, m, n, k, alpha, A, lda, strideA, B, ldb, strideB, beta, &C, ldc, strideC, batchCount);
+    scuda_intercept_result = cublasCgemmStridedBatched(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, &C, ldc, strideC, batchCount);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(cuComplex)) < 0 ||
@@ -39742,14 +39802,16 @@ int handle_cublasCgemmStridedBatched_64(void *conn)
     int64_t m;
     int64_t n;
     int64_t k;
-    const cuComplex* alpha;
+    cuComplex* alpha_null_check;
+    cuComplex alpha;
     const cuComplex* A;
     int64_t lda;
     long long int strideA;
     const cuComplex* B;
     int64_t ldb;
     long long int strideB;
-    const cuComplex* beta;
+    cuComplex* beta_null_check;
+    cuComplex beta;
     cuComplex C;
     int64_t ldc;
     long long int strideC;
@@ -39763,14 +39825,16 @@ int handle_cublasCgemmStridedBatched_64(void *conn)
         rpc_read(conn, &m, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &k, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const cuComplex*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const cuComplex)) < 0) ||
         rpc_read(conn, &A, sizeof(const cuComplex*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &strideA, sizeof(long long int)) < 0 ||
         rpc_read(conn, &B, sizeof(const cuComplex*)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &strideB, sizeof(long long int)) < 0 ||
-        rpc_read(conn, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_read(conn, &beta_null_check, sizeof(const cuComplex*)) < 0 ||
+        (beta_null_check && rpc_read(conn, &beta, sizeof(const cuComplex)) < 0) ||
         rpc_read(conn, &C, sizeof(cuComplex)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &strideC, sizeof(long long int)) < 0 ||
@@ -39781,7 +39845,7 @@ int handle_cublasCgemmStridedBatched_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasCgemmStridedBatched_64(handle, transa, transb, m, n, k, alpha, A, lda, strideA, B, ldb, strideB, beta, &C, ldc, strideC, batchCount);
+    scuda_intercept_result = cublasCgemmStridedBatched_64(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, &C, ldc, strideC, batchCount);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(cuComplex)) < 0 ||
@@ -39801,14 +39865,16 @@ int handle_cublasCgemm3mStridedBatched(void *conn)
     int m;
     int n;
     int k;
-    const cuComplex* alpha;
+    cuComplex* alpha_null_check;
+    cuComplex alpha;
     const cuComplex* A;
     int lda;
     long long int strideA;
     const cuComplex* B;
     int ldb;
     long long int strideB;
-    const cuComplex* beta;
+    cuComplex* beta_null_check;
+    cuComplex beta;
     cuComplex C;
     int ldc;
     long long int strideC;
@@ -39822,14 +39888,16 @@ int handle_cublasCgemm3mStridedBatched(void *conn)
         rpc_read(conn, &m, sizeof(int)) < 0 ||
         rpc_read(conn, &n, sizeof(int)) < 0 ||
         rpc_read(conn, &k, sizeof(int)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const cuComplex*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const cuComplex)) < 0) ||
         rpc_read(conn, &A, sizeof(const cuComplex*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
         rpc_read(conn, &strideA, sizeof(long long int)) < 0 ||
         rpc_read(conn, &B, sizeof(const cuComplex*)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int)) < 0 ||
         rpc_read(conn, &strideB, sizeof(long long int)) < 0 ||
-        rpc_read(conn, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_read(conn, &beta_null_check, sizeof(const cuComplex*)) < 0 ||
+        (beta_null_check && rpc_read(conn, &beta, sizeof(const cuComplex)) < 0) ||
         rpc_read(conn, &C, sizeof(cuComplex)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int)) < 0 ||
         rpc_read(conn, &strideC, sizeof(long long int)) < 0 ||
@@ -39840,7 +39908,7 @@ int handle_cublasCgemm3mStridedBatched(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasCgemm3mStridedBatched(handle, transa, transb, m, n, k, alpha, A, lda, strideA, B, ldb, strideB, beta, &C, ldc, strideC, batchCount);
+    scuda_intercept_result = cublasCgemm3mStridedBatched(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, &C, ldc, strideC, batchCount);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(cuComplex)) < 0 ||
@@ -39860,14 +39928,16 @@ int handle_cublasCgemm3mStridedBatched_64(void *conn)
     int64_t m;
     int64_t n;
     int64_t k;
-    const cuComplex* alpha;
+    cuComplex* alpha_null_check;
+    cuComplex alpha;
     const cuComplex* A;
     int64_t lda;
     long long int strideA;
     const cuComplex* B;
     int64_t ldb;
     long long int strideB;
-    const cuComplex* beta;
+    cuComplex* beta_null_check;
+    cuComplex beta;
     cuComplex C;
     int64_t ldc;
     long long int strideC;
@@ -39881,14 +39951,16 @@ int handle_cublasCgemm3mStridedBatched_64(void *conn)
         rpc_read(conn, &m, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &k, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const cuComplex*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const cuComplex)) < 0) ||
         rpc_read(conn, &A, sizeof(const cuComplex*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &strideA, sizeof(long long int)) < 0 ||
         rpc_read(conn, &B, sizeof(const cuComplex*)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &strideB, sizeof(long long int)) < 0 ||
-        rpc_read(conn, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_read(conn, &beta_null_check, sizeof(const cuComplex*)) < 0 ||
+        (beta_null_check && rpc_read(conn, &beta, sizeof(const cuComplex)) < 0) ||
         rpc_read(conn, &C, sizeof(cuComplex)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &strideC, sizeof(long long int)) < 0 ||
@@ -39899,7 +39971,7 @@ int handle_cublasCgemm3mStridedBatched_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasCgemm3mStridedBatched_64(handle, transa, transb, m, n, k, alpha, A, lda, strideA, B, ldb, strideB, beta, &C, ldc, strideC, batchCount);
+    scuda_intercept_result = cublasCgemm3mStridedBatched_64(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, &C, ldc, strideC, batchCount);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(cuComplex)) < 0 ||
@@ -39919,14 +39991,16 @@ int handle_cublasZgemmStridedBatched(void *conn)
     int m;
     int n;
     int k;
-    const cuDoubleComplex* alpha;
+    cuDoubleComplex* alpha_null_check;
+    cuDoubleComplex alpha;
     const cuDoubleComplex* A;
     int lda;
     long long int strideA;
     const cuDoubleComplex* B;
     int ldb;
     long long int strideB;
-    const cuDoubleComplex* beta;
+    cuDoubleComplex* beta_null_check;
+    cuDoubleComplex beta;
     cuDoubleComplex C;
     int ldc;
     long long int strideC;
@@ -39940,14 +40014,16 @@ int handle_cublasZgemmStridedBatched(void *conn)
         rpc_read(conn, &m, sizeof(int)) < 0 ||
         rpc_read(conn, &n, sizeof(int)) < 0 ||
         rpc_read(conn, &k, sizeof(int)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const cuDoubleComplex*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_read(conn, &A, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
         rpc_read(conn, &strideA, sizeof(long long int)) < 0 ||
         rpc_read(conn, &B, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int)) < 0 ||
         rpc_read(conn, &strideB, sizeof(long long int)) < 0 ||
-        rpc_read(conn, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_read(conn, &beta_null_check, sizeof(const cuDoubleComplex*)) < 0 ||
+        (beta_null_check && rpc_read(conn, &beta, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_read(conn, &C, sizeof(cuDoubleComplex)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int)) < 0 ||
         rpc_read(conn, &strideC, sizeof(long long int)) < 0 ||
@@ -39958,7 +40034,7 @@ int handle_cublasZgemmStridedBatched(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasZgemmStridedBatched(handle, transa, transb, m, n, k, alpha, A, lda, strideA, B, ldb, strideB, beta, &C, ldc, strideC, batchCount);
+    scuda_intercept_result = cublasZgemmStridedBatched(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, &C, ldc, strideC, batchCount);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(cuDoubleComplex)) < 0 ||
@@ -39978,14 +40054,16 @@ int handle_cublasZgemmStridedBatched_64(void *conn)
     int64_t m;
     int64_t n;
     int64_t k;
-    const cuDoubleComplex* alpha;
+    cuDoubleComplex* alpha_null_check;
+    cuDoubleComplex alpha;
     const cuDoubleComplex* A;
     int64_t lda;
     long long int strideA;
     const cuDoubleComplex* B;
     int64_t ldb;
     long long int strideB;
-    const cuDoubleComplex* beta;
+    cuDoubleComplex* beta_null_check;
+    cuDoubleComplex beta;
     cuDoubleComplex C;
     int64_t ldc;
     long long int strideC;
@@ -39999,14 +40077,16 @@ int handle_cublasZgemmStridedBatched_64(void *conn)
         rpc_read(conn, &m, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &k, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const cuDoubleComplex*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_read(conn, &A, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &strideA, sizeof(long long int)) < 0 ||
         rpc_read(conn, &B, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &strideB, sizeof(long long int)) < 0 ||
-        rpc_read(conn, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_read(conn, &beta_null_check, sizeof(const cuDoubleComplex*)) < 0 ||
+        (beta_null_check && rpc_read(conn, &beta, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_read(conn, &C, sizeof(cuDoubleComplex)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &strideC, sizeof(long long int)) < 0 ||
@@ -40017,7 +40097,7 @@ int handle_cublasZgemmStridedBatched_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasZgemmStridedBatched_64(handle, transa, transb, m, n, k, alpha, A, lda, strideA, B, ldb, strideB, beta, &C, ldc, strideC, batchCount);
+    scuda_intercept_result = cublasZgemmStridedBatched_64(handle, transa, transb, m, n, k, &alpha, A, lda, strideA, B, ldb, strideB, &beta, &C, ldc, strideC, batchCount);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(cuDoubleComplex)) < 0 ||
@@ -40038,14 +40118,16 @@ int handle_cublasGemmBatchedEx_64(void *conn)
     int64_t m;
     int64_t n;
     int64_t k;
-    const void* alpha;
+    void* alpha_null_check;
+    void* alpha;
     const void* * Aarray = nullptr;
     cudaDataType Atype;
     int64_t lda;
     const void* * Barray = nullptr;
     cudaDataType Btype;
     int64_t ldb;
-    const void* beta;
+    void* beta_null_check;
+    void* beta;
     void* * Carray = nullptr;
     cudaDataType Ctype;
     int64_t ldc;
@@ -40061,14 +40143,16 @@ int handle_cublasGemmBatchedEx_64(void *conn)
         rpc_read(conn, &m, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &k, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const void*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const void*)) < 0) ||
         rpc_read(conn, &Aarray, sizeof(const void* const)) < 0 ||
         rpc_read(conn, &Atype, sizeof(cudaDataType)) < 0 ||
         rpc_read(conn, &lda, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &Barray, sizeof(const void* const)) < 0 ||
         rpc_read(conn, &Btype, sizeof(cudaDataType)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &beta, sizeof(const void*)) < 0 ||
+        rpc_read(conn, &beta_null_check, sizeof(const void*)) < 0 ||
+        (beta_null_check && rpc_read(conn, &beta, sizeof(const void*)) < 0) ||
         rpc_read(conn, &Carray, sizeof(void* const)) < 0 ||
         rpc_read(conn, &Ctype, sizeof(cudaDataType)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int64_t)) < 0 ||
@@ -40080,7 +40164,7 @@ int handle_cublasGemmBatchedEx_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasGemmBatchedEx_64(handle, transa, transb, m, n, k, alpha, Aarray, Atype, lda, Barray, Btype, ldb, beta, Carray, Ctype, ldc, batchCount, computeType, algo);
+    scuda_intercept_result = cublasGemmBatchedEx_64(handle, transa, transb, m, n, k, &alpha, Aarray, Atype, lda, Barray, Btype, ldb, &beta, Carray, Ctype, ldc, batchCount, computeType, algo);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_end_response(conn, &scuda_intercept_result) < 0)
@@ -40098,10 +40182,12 @@ int handle_cublasSgeam(void *conn)
     cublasOperation_t transb;
     int m;
     int n;
-    const float* alpha;
+    float* alpha_null_check;
+    float alpha;
     const float* A;
     int lda;
-    const float* beta;
+    float* beta_null_check;
+    float beta;
     const float* B;
     int ldb;
     float C;
@@ -40114,10 +40200,12 @@ int handle_cublasSgeam(void *conn)
         rpc_read(conn, &transb, sizeof(cublasOperation_t)) < 0 ||
         rpc_read(conn, &m, sizeof(int)) < 0 ||
         rpc_read(conn, &n, sizeof(int)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const float*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const float*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const float)) < 0) ||
         rpc_read(conn, &A, sizeof(const float*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
-        rpc_read(conn, &beta, sizeof(const float*)) < 0 ||
+        rpc_read(conn, &beta_null_check, sizeof(const float*)) < 0 ||
+        (beta_null_check && rpc_read(conn, &beta, sizeof(const float)) < 0) ||
         rpc_read(conn, &B, sizeof(const float*)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int)) < 0 ||
         rpc_read(conn, &C, sizeof(float)) < 0 ||
@@ -40128,7 +40216,7 @@ int handle_cublasSgeam(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasSgeam(handle, transa, transb, m, n, alpha, A, lda, beta, B, ldb, &C, ldc);
+    scuda_intercept_result = cublasSgeam(handle, transa, transb, m, n, &alpha, A, lda, &beta, B, ldb, &C, ldc);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(float)) < 0 ||
@@ -40147,10 +40235,12 @@ int handle_cublasSgeam_64(void *conn)
     cublasOperation_t transb;
     int64_t m;
     int64_t n;
-    const float* alpha;
+    float* alpha_null_check;
+    float alpha;
     const float* A;
     int64_t lda;
-    const float* beta;
+    float* beta_null_check;
+    float beta;
     const float* B;
     int64_t ldb;
     float C;
@@ -40163,10 +40253,12 @@ int handle_cublasSgeam_64(void *conn)
         rpc_read(conn, &transb, sizeof(cublasOperation_t)) < 0 ||
         rpc_read(conn, &m, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const float*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const float*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const float)) < 0) ||
         rpc_read(conn, &A, sizeof(const float*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &beta, sizeof(const float*)) < 0 ||
+        rpc_read(conn, &beta_null_check, sizeof(const float*)) < 0 ||
+        (beta_null_check && rpc_read(conn, &beta, sizeof(const float)) < 0) ||
         rpc_read(conn, &B, sizeof(const float*)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &C, sizeof(float)) < 0 ||
@@ -40177,7 +40269,7 @@ int handle_cublasSgeam_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasSgeam_64(handle, transa, transb, m, n, alpha, A, lda, beta, B, ldb, &C, ldc);
+    scuda_intercept_result = cublasSgeam_64(handle, transa, transb, m, n, &alpha, A, lda, &beta, B, ldb, &C, ldc);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(float)) < 0 ||
@@ -40196,11 +40288,13 @@ int handle_cublasDgeam(void *conn)
     cublasOperation_t transb;
     int m;
     int n;
+    double* alpha_null_check;
     double alpha;
-    double A;
+    const double* A;
     int lda;
+    double* beta_null_check;
     double beta;
-    double B;
+    const double* B;
     int ldb;
     double C;
     int ldc;
@@ -40212,10 +40306,12 @@ int handle_cublasDgeam(void *conn)
         rpc_read(conn, &transb, sizeof(cublasOperation_t)) < 0 ||
         rpc_read(conn, &m, sizeof(int)) < 0 ||
         rpc_read(conn, &n, sizeof(int)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const double*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const double*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const double)) < 0) ||
         rpc_read(conn, &A, sizeof(const double*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
-        rpc_read(conn, &beta, sizeof(const double*)) < 0 ||
+        rpc_read(conn, &beta_null_check, sizeof(const double*)) < 0 ||
+        (beta_null_check && rpc_read(conn, &beta, sizeof(const double)) < 0) ||
         rpc_read(conn, &B, sizeof(const double*)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int)) < 0 ||
         rpc_read(conn, &C, sizeof(double)) < 0 ||
@@ -40226,7 +40322,7 @@ int handle_cublasDgeam(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDgeam(handle, transa, transb, m, n, &alpha, &A, lda, &beta, &B, ldb, &C, ldc);
+    scuda_intercept_result = cublasDgeam(handle, transa, transb, m, n, &alpha, A, lda, &beta, B, ldb, &C, ldc);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(double)) < 0 ||
@@ -40245,11 +40341,13 @@ int handle_cublasDgeam_64(void *conn)
     cublasOperation_t transb;
     int64_t m;
     int64_t n;
+    double* alpha_null_check;
     double alpha;
-    double A;
+    const double* A;
     int64_t lda;
+    double* beta_null_check;
     double beta;
-    double B;
+    const double* B;
     int64_t ldb;
     double C;
     int64_t ldc;
@@ -40261,10 +40359,12 @@ int handle_cublasDgeam_64(void *conn)
         rpc_read(conn, &transb, sizeof(cublasOperation_t)) < 0 ||
         rpc_read(conn, &m, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const double*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const double*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const double)) < 0) ||
         rpc_read(conn, &A, sizeof(const double*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &beta, sizeof(const double*)) < 0 ||
+        rpc_read(conn, &beta_null_check, sizeof(const double*)) < 0 ||
+        (beta_null_check && rpc_read(conn, &beta, sizeof(const double)) < 0) ||
         rpc_read(conn, &B, sizeof(const double*)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &C, sizeof(double)) < 0 ||
@@ -40275,7 +40375,7 @@ int handle_cublasDgeam_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDgeam_64(handle, transa, transb, m, n, &alpha, &A, lda, &beta, &B, ldb, &C, ldc);
+    scuda_intercept_result = cublasDgeam_64(handle, transa, transb, m, n, &alpha, A, lda, &beta, B, ldb, &C, ldc);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(double)) < 0 ||
@@ -40294,10 +40394,12 @@ int handle_cublasCgeam(void *conn)
     cublasOperation_t transb;
     int m;
     int n;
-    const cuComplex* alpha;
+    cuComplex* alpha_null_check;
+    cuComplex alpha;
     const cuComplex* A;
     int lda;
-    const cuComplex* beta;
+    cuComplex* beta_null_check;
+    cuComplex beta;
     const cuComplex* B;
     int ldb;
     cuComplex C;
@@ -40310,10 +40412,12 @@ int handle_cublasCgeam(void *conn)
         rpc_read(conn, &transb, sizeof(cublasOperation_t)) < 0 ||
         rpc_read(conn, &m, sizeof(int)) < 0 ||
         rpc_read(conn, &n, sizeof(int)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const cuComplex*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const cuComplex)) < 0) ||
         rpc_read(conn, &A, sizeof(const cuComplex*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
-        rpc_read(conn, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_read(conn, &beta_null_check, sizeof(const cuComplex*)) < 0 ||
+        (beta_null_check && rpc_read(conn, &beta, sizeof(const cuComplex)) < 0) ||
         rpc_read(conn, &B, sizeof(const cuComplex*)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int)) < 0 ||
         rpc_read(conn, &C, sizeof(cuComplex)) < 0 ||
@@ -40324,7 +40428,7 @@ int handle_cublasCgeam(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasCgeam(handle, transa, transb, m, n, alpha, A, lda, beta, B, ldb, &C, ldc);
+    scuda_intercept_result = cublasCgeam(handle, transa, transb, m, n, &alpha, A, lda, &beta, B, ldb, &C, ldc);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(cuComplex)) < 0 ||
@@ -40343,10 +40447,12 @@ int handle_cublasCgeam_64(void *conn)
     cublasOperation_t transb;
     int64_t m;
     int64_t n;
-    const cuComplex* alpha;
+    cuComplex* alpha_null_check;
+    cuComplex alpha;
     const cuComplex* A;
     int64_t lda;
-    const cuComplex* beta;
+    cuComplex* beta_null_check;
+    cuComplex beta;
     const cuComplex* B;
     int64_t ldb;
     cuComplex C;
@@ -40359,10 +40465,12 @@ int handle_cublasCgeam_64(void *conn)
         rpc_read(conn, &transb, sizeof(cublasOperation_t)) < 0 ||
         rpc_read(conn, &m, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const cuComplex*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const cuComplex)) < 0) ||
         rpc_read(conn, &A, sizeof(const cuComplex*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &beta, sizeof(const cuComplex*)) < 0 ||
+        rpc_read(conn, &beta_null_check, sizeof(const cuComplex*)) < 0 ||
+        (beta_null_check && rpc_read(conn, &beta, sizeof(const cuComplex)) < 0) ||
         rpc_read(conn, &B, sizeof(const cuComplex*)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &C, sizeof(cuComplex)) < 0 ||
@@ -40373,7 +40481,7 @@ int handle_cublasCgeam_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasCgeam_64(handle, transa, transb, m, n, alpha, A, lda, beta, B, ldb, &C, ldc);
+    scuda_intercept_result = cublasCgeam_64(handle, transa, transb, m, n, &alpha, A, lda, &beta, B, ldb, &C, ldc);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(cuComplex)) < 0 ||
@@ -40392,10 +40500,12 @@ int handle_cublasZgeam(void *conn)
     cublasOperation_t transb;
     int m;
     int n;
-    const cuDoubleComplex* alpha;
+    cuDoubleComplex* alpha_null_check;
+    cuDoubleComplex alpha;
     const cuDoubleComplex* A;
     int lda;
-    const cuDoubleComplex* beta;
+    cuDoubleComplex* beta_null_check;
+    cuDoubleComplex beta;
     const cuDoubleComplex* B;
     int ldb;
     cuDoubleComplex C;
@@ -40408,10 +40518,12 @@ int handle_cublasZgeam(void *conn)
         rpc_read(conn, &transb, sizeof(cublasOperation_t)) < 0 ||
         rpc_read(conn, &m, sizeof(int)) < 0 ||
         rpc_read(conn, &n, sizeof(int)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const cuDoubleComplex*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_read(conn, &A, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
-        rpc_read(conn, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_read(conn, &beta_null_check, sizeof(const cuDoubleComplex*)) < 0 ||
+        (beta_null_check && rpc_read(conn, &beta, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_read(conn, &B, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int)) < 0 ||
         rpc_read(conn, &C, sizeof(cuDoubleComplex)) < 0 ||
@@ -40422,7 +40534,7 @@ int handle_cublasZgeam(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasZgeam(handle, transa, transb, m, n, alpha, A, lda, beta, B, ldb, &C, ldc);
+    scuda_intercept_result = cublasZgeam(handle, transa, transb, m, n, &alpha, A, lda, &beta, B, ldb, &C, ldc);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(cuDoubleComplex)) < 0 ||
@@ -40441,10 +40553,12 @@ int handle_cublasZgeam_64(void *conn)
     cublasOperation_t transb;
     int64_t m;
     int64_t n;
-    const cuDoubleComplex* alpha;
+    cuDoubleComplex* alpha_null_check;
+    cuDoubleComplex alpha;
     const cuDoubleComplex* A;
     int64_t lda;
-    const cuDoubleComplex* beta;
+    cuDoubleComplex* beta_null_check;
+    cuDoubleComplex beta;
     const cuDoubleComplex* B;
     int64_t ldb;
     cuDoubleComplex C;
@@ -40457,10 +40571,12 @@ int handle_cublasZgeam_64(void *conn)
         rpc_read(conn, &transb, sizeof(cublasOperation_t)) < 0 ||
         rpc_read(conn, &m, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const cuDoubleComplex*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_read(conn, &A, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_read(conn, &beta_null_check, sizeof(const cuDoubleComplex*)) < 0 ||
+        (beta_null_check && rpc_read(conn, &beta, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_read(conn, &B, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &C, sizeof(cuDoubleComplex)) < 0 ||
@@ -40471,7 +40587,7 @@ int handle_cublasZgeam_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasZgeam_64(handle, transa, transb, m, n, alpha, A, lda, beta, B, ldb, &C, ldc);
+    scuda_intercept_result = cublasZgeam_64(handle, transa, transb, m, n, &alpha, A, lda, &beta, B, ldb, &C, ldc);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(cuDoubleComplex)) < 0 ||
@@ -40493,7 +40609,8 @@ int handle_cublasStrsmBatched(void *conn)
     cublasDiagType_t diag;
     int m;
     int n;
-    const float* alpha;
+    float* alpha_null_check;
+    float alpha;
     const float* * A = nullptr;
     int lda;
     float* * B = nullptr;
@@ -40509,7 +40626,8 @@ int handle_cublasStrsmBatched(void *conn)
         rpc_read(conn, &diag, sizeof(cublasDiagType_t)) < 0 ||
         rpc_read(conn, &m, sizeof(int)) < 0 ||
         rpc_read(conn, &n, sizeof(int)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const float*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const float*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const float)) < 0) ||
         rpc_read(conn, &A, sizeof(const float* const)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
         rpc_read(conn, &B, sizeof(float* const)) < 0 ||
@@ -40520,7 +40638,7 @@ int handle_cublasStrsmBatched(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasStrsmBatched(handle, side, uplo, trans, diag, m, n, alpha, A, lda, B, ldb, batchCount);
+    scuda_intercept_result = cublasStrsmBatched(handle, side, uplo, trans, diag, m, n, &alpha, A, lda, B, ldb, batchCount);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_end_response(conn, &scuda_intercept_result) < 0)
@@ -40541,7 +40659,8 @@ int handle_cublasStrsmBatched_64(void *conn)
     cublasDiagType_t diag;
     int64_t m;
     int64_t n;
-    const float* alpha;
+    float* alpha_null_check;
+    float alpha;
     const float* * A = nullptr;
     int64_t lda;
     float* * B = nullptr;
@@ -40557,7 +40676,8 @@ int handle_cublasStrsmBatched_64(void *conn)
         rpc_read(conn, &diag, sizeof(cublasDiagType_t)) < 0 ||
         rpc_read(conn, &m, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const float*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const float*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const float)) < 0) ||
         rpc_read(conn, &A, sizeof(const float* const)) < 0 ||
         rpc_read(conn, &lda, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &B, sizeof(float* const)) < 0 ||
@@ -40568,7 +40688,7 @@ int handle_cublasStrsmBatched_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasStrsmBatched_64(handle, side, uplo, trans, diag, m, n, alpha, A, lda, B, ldb, batchCount);
+    scuda_intercept_result = cublasStrsmBatched_64(handle, side, uplo, trans, diag, m, n, &alpha, A, lda, B, ldb, batchCount);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_end_response(conn, &scuda_intercept_result) < 0)
@@ -40589,6 +40709,7 @@ int handle_cublasDtrsmBatched(void *conn)
     cublasDiagType_t diag;
     int m;
     int n;
+    double* alpha_null_check;
     double alpha;
     const double* * A = nullptr;
     int lda;
@@ -40605,7 +40726,8 @@ int handle_cublasDtrsmBatched(void *conn)
         rpc_read(conn, &diag, sizeof(cublasDiagType_t)) < 0 ||
         rpc_read(conn, &m, sizeof(int)) < 0 ||
         rpc_read(conn, &n, sizeof(int)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const double*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const double*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const double)) < 0) ||
         rpc_read(conn, &A, sizeof(const double* const)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
         rpc_read(conn, &B, sizeof(double* const)) < 0 ||
@@ -40637,6 +40759,7 @@ int handle_cublasDtrsmBatched_64(void *conn)
     cublasDiagType_t diag;
     int64_t m;
     int64_t n;
+    double* alpha_null_check;
     double alpha;
     const double* * A = nullptr;
     int64_t lda;
@@ -40653,7 +40776,8 @@ int handle_cublasDtrsmBatched_64(void *conn)
         rpc_read(conn, &diag, sizeof(cublasDiagType_t)) < 0 ||
         rpc_read(conn, &m, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const double*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const double*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const double)) < 0) ||
         rpc_read(conn, &A, sizeof(const double* const)) < 0 ||
         rpc_read(conn, &lda, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &B, sizeof(double* const)) < 0 ||
@@ -40685,7 +40809,8 @@ int handle_cublasCtrsmBatched(void *conn)
     cublasDiagType_t diag;
     int m;
     int n;
-    const cuComplex* alpha;
+    cuComplex* alpha_null_check;
+    cuComplex alpha;
     const cuComplex* * A = nullptr;
     int lda;
     cuComplex* * B = nullptr;
@@ -40701,7 +40826,8 @@ int handle_cublasCtrsmBatched(void *conn)
         rpc_read(conn, &diag, sizeof(cublasDiagType_t)) < 0 ||
         rpc_read(conn, &m, sizeof(int)) < 0 ||
         rpc_read(conn, &n, sizeof(int)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const cuComplex*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const cuComplex)) < 0) ||
         rpc_read(conn, &A, sizeof(const cuComplex* const)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
         rpc_read(conn, &B, sizeof(cuComplex* const)) < 0 ||
@@ -40712,7 +40838,7 @@ int handle_cublasCtrsmBatched(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasCtrsmBatched(handle, side, uplo, trans, diag, m, n, alpha, A, lda, B, ldb, batchCount);
+    scuda_intercept_result = cublasCtrsmBatched(handle, side, uplo, trans, diag, m, n, &alpha, A, lda, B, ldb, batchCount);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_end_response(conn, &scuda_intercept_result) < 0)
@@ -40733,7 +40859,8 @@ int handle_cublasCtrsmBatched_64(void *conn)
     cublasDiagType_t diag;
     int64_t m;
     int64_t n;
-    const cuComplex* alpha;
+    cuComplex* alpha_null_check;
+    cuComplex alpha;
     const cuComplex* * A = nullptr;
     int64_t lda;
     cuComplex* * B = nullptr;
@@ -40749,7 +40876,8 @@ int handle_cublasCtrsmBatched_64(void *conn)
         rpc_read(conn, &diag, sizeof(cublasDiagType_t)) < 0 ||
         rpc_read(conn, &m, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const cuComplex*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const cuComplex*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const cuComplex)) < 0) ||
         rpc_read(conn, &A, sizeof(const cuComplex* const)) < 0 ||
         rpc_read(conn, &lda, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &B, sizeof(cuComplex* const)) < 0 ||
@@ -40760,7 +40888,7 @@ int handle_cublasCtrsmBatched_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasCtrsmBatched_64(handle, side, uplo, trans, diag, m, n, alpha, A, lda, B, ldb, batchCount);
+    scuda_intercept_result = cublasCtrsmBatched_64(handle, side, uplo, trans, diag, m, n, &alpha, A, lda, B, ldb, batchCount);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_end_response(conn, &scuda_intercept_result) < 0)
@@ -40781,7 +40909,8 @@ int handle_cublasZtrsmBatched(void *conn)
     cublasDiagType_t diag;
     int m;
     int n;
-    const cuDoubleComplex* alpha;
+    cuDoubleComplex* alpha_null_check;
+    cuDoubleComplex alpha;
     const cuDoubleComplex* * A = nullptr;
     int lda;
     cuDoubleComplex* * B = nullptr;
@@ -40797,7 +40926,8 @@ int handle_cublasZtrsmBatched(void *conn)
         rpc_read(conn, &diag, sizeof(cublasDiagType_t)) < 0 ||
         rpc_read(conn, &m, sizeof(int)) < 0 ||
         rpc_read(conn, &n, sizeof(int)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const cuDoubleComplex*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_read(conn, &A, sizeof(const cuDoubleComplex* const)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
         rpc_read(conn, &B, sizeof(cuDoubleComplex* const)) < 0 ||
@@ -40808,7 +40938,7 @@ int handle_cublasZtrsmBatched(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasZtrsmBatched(handle, side, uplo, trans, diag, m, n, alpha, A, lda, B, ldb, batchCount);
+    scuda_intercept_result = cublasZtrsmBatched(handle, side, uplo, trans, diag, m, n, &alpha, A, lda, B, ldb, batchCount);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_end_response(conn, &scuda_intercept_result) < 0)
@@ -40829,7 +40959,8 @@ int handle_cublasZtrsmBatched_64(void *conn)
     cublasDiagType_t diag;
     int64_t m;
     int64_t n;
-    const cuDoubleComplex* alpha;
+    cuDoubleComplex* alpha_null_check;
+    cuDoubleComplex alpha;
     const cuDoubleComplex* * A = nullptr;
     int64_t lda;
     cuDoubleComplex* * B = nullptr;
@@ -40845,7 +40976,8 @@ int handle_cublasZtrsmBatched_64(void *conn)
         rpc_read(conn, &diag, sizeof(cublasDiagType_t)) < 0 ||
         rpc_read(conn, &m, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_read(conn, &alpha_null_check, sizeof(const cuDoubleComplex*)) < 0 ||
+        (alpha_null_check && rpc_read(conn, &alpha, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_read(conn, &A, sizeof(const cuDoubleComplex* const)) < 0 ||
         rpc_read(conn, &lda, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &B, sizeof(cuDoubleComplex* const)) < 0 ||
@@ -40856,7 +40988,7 @@ int handle_cublasZtrsmBatched_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasZtrsmBatched_64(handle, side, uplo, trans, diag, m, n, alpha, A, lda, B, ldb, batchCount);
+    scuda_intercept_result = cublasZtrsmBatched_64(handle, side, uplo, trans, diag, m, n, &alpha, A, lda, B, ldb, batchCount);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_end_response(conn, &scuda_intercept_result) < 0)
@@ -40875,7 +41007,8 @@ int handle_cublasSdgmm(void *conn)
     int n;
     const float* A;
     int lda;
-    const float* x;
+    float* x_null_check;
+    float x;
     int incx;
     float C;
     int ldc;
@@ -40888,7 +41021,8 @@ int handle_cublasSdgmm(void *conn)
         rpc_read(conn, &n, sizeof(int)) < 0 ||
         rpc_read(conn, &A, sizeof(const float*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
-        rpc_read(conn, &x, sizeof(const float*)) < 0 ||
+        rpc_read(conn, &x_null_check, sizeof(const float*)) < 0 ||
+        (x_null_check && rpc_read(conn, &x, sizeof(const float)) < 0) ||
         rpc_read(conn, &incx, sizeof(int)) < 0 ||
         rpc_read(conn, &C, sizeof(float)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int)) < 0 ||
@@ -40898,7 +41032,7 @@ int handle_cublasSdgmm(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasSdgmm(handle, mode, m, n, A, lda, x, incx, &C, ldc);
+    scuda_intercept_result = cublasSdgmm(handle, mode, m, n, A, lda, &x, incx, &C, ldc);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(float)) < 0 ||
@@ -40918,7 +41052,8 @@ int handle_cublasSdgmm_64(void *conn)
     int64_t n;
     const float* A;
     int64_t lda;
-    const float* x;
+    float* x_null_check;
+    float x;
     int64_t incx;
     float C;
     int64_t ldc;
@@ -40931,7 +41066,8 @@ int handle_cublasSdgmm_64(void *conn)
         rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &A, sizeof(const float*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &x, sizeof(const float*)) < 0 ||
+        rpc_read(conn, &x_null_check, sizeof(const float*)) < 0 ||
+        (x_null_check && rpc_read(conn, &x, sizeof(const float)) < 0) ||
         rpc_read(conn, &incx, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &C, sizeof(float)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int64_t)) < 0 ||
@@ -40941,7 +41077,7 @@ int handle_cublasSdgmm_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasSdgmm_64(handle, mode, m, n, A, lda, x, incx, &C, ldc);
+    scuda_intercept_result = cublasSdgmm_64(handle, mode, m, n, A, lda, &x, incx, &C, ldc);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(float)) < 0 ||
@@ -40959,8 +41095,9 @@ int handle_cublasDdgmm(void *conn)
     cublasSideMode_t mode;
     int m;
     int n;
-    double A;
+    const double* A;
     int lda;
+    double* x_null_check;
     double x;
     int incx;
     double C;
@@ -40974,7 +41111,8 @@ int handle_cublasDdgmm(void *conn)
         rpc_read(conn, &n, sizeof(int)) < 0 ||
         rpc_read(conn, &A, sizeof(const double*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
-        rpc_read(conn, &x, sizeof(const double*)) < 0 ||
+        rpc_read(conn, &x_null_check, sizeof(const double*)) < 0 ||
+        (x_null_check && rpc_read(conn, &x, sizeof(const double)) < 0) ||
         rpc_read(conn, &incx, sizeof(int)) < 0 ||
         rpc_read(conn, &C, sizeof(double)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int)) < 0 ||
@@ -40984,7 +41122,7 @@ int handle_cublasDdgmm(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDdgmm(handle, mode, m, n, &A, lda, &x, incx, &C, ldc);
+    scuda_intercept_result = cublasDdgmm(handle, mode, m, n, A, lda, &x, incx, &C, ldc);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(double)) < 0 ||
@@ -41002,8 +41140,9 @@ int handle_cublasDdgmm_64(void *conn)
     cublasSideMode_t mode;
     int64_t m;
     int64_t n;
-    double A;
+    const double* A;
     int64_t lda;
+    double* x_null_check;
     double x;
     int64_t incx;
     double C;
@@ -41017,7 +41156,8 @@ int handle_cublasDdgmm_64(void *conn)
         rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &A, sizeof(const double*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &x, sizeof(const double*)) < 0 ||
+        rpc_read(conn, &x_null_check, sizeof(const double*)) < 0 ||
+        (x_null_check && rpc_read(conn, &x, sizeof(const double)) < 0) ||
         rpc_read(conn, &incx, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &C, sizeof(double)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int64_t)) < 0 ||
@@ -41027,7 +41167,7 @@ int handle_cublasDdgmm_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDdgmm_64(handle, mode, m, n, &A, lda, &x, incx, &C, ldc);
+    scuda_intercept_result = cublasDdgmm_64(handle, mode, m, n, A, lda, &x, incx, &C, ldc);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(double)) < 0 ||
@@ -41047,7 +41187,8 @@ int handle_cublasCdgmm(void *conn)
     int n;
     const cuComplex* A;
     int lda;
-    const cuComplex* x;
+    cuComplex* x_null_check;
+    cuComplex x;
     int incx;
     cuComplex C;
     int ldc;
@@ -41060,7 +41201,8 @@ int handle_cublasCdgmm(void *conn)
         rpc_read(conn, &n, sizeof(int)) < 0 ||
         rpc_read(conn, &A, sizeof(const cuComplex*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
-        rpc_read(conn, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_read(conn, &x_null_check, sizeof(const cuComplex*)) < 0 ||
+        (x_null_check && rpc_read(conn, &x, sizeof(const cuComplex)) < 0) ||
         rpc_read(conn, &incx, sizeof(int)) < 0 ||
         rpc_read(conn, &C, sizeof(cuComplex)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int)) < 0 ||
@@ -41070,7 +41212,7 @@ int handle_cublasCdgmm(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasCdgmm(handle, mode, m, n, A, lda, x, incx, &C, ldc);
+    scuda_intercept_result = cublasCdgmm(handle, mode, m, n, A, lda, &x, incx, &C, ldc);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(cuComplex)) < 0 ||
@@ -41090,7 +41232,8 @@ int handle_cublasCdgmm_64(void *conn)
     int64_t n;
     const cuComplex* A;
     int64_t lda;
-    const cuComplex* x;
+    cuComplex* x_null_check;
+    cuComplex x;
     int64_t incx;
     cuComplex C;
     int64_t ldc;
@@ -41103,7 +41246,8 @@ int handle_cublasCdgmm_64(void *conn)
         rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &A, sizeof(const cuComplex*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &x, sizeof(const cuComplex*)) < 0 ||
+        rpc_read(conn, &x_null_check, sizeof(const cuComplex*)) < 0 ||
+        (x_null_check && rpc_read(conn, &x, sizeof(const cuComplex)) < 0) ||
         rpc_read(conn, &incx, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &C, sizeof(cuComplex)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int64_t)) < 0 ||
@@ -41113,7 +41257,7 @@ int handle_cublasCdgmm_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasCdgmm_64(handle, mode, m, n, A, lda, x, incx, &C, ldc);
+    scuda_intercept_result = cublasCdgmm_64(handle, mode, m, n, A, lda, &x, incx, &C, ldc);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(cuComplex)) < 0 ||
@@ -41133,7 +41277,8 @@ int handle_cublasZdgmm(void *conn)
     int n;
     const cuDoubleComplex* A;
     int lda;
-    const cuDoubleComplex* x;
+    cuDoubleComplex* x_null_check;
+    cuDoubleComplex x;
     int incx;
     cuDoubleComplex C;
     int ldc;
@@ -41146,7 +41291,8 @@ int handle_cublasZdgmm(void *conn)
         rpc_read(conn, &n, sizeof(int)) < 0 ||
         rpc_read(conn, &A, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
-        rpc_read(conn, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_read(conn, &x_null_check, sizeof(const cuDoubleComplex*)) < 0 ||
+        (x_null_check && rpc_read(conn, &x, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_read(conn, &incx, sizeof(int)) < 0 ||
         rpc_read(conn, &C, sizeof(cuDoubleComplex)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int)) < 0 ||
@@ -41156,7 +41302,7 @@ int handle_cublasZdgmm(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasZdgmm(handle, mode, m, n, A, lda, x, incx, &C, ldc);
+    scuda_intercept_result = cublasZdgmm(handle, mode, m, n, A, lda, &x, incx, &C, ldc);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(cuDoubleComplex)) < 0 ||
@@ -41176,7 +41322,8 @@ int handle_cublasZdgmm_64(void *conn)
     int64_t n;
     const cuDoubleComplex* A;
     int64_t lda;
-    const cuDoubleComplex* x;
+    cuDoubleComplex* x_null_check;
+    cuDoubleComplex x;
     int64_t incx;
     cuDoubleComplex C;
     int64_t ldc;
@@ -41189,7 +41336,8 @@ int handle_cublasZdgmm_64(void *conn)
         rpc_read(conn, &n, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &A, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_read(conn, &lda, sizeof(int64_t)) < 0 ||
-        rpc_read(conn, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_read(conn, &x_null_check, sizeof(const cuDoubleComplex*)) < 0 ||
+        (x_null_check && rpc_read(conn, &x, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_read(conn, &incx, sizeof(int64_t)) < 0 ||
         rpc_read(conn, &C, sizeof(cuDoubleComplex)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int64_t)) < 0 ||
@@ -41199,7 +41347,7 @@ int handle_cublasZdgmm_64(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasZdgmm_64(handle, mode, m, n, A, lda, x, incx, &C, ldc);
+    scuda_intercept_result = cublasZdgmm_64(handle, mode, m, n, A, lda, &x, incx, &C, ldc);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &C, sizeof(cuDoubleComplex)) < 0 ||
@@ -41720,7 +41868,8 @@ int handle_cublasStpttr(void *conn)
     cublasHandle_t handle;
     cublasFillMode_t uplo;
     int n;
-    const float* AP;
+    float* AP_null_check;
+    float AP;
     float A;
     int lda;
     int request_id;
@@ -41729,7 +41878,8 @@ int handle_cublasStpttr(void *conn)
         rpc_read(conn, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_read(conn, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_read(conn, &n, sizeof(int)) < 0 ||
-        rpc_read(conn, &AP, sizeof(const float*)) < 0 ||
+        rpc_read(conn, &AP_null_check, sizeof(const float*)) < 0 ||
+        (AP_null_check && rpc_read(conn, &AP, sizeof(const float)) < 0) ||
         rpc_read(conn, &A, sizeof(float)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
         false)
@@ -41738,7 +41888,7 @@ int handle_cublasStpttr(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasStpttr(handle, uplo, n, AP, &A, lda);
+    scuda_intercept_result = cublasStpttr(handle, uplo, n, &AP, &A, lda);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &A, sizeof(float)) < 0 ||
@@ -41755,6 +41905,7 @@ int handle_cublasDtpttr(void *conn)
     cublasHandle_t handle;
     cublasFillMode_t uplo;
     int n;
+    double* AP_null_check;
     double AP;
     double A;
     int lda;
@@ -41764,7 +41915,8 @@ int handle_cublasDtpttr(void *conn)
         rpc_read(conn, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_read(conn, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_read(conn, &n, sizeof(int)) < 0 ||
-        rpc_read(conn, &AP, sizeof(const double*)) < 0 ||
+        rpc_read(conn, &AP_null_check, sizeof(const double*)) < 0 ||
+        (AP_null_check && rpc_read(conn, &AP, sizeof(const double)) < 0) ||
         rpc_read(conn, &A, sizeof(double)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
         false)
@@ -41790,7 +41942,8 @@ int handle_cublasCtpttr(void *conn)
     cublasHandle_t handle;
     cublasFillMode_t uplo;
     int n;
-    const cuComplex* AP;
+    cuComplex* AP_null_check;
+    cuComplex AP;
     cuComplex A;
     int lda;
     int request_id;
@@ -41799,7 +41952,8 @@ int handle_cublasCtpttr(void *conn)
         rpc_read(conn, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_read(conn, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_read(conn, &n, sizeof(int)) < 0 ||
-        rpc_read(conn, &AP, sizeof(const cuComplex*)) < 0 ||
+        rpc_read(conn, &AP_null_check, sizeof(const cuComplex*)) < 0 ||
+        (AP_null_check && rpc_read(conn, &AP, sizeof(const cuComplex)) < 0) ||
         rpc_read(conn, &A, sizeof(cuComplex)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
         false)
@@ -41808,7 +41962,7 @@ int handle_cublasCtpttr(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasCtpttr(handle, uplo, n, AP, &A, lda);
+    scuda_intercept_result = cublasCtpttr(handle, uplo, n, &AP, &A, lda);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &A, sizeof(cuComplex)) < 0 ||
@@ -41825,7 +41979,8 @@ int handle_cublasZtpttr(void *conn)
     cublasHandle_t handle;
     cublasFillMode_t uplo;
     int n;
-    const cuDoubleComplex* AP;
+    cuDoubleComplex* AP_null_check;
+    cuDoubleComplex AP;
     cuDoubleComplex A;
     int lda;
     int request_id;
@@ -41834,7 +41989,8 @@ int handle_cublasZtpttr(void *conn)
         rpc_read(conn, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_read(conn, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_read(conn, &n, sizeof(int)) < 0 ||
-        rpc_read(conn, &AP, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_read(conn, &AP_null_check, sizeof(const cuDoubleComplex*)) < 0 ||
+        (AP_null_check && rpc_read(conn, &AP, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_read(conn, &A, sizeof(cuDoubleComplex)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
         false)
@@ -41843,7 +41999,7 @@ int handle_cublasZtpttr(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasZtpttr(handle, uplo, n, AP, &A, lda);
+    scuda_intercept_result = cublasZtpttr(handle, uplo, n, &AP, &A, lda);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &A, sizeof(cuDoubleComplex)) < 0 ||
@@ -41860,7 +42016,8 @@ int handle_cublasStrttp(void *conn)
     cublasHandle_t handle;
     cublasFillMode_t uplo;
     int n;
-    const float* A;
+    float* A_null_check;
+    float A;
     int lda;
     float AP;
     int request_id;
@@ -41869,7 +42026,8 @@ int handle_cublasStrttp(void *conn)
         rpc_read(conn, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_read(conn, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_read(conn, &n, sizeof(int)) < 0 ||
-        rpc_read(conn, &A, sizeof(const float*)) < 0 ||
+        rpc_read(conn, &A_null_check, sizeof(const float*)) < 0 ||
+        (A_null_check && rpc_read(conn, &A, sizeof(const float)) < 0) ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
         rpc_read(conn, &AP, sizeof(float)) < 0 ||
         false)
@@ -41878,7 +42036,7 @@ int handle_cublasStrttp(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasStrttp(handle, uplo, n, A, lda, &AP);
+    scuda_intercept_result = cublasStrttp(handle, uplo, n, &A, lda, &AP);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &AP, sizeof(float)) < 0 ||
@@ -41895,6 +42053,7 @@ int handle_cublasDtrttp(void *conn)
     cublasHandle_t handle;
     cublasFillMode_t uplo;
     int n;
+    double* A_null_check;
     double A;
     int lda;
     double AP;
@@ -41904,7 +42063,8 @@ int handle_cublasDtrttp(void *conn)
         rpc_read(conn, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_read(conn, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_read(conn, &n, sizeof(int)) < 0 ||
-        rpc_read(conn, &A, sizeof(const double*)) < 0 ||
+        rpc_read(conn, &A_null_check, sizeof(const double*)) < 0 ||
+        (A_null_check && rpc_read(conn, &A, sizeof(const double)) < 0) ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
         rpc_read(conn, &AP, sizeof(double)) < 0 ||
         false)
@@ -41930,7 +42090,8 @@ int handle_cublasCtrttp(void *conn)
     cublasHandle_t handle;
     cublasFillMode_t uplo;
     int n;
-    const cuComplex* A;
+    cuComplex* A_null_check;
+    cuComplex A;
     int lda;
     cuComplex AP;
     int request_id;
@@ -41939,7 +42100,8 @@ int handle_cublasCtrttp(void *conn)
         rpc_read(conn, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_read(conn, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_read(conn, &n, sizeof(int)) < 0 ||
-        rpc_read(conn, &A, sizeof(const cuComplex*)) < 0 ||
+        rpc_read(conn, &A_null_check, sizeof(const cuComplex*)) < 0 ||
+        (A_null_check && rpc_read(conn, &A, sizeof(const cuComplex)) < 0) ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
         rpc_read(conn, &AP, sizeof(cuComplex)) < 0 ||
         false)
@@ -41948,7 +42110,7 @@ int handle_cublasCtrttp(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasCtrttp(handle, uplo, n, A, lda, &AP);
+    scuda_intercept_result = cublasCtrttp(handle, uplo, n, &A, lda, &AP);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &AP, sizeof(cuComplex)) < 0 ||
@@ -41965,7 +42127,8 @@ int handle_cublasZtrttp(void *conn)
     cublasHandle_t handle;
     cublasFillMode_t uplo;
     int n;
-    const cuDoubleComplex* A;
+    cuDoubleComplex* A_null_check;
+    cuDoubleComplex A;
     int lda;
     cuDoubleComplex AP;
     int request_id;
@@ -41974,7 +42137,8 @@ int handle_cublasZtrttp(void *conn)
         rpc_read(conn, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_read(conn, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_read(conn, &n, sizeof(int)) < 0 ||
-        rpc_read(conn, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        rpc_read(conn, &A_null_check, sizeof(const cuDoubleComplex*)) < 0 ||
+        (A_null_check && rpc_read(conn, &A, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
         rpc_read(conn, &AP, sizeof(cuDoubleComplex)) < 0 ||
         false)
@@ -41983,7 +42147,7 @@ int handle_cublasZtrttp(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasZtrttp(handle, uplo, n, A, lda, &AP);
+    scuda_intercept_result = cublasZtrttp(handle, uplo, n, &A, lda, &AP);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &AP, sizeof(cuDoubleComplex)) < 0 ||
@@ -42002,7 +42166,8 @@ int handle_cublasSgetriBatched(void *conn)
     int n;
     const float* * A = nullptr;
     int lda;
-    const int* P;
+    int* P_null_check;
+    int P;
     float* * C = nullptr;
     int ldc;
     int info;
@@ -42014,7 +42179,8 @@ int handle_cublasSgetriBatched(void *conn)
         rpc_read(conn, &n, sizeof(int)) < 0 ||
         rpc_read(conn, &A, sizeof(const float* const)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
-        rpc_read(conn, &P, sizeof(const int*)) < 0 ||
+        rpc_read(conn, &P_null_check, sizeof(const int*)) < 0 ||
+        (P_null_check && rpc_read(conn, &P, sizeof(const int)) < 0) ||
         rpc_read(conn, &C, sizeof(float* const)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int)) < 0 ||
         rpc_read(conn, &info, sizeof(int)) < 0 ||
@@ -42024,7 +42190,7 @@ int handle_cublasSgetriBatched(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasSgetriBatched(handle, n, A, lda, P, C, ldc, &info, batchSize);
+    scuda_intercept_result = cublasSgetriBatched(handle, n, A, lda, &P, C, ldc, &info, batchSize);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &info, sizeof(int)) < 0 ||
@@ -42043,7 +42209,8 @@ int handle_cublasDgetriBatched(void *conn)
     int n;
     const double* * A = nullptr;
     int lda;
-    const int* P;
+    int* P_null_check;
+    int P;
     double* * C = nullptr;
     int ldc;
     int info;
@@ -42055,7 +42222,8 @@ int handle_cublasDgetriBatched(void *conn)
         rpc_read(conn, &n, sizeof(int)) < 0 ||
         rpc_read(conn, &A, sizeof(const double* const)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
-        rpc_read(conn, &P, sizeof(const int*)) < 0 ||
+        rpc_read(conn, &P_null_check, sizeof(const int*)) < 0 ||
+        (P_null_check && rpc_read(conn, &P, sizeof(const int)) < 0) ||
         rpc_read(conn, &C, sizeof(double* const)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int)) < 0 ||
         rpc_read(conn, &info, sizeof(int)) < 0 ||
@@ -42065,7 +42233,7 @@ int handle_cublasDgetriBatched(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDgetriBatched(handle, n, A, lda, P, C, ldc, &info, batchSize);
+    scuda_intercept_result = cublasDgetriBatched(handle, n, A, lda, &P, C, ldc, &info, batchSize);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &info, sizeof(int)) < 0 ||
@@ -42084,7 +42252,8 @@ int handle_cublasCgetriBatched(void *conn)
     int n;
     const cuComplex* * A = nullptr;
     int lda;
-    const int* P;
+    int* P_null_check;
+    int P;
     cuComplex* * C = nullptr;
     int ldc;
     int info;
@@ -42096,7 +42265,8 @@ int handle_cublasCgetriBatched(void *conn)
         rpc_read(conn, &n, sizeof(int)) < 0 ||
         rpc_read(conn, &A, sizeof(const cuComplex* const)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
-        rpc_read(conn, &P, sizeof(const int*)) < 0 ||
+        rpc_read(conn, &P_null_check, sizeof(const int*)) < 0 ||
+        (P_null_check && rpc_read(conn, &P, sizeof(const int)) < 0) ||
         rpc_read(conn, &C, sizeof(cuComplex* const)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int)) < 0 ||
         rpc_read(conn, &info, sizeof(int)) < 0 ||
@@ -42106,7 +42276,7 @@ int handle_cublasCgetriBatched(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasCgetriBatched(handle, n, A, lda, P, C, ldc, &info, batchSize);
+    scuda_intercept_result = cublasCgetriBatched(handle, n, A, lda, &P, C, ldc, &info, batchSize);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &info, sizeof(int)) < 0 ||
@@ -42125,7 +42295,8 @@ int handle_cublasZgetriBatched(void *conn)
     int n;
     const cuDoubleComplex* * A = nullptr;
     int lda;
-    const int* P;
+    int* P_null_check;
+    int P;
     cuDoubleComplex* * C = nullptr;
     int ldc;
     int info;
@@ -42137,7 +42308,8 @@ int handle_cublasZgetriBatched(void *conn)
         rpc_read(conn, &n, sizeof(int)) < 0 ||
         rpc_read(conn, &A, sizeof(const cuDoubleComplex* const)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
-        rpc_read(conn, &P, sizeof(const int*)) < 0 ||
+        rpc_read(conn, &P_null_check, sizeof(const int*)) < 0 ||
+        (P_null_check && rpc_read(conn, &P, sizeof(const int)) < 0) ||
         rpc_read(conn, &C, sizeof(cuDoubleComplex* const)) < 0 ||
         rpc_read(conn, &ldc, sizeof(int)) < 0 ||
         rpc_read(conn, &info, sizeof(int)) < 0 ||
@@ -42147,7 +42319,7 @@ int handle_cublasZgetriBatched(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasZgetriBatched(handle, n, A, lda, P, C, ldc, &info, batchSize);
+    scuda_intercept_result = cublasZgetriBatched(handle, n, A, lda, &P, C, ldc, &info, batchSize);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &info, sizeof(int)) < 0 ||
@@ -42168,7 +42340,8 @@ int handle_cublasSgetrsBatched(void *conn)
     int nrhs;
     const float* * Aarray = nullptr;
     int lda;
-    const int* devIpiv;
+    int* devIpiv_null_check;
+    int devIpiv;
     float* * Barray = nullptr;
     int ldb;
     int info;
@@ -42182,7 +42355,8 @@ int handle_cublasSgetrsBatched(void *conn)
         rpc_read(conn, &nrhs, sizeof(int)) < 0 ||
         rpc_read(conn, &Aarray, sizeof(const float* const)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
-        rpc_read(conn, &devIpiv, sizeof(const int*)) < 0 ||
+        rpc_read(conn, &devIpiv_null_check, sizeof(const int*)) < 0 ||
+        (devIpiv_null_check && rpc_read(conn, &devIpiv, sizeof(const int)) < 0) ||
         rpc_read(conn, &Barray, sizeof(float* const)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int)) < 0 ||
         rpc_read(conn, &info, sizeof(int)) < 0 ||
@@ -42192,7 +42366,7 @@ int handle_cublasSgetrsBatched(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasSgetrsBatched(handle, trans, n, nrhs, Aarray, lda, devIpiv, Barray, ldb, &info, batchSize);
+    scuda_intercept_result = cublasSgetrsBatched(handle, trans, n, nrhs, Aarray, lda, &devIpiv, Barray, ldb, &info, batchSize);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &info, sizeof(int)) < 0 ||
@@ -42213,7 +42387,8 @@ int handle_cublasDgetrsBatched(void *conn)
     int nrhs;
     const double* * Aarray = nullptr;
     int lda;
-    const int* devIpiv;
+    int* devIpiv_null_check;
+    int devIpiv;
     double* * Barray = nullptr;
     int ldb;
     int info;
@@ -42227,7 +42402,8 @@ int handle_cublasDgetrsBatched(void *conn)
         rpc_read(conn, &nrhs, sizeof(int)) < 0 ||
         rpc_read(conn, &Aarray, sizeof(const double* const)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
-        rpc_read(conn, &devIpiv, sizeof(const int*)) < 0 ||
+        rpc_read(conn, &devIpiv_null_check, sizeof(const int*)) < 0 ||
+        (devIpiv_null_check && rpc_read(conn, &devIpiv, sizeof(const int)) < 0) ||
         rpc_read(conn, &Barray, sizeof(double* const)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int)) < 0 ||
         rpc_read(conn, &info, sizeof(int)) < 0 ||
@@ -42237,7 +42413,7 @@ int handle_cublasDgetrsBatched(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasDgetrsBatched(handle, trans, n, nrhs, Aarray, lda, devIpiv, Barray, ldb, &info, batchSize);
+    scuda_intercept_result = cublasDgetrsBatched(handle, trans, n, nrhs, Aarray, lda, &devIpiv, Barray, ldb, &info, batchSize);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &info, sizeof(int)) < 0 ||
@@ -42303,7 +42479,8 @@ int handle_cublasZgetrsBatched(void *conn)
     int nrhs;
     const cuDoubleComplex* * Aarray = nullptr;
     int lda;
-    const int* devIpiv;
+    int* devIpiv_null_check;
+    int devIpiv;
     cuDoubleComplex* * Barray = nullptr;
     int ldb;
     int info;
@@ -42317,7 +42494,8 @@ int handle_cublasZgetrsBatched(void *conn)
         rpc_read(conn, &nrhs, sizeof(int)) < 0 ||
         rpc_read(conn, &Aarray, sizeof(const cuDoubleComplex* const)) < 0 ||
         rpc_read(conn, &lda, sizeof(int)) < 0 ||
-        rpc_read(conn, &devIpiv, sizeof(const int*)) < 0 ||
+        rpc_read(conn, &devIpiv_null_check, sizeof(const int*)) < 0 ||
+        (devIpiv_null_check && rpc_read(conn, &devIpiv, sizeof(const int)) < 0) ||
         rpc_read(conn, &Barray, sizeof(cuDoubleComplex* const)) < 0 ||
         rpc_read(conn, &ldb, sizeof(int)) < 0 ||
         rpc_read(conn, &info, sizeof(int)) < 0 ||
@@ -42327,7 +42505,7 @@ int handle_cublasZgetrsBatched(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cublasZgetrsBatched(handle, trans, n, nrhs, Aarray, lda, devIpiv, Barray, ldb, &info, batchSize);
+    scuda_intercept_result = cublasZgetrsBatched(handle, trans, n, nrhs, Aarray, lda, &devIpiv, Barray, ldb, &info, batchSize);
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &info, sizeof(int)) < 0 ||

@@ -12220,12 +12220,12 @@ cublasStatus_t cublasSgemmBatched_64(cublasHandle_t handle, cublasOperation_t tr
  * @param m SEND_ONLY
  * @param n SEND_ONLY
  * @param k SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param Aarray SEND_ONLY LENGTH:batchCount
  * @param lda SEND_ONLY
  * @param Barray SEND_ONLY LENGTH:batchCount
  * @param ldb SEND_ONLY
- * @param beta SEND_RECV
+ * @param beta SEND_RECV NULLABLE
  * @param Carray SEND_ONLY LENGTH:batchCount
  * @param ldc SEND_ONLY
  */
@@ -12238,12 +12238,12 @@ cublasStatus_t cublasDgemmBatched(cublasHandle_t handle, cublasOperation_t trans
  * @param m SEND_ONLY
  * @param n SEND_ONLY
  * @param k SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param Aarray SEND_ONLY LENGTH:batchCount
  * @param lda SEND_ONLY
  * @param Barray SEND_ONLY LENGTH:batchCount
  * @param ldb SEND_ONLY
- * @param beta SEND_RECV
+ * @param beta SEND_RECV NULLABLE
  * @param Carray SEND_ONLY LENGTH:batchCount
  * @param ldc SEND_ONLY
  */
@@ -12256,12 +12256,12 @@ cublasStatus_t cublasDgemmBatched_64(cublasHandle_t handle, cublasOperation_t tr
  * @param m SEND_ONLY
  * @param n SEND_ONLY
  * @param k SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param Aarray SEND_ONLY LENGTH:batchCount
  * @param lda SEND_ONLY
  * @param Barray SEND_ONLY LENGTH:batchCount
  * @param ldb SEND_ONLY
- * @param beta SEND_RECV
+ * @param beta SEND_RECV NULLABLE
  * @param Carray SEND_ONLY LENGTH:batchCount
  * @param ldc SEND_ONLY
  */
@@ -12274,12 +12274,12 @@ cublasStatus_t cublasCgemmBatched(cublasHandle_t handle, cublasOperation_t trans
  * @param m SEND_ONLY
  * @param n SEND_ONLY
  * @param k SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param Aarray SEND_ONLY LENGTH:batchCount
  * @param lda SEND_ONLY
  * @param Barray SEND_ONLY LENGTH:batchCount
  * @param ldb SEND_ONLY
- * @param beta SEND_RECV
+ * @param beta SEND_RECV NULLABLE
  * @param Carray SEND_ONLY LENGTH:batchCount
  * @param ldc SEND_ONLY
  */
@@ -12292,12 +12292,12 @@ cublasStatus_t cublasCgemmBatched_64(cublasHandle_t handle, cublasOperation_t tr
  * @param m SEND_ONLY
  * @param n SEND_ONLY
  * @param k SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param Aarray SEND_ONLY LENGTH:batchCount
  * @param lda SEND_ONLY
  * @param Barray SEND_ONLY LENGTH:batchCount
  * @param ldb SEND_ONLY
- * @param beta SEND_RECV
+ * @param beta SEND_RECV NULLABLE
  * @param Carray SEND_ONLY LENGTH:batchCount
  * @param ldc SEND_ONLY
  */
@@ -12310,12 +12310,12 @@ cublasStatus_t cublasCgemm3mBatched(cublasHandle_t handle, cublasOperation_t tra
  * @param m SEND_ONLY
  * @param n SEND_ONLY
  * @param k SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param Aarray SEND_ONLY LENGTH:batchCount
  * @param lda SEND_ONLY
  * @param Barray SEND_ONLY LENGTH:batchCount
  * @param ldb SEND_ONLY
- * @param beta SEND_RECV
+ * @param beta SEND_RECV NULLABLE
  * @param Carray SEND_ONLY LENGTH:batchCount
  * @param ldc SEND_ONLY
  */
@@ -12328,12 +12328,12 @@ cublasStatus_t cublasCgemm3mBatched_64(cublasHandle_t handle, cublasOperation_t 
  * @param m SEND_ONLY
  * @param n SEND_ONLY
  * @param k SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param Aarray SEND_ONLY LENGTH:batchCount
  * @param lda SEND_ONLY
  * @param Barray SEND_ONLY LENGTH:batchCount
  * @param ldb SEND_ONLY
- * @param beta SEND_RECV
+ * @param beta SEND_RECV NULLABLE
  * @param Carray SEND_ONLY LENGTH:batchCount
  * @param ldc SEND_ONLY
  */
@@ -12346,12 +12346,12 @@ cublasStatus_t cublasZgemmBatched(cublasHandle_t handle, cublasOperation_t trans
  * @param m SEND_ONLY
  * @param n SEND_ONLY
  * @param k SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param Aarray SEND_ONLY LENGTH:batchCount
  * @param lda SEND_ONLY
  * @param Barray SEND_ONLY LENGTH:batchCount
  * @param ldb SEND_ONLY
- * @param beta SEND_RECV
+ * @param beta SEND_RECV NULLABLE
  * @param Carray SEND_ONLY LENGTH:batchCount
  * @param ldc SEND_ONLY
  */
@@ -12363,14 +12363,14 @@ cublasStatus_t cublasZgemmBatched_64(cublasHandle_t handle, cublasOperation_t tr
  * @param m SEND_ONLY
  * @param n SEND_ONLY
  * @param k SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param A SEND_RECV
  * @param lda SEND_ONLY
  * @param strideA SEND_ONLY
  * @param B SEND_RECV
  * @param ldb SEND_ONLY
  * @param strideB SEND_ONLY
- * @param beta SEND_RECV
+ * @param beta SEND_RECV NULLABLE
  * @param C SEND_RECV
  * @param ldc SEND_ONLY
  * @param strideC SEND_ONLY
@@ -12384,14 +12384,14 @@ cublasStatus_t cublasHgemmStridedBatched(cublasHandle_t handle, cublasOperation_
  * @param m SEND_ONLY
  * @param n SEND_ONLY
  * @param k SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param A SEND_RECV
  * @param lda SEND_ONLY
  * @param strideA SEND_ONLY
  * @param B SEND_RECV
  * @param ldb SEND_ONLY
  * @param strideB SEND_ONLY
- * @param beta SEND_RECV
+ * @param beta SEND_RECV NULLABLE
  * @param C SEND_RECV
  * @param ldc SEND_ONLY
  * @param strideC SEND_ONLY
@@ -12405,14 +12405,14 @@ cublasStatus_t cublasHgemmStridedBatched_64(cublasHandle_t handle, cublasOperati
  * @param m SEND_ONLY
  * @param n SEND_ONLY
  * @param k SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param A SEND_RECV
  * @param lda SEND_ONLY
  * @param strideA SEND_ONLY
  * @param B SEND_RECV
  * @param ldb SEND_ONLY
  * @param strideB SEND_ONLY
- * @param beta SEND_RECV
+ * @param beta SEND_RECV NULLABLE
  * @param C SEND_RECV
  * @param ldc SEND_ONLY
  * @param strideC SEND_ONLY
@@ -12426,14 +12426,14 @@ cublasStatus_t cublasSgemmStridedBatched(cublasHandle_t handle, cublasOperation_
  * @param m SEND_ONLY
  * @param n SEND_ONLY
  * @param k SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param A SEND_RECV
  * @param lda SEND_ONLY
  * @param strideA SEND_ONLY
  * @param B SEND_RECV
  * @param ldb SEND_ONLY
  * @param strideB SEND_ONLY
- * @param beta SEND_RECV
+ * @param beta SEND_RECV NULLABLE
  * @param C SEND_RECV
  * @param ldc SEND_ONLY
  * @param strideC SEND_ONLY
@@ -12447,14 +12447,14 @@ cublasStatus_t cublasSgemmStridedBatched_64(cublasHandle_t handle, cublasOperati
  * @param m SEND_ONLY
  * @param n SEND_ONLY
  * @param k SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param A SEND_RECV
  * @param lda SEND_ONLY
  * @param strideA SEND_ONLY
  * @param B SEND_RECV
  * @param ldb SEND_ONLY
  * @param strideB SEND_ONLY
- * @param beta SEND_RECV
+ * @param beta SEND_RECV NULLABLE
  * @param C SEND_RECV
  * @param ldc SEND_ONLY
  * @param strideC SEND_ONLY
@@ -12468,14 +12468,14 @@ cublasStatus_t cublasDgemmStridedBatched(cublasHandle_t handle, cublasOperation_
  * @param m SEND_ONLY
  * @param n SEND_ONLY
  * @param k SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param A SEND_RECV
  * @param lda SEND_ONLY
  * @param strideA SEND_ONLY
  * @param B SEND_RECV
  * @param ldb SEND_ONLY
  * @param strideB SEND_ONLY
- * @param beta SEND_RECV
+ * @param beta SEND_RECV NULLABLE
  * @param C SEND_RECV
  * @param ldc SEND_ONLY
  * @param strideC SEND_ONLY
@@ -12489,14 +12489,14 @@ cublasStatus_t cublasDgemmStridedBatched_64(cublasHandle_t handle, cublasOperati
  * @param m SEND_ONLY
  * @param n SEND_ONLY
  * @param k SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param A SEND_RECV
  * @param lda SEND_ONLY
  * @param strideA SEND_ONLY
  * @param B SEND_RECV
  * @param ldb SEND_ONLY
  * @param strideB SEND_ONLY
- * @param beta SEND_RECV
+ * @param beta SEND_RECV NULLABLE
  * @param C SEND_RECV
  * @param ldc SEND_ONLY
  * @param strideC SEND_ONLY
@@ -12510,14 +12510,14 @@ cublasStatus_t cublasCgemmStridedBatched(cublasHandle_t handle, cublasOperation_
  * @param m SEND_ONLY
  * @param n SEND_ONLY
  * @param k SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param A SEND_RECV
  * @param lda SEND_ONLY
  * @param strideA SEND_ONLY
  * @param B SEND_RECV
  * @param ldb SEND_ONLY
  * @param strideB SEND_ONLY
- * @param beta SEND_RECV
+ * @param beta SEND_RECV NULLABLE
  * @param C SEND_RECV
  * @param ldc SEND_ONLY
  * @param strideC SEND_ONLY
@@ -12531,14 +12531,14 @@ cublasStatus_t cublasCgemmStridedBatched_64(cublasHandle_t handle, cublasOperati
  * @param m SEND_ONLY
  * @param n SEND_ONLY
  * @param k SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param A SEND_RECV
  * @param lda SEND_ONLY
  * @param strideA SEND_ONLY
  * @param B SEND_RECV
  * @param ldb SEND_ONLY
  * @param strideB SEND_ONLY
- * @param beta SEND_RECV
+ * @param beta SEND_RECV NULLABLE
  * @param C SEND_RECV
  * @param ldc SEND_ONLY
  * @param strideC SEND_ONLY
@@ -12552,14 +12552,14 @@ cublasStatus_t cublasCgemm3mStridedBatched(cublasHandle_t handle, cublasOperatio
  * @param m SEND_ONLY
  * @param n SEND_ONLY
  * @param k SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param A SEND_RECV
  * @param lda SEND_ONLY
  * @param strideA SEND_ONLY
  * @param B SEND_RECV
  * @param ldb SEND_ONLY
  * @param strideB SEND_ONLY
- * @param beta SEND_RECV
+ * @param beta SEND_RECV NULLABLE
  * @param C SEND_RECV
  * @param ldc SEND_ONLY
  * @param strideC SEND_ONLY
@@ -12573,14 +12573,14 @@ cublasStatus_t cublasCgemm3mStridedBatched_64(cublasHandle_t handle, cublasOpera
  * @param m SEND_ONLY
  * @param n SEND_ONLY
  * @param k SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param A SEND_RECV
  * @param lda SEND_ONLY
  * @param strideA SEND_ONLY
  * @param B SEND_RECV
  * @param ldb SEND_ONLY
  * @param strideB SEND_ONLY
- * @param beta SEND_RECV
+ * @param beta SEND_RECV NULLABLE
  * @param C SEND_RECV
  * @param ldc SEND_ONLY
  * @param strideC SEND_ONLY
@@ -12594,14 +12594,14 @@ cublasStatus_t cublasZgemmStridedBatched(cublasHandle_t handle, cublasOperation_
  * @param m SEND_ONLY
  * @param n SEND_ONLY
  * @param k SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param A SEND_RECV
  * @param lda SEND_ONLY
  * @param strideA SEND_ONLY
  * @param B SEND_RECV
  * @param ldb SEND_ONLY
  * @param strideB SEND_ONLY
- * @param beta SEND_RECV
+ * @param beta SEND_RECV NULLABLE
  * @param C SEND_RECV
  * @param ldc SEND_ONLY
  * @param strideC SEND_ONLY
@@ -12617,14 +12617,14 @@ cublasStatus_t cublasZgemmStridedBatched_64(cublasHandle_t handle, cublasOperati
  * @param m SEND_ONLY
  * @param n SEND_ONLY
  * @param k SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param Aarray SEND_ONLY LENGTH:batchCount
  * @param Atype SEND_ONLY
  * @param lda SEND_ONLY
  * @param Barray SEND_ONLY LENGTH:batchCount
  * @param Btype SEND_ONLY
  * @param ldb SEND_ONLY
- * @param beta SEND_RECV
+ * @param beta SEND_RECV NULLABLE
  * @param Carray SEND_ONLY LENGTH:batchCount
  * @param Ctype SEND_ONLY
  * @param ldc SEND_ONLY
@@ -12640,14 +12640,14 @@ cublasStatus_t cublasGemmBatchedEx(cublasHandle_t handle, cublasOperation_t tran
  * @param m SEND_ONLY
  * @param n SEND_ONLY
  * @param k SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param Aarray SEND_ONLY LENGTH:batchCount
  * @param Atype SEND_ONLY
  * @param lda SEND_ONLY
  * @param Barray SEND_ONLY LENGTH:batchCount
  * @param Btype SEND_ONLY
  * @param ldb SEND_ONLY
- * @param beta SEND_RECV
+ * @param beta SEND_RECV NULLABLE
  * @param Carray SEND_ONLY LENGTH:batchCount
  * @param Ctype SEND_ONLY
  * @param ldc SEND_ONLY
@@ -12662,7 +12662,7 @@ cublasStatus_t cublasGemmBatchedEx_64(cublasHandle_t handle, cublasOperation_t t
  * @param m SEND_ONLY
  * @param n SEND_ONLY
  * @param k SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param A SEND_RECV
  * @param Atype SEND_ONLY
  * @param lda SEND_ONLY
@@ -12671,7 +12671,7 @@ cublasStatus_t cublasGemmBatchedEx_64(cublasHandle_t handle, cublasOperation_t t
  * @param Btype SEND_ONLY
  * @param ldb SEND_ONLY
  * @param strideB SEND_ONLY
- * @param beta SEND_RECV
+ * @param beta SEND_RECV NULLABLE
  * @param C SEND_RECV
  * @param Ctype SEND_ONLY
  * @param ldc SEND_ONLY
@@ -12688,7 +12688,7 @@ cublasStatus_t cublasGemmStridedBatchedEx(cublasHandle_t handle, cublasOperation
  * @param m SEND_ONLY
  * @param n SEND_ONLY
  * @param k SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param A SEND_RECV
  * @param Atype SEND_ONLY
  * @param lda SEND_ONLY
@@ -12697,7 +12697,7 @@ cublasStatus_t cublasGemmStridedBatchedEx(cublasHandle_t handle, cublasOperation
  * @param Btype SEND_ONLY
  * @param ldb SEND_ONLY
  * @param strideB SEND_ONLY
- * @param beta SEND_RECV
+ * @param beta SEND_RECV NULLABLE
  * @param C SEND_RECV
  * @param Ctype SEND_ONLY
  * @param ldc SEND_ONLY
@@ -12713,10 +12713,10 @@ cublasStatus_t cublasGemmStridedBatchedEx_64(cublasHandle_t handle, cublasOperat
  * @param transb SEND_ONLY
  * @param m SEND_ONLY
  * @param n SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param A SEND_RECV
  * @param lda SEND_ONLY
- * @param beta SEND_RECV
+ * @param beta SEND_RECV NULLABLE
  * @param B SEND_RECV
  * @param ldb SEND_ONLY
  * @param C SEND_RECV
@@ -12729,10 +12729,10 @@ cublasStatus_t cublasSgeam(cublasHandle_t handle, cublasOperation_t transa, cubl
  * @param transb SEND_ONLY
  * @param m SEND_ONLY
  * @param n SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param A SEND_RECV
  * @param lda SEND_ONLY
- * @param beta SEND_RECV
+ * @param beta SEND_RECV NULLABLE
  * @param B SEND_RECV
  * @param ldb SEND_ONLY
  * @param C SEND_RECV
@@ -12745,10 +12745,10 @@ cublasStatus_t cublasSgeam_64(cublasHandle_t handle, cublasOperation_t transa, c
  * @param transb SEND_ONLY
  * @param m SEND_ONLY
  * @param n SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param A SEND_RECV
  * @param lda SEND_ONLY
- * @param beta SEND_RECV
+ * @param beta SEND_RECV NULLABLE
  * @param B SEND_RECV
  * @param ldb SEND_ONLY
  * @param C SEND_RECV
@@ -12761,10 +12761,10 @@ cublasStatus_t cublasDgeam(cublasHandle_t handle, cublasOperation_t transa, cubl
  * @param transb SEND_ONLY
  * @param m SEND_ONLY
  * @param n SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param A SEND_RECV
  * @param lda SEND_ONLY
- * @param beta SEND_RECV
+ * @param beta SEND_RECV NULLABLE
  * @param B SEND_RECV
  * @param ldb SEND_ONLY
  * @param C SEND_RECV
@@ -12777,10 +12777,10 @@ cublasStatus_t cublasDgeam_64(cublasHandle_t handle, cublasOperation_t transa, c
  * @param transb SEND_ONLY
  * @param m SEND_ONLY
  * @param n SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param A SEND_RECV
  * @param lda SEND_ONLY
- * @param beta SEND_RECV
+ * @param beta SEND_RECV NULLABLE
  * @param B SEND_RECV
  * @param ldb SEND_ONLY
  * @param C SEND_RECV
@@ -12793,10 +12793,10 @@ cublasStatus_t cublasCgeam(cublasHandle_t handle, cublasOperation_t transa, cubl
  * @param transb SEND_ONLY
  * @param m SEND_ONLY
  * @param n SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param A SEND_RECV
  * @param lda SEND_ONLY
- * @param beta SEND_RECV
+ * @param beta SEND_RECV NULLABLE
  * @param B SEND_RECV
  * @param ldb SEND_ONLY
  * @param C SEND_RECV
@@ -12809,10 +12809,10 @@ cublasStatus_t cublasCgeam_64(cublasHandle_t handle, cublasOperation_t transa, c
  * @param transb SEND_ONLY
  * @param m SEND_ONLY
  * @param n SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param A SEND_RECV
  * @param lda SEND_ONLY
- * @param beta SEND_RECV
+ * @param beta SEND_RECV NULLABLE
  * @param B SEND_RECV
  * @param ldb SEND_ONLY
  * @param C SEND_RECV
@@ -12825,10 +12825,10 @@ cublasStatus_t cublasZgeam(cublasHandle_t handle, cublasOperation_t transa, cubl
  * @param transb SEND_ONLY
  * @param m SEND_ONLY
  * @param n SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param A SEND_RECV
  * @param lda SEND_ONLY
- * @param beta SEND_RECV
+ * @param beta SEND_RECV NULLABLE
  * @param B SEND_RECV
  * @param ldb SEND_ONLY
  * @param C SEND_RECV
@@ -12844,7 +12844,7 @@ cublasStatus_t cublasZgeam_64(cublasHandle_t handle, cublasOperation_t transa, c
  * @param diag SEND_ONLY
  * @param m SEND_ONLY
  * @param n SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param A SEND_ONLY LENGTH:batchCount
  * @param lda SEND_ONLY
  * @param B SEND_ONLY LENGTH:batchCount
@@ -12860,7 +12860,7 @@ cublasStatus_t cublasStrsmBatched(cublasHandle_t handle, cublasSideMode_t side, 
  * @param diag SEND_ONLY
  * @param m SEND_ONLY
  * @param n SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param A SEND_ONLY LENGTH:batchCount
  * @param lda SEND_ONLY
  * @param B SEND_ONLY LENGTH:batchCount
@@ -12876,7 +12876,7 @@ cublasStatus_t cublasStrsmBatched_64(cublasHandle_t handle, cublasSideMode_t sid
  * @param diag SEND_ONLY
  * @param m SEND_ONLY
  * @param n SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param A SEND_ONLY LENGTH:batchCount
  * @param lda SEND_ONLY
  * @param B SEND_ONLY LENGTH:batchCount
@@ -12892,7 +12892,7 @@ cublasStatus_t cublasDtrsmBatched(cublasHandle_t handle, cublasSideMode_t side, 
  * @param diag SEND_ONLY
  * @param m SEND_ONLY
  * @param n SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param A SEND_ONLY LENGTH:batchCount
  * @param lda SEND_ONLY
  * @param B SEND_ONLY LENGTH:batchCount
@@ -12908,7 +12908,7 @@ cublasStatus_t cublasDtrsmBatched_64(cublasHandle_t handle, cublasSideMode_t sid
  * @param diag SEND_ONLY
  * @param m SEND_ONLY
  * @param n SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param A SEND_ONLY LENGTH:batchCount
  * @param lda SEND_ONLY
  * @param B SEND_ONLY LENGTH:batchCount
@@ -12924,7 +12924,7 @@ cublasStatus_t cublasCtrsmBatched(cublasHandle_t handle, cublasSideMode_t side, 
  * @param diag SEND_ONLY
  * @param m SEND_ONLY
  * @param n SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param A SEND_ONLY LENGTH:batchCount
  * @param lda SEND_ONLY
  * @param B SEND_ONLY LENGTH:batchCount
@@ -12940,7 +12940,7 @@ cublasStatus_t cublasCtrsmBatched_64(cublasHandle_t handle, cublasSideMode_t sid
  * @param diag SEND_ONLY
  * @param m SEND_ONLY
  * @param n SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param A SEND_ONLY LENGTH:batchCount
  * @param lda SEND_ONLY
  * @param B SEND_ONLY LENGTH:batchCount
@@ -12956,7 +12956,7 @@ cublasStatus_t cublasZtrsmBatched(cublasHandle_t handle, cublasSideMode_t side, 
  * @param diag SEND_ONLY
  * @param m SEND_ONLY
  * @param n SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param A SEND_ONLY LENGTH:batchCount
  * @param lda SEND_ONLY
  * @param B SEND_ONLY LENGTH:batchCount
@@ -12970,7 +12970,7 @@ cublasStatus_t cublasZtrsmBatched_64(cublasHandle_t handle, cublasSideMode_t sid
  * @param n SEND_ONLY
  * @param A SEND_RECV
  * @param lda SEND_ONLY
- * @param x SEND_RECV
+ * @param x SEND_RECV NULLABLE
  * @param incx SEND_ONLY
  * @param C SEND_RECV
  * @param ldc SEND_ONLY
@@ -12983,7 +12983,7 @@ cublasStatus_t cublasSdgmm(cublasHandle_t handle, cublasSideMode_t mode, int m, 
  * @param n SEND_ONLY
  * @param A SEND_RECV
  * @param lda SEND_ONLY
- * @param x SEND_RECV
+ * @param x SEND_RECV NULLABLE
  * @param incx SEND_ONLY
  * @param C SEND_RECV
  * @param ldc SEND_ONLY
@@ -12996,7 +12996,7 @@ cublasStatus_t cublasSdgmm_64(cublasHandle_t handle, cublasSideMode_t mode, int6
  * @param n SEND_ONLY
  * @param A SEND_RECV
  * @param lda SEND_ONLY
- * @param x SEND_RECV
+ * @param x SEND_RECV NULLABLE
  * @param incx SEND_ONLY
  * @param C SEND_RECV
  * @param ldc SEND_ONLY
@@ -13009,7 +13009,7 @@ cublasStatus_t cublasDdgmm(cublasHandle_t handle, cublasSideMode_t mode, int m, 
  * @param n SEND_ONLY
  * @param A SEND_RECV
  * @param lda SEND_ONLY
- * @param x SEND_RECV
+ * @param x SEND_RECV NULLABLE
  * @param incx SEND_ONLY
  * @param C SEND_RECV
  * @param ldc SEND_ONLY
@@ -13022,7 +13022,7 @@ cublasStatus_t cublasDdgmm_64(cublasHandle_t handle, cublasSideMode_t mode, int6
  * @param n SEND_ONLY
  * @param A SEND_RECV
  * @param lda SEND_ONLY
- * @param x SEND_RECV
+ * @param x SEND_RECV NULLABLE
  * @param incx SEND_ONLY
  * @param C SEND_RECV
  * @param ldc SEND_ONLY
@@ -13035,7 +13035,7 @@ cublasStatus_t cublasCdgmm(cublasHandle_t handle, cublasSideMode_t mode, int m, 
  * @param n SEND_ONLY
  * @param A SEND_RECV
  * @param lda SEND_ONLY
- * @param x SEND_RECV
+ * @param x SEND_RECV NULLABLE
  * @param incx SEND_ONLY
  * @param C SEND_RECV
  * @param ldc SEND_ONLY
@@ -13048,7 +13048,7 @@ cublasStatus_t cublasCdgmm_64(cublasHandle_t handle, cublasSideMode_t mode, int6
  * @param n SEND_ONLY
  * @param A SEND_RECV
  * @param lda SEND_ONLY
- * @param x SEND_RECV
+ * @param x SEND_RECV NULLABLE
  * @param incx SEND_ONLY
  * @param C SEND_RECV
  * @param ldc SEND_ONLY
@@ -13061,7 +13061,7 @@ cublasStatus_t cublasZdgmm(cublasHandle_t handle, cublasSideMode_t mode, int m, 
  * @param n SEND_ONLY
  * @param A SEND_RECV
  * @param lda SEND_ONLY
- * @param x SEND_RECV
+ * @param x SEND_RECV NULLABLE
  * @param incx SEND_ONLY
  * @param C SEND_RECV
  * @param ldc SEND_ONLY
@@ -13219,7 +13219,7 @@ cublasStatus_t cublasZgelsBatched(cublasHandle_t handle, cublasOperation_t trans
  * @param handle SEND_ONLY
  * @param uplo SEND_ONLY
  * @param n SEND_ONLY
- * @param AP SEND_RECV
+ * @param AP SEND_RECV NULLABLE
  * @param A SEND_RECV
  * @param lda SEND_ONLY
  */
@@ -13228,7 +13228,7 @@ cublasStatus_t cublasStpttr(cublasHandle_t handle, cublasFillMode_t uplo, int n,
  * @param handle SEND_ONLY
  * @param uplo SEND_ONLY
  * @param n SEND_ONLY
- * @param AP SEND_RECV
+ * @param AP SEND_RECV NULLABLE
  * @param A SEND_RECV
  * @param lda SEND_ONLY
  */
@@ -13237,7 +13237,7 @@ cublasStatus_t cublasDtpttr(cublasHandle_t handle, cublasFillMode_t uplo, int n,
  * @param handle SEND_ONLY
  * @param uplo SEND_ONLY
  * @param n SEND_ONLY
- * @param AP SEND_RECV
+ * @param AP SEND_RECV NULLABLE
  * @param A SEND_RECV
  * @param lda SEND_ONLY
  */
@@ -13246,7 +13246,7 @@ cublasStatus_t cublasCtpttr(cublasHandle_t handle, cublasFillMode_t uplo, int n,
  * @param handle SEND_ONLY
  * @param uplo SEND_ONLY
  * @param n SEND_ONLY
- * @param AP SEND_RECV
+ * @param AP SEND_RECV NULLABLE
  * @param A SEND_RECV
  * @param lda SEND_ONLY
  */
@@ -13255,7 +13255,7 @@ cublasStatus_t cublasZtpttr(cublasHandle_t handle, cublasFillMode_t uplo, int n,
  * @param handle SEND_ONLY
  * @param uplo SEND_ONLY
  * @param n SEND_ONLY
- * @param A SEND_RECV
+ * @param A SEND_RECV NULLABLE
  * @param lda SEND_ONLY
  * @param AP SEND_RECV
  */
@@ -13264,7 +13264,7 @@ cublasStatus_t cublasStrttp(cublasHandle_t handle, cublasFillMode_t uplo, int n,
  * @param handle SEND_ONLY
  * @param uplo SEND_ONLY
  * @param n SEND_ONLY
- * @param A SEND_RECV
+ * @param A SEND_RECV NULLABLE
  * @param lda SEND_ONLY
  * @param AP SEND_RECV
  */
@@ -13273,7 +13273,7 @@ cublasStatus_t cublasDtrttp(cublasHandle_t handle, cublasFillMode_t uplo, int n,
  * @param handle SEND_ONLY
  * @param uplo SEND_ONLY
  * @param n SEND_ONLY
- * @param A SEND_RECV
+ * @param A SEND_RECV NULLABLE
  * @param lda SEND_ONLY
  * @param AP SEND_RECV
  */
@@ -13282,7 +13282,7 @@ cublasStatus_t cublasCtrttp(cublasHandle_t handle, cublasFillMode_t uplo, int n,
  * @param handle SEND_ONLY
  * @param uplo SEND_ONLY
  * @param n SEND_ONLY
- * @param A SEND_RECV
+ * @param A SEND_RECV NULLABLE
  * @param lda SEND_ONLY
  * @param AP SEND_RECV
  */
@@ -13333,7 +13333,7 @@ cublasStatus_t cublasZgetrfBatched(cublasHandle_t handle, int n, cuDoubleComplex
  * @param n SEND_ONLY
  * @param A SEND_ONLY LENGTH:batchSize
  * @param lda SEND_ONLY
- * @param P SEND_RECV
+ * @param P SEND_RECV NULLABLE
  * @param C SEND_ONLY LENGTH:batchSize
  * @param ldc SEND_ONLY
  * @param info SEND_RECV
@@ -13345,7 +13345,7 @@ cublasStatus_t cublasSgetriBatched(cublasHandle_t handle, int n, const float* co
  * @param n SEND_ONLY
  * @param A SEND_ONLY LENGTH:batchSize
  * @param lda SEND_ONLY
- * @param P SEND_RECV
+ * @param P SEND_RECV NULLABLE
  * @param C SEND_ONLY LENGTH:batchSize
  * @param ldc SEND_ONLY
  * @param info SEND_RECV
@@ -13357,7 +13357,7 @@ cublasStatus_t cublasDgetriBatched(cublasHandle_t handle, int n, const double* c
  * @param n SEND_ONLY
  * @param A SEND_ONLY LENGTH:batchSize
  * @param lda SEND_ONLY
- * @param P SEND_RECV
+ * @param P SEND_RECV NULLABLE
  * @param C SEND_ONLY LENGTH:batchSize
  * @param ldc SEND_ONLY
  * @param info SEND_RECV
@@ -13369,7 +13369,7 @@ cublasStatus_t cublasCgetriBatched(cublasHandle_t handle, int n, const cuComplex
  * @param n SEND_ONLY
  * @param A SEND_ONLY LENGTH:batchSize
  * @param lda SEND_ONLY
- * @param P SEND_RECV
+ * @param P SEND_RECV NULLABLE
  * @param C SEND_ONLY LENGTH:batchSize
  * @param ldc SEND_ONLY
  * @param info SEND_RECV
@@ -13383,7 +13383,7 @@ cublasStatus_t cublasZgetriBatched(cublasHandle_t handle, int n, const cuDoubleC
  * @param nrhs SEND_ONLY
  * @param Aarray SEND_ONLY LENGTH:batchSize
  * @param lda SEND_ONLY
- * @param devIpiv SEND_RECV
+ * @param devIpiv SEND_RECV NULLABLE
  * @param Barray SEND_ONLY LENGTH:batchSize
  * @param ldb SEND_ONLY
  * @param info SEND_RECV
@@ -13397,7 +13397,7 @@ cublasStatus_t cublasSgetrsBatched(cublasHandle_t handle, cublasOperation_t tran
  * @param nrhs SEND_ONLY
  * @param Aarray SEND_ONLY LENGTH:batchSize
  * @param lda SEND_ONLY
- * @param devIpiv SEND_RECV
+ * @param devIpiv SEND_RECV NULLABLE
  * @param Barray SEND_ONLY LENGTH:batchSize
  * @param ldb SEND_ONLY
  * @param info SEND_RECV
@@ -13425,7 +13425,7 @@ cublasStatus_t cublasCgetrsBatched(cublasHandle_t handle, cublasOperation_t tran
  * @param nrhs SEND_ONLY
  * @param Aarray SEND_ONLY LENGTH:batchSize
  * @param lda SEND_ONLY
- * @param devIpiv SEND_RECV
+ * @param devIpiv SEND_RECV NULLABLE
  * @param Barray SEND_ONLY LENGTH:batchSize
  * @param ldb SEND_ONLY
  * @param info SEND_RECV
@@ -13466,14 +13466,14 @@ cublasStatus_t cublasMigrateComputeType(cublasHandle_t handle, cudaDataType_t da
  * @param m SEND_ONLY
  * @param n SEND_ONLY
  * @param k SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param A SEND_RECV
  * @param Atype SEND_ONLY
  * @param lda SEND_ONLY
  * @param B SEND_RECV
  * @param Btype SEND_ONLY
  * @param ldb SEND_ONLY
- * @param beta SEND_RECV
+ * @param beta SEND_RECV NULLABLE
  * @param C SEND_RECV
  * @param Ctype SEND_ONLY
  * @param ldc SEND_ONLY
@@ -13488,7 +13488,7 @@ cublasStatus_t cublasGemmEx(cublasHandle_t handle, cublasOperation_t transa, cub
  * @param m SEND_ONLY
  * @param n SEND_ONLY
  * @param k SEND_ONLY
- * @param alpha SEND_RECV
+ * @param alpha SEND_RECV NULLABLE
  * @param A SEND_RECV
  * @param Atype SEND_ONLY
  * @param lda SEND_ONLY
@@ -13497,7 +13497,7 @@ cublasStatus_t cublasGemmEx(cublasHandle_t handle, cublasOperation_t transa, cub
  * @param Btype SEND_ONLY
  * @param ldb SEND_ONLY
  * @param strideB SEND_ONLY
- * @param beta SEND_RECV
+ * @param beta SEND_RECV NULLABLE
  * @param C SEND_RECV
  * @param Ctype SEND_ONLY
  * @param ldc SEND_ONLY

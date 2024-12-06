@@ -11361,7 +11361,7 @@ cublasStatus_t cublasDnrm2_v2(cublasHandle_t handle, int n, const double* x, int
     if (rpc_start_request(0, RPC_cublasDnrm2_v2) < 0 ||
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int)) < 0 ||
         rpc_write(0, result, sizeof(double)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -11377,7 +11377,7 @@ cublasStatus_t cublasDnrm2_v2_64(cublasHandle_t handle, int64_t n, const double*
     if (rpc_start_request(0, RPC_cublasDnrm2_v2_64) < 0 ||
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
         rpc_write(0, result, sizeof(double)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -11493,9 +11493,9 @@ cublasStatus_t cublasDdot_v2(cublasHandle_t handle, int n, const double* x, int 
     if (rpc_start_request(0, RPC_cublasDdot_v2) < 0 ||
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int)) < 0 ||
-        rpc_write(0, y, sizeof(const double*)) < 0 ||
+        rpc_write(0, &y, sizeof(const double*)) < 0 ||
         rpc_write(0, &incy, sizeof(int)) < 0 ||
         rpc_write(0, result, sizeof(double)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -11511,9 +11511,9 @@ cublasStatus_t cublasDdot_v2_64(cublasHandle_t handle, int64_t n, const double* 
     if (rpc_start_request(0, RPC_cublasDdot_v2_64) < 0 ||
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
-        rpc_write(0, y, sizeof(const double*)) < 0 ||
+        rpc_write(0, &y, sizeof(const double*)) < 0 ||
         rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
         rpc_write(0, result, sizeof(double)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -11705,7 +11705,7 @@ cublasStatus_t cublasDscal_v2(cublasHandle_t handle, int n, const double* alpha,
     if (rpc_start_request(0, RPC_cublasDscal_v2) < 0 ||
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
         rpc_write(0, x, sizeof(double)) < 0 ||
         rpc_write(0, &incx, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -11721,7 +11721,7 @@ cublasStatus_t cublasDscal_v2_64(cublasHandle_t handle, int64_t n, const double*
     if (rpc_start_request(0, RPC_cublasDscal_v2_64) < 0 ||
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
         rpc_write(0, x, sizeof(double)) < 0 ||
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -11833,7 +11833,7 @@ cublasStatus_t cublasZdscal_v2(cublasHandle_t handle, int n, const double* alpha
     if (rpc_start_request(0, RPC_cublasZdscal_v2) < 0 ||
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
         rpc_write(0, x, sizeof(cuDoubleComplex)) < 0 ||
         rpc_write(0, &incx, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -11849,7 +11849,7 @@ cublasStatus_t cublasZdscal_v2_64(cublasHandle_t handle, int64_t n, const double
     if (rpc_start_request(0, RPC_cublasZdscal_v2_64) < 0 ||
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
         rpc_write(0, x, sizeof(cuDoubleComplex)) < 0 ||
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -11901,8 +11901,8 @@ cublasStatus_t cublasDaxpy_v2(cublasHandle_t handle, int n, const double* alpha,
     if (rpc_start_request(0, RPC_cublasDaxpy_v2) < 0 ||
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int)) < 0 ||
         rpc_write(0, y, sizeof(double)) < 0 ||
         rpc_write(0, &incy, sizeof(int)) < 0 ||
@@ -11919,8 +11919,8 @@ cublasStatus_t cublasDaxpy_v2_64(cublasHandle_t handle, int64_t n, const double*
     if (rpc_start_request(0, RPC_cublasDaxpy_v2_64) < 0 ||
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
         rpc_write(0, y, sizeof(double)) < 0 ||
         rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
@@ -12043,7 +12043,7 @@ cublasStatus_t cublasDcopy_v2(cublasHandle_t handle, int n, const double* x, int
     if (rpc_start_request(0, RPC_cublasDcopy_v2) < 0 ||
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int)) < 0 ||
         rpc_write(0, y, sizeof(double)) < 0 ||
         rpc_write(0, &incy, sizeof(int)) < 0 ||
@@ -12060,7 +12060,7 @@ cublasStatus_t cublasDcopy_v2_64(cublasHandle_t handle, int64_t n, const double*
     if (rpc_start_request(0, RPC_cublasDcopy_v2_64) < 0 ||
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
         rpc_write(0, y, sizeof(double)) < 0 ||
         rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
@@ -12321,7 +12321,7 @@ cublasStatus_t cublasIdamax_v2(cublasHandle_t handle, int n, const double* x, in
     if (rpc_start_request(0, RPC_cublasIdamax_v2) < 0 ||
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int)) < 0 ||
         rpc_write(0, result, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -12337,7 +12337,7 @@ cublasStatus_t cublasIdamax_v2_64(cublasHandle_t handle, int64_t n, const double
     if (rpc_start_request(0, RPC_cublasIdamax_v2_64) < 0 ||
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
         rpc_write(0, result, sizeof(int64_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -12483,7 +12483,7 @@ cublasStatus_t cublasIdamin_v2(cublasHandle_t handle, int n, const double* x, in
     if (rpc_start_request(0, RPC_cublasIdamin_v2) < 0 ||
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int)) < 0 ||
         rpc_write(0, result, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -12499,7 +12499,7 @@ cublasStatus_t cublasIdamin_v2_64(cublasHandle_t handle, int64_t n, const double
     if (rpc_start_request(0, RPC_cublasIdamin_v2_64) < 0 ||
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
         rpc_write(0, result, sizeof(int64_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -12645,7 +12645,7 @@ cublasStatus_t cublasDasum_v2(cublasHandle_t handle, int n, const double* x, int
     if (rpc_start_request(0, RPC_cublasDasum_v2) < 0 ||
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int)) < 0 ||
         rpc_write(0, result, sizeof(double)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -12661,7 +12661,7 @@ cublasStatus_t cublasDasum_v2_64(cublasHandle_t handle, int64_t n, const double*
     if (rpc_start_request(0, RPC_cublasDasum_v2_64) < 0 ||
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
         rpc_write(0, result, sizeof(double)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -12785,8 +12785,8 @@ cublasStatus_t cublasDrot_v2(cublasHandle_t handle, int n, double* x, int incx, 
         rpc_write(0, &incx, sizeof(int)) < 0 ||
         rpc_write(0, y, sizeof(double)) < 0 ||
         rpc_write(0, &incy, sizeof(int)) < 0 ||
-        rpc_write(0, c, sizeof(const double*)) < 0 ||
-        rpc_write(0, s, sizeof(const double*)) < 0 ||
+        rpc_write(0, &c, sizeof(const double*)) < 0 ||
+        rpc_write(0, &s, sizeof(const double*)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, x, sizeof(double)) < 0 ||
         rpc_read(0, y, sizeof(double)) < 0 ||
@@ -12805,8 +12805,8 @@ cublasStatus_t cublasDrot_v2_64(cublasHandle_t handle, int64_t n, double* x, int
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
         rpc_write(0, y, sizeof(double)) < 0 ||
         rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
-        rpc_write(0, c, sizeof(const double*)) < 0 ||
-        rpc_write(0, s, sizeof(const double*)) < 0 ||
+        rpc_write(0, &c, sizeof(const double*)) < 0 ||
+        rpc_write(0, &s, sizeof(const double*)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, x, sizeof(double)) < 0 ||
         rpc_read(0, y, sizeof(double)) < 0 ||
@@ -12905,7 +12905,7 @@ cublasStatus_t cublasZrot_v2(cublasHandle_t handle, int n, cuDoubleComplex* x, i
         rpc_write(0, &incx, sizeof(int)) < 0 ||
         rpc_write(0, y, sizeof(cuDoubleComplex)) < 0 ||
         rpc_write(0, &incy, sizeof(int)) < 0 ||
-        rpc_write(0, c, sizeof(const double*)) < 0 ||
+        rpc_write(0, &c, sizeof(const double*)) < 0 ||
         rpc_write(0, &s, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, x, sizeof(cuDoubleComplex)) < 0 ||
@@ -12925,7 +12925,7 @@ cublasStatus_t cublasZrot_v2_64(cublasHandle_t handle, int64_t n, cuDoubleComple
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
         rpc_write(0, y, sizeof(cuDoubleComplex)) < 0 ||
         rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
-        rpc_write(0, c, sizeof(const double*)) < 0 ||
+        rpc_write(0, &c, sizeof(const double*)) < 0 ||
         rpc_write(0, &s, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, x, sizeof(cuDoubleComplex)) < 0 ||
@@ -12945,8 +12945,8 @@ cublasStatus_t cublasZdrot_v2(cublasHandle_t handle, int n, cuDoubleComplex* x, 
         rpc_write(0, &incx, sizeof(int)) < 0 ||
         rpc_write(0, y, sizeof(cuDoubleComplex)) < 0 ||
         rpc_write(0, &incy, sizeof(int)) < 0 ||
-        rpc_write(0, c, sizeof(const double*)) < 0 ||
-        rpc_write(0, s, sizeof(const double*)) < 0 ||
+        rpc_write(0, &c, sizeof(const double*)) < 0 ||
+        rpc_write(0, &s, sizeof(const double*)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, x, sizeof(cuDoubleComplex)) < 0 ||
         rpc_read(0, y, sizeof(cuDoubleComplex)) < 0 ||
@@ -12965,8 +12965,8 @@ cublasStatus_t cublasZdrot_v2_64(cublasHandle_t handle, int64_t n, cuDoubleCompl
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
         rpc_write(0, y, sizeof(cuDoubleComplex)) < 0 ||
         rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
-        rpc_write(0, c, sizeof(const double*)) < 0 ||
-        rpc_write(0, s, sizeof(const double*)) < 0 ||
+        rpc_write(0, &c, sizeof(const double*)) < 0 ||
+        rpc_write(0, &s, sizeof(const double*)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, x, sizeof(cuDoubleComplex)) < 0 ||
         rpc_read(0, y, sizeof(cuDoubleComplex)) < 0 ||
@@ -13099,7 +13099,7 @@ cublasStatus_t cublasDrotm_v2(cublasHandle_t handle, int n, double* x, int incx,
         rpc_write(0, &incx, sizeof(int)) < 0 ||
         rpc_write(0, y, sizeof(double)) < 0 ||
         rpc_write(0, &incy, sizeof(int)) < 0 ||
-        rpc_write(0, param, sizeof(const double*)) < 0 ||
+        rpc_write(0, &param, sizeof(const double*)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, x, sizeof(double)) < 0 ||
         rpc_read(0, y, sizeof(double)) < 0 ||
@@ -13118,7 +13118,7 @@ cublasStatus_t cublasDrotm_v2_64(cublasHandle_t handle, int64_t n, double* x, in
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
         rpc_write(0, y, sizeof(double)) < 0 ||
         rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
-        rpc_write(0, param, sizeof(const double*)) < 0 ||
+        rpc_write(0, &param, sizeof(const double*)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, x, sizeof(double)) < 0 ||
         rpc_read(0, y, sizeof(double)) < 0 ||
@@ -13155,7 +13155,7 @@ cublasStatus_t cublasDrotmg_v2(cublasHandle_t handle, double* d1, double* d2, do
         rpc_write(0, d1, sizeof(double)) < 0 ||
         rpc_write(0, d2, sizeof(double)) < 0 ||
         rpc_write(0, x1, sizeof(double)) < 0 ||
-        rpc_write(0, y1, sizeof(const double*)) < 0 ||
+        rpc_write(0, &y1, sizeof(const double*)) < 0 ||
         rpc_write(0, param, sizeof(double)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, d1, sizeof(double)) < 0 ||
@@ -13221,12 +13221,12 @@ cublasStatus_t cublasDgemv_v2(cublasHandle_t handle, cublasOperation_t trans, in
         rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
         rpc_write(0, &m, sizeof(int)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int)) < 0 ||
-        rpc_write(0, beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
         rpc_write(0, y, sizeof(double)) < 0 ||
         rpc_write(0, &incy, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -13244,12 +13244,12 @@ cublasStatus_t cublasDgemv_v2_64(cublasHandle_t handle, cublasOperation_t trans,
         rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
         rpc_write(0, &m, sizeof(int64_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
-        rpc_write(0, beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
         rpc_write(0, y, sizeof(double)) < 0 ||
         rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -13411,12 +13411,12 @@ cublasStatus_t cublasDgbmv_v2(cublasHandle_t handle, cublasOperation_t trans, in
         rpc_write(0, &n, sizeof(int)) < 0 ||
         rpc_write(0, &kl, sizeof(int)) < 0 ||
         rpc_write(0, &ku, sizeof(int)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int)) < 0 ||
-        rpc_write(0, beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
         rpc_write(0, y, sizeof(double)) < 0 ||
         rpc_write(0, &incy, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -13436,12 +13436,12 @@ cublasStatus_t cublasDgbmv_v2_64(cublasHandle_t handle, cublasOperation_t trans,
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
         rpc_write(0, &kl, sizeof(int64_t)) < 0 ||
         rpc_write(0, &ku, sizeof(int64_t)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
-        rpc_write(0, beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
         rpc_write(0, y, sizeof(double)) < 0 ||
         rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -13600,7 +13600,7 @@ cublasStatus_t cublasDtrmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cubl
         rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
         rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, x, sizeof(double)) < 0 ||
         rpc_write(0, &incx, sizeof(int)) < 0 ||
@@ -13620,7 +13620,7 @@ cublasStatus_t cublasDtrmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, c
         rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
         rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
         rpc_write(0, x, sizeof(double)) < 0 ||
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
@@ -13763,7 +13763,7 @@ cublasStatus_t cublasDtbmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cubl
         rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
         rpc_write(0, &k, sizeof(int)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, x, sizeof(double)) < 0 ||
         rpc_write(0, &incx, sizeof(int)) < 0 ||
@@ -13784,7 +13784,7 @@ cublasStatus_t cublasDtbmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, c
         rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
         rpc_write(0, &k, sizeof(int64_t)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
         rpc_write(0, x, sizeof(double)) < 0 ||
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
@@ -13926,7 +13926,7 @@ cublasStatus_t cublasDtpmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cubl
         rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
         rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
-        rpc_write(0, AP, sizeof(const double*)) < 0 ||
+        rpc_write(0, &AP, sizeof(const double*)) < 0 ||
         rpc_write(0, x, sizeof(double)) < 0 ||
         rpc_write(0, &incx, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -13945,7 +13945,7 @@ cublasStatus_t cublasDtpmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, c
         rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
         rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
-        rpc_write(0, AP, sizeof(const double*)) < 0 ||
+        rpc_write(0, &AP, sizeof(const double*)) < 0 ||
         rpc_write(0, x, sizeof(double)) < 0 ||
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -14080,7 +14080,7 @@ cublasStatus_t cublasDtrsv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cubl
         rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
         rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, x, sizeof(double)) < 0 ||
         rpc_write(0, &incx, sizeof(int)) < 0 ||
@@ -14100,7 +14100,7 @@ cublasStatus_t cublasDtrsv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, c
         rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
         rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
         rpc_write(0, x, sizeof(double)) < 0 ||
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
@@ -14238,7 +14238,7 @@ cublasStatus_t cublasDtpsv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cubl
         rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
         rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
-        rpc_write(0, AP, sizeof(const double*)) < 0 ||
+        rpc_write(0, &AP, sizeof(const double*)) < 0 ||
         rpc_write(0, x, sizeof(double)) < 0 ||
         rpc_write(0, &incx, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -14257,7 +14257,7 @@ cublasStatus_t cublasDtpsv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, c
         rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
         rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
-        rpc_write(0, AP, sizeof(const double*)) < 0 ||
+        rpc_write(0, &AP, sizeof(const double*)) < 0 ||
         rpc_write(0, x, sizeof(double)) < 0 ||
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -14395,7 +14395,7 @@ cublasStatus_t cublasDtbsv_v2(cublasHandle_t handle, cublasFillMode_t uplo, cubl
         rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
         rpc_write(0, &k, sizeof(int)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, x, sizeof(double)) < 0 ||
         rpc_write(0, &incx, sizeof(int)) < 0 ||
@@ -14416,7 +14416,7 @@ cublasStatus_t cublasDtbsv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, c
         rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
         rpc_write(0, &k, sizeof(int64_t)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
         rpc_write(0, x, sizeof(double)) < 0 ||
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
@@ -14562,12 +14562,12 @@ cublasStatus_t cublasDsymv_v2(cublasHandle_t handle, cublasFillMode_t uplo, int 
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int)) < 0 ||
-        rpc_write(0, beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
         rpc_write(0, y, sizeof(double)) < 0 ||
         rpc_write(0, &incy, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -14584,12 +14584,12 @@ cublasStatus_t cublasDsymv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, i
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
-        rpc_write(0, beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
         rpc_write(0, y, sizeof(double)) < 0 ||
         rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -14829,12 +14829,12 @@ cublasStatus_t cublasDsbmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, int 
         rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
         rpc_write(0, &k, sizeof(int)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int)) < 0 ||
-        rpc_write(0, beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
         rpc_write(0, y, sizeof(double)) < 0 ||
         rpc_write(0, &incy, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -14852,12 +14852,12 @@ cublasStatus_t cublasDsbmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, i
         rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
         rpc_write(0, &k, sizeof(int64_t)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
-        rpc_write(0, beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
         rpc_write(0, y, sizeof(double)) < 0 ||
         rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -15008,11 +15008,11 @@ cublasStatus_t cublasDspmv_v2(cublasHandle_t handle, cublasFillMode_t uplo, int 
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, AP, sizeof(const double*)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &AP, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int)) < 0 ||
-        rpc_write(0, beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
         rpc_write(0, y, sizeof(double)) < 0 ||
         rpc_write(0, &incy, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -15029,11 +15029,11 @@ cublasStatus_t cublasDspmv_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, i
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, AP, sizeof(const double*)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &AP, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
-        rpc_write(0, beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
         rpc_write(0, y, sizeof(double)) < 0 ||
         rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -15176,10 +15176,10 @@ cublasStatus_t cublasDger_v2(cublasHandle_t handle, int m, int n, const double* 
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &m, sizeof(int)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int)) < 0 ||
-        rpc_write(0, y, sizeof(const double*)) < 0 ||
+        rpc_write(0, &y, sizeof(const double*)) < 0 ||
         rpc_write(0, &incy, sizeof(int)) < 0 ||
         rpc_write(0, A, sizeof(double)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
@@ -15197,10 +15197,10 @@ cublasStatus_t cublasDger_v2_64(cublasHandle_t handle, int64_t m, int64_t n, con
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &m, sizeof(int64_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
-        rpc_write(0, y, sizeof(const double*)) < 0 ||
+        rpc_write(0, &y, sizeof(const double*)) < 0 ||
         rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
         rpc_write(0, A, sizeof(double)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
@@ -15424,8 +15424,8 @@ cublasStatus_t cublasDsyr_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int)) < 0 ||
         rpc_write(0, A, sizeof(double)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
@@ -15443,8 +15443,8 @@ cublasStatus_t cublasDsyr_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, in
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
         rpc_write(0, A, sizeof(double)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
@@ -15576,7 +15576,7 @@ cublasStatus_t cublasZher_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
         rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_write(0, &incx, sizeof(int)) < 0 ||
         rpc_write(0, A, sizeof(cuDoubleComplex)) < 0 ||
@@ -15595,7 +15595,7 @@ cublasStatus_t cublasZher_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, in
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
         rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
         rpc_write(0, A, sizeof(cuDoubleComplex)) < 0 ||
@@ -15650,8 +15650,8 @@ cublasStatus_t cublasDspr_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int)) < 0 ||
         rpc_write(0, AP, sizeof(double)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -15668,8 +15668,8 @@ cublasStatus_t cublasDspr_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, in
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
         rpc_write(0, AP, sizeof(double)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -15722,7 +15722,7 @@ cublasStatus_t cublasZhpr_v2(cublasHandle_t handle, cublasFillMode_t uplo, int n
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
         rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_write(0, &incx, sizeof(int)) < 0 ||
         rpc_write(0, AP, sizeof(cuDoubleComplex)) < 0 ||
@@ -15740,7 +15740,7 @@ cublasStatus_t cublasZhpr_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, in
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
         rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
         rpc_write(0, AP, sizeof(cuDoubleComplex)) < 0 ||
@@ -15800,10 +15800,10 @@ cublasStatus_t cublasDsyr2_v2(cublasHandle_t handle, cublasFillMode_t uplo, int 
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int)) < 0 ||
-        rpc_write(0, y, sizeof(const double*)) < 0 ||
+        rpc_write(0, &y, sizeof(const double*)) < 0 ||
         rpc_write(0, &incy, sizeof(int)) < 0 ||
         rpc_write(0, A, sizeof(double)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
@@ -15821,10 +15821,10 @@ cublasStatus_t cublasDsyr2_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, i
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
-        rpc_write(0, y, sizeof(const double*)) < 0 ||
+        rpc_write(0, &y, sizeof(const double*)) < 0 ||
         rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
         rpc_write(0, A, sizeof(double)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
@@ -16050,10 +16050,10 @@ cublasStatus_t cublasDspr2_v2(cublasHandle_t handle, cublasFillMode_t uplo, int 
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int)) < 0 ||
-        rpc_write(0, y, sizeof(const double*)) < 0 ||
+        rpc_write(0, &y, sizeof(const double*)) < 0 ||
         rpc_write(0, &incy, sizeof(int)) < 0 ||
         rpc_write(0, AP, sizeof(double)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -16070,10 +16070,10 @@ cublasStatus_t cublasDspr2_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, i
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
-        rpc_write(0, y, sizeof(const double*)) < 0 ||
+        rpc_write(0, &y, sizeof(const double*)) < 0 ||
         rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
         rpc_write(0, AP, sizeof(double)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -16271,14 +16271,14 @@ cublasStatus_t cublasDgemvStridedBatched(cublasHandle_t handle, cublasOperation_
         rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
         rpc_write(0, &m, sizeof(int)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int)) < 0 ||
         rpc_write(0, &stridex, sizeof(long long int)) < 0 ||
-        rpc_write(0, beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
         rpc_write(0, y, sizeof(double)) < 0 ||
         rpc_write(0, &incy, sizeof(int)) < 0 ||
         rpc_write(0, &stridey, sizeof(long long int)) < 0 ||
@@ -16298,14 +16298,14 @@ cublasStatus_t cublasDgemvStridedBatched_64(cublasHandle_t handle, cublasOperati
         rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
         rpc_write(0, &m, sizeof(int64_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
         rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
         rpc_write(0, &stridex, sizeof(long long int)) < 0 ||
-        rpc_write(0, beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
         rpc_write(0, y, sizeof(double)) < 0 ||
         rpc_write(0, &incy, sizeof(int64_t)) < 0 ||
         rpc_write(0, &stridey, sizeof(long long int)) < 0 ||
@@ -16702,12 +16702,12 @@ cublasStatus_t cublasDgemm_v2(cublasHandle_t handle, cublasOperation_t transa, c
         rpc_write(0, &m, sizeof(int)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
         rpc_write(0, &k, sizeof(int)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
-        rpc_write(0, B, sizeof(const double*)) < 0 ||
+        rpc_write(0, &B, sizeof(const double*)) < 0 ||
         rpc_write(0, &ldb, sizeof(int)) < 0 ||
-        rpc_write(0, beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
         rpc_write(0, C, sizeof(double)) < 0 ||
         rpc_write(0, &ldc, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -16727,12 +16727,12 @@ cublasStatus_t cublasDgemm_v2_64(cublasHandle_t handle, cublasOperation_t transa
         rpc_write(0, &m, sizeof(int64_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
         rpc_write(0, &k, sizeof(int64_t)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
-        rpc_write(0, B, sizeof(const double*)) < 0 ||
+        rpc_write(0, &B, sizeof(const double*)) < 0 ||
         rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
-        rpc_write(0, beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
         rpc_write(0, C, sizeof(double)) < 0 ||
         rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -17045,10 +17045,10 @@ cublasStatus_t cublasDsyrk_v2(cublasHandle_t handle, cublasFillMode_t uplo, cubl
         rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
         rpc_write(0, &k, sizeof(int)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
-        rpc_write(0, beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
         rpc_write(0, C, sizeof(double)) < 0 ||
         rpc_write(0, &ldc, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -17067,10 +17067,10 @@ cublasStatus_t cublasDsyrk_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, c
         rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
         rpc_write(0, &k, sizeof(int64_t)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
-        rpc_write(0, beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
         rpc_write(0, C, sizeof(double)) < 0 ||
         rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -17221,10 +17221,10 @@ cublasStatus_t cublasZherk_v2(cublasHandle_t handle, cublasFillMode_t uplo, cubl
         rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
         rpc_write(0, &k, sizeof(int)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
         rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
-        rpc_write(0, beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
         rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
         rpc_write(0, &ldc, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -17243,10 +17243,10 @@ cublasStatus_t cublasZherk_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, c
         rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
         rpc_write(0, &k, sizeof(int64_t)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
         rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
-        rpc_write(0, beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
         rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
         rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -17313,12 +17313,12 @@ cublasStatus_t cublasDsyr2k_v2(cublasHandle_t handle, cublasFillMode_t uplo, cub
         rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
         rpc_write(0, &k, sizeof(int)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
-        rpc_write(0, B, sizeof(const double*)) < 0 ||
+        rpc_write(0, &B, sizeof(const double*)) < 0 ||
         rpc_write(0, &ldb, sizeof(int)) < 0 ||
-        rpc_write(0, beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
         rpc_write(0, C, sizeof(double)) < 0 ||
         rpc_write(0, &ldc, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -17337,12 +17337,12 @@ cublasStatus_t cublasDsyr2k_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, 
         rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
         rpc_write(0, &k, sizeof(int64_t)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
-        rpc_write(0, B, sizeof(const double*)) < 0 ||
+        rpc_write(0, &B, sizeof(const double*)) < 0 ||
         rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
-        rpc_write(0, beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
         rpc_write(0, C, sizeof(double)) < 0 ||
         rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -17510,7 +17510,7 @@ cublasStatus_t cublasZher2k_v2(cublasHandle_t handle, cublasFillMode_t uplo, cub
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, &B, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_write(0, &ldb, sizeof(int)) < 0 ||
-        rpc_write(0, beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
         rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
         rpc_write(0, &ldc, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -17534,7 +17534,7 @@ cublasStatus_t cublasZher2k_v2_64(cublasHandle_t handle, cublasFillMode_t uplo, 
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
         rpc_write(0, &B, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
-        rpc_write(0, beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
         rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
         rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -17601,12 +17601,12 @@ cublasStatus_t cublasDsyrkx(cublasHandle_t handle, cublasFillMode_t uplo, cublas
         rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
         rpc_write(0, &k, sizeof(int)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
-        rpc_write(0, B, sizeof(const double*)) < 0 ||
+        rpc_write(0, &B, sizeof(const double*)) < 0 ||
         rpc_write(0, &ldb, sizeof(int)) < 0 ||
-        rpc_write(0, beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
         rpc_write(0, C, sizeof(double)) < 0 ||
         rpc_write(0, &ldc, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -17625,12 +17625,12 @@ cublasStatus_t cublasDsyrkx_64(cublasHandle_t handle, cublasFillMode_t uplo, cub
         rpc_write(0, &trans, sizeof(cublasOperation_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
         rpc_write(0, &k, sizeof(int64_t)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
-        rpc_write(0, B, sizeof(const double*)) < 0 ||
+        rpc_write(0, &B, sizeof(const double*)) < 0 ||
         rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
-        rpc_write(0, beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
         rpc_write(0, C, sizeof(double)) < 0 ||
         rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -17798,7 +17798,7 @@ cublasStatus_t cublasZherkx(cublasHandle_t handle, cublasFillMode_t uplo, cublas
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, &B, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_write(0, &ldb, sizeof(int)) < 0 ||
-        rpc_write(0, beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
         rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
         rpc_write(0, &ldc, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -17822,7 +17822,7 @@ cublasStatus_t cublasZherkx_64(cublasHandle_t handle, cublasFillMode_t uplo, cub
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
         rpc_write(0, &B, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
-        rpc_write(0, beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
         rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
         rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -17889,12 +17889,12 @@ cublasStatus_t cublasDsymm_v2(cublasHandle_t handle, cublasSideMode_t side, cubl
         rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_write(0, &m, sizeof(int)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
-        rpc_write(0, B, sizeof(const double*)) < 0 ||
+        rpc_write(0, &B, sizeof(const double*)) < 0 ||
         rpc_write(0, &ldb, sizeof(int)) < 0 ||
-        rpc_write(0, beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
         rpc_write(0, C, sizeof(double)) < 0 ||
         rpc_write(0, &ldc, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -17913,12 +17913,12 @@ cublasStatus_t cublasDsymm_v2_64(cublasHandle_t handle, cublasSideMode_t side, c
         rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_write(0, &m, sizeof(int64_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
-        rpc_write(0, B, sizeof(const double*)) < 0 ||
+        rpc_write(0, &B, sizeof(const double*)) < 0 ||
         rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
-        rpc_write(0, beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
         rpc_write(0, C, sizeof(double)) < 0 ||
         rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -18177,8 +18177,8 @@ cublasStatus_t cublasDtrsm_v2(cublasHandle_t handle, cublasSideMode_t side, cubl
         rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
         rpc_write(0, &m, sizeof(int)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, B, sizeof(double)) < 0 ||
         rpc_write(0, &ldb, sizeof(int)) < 0 ||
@@ -18200,8 +18200,8 @@ cublasStatus_t cublasDtrsm_v2_64(cublasHandle_t handle, cublasSideMode_t side, c
         rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
         rpc_write(0, &m, sizeof(int64_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
         rpc_write(0, B, sizeof(double)) < 0 ||
         rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
@@ -18365,10 +18365,10 @@ cublasStatus_t cublasDtrmm_v2(cublasHandle_t handle, cublasSideMode_t side, cubl
         rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
         rpc_write(0, &m, sizeof(int)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
-        rpc_write(0, B, sizeof(const double*)) < 0 ||
+        rpc_write(0, &B, sizeof(const double*)) < 0 ||
         rpc_write(0, &ldb, sizeof(int)) < 0 ||
         rpc_write(0, C, sizeof(double)) < 0 ||
         rpc_write(0, &ldc, sizeof(int)) < 0 ||
@@ -18390,10 +18390,10 @@ cublasStatus_t cublasDtrmm_v2_64(cublasHandle_t handle, cublasSideMode_t side, c
         rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
         rpc_write(0, &m, sizeof(int64_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
-        rpc_write(0, B, sizeof(const double*)) < 0 ||
+        rpc_write(0, &B, sizeof(const double*)) < 0 ||
         rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
         rpc_write(0, C, sizeof(double)) < 0 ||
         rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
@@ -18615,12 +18615,14 @@ cublasStatus_t cublasDgemmBatched(cublasHandle_t handle, cublasOperation_t trans
         rpc_write(0, &m, sizeof(int)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
         rpc_write(0, &k, sizeof(int)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const double)) < 0) ||
         rpc_write(0, &Aarray, sizeof(Aarray)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, &Barray, sizeof(Barray)) < 0 ||
         rpc_write(0, &ldb, sizeof(int)) < 0 ||
-        rpc_write(0, beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        (beta != nullptr && rpc_write(0, beta, sizeof(const double)) < 0) ||
         rpc_write(0, &Carray, sizeof(Carray)) < 0 ||
         rpc_write(0, &ldc, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -18640,12 +18642,14 @@ cublasStatus_t cublasDgemmBatched_64(cublasHandle_t handle, cublasOperation_t tr
         rpc_write(0, &m, sizeof(int64_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
         rpc_write(0, &k, sizeof(int64_t)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const double)) < 0) ||
         rpc_write(0, &Aarray, sizeof(Aarray)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
         rpc_write(0, &Barray, sizeof(Barray)) < 0 ||
         rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
-        rpc_write(0, beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        (beta != nullptr && rpc_write(0, beta, sizeof(const double)) < 0) ||
         rpc_write(0, &Carray, sizeof(Carray)) < 0 ||
         rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -18666,11 +18670,13 @@ cublasStatus_t cublasCgemmBatched(cublasHandle_t handle, cublasOperation_t trans
         rpc_write(0, &n, sizeof(int)) < 0 ||
         rpc_write(0, &k, sizeof(int)) < 0 ||
         rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const cuComplex)) < 0) ||
         rpc_write(0, &Aarray, sizeof(Aarray)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, &Barray, sizeof(Barray)) < 0 ||
         rpc_write(0, &ldb, sizeof(int)) < 0 ||
         rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        (beta != nullptr && rpc_write(0, beta, sizeof(const cuComplex)) < 0) ||
         rpc_write(0, &Carray, sizeof(Carray)) < 0 ||
         rpc_write(0, &ldc, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -18691,11 +18697,13 @@ cublasStatus_t cublasCgemmBatched_64(cublasHandle_t handle, cublasOperation_t tr
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
         rpc_write(0, &k, sizeof(int64_t)) < 0 ||
         rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const cuComplex)) < 0) ||
         rpc_write(0, &Aarray, sizeof(Aarray)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
         rpc_write(0, &Barray, sizeof(Barray)) < 0 ||
         rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
         rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        (beta != nullptr && rpc_write(0, beta, sizeof(const cuComplex)) < 0) ||
         rpc_write(0, &Carray, sizeof(Carray)) < 0 ||
         rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -18716,11 +18724,13 @@ cublasStatus_t cublasCgemm3mBatched(cublasHandle_t handle, cublasOperation_t tra
         rpc_write(0, &n, sizeof(int)) < 0 ||
         rpc_write(0, &k, sizeof(int)) < 0 ||
         rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const cuComplex)) < 0) ||
         rpc_write(0, &Aarray, sizeof(Aarray)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, &Barray, sizeof(Barray)) < 0 ||
         rpc_write(0, &ldb, sizeof(int)) < 0 ||
         rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        (beta != nullptr && rpc_write(0, beta, sizeof(const cuComplex)) < 0) ||
         rpc_write(0, &Carray, sizeof(Carray)) < 0 ||
         rpc_write(0, &ldc, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -18741,11 +18751,13 @@ cublasStatus_t cublasCgemm3mBatched_64(cublasHandle_t handle, cublasOperation_t 
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
         rpc_write(0, &k, sizeof(int64_t)) < 0 ||
         rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const cuComplex)) < 0) ||
         rpc_write(0, &Aarray, sizeof(Aarray)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
         rpc_write(0, &Barray, sizeof(Barray)) < 0 ||
         rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
         rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        (beta != nullptr && rpc_write(0, beta, sizeof(const cuComplex)) < 0) ||
         rpc_write(0, &Carray, sizeof(Carray)) < 0 ||
         rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -18766,11 +18778,13 @@ cublasStatus_t cublasZgemmBatched(cublasHandle_t handle, cublasOperation_t trans
         rpc_write(0, &n, sizeof(int)) < 0 ||
         rpc_write(0, &k, sizeof(int)) < 0 ||
         rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_write(0, &Aarray, sizeof(Aarray)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, &Barray, sizeof(Barray)) < 0 ||
         rpc_write(0, &ldb, sizeof(int)) < 0 ||
         rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        (beta != nullptr && rpc_write(0, beta, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_write(0, &Carray, sizeof(Carray)) < 0 ||
         rpc_write(0, &ldc, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -18791,11 +18805,13 @@ cublasStatus_t cublasZgemmBatched_64(cublasHandle_t handle, cublasOperation_t tr
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
         rpc_write(0, &k, sizeof(int64_t)) < 0 ||
         rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_write(0, &Aarray, sizeof(Aarray)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
         rpc_write(0, &Barray, sizeof(Barray)) < 0 ||
         rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
         rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        (beta != nullptr && rpc_write(0, beta, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_write(0, &Carray, sizeof(Carray)) < 0 ||
         rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -18815,6 +18831,7 @@ cublasStatus_t cublasHgemmStridedBatched(cublasHandle_t handle, cublasOperation_
         rpc_write(0, &n, sizeof(int)) < 0 ||
         rpc_write(0, &k, sizeof(int)) < 0 ||
         rpc_write(0, &alpha, sizeof(const __half*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const __half)) < 0) ||
         rpc_write(0, &A, sizeof(const __half*)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
@@ -18822,6 +18839,7 @@ cublasStatus_t cublasHgemmStridedBatched(cublasHandle_t handle, cublasOperation_
         rpc_write(0, &ldb, sizeof(int)) < 0 ||
         rpc_write(0, &strideB, sizeof(long long int)) < 0 ||
         rpc_write(0, &beta, sizeof(const __half*)) < 0 ||
+        (beta != nullptr && rpc_write(0, beta, sizeof(const __half)) < 0) ||
         rpc_write(0, C, sizeof(__half)) < 0 ||
         rpc_write(0, &ldc, sizeof(int)) < 0 ||
         rpc_write(0, &strideC, sizeof(long long int)) < 0 ||
@@ -18844,6 +18862,7 @@ cublasStatus_t cublasHgemmStridedBatched_64(cublasHandle_t handle, cublasOperati
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
         rpc_write(0, &k, sizeof(int64_t)) < 0 ||
         rpc_write(0, &alpha, sizeof(const __half*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const __half)) < 0) ||
         rpc_write(0, &A, sizeof(const __half*)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
         rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
@@ -18851,6 +18870,7 @@ cublasStatus_t cublasHgemmStridedBatched_64(cublasHandle_t handle, cublasOperati
         rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
         rpc_write(0, &strideB, sizeof(long long int)) < 0 ||
         rpc_write(0, &beta, sizeof(const __half*)) < 0 ||
+        (beta != nullptr && rpc_write(0, beta, sizeof(const __half)) < 0) ||
         rpc_write(0, C, sizeof(__half)) < 0 ||
         rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
         rpc_write(0, &strideC, sizeof(long long int)) < 0 ||
@@ -18873,6 +18893,7 @@ cublasStatus_t cublasSgemmStridedBatched(cublasHandle_t handle, cublasOperation_
         rpc_write(0, &n, sizeof(int)) < 0 ||
         rpc_write(0, &k, sizeof(int)) < 0 ||
         rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const float)) < 0) ||
         rpc_write(0, &A, sizeof(const float*)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
@@ -18880,6 +18901,7 @@ cublasStatus_t cublasSgemmStridedBatched(cublasHandle_t handle, cublasOperation_
         rpc_write(0, &ldb, sizeof(int)) < 0 ||
         rpc_write(0, &strideB, sizeof(long long int)) < 0 ||
         rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        (beta != nullptr && rpc_write(0, beta, sizeof(const float)) < 0) ||
         rpc_write(0, C, sizeof(float)) < 0 ||
         rpc_write(0, &ldc, sizeof(int)) < 0 ||
         rpc_write(0, &strideC, sizeof(long long int)) < 0 ||
@@ -18902,6 +18924,7 @@ cublasStatus_t cublasSgemmStridedBatched_64(cublasHandle_t handle, cublasOperati
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
         rpc_write(0, &k, sizeof(int64_t)) < 0 ||
         rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const float)) < 0) ||
         rpc_write(0, &A, sizeof(const float*)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
         rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
@@ -18909,6 +18932,7 @@ cublasStatus_t cublasSgemmStridedBatched_64(cublasHandle_t handle, cublasOperati
         rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
         rpc_write(0, &strideB, sizeof(long long int)) < 0 ||
         rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        (beta != nullptr && rpc_write(0, beta, sizeof(const float)) < 0) ||
         rpc_write(0, C, sizeof(float)) < 0 ||
         rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
         rpc_write(0, &strideC, sizeof(long long int)) < 0 ||
@@ -18930,14 +18954,16 @@ cublasStatus_t cublasDgemmStridedBatched(cublasHandle_t handle, cublasOperation_
         rpc_write(0, &m, sizeof(int)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
         rpc_write(0, &k, sizeof(int)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const double)) < 0) ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
-        rpc_write(0, B, sizeof(const double*)) < 0 ||
+        rpc_write(0, &B, sizeof(const double*)) < 0 ||
         rpc_write(0, &ldb, sizeof(int)) < 0 ||
         rpc_write(0, &strideB, sizeof(long long int)) < 0 ||
-        rpc_write(0, beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        (beta != nullptr && rpc_write(0, beta, sizeof(const double)) < 0) ||
         rpc_write(0, C, sizeof(double)) < 0 ||
         rpc_write(0, &ldc, sizeof(int)) < 0 ||
         rpc_write(0, &strideC, sizeof(long long int)) < 0 ||
@@ -18959,14 +18985,16 @@ cublasStatus_t cublasDgemmStridedBatched_64(cublasHandle_t handle, cublasOperati
         rpc_write(0, &m, sizeof(int64_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
         rpc_write(0, &k, sizeof(int64_t)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const double)) < 0) ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
         rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
-        rpc_write(0, B, sizeof(const double*)) < 0 ||
+        rpc_write(0, &B, sizeof(const double*)) < 0 ||
         rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
         rpc_write(0, &strideB, sizeof(long long int)) < 0 ||
-        rpc_write(0, beta, sizeof(const double*)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        (beta != nullptr && rpc_write(0, beta, sizeof(const double)) < 0) ||
         rpc_write(0, C, sizeof(double)) < 0 ||
         rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
         rpc_write(0, &strideC, sizeof(long long int)) < 0 ||
@@ -18989,6 +19017,7 @@ cublasStatus_t cublasCgemmStridedBatched(cublasHandle_t handle, cublasOperation_
         rpc_write(0, &n, sizeof(int)) < 0 ||
         rpc_write(0, &k, sizeof(int)) < 0 ||
         rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const cuComplex)) < 0) ||
         rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
@@ -18996,6 +19025,7 @@ cublasStatus_t cublasCgemmStridedBatched(cublasHandle_t handle, cublasOperation_
         rpc_write(0, &ldb, sizeof(int)) < 0 ||
         rpc_write(0, &strideB, sizeof(long long int)) < 0 ||
         rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        (beta != nullptr && rpc_write(0, beta, sizeof(const cuComplex)) < 0) ||
         rpc_write(0, C, sizeof(cuComplex)) < 0 ||
         rpc_write(0, &ldc, sizeof(int)) < 0 ||
         rpc_write(0, &strideC, sizeof(long long int)) < 0 ||
@@ -19018,6 +19048,7 @@ cublasStatus_t cublasCgemmStridedBatched_64(cublasHandle_t handle, cublasOperati
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
         rpc_write(0, &k, sizeof(int64_t)) < 0 ||
         rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const cuComplex)) < 0) ||
         rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
         rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
@@ -19025,6 +19056,7 @@ cublasStatus_t cublasCgemmStridedBatched_64(cublasHandle_t handle, cublasOperati
         rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
         rpc_write(0, &strideB, sizeof(long long int)) < 0 ||
         rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        (beta != nullptr && rpc_write(0, beta, sizeof(const cuComplex)) < 0) ||
         rpc_write(0, C, sizeof(cuComplex)) < 0 ||
         rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
         rpc_write(0, &strideC, sizeof(long long int)) < 0 ||
@@ -19047,6 +19079,7 @@ cublasStatus_t cublasCgemm3mStridedBatched(cublasHandle_t handle, cublasOperatio
         rpc_write(0, &n, sizeof(int)) < 0 ||
         rpc_write(0, &k, sizeof(int)) < 0 ||
         rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const cuComplex)) < 0) ||
         rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
@@ -19054,6 +19087,7 @@ cublasStatus_t cublasCgemm3mStridedBatched(cublasHandle_t handle, cublasOperatio
         rpc_write(0, &ldb, sizeof(int)) < 0 ||
         rpc_write(0, &strideB, sizeof(long long int)) < 0 ||
         rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        (beta != nullptr && rpc_write(0, beta, sizeof(const cuComplex)) < 0) ||
         rpc_write(0, C, sizeof(cuComplex)) < 0 ||
         rpc_write(0, &ldc, sizeof(int)) < 0 ||
         rpc_write(0, &strideC, sizeof(long long int)) < 0 ||
@@ -19076,6 +19110,7 @@ cublasStatus_t cublasCgemm3mStridedBatched_64(cublasHandle_t handle, cublasOpera
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
         rpc_write(0, &k, sizeof(int64_t)) < 0 ||
         rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const cuComplex)) < 0) ||
         rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
         rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
@@ -19083,6 +19118,7 @@ cublasStatus_t cublasCgemm3mStridedBatched_64(cublasHandle_t handle, cublasOpera
         rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
         rpc_write(0, &strideB, sizeof(long long int)) < 0 ||
         rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        (beta != nullptr && rpc_write(0, beta, sizeof(const cuComplex)) < 0) ||
         rpc_write(0, C, sizeof(cuComplex)) < 0 ||
         rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
         rpc_write(0, &strideC, sizeof(long long int)) < 0 ||
@@ -19105,6 +19141,7 @@ cublasStatus_t cublasZgemmStridedBatched(cublasHandle_t handle, cublasOperation_
         rpc_write(0, &n, sizeof(int)) < 0 ||
         rpc_write(0, &k, sizeof(int)) < 0 ||
         rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
@@ -19112,6 +19149,7 @@ cublasStatus_t cublasZgemmStridedBatched(cublasHandle_t handle, cublasOperation_
         rpc_write(0, &ldb, sizeof(int)) < 0 ||
         rpc_write(0, &strideB, sizeof(long long int)) < 0 ||
         rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        (beta != nullptr && rpc_write(0, beta, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
         rpc_write(0, &ldc, sizeof(int)) < 0 ||
         rpc_write(0, &strideC, sizeof(long long int)) < 0 ||
@@ -19134,6 +19172,7 @@ cublasStatus_t cublasZgemmStridedBatched_64(cublasHandle_t handle, cublasOperati
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
         rpc_write(0, &k, sizeof(int64_t)) < 0 ||
         rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
         rpc_write(0, &strideA, sizeof(long long int)) < 0 ||
@@ -19141,6 +19180,7 @@ cublasStatus_t cublasZgemmStridedBatched_64(cublasHandle_t handle, cublasOperati
         rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
         rpc_write(0, &strideB, sizeof(long long int)) < 0 ||
         rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        (beta != nullptr && rpc_write(0, beta, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
         rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
         rpc_write(0, &strideC, sizeof(long long int)) < 0 ||
@@ -19164,6 +19204,7 @@ cublasStatus_t cublasGemmBatchedEx_64(cublasHandle_t handle, cublasOperation_t t
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
         rpc_write(0, &k, sizeof(int64_t)) < 0 ||
         rpc_write(0, &alpha, sizeof(const void*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const void*)) < 0) ||
         rpc_write(0, &Aarray, sizeof(Aarray)) < 0 ||
         rpc_write(0, &Atype, sizeof(cudaDataType)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
@@ -19171,6 +19212,7 @@ cublasStatus_t cublasGemmBatchedEx_64(cublasHandle_t handle, cublasOperation_t t
         rpc_write(0, &Btype, sizeof(cudaDataType)) < 0 ||
         rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
         rpc_write(0, &beta, sizeof(const void*)) < 0 ||
+        (beta != nullptr && rpc_write(0, beta, sizeof(const void*)) < 0) ||
         rpc_write(0, &Carray, sizeof(Carray)) < 0 ||
         rpc_write(0, &Ctype, sizeof(cudaDataType)) < 0 ||
         rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
@@ -19192,9 +19234,11 @@ cublasStatus_t cublasSgeam(cublasHandle_t handle, cublasOperation_t transa, cubl
         rpc_write(0, &m, sizeof(int)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
         rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const float)) < 0) ||
         rpc_write(0, &A, sizeof(const float*)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        (beta != nullptr && rpc_write(0, beta, sizeof(const float)) < 0) ||
         rpc_write(0, &B, sizeof(const float*)) < 0 ||
         rpc_write(0, &ldb, sizeof(int)) < 0 ||
         rpc_write(0, C, sizeof(float)) < 0 ||
@@ -19216,9 +19260,11 @@ cublasStatus_t cublasSgeam_64(cublasHandle_t handle, cublasOperation_t transa, c
         rpc_write(0, &m, sizeof(int64_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
         rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const float)) < 0) ||
         rpc_write(0, &A, sizeof(const float*)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
         rpc_write(0, &beta, sizeof(const float*)) < 0 ||
+        (beta != nullptr && rpc_write(0, beta, sizeof(const float)) < 0) ||
         rpc_write(0, &B, sizeof(const float*)) < 0 ||
         rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
         rpc_write(0, C, sizeof(float)) < 0 ||
@@ -19239,11 +19285,13 @@ cublasStatus_t cublasDgeam(cublasHandle_t handle, cublasOperation_t transa, cubl
         rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
         rpc_write(0, &m, sizeof(int)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const double)) < 0) ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
-        rpc_write(0, beta, sizeof(const double*)) < 0 ||
-        rpc_write(0, B, sizeof(const double*)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        (beta != nullptr && rpc_write(0, beta, sizeof(const double)) < 0) ||
+        rpc_write(0, &B, sizeof(const double*)) < 0 ||
         rpc_write(0, &ldb, sizeof(int)) < 0 ||
         rpc_write(0, C, sizeof(double)) < 0 ||
         rpc_write(0, &ldc, sizeof(int)) < 0 ||
@@ -19263,11 +19311,13 @@ cublasStatus_t cublasDgeam_64(cublasHandle_t handle, cublasOperation_t transa, c
         rpc_write(0, &transb, sizeof(cublasOperation_t)) < 0 ||
         rpc_write(0, &m, sizeof(int64_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const double)) < 0) ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
-        rpc_write(0, beta, sizeof(const double*)) < 0 ||
-        rpc_write(0, B, sizeof(const double*)) < 0 ||
+        rpc_write(0, &beta, sizeof(const double*)) < 0 ||
+        (beta != nullptr && rpc_write(0, beta, sizeof(const double)) < 0) ||
+        rpc_write(0, &B, sizeof(const double*)) < 0 ||
         rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
         rpc_write(0, C, sizeof(double)) < 0 ||
         rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
@@ -19288,9 +19338,11 @@ cublasStatus_t cublasCgeam(cublasHandle_t handle, cublasOperation_t transa, cubl
         rpc_write(0, &m, sizeof(int)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
         rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const cuComplex)) < 0) ||
         rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        (beta != nullptr && rpc_write(0, beta, sizeof(const cuComplex)) < 0) ||
         rpc_write(0, &B, sizeof(const cuComplex*)) < 0 ||
         rpc_write(0, &ldb, sizeof(int)) < 0 ||
         rpc_write(0, C, sizeof(cuComplex)) < 0 ||
@@ -19312,9 +19364,11 @@ cublasStatus_t cublasCgeam_64(cublasHandle_t handle, cublasOperation_t transa, c
         rpc_write(0, &m, sizeof(int64_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
         rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const cuComplex)) < 0) ||
         rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
         rpc_write(0, &beta, sizeof(const cuComplex*)) < 0 ||
+        (beta != nullptr && rpc_write(0, beta, sizeof(const cuComplex)) < 0) ||
         rpc_write(0, &B, sizeof(const cuComplex*)) < 0 ||
         rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
         rpc_write(0, C, sizeof(cuComplex)) < 0 ||
@@ -19336,9 +19390,11 @@ cublasStatus_t cublasZgeam(cublasHandle_t handle, cublasOperation_t transa, cubl
         rpc_write(0, &m, sizeof(int)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
         rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        (beta != nullptr && rpc_write(0, beta, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_write(0, &B, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_write(0, &ldb, sizeof(int)) < 0 ||
         rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
@@ -19360,9 +19416,11 @@ cublasStatus_t cublasZgeam_64(cublasHandle_t handle, cublasOperation_t transa, c
         rpc_write(0, &m, sizeof(int64_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
         rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
         rpc_write(0, &beta, sizeof(const cuDoubleComplex*)) < 0 ||
+        (beta != nullptr && rpc_write(0, beta, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_write(0, &B, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_write(0, &ldb, sizeof(int64_t)) < 0 ||
         rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
@@ -19387,6 +19445,7 @@ cublasStatus_t cublasStrsmBatched(cublasHandle_t handle, cublasSideMode_t side, 
         rpc_write(0, &m, sizeof(int)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
         rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const float)) < 0) ||
         rpc_write(0, &A, sizeof(A)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, &B, sizeof(B)) < 0 ||
@@ -19410,6 +19469,7 @@ cublasStatus_t cublasStrsmBatched_64(cublasHandle_t handle, cublasSideMode_t sid
         rpc_write(0, &m, sizeof(int64_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
         rpc_write(0, &alpha, sizeof(const float*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const float)) < 0) ||
         rpc_write(0, &A, sizeof(A)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
         rpc_write(0, &B, sizeof(B)) < 0 ||
@@ -19432,7 +19492,8 @@ cublasStatus_t cublasDtrsmBatched(cublasHandle_t handle, cublasSideMode_t side, 
         rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
         rpc_write(0, &m, sizeof(int)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const double)) < 0) ||
         rpc_write(0, &A, sizeof(A)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, &B, sizeof(B)) < 0 ||
@@ -19455,7 +19516,8 @@ cublasStatus_t cublasDtrsmBatched_64(cublasHandle_t handle, cublasSideMode_t sid
         rpc_write(0, &diag, sizeof(cublasDiagType_t)) < 0 ||
         rpc_write(0, &m, sizeof(int64_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
-        rpc_write(0, alpha, sizeof(const double*)) < 0 ||
+        rpc_write(0, &alpha, sizeof(const double*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const double)) < 0) ||
         rpc_write(0, &A, sizeof(A)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
         rpc_write(0, &B, sizeof(B)) < 0 ||
@@ -19479,6 +19541,7 @@ cublasStatus_t cublasCtrsmBatched(cublasHandle_t handle, cublasSideMode_t side, 
         rpc_write(0, &m, sizeof(int)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
         rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const cuComplex)) < 0) ||
         rpc_write(0, &A, sizeof(A)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, &B, sizeof(B)) < 0 ||
@@ -19502,6 +19565,7 @@ cublasStatus_t cublasCtrsmBatched_64(cublasHandle_t handle, cublasSideMode_t sid
         rpc_write(0, &m, sizeof(int64_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
         rpc_write(0, &alpha, sizeof(const cuComplex*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const cuComplex)) < 0) ||
         rpc_write(0, &A, sizeof(A)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
         rpc_write(0, &B, sizeof(B)) < 0 ||
@@ -19525,6 +19589,7 @@ cublasStatus_t cublasZtrsmBatched(cublasHandle_t handle, cublasSideMode_t side, 
         rpc_write(0, &m, sizeof(int)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
         rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_write(0, &A, sizeof(A)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, &B, sizeof(B)) < 0 ||
@@ -19548,6 +19613,7 @@ cublasStatus_t cublasZtrsmBatched_64(cublasHandle_t handle, cublasSideMode_t sid
         rpc_write(0, &m, sizeof(int64_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
         rpc_write(0, &alpha, sizeof(const cuDoubleComplex*)) < 0 ||
+        (alpha != nullptr && rpc_write(0, alpha, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_write(0, &A, sizeof(A)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
         rpc_write(0, &B, sizeof(B)) < 0 ||
@@ -19569,6 +19635,7 @@ cublasStatus_t cublasSdgmm(cublasHandle_t handle, cublasSideMode_t mode, int m, 
         rpc_write(0, &A, sizeof(const float*)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        (x != nullptr && rpc_write(0, x, sizeof(const float)) < 0) ||
         rpc_write(0, &incx, sizeof(int)) < 0 ||
         rpc_write(0, C, sizeof(float)) < 0 ||
         rpc_write(0, &ldc, sizeof(int)) < 0 ||
@@ -19590,6 +19657,7 @@ cublasStatus_t cublasSdgmm_64(cublasHandle_t handle, cublasSideMode_t mode, int6
         rpc_write(0, &A, sizeof(const float*)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
         rpc_write(0, &x, sizeof(const float*)) < 0 ||
+        (x != nullptr && rpc_write(0, x, sizeof(const float)) < 0) ||
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
         rpc_write(0, C, sizeof(float)) < 0 ||
         rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
@@ -19608,9 +19676,10 @@ cublasStatus_t cublasDdgmm(cublasHandle_t handle, cublasSideMode_t mode, int m, 
         rpc_write(0, &mode, sizeof(cublasSideMode_t)) < 0 ||
         rpc_write(0, &m, sizeof(int)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        (x != nullptr && rpc_write(0, x, sizeof(const double)) < 0) ||
         rpc_write(0, &incx, sizeof(int)) < 0 ||
         rpc_write(0, C, sizeof(double)) < 0 ||
         rpc_write(0, &ldc, sizeof(int)) < 0 ||
@@ -19629,9 +19698,10 @@ cublasStatus_t cublasDdgmm_64(cublasHandle_t handle, cublasSideMode_t mode, int6
         rpc_write(0, &mode, sizeof(cublasSideMode_t)) < 0 ||
         rpc_write(0, &m, sizeof(int64_t)) < 0 ||
         rpc_write(0, &n, sizeof(int64_t)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
-        rpc_write(0, x, sizeof(const double*)) < 0 ||
+        rpc_write(0, &x, sizeof(const double*)) < 0 ||
+        (x != nullptr && rpc_write(0, x, sizeof(const double)) < 0) ||
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
         rpc_write(0, C, sizeof(double)) < 0 ||
         rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
@@ -19653,6 +19723,7 @@ cublasStatus_t cublasCdgmm(cublasHandle_t handle, cublasSideMode_t mode, int m, 
         rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        (x != nullptr && rpc_write(0, x, sizeof(const cuComplex)) < 0) ||
         rpc_write(0, &incx, sizeof(int)) < 0 ||
         rpc_write(0, C, sizeof(cuComplex)) < 0 ||
         rpc_write(0, &ldc, sizeof(int)) < 0 ||
@@ -19674,6 +19745,7 @@ cublasStatus_t cublasCdgmm_64(cublasHandle_t handle, cublasSideMode_t mode, int6
         rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
         rpc_write(0, &x, sizeof(const cuComplex*)) < 0 ||
+        (x != nullptr && rpc_write(0, x, sizeof(const cuComplex)) < 0) ||
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
         rpc_write(0, C, sizeof(cuComplex)) < 0 ||
         rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
@@ -19695,6 +19767,7 @@ cublasStatus_t cublasZdgmm(cublasHandle_t handle, cublasSideMode_t mode, int m, 
         rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        (x != nullptr && rpc_write(0, x, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_write(0, &incx, sizeof(int)) < 0 ||
         rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
         rpc_write(0, &ldc, sizeof(int)) < 0 ||
@@ -19716,6 +19789,7 @@ cublasStatus_t cublasZdgmm_64(cublasHandle_t handle, cublasSideMode_t mode, int6
         rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
         rpc_write(0, &lda, sizeof(int64_t)) < 0 ||
         rpc_write(0, &x, sizeof(const cuDoubleComplex*)) < 0 ||
+        (x != nullptr && rpc_write(0, x, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_write(0, &incx, sizeof(int64_t)) < 0 ||
         rpc_write(0, C, sizeof(cuDoubleComplex)) < 0 ||
         rpc_write(0, &ldc, sizeof(int64_t)) < 0 ||
@@ -19982,6 +20056,7 @@ cublasStatus_t cublasStpttr(cublasHandle_t handle, cublasFillMode_t uplo, int n,
         rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
         rpc_write(0, &AP, sizeof(const float*)) < 0 ||
+        (AP != nullptr && rpc_write(0, AP, sizeof(const float)) < 0) ||
         rpc_write(0, A, sizeof(float)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -19998,7 +20073,8 @@ cublasStatus_t cublasDtpttr(cublasHandle_t handle, cublasFillMode_t uplo, int n,
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
-        rpc_write(0, AP, sizeof(const double*)) < 0 ||
+        rpc_write(0, &AP, sizeof(const double*)) < 0 ||
+        (AP != nullptr && rpc_write(0, AP, sizeof(const double)) < 0) ||
         rpc_write(0, A, sizeof(double)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -20016,6 +20092,7 @@ cublasStatus_t cublasCtpttr(cublasHandle_t handle, cublasFillMode_t uplo, int n,
         rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
         rpc_write(0, &AP, sizeof(const cuComplex*)) < 0 ||
+        (AP != nullptr && rpc_write(0, AP, sizeof(const cuComplex)) < 0) ||
         rpc_write(0, A, sizeof(cuComplex)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -20033,6 +20110,7 @@ cublasStatus_t cublasZtpttr(cublasHandle_t handle, cublasFillMode_t uplo, int n,
         rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
         rpc_write(0, &AP, sizeof(const cuDoubleComplex*)) < 0 ||
+        (AP != nullptr && rpc_write(0, AP, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_write(0, A, sizeof(cuDoubleComplex)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -20050,6 +20128,7 @@ cublasStatus_t cublasStrttp(cublasHandle_t handle, cublasFillMode_t uplo, int n,
         rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
         rpc_write(0, &A, sizeof(const float*)) < 0 ||
+        (A != nullptr && rpc_write(0, A, sizeof(const float)) < 0) ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, AP, sizeof(float)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -20066,7 +20145,8 @@ cublasStatus_t cublasDtrttp(cublasHandle_t handle, cublasFillMode_t uplo, int n,
         rpc_write(0, &handle, sizeof(cublasHandle_t)) < 0 ||
         rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
-        rpc_write(0, A, sizeof(const double*)) < 0 ||
+        rpc_write(0, &A, sizeof(const double*)) < 0 ||
+        (A != nullptr && rpc_write(0, A, sizeof(const double)) < 0) ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, AP, sizeof(double)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -20084,6 +20164,7 @@ cublasStatus_t cublasCtrttp(cublasHandle_t handle, cublasFillMode_t uplo, int n,
         rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
         rpc_write(0, &A, sizeof(const cuComplex*)) < 0 ||
+        (A != nullptr && rpc_write(0, A, sizeof(const cuComplex)) < 0) ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, AP, sizeof(cuComplex)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -20101,6 +20182,7 @@ cublasStatus_t cublasZtrttp(cublasHandle_t handle, cublasFillMode_t uplo, int n,
         rpc_write(0, &uplo, sizeof(cublasFillMode_t)) < 0 ||
         rpc_write(0, &n, sizeof(int)) < 0 ||
         rpc_write(0, &A, sizeof(const cuDoubleComplex*)) < 0 ||
+        (A != nullptr && rpc_write(0, A, sizeof(const cuDoubleComplex)) < 0) ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, AP, sizeof(cuDoubleComplex)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
@@ -20120,6 +20202,7 @@ cublasStatus_t cublasSgetriBatched(cublasHandle_t handle, int n, const float* co
         rpc_write(0, &A, sizeof(A)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, &P, sizeof(const int*)) < 0 ||
+        (P != nullptr && rpc_write(0, P, sizeof(const int)) < 0) ||
         rpc_write(0, &C, sizeof(C)) < 0 ||
         rpc_write(0, &ldc, sizeof(int)) < 0 ||
         rpc_write(0, info, sizeof(int)) < 0 ||
@@ -20140,6 +20223,7 @@ cublasStatus_t cublasDgetriBatched(cublasHandle_t handle, int n, const double* c
         rpc_write(0, &A, sizeof(A)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, &P, sizeof(const int*)) < 0 ||
+        (P != nullptr && rpc_write(0, P, sizeof(const int)) < 0) ||
         rpc_write(0, &C, sizeof(C)) < 0 ||
         rpc_write(0, &ldc, sizeof(int)) < 0 ||
         rpc_write(0, info, sizeof(int)) < 0 ||
@@ -20160,6 +20244,7 @@ cublasStatus_t cublasCgetriBatched(cublasHandle_t handle, int n, const cuComplex
         rpc_write(0, &A, sizeof(A)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, &P, sizeof(const int*)) < 0 ||
+        (P != nullptr && rpc_write(0, P, sizeof(const int)) < 0) ||
         rpc_write(0, &C, sizeof(C)) < 0 ||
         rpc_write(0, &ldc, sizeof(int)) < 0 ||
         rpc_write(0, info, sizeof(int)) < 0 ||
@@ -20180,6 +20265,7 @@ cublasStatus_t cublasZgetriBatched(cublasHandle_t handle, int n, const cuDoubleC
         rpc_write(0, &A, sizeof(A)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, &P, sizeof(const int*)) < 0 ||
+        (P != nullptr && rpc_write(0, P, sizeof(const int)) < 0) ||
         rpc_write(0, &C, sizeof(C)) < 0 ||
         rpc_write(0, &ldc, sizeof(int)) < 0 ||
         rpc_write(0, info, sizeof(int)) < 0 ||
@@ -20202,6 +20288,7 @@ cublasStatus_t cublasSgetrsBatched(cublasHandle_t handle, cublasOperation_t tran
         rpc_write(0, &Aarray, sizeof(Aarray)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, &devIpiv, sizeof(const int*)) < 0 ||
+        (devIpiv != nullptr && rpc_write(0, devIpiv, sizeof(const int)) < 0) ||
         rpc_write(0, &Barray, sizeof(Barray)) < 0 ||
         rpc_write(0, &ldb, sizeof(int)) < 0 ||
         rpc_write(0, info, sizeof(int)) < 0 ||
@@ -20224,6 +20311,7 @@ cublasStatus_t cublasDgetrsBatched(cublasHandle_t handle, cublasOperation_t tran
         rpc_write(0, &Aarray, sizeof(Aarray)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, &devIpiv, sizeof(const int*)) < 0 ||
+        (devIpiv != nullptr && rpc_write(0, devIpiv, sizeof(const int)) < 0) ||
         rpc_write(0, &Barray, sizeof(Barray)) < 0 ||
         rpc_write(0, &ldb, sizeof(int)) < 0 ||
         rpc_write(0, info, sizeof(int)) < 0 ||
@@ -20268,6 +20356,7 @@ cublasStatus_t cublasZgetrsBatched(cublasHandle_t handle, cublasOperation_t tran
         rpc_write(0, &Aarray, sizeof(Aarray)) < 0 ||
         rpc_write(0, &lda, sizeof(int)) < 0 ||
         rpc_write(0, &devIpiv, sizeof(const int*)) < 0 ||
+        (devIpiv != nullptr && rpc_write(0, devIpiv, sizeof(const int)) < 0) ||
         rpc_write(0, &Barray, sizeof(Barray)) < 0 ||
         rpc_write(0, &ldb, sizeof(int)) < 0 ||
         rpc_write(0, info, sizeof(int)) < 0 ||
