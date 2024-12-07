@@ -137,7 +137,7 @@ int handle_cudaMemcpyAsync(void *conn)
             std::cerr << "Failed to allocate host memory for device-to-host transfer." << std::endl;
             return -1;
         }
-
+        
         int request_id = rpc_end_request(conn);
         if (request_id < 0)
         {
