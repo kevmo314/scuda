@@ -19394,6 +19394,7 @@ int handle_cudaMallocManaged(void *conn)
     unsigned int flags;
     int request_id;
     cudaError_t scuda_intercept_result;
+    std::cout << "calling cudaMallocManaged" << std::endl;
     if (
         rpc_read(conn, &devPtr, sizeof(void*)) < 0 ||
         rpc_read(conn, &size, sizeof(size_t)) < 0 ||
@@ -19431,6 +19432,8 @@ int handle_cudaMalloc(void *conn)
     if (request_id < 0)
         goto ERROR_0;
     scuda_intercept_result = cudaMalloc(&devPtr, size);
+
+    std::cout << "ADDRESS : " << &devPtr << std::endl;
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &devPtr, sizeof(void*)) < 0 ||
@@ -19543,7 +19546,8 @@ int handle_cudaFree(void *conn)
         rpc_read(conn, &devPtr, sizeof(void*)) < 0 ||
         false)
         goto ERROR_0;
-
+        
+    std::cout << "freeing... " << devPtr << std::endl;
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;

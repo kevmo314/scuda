@@ -18,6 +18,7 @@
 #include <cuda.h>
 #include <sys/uio.h>
 #include <netinet/tcp.h>
+#include <cuda_runtime.h>
 
 #include <unordered_map>
 
@@ -34,6 +35,9 @@ typedef struct
     pthread_cond_t read_cond;
     struct iovec write_iov[128];
     int write_iov_count = 0;
+
+    void ***unified_mem_pointers;
+    int mem_idx = 0;
 } conn_t;
 
 pthread_mutex_t conn_mutex;
@@ -218,6 +222,87 @@ int rpc_read(const int index, void *data, size_t size)
     if (n < 0)
         pthread_mutex_unlock(&conns[index].read_mutex);
     return n;
+}
+
+void allocate_unified_mem_pointer(const int index, void *dev_ptr, void *ptr, size_t size)
+{
+    std::cout << "Allocating device ptr: " << dev_ptr 
+              << " and host ptr: " << ptr 
+              << " with size: " << size << std::endl;
+
+    if (conns[index].mem_idx == 0) {
+        conns[index].unified_mem_pointers = new void **[5];
+        conns[index].unified_mem_pointers[0] = new void *[3];
+    }
+
+    if (conns[index].mem_idx >= 5) {
+        int new_capacity = conns[index].mem_idx + 1;
+
+        void ***new_arr = new void **[new_capacity];
+
+        for (int i = 0; i < conns[index].mem_idx; ++i) {
+            new_arr[i] = conns[index].unified_mem_pointers[i];
+        }
+
+        for (int i = conns[index].mem_idx; i < new_capacity; ++i) {
+            new_arr[i] = new void *[3];
+        }
+
+        delete[] conns[index].unified_mem_pointers;
+        conns[index].unified_mem_pointers = new_arr;
+    } else {
+        conns[index].unified_mem_pointers[conns[index].mem_idx] = new void *[3];
+    }
+
+    conns[index].unified_mem_pointers[conns[index].mem_idx][0] = dev_ptr;
+    conns[index].unified_mem_pointers[conns[index].mem_idx][1] = ptr;
+    conns[index].unified_mem_pointers[conns[index].mem_idx][2] = reinterpret_cast<void*>(size);
+
+    conns[index].mem_idx++;
+}
+
+void cuda_memcpy_unified_ptrs(const int index)
+{
+    std::cout << "copying memory..." << std::endl;
+
+    for (int i = 0; i < conns[index].mem_idx; i++) {
+        void *dev_ptr = conns[index].unified_mem_pointers[i][0];
+        void *host_ptr = conns[index].unified_mem_pointers[i][1];
+        size_t size = reinterpret_cast<size_t>(conns[index].unified_mem_pointers[i][2]);
+
+        std::cout << "Index " << i << " Parameters:\n"
+                  << "  Device Pointer (dev_ptr): " << dev_ptr << "\n"
+                  << "  Host Pointer (host_ptr): " << host_ptr << "\n"
+                  << "  Size (bytes): " << size << "\n";
+
+        cudaError_t res = cudaMemcpy(dev_ptr, host_ptr, size, cudaMemcpyHostToDevice);
+
+        std::cout << "result: " << res << std::endl;
+
+        if (res != cudaSuccess) {
+            std::cerr << "cudaMemcpy failed for index " << i
+                      << ": " << cudaGetErrorString(res) << std::endl;
+        } else {
+            std::cout << "Successfully copied " << size << " bytes for index " << i << std::endl;
+        }
+    }
+}
+
+void* maybe_free_unified_mem(const int index, void *ptr)
+{
+    for (int i = 0; i < conns[index].mem_idx; i++) {
+        void *dev_ptr = conns[index].unified_mem_pointers[i][1];
+        void *target_free_ptr = conns[index].unified_mem_pointers[i][0];
+
+        std::cout << "comparing pointers: " << dev_ptr << " ptr " << ptr << std::endl;
+
+        if (dev_ptr == ptr) {
+            std::cout << "freeing pointer " << target_free_ptr << std::endl;
+
+            // mem addresses are the same, free
+            return target_free_ptr;
+        }
+    }
 }
 
 int rpc_end_response(const int index, void *result)

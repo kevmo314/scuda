@@ -6,6 +6,7 @@
 
 #include <cstring>
 #include <string>
+#include <iostream>
 #include <unordered_map>
 
 #include "gen_api.h"
@@ -20,6 +21,8 @@ extern int rpc_wait_for_response(const int index);
 extern int rpc_read(const int index, void *data, const std::size_t size);
 extern int rpc_end_response(const int index, void *return_value);
 extern int rpc_close();
+extern void* maybe_free_unified_mem(const int index, void *ptr);
+extern void allocate_unified_mem_pointer(const int index, void *dev_ptr, void *ptr, size_t size);
 
 nvmlReturn_t nvmlInit_v2()
 {
@@ -9114,16 +9117,19 @@ cudaError_t cudaOccupancyMaxActiveClusters(int* numClusters, const void* func, c
 
 cudaError_t cudaMallocManaged(void** devPtr, size_t size, unsigned int flags)
 {
-    cudaError_t return_value;
-    if (rpc_start_request(0, RPC_cudaMallocManaged) < 0 ||
-        rpc_write(0, devPtr, sizeof(void*)) < 0 ||
-        rpc_write(0, &size, sizeof(size_t)) < 0 ||
-        rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, devPtr, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return cudaErrorDevicesUnavailable;
-    return return_value;
+    std::cout << "CALLING MALLOC WITH DEV PTR: " << devPtr << std::endl;
+
+    void* host_alloc = (void*) malloc(size);
+    void*d_a;
+    cudaMalloc((void **)&d_a, size);
+    std::cout << "AFTER DEVICE PTR: " << d_a << std::endl;
+
+    allocate_unified_mem_pointer(0, d_a, host_alloc, size);
+
+    std::cout << "done allocate_unified_mem_pointer" << std::endl;
+    *devPtr = host_alloc;
+
+    std::cout << "DONE MALLOC" << std::endl;
 }
 
 cudaError_t cudaMalloc(void** devPtr, size_t size)
@@ -9135,6 +9141,8 @@ cudaError_t cudaMalloc(void** devPtr, size_t size)
         rpc_read(0, devPtr, sizeof(void*)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return cudaErrorDevicesUnavailable;
+
+    std::cout << "done calling cudaMalloc... " << devPtr << std::endl;
     return return_value;
 }
 
@@ -9186,11 +9194,25 @@ cudaError_t cudaMallocArray(cudaArray_t* array, const struct cudaChannelFormatDe
 cudaError_t cudaFree(void* devPtr)
 {
     cudaError_t return_value;
-    if (rpc_start_request(0, RPC_cudaFree) < 0 ||
-        rpc_write(0, &devPtr, sizeof(void*)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return cudaErrorDevicesUnavailable;
+    void *maybe_ptr = maybe_free_unified_mem(0, devPtr);
+
+    if (maybe_ptr != nullptr) {
+        std::cout << "POITNER FOUND!! " << maybe_ptr << std::endl;
+
+        if (rpc_start_request(0, RPC_cudaFree) < 0 ||
+            rpc_write(0, &maybe_ptr, sizeof(void*)) < 0 ||
+            rpc_wait_for_response(0) < 0 ||
+            rpc_end_response(0, &return_value) < 0)
+            return cudaErrorDevicesUnavailable;
+    } else {
+        std::cout << "no poitner found..." << std::endl;
+        if (rpc_start_request(0, RPC_cudaFree) < 0 ||
+            rpc_write(0, &devPtr, sizeof(void*)) < 0 ||
+            rpc_wait_for_response(0) < 0 ||
+            rpc_end_response(0, &return_value) < 0)
+            return cudaErrorDevicesUnavailable;
+    }
+    
     return return_value;
 }
 
