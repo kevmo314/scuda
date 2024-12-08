@@ -24,6 +24,7 @@ extern int rpc_wait_for_response(const int index);
 extern int rpc_read(const int index, void *data, const std::size_t size);
 extern int rpc_end_response(const int index, void *return_value);
 extern int rpc_close();
+void cuda_memcpy_unified_ptrs(const int index);
 
 #define MAX_FUNCTION_NAME 1024
 #define MAX_ARGS 128
@@ -371,6 +372,8 @@ const char *cudaGetErrorString(cudaError_t error)
 cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim, void **args, size_t sharedMem, cudaStream_t stream)
 {
     cudaError_t return_value;
+
+    cuda_memcpy_unified_ptrs(0);
 
     // Start the RPC request
     int request_id = rpc_start_request(0, RPC_cudaLaunchKernel);
