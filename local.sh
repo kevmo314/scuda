@@ -26,8 +26,8 @@ build() {
 
   nvcc --cudart=shared -lnvidia-ml -lcuda ./test/vector_add.cu -o vector.o
   nvcc --cudart=shared -lnvidia-ml -lcuda -lcudnn ./test/cudnn.cu -o cudnn.o
-
   nvcc --cudart=shared -lnvidia-ml -lcuda -lcudnn -lcublas ./test/cublas_batched.cu -o cublas_batched.o
+  nvcc --cudart=shared -lnvidia-ml -lcuda -lcudnn -lcublas ./test/unified.cu -o unified.o
 
   if [ ! -f "$libscuda_path" ]; then
     echo "libscuda.so not found. build may have failed."
