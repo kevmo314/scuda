@@ -58,7 +58,8 @@
 
 using data_type = double;
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     cublasHandle_t cublasH = NULL;
     cudaStream_t stream = NULL;
 
@@ -78,7 +79,7 @@ int main(int argc, char *argv[]) {
      *       | 7.0 | 8.0 | 11.0 | 12.0 |
      */
 
-    const std::vector<std::vector<data_type>> A_array = {{1.0 ,3.0, 2.0, 4.0},
+    const std::vector<std::vector<data_type>> A_array = {{1.0, 3.0, 2.0, 4.0},
                                                          {5.0, 7.0, 6.0, 8.0}};
     const std::vector<std::vector<data_type>> B_array = {{5.0, 7.0, 6.0, 8.0},
                                                          {9.0, 11.0, 10.0, 12.0}};
@@ -121,7 +122,8 @@ int main(int argc, char *argv[]) {
     CUBLAS_CHECK(cublasSetStream(cublasH, stream));
 
     /* step 2: copy data to device */
-    for (int i = 0; i < batch_count; i++) {
+    for (int i = 0; i < batch_count; i++)
+    {
         CUDA_CHECK(
             cudaMalloc(reinterpret_cast<void **>(&d_A[i]), sizeof(data_type) * A_array[i].size()));
         CUDA_CHECK(
@@ -137,7 +139,8 @@ int main(int argc, char *argv[]) {
     CUDA_CHECK(
         cudaMalloc(reinterpret_cast<void **>(&d_C_array), sizeof(data_type *) * batch_count));
 
-    for (int i = 0; i < batch_count; i++) {
+    for (int i = 0; i < batch_count; i++)
+    {
         CUDA_CHECK(cudaMemcpyAsync(d_A[i], A_array[i].data(), sizeof(data_type) * A_array[i].size(),
                                    cudaMemcpyHostToDevice, stream));
         CUDA_CHECK(cudaMemcpyAsync(d_B[i], B_array[i].data(), sizeof(data_type) * B_array[i].size(),
@@ -156,8 +159,9 @@ int main(int argc, char *argv[]) {
                                     d_B_array, ldb, &beta, d_C_array, ldc, batch_count));
 
     /* step 4: copy data to host */
-    for (int i = 0; i < batch_count; i++) {
-        CUDA_CHECK(cudaMemcpy(C_array[i].data(), d_C[i], sizeof(data_type) * C_array[i].size(),
+    for (int i = 0; i < batch_count; i++)
+    {
+        CUDA_CHECK(cudaMemcpyAsync(C_array[i].data(), d_C[i], sizeof(data_type) * C_array[i].size(),
                                    cudaMemcpyDeviceToHost));
     }
 
@@ -180,7 +184,8 @@ int main(int argc, char *argv[]) {
     CUDA_CHECK(cudaFree(d_A_array));
     CUDA_CHECK(cudaFree(d_B_array));
     CUDA_CHECK(cudaFree(d_C_array));
-    for (int i = 0; i < batch_count; i++) {
+    for (int i = 0; i < batch_count; i++)
+    {
         CUDA_CHECK(cudaFree(d_A[i]));
         CUDA_CHECK(cudaFree(d_B[i]));
         CUDA_CHECK(cudaFree(d_C[i]));
