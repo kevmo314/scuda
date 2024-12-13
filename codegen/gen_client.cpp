@@ -9117,19 +9117,20 @@ cudaError_t cudaOccupancyMaxActiveClusters(int* numClusters, const void* func, c
 
 cudaError_t cudaMallocManaged(void** devPtr, size_t size, unsigned int flags)
 {
-    std::cout << "CALLING MALLOC WITH DEV PTR: " << devPtr << std::endl;
+    void* host_alloc = new void*[size];
+    void* d_a;
 
-    void* host_alloc = (void*) malloc(size);
-    void*d_a;
-    cudaMalloc((void **)&d_a, size);
-    std::cout << "AFTER DEVICE PTR: " << d_a << std::endl;
+    cudaError_t err = cudaMalloc((void **)&d_a, size);
+    if (err != cudaSuccess) {
+        std::cerr << "cudaMalloc failed: " << cudaGetErrorString(err) << std::endl;
+        return err;
+    }
 
     allocate_unified_mem_pointer(0, d_a, host_alloc, size);
 
-    std::cout << "done allocate_unified_mem_pointer" << std::endl;
     *devPtr = host_alloc;
 
-    std::cout << "DONE MALLOC" << std::endl;
+    return cudaSuccess;
 }
 
 cudaError_t cudaMalloc(void** devPtr, size_t size)
@@ -9141,8 +9142,6 @@ cudaError_t cudaMalloc(void** devPtr, size_t size)
         rpc_read(0, devPtr, sizeof(void*)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return cudaErrorDevicesUnavailable;
-
-    std::cout << "done calling cudaMalloc... " << devPtr << std::endl;
     return return_value;
 }
 

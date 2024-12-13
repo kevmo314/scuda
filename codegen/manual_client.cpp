@@ -24,7 +24,6 @@ extern int rpc_wait_for_response(const int index);
 extern int rpc_read(const int index, void *data, const std::size_t size);
 extern int rpc_end_response(const int index, void *return_value);
 extern int rpc_close();
-void cuda_memcpy_unified_ptrs(const int index);
 
 #define MAX_FUNCTION_NAME 1024
 #define MAX_ARGS 128
@@ -373,7 +372,7 @@ cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim, void
 {
     cudaError_t return_value;
 
-    cuda_memcpy_unified_ptrs(0);
+    cuda_memcpy_unified_ptrs(0, cudaMemcpyHostToDevice);
 
     // Start the RPC request
     int request_id = rpc_start_request(0, RPC_cudaLaunchKernel);
@@ -418,9 +417,22 @@ cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim, void
 
     for (int i = 0; i < f->arg_count; ++i)
     {
-        if (rpc_write(0, &f->arg_sizes[i], sizeof(int)) < 0 ||
-            rpc_write(0, args[i], f->arg_sizes[i]) < 0)
-            return cudaErrorDevicesUnavailable;
+        void* maybe_ptr = maybe_get_cached_arg_ptr(0, i, args[i]);
+
+        if (maybe_ptr != 0)
+        {
+            std::cout << "writing dynamic pointer" << std::endl;
+            if (rpc_write(0, &f->arg_sizes[i], sizeof(int)) < 0 ||
+                rpc_write(0, maybe_ptr, f->arg_sizes[i]) < 0)
+                return cudaErrorDevicesUnavailable;
+        }
+        else
+        {
+            std::cout << "writing original pointer" << std::endl;
+            if (rpc_write(0, &f->arg_sizes[i], sizeof(int)) < 0 ||
+                rpc_write(0, args[i], f->arg_sizes[i]) < 0)
+                return cudaErrorDevicesUnavailable;
+        }
     }
 
     if (rpc_wait_for_response(0) < 0)
@@ -432,6 +444,8 @@ cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim, void
     {
         return cudaErrorDevicesUnavailable;
     }
+
+    cuda_memcpy_unified_ptrs(0, cudaMemcpyDeviceToHost);
 
     return return_value;
 }
