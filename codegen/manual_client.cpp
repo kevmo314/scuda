@@ -24,7 +24,7 @@ extern int rpc_wait_for_response(const int index);
 extern int rpc_read(const int index, void *data, const std::size_t size);
 extern int rpc_end_response(const int index, void *return_value);
 extern int rpc_close();
-void* maybe_get_cached_arg_ptr(const int index, int arg_index, void* arg);
+void* maybe_get_cached_arg_ptr(const int index, int arg_index);
 void cuda_memcpy_unified_ptrs(const int index, cudaMemcpyKind kind);
 
 #define MAX_FUNCTION_NAME 1024
@@ -419,7 +419,7 @@ cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim, void
 
     for (int i = 0; i < f->arg_count; ++i)
     {
-        void* maybe_ptr = maybe_get_cached_arg_ptr(0, i, args[i]);
+        void* maybe_ptr = maybe_get_cached_arg_ptr(0, i);
 
         if (maybe_ptr != 0)
         {

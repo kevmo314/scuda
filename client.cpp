@@ -259,11 +259,14 @@ void allocate_unified_mem_pointer(const int index, void *dev_ptr, void *ptr, siz
     conns[index].mem_idx++;
 }
 
-void* maybe_get_cached_arg_ptr(const int index, int arg_index, void* arg)
+void* maybe_get_cached_arg_ptr(const int index, int arg_index)
 {
     if (arg_index >= conns[index].mem_idx)
         return nullptr;
 
+    // @TODO: this is currently very naive. it depends on the ordering of the args passed to launchKernel...
+    // to be the same order that the memory addresses are allocated.
+    // expand on this soon. - brodey
    return &conns[index].unified_mem_pointers[arg_index][0];
 }
 
