@@ -271,12 +271,10 @@ void* maybe_get_cached_arg_ptr(const int index, void* arg_ptr)
         }
     }
 
+    // no matching host pointer found
     if (found < 0)
         return nullptr;
 
-    // @TODO: this is currently very naive. it depends on the ordering of the args passed to launchKernel...
-    // to be the same order that the memory addresses are allocated.
-    // expand on this soon. - brodey
    return &conns[index].unified_mem_pointers[found][0];
 }
 

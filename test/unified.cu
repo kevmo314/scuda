@@ -25,8 +25,8 @@ int main() {
     // Unified memory allocation
     int *a, *c;
 
-    cudaMallocManaged(&a, bytes);
     cudaMallocManaged(&c, bytes);
+    cudaMallocManaged(&a, bytes);
 
     // Initialize arrays on the CPU
     for (int i = 0; i < size; ++i) {
