@@ -261,21 +261,16 @@ void allocate_unified_mem_pointer(const int index, void *dev_ptr, void *ptr, siz
 
 void* maybe_get_cached_arg_ptr(const int index, void* arg_ptr)
 {
-    int found = -1;
     for (int i = 0; i < conns[index].mem_idx; i++)
     {
         // index 1 is host pointer
         if (conns[index].unified_mem_pointers[i][1] == arg_ptr)
         {
-            found = i;
+            return &conns[index].unified_mem_pointers[i][0];
         }
     }
 
-    // no matching host pointer found
-    if (found < 0)
-        return nullptr;
-
-   return &conns[index].unified_mem_pointers[found][0];
+   return nullptr;
 }
 
 void cuda_memcpy_unified_ptrs(const int index, cudaMemcpyKind kind)
