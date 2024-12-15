@@ -259,15 +259,25 @@ void allocate_unified_mem_pointer(const int index, void *dev_ptr, void *ptr, siz
     conns[index].mem_idx++;
 }
 
-void* maybe_get_cached_arg_ptr(const int index, int arg_index)
+void* maybe_get_cached_arg_ptr(const int index, void* arg_ptr)
 {
-    if (arg_index >= conns[index].mem_idx)
+    int found = -1;
+    for (int i = 0; i < conns[index].mem_idx; i++)
+    {
+        // index 1 is host pointer
+        if (conns[index].unified_mem_pointers[i][1] == arg_ptr)
+        {
+            found = i;
+        }
+    }
+
+    if (found < 0)
         return nullptr;
 
     // @TODO: this is currently very naive. it depends on the ordering of the args passed to launchKernel...
     // to be the same order that the memory addresses are allocated.
     // expand on this soon. - brodey
-   return &conns[index].unified_mem_pointers[arg_index][0];
+   return &conns[index].unified_mem_pointers[found][0];
 }
 
 void cuda_memcpy_unified_ptrs(const int index, cudaMemcpyKind kind)
