@@ -277,12 +277,9 @@ void cuda_memcpy_unified_ptrs(const int index, cudaMemcpyKind kind)
 {
     for (int i = 0; i < conns[index].mem_idx; i++) {
         if (kind == cudaMemcpyHostToDevice) {
-            void *dev_ptr = conns[index].unified_mem_pointers[i][0];
-            void *host_ptr = conns[index].unified_mem_pointers[i][1];
-
             size_t size = reinterpret_cast<size_t>(conns[index].unified_mem_pointers[i][2]);
 
-            cudaError_t res = cudaMemcpy(dev_ptr, host_ptr, size, cudaMemcpyHostToDevice);
+            cudaError_t res = cudaMemcpy(conns[index].unified_mem_pointers[i][0], conns[index].unified_mem_pointers[i][1], size, cudaMemcpyHostToDevice);
 
             if (res != cudaSuccess) {
                 std::cerr << "cudaMemcpy failed for index " << i
@@ -291,12 +288,9 @@ void cuda_memcpy_unified_ptrs(const int index, cudaMemcpyKind kind)
                 std::cout << "Successfully copied " << size << " bytes for index " << i << std::endl;
             }
         }  else {
-            void *dev_ptr = conns[index].unified_mem_pointers[i][0];
-            void *host_ptr = conns[index].unified_mem_pointers[i][1];
-
             size_t size = reinterpret_cast<size_t>(conns[index].unified_mem_pointers[i][2]);
 
-            cudaError_t res = cudaMemcpy(host_ptr, dev_ptr, size, cudaMemcpyDeviceToHost);
+            cudaError_t res = cudaMemcpy(conns[index].unified_mem_pointers[i][1], conns[index].unified_mem_pointers[i][0], size, cudaMemcpyDeviceToHost);
 
             if (res != cudaSuccess) {
                 std::cerr << "cudaMemcpy failed for index " << i
@@ -315,8 +309,6 @@ void* maybe_free_unified_mem(const int index, void *ptr)
         void *target_free_ptr = conns[index].unified_mem_pointers[i][0];
 
         if (dev_ptr == ptr) {
-            std::cout << "freeing dynamic pointer " << target_free_ptr << std::endl;
-
             return target_free_ptr;
         }
     }

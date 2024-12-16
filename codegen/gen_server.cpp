@@ -19546,7 +19546,7 @@ int handle_cudaFree(void *conn)
         rpc_read(conn, &devPtr, sizeof(void*)) < 0 ||
         false)
         goto ERROR_0;
-        
+            
     std::cout << "freeing... " << devPtr << std::endl;
     request_id = rpc_end_request(conn);
     if (request_id < 0)

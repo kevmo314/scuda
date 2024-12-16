@@ -422,20 +422,23 @@ cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim, void
         // convert each to a void pointer so that we can map it back to...
         // our origional host pointers.
         void *arg_ptr = *reinterpret_cast<void**>(args[i]);
-        void* maybe_ptr = maybe_get_cached_arg_ptr(0, arg_ptr);
+        void *maybe_ptr = maybe_get_cached_arg_ptr(0, arg_ptr);
 
+        // Hardconding 24 bytes for now for the unified memory case. Will remove before merge!
         if (maybe_ptr != 0)
         {
-            std::cout << "writing dynamic pointer" << std::endl;
-            if (rpc_write(0, &f->arg_sizes[i], sizeof(int)) < 0 ||
-                rpc_write(0, maybe_ptr, f->arg_sizes[i]) < 0)
+            int size = 24;
+            std::cout << "writing dynamic pointer " << maybe_ptr << std::endl;
+            if (rpc_write(0, &size, sizeof(int)) < 0 ||
+                rpc_write(0, maybe_ptr, size) < 0)
                 return cudaErrorDevicesUnavailable;
         }
         else
         {
+            int size = 24;
             std::cout << "writing original pointer" << std::endl;
-            if (rpc_write(0, &f->arg_sizes[i], sizeof(int)) < 0 ||
-                rpc_write(0, args[i], f->arg_sizes[i]) < 0)
+            if (rpc_write(0, &size, sizeof(int)) < 0 ||
+                rpc_write(0, args[i], size) < 0)
                 return cudaErrorDevicesUnavailable;
         }
     }
@@ -540,8 +543,6 @@ void parse_ptx_string(void *fatCubin, const char *ptx_string, unsigned long long
                         if (type_size == 0)
                             continue;
                         arg_size = type_size;
-
-                        std::cout << "arg size: " << arg_size << std::endl;
                     }
                     else if (ptx_string[i] == '[')
                     {

@@ -264,6 +264,8 @@ int handle_cudaLaunchKernel(void *conn)
 
     result = cudaLaunchKernel(func, gridDim, blockDim, args, sharedMem, stream);
 
+    std::cout << "Launch kern result: " << result << std::endl;
+
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_end_response(conn, &result) < 0)
         goto ERROR_1;
