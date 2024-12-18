@@ -10,6 +10,10 @@ elif [[ "$1" == "cublas" ]]; then
     echo "Running cublas example..."
 
     LD_PRELOAD="$libscuda_path" /matrixMulCUBLAS
+elif [[ "$1" == "unified" ]]; then
+    echo "Running cublas example..."
+
+    LD_PRELOAD="$libscuda_path" /unified.o
 else
-    echo "Unknown option: $1. Please specify 'torch' or 'cublas'."
+    echo "Unknown option: $1. Please specify one of: torch | cublas | unified ."
 fi

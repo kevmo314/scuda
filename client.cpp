@@ -22,6 +22,13 @@
 
 #include <unordered_map>
 
+#include <setjmp.h>
+#include <signal.h>
+#include <csignal>
+#include <cstdlib>
+#include <cstring>
+#include <sys/mman.h>
+
 #include "codegen/gen_client.h"
 
 typedef struct
@@ -46,8 +53,67 @@ int nconns = 0;
 
 const char *DEFAULT_PORT = "14833";
 
+static int init = 0;
+static jmp_buf catch_segfault;
+static void* faulting_address = nullptr;
+
+void add_host_mem_to_devptr_mapping(const int index, void *dev_ptr, void *host_ptr)
+{
+    for (int i = 0; i < conns[index].mem_idx; i++)
+    {
+        // index 1 is host pointer
+        if (conns[index].unified_mem_pointers[i][0] == dev_ptr)
+        {
+            conns[index].unified_mem_pointers[i][2] = host_ptr;
+        }
+    }
+}
+
+static void segfault(int sig, siginfo_t* info, void* unused) {
+    faulting_address = info->si_addr; 
+    std::cout << "Caught segfault at address: " << faulting_address << std::endl;
+
+    size_t page_size = sysconf(_SC_PAGESIZE);
+    void* aligned_address = (void*)((uintptr_t)faulting_address & ~(page_size - 1));
+
+    // Allocate memory at the faulting address
+    void* allocated = mmap(aligned_address, page_size, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+    if (allocated == MAP_FAILED) {
+        perror("Failed to allocate memory at faulting address");
+        _exit(1);
+    }
+
+    add_host_mem_to_devptr_mapping(0, faulting_address, allocated);
+
+    std::cout << "Allocated and registered memory at address: " << allocated << std::endl;
+}
+
+static void set_segfault_handlers() {
+    if (init > 0) {
+        return;
+    }
+
+    struct sigaction sa;
+    memset(&sa, 0, sizeof(sa));
+    sa.sa_flags = SA_SIGINFO;
+    sa.sa_sigaction = segfault;
+
+    if (sigaction(SIGSEGV, &sa, NULL) == -1) {
+        perror("sigaction");
+        exit(EXIT_FAILURE);
+    }
+
+    std::cout << "Segfault handler installed." << std::endl;
+
+    init = 1;
+}
+
 int rpc_open()
 {
+    set_segfault_handlers();
+
+    sigsetjmp(catch_segfault, 1);
+
     if (pthread_mutex_lock(&conn_mutex) < 0)
         return -1;
 
@@ -224,37 +290,22 @@ int rpc_read(const int index, void *data, size_t size)
     return n;
 }
 
-void allocate_unified_mem_pointer(const int index, void *dev_ptr, void *ptr, size_t size)
+void allocate_unified_mem_pointer(const int index, void *dev_ptr, size_t size)
 {
     // Initialize unified_mem_pointers if not already initialized
     if (conns[index].mem_idx == 0) {
-        conns[index].unified_mem_pointers = new void **[5]; // Initial capacity of 5
+        conns[index].unified_mem_pointers = new void **[10]; // Initial capacity of 5
         for (int i = 0; i < 5; ++i) {
             conns[index].unified_mem_pointers[i] = nullptr;
         }
     }
 
-    // we need to handle resize here at some point
-    // // Resize array if current capacity is exceeded
-    // if (conns[index].mem_idx >= 5) {
-    //     int current_capacity = 5 + conns[index].mem_idx;
-    //     int new_capacity = conns[index].mem_idx + 5;
-
-    //     void ***new_arr = new void **[new_capacity];
-    //     for (int i = 0; i < new_capacity; ++i) {
-    //         new_arr[i] = (i < conns[index].mem_idx) ? conns[index].unified_mem_pointers[i] : nullptr;
-    //     }
-
-    //     delete[] conns[index].unified_mem_pointers;
-    //     conns[index].unified_mem_pointers = new_arr;
-    // }
-
     // allocate new space for pointer mapping
     conns[index].unified_mem_pointers[conns[index].mem_idx] = new void *[3];
 
     conns[index].unified_mem_pointers[conns[index].mem_idx][0] = dev_ptr;
-    conns[index].unified_mem_pointers[conns[index].mem_idx][1] = ptr;
-    conns[index].unified_mem_pointers[conns[index].mem_idx][2] = reinterpret_cast<void*>(size);
+    conns[index].unified_mem_pointers[conns[index].mem_idx][1] = reinterpret_cast<void*>(size);
+    conns[index].unified_mem_pointers[conns[index].mem_idx][2] = nullptr;
 
     conns[index].mem_idx++;
 }
@@ -277,9 +328,9 @@ void cuda_memcpy_unified_ptrs(const int index, cudaMemcpyKind kind)
 {
     for (int i = 0; i < conns[index].mem_idx; i++) {
         if (kind == cudaMemcpyHostToDevice) {
-            size_t size = reinterpret_cast<size_t>(conns[index].unified_mem_pointers[i][2]);
+            size_t size = reinterpret_cast<size_t>(conns[index].unified_mem_pointers[i][1]);
 
-            cudaError_t res = cudaMemcpy(conns[index].unified_mem_pointers[i][0], conns[index].unified_mem_pointers[i][1], size, cudaMemcpyHostToDevice);
+            cudaError_t res = cudaMemcpy(conns[index].unified_mem_pointers[i][0], conns[index].unified_mem_pointers[i][0], size, cudaMemcpyHostToDevice);
 
             if (res != cudaSuccess) {
                 std::cerr << "cudaMemcpy failed for index " << i
@@ -288,9 +339,9 @@ void cuda_memcpy_unified_ptrs(const int index, cudaMemcpyKind kind)
                 std::cout << "Successfully copied " << size << " bytes for index " << i << std::endl;
             }
         }  else {
-            size_t size = reinterpret_cast<size_t>(conns[index].unified_mem_pointers[i][2]);
+            size_t size = reinterpret_cast<size_t>(conns[index].unified_mem_pointers[i][1]);
 
-            cudaError_t res = cudaMemcpy(conns[index].unified_mem_pointers[i][1], conns[index].unified_mem_pointers[i][0], size, cudaMemcpyDeviceToHost);
+            cudaError_t res = cudaMemcpy(conns[index].unified_mem_pointers[i][0], conns[index].unified_mem_pointers[i][0], size, cudaMemcpyDeviceToHost);
 
             if (res != cudaSuccess) {
                 std::cerr << "cudaMemcpy failed for index " << i
@@ -305,11 +356,12 @@ void cuda_memcpy_unified_ptrs(const int index, cudaMemcpyKind kind)
 void* maybe_free_unified_mem(const int index, void *ptr)
 {
     for (int i = 0; i < conns[index].mem_idx; i++) {
-        void *dev_ptr = conns[index].unified_mem_pointers[i][1];
-        void *target_free_ptr = conns[index].unified_mem_pointers[i][0];
+        void *dev_ptr = conns[index].unified_mem_pointers[i][0];
+        size_t size = reinterpret_cast<size_t>(conns[index].unified_mem_pointers[i][1]);
 
         if (dev_ptr == ptr) {
-            return target_free_ptr;
+            munmap(dev_ptr, size);
+            return dev_ptr;
         }
     }
 }

@@ -22,7 +22,7 @@ extern int rpc_read(const int index, void *data, const std::size_t size);
 extern int rpc_end_response(const int index, void *return_value);
 extern int rpc_close();
 extern void* maybe_free_unified_mem(const int index, void *ptr);
-extern void allocate_unified_mem_pointer(const int index, void *dev_ptr, void *ptr, size_t size);
+extern void allocate_unified_mem_pointer(const int index, void *dev_ptr, size_t size);
 
 nvmlReturn_t nvmlInit_v2()
 {
@@ -9117,18 +9117,19 @@ cudaError_t cudaOccupancyMaxActiveClusters(int* numClusters, const void* func, c
 
 cudaError_t cudaMallocManaged(void** devPtr, size_t size, unsigned int flags)
 {
-    void* host_alloc = new void*[size];
-    void* d_a;
+    void* d_mem;
 
-    cudaError_t err = cudaMalloc((void **)&d_a, size);
+    cudaError_t err = cudaMalloc((void**)&d_mem, size);
     if (err != cudaSuccess) {
         std::cerr << "cudaMalloc failed: " << cudaGetErrorString(err) << std::endl;
         return err;
     }
 
-    allocate_unified_mem_pointer(0, d_a, host_alloc, size);
+    std::cout << "allocated unified device mem " << d_mem << std::endl;
 
-    *devPtr = host_alloc;
+    allocate_unified_mem_pointer(0, d_mem, size);
+
+    *devPtr = d_mem;
 
     return cudaSuccess;
 }

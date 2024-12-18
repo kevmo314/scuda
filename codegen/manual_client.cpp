@@ -419,28 +419,9 @@ cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim, void
 
     for (int i = 0; i < f->arg_count; ++i)
     {
-        // convert each to a void pointer so that we can map it back to...
-        // our origional host pointers.
-        void *arg_ptr = *reinterpret_cast<void**>(args[i]);
-        void *maybe_ptr = maybe_get_cached_arg_ptr(0, arg_ptr);
-
-        // Hardconding 24 bytes for now for the unified memory case. Will remove before merge!
-        if (maybe_ptr != 0)
-        {
-            int size = 24;
-            std::cout << "writing dynamic pointer " << maybe_ptr << std::endl;
-            if (rpc_write(0, &size, sizeof(int)) < 0 ||
-                rpc_write(0, maybe_ptr, size) < 0)
-                return cudaErrorDevicesUnavailable;
-        }
-        else
-        {
-            int size = 24;
-            std::cout << "writing original pointer" << std::endl;
-            if (rpc_write(0, &size, sizeof(int)) < 0 ||
-                rpc_write(0, args[i], size) < 0)
-                return cudaErrorDevicesUnavailable;
-        }
+        if (rpc_write(0, &f->arg_sizes[i], sizeof(int)) < 0 ||
+            rpc_write(0, args[i], f->arg_sizes[i]) < 0)
+            return cudaErrorDevicesUnavailable;
     }
 
     if (rpc_wait_for_response(0) < 0)
@@ -762,6 +743,8 @@ extern "C"
     void __cudaRegisterVar(void **fatCubinHandle, char *hostVar, char *deviceAddress, const char *deviceName, int ext, size_t size, int constant, int global)
     {
         void *return_value;
+
+        std::cout << "calling __cudaRegisterVar" << std::endl;
 
         // Start the RPC request
         int request_id = rpc_start_request(0, RPC___cudaRegisterVar);
