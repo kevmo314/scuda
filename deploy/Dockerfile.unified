@@ -23,11 +23,12 @@ RUN apt-get install -y cuda-toolkit-12-2
 ENV PATH=/usr/local/cuda-12.2/bin:${PATH}
 ENV LD_LIBRARY_PATH=/usr/local/cuda-12.2/lib64
 
-ENV SCUDA_SERVER=100.118.7.128
+ENV SCUDA_SERVER=71.183.65.76
 ENV libscuda_path=/usr/local/lib/libscuda.so
 
 COPY ./libscuda.so /usr/local/lib/libscuda.so
 COPY unified.o unified.o
+COPY unified_pointer.o unified_pointer.o
 
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
