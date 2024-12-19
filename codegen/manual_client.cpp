@@ -24,6 +24,9 @@ extern int rpc_wait_for_response(const int index);
 extern int rpc_read(const int index, void *data, const std::size_t size);
 extern int rpc_end_response(const int index, void *return_value);
 extern int rpc_close();
+void cuda_memcpy_unified_ptrs(const int index, cudaMemcpyKind kind);
+void* maybe_free_unified_mem(const int index, void *ptr);
+extern void allocate_unified_mem_pointer(const int index, void *dev_ptr, size_t size);
 
 #define MAX_FUNCTION_NAME 1024
 #define MAX_ARGS 128
@@ -337,6 +340,8 @@ cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim, void
 {
     cudaError_t return_value;
 
+    cuda_memcpy_unified_ptrs(0, cudaMemcpyHostToDevice);
+
     // Start the RPC request
     int request_id = rpc_start_request(0, RPC_cudaLaunchKernel);
     if (request_id < 0)
@@ -394,6 +399,8 @@ cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim, void
     {
         return cudaErrorDevicesUnavailable;
     }
+
+    cuda_memcpy_unified_ptrs(0, cudaMemcpyDeviceToHost);
 
     return return_value;
 }
@@ -483,8 +490,6 @@ void parse_ptx_string(void *fatCubin, const char *ptx_string, unsigned long long
                         if (type_size == 0)
                             continue;
                         arg_size = type_size;
-
-                        std::cout << "arg size: " << arg_size << std::endl;
                     }
                     else if (ptx_string[i] == '[')
                     {
@@ -705,6 +710,8 @@ extern "C"
     {
         void *return_value;
 
+        std::cout << "calling __cudaRegisterVar" << std::endl;
+
         // Start the RPC request
         int request_id = rpc_start_request(0, RPC___cudaRegisterVar);
         if (request_id < 0)
@@ -791,4 +798,37 @@ extern "C"
             return;
         }
     }
+}
+
+cudaError_t cudaFree(void* devPtr)
+{
+    cudaError_t return_value;
+    maybe_free_unified_mem(0, devPtr);
+
+    if (rpc_start_request(0, RPC_cudaFree) < 0 ||
+        rpc_write(0, &devPtr, sizeof(void*)) < 0 ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+    
+    return return_value;
+}
+
+cudaError_t cudaMallocManaged(void** devPtr, size_t size, unsigned int flags)
+{
+    void* d_mem;
+
+    cudaError_t err = cudaMalloc((void**)&d_mem, size);
+    if (err != cudaSuccess) {
+        std::cerr << "cudaMalloc failed: " << cudaGetErrorString(err) << std::endl;
+        return err;
+    }
+
+    std::cout << "allocated unified device mem " << d_mem << " size: " << size << std::endl;
+
+    allocate_unified_mem_pointer(0, d_mem, size);
+
+    *devPtr = d_mem;
+
+    return cudaSuccess;
 }

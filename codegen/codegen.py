@@ -69,9 +69,11 @@ INTERNAL_FUNCTIONS = [
 # a list of manually implemented cuda/nvml functions.
 # these are automatically appended to each file; operation order is maintained as well.
 MANUAL_IMPLEMENTATIONS = [
+    "cudaFree",
     "cudaMemcpy",
     "cudaMemcpyAsync",
     "cudaLaunchKernel",
+    "cudaMallocManaged",
 ]
 
 @dataclass
