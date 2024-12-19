@@ -319,14 +319,12 @@ void cuda_memcpy_unified_ptrs(const int index, cudaMemcpyKind kind)
     }
 }
 
-void* maybe_free_unified_mem(const int index, void *ptr)
+void maybe_free_unified_mem(const int index, void *ptr)
 {
     for (const auto & [ dev_ptr, sz ] : conns[index].unified_devices) {
         size_t size = reinterpret_cast<size_t>(sz);
 
         if (dev_ptr == ptr) {
-            std::cout << "mem-unmapping device ptr: " << dev_ptr << " size " << size << std::endl;
-
             munmap(dev_ptr, size);
             return;
         }

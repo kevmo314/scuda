@@ -165,6 +165,17 @@ test_cublas_batched() {
   fi
 }
 
+test_unified_mem() {
+  output=$(LD_PRELOAD="$libscuda_path" ./unified_pointer.o | tail -n 1)
+
+  if [[ "$output" == "Max error: 0" ]]; then
+    ansi_format "pass" "$pass_message"
+  else
+    ansi_format "fail" "vector_add failed. Got [$output]."
+    return 1
+  fi
+}
+
 #---- declare test cases ----#
 declare -A test_cuda_avail=(
   ["function"]="test_cuda_available"
@@ -196,8 +207,13 @@ declare -A test_cublas_batched=(
   ["pass"]="Batched cublas works via test/cublas_batched.cu."
 )
 
+declare -A test_unified_mem=(
+  ["function"]="test_unified_mem"
+  ["pass"]="Unified memory works as expected."
+)
+
 #---- assign them to our associative array ----#
-tests=("test_cuda_avail" "test_tensor_to_cuda" "test_tensor_to_cuda_to_cpu" "test_vector_add" "test_cudnn" "test_cublas_batched")
+tests=("test_cuda_avail" "test_tensor_to_cuda" "test_tensor_to_cuda_to_cpu" "test_vector_add" "test_cudnn" "test_cublas_batched" "test_unified_mem")
 
 test() {
   build
