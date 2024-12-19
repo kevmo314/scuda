@@ -63,7 +63,7 @@ static void segfault(int sig, siginfo_t* info, void* unused) {
 
     for (const auto & [ ptr, sz ] : conns[0].unified_devices)
     {
-        if (faulting_address >= (ptr) && faulting_address <= (ptr + sz))
+        if (ptr <= faulting_address && faulting_address < (ptr + sz))
         {
             // ensure we assign memory as close to the faulting address as possible...
             // by masking via the allocated unified memory size.
@@ -307,27 +307,14 @@ void allocate_unified_mem_pointer(const int index, void *dev_ptr, size_t size)
 void cuda_memcpy_unified_ptrs(const int index, cudaMemcpyKind kind)
 {
     for (const auto & [ ptr, sz ] : conns[index].unified_devices) {
-        if (kind == cudaMemcpyHostToDevice) {
-            size_t size = reinterpret_cast<size_t>(sz);
+        size_t size = reinterpret_cast<size_t>(sz);
 
-            // ptr is the same on both host/device
-            cudaError_t res = cudaMemcpy(ptr, ptr, size, cudaMemcpyHostToDevice);
-            if (res != cudaSuccess) {
-                std::cerr << "cudaMemcpy failed :" << cudaGetErrorString(res) << std::endl;
-            } else {
-                std::cout << "Successfully copied " << size << " bytes" << std::endl;
-            }
+        // ptr is the same on both host/device
+        cudaError_t res = cudaMemcpy(ptr, ptr, size, kind);
+        if (res != cudaSuccess) {
+            std::cerr << "cudaMemcpy failed :" << cudaGetErrorString(res) << std::endl;
         } else {
-            size_t size = reinterpret_cast<size_t>(sz);
-
-            // ptr is the same on both host/device
-            cudaError_t res = cudaMemcpy(ptr, ptr, size, cudaMemcpyDeviceToHost);
-
-            if (res != cudaSuccess) {
-                std::cerr << "cudaMemcpy failed :" << cudaGetErrorString(res) << std::endl;
-            } else {
-                std::cout << "Successfully copied " << size << " bytes" << std::endl;
-            }
+            std::cout << "Successfully copied " << size << " bytes" << std::endl;
         }
     }
 }
@@ -338,10 +325,10 @@ void* maybe_free_unified_mem(const int index, void *ptr)
         size_t size = reinterpret_cast<size_t>(sz);
 
         if (dev_ptr == ptr) {
-            std::cout << "mem-unampping device ptr: " << dev_ptr << " size " << size << std::endl;
+            std::cout << "mem-unmapping device ptr: " << dev_ptr << " size " << size << std::endl;
 
             munmap(dev_ptr, size);
-            return dev_ptr;
+            return;
         }
     }
 }
