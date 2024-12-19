@@ -17,7 +17,6 @@ __global__ void add(Operation *op) {
     for (int i = index; i < op->n; i += stride)
     {
       op->y[i] = op->x[i] + op->y[i];
-      printf("The value is: %f\n", op->y[i]);
     }
 }
 
@@ -42,7 +41,7 @@ int main(void) {
     int numBlocks = (op->n + blockSize - 1) / blockSize;
 
     std::cout << "numBlocks: " << numBlocks << std::endl;
-    std::cout << "N: " << op->n << std::endl;
+    std::cout << "X: " << &op->x << std::endl;
 
     add<<<numBlocks, blockSize>>>(op);
 

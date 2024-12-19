@@ -43,8 +43,7 @@ typedef struct
     struct iovec write_iov[128];
     int write_iov_count = 0;
 
-    void ***unified_mem_pointers;
-    int mem_idx = 0;
+    std::unordered_map<void*, size_t> unified_devices;
 } conn_t;
 
 pthread_mutex_t conn_mutex;
@@ -57,35 +56,44 @@ static int init = 0;
 static jmp_buf catch_segfault;
 static void* faulting_address = nullptr;
 
-void add_host_mem_to_devptr_mapping(const int index, void *dev_ptr, void *host_ptr)
-{
-    for (int i = 0; i < conns[index].mem_idx; i++)
-    {
-        // index 1 is host pointer
-        if (conns[index].unified_mem_pointers[i][0] == dev_ptr)
-        {
-            conns[index].unified_mem_pointers[i][2] = host_ptr;
-        }
-    }
-}
-
 static void segfault(int sig, siginfo_t* info, void* unused) {
     faulting_address = info->si_addr; 
+
     std::cout << "Caught segfault at address: " << faulting_address << std::endl;
 
-    size_t page_size = sysconf(_SC_PAGESIZE);
-    void* aligned_address = (void*)((uintptr_t)faulting_address & ~(page_size - 1));
+    for (const auto & [ ptr, sz ] : conns[0].unified_devices)
+    {
+        if (faulting_address >= (ptr) && faulting_address <= (ptr + sz))
+        {
+            // ensure we assign memory as close to the faulting address as possible...
+            // by masking via the allocated unified memory size.
+            void* aligned_address = (void*)((uintptr_t)faulting_address & ~(sz - 1));
 
-    // Allocate memory at the faulting address
-    void* allocated = mmap(aligned_address, page_size, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
-    if (allocated == MAP_FAILED) {
-        perror("Failed to allocate memory at faulting address");
-        _exit(1);
+            // Allocate memory at the faulting address
+            void* allocated = mmap(aligned_address, sz, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+            if (allocated == MAP_FAILED) {
+                perror("Failed to allocate memory at faulting address");
+                _exit(1);
+            }
+
+            std::cout << "allocated dynamic memory at address: " << allocated << std::endl;
+
+            return;
+        }
     }
 
-    add_host_mem_to_devptr_mapping(0, faulting_address, allocated);
+    // raise our original segfault handler
+    struct sigaction sa;
+    sa.sa_handler = SIG_DFL;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
 
-    std::cout << "Allocated and registered memory at address: " << allocated << std::endl;
+    if (sigaction(SIGSEGV, &sa, nullptr) == -1) {
+        perror("Failed to reset SIGSEGV handler");
+        _exit(EXIT_FAILURE);
+    }
+
+    raise(SIGSEGV);
 }
 
 static void set_segfault_handlers() {
@@ -292,62 +300,33 @@ int rpc_read(const int index, void *data, size_t size)
 
 void allocate_unified_mem_pointer(const int index, void *dev_ptr, size_t size)
 {
-    // Initialize unified_mem_pointers if not already initialized
-    if (conns[index].mem_idx == 0) {
-        conns[index].unified_mem_pointers = new void **[10]; // Initial capacity of 5
-        for (int i = 0; i < 5; ++i) {
-            conns[index].unified_mem_pointers[i] = nullptr;
-        }
-    }
-
     // allocate new space for pointer mapping
-    conns[index].unified_mem_pointers[conns[index].mem_idx] = new void *[3];
-
-    conns[index].unified_mem_pointers[conns[index].mem_idx][0] = dev_ptr;
-    conns[index].unified_mem_pointers[conns[index].mem_idx][1] = reinterpret_cast<void*>(size);
-    conns[index].unified_mem_pointers[conns[index].mem_idx][2] = nullptr;
-
-    conns[index].mem_idx++;
-}
-
-void* maybe_get_cached_arg_ptr(const int index, void* arg_ptr)
-{
-    for (int i = 0; i < conns[index].mem_idx; i++)
-    {
-        // index 1 is host pointer
-        if (conns[index].unified_mem_pointers[i][1] == arg_ptr)
-        {
-            return &conns[index].unified_mem_pointers[i][0];
-        }
-    }
-
-   return nullptr;
+    conns[index].unified_devices.insert({ dev_ptr, size });
 }
 
 void cuda_memcpy_unified_ptrs(const int index, cudaMemcpyKind kind)
 {
-    for (int i = 0; i < conns[index].mem_idx; i++) {
+    for (const auto & [ ptr, sz ] : conns[index].unified_devices) {
         if (kind == cudaMemcpyHostToDevice) {
-            size_t size = reinterpret_cast<size_t>(conns[index].unified_mem_pointers[i][1]);
+            size_t size = reinterpret_cast<size_t>(sz);
 
-            cudaError_t res = cudaMemcpy(conns[index].unified_mem_pointers[i][0], conns[index].unified_mem_pointers[i][0], size, cudaMemcpyHostToDevice);
-
+            // ptr is the same on both host/device
+            cudaError_t res = cudaMemcpy(ptr, ptr, size, cudaMemcpyHostToDevice);
             if (res != cudaSuccess) {
-                std::cerr << "cudaMemcpy failed for index " << i
-                        << ": " << cudaGetErrorString(res) << std::endl;
+                std::cerr << "cudaMemcpy failed :" << cudaGetErrorString(res) << std::endl;
             } else {
-                std::cout << "Successfully copied " << size << " bytes for index " << i << std::endl;
+                std::cout << "Successfully copied " << size << " bytes" << std::endl;
             }
-        }  else {
-            size_t size = reinterpret_cast<size_t>(conns[index].unified_mem_pointers[i][1]);
+        } else {
+            size_t size = reinterpret_cast<size_t>(sz);
 
-            cudaError_t res = cudaMemcpy(conns[index].unified_mem_pointers[i][0], conns[index].unified_mem_pointers[i][0], size, cudaMemcpyDeviceToHost);
+            // ptr is the same on both host/device
+            cudaError_t res = cudaMemcpy(ptr, ptr, size, cudaMemcpyDeviceToHost);
 
             if (res != cudaSuccess) {
-                std::cerr << "cudaMemcpy failed for index " << i
-                        << ": " << cudaGetErrorString(res) << std::endl;
+                std::cerr << "cudaMemcpy failed :" << cudaGetErrorString(res) << std::endl;
             } else {
-                std::cout << "Successfully copied " << size << " bytes for index " << i << std::endl;
+                std::cout << "Successfully copied " << size << " bytes" << std::endl;
             }
         }
     }
@@ -355,11 +334,12 @@ void cuda_memcpy_unified_ptrs(const int index, cudaMemcpyKind kind)
 
 void* maybe_free_unified_mem(const int index, void *ptr)
 {
-    for (int i = 0; i < conns[index].mem_idx; i++) {
-        void *dev_ptr = conns[index].unified_mem_pointers[i][0];
-        size_t size = reinterpret_cast<size_t>(conns[index].unified_mem_pointers[i][1]);
+    for (const auto & [ dev_ptr, sz ] : conns[index].unified_devices) {
+        size_t size = reinterpret_cast<size_t>(sz);
 
         if (dev_ptr == ptr) {
+            std::cout << "mem-unampping device ptr: " << dev_ptr << " size " << size << std::endl;
+
             munmap(dev_ptr, size);
             return dev_ptr;
         }

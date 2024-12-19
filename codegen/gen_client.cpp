@@ -6,7 +6,6 @@
 
 #include <cstring>
 #include <string>
-#include <iostream>
 #include <unordered_map>
 
 #include "gen_api.h"
@@ -21,8 +20,6 @@ extern int rpc_wait_for_response(const int index);
 extern int rpc_read(const int index, void *data, const std::size_t size);
 extern int rpc_end_response(const int index, void *return_value);
 extern int rpc_close();
-extern void* maybe_free_unified_mem(const int index, void *ptr);
-extern void allocate_unified_mem_pointer(const int index, void *dev_ptr, size_t size);
 
 nvmlReturn_t nvmlInit_v2()
 {
@@ -9115,25 +9112,6 @@ cudaError_t cudaOccupancyMaxActiveClusters(int* numClusters, const void* func, c
     return return_value;
 }
 
-cudaError_t cudaMallocManaged(void** devPtr, size_t size, unsigned int flags)
-{
-    void* d_mem;
-
-    cudaError_t err = cudaMalloc((void**)&d_mem, size);
-    if (err != cudaSuccess) {
-        std::cerr << "cudaMalloc failed: " << cudaGetErrorString(err) << std::endl;
-        return err;
-    }
-
-    std::cout << "allocated unified device mem " << d_mem << std::endl;
-
-    allocate_unified_mem_pointer(0, d_mem, size);
-
-    *devPtr = d_mem;
-
-    return cudaSuccess;
-}
-
 cudaError_t cudaMalloc(void** devPtr, size_t size)
 {
     cudaError_t return_value;
@@ -9188,31 +9166,6 @@ cudaError_t cudaMallocArray(cudaArray_t* array, const struct cudaChannelFormatDe
         rpc_read(0, array, sizeof(cudaArray_t)) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return cudaErrorDevicesUnavailable;
-    return return_value;
-}
-
-cudaError_t cudaFree(void* devPtr)
-{
-    cudaError_t return_value;
-    void *maybe_ptr = maybe_free_unified_mem(0, devPtr);
-
-    if (maybe_ptr != nullptr) {
-        std::cout << "POITNER FOUND!! " << maybe_ptr << std::endl;
-
-        if (rpc_start_request(0, RPC_cudaFree) < 0 ||
-            rpc_write(0, &maybe_ptr, sizeof(void*)) < 0 ||
-            rpc_wait_for_response(0) < 0 ||
-            rpc_end_response(0, &return_value) < 0)
-            return cudaErrorDevicesUnavailable;
-    } else {
-        std::cout << "no poitner found..." << std::endl;
-        if (rpc_start_request(0, RPC_cudaFree) < 0 ||
-            rpc_write(0, &devPtr, sizeof(void*)) < 0 ||
-            rpc_wait_for_response(0) < 0 ||
-            rpc_end_response(0, &return_value) < 0)
-            return cudaErrorDevicesUnavailable;
-    }
-    
     return return_value;
 }
 
@@ -22176,12 +22129,10 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags", (void *)cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags},
     {"cudaOccupancyMaxPotentialClusterSize", (void *)cudaOccupancyMaxPotentialClusterSize},
     {"cudaOccupancyMaxActiveClusters", (void *)cudaOccupancyMaxActiveClusters},
-    {"cudaMallocManaged", (void *)cudaMallocManaged},
     {"cudaMalloc", (void *)cudaMalloc},
     {"cudaMallocHost", (void *)cudaMallocHost},
     {"cudaMallocPitch", (void *)cudaMallocPitch},
     {"cudaMallocArray", (void *)cudaMallocArray},
-    {"cudaFree", (void *)cudaFree},
     {"cudaFreeHost", (void *)cudaFreeHost},
     {"cudaFreeArray", (void *)cudaFreeArray},
     {"cudaFreeMipmappedArray", (void *)cudaFreeMipmappedArray},
@@ -22874,9 +22825,11 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cuMemFreeAsync_ptsz", (void *)cuMemFreeAsync},
     {"cuMemAllocAsync_ptsz", (void *)cuMemAllocAsync},
     {"cuMemAllocFromPoolAsync_ptsz", (void *)cuMemAllocFromPoolAsync},
+    {"cudaFree", (void *)cudaFree},
     {"cudaMemcpy", (void *)cudaMemcpy},
     {"cudaMemcpyAsync", (void *)cudaMemcpyAsync},
     {"cudaLaunchKernel", (void *)cudaLaunchKernel},
+    {"cudaMallocManaged", (void *)cudaMallocManaged},
 };
 
 void *get_function_pointer(const char *name)
