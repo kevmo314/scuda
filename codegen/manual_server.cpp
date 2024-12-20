@@ -34,16 +34,15 @@ int handle_cudaMemcpy(void *conn)
     enum cudaMemcpyKind kind;
     int ret = -1;
 
-    if (rpc_read(conn, &kind, sizeof(enum cudaMemcpyKind)) < 0)
+    if (rpc_read(conn, &kind, sizeof(enum cudaMemcpyKind)) < 0 ||
+        (kind != cudaMemcpyHostToDevice && rpc_read(conn, &src, sizeof(void *)) < 0) ||
+        (kind != cudaMemcpyDeviceToHost && rpc_read(conn, &dst, sizeof(void *)) < 0) ||
+        rpc_read(conn, &count, sizeof(size_t)) < 0)
         goto ERROR_0;
 
     switch (kind)
     {
     case cudaMemcpyDeviceToHost:
-        if (rpc_read(conn, &src, sizeof(void *)) < 0 ||
-            rpc_read(conn, &count, sizeof(size_t)) < 0)
-            goto ERROR_0;
-
         host_data = malloc(count);
         if (host_data == NULL)
             goto ERROR_0;
@@ -53,16 +52,8 @@ int handle_cudaMemcpy(void *conn)
             goto ERROR_1;
 
         result = cudaMemcpy(host_data, src, count, kind);
-
-        if (rpc_start_response(conn, request_id) < 0 ||
-            rpc_write(conn, host_data, count) < 0)
-            goto ERROR_1;
         break;
     case cudaMemcpyHostToDevice:
-        if (rpc_read(conn, &dst, sizeof(void *)) < 0 ||
-            rpc_read(conn, &count, sizeof(size_t)) < 0)
-            goto ERROR_0;
-
         host_data = malloc(count);
         if (host_data == NULL)
             goto ERROR_0;
@@ -75,33 +66,25 @@ int handle_cudaMemcpy(void *conn)
             goto ERROR_1;
 
         result = cudaMemcpy(dst, host_data, count, kind);
-
-        if (rpc_start_response(conn, request_id) < 0)
-            goto ERROR_1;
         break;
     case cudaMemcpyDeviceToDevice:
-        if (rpc_read(conn, &src, sizeof(void *)) < 0 ||
-            rpc_read(conn, &dst, sizeof(void *)) < 0 ||
-            rpc_read(conn, &count, sizeof(size_t)) < 0)
-            goto ERROR_0;
-
         request_id = rpc_end_request(conn);
         if (request_id < 0)
             goto ERROR_0;
 
         result = cudaMemcpy(dst, src, count, kind);
-
-        if (rpc_start_response(conn, request_id) < 0)
-            goto ERROR_0;
         break;
     }
 
-    if (rpc_end_response(conn, &result) < 0)
+    if (rpc_start_response(conn, request_id) < 0 ||
+        (kind == cudaMemcpyDeviceToHost && rpc_write(conn, host_data, count) < 0) ||
+        rpc_end_response(conn, &result) < 0)
         goto ERROR_1;
 
     ret = 0;
 ERROR_1:
-    free((void *)host_data);
+    if (host_data != NULL)
+        free((void *)host_data);
 ERROR_0:
     return ret;
 }
@@ -121,75 +104,56 @@ int handle_cudaMemcpyAsync(void *conn)
 
     if (rpc_read(conn, &kind, sizeof(enum cudaMemcpyKind)) < 0 ||
         rpc_read(conn, &stream_null_check, sizeof(int)) < 0 ||
-        (stream_null_check == 0 && rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0))
+        (stream_null_check == 0 && rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0) ||
+        (kind != cudaMemcpyHostToDevice && rpc_read(conn, &src, sizeof(void *)) < 0) ||
+        (kind != cudaMemcpyDeviceToHost && rpc_read(conn, &dst, sizeof(void *)) < 0) ||
+        rpc_read(conn, &count, sizeof(size_t)) < 0)
         goto ERROR_0;
 
     switch (kind)
     {
     case cudaMemcpyDeviceToHost:
-        if (rpc_read(conn, &src, sizeof(void *)) < 0 ||
-            rpc_read(conn, &count, sizeof(size_t)) < 0)
-            goto ERROR_0;
-
         host_data = malloc(count);
         if (host_data == NULL)
             goto ERROR_0;
 
         request_id = rpc_end_request(conn);
         if (request_id < 0)
-            goto ERROR_1;
-
-        result = cudaMemcpyAsync(host_data, src, count, kind, stream);
-
-        if (rpc_start_response(conn, request_id) < 0 ||
-            rpc_write(conn, host_data, count) < 0)
-            goto ERROR_1;
-        break;
-    case cudaMemcpyHostToDevice:
-        if (rpc_read(conn, &dst, sizeof(void *)) < 0 ||
-            rpc_read(conn, &count, sizeof(size_t)) < 0)
             goto ERROR_0;
 
+        result = cudaMemcpyAsync(host_data, src, count, kind, stream);
+        break;
+    case cudaMemcpyHostToDevice:
         host_data = malloc(count);
         if (host_data == NULL)
             goto ERROR_0;
 
         if (rpc_read(conn, host_data, count) < 0)
-            goto ERROR_1;
+            goto ERROR_0;
 
         request_id = rpc_end_request(conn);
         if (request_id < 0)
-            goto ERROR_1;
-
-        result = cudaMemcpyAsync(dst, host_data, count, kind, stream);
-
-        if (rpc_start_response(conn, request_id) < 0)
-            goto ERROR_1;
-        break;
-    case cudaMemcpyDeviceToDevice:
-        if (rpc_read(conn, &src, sizeof(void *)) < 0 ||
-            rpc_read(conn, &dst, sizeof(void *)) < 0 ||
-            rpc_read(conn, &count, sizeof(size_t)) < 0)
             goto ERROR_0;
 
+        result = cudaMemcpyAsync(dst, host_data, count, kind, stream);
+        break;
+    case cudaMemcpyDeviceToDevice:
         request_id = rpc_end_request(conn);
         if (request_id < 0)
             goto ERROR_0;
 
         result = cudaMemcpyAsync(dst, src, count, kind, stream);
-
-        if (rpc_start_response(conn, request_id) < 0)
-            goto ERROR_0;
         break;
     }
 
-    if (rpc_end_response(conn, &result) < 0 ||
-        cudaStreamSynchronize(stream) != cudaSuccess)
-        goto ERROR_1;
+    if (rpc_start_response(conn, request_id) < 0 ||
+        (kind == cudaMemcpyDeviceToHost && rpc_write(conn, host_data, count) < 0) ||
+        rpc_end_response(conn, &result) < 0 ||
+        (host_data != NULL && cudaStreamAddCallback(stream, [](cudaStream_t stream, cudaError_t status, void *ptr)
+                                                    { free(ptr); }, host_data, 0) != cudaSuccess))
+        goto ERROR_0;
 
     ret = 0;
-ERROR_1:
-    free((void *)host_data);
 ERROR_0:
     return ret;
 }
@@ -575,11 +539,11 @@ int handle___cudaRegisterVar(void *conn)
 
 int handle_cudaFree(void *conn)
 {
-    void* devPtr;
+    void *devPtr;
     int request_id;
     cudaError_t scuda_intercept_result;
     if (
-        rpc_read(conn, &devPtr, sizeof(void*)) < 0 ||
+        rpc_read(conn, &devPtr, sizeof(void *)) < 0 ||
         false)
         goto ERROR_0;
 
@@ -599,13 +563,13 @@ ERROR_0:
 
 int handle_cudaMallocManaged(void *conn)
 {
-    void* devPtr;
+    void *devPtr;
     size_t size;
     unsigned int flags;
     int request_id;
     cudaError_t scuda_intercept_result;
     if (
-        rpc_read(conn, &devPtr, sizeof(void*)) < 0 ||
+        rpc_read(conn, &devPtr, sizeof(void *)) < 0 ||
         rpc_read(conn, &size, sizeof(size_t)) < 0 ||
         rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
         false)
@@ -617,7 +581,7 @@ int handle_cudaMallocManaged(void *conn)
     scuda_intercept_result = cudaMallocManaged(&devPtr, size, flags);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &devPtr, sizeof(void*)) < 0 ||
+        rpc_write(conn, &devPtr, sizeof(void *)) < 0 ||
         rpc_end_response(conn, &scuda_intercept_result) < 0)
         goto ERROR_0;
 

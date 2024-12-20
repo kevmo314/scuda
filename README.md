@@ -3,30 +3,18 @@
 SCUDA is a GPU over IP bridge allowing GPUs on remote machines to be attached
 to CPU-only machines.
 
-## Demos
+## Demo
 
-### CUBLAS Matrix Multiplication
-
-The below demo displays a NVIDIA GeForce RTX 4090 running on a remote machine (right pane).
-Left pane is a Mac running a docker container with nvidia utils installed.
-
-The docker container runs this [matrixMulCUBLAS](https://github.com/zchee/cuda-sample/blob/master/0_Simple/matrixMulCUBLAS/matrixMulCUBLAS.cpp) example.
-
-You can view the docker image used [here](./deploy/Dockerfile.cublas-test).
-
-https://github.com/user-attachments/assets/4bf130c5-5544-442f-b1a5-6216255ab499
-
-### Simple torch example
+### CUBLAS Matrix Multiplication using Unified Memory
 
 The below demo displays a NVIDIA GeForce RTX 4090 running on a remote machine (right pane).
 Left pane is a Mac running a docker container with nvidia utils installed.
 
-The docker container runs `python3 -c "import torch; print(torch.cuda.is_available())"` to check if cuda is available.
+The docker container runs this [matrixMulCUBLAS](./deploy/cublas_unified.o) example. This example not only uses cuBLAS, but also takes advantage of unified memory.
 
-You can view the docker image used [here](./deploy/Dockerfile.torch-test).
+You can view the docker image used [here](./deploy/Dockerfile.unified).
 
-https://github.com/user-attachments/assets/035950bb-3cc1-4c73-9ad5-b00871a159ec
-
+https://github.com/user-attachments/assets/b2db5d82-f214-41cf-8274-b913c04080f9
 
 ## Local development
 
