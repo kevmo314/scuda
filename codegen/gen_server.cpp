@@ -19387,35 +19387,6 @@ ERROR_0:
     return -1;
 }
 
-int handle_cudaMallocManaged(void *conn)
-{
-    void* devPtr;
-    size_t size;
-    unsigned int flags;
-    int request_id;
-    cudaError_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &devPtr, sizeof(void*)) < 0 ||
-        rpc_read(conn, &size, sizeof(size_t)) < 0 ||
-        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = cudaMallocManaged(&devPtr, size, flags);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &devPtr, sizeof(void*)) < 0 ||
-        rpc_end_response(conn, &scuda_intercept_result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
 int handle_cudaMalloc(void *conn)
 {
     void* devPtr;
@@ -19526,30 +19497,6 @@ int handle_cudaMallocArray(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &array, sizeof(cudaArray_t)) < 0 ||
-        rpc_end_response(conn, &scuda_intercept_result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_cudaFree(void *conn)
-{
-    void* devPtr;
-    int request_id;
-    cudaError_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &devPtr, sizeof(void*)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = cudaFree(devPtr);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
         rpc_end_response(conn, &scuda_intercept_result) < 0)
         goto ERROR_0;
 

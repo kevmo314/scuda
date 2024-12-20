@@ -18,8 +18,16 @@
 #include <cuda.h>
 #include <sys/uio.h>
 #include <netinet/tcp.h>
+#include <cuda_runtime.h>
 
 #include <unordered_map>
+
+#include <setjmp.h>
+#include <signal.h>
+#include <csignal>
+#include <cstdlib>
+#include <cstring>
+#include <sys/mman.h>
 
 #include "codegen/gen_client.h"
 
@@ -34,6 +42,8 @@ typedef struct
     pthread_cond_t read_cond;
     struct iovec write_iov[128];
     int write_iov_count = 0;
+
+    std::unordered_map<void*, size_t> unified_devices;
 } conn_t;
 
 pthread_mutex_t conn_mutex;
@@ -42,8 +52,76 @@ int nconns = 0;
 
 const char *DEFAULT_PORT = "14833";
 
+static int init = 0;
+static jmp_buf catch_segfault;
+static void* faulting_address = nullptr;
+
+static void segfault(int sig, siginfo_t* info, void* unused) {
+    faulting_address = info->si_addr; 
+
+    std::cout << "Caught segfault at address: " << faulting_address << std::endl;
+
+    for (const auto & [ ptr, sz ] : conns[0].unified_devices)
+    {
+        if (ptr <= faulting_address && faulting_address < (ptr + sz))
+        {
+            // ensure we assign memory as close to the faulting address as possible...
+            // by masking via the allocated unified memory size.
+            void* aligned_address = (void*)((uintptr_t)faulting_address & ~(sz - 1));
+
+            // Allocate memory at the faulting address
+            void* allocated = mmap(aligned_address, sz, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+            if (allocated == MAP_FAILED) {
+                perror("Failed to allocate memory at faulting address");
+                _exit(1);
+            }
+
+            std::cout << "allocated dynamic memory at address: " << allocated << std::endl;
+
+            return;
+        }
+    }
+
+    // raise our original segfault handler
+    struct sigaction sa;
+    sa.sa_handler = SIG_DFL;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+
+    if (sigaction(SIGSEGV, &sa, nullptr) == -1) {
+        perror("Failed to reset SIGSEGV handler");
+        _exit(EXIT_FAILURE);
+    }
+
+    raise(SIGSEGV);
+}
+
+static void set_segfault_handlers() {
+    if (init > 0) {
+        return;
+    }
+
+    struct sigaction sa;
+    memset(&sa, 0, sizeof(sa));
+    sa.sa_flags = SA_SIGINFO;
+    sa.sa_sigaction = segfault;
+
+    if (sigaction(SIGSEGV, &sa, NULL) == -1) {
+        perror("sigaction");
+        exit(EXIT_FAILURE);
+    }
+
+    std::cout << "Segfault handler installed." << std::endl;
+
+    init = 1;
+}
+
 int rpc_open()
 {
+    set_segfault_handlers();
+
+    sigsetjmp(catch_segfault, 1);
+
     if (pthread_mutex_lock(&conn_mutex) < 0)
         return -1;
 
@@ -218,6 +296,39 @@ int rpc_read(const int index, void *data, size_t size)
     if (n < 0)
         pthread_mutex_unlock(&conns[index].read_mutex);
     return n;
+}
+
+void allocate_unified_mem_pointer(const int index, void *dev_ptr, size_t size)
+{
+    // allocate new space for pointer mapping
+    conns[index].unified_devices.insert({ dev_ptr, size });
+}
+
+void cuda_memcpy_unified_ptrs(const int index, cudaMemcpyKind kind)
+{
+    for (const auto & [ ptr, sz ] : conns[index].unified_devices) {
+        size_t size = reinterpret_cast<size_t>(sz);
+
+        // ptr is the same on both host/device
+        cudaError_t res = cudaMemcpy(ptr, ptr, size, kind);
+        if (res != cudaSuccess) {
+            std::cerr << "cudaMemcpy failed :" << cudaGetErrorString(res) << std::endl;
+        } else {
+            std::cout << "Successfully copied " << size << " bytes" << std::endl;
+        }
+    }
+}
+
+void maybe_free_unified_mem(const int index, void *ptr)
+{
+    for (const auto & [ dev_ptr, sz ] : conns[index].unified_devices) {
+        size_t size = reinterpret_cast<size_t>(sz);
+
+        if (dev_ptr == ptr) {
+            munmap(dev_ptr, size);
+            return;
+        }
+    }
 }
 
 int rpc_end_response(const int index, void *result)

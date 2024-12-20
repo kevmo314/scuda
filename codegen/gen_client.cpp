@@ -9112,20 +9112,6 @@ cudaError_t cudaOccupancyMaxActiveClusters(int* numClusters, const void* func, c
     return return_value;
 }
 
-cudaError_t cudaMallocManaged(void** devPtr, size_t size, unsigned int flags)
-{
-    cudaError_t return_value;
-    if (rpc_start_request(0, RPC_cudaMallocManaged) < 0 ||
-        rpc_write(0, devPtr, sizeof(void*)) < 0 ||
-        rpc_write(0, &size, sizeof(size_t)) < 0 ||
-        rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, devPtr, sizeof(void*)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return cudaErrorDevicesUnavailable;
-    return return_value;
-}
-
 cudaError_t cudaMalloc(void** devPtr, size_t size)
 {
     cudaError_t return_value;
@@ -9178,17 +9164,6 @@ cudaError_t cudaMallocArray(cudaArray_t* array, const struct cudaChannelFormatDe
         rpc_write(0, &flags, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(0) < 0 ||
         rpc_read(0, array, sizeof(cudaArray_t)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return cudaErrorDevicesUnavailable;
-    return return_value;
-}
-
-cudaError_t cudaFree(void* devPtr)
-{
-    cudaError_t return_value;
-    if (rpc_start_request(0, RPC_cudaFree) < 0 ||
-        rpc_write(0, &devPtr, sizeof(void*)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return cudaErrorDevicesUnavailable;
     return return_value;
@@ -22154,12 +22129,10 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags", (void *)cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags},
     {"cudaOccupancyMaxPotentialClusterSize", (void *)cudaOccupancyMaxPotentialClusterSize},
     {"cudaOccupancyMaxActiveClusters", (void *)cudaOccupancyMaxActiveClusters},
-    {"cudaMallocManaged", (void *)cudaMallocManaged},
     {"cudaMalloc", (void *)cudaMalloc},
     {"cudaMallocHost", (void *)cudaMallocHost},
     {"cudaMallocPitch", (void *)cudaMallocPitch},
     {"cudaMallocArray", (void *)cudaMallocArray},
-    {"cudaFree", (void *)cudaFree},
     {"cudaFreeHost", (void *)cudaFreeHost},
     {"cudaFreeArray", (void *)cudaFreeArray},
     {"cudaFreeMipmappedArray", (void *)cudaFreeMipmappedArray},
@@ -22852,9 +22825,11 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cuMemFreeAsync_ptsz", (void *)cuMemFreeAsync},
     {"cuMemAllocAsync_ptsz", (void *)cuMemAllocAsync},
     {"cuMemAllocFromPoolAsync_ptsz", (void *)cuMemAllocFromPoolAsync},
+    {"cudaFree", (void *)cudaFree},
     {"cudaMemcpy", (void *)cudaMemcpy},
     {"cudaMemcpyAsync", (void *)cudaMemcpyAsync},
     {"cudaLaunchKernel", (void *)cudaLaunchKernel},
+    {"cudaMallocManaged", (void *)cudaMallocManaged},
 };
 
 void *get_function_pointer(const char *name)

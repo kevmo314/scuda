@@ -4357,6 +4357,7 @@ cudaError_t cudaOccupancyMaxPotentialClusterSize(int *clusterSize, const void *f
  */
 cudaError_t cudaOccupancyMaxActiveClusters(int *numClusters, const void *func, const cudaLaunchConfig_t *launchConfig);
 /**
+ * @disabled
  * @param devPtr SEND_RECV
  * @param size SEND_ONLY
  * @param flags SEND_ONLY
@@ -4388,6 +4389,7 @@ cudaError_t cudaMallocPitch(void **devPtr, size_t *pitch, size_t width, size_t h
  */
 cudaError_t cudaMallocArray(cudaArray_t *array, const struct cudaChannelFormatDesc *desc, size_t width, size_t height, unsigned int flags);
 /**
+ * @disabled
  * @param devPtr SEND_ONLY
  */
 cudaError_t cudaFree(void *devPtr);
