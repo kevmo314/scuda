@@ -137,13 +137,13 @@ int handle_cudaMemcpyAsync(void *conn)
 
         request_id = rpc_end_request(conn);
         if (request_id < 0)
-            goto ERROR_1;
+            goto ERROR_0;
 
         result = cudaMemcpyAsync(host_data, src, count, kind, stream);
 
         if (rpc_start_response(conn, request_id) < 0 ||
             rpc_write(conn, host_data, count) < 0)
-            goto ERROR_1;
+            goto ERROR_0;
         break;
     case cudaMemcpyHostToDevice:
         if (rpc_read(conn, &dst, sizeof(void *)) < 0 ||
@@ -155,16 +155,16 @@ int handle_cudaMemcpyAsync(void *conn)
             goto ERROR_0;
 
         if (rpc_read(conn, host_data, count) < 0)
-            goto ERROR_1;
+            goto ERROR_0;
 
         request_id = rpc_end_request(conn);
         if (request_id < 0)
-            goto ERROR_1;
+            goto ERROR_0;
 
         result = cudaMemcpyAsync(dst, host_data, count, kind, stream);
 
         if (rpc_start_response(conn, request_id) < 0)
-            goto ERROR_1;
+            goto ERROR_0;
         break;
     case cudaMemcpyDeviceToDevice:
         if (rpc_read(conn, &src, sizeof(void *)) < 0 ||
@@ -184,12 +184,11 @@ int handle_cudaMemcpyAsync(void *conn)
     }
 
     if (rpc_end_response(conn, &result) < 0 ||
-        cudaStreamSynchronize(stream) != cudaSuccess)
-        goto ERROR_1;
+        cudaStreamAddCallback(stream, [](cudaStream_t stream, cudaError_t status, void *ptr)
+                              { free(ptr); }, host_data, 0) != cudaSuccess)
+        goto ERROR_0;
 
     ret = 0;
-ERROR_1:
-    free((void *)host_data);
 ERROR_0:
     return ret;
 }
@@ -575,11 +574,11 @@ int handle___cudaRegisterVar(void *conn)
 
 int handle_cudaFree(void *conn)
 {
-    void* devPtr;
+    void *devPtr;
     int request_id;
     cudaError_t scuda_intercept_result;
     if (
-        rpc_read(conn, &devPtr, sizeof(void*)) < 0 ||
+        rpc_read(conn, &devPtr, sizeof(void *)) < 0 ||
         false)
         goto ERROR_0;
 
@@ -599,13 +598,13 @@ ERROR_0:
 
 int handle_cudaMallocManaged(void *conn)
 {
-    void* devPtr;
+    void *devPtr;
     size_t size;
     unsigned int flags;
     int request_id;
     cudaError_t scuda_intercept_result;
     if (
-        rpc_read(conn, &devPtr, sizeof(void*)) < 0 ||
+        rpc_read(conn, &devPtr, sizeof(void *)) < 0 ||
         rpc_read(conn, &size, sizeof(size_t)) < 0 ||
         rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
         false)
@@ -617,7 +616,7 @@ int handle_cudaMallocManaged(void *conn)
     scuda_intercept_result = cudaMallocManaged(&devPtr, size, flags);
 
     if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &devPtr, sizeof(void*)) < 0 ||
+        rpc_write(conn, &devPtr, sizeof(void *)) < 0 ||
         rpc_end_response(conn, &scuda_intercept_result) < 0)
         goto ERROR_0;
 
