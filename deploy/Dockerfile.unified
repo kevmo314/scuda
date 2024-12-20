@@ -29,6 +29,7 @@ ENV libscuda_path=/usr/local/lib/libscuda.so
 COPY ./libscuda.so /usr/local/lib/libscuda.so
 COPY unified.o unified.o
 COPY unified_pointer.o unified_pointer.o
+COPY cublas_unified.o cublas_unified.o
 
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
