@@ -14,6 +14,8 @@ The docker container runs this [matrixMulCUBLAS](./deploy/cublas_unified.o) exam
 
 You can view the docker image used [here](./deploy/Dockerfile.unified).
 
+https://github.com/user-attachments/assets/b2db5d82-f214-41cf-8274-b913c04080f9
+
 ## Local development
 
 Make the local dev script executable
