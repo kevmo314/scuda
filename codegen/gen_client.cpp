@@ -19,6 +19,7 @@ extern int rpc_end_request(const int index);
 extern int rpc_wait_for_response(const int index);
 extern int rpc_read(const int index, void *data, const std::size_t size);
 extern int rpc_end_response(const int index, void *return_value);
+void cuda_memcpy_unified_ptrs(const int index, cudaMemcpyKind kind);
 extern int rpc_close();
 
 nvmlReturn_t nvmlInit_v2()
@@ -18581,6 +18582,7 @@ cublasStatus_t cublasSgemmBatched_64(cublasHandle_t handle, cublasOperation_t tr
 
 cublasStatus_t cublasDgemmBatched(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k, const double* alpha, const double* const Aarray[], int lda, const double* const Barray[], int ldb, const double* beta, double* const Carray[], int ldc, int batchCount)
 {
+    cuda_memcpy_unified_ptrs(0, cudaMemcpyHostToDevice);
     cublasStatus_t return_value;
     if (rpc_start_request(0, RPC_cublasDgemmBatched) < 0 ||
         rpc_write(0, &batchCount, sizeof(int)) < 0 ||
@@ -18603,6 +18605,7 @@ cublasStatus_t cublasDgemmBatched(cublasHandle_t handle, cublasOperation_t trans
         rpc_wait_for_response(0) < 0 ||
         rpc_end_response(0, &return_value) < 0)
         return CUBLAS_STATUS_NOT_INITIALIZED;
+    cuda_memcpy_unified_ptrs(0, cudaMemcpyDeviceToHost);
     return return_value;
 }
 

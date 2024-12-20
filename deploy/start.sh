@@ -13,7 +13,7 @@ elif [[ "$1" == "cublas" ]]; then
 elif [[ "$1" == "unified" ]]; then
     echo "Running cublas example..."
 
-    LD_PRELOAD="$libscuda_path" /unified_pointer.o
+    LD_PRELOAD="$libscuda_path" /cublas_unified.o
 else
     echo "Unknown option: $1. Please specify one of: torch | cublas | unified ."
 fi
