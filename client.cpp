@@ -96,6 +96,28 @@ static void segfault(int sig, siginfo_t* info, void* unused) {
     raise(SIGSEGV);
 }
 
+void maybe_copy_unified_arg(const int index, void* arg, enum cudaMemcpyKind kind)
+{
+    auto& unified_devices = conns[index].unified_devices;
+    auto found = unified_devices.find(arg);
+    if (found != unified_devices.end())
+    {
+        std::cout << "found unified arg pointer; copying..." << std::endl;
+
+        void* ptr = found->first;
+        size_t size = found->second;
+
+        cudaError_t res = cudaMemcpy(ptr, ptr, size, kind);
+
+        if (res != cudaSuccess) {
+            std::cerr << "cudaMemcpy failed: " << cudaGetErrorString(res) << std::endl;
+        } else {
+            std::cout << "Successfully copied " << size << " bytes" << std::endl;
+        }
+    }
+}
+
+
 static void set_segfault_handlers() {
     if (init > 0) {
         return;
