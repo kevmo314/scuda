@@ -106,7 +106,7 @@ int is_unified_pointer(const int index, void* arg)
     return 0;
 }
 
-void maybe_copy_unified_arg(const int index, void* arg, enum cudaMemcpyKind kind)
+int maybe_copy_unified_arg(const int index, void* arg, enum cudaMemcpyKind kind)
 {
     auto& unified_devices = conns[index].unified_devices;
     auto found = unified_devices.find(arg);
@@ -121,10 +121,14 @@ void maybe_copy_unified_arg(const int index, void* arg, enum cudaMemcpyKind kind
 
         if (res != cudaSuccess) {
             std::cerr << "cudaMemcpy failed: " << cudaGetErrorString(res) << std::endl;
+
+            return -1;
         } else {
             std::cout << "Successfully copied " << size << " bytes" << std::endl;
         }
     }
+
+    return 0;
 }
 
 
