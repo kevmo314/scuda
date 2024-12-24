@@ -96,6 +96,16 @@ static void segfault(int sig, siginfo_t* info, void* unused) {
     raise(SIGSEGV);
 }
 
+int is_unified_pointer(const int index, void* arg)
+{
+    auto& unified_devices = conns[index].unified_devices;
+    auto found = unified_devices.find(arg);
+    if (found != unified_devices.end())
+        return 1;
+
+    return 0;
+}
+
 void maybe_copy_unified_arg(const int index, void* arg, enum cudaMemcpyKind kind)
 {
     auto& unified_devices = conns[index].unified_devices;

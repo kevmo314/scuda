@@ -217,18 +217,18 @@ class ArrayOperation:
         f.write("    maybe_copy_unified_arg(0, (void*){name}, {direction});\n".format(name=self.parameter.name, direction=direction))
 
         if isinstance(self.length, int):
-            f.write("    for (int i = 0; i < {name}; i++)\n".format(name=self.length))
+            f.write("    for (int i = 0; i < {name} && is_unified_pointer(0, (void*){param}); i++)\n".format(param=self.parameter.name, name=self.length))
             f.write("       maybe_copy_unified_arg(0, (void*)&{name}[i], {direction});\n".format(name=self.parameter.name, direction=direction))
         else:
             if hasattr(self.length.type, "ptr_to"):
-                f.write("    for (int i = 0; i < static_cast<int>(*{name}); i++)\n".format(name=self.length.name))
+                f.write("    for (int i = 0; i < static_cast<int>(*{name}) && is_unified_pointer(0, (void*){param}); i++)\n".format(param=self.parameter.name, name=self.length.name))
                 f.write("       maybe_copy_unified_arg(0, (void*)&{name}[i], {direction});\n".format(name=self.parameter.name, direction=direction))
             else:
                 if hasattr(self.parameter.type, "ptr_to"):
-                    f.write("    for (int i = 0; i < static_cast<int>({name}); i++)\n".format(name=self.length.name))
+                    f.write("    for (int i = 0; i < static_cast<int>({name}) && is_unified_pointer(0, (void*){param}); i++)\n".format(param=self.parameter.name, name=self.length.name))
                     f.write("       maybe_copy_unified_arg(0, (void*)&{name}[i], {direction});\n".format(name=self.parameter.name, direction=direction))
                 else:
-                    f.write("    for (int i = 0; i < static_cast<int>({name}); i++)\n".format(name=self.length.name))
+                    f.write("    for (int i = 0; i < static_cast<int>({name}) && is_unified_pointer(0, (void*){param}); i++)\n".format(param=self.parameter.name, name=self.length.name))
                     f.write("       maybe_copy_unified_arg(0, (void*){name}[i], {direction});\n".format(name=self.parameter.name, direction=direction))
 
     @property
@@ -791,6 +791,7 @@ def main():
             "extern int rpc_write(const int index, const void *data, const std::size_t size);\n"
             "extern int rpc_end_request(const int index);\n"
             "extern int rpc_wait_for_response(const int index);\n"
+            "extern int is_unified_pointer(const int index, void* arg);\n"
             "extern int rpc_read(const int index, void *data, const std::size_t size);\n"
             "extern int rpc_end_response(const int index, void *return_value);\n"
             "void maybe_copy_unified_arg(const int index, void *arg, enum cudaMemcpyKind kind);\n"

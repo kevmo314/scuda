@@ -17,6 +17,7 @@ extern int rpc_start_request(const int index, const unsigned int request);
 extern int rpc_write(const int index, const void *data, const std::size_t size);
 extern int rpc_end_request(const int index);
 extern int rpc_wait_for_response(const int index);
+extern int is_unified_pointer(const int index, void* arg);
 extern int rpc_read(const int index, void *data, const std::size_t size);
 extern int rpc_end_response(const int index, void *return_value);
 void maybe_copy_unified_arg(const int index, void *arg, enum cudaMemcpyKind kind);
@@ -61,7 +62,7 @@ nvmlReturn_t nvmlSystemGetDriverVersion(char* version, unsigned int length)
 {
     maybe_copy_unified_arg(0, (void*)&length, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)version, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(length); i++)
+    for (int i = 0; i < static_cast<int>(length) && is_unified_pointer(0, (void*)version); i++)
        maybe_copy_unified_arg(0, (void*)&version[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlSystemGetDriverVersion) < 0 ||
@@ -72,7 +73,7 @@ nvmlReturn_t nvmlSystemGetDriverVersion(char* version, unsigned int length)
         return NVML_ERROR_GPU_IS_LOST;
     maybe_copy_unified_arg(0, (void*)&length, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)version, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(length); i++)
+    for (int i = 0; i < static_cast<int>(length) && is_unified_pointer(0, (void*)version); i++)
        maybe_copy_unified_arg(0, (void*)&version[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -81,7 +82,7 @@ nvmlReturn_t nvmlSystemGetNVMLVersion(char* version, unsigned int length)
 {
     maybe_copy_unified_arg(0, (void*)&length, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)version, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(length); i++)
+    for (int i = 0; i < static_cast<int>(length) && is_unified_pointer(0, (void*)version); i++)
        maybe_copy_unified_arg(0, (void*)&version[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlSystemGetNVMLVersion) < 0 ||
@@ -92,7 +93,7 @@ nvmlReturn_t nvmlSystemGetNVMLVersion(char* version, unsigned int length)
         return NVML_ERROR_GPU_IS_LOST;
     maybe_copy_unified_arg(0, (void*)&length, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)version, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(length); i++)
+    for (int i = 0; i < static_cast<int>(length) && is_unified_pointer(0, (void*)version); i++)
        maybe_copy_unified_arg(0, (void*)&version[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -128,7 +129,7 @@ nvmlReturn_t nvmlSystemGetProcessName(unsigned int pid, char* name, unsigned int
     maybe_copy_unified_arg(0, (void*)&pid, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&length, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)name, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(length); i++)
+    for (int i = 0; i < static_cast<int>(length) && is_unified_pointer(0, (void*)name); i++)
        maybe_copy_unified_arg(0, (void*)&name[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlSystemGetProcessName) < 0 ||
@@ -141,7 +142,7 @@ nvmlReturn_t nvmlSystemGetProcessName(unsigned int pid, char* name, unsigned int
     maybe_copy_unified_arg(0, (void*)&pid, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&length, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)name, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(length); i++)
+    for (int i = 0; i < static_cast<int>(length) && is_unified_pointer(0, (void*)name); i++)
        maybe_copy_unified_arg(0, (void*)&name[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -263,7 +264,7 @@ nvmlReturn_t nvmlUnitGetDevices(nvmlUnit_t unit, unsigned int* deviceCount, nvml
     maybe_copy_unified_arg(0, (void*)&unit, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)deviceCount, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)devices, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*deviceCount); i++)
+    for (int i = 0; i < static_cast<int>(*deviceCount) && is_unified_pointer(0, (void*)devices); i++)
        maybe_copy_unified_arg(0, (void*)&devices[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlUnitGetDevices) < 0 ||
@@ -277,7 +278,7 @@ nvmlReturn_t nvmlUnitGetDevices(nvmlUnit_t unit, unsigned int* deviceCount, nvml
     maybe_copy_unified_arg(0, (void*)&unit, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)deviceCount, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)devices, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*deviceCount); i++)
+    for (int i = 0; i < static_cast<int>(*deviceCount) && is_unified_pointer(0, (void*)devices); i++)
        maybe_copy_unified_arg(0, (void*)&devices[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -286,7 +287,7 @@ nvmlReturn_t nvmlSystemGetHicVersion(unsigned int* hwbcCount, nvmlHwbcEntry_t* h
 {
     maybe_copy_unified_arg(0, (void*)hwbcCount, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)hwbcEntries, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*hwbcCount); i++)
+    for (int i = 0; i < static_cast<int>(*hwbcCount) && is_unified_pointer(0, (void*)hwbcEntries); i++)
        maybe_copy_unified_arg(0, (void*)&hwbcEntries[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlSystemGetHicVersion) < 0 ||
@@ -298,7 +299,7 @@ nvmlReturn_t nvmlSystemGetHicVersion(unsigned int* hwbcCount, nvmlHwbcEntry_t* h
         return NVML_ERROR_GPU_IS_LOST;
     maybe_copy_unified_arg(0, (void*)hwbcCount, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)hwbcEntries, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*hwbcCount); i++)
+    for (int i = 0; i < static_cast<int>(*hwbcCount) && is_unified_pointer(0, (void*)hwbcEntries); i++)
        maybe_copy_unified_arg(0, (void*)&hwbcEntries[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -407,7 +408,7 @@ nvmlReturn_t nvmlDeviceGetName(nvmlDevice_t device, char* name, unsigned int len
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&length, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)name, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(length); i++)
+    for (int i = 0; i < static_cast<int>(length) && is_unified_pointer(0, (void*)name); i++)
        maybe_copy_unified_arg(0, (void*)&name[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlDeviceGetName) < 0 ||
@@ -420,7 +421,7 @@ nvmlReturn_t nvmlDeviceGetName(nvmlDevice_t device, char* name, unsigned int len
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&length, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)name, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(length); i++)
+    for (int i = 0; i < static_cast<int>(length) && is_unified_pointer(0, (void*)name); i++)
        maybe_copy_unified_arg(0, (void*)&name[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -462,7 +463,7 @@ nvmlReturn_t nvmlDeviceGetSerial(nvmlDevice_t device, char* serial, unsigned int
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&length, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)serial, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(length); i++)
+    for (int i = 0; i < static_cast<int>(length) && is_unified_pointer(0, (void*)serial); i++)
        maybe_copy_unified_arg(0, (void*)&serial[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlDeviceGetSerial) < 0 ||
@@ -475,7 +476,7 @@ nvmlReturn_t nvmlDeviceGetSerial(nvmlDevice_t device, char* serial, unsigned int
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&length, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)serial, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(length); i++)
+    for (int i = 0; i < static_cast<int>(length) && is_unified_pointer(0, (void*)serial); i++)
        maybe_copy_unified_arg(0, (void*)&serial[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -485,7 +486,7 @@ nvmlReturn_t nvmlDeviceGetMemoryAffinity(nvmlDevice_t device, unsigned int nodeS
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&nodeSetSize, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)nodeSet, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(nodeSetSize); i++)
+    for (int i = 0; i < static_cast<int>(nodeSetSize) && is_unified_pointer(0, (void*)nodeSet); i++)
        maybe_copy_unified_arg(0, (void*)&nodeSet[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&scope, cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
@@ -500,7 +501,7 @@ nvmlReturn_t nvmlDeviceGetMemoryAffinity(nvmlDevice_t device, unsigned int nodeS
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&nodeSetSize, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)nodeSet, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(nodeSetSize); i++)
+    for (int i = 0; i < static_cast<int>(nodeSetSize) && is_unified_pointer(0, (void*)nodeSet); i++)
        maybe_copy_unified_arg(0, (void*)&nodeSet[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&scope, cudaMemcpyDeviceToHost);
     return return_value;
@@ -511,7 +512,7 @@ nvmlReturn_t nvmlDeviceGetCpuAffinityWithinScope(nvmlDevice_t device, unsigned i
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&cpuSetSize, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)cpuSet, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(cpuSetSize); i++)
+    for (int i = 0; i < static_cast<int>(cpuSetSize) && is_unified_pointer(0, (void*)cpuSet); i++)
        maybe_copy_unified_arg(0, (void*)&cpuSet[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&scope, cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
@@ -526,7 +527,7 @@ nvmlReturn_t nvmlDeviceGetCpuAffinityWithinScope(nvmlDevice_t device, unsigned i
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&cpuSetSize, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)cpuSet, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(cpuSetSize); i++)
+    for (int i = 0; i < static_cast<int>(cpuSetSize) && is_unified_pointer(0, (void*)cpuSet); i++)
        maybe_copy_unified_arg(0, (void*)&cpuSet[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&scope, cudaMemcpyDeviceToHost);
     return return_value;
@@ -537,7 +538,7 @@ nvmlReturn_t nvmlDeviceGetCpuAffinity(nvmlDevice_t device, unsigned int cpuSetSi
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&cpuSetSize, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)cpuSet, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(cpuSetSize); i++)
+    for (int i = 0; i < static_cast<int>(cpuSetSize) && is_unified_pointer(0, (void*)cpuSet); i++)
        maybe_copy_unified_arg(0, (void*)&cpuSet[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlDeviceGetCpuAffinity) < 0 ||
@@ -550,7 +551,7 @@ nvmlReturn_t nvmlDeviceGetCpuAffinity(nvmlDevice_t device, unsigned int cpuSetSi
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&cpuSetSize, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)cpuSet, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(cpuSetSize); i++)
+    for (int i = 0; i < static_cast<int>(cpuSetSize) && is_unified_pointer(0, (void*)cpuSet); i++)
        maybe_copy_unified_arg(0, (void*)&cpuSet[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -606,7 +607,7 @@ nvmlReturn_t nvmlDeviceGetTopologyNearestGpus(nvmlDevice_t device, nvmlGpuTopolo
     maybe_copy_unified_arg(0, (void*)&level, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)count, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)deviceArray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*count); i++)
+    for (int i = 0; i < static_cast<int>(*count) && is_unified_pointer(0, (void*)deviceArray); i++)
        maybe_copy_unified_arg(0, (void*)&deviceArray[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlDeviceGetTopologyNearestGpus) < 0 ||
@@ -622,7 +623,7 @@ nvmlReturn_t nvmlDeviceGetTopologyNearestGpus(nvmlDevice_t device, nvmlGpuTopolo
     maybe_copy_unified_arg(0, (void*)&level, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)count, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)deviceArray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*count); i++)
+    for (int i = 0; i < static_cast<int>(*count) && is_unified_pointer(0, (void*)deviceArray); i++)
        maybe_copy_unified_arg(0, (void*)&deviceArray[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -632,7 +633,7 @@ nvmlReturn_t nvmlSystemGetTopologyGpuSet(unsigned int cpuNumber, unsigned int* c
     maybe_copy_unified_arg(0, (void*)&cpuNumber, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)count, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)deviceArray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*count); i++)
+    for (int i = 0; i < static_cast<int>(*count) && is_unified_pointer(0, (void*)deviceArray); i++)
        maybe_copy_unified_arg(0, (void*)&deviceArray[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlSystemGetTopologyGpuSet) < 0 ||
@@ -646,7 +647,7 @@ nvmlReturn_t nvmlSystemGetTopologyGpuSet(unsigned int cpuNumber, unsigned int* c
     maybe_copy_unified_arg(0, (void*)&cpuNumber, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)count, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)deviceArray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*count); i++)
+    for (int i = 0; i < static_cast<int>(*count) && is_unified_pointer(0, (void*)deviceArray); i++)
        maybe_copy_unified_arg(0, (void*)&deviceArray[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -678,7 +679,7 @@ nvmlReturn_t nvmlDeviceGetUUID(nvmlDevice_t device, char* uuid, unsigned int len
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&length, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)uuid, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(length); i++)
+    for (int i = 0; i < static_cast<int>(length) && is_unified_pointer(0, (void*)uuid); i++)
        maybe_copy_unified_arg(0, (void*)&uuid[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlDeviceGetUUID) < 0 ||
@@ -691,7 +692,7 @@ nvmlReturn_t nvmlDeviceGetUUID(nvmlDevice_t device, char* uuid, unsigned int len
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&length, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)uuid, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(length); i++)
+    for (int i = 0; i < static_cast<int>(length) && is_unified_pointer(0, (void*)uuid); i++)
        maybe_copy_unified_arg(0, (void*)&uuid[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -701,7 +702,7 @@ nvmlReturn_t nvmlVgpuInstanceGetMdevUUID(nvmlVgpuInstance_t vgpuInstance, char* 
     maybe_copy_unified_arg(0, (void*)&vgpuInstance, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&size, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)mdevUuid, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(size); i++)
+    for (int i = 0; i < static_cast<int>(size) && is_unified_pointer(0, (void*)mdevUuid); i++)
        maybe_copy_unified_arg(0, (void*)&mdevUuid[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlVgpuInstanceGetMdevUUID) < 0 ||
@@ -714,7 +715,7 @@ nvmlReturn_t nvmlVgpuInstanceGetMdevUUID(nvmlVgpuInstance_t vgpuInstance, char* 
     maybe_copy_unified_arg(0, (void*)&vgpuInstance, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&size, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)mdevUuid, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(size); i++)
+    for (int i = 0; i < static_cast<int>(size) && is_unified_pointer(0, (void*)mdevUuid); i++)
        maybe_copy_unified_arg(0, (void*)&mdevUuid[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -740,7 +741,7 @@ nvmlReturn_t nvmlDeviceGetBoardPartNumber(nvmlDevice_t device, char* partNumber,
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&length, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)partNumber, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(length); i++)
+    for (int i = 0; i < static_cast<int>(length) && is_unified_pointer(0, (void*)partNumber); i++)
        maybe_copy_unified_arg(0, (void*)&partNumber[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlDeviceGetBoardPartNumber) < 0 ||
@@ -753,7 +754,7 @@ nvmlReturn_t nvmlDeviceGetBoardPartNumber(nvmlDevice_t device, char* partNumber,
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&length, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)partNumber, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(length); i++)
+    for (int i = 0; i < static_cast<int>(length) && is_unified_pointer(0, (void*)partNumber); i++)
        maybe_copy_unified_arg(0, (void*)&partNumber[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -764,7 +765,7 @@ nvmlReturn_t nvmlDeviceGetInforomVersion(nvmlDevice_t device, nvmlInforomObject_
     maybe_copy_unified_arg(0, (void*)&object, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&length, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)version, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(length); i++)
+    for (int i = 0; i < static_cast<int>(length) && is_unified_pointer(0, (void*)version); i++)
        maybe_copy_unified_arg(0, (void*)&version[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlDeviceGetInforomVersion) < 0 ||
@@ -779,7 +780,7 @@ nvmlReturn_t nvmlDeviceGetInforomVersion(nvmlDevice_t device, nvmlInforomObject_
     maybe_copy_unified_arg(0, (void*)&object, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&length, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)version, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(length); i++)
+    for (int i = 0; i < static_cast<int>(length) && is_unified_pointer(0, (void*)version); i++)
        maybe_copy_unified_arg(0, (void*)&version[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -789,7 +790,7 @@ nvmlReturn_t nvmlDeviceGetInforomImageVersion(nvmlDevice_t device, char* version
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&length, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)version, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(length); i++)
+    for (int i = 0; i < static_cast<int>(length) && is_unified_pointer(0, (void*)version); i++)
        maybe_copy_unified_arg(0, (void*)&version[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlDeviceGetInforomImageVersion) < 0 ||
@@ -802,7 +803,7 @@ nvmlReturn_t nvmlDeviceGetInforomImageVersion(nvmlDevice_t device, char* version
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&length, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)version, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(length); i++)
+    for (int i = 0; i < static_cast<int>(length) && is_unified_pointer(0, (void*)version); i++)
        maybe_copy_unified_arg(0, (void*)&version[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -1150,7 +1151,7 @@ nvmlReturn_t nvmlDeviceGetSupportedMemoryClocks(nvmlDevice_t device, unsigned in
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)count, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)clocksMHz, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*count); i++)
+    for (int i = 0; i < static_cast<int>(*count) && is_unified_pointer(0, (void*)clocksMHz); i++)
        maybe_copy_unified_arg(0, (void*)&clocksMHz[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlDeviceGetSupportedMemoryClocks) < 0 ||
@@ -1164,7 +1165,7 @@ nvmlReturn_t nvmlDeviceGetSupportedMemoryClocks(nvmlDevice_t device, unsigned in
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)count, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)clocksMHz, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*count); i++)
+    for (int i = 0; i < static_cast<int>(*count) && is_unified_pointer(0, (void*)clocksMHz); i++)
        maybe_copy_unified_arg(0, (void*)&clocksMHz[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -1175,7 +1176,7 @@ nvmlReturn_t nvmlDeviceGetSupportedGraphicsClocks(nvmlDevice_t device, unsigned 
     maybe_copy_unified_arg(0, (void*)&memoryClockMHz, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)count, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)clocksMHz, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*count); i++)
+    for (int i = 0; i < static_cast<int>(*count) && is_unified_pointer(0, (void*)clocksMHz); i++)
        maybe_copy_unified_arg(0, (void*)&clocksMHz[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlDeviceGetSupportedGraphicsClocks) < 0 ||
@@ -1191,7 +1192,7 @@ nvmlReturn_t nvmlDeviceGetSupportedGraphicsClocks(nvmlDevice_t device, unsigned 
     maybe_copy_unified_arg(0, (void*)&memoryClockMHz, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)count, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)clocksMHz, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*count); i++)
+    for (int i = 0; i < static_cast<int>(*count) && is_unified_pointer(0, (void*)clocksMHz); i++)
        maybe_copy_unified_arg(0, (void*)&clocksMHz[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -1952,7 +1953,7 @@ nvmlReturn_t nvmlDeviceGetEncoderSessions(nvmlDevice_t device, unsigned int* ses
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)sessionCount, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)sessionInfos, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*sessionCount); i++)
+    for (int i = 0; i < static_cast<int>(*sessionCount) && is_unified_pointer(0, (void*)sessionInfos); i++)
        maybe_copy_unified_arg(0, (void*)&sessionInfos[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlDeviceGetEncoderSessions) < 0 ||
@@ -1966,7 +1967,7 @@ nvmlReturn_t nvmlDeviceGetEncoderSessions(nvmlDevice_t device, unsigned int* ses
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)sessionCount, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)sessionInfos, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*sessionCount); i++)
+    for (int i = 0; i < static_cast<int>(*sessionCount) && is_unified_pointer(0, (void*)sessionInfos); i++)
        maybe_copy_unified_arg(0, (void*)&sessionInfos[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -2011,7 +2012,7 @@ nvmlReturn_t nvmlDeviceGetFBCSessions(nvmlDevice_t device, unsigned int* session
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)sessionCount, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)sessionInfo, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*sessionCount); i++)
+    for (int i = 0; i < static_cast<int>(*sessionCount) && is_unified_pointer(0, (void*)sessionInfo); i++)
        maybe_copy_unified_arg(0, (void*)&sessionInfo[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlDeviceGetFBCSessions) < 0 ||
@@ -2025,7 +2026,7 @@ nvmlReturn_t nvmlDeviceGetFBCSessions(nvmlDevice_t device, unsigned int* session
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)sessionCount, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)sessionInfo, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*sessionCount); i++)
+    for (int i = 0; i < static_cast<int>(*sessionCount) && is_unified_pointer(0, (void*)sessionInfo); i++)
        maybe_copy_unified_arg(0, (void*)&sessionInfo[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -2054,7 +2055,7 @@ nvmlReturn_t nvmlDeviceGetVbiosVersion(nvmlDevice_t device, char* version, unsig
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&length, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)version, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(length); i++)
+    for (int i = 0; i < static_cast<int>(length) && is_unified_pointer(0, (void*)version); i++)
        maybe_copy_unified_arg(0, (void*)&version[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlDeviceGetVbiosVersion) < 0 ||
@@ -2067,7 +2068,7 @@ nvmlReturn_t nvmlDeviceGetVbiosVersion(nvmlDevice_t device, char* version, unsig
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&length, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)version, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(length); i++)
+    for (int i = 0; i < static_cast<int>(length) && is_unified_pointer(0, (void*)version); i++)
        maybe_copy_unified_arg(0, (void*)&version[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -2093,7 +2094,7 @@ nvmlReturn_t nvmlDeviceGetComputeRunningProcesses_v3(nvmlDevice_t device, unsign
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)infoCount, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)infos, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*infoCount); i++)
+    for (int i = 0; i < static_cast<int>(*infoCount) && is_unified_pointer(0, (void*)infos); i++)
        maybe_copy_unified_arg(0, (void*)&infos[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlDeviceGetComputeRunningProcesses_v3) < 0 ||
@@ -2107,7 +2108,7 @@ nvmlReturn_t nvmlDeviceGetComputeRunningProcesses_v3(nvmlDevice_t device, unsign
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)infoCount, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)infos, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*infoCount); i++)
+    for (int i = 0; i < static_cast<int>(*infoCount) && is_unified_pointer(0, (void*)infos); i++)
        maybe_copy_unified_arg(0, (void*)&infos[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -2117,7 +2118,7 @@ nvmlReturn_t nvmlDeviceGetGraphicsRunningProcesses_v3(nvmlDevice_t device, unsig
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)infoCount, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)infos, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*infoCount); i++)
+    for (int i = 0; i < static_cast<int>(*infoCount) && is_unified_pointer(0, (void*)infos); i++)
        maybe_copy_unified_arg(0, (void*)&infos[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlDeviceGetGraphicsRunningProcesses_v3) < 0 ||
@@ -2131,7 +2132,7 @@ nvmlReturn_t nvmlDeviceGetGraphicsRunningProcesses_v3(nvmlDevice_t device, unsig
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)infoCount, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)infos, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*infoCount); i++)
+    for (int i = 0; i < static_cast<int>(*infoCount) && is_unified_pointer(0, (void*)infos); i++)
        maybe_copy_unified_arg(0, (void*)&infos[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -2141,7 +2142,7 @@ nvmlReturn_t nvmlDeviceGetMPSComputeRunningProcesses_v3(nvmlDevice_t device, uns
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)infoCount, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)infos, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*infoCount); i++)
+    for (int i = 0; i < static_cast<int>(*infoCount) && is_unified_pointer(0, (void*)infos); i++)
        maybe_copy_unified_arg(0, (void*)&infos[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlDeviceGetMPSComputeRunningProcesses_v3) < 0 ||
@@ -2155,7 +2156,7 @@ nvmlReturn_t nvmlDeviceGetMPSComputeRunningProcesses_v3(nvmlDevice_t device, uns
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)infoCount, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)infos, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*infoCount); i++)
+    for (int i = 0; i < static_cast<int>(*infoCount) && is_unified_pointer(0, (void*)infos); i++)
        maybe_copy_unified_arg(0, (void*)&infos[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -2206,7 +2207,7 @@ nvmlReturn_t nvmlDeviceGetSamples(nvmlDevice_t device, nvmlSamplingType_t type, 
     maybe_copy_unified_arg(0, (void*)sampleValType, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)sampleCount, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)samples, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*sampleCount); i++)
+    for (int i = 0; i < static_cast<int>(*sampleCount) && is_unified_pointer(0, (void*)samples); i++)
        maybe_copy_unified_arg(0, (void*)&samples[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlDeviceGetSamples) < 0 ||
@@ -2226,7 +2227,7 @@ nvmlReturn_t nvmlDeviceGetSamples(nvmlDevice_t device, nvmlSamplingType_t type, 
     maybe_copy_unified_arg(0, (void*)sampleValType, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)sampleCount, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)samples, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*sampleCount); i++)
+    for (int i = 0; i < static_cast<int>(*sampleCount) && is_unified_pointer(0, (void*)samples); i++)
        maybe_copy_unified_arg(0, (void*)&samples[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -2418,7 +2419,7 @@ nvmlReturn_t nvmlDeviceGetAccountingPids(nvmlDevice_t device, unsigned int* coun
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)count, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)pids, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*count); i++)
+    for (int i = 0; i < static_cast<int>(*count) && is_unified_pointer(0, (void*)pids); i++)
        maybe_copy_unified_arg(0, (void*)&pids[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlDeviceGetAccountingPids) < 0 ||
@@ -2432,7 +2433,7 @@ nvmlReturn_t nvmlDeviceGetAccountingPids(nvmlDevice_t device, unsigned int* coun
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)count, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)pids, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*count); i++)
+    for (int i = 0; i < static_cast<int>(*count) && is_unified_pointer(0, (void*)pids); i++)
        maybe_copy_unified_arg(0, (void*)&pids[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -2459,7 +2460,7 @@ nvmlReturn_t nvmlDeviceGetRetiredPages(nvmlDevice_t device, nvmlPageRetirementCa
     maybe_copy_unified_arg(0, (void*)&cause, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)pageCount, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)addresses, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*pageCount); i++)
+    for (int i = 0; i < static_cast<int>(*pageCount) && is_unified_pointer(0, (void*)addresses); i++)
        maybe_copy_unified_arg(0, (void*)&addresses[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlDeviceGetRetiredPages) < 0 ||
@@ -2475,7 +2476,7 @@ nvmlReturn_t nvmlDeviceGetRetiredPages(nvmlDevice_t device, nvmlPageRetirementCa
     maybe_copy_unified_arg(0, (void*)&cause, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)pageCount, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)addresses, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*pageCount); i++)
+    for (int i = 0; i < static_cast<int>(*pageCount) && is_unified_pointer(0, (void*)addresses); i++)
        maybe_copy_unified_arg(0, (void*)&addresses[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -2486,10 +2487,10 @@ nvmlReturn_t nvmlDeviceGetRetiredPages_v2(nvmlDevice_t device, nvmlPageRetiremen
     maybe_copy_unified_arg(0, (void*)&cause, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)pageCount, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)addresses, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*pageCount); i++)
+    for (int i = 0; i < static_cast<int>(*pageCount) && is_unified_pointer(0, (void*)addresses); i++)
        maybe_copy_unified_arg(0, (void*)&addresses[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)timestamps, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*pageCount); i++)
+    for (int i = 0; i < static_cast<int>(*pageCount) && is_unified_pointer(0, (void*)timestamps); i++)
        maybe_copy_unified_arg(0, (void*)&timestamps[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlDeviceGetRetiredPages_v2) < 0 ||
@@ -2506,10 +2507,10 @@ nvmlReturn_t nvmlDeviceGetRetiredPages_v2(nvmlDevice_t device, nvmlPageRetiremen
     maybe_copy_unified_arg(0, (void*)&cause, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)pageCount, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)addresses, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*pageCount); i++)
+    for (int i = 0; i < static_cast<int>(*pageCount) && is_unified_pointer(0, (void*)addresses); i++)
        maybe_copy_unified_arg(0, (void*)&addresses[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)timestamps, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*pageCount); i++)
+    for (int i = 0; i < static_cast<int>(*pageCount) && is_unified_pointer(0, (void*)timestamps); i++)
        maybe_copy_unified_arg(0, (void*)&timestamps[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -3267,7 +3268,7 @@ nvmlReturn_t nvmlDeviceGetFieldValues(nvmlDevice_t device, int valuesCount, nvml
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&valuesCount, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)values, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(valuesCount); i++)
+    for (int i = 0; i < static_cast<int>(valuesCount) && is_unified_pointer(0, (void*)values); i++)
        maybe_copy_unified_arg(0, (void*)&values[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlDeviceGetFieldValues) < 0 ||
@@ -3280,7 +3281,7 @@ nvmlReturn_t nvmlDeviceGetFieldValues(nvmlDevice_t device, int valuesCount, nvml
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&valuesCount, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)values, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(valuesCount); i++)
+    for (int i = 0; i < static_cast<int>(valuesCount) && is_unified_pointer(0, (void*)values); i++)
        maybe_copy_unified_arg(0, (void*)&values[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -3290,7 +3291,7 @@ nvmlReturn_t nvmlDeviceClearFieldValues(nvmlDevice_t device, int valuesCount, nv
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&valuesCount, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)values, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(valuesCount); i++)
+    for (int i = 0; i < static_cast<int>(valuesCount) && is_unified_pointer(0, (void*)values); i++)
        maybe_copy_unified_arg(0, (void*)&values[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlDeviceClearFieldValues) < 0 ||
@@ -3303,7 +3304,7 @@ nvmlReturn_t nvmlDeviceClearFieldValues(nvmlDevice_t device, int valuesCount, nv
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&valuesCount, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)values, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(valuesCount); i++)
+    for (int i = 0; i < static_cast<int>(valuesCount) && is_unified_pointer(0, (void*)values); i++)
        maybe_copy_unified_arg(0, (void*)&values[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -3377,7 +3378,7 @@ nvmlReturn_t nvmlDeviceGetProcessUtilization(nvmlDevice_t device, nvmlProcessUti
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)processSamplesCount, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)utilization, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*processSamplesCount); i++)
+    for (int i = 0; i < static_cast<int>(*processSamplesCount) && is_unified_pointer(0, (void*)utilization); i++)
        maybe_copy_unified_arg(0, (void*)&utilization[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lastSeenTimeStamp, cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
@@ -3393,7 +3394,7 @@ nvmlReturn_t nvmlDeviceGetProcessUtilization(nvmlDevice_t device, nvmlProcessUti
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)processSamplesCount, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)utilization, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*processSamplesCount); i++)
+    for (int i = 0; i < static_cast<int>(*processSamplesCount) && is_unified_pointer(0, (void*)utilization); i++)
        maybe_copy_unified_arg(0, (void*)&utilization[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lastSeenTimeStamp, cudaMemcpyDeviceToHost);
     return return_value;
@@ -3474,7 +3475,7 @@ nvmlReturn_t nvmlDeviceGetSupportedVgpus(nvmlDevice_t device, unsigned int* vgpu
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)vgpuCount, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)vgpuTypeIds, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*vgpuCount); i++)
+    for (int i = 0; i < static_cast<int>(*vgpuCount) && is_unified_pointer(0, (void*)vgpuTypeIds); i++)
        maybe_copy_unified_arg(0, (void*)&vgpuTypeIds[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlDeviceGetSupportedVgpus) < 0 ||
@@ -3488,7 +3489,7 @@ nvmlReturn_t nvmlDeviceGetSupportedVgpus(nvmlDevice_t device, unsigned int* vgpu
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)vgpuCount, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)vgpuTypeIds, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*vgpuCount); i++)
+    for (int i = 0; i < static_cast<int>(*vgpuCount) && is_unified_pointer(0, (void*)vgpuTypeIds); i++)
        maybe_copy_unified_arg(0, (void*)&vgpuTypeIds[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -3498,7 +3499,7 @@ nvmlReturn_t nvmlDeviceGetCreatableVgpus(nvmlDevice_t device, unsigned int* vgpu
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)vgpuCount, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)vgpuTypeIds, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*vgpuCount); i++)
+    for (int i = 0; i < static_cast<int>(*vgpuCount) && is_unified_pointer(0, (void*)vgpuTypeIds); i++)
        maybe_copy_unified_arg(0, (void*)&vgpuTypeIds[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlDeviceGetCreatableVgpus) < 0 ||
@@ -3512,7 +3513,7 @@ nvmlReturn_t nvmlDeviceGetCreatableVgpus(nvmlDevice_t device, unsigned int* vgpu
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)vgpuCount, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)vgpuTypeIds, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*vgpuCount); i++)
+    for (int i = 0; i < static_cast<int>(*vgpuCount) && is_unified_pointer(0, (void*)vgpuTypeIds); i++)
        maybe_copy_unified_arg(0, (void*)&vgpuTypeIds[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -3522,7 +3523,7 @@ nvmlReturn_t nvmlVgpuTypeGetClass(nvmlVgpuTypeId_t vgpuTypeId, char* vgpuTypeCla
     maybe_copy_unified_arg(0, (void*)&vgpuTypeId, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)size, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)vgpuTypeClass, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*size); i++)
+    for (int i = 0; i < static_cast<int>(*size) && is_unified_pointer(0, (void*)vgpuTypeClass); i++)
        maybe_copy_unified_arg(0, (void*)&vgpuTypeClass[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlVgpuTypeGetClass) < 0 ||
@@ -3535,7 +3536,7 @@ nvmlReturn_t nvmlVgpuTypeGetClass(nvmlVgpuTypeId_t vgpuTypeId, char* vgpuTypeCla
     maybe_copy_unified_arg(0, (void*)&vgpuTypeId, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)size, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)vgpuTypeClass, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*size); i++)
+    for (int i = 0; i < static_cast<int>(*size) && is_unified_pointer(0, (void*)vgpuTypeClass); i++)
        maybe_copy_unified_arg(0, (void*)&vgpuTypeClass[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -3545,7 +3546,7 @@ nvmlReturn_t nvmlVgpuTypeGetName(nvmlVgpuTypeId_t vgpuTypeId, char* vgpuTypeName
     maybe_copy_unified_arg(0, (void*)&vgpuTypeId, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)size, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)vgpuTypeName, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*size); i++)
+    for (int i = 0; i < static_cast<int>(*size) && is_unified_pointer(0, (void*)vgpuTypeName); i++)
        maybe_copy_unified_arg(0, (void*)&vgpuTypeName[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlVgpuTypeGetName) < 0 ||
@@ -3559,7 +3560,7 @@ nvmlReturn_t nvmlVgpuTypeGetName(nvmlVgpuTypeId_t vgpuTypeId, char* vgpuTypeName
     maybe_copy_unified_arg(0, (void*)&vgpuTypeId, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)size, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)vgpuTypeName, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*size); i++)
+    for (int i = 0; i < static_cast<int>(*size) && is_unified_pointer(0, (void*)vgpuTypeName); i++)
        maybe_copy_unified_arg(0, (void*)&vgpuTypeName[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -3658,7 +3659,7 @@ nvmlReturn_t nvmlVgpuTypeGetLicense(nvmlVgpuTypeId_t vgpuTypeId, char* vgpuTypeL
     maybe_copy_unified_arg(0, (void*)&vgpuTypeId, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&size, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)vgpuTypeLicenseString, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(size); i++)
+    for (int i = 0; i < static_cast<int>(size) && is_unified_pointer(0, (void*)vgpuTypeLicenseString); i++)
        maybe_copy_unified_arg(0, (void*)&vgpuTypeLicenseString[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlVgpuTypeGetLicense) < 0 ||
@@ -3671,7 +3672,7 @@ nvmlReturn_t nvmlVgpuTypeGetLicense(nvmlVgpuTypeId_t vgpuTypeId, char* vgpuTypeL
     maybe_copy_unified_arg(0, (void*)&vgpuTypeId, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&size, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)vgpuTypeLicenseString, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(size); i++)
+    for (int i = 0; i < static_cast<int>(size) && is_unified_pointer(0, (void*)vgpuTypeLicenseString); i++)
        maybe_copy_unified_arg(0, (void*)&vgpuTypeLicenseString[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -3732,7 +3733,7 @@ nvmlReturn_t nvmlDeviceGetActiveVgpus(nvmlDevice_t device, unsigned int* vgpuCou
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)vgpuCount, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)vgpuInstances, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*vgpuCount); i++)
+    for (int i = 0; i < static_cast<int>(*vgpuCount) && is_unified_pointer(0, (void*)vgpuInstances); i++)
        maybe_copy_unified_arg(0, (void*)&vgpuInstances[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlDeviceGetActiveVgpus) < 0 ||
@@ -3746,7 +3747,7 @@ nvmlReturn_t nvmlDeviceGetActiveVgpus(nvmlDevice_t device, unsigned int* vgpuCou
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)vgpuCount, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)vgpuInstances, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*vgpuCount); i++)
+    for (int i = 0; i < static_cast<int>(*vgpuCount) && is_unified_pointer(0, (void*)vgpuInstances); i++)
        maybe_copy_unified_arg(0, (void*)&vgpuInstances[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -3756,7 +3757,7 @@ nvmlReturn_t nvmlVgpuInstanceGetVmID(nvmlVgpuInstance_t vgpuInstance, char* vmId
     maybe_copy_unified_arg(0, (void*)&vgpuInstance, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&size, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)vmId, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(size); i++)
+    for (int i = 0; i < static_cast<int>(size) && is_unified_pointer(0, (void*)vmId); i++)
        maybe_copy_unified_arg(0, (void*)&vmId[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)vmIdType, cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
@@ -3771,7 +3772,7 @@ nvmlReturn_t nvmlVgpuInstanceGetVmID(nvmlVgpuInstance_t vgpuInstance, char* vmId
     maybe_copy_unified_arg(0, (void*)&vgpuInstance, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&size, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)vmId, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(size); i++)
+    for (int i = 0; i < static_cast<int>(size) && is_unified_pointer(0, (void*)vmId); i++)
        maybe_copy_unified_arg(0, (void*)&vmId[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)vmIdType, cudaMemcpyDeviceToHost);
     return return_value;
@@ -3782,7 +3783,7 @@ nvmlReturn_t nvmlVgpuInstanceGetUUID(nvmlVgpuInstance_t vgpuInstance, char* uuid
     maybe_copy_unified_arg(0, (void*)&vgpuInstance, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&size, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)uuid, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(size); i++)
+    for (int i = 0; i < static_cast<int>(size) && is_unified_pointer(0, (void*)uuid); i++)
        maybe_copy_unified_arg(0, (void*)&uuid[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlVgpuInstanceGetUUID) < 0 ||
@@ -3795,7 +3796,7 @@ nvmlReturn_t nvmlVgpuInstanceGetUUID(nvmlVgpuInstance_t vgpuInstance, char* uuid
     maybe_copy_unified_arg(0, (void*)&vgpuInstance, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&size, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)uuid, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(size); i++)
+    for (int i = 0; i < static_cast<int>(size) && is_unified_pointer(0, (void*)uuid); i++)
        maybe_copy_unified_arg(0, (void*)&uuid[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -3805,7 +3806,7 @@ nvmlReturn_t nvmlVgpuInstanceGetVmDriverVersion(nvmlVgpuInstance_t vgpuInstance,
     maybe_copy_unified_arg(0, (void*)&vgpuInstance, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&length, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)version, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(length); i++)
+    for (int i = 0; i < static_cast<int>(length) && is_unified_pointer(0, (void*)version); i++)
        maybe_copy_unified_arg(0, (void*)&version[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlVgpuInstanceGetVmDriverVersion) < 0 ||
@@ -3818,7 +3819,7 @@ nvmlReturn_t nvmlVgpuInstanceGetVmDriverVersion(nvmlVgpuInstance_t vgpuInstance,
     maybe_copy_unified_arg(0, (void*)&vgpuInstance, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&length, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)version, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(length); i++)
+    for (int i = 0; i < static_cast<int>(length) && is_unified_pointer(0, (void*)version); i++)
        maybe_copy_unified_arg(0, (void*)&version[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -3962,7 +3963,7 @@ nvmlReturn_t nvmlVgpuInstanceGetEncoderSessions(nvmlVgpuInstance_t vgpuInstance,
     maybe_copy_unified_arg(0, (void*)&vgpuInstance, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)sessionCount, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)sessionInfo, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*sessionCount); i++)
+    for (int i = 0; i < static_cast<int>(*sessionCount) && is_unified_pointer(0, (void*)sessionInfo); i++)
        maybe_copy_unified_arg(0, (void*)&sessionInfo[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlVgpuInstanceGetEncoderSessions) < 0 ||
@@ -3976,7 +3977,7 @@ nvmlReturn_t nvmlVgpuInstanceGetEncoderSessions(nvmlVgpuInstance_t vgpuInstance,
     maybe_copy_unified_arg(0, (void*)&vgpuInstance, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)sessionCount, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)sessionInfo, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*sessionCount); i++)
+    for (int i = 0; i < static_cast<int>(*sessionCount) && is_unified_pointer(0, (void*)sessionInfo); i++)
        maybe_copy_unified_arg(0, (void*)&sessionInfo[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -4002,7 +4003,7 @@ nvmlReturn_t nvmlVgpuInstanceGetFBCSessions(nvmlVgpuInstance_t vgpuInstance, uns
     maybe_copy_unified_arg(0, (void*)&vgpuInstance, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)sessionCount, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)sessionInfo, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*sessionCount); i++)
+    for (int i = 0; i < static_cast<int>(*sessionCount) && is_unified_pointer(0, (void*)sessionInfo); i++)
        maybe_copy_unified_arg(0, (void*)&sessionInfo[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlVgpuInstanceGetFBCSessions) < 0 ||
@@ -4016,7 +4017,7 @@ nvmlReturn_t nvmlVgpuInstanceGetFBCSessions(nvmlVgpuInstance_t vgpuInstance, uns
     maybe_copy_unified_arg(0, (void*)&vgpuInstance, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)sessionCount, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)sessionInfo, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*sessionCount); i++)
+    for (int i = 0; i < static_cast<int>(*sessionCount) && is_unified_pointer(0, (void*)sessionInfo); i++)
        maybe_copy_unified_arg(0, (void*)&sessionInfo[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -4042,7 +4043,7 @@ nvmlReturn_t nvmlVgpuInstanceGetGpuPciId(nvmlVgpuInstance_t vgpuInstance, char* 
     maybe_copy_unified_arg(0, (void*)&vgpuInstance, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)length, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)vgpuPciId, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*length); i++)
+    for (int i = 0; i < static_cast<int>(*length) && is_unified_pointer(0, (void*)vgpuPciId); i++)
        maybe_copy_unified_arg(0, (void*)&vgpuPciId[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlVgpuInstanceGetGpuPciId) < 0 ||
@@ -4056,7 +4057,7 @@ nvmlReturn_t nvmlVgpuInstanceGetGpuPciId(nvmlVgpuInstance_t vgpuInstance, char* 
     maybe_copy_unified_arg(0, (void*)&vgpuInstance, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)length, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)vgpuPciId, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*length); i++)
+    for (int i = 0; i < static_cast<int>(*length) && is_unified_pointer(0, (void*)vgpuPciId); i++)
        maybe_copy_unified_arg(0, (void*)&vgpuPciId[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -4085,7 +4086,7 @@ nvmlReturn_t nvmlVgpuInstanceGetMetadata(nvmlVgpuInstance_t vgpuInstance, nvmlVg
     maybe_copy_unified_arg(0, (void*)&vgpuInstance, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)bufferSize, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)vgpuMetadata, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*bufferSize); i++)
+    for (int i = 0; i < static_cast<int>(*bufferSize) && is_unified_pointer(0, (void*)vgpuMetadata); i++)
        maybe_copy_unified_arg(0, (void*)&vgpuMetadata[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlVgpuInstanceGetMetadata) < 0 ||
@@ -4099,7 +4100,7 @@ nvmlReturn_t nvmlVgpuInstanceGetMetadata(nvmlVgpuInstance_t vgpuInstance, nvmlVg
     maybe_copy_unified_arg(0, (void*)&vgpuInstance, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)bufferSize, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)vgpuMetadata, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*bufferSize); i++)
+    for (int i = 0; i < static_cast<int>(*bufferSize) && is_unified_pointer(0, (void*)vgpuMetadata); i++)
        maybe_copy_unified_arg(0, (void*)&vgpuMetadata[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -4109,7 +4110,7 @@ nvmlReturn_t nvmlDeviceGetVgpuMetadata(nvmlDevice_t device, nvmlVgpuPgpuMetadata
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)bufferSize, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)pgpuMetadata, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*bufferSize); i++)
+    for (int i = 0; i < static_cast<int>(*bufferSize) && is_unified_pointer(0, (void*)pgpuMetadata); i++)
        maybe_copy_unified_arg(0, (void*)&pgpuMetadata[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlDeviceGetVgpuMetadata) < 0 ||
@@ -4123,7 +4124,7 @@ nvmlReturn_t nvmlDeviceGetVgpuMetadata(nvmlDevice_t device, nvmlVgpuPgpuMetadata
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)bufferSize, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)pgpuMetadata, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*bufferSize); i++)
+    for (int i = 0; i < static_cast<int>(*bufferSize) && is_unified_pointer(0, (void*)pgpuMetadata); i++)
        maybe_copy_unified_arg(0, (void*)&pgpuMetadata[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -4153,7 +4154,7 @@ nvmlReturn_t nvmlDeviceGetPgpuMetadataString(nvmlDevice_t device, char* pgpuMeta
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)bufferSize, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)pgpuMetadata, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*bufferSize); i++)
+    for (int i = 0; i < static_cast<int>(*bufferSize) && is_unified_pointer(0, (void*)pgpuMetadata); i++)
        maybe_copy_unified_arg(0, (void*)&pgpuMetadata[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlDeviceGetPgpuMetadataString) < 0 ||
@@ -4167,7 +4168,7 @@ nvmlReturn_t nvmlDeviceGetPgpuMetadataString(nvmlDevice_t device, char* pgpuMeta
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)bufferSize, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)pgpuMetadata, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*bufferSize); i++)
+    for (int i = 0; i < static_cast<int>(*bufferSize) && is_unified_pointer(0, (void*)pgpuMetadata); i++)
        maybe_copy_unified_arg(0, (void*)&pgpuMetadata[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -4256,7 +4257,7 @@ nvmlReturn_t nvmlDeviceGetVgpuUtilization(nvmlDevice_t device, unsigned long lon
     maybe_copy_unified_arg(0, (void*)sampleValType, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)vgpuInstanceSamplesCount, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)utilizationSamples, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*vgpuInstanceSamplesCount); i++)
+    for (int i = 0; i < static_cast<int>(*vgpuInstanceSamplesCount) && is_unified_pointer(0, (void*)utilizationSamples); i++)
        maybe_copy_unified_arg(0, (void*)&utilizationSamples[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlDeviceGetVgpuUtilization) < 0 ||
@@ -4275,7 +4276,7 @@ nvmlReturn_t nvmlDeviceGetVgpuUtilization(nvmlDevice_t device, unsigned long lon
     maybe_copy_unified_arg(0, (void*)sampleValType, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)vgpuInstanceSamplesCount, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)utilizationSamples, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*vgpuInstanceSamplesCount); i++)
+    for (int i = 0; i < static_cast<int>(*vgpuInstanceSamplesCount) && is_unified_pointer(0, (void*)utilizationSamples); i++)
        maybe_copy_unified_arg(0, (void*)&utilizationSamples[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -4286,7 +4287,7 @@ nvmlReturn_t nvmlDeviceGetVgpuProcessUtilization(nvmlDevice_t device, unsigned l
     maybe_copy_unified_arg(0, (void*)&lastSeenTimeStamp, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)vgpuProcessSamplesCount, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)utilizationSamples, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*vgpuProcessSamplesCount); i++)
+    for (int i = 0; i < static_cast<int>(*vgpuProcessSamplesCount) && is_unified_pointer(0, (void*)utilizationSamples); i++)
        maybe_copy_unified_arg(0, (void*)&utilizationSamples[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlDeviceGetVgpuProcessUtilization) < 0 ||
@@ -4302,7 +4303,7 @@ nvmlReturn_t nvmlDeviceGetVgpuProcessUtilization(nvmlDevice_t device, unsigned l
     maybe_copy_unified_arg(0, (void*)&lastSeenTimeStamp, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)vgpuProcessSamplesCount, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)utilizationSamples, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*vgpuProcessSamplesCount); i++)
+    for (int i = 0; i < static_cast<int>(*vgpuProcessSamplesCount) && is_unified_pointer(0, (void*)utilizationSamples); i++)
        maybe_copy_unified_arg(0, (void*)&utilizationSamples[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -4328,7 +4329,7 @@ nvmlReturn_t nvmlVgpuInstanceGetAccountingPids(nvmlVgpuInstance_t vgpuInstance, 
     maybe_copy_unified_arg(0, (void*)&vgpuInstance, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)count, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)pids, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*count); i++)
+    for (int i = 0; i < static_cast<int>(*count) && is_unified_pointer(0, (void*)pids); i++)
        maybe_copy_unified_arg(0, (void*)&pids[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlVgpuInstanceGetAccountingPids) < 0 ||
@@ -4342,7 +4343,7 @@ nvmlReturn_t nvmlVgpuInstanceGetAccountingPids(nvmlVgpuInstance_t vgpuInstance, 
     maybe_copy_unified_arg(0, (void*)&vgpuInstance, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)count, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)pids, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*count); i++)
+    for (int i = 0; i < static_cast<int>(*count) && is_unified_pointer(0, (void*)pids); i++)
        maybe_copy_unified_arg(0, (void*)&pids[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -4506,7 +4507,7 @@ nvmlReturn_t nvmlDeviceGetGpuInstancePossiblePlacements_v2(nvmlDevice_t device, 
     maybe_copy_unified_arg(0, (void*)&profileId, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)count, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)placements, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*count); i++)
+    for (int i = 0; i < static_cast<int>(*count) && is_unified_pointer(0, (void*)placements); i++)
        maybe_copy_unified_arg(0, (void*)&placements[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlDeviceGetGpuInstancePossiblePlacements_v2) < 0 ||
@@ -4522,7 +4523,7 @@ nvmlReturn_t nvmlDeviceGetGpuInstancePossiblePlacements_v2(nvmlDevice_t device, 
     maybe_copy_unified_arg(0, (void*)&profileId, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)count, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)placements, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*count); i++)
+    for (int i = 0; i < static_cast<int>(*count) && is_unified_pointer(0, (void*)placements); i++)
        maybe_copy_unified_arg(0, (void*)&placements[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -4584,7 +4585,7 @@ nvmlReturn_t nvmlDeviceGetGpuInstances(nvmlDevice_t device, unsigned int profile
     maybe_copy_unified_arg(0, (void*)&profileId, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)count, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)gpuInstances, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*count); i++)
+    for (int i = 0; i < static_cast<int>(*count) && is_unified_pointer(0, (void*)gpuInstances); i++)
        maybe_copy_unified_arg(0, (void*)&gpuInstances[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlDeviceGetGpuInstances) < 0 ||
@@ -4600,7 +4601,7 @@ nvmlReturn_t nvmlDeviceGetGpuInstances(nvmlDevice_t device, unsigned int profile
     maybe_copy_unified_arg(0, (void*)&profileId, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)count, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)gpuInstances, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*count); i++)
+    for (int i = 0; i < static_cast<int>(*count) && is_unified_pointer(0, (void*)gpuInstances); i++)
        maybe_copy_unified_arg(0, (void*)&gpuInstances[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -4709,7 +4710,7 @@ nvmlReturn_t nvmlGpuInstanceGetComputeInstancePossiblePlacements(nvmlGpuInstance
     maybe_copy_unified_arg(0, (void*)&profileId, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)count, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)placements, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*count); i++)
+    for (int i = 0; i < static_cast<int>(*count) && is_unified_pointer(0, (void*)placements); i++)
        maybe_copy_unified_arg(0, (void*)&placements[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlGpuInstanceGetComputeInstancePossiblePlacements) < 0 ||
@@ -4725,7 +4726,7 @@ nvmlReturn_t nvmlGpuInstanceGetComputeInstancePossiblePlacements(nvmlGpuInstance
     maybe_copy_unified_arg(0, (void*)&profileId, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)count, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)placements, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*count); i++)
+    for (int i = 0; i < static_cast<int>(*count) && is_unified_pointer(0, (void*)placements); i++)
        maybe_copy_unified_arg(0, (void*)&placements[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -4768,7 +4769,7 @@ nvmlReturn_t nvmlGpuInstanceGetComputeInstances(nvmlGpuInstance_t gpuInstance, u
     maybe_copy_unified_arg(0, (void*)&profileId, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)count, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)computeInstances, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*count); i++)
+    for (int i = 0; i < static_cast<int>(*count) && is_unified_pointer(0, (void*)computeInstances); i++)
        maybe_copy_unified_arg(0, (void*)&computeInstances[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlGpuInstanceGetComputeInstances) < 0 ||
@@ -4784,7 +4785,7 @@ nvmlReturn_t nvmlGpuInstanceGetComputeInstances(nvmlGpuInstance_t gpuInstance, u
     maybe_copy_unified_arg(0, (void*)&profileId, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)count, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)computeInstances, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*count); i++)
+    for (int i = 0; i < static_cast<int>(*count) && is_unified_pointer(0, (void*)computeInstances); i++)
        maybe_copy_unified_arg(0, (void*)&computeInstances[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -5068,7 +5069,7 @@ nvmlReturn_t nvmlDeviceGetSupportedPerformanceStates(nvmlDevice_t device, nvmlPs
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&size, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)pstates, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(size); i++)
+    for (int i = 0; i < static_cast<int>(size) && is_unified_pointer(0, (void*)pstates); i++)
        maybe_copy_unified_arg(0, (void*)&pstates[i], cudaMemcpyHostToDevice);
     nvmlReturn_t return_value;
     if (rpc_start_request(0, RPC_nvmlDeviceGetSupportedPerformanceStates) < 0 ||
@@ -5081,7 +5082,7 @@ nvmlReturn_t nvmlDeviceGetSupportedPerformanceStates(nvmlDevice_t device, nvmlPs
     maybe_copy_unified_arg(0, (void*)&device, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&size, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)pstates, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(size); i++)
+    for (int i = 0; i < static_cast<int>(size) && is_unified_pointer(0, (void*)pstates); i++)
        maybe_copy_unified_arg(0, (void*)&pstates[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -5305,7 +5306,7 @@ CUresult cuDeviceGetName(char* name, int len, CUdevice dev)
 {
     maybe_copy_unified_arg(0, (void*)&len, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)name, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(len); i++)
+    for (int i = 0; i < static_cast<int>(len) && is_unified_pointer(0, (void*)name); i++)
        maybe_copy_unified_arg(0, (void*)&name[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&dev, cudaMemcpyHostToDevice);
     CUresult return_value;
@@ -5318,7 +5319,7 @@ CUresult cuDeviceGetName(char* name, int len, CUdevice dev)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
     maybe_copy_unified_arg(0, (void*)&len, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)name, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(len); i++)
+    for (int i = 0; i < static_cast<int>(len) && is_unified_pointer(0, (void*)name); i++)
        maybe_copy_unified_arg(0, (void*)&name[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&dev, cudaMemcpyDeviceToHost);
     return return_value;
@@ -5327,7 +5328,7 @@ CUresult cuDeviceGetName(char* name, int len, CUdevice dev)
 CUresult cuDeviceGetUuid(CUuuid* uuid, CUdevice dev)
 {
     maybe_copy_unified_arg(0, (void*)uuid, cudaMemcpyHostToDevice);
-    for (int i = 0; i < 16; i++)
+    for (int i = 0; i < 16 && is_unified_pointer(0, (void*)uuid); i++)
        maybe_copy_unified_arg(0, (void*)&uuid[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&dev, cudaMemcpyHostToDevice);
     CUresult return_value;
@@ -5338,7 +5339,7 @@ CUresult cuDeviceGetUuid(CUuuid* uuid, CUdevice dev)
         rpc_end_response(0, &return_value) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
     maybe_copy_unified_arg(0, (void*)uuid, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < 16; i++)
+    for (int i = 0; i < 16 && is_unified_pointer(0, (void*)uuid); i++)
        maybe_copy_unified_arg(0, (void*)&uuid[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&dev, cudaMemcpyDeviceToHost);
     return return_value;
@@ -5347,7 +5348,7 @@ CUresult cuDeviceGetUuid(CUuuid* uuid, CUdevice dev)
 CUresult cuDeviceGetUuid_v2(CUuuid* uuid, CUdevice dev)
 {
     maybe_copy_unified_arg(0, (void*)uuid, cudaMemcpyHostToDevice);
-    for (int i = 0; i < 16; i++)
+    for (int i = 0; i < 16 && is_unified_pointer(0, (void*)uuid); i++)
        maybe_copy_unified_arg(0, (void*)&uuid[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&dev, cudaMemcpyHostToDevice);
     CUresult return_value;
@@ -5358,7 +5359,7 @@ CUresult cuDeviceGetUuid_v2(CUuuid* uuid, CUdevice dev)
         rpc_end_response(0, &return_value) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
     maybe_copy_unified_arg(0, (void*)uuid, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < 16; i++)
+    for (int i = 0; i < 16 && is_unified_pointer(0, (void*)uuid); i++)
        maybe_copy_unified_arg(0, (void*)&uuid[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&dev, cudaMemcpyDeviceToHost);
     return return_value;
@@ -5661,7 +5662,7 @@ CUresult cuCtxCreate_v3(CUcontext* pctx, CUexecAffinityParam* paramsArray, int n
     maybe_copy_unified_arg(0, (void*)pctx, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&numParams, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)paramsArray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(numParams); i++)
+    for (int i = 0; i < static_cast<int>(numParams) && is_unified_pointer(0, (void*)paramsArray); i++)
        maybe_copy_unified_arg(0, (void*)&paramsArray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&flags, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&dev, cudaMemcpyHostToDevice);
@@ -5678,7 +5679,7 @@ CUresult cuCtxCreate_v3(CUcontext* pctx, CUexecAffinityParam* paramsArray, int n
     maybe_copy_unified_arg(0, (void*)pctx, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&numParams, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)paramsArray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(numParams); i++)
+    for (int i = 0; i < static_cast<int>(numParams) && is_unified_pointer(0, (void*)paramsArray); i++)
        maybe_copy_unified_arg(0, (void*)&paramsArray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&flags, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&dev, cudaMemcpyDeviceToHost);
@@ -6095,10 +6096,10 @@ CUresult cuLinkAddFile_v2(CUlinkState state, CUjitInputType type, const char* pa
     maybe_copy_unified_arg(0, (void*)path, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&numOptions, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)options, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(numOptions); i++)
+    for (int i = 0; i < static_cast<int>(numOptions) && is_unified_pointer(0, (void*)options); i++)
        maybe_copy_unified_arg(0, (void*)&options[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)optionValues, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(numOptions); i++)
+    for (int i = 0; i < static_cast<int>(numOptions) && is_unified_pointer(0, (void*)optionValues); i++)
        maybe_copy_unified_arg(0, (void*)&optionValues[i], cudaMemcpyHostToDevice);
     CUresult return_value;
     std::size_t path_len = std::strlen(path) + 1;
@@ -6118,10 +6119,10 @@ CUresult cuLinkAddFile_v2(CUlinkState state, CUjitInputType type, const char* pa
     maybe_copy_unified_arg(0, (void*)path, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&numOptions, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)options, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(numOptions); i++)
+    for (int i = 0; i < static_cast<int>(numOptions) && is_unified_pointer(0, (void*)options); i++)
        maybe_copy_unified_arg(0, (void*)&options[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)optionValues, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(numOptions); i++)
+    for (int i = 0; i < static_cast<int>(numOptions) && is_unified_pointer(0, (void*)optionValues); i++)
        maybe_copy_unified_arg(0, (void*)&optionValues[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -6206,17 +6207,17 @@ CUresult cuLibraryLoadFromFile(CUlibrary* library, const char* fileName, CUjit_o
     maybe_copy_unified_arg(0, (void*)fileName, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&numJitOptions, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)jitOptions, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(numJitOptions); i++)
+    for (int i = 0; i < static_cast<int>(numJitOptions) && is_unified_pointer(0, (void*)jitOptions); i++)
        maybe_copy_unified_arg(0, (void*)&jitOptions[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)jitOptionsValues, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(numJitOptions); i++)
+    for (int i = 0; i < static_cast<int>(numJitOptions) && is_unified_pointer(0, (void*)jitOptionsValues); i++)
        maybe_copy_unified_arg(0, (void*)&jitOptionsValues[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&numLibraryOptions, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)libraryOptions, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(numLibraryOptions); i++)
+    for (int i = 0; i < static_cast<int>(numLibraryOptions) && is_unified_pointer(0, (void*)libraryOptions); i++)
        maybe_copy_unified_arg(0, (void*)&libraryOptions[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)libraryOptionValues, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(numLibraryOptions); i++)
+    for (int i = 0; i < static_cast<int>(numLibraryOptions) && is_unified_pointer(0, (void*)libraryOptionValues); i++)
        maybe_copy_unified_arg(0, (void*)&libraryOptionValues[i], cudaMemcpyHostToDevice);
     CUresult return_value;
     std::size_t fileName_len = std::strlen(fileName) + 1;
@@ -6237,17 +6238,17 @@ CUresult cuLibraryLoadFromFile(CUlibrary* library, const char* fileName, CUjit_o
     maybe_copy_unified_arg(0, (void*)fileName, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&numJitOptions, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)jitOptions, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(numJitOptions); i++)
+    for (int i = 0; i < static_cast<int>(numJitOptions) && is_unified_pointer(0, (void*)jitOptions); i++)
        maybe_copy_unified_arg(0, (void*)&jitOptions[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)jitOptionsValues, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(numJitOptions); i++)
+    for (int i = 0; i < static_cast<int>(numJitOptions) && is_unified_pointer(0, (void*)jitOptionsValues); i++)
        maybe_copy_unified_arg(0, (void*)&jitOptionsValues[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&numLibraryOptions, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)libraryOptions, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(numLibraryOptions); i++)
+    for (int i = 0; i < static_cast<int>(numLibraryOptions) && is_unified_pointer(0, (void*)libraryOptions); i++)
        maybe_copy_unified_arg(0, (void*)&libraryOptions[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)libraryOptionValues, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(numLibraryOptions); i++)
+    for (int i = 0; i < static_cast<int>(numLibraryOptions) && is_unified_pointer(0, (void*)libraryOptionValues); i++)
        maybe_copy_unified_arg(0, (void*)&libraryOptionValues[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -6675,7 +6676,7 @@ CUresult cuDeviceGetPCIBusId(char* pciBusId, int len, CUdevice dev)
 {
     maybe_copy_unified_arg(0, (void*)&len, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)pciBusId, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(len); i++)
+    for (int i = 0; i < static_cast<int>(len) && is_unified_pointer(0, (void*)pciBusId); i++)
        maybe_copy_unified_arg(0, (void*)&pciBusId[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&dev, cudaMemcpyHostToDevice);
     CUresult return_value;
@@ -6688,7 +6689,7 @@ CUresult cuDeviceGetPCIBusId(char* pciBusId, int len, CUdevice dev)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
     maybe_copy_unified_arg(0, (void*)&len, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)pciBusId, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(len); i++)
+    for (int i = 0; i < static_cast<int>(len) && is_unified_pointer(0, (void*)pciBusId); i++)
        maybe_copy_unified_arg(0, (void*)&pciBusId[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&dev, cudaMemcpyDeviceToHost);
     return return_value;
@@ -9813,7 +9814,7 @@ CUresult cuGraphAddMemFreeNode(CUgraphNode* phGraphNode, CUgraph hGraph, const C
     maybe_copy_unified_arg(0, (void*)&hGraph, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&numDependencies, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)dependencies, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(numDependencies); i++)
+    for (int i = 0; i < static_cast<int>(numDependencies) && is_unified_pointer(0, (void*)dependencies); i++)
        maybe_copy_unified_arg(0, (void*)&dependencies[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&dptr, cudaMemcpyHostToDevice);
     CUresult return_value;
@@ -9831,7 +9832,7 @@ CUresult cuGraphAddMemFreeNode(CUgraphNode* phGraphNode, CUgraph hGraph, const C
     maybe_copy_unified_arg(0, (void*)&hGraph, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&numDependencies, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)dependencies, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(numDependencies); i++)
+    for (int i = 0; i < static_cast<int>(numDependencies) && is_unified_pointer(0, (void*)dependencies); i++)
        maybe_copy_unified_arg(0, (void*)&dependencies[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&dptr, cudaMemcpyDeviceToHost);
     return return_value;
@@ -12427,7 +12428,7 @@ cudaError_t cudaStreamGetCaptureInfo_v2(cudaStream_t stream, enum cudaStreamCapt
     maybe_copy_unified_arg(0, (void*)graph_out, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)numDependencies_out, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)dependencies_out, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(*numDependencies_out); i++)
+    for (int i = 0; i < static_cast<int>(*numDependencies_out) && is_unified_pointer(0, (void*)dependencies_out); i++)
        maybe_copy_unified_arg(0, (void*)&dependencies_out[i], cudaMemcpyHostToDevice);
     cudaError_t return_value;
     if (rpc_start_request(0, RPC_cudaStreamGetCaptureInfo_v2) < 0 ||
@@ -12446,7 +12447,7 @@ cudaError_t cudaStreamGetCaptureInfo_v2(cudaStream_t stream, enum cudaStreamCapt
     maybe_copy_unified_arg(0, (void*)graph_out, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)numDependencies_out, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)dependencies_out, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(*numDependencies_out); i++)
+    for (int i = 0; i < static_cast<int>(*numDependencies_out) && is_unified_pointer(0, (void*)dependencies_out); i++)
        maybe_copy_unified_arg(0, (void*)&dependencies_out[i], cudaMemcpyDeviceToHost);
     return return_value;
 }
@@ -12456,7 +12457,7 @@ cudaError_t cudaStreamUpdateCaptureDependencies(cudaStream_t stream, cudaGraphNo
     maybe_copy_unified_arg(0, (void*)&stream, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&numDependencies, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)dependencies, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(numDependencies); i++)
+    for (int i = 0; i < static_cast<int>(numDependencies) && is_unified_pointer(0, (void*)dependencies); i++)
        maybe_copy_unified_arg(0, (void*)&dependencies[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&flags, cudaMemcpyHostToDevice);
     cudaError_t return_value;
@@ -12471,7 +12472,7 @@ cudaError_t cudaStreamUpdateCaptureDependencies(cudaStream_t stream, cudaGraphNo
     maybe_copy_unified_arg(0, (void*)&stream, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&numDependencies, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)dependencies, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(numDependencies); i++)
+    for (int i = 0; i < static_cast<int>(numDependencies) && is_unified_pointer(0, (void*)dependencies); i++)
        maybe_copy_unified_arg(0, (void*)&dependencies[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&flags, cudaMemcpyDeviceToHost);
     return return_value;
@@ -25074,16 +25075,16 @@ cublasStatus_t cublasSgemvBatched(cublasHandle_t handle, cublasOperation_t trans
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)xarray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)xarray); i++)
        maybe_copy_unified_arg(0, (void*)xarray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&incx, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)beta, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)yarray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)yarray); i++)
        maybe_copy_unified_arg(0, (void*)yarray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&incy, cudaMemcpyHostToDevice);
     cublasStatus_t return_value;
@@ -25111,16 +25112,16 @@ cublasStatus_t cublasSgemvBatched(cublasHandle_t handle, cublasOperation_t trans
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)xarray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)xarray); i++)
        maybe_copy_unified_arg(0, (void*)xarray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&incx, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)beta, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)yarray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)yarray); i++)
        maybe_copy_unified_arg(0, (void*)yarray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&incy, cudaMemcpyDeviceToHost);
     return return_value;
@@ -25135,16 +25136,16 @@ cublasStatus_t cublasTSTgemvBatched(cublasHandle_t handle, cublasOperation_t tra
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)xarray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)xarray); i++)
        maybe_copy_unified_arg(0, (void*)xarray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&incx, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)beta, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)yarray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)yarray); i++)
        maybe_copy_unified_arg(0, (void*)yarray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&incy, cudaMemcpyHostToDevice);
     cublasStatus_t return_value;
@@ -25172,16 +25173,16 @@ cublasStatus_t cublasTSTgemvBatched(cublasHandle_t handle, cublasOperation_t tra
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)xarray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)xarray); i++)
        maybe_copy_unified_arg(0, (void*)xarray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&incx, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)beta, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)yarray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)yarray); i++)
        maybe_copy_unified_arg(0, (void*)yarray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&incy, cudaMemcpyDeviceToHost);
     return return_value;
@@ -30013,16 +30014,16 @@ cublasStatus_t cublasHgemmBatched(cublasHandle_t handle, cublasOperation_t trans
     maybe_copy_unified_arg(0, (void*)&k, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Barray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Barray); i++)
        maybe_copy_unified_arg(0, (void*)Barray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)beta, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Carray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Carray); i++)
        maybe_copy_unified_arg(0, (void*)Carray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyHostToDevice);
     cublasStatus_t return_value;
@@ -30054,16 +30055,16 @@ cublasStatus_t cublasHgemmBatched(cublasHandle_t handle, cublasOperation_t trans
     maybe_copy_unified_arg(0, (void*)&k, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Barray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Barray); i++)
        maybe_copy_unified_arg(0, (void*)Barray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)beta, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Carray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Carray); i++)
        maybe_copy_unified_arg(0, (void*)Carray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyDeviceToHost);
     return return_value;
@@ -30080,16 +30081,16 @@ cublasStatus_t cublasHgemmBatched_64(cublasHandle_t handle, cublasOperation_t tr
     maybe_copy_unified_arg(0, (void*)&k, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Barray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Barray); i++)
        maybe_copy_unified_arg(0, (void*)Barray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)beta, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Carray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Carray); i++)
        maybe_copy_unified_arg(0, (void*)Carray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyHostToDevice);
     cublasStatus_t return_value;
@@ -30121,16 +30122,16 @@ cublasStatus_t cublasHgemmBatched_64(cublasHandle_t handle, cublasOperation_t tr
     maybe_copy_unified_arg(0, (void*)&k, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Barray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Barray); i++)
        maybe_copy_unified_arg(0, (void*)Barray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)beta, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Carray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Carray); i++)
        maybe_copy_unified_arg(0, (void*)Carray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyDeviceToHost);
     return return_value;
@@ -30147,16 +30148,16 @@ cublasStatus_t cublasSgemmBatched(cublasHandle_t handle, cublasOperation_t trans
     maybe_copy_unified_arg(0, (void*)&k, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Barray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Barray); i++)
        maybe_copy_unified_arg(0, (void*)Barray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)beta, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Carray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Carray); i++)
        maybe_copy_unified_arg(0, (void*)Carray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyHostToDevice);
     cublasStatus_t return_value;
@@ -30188,16 +30189,16 @@ cublasStatus_t cublasSgemmBatched(cublasHandle_t handle, cublasOperation_t trans
     maybe_copy_unified_arg(0, (void*)&k, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Barray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Barray); i++)
        maybe_copy_unified_arg(0, (void*)Barray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)beta, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Carray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Carray); i++)
        maybe_copy_unified_arg(0, (void*)Carray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyDeviceToHost);
     return return_value;
@@ -30214,16 +30215,16 @@ cublasStatus_t cublasSgemmBatched_64(cublasHandle_t handle, cublasOperation_t tr
     maybe_copy_unified_arg(0, (void*)&k, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Barray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Barray); i++)
        maybe_copy_unified_arg(0, (void*)Barray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)beta, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Carray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Carray); i++)
        maybe_copy_unified_arg(0, (void*)Carray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyHostToDevice);
     cublasStatus_t return_value;
@@ -30255,16 +30256,16 @@ cublasStatus_t cublasSgemmBatched_64(cublasHandle_t handle, cublasOperation_t tr
     maybe_copy_unified_arg(0, (void*)&k, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Barray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Barray); i++)
        maybe_copy_unified_arg(0, (void*)Barray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)beta, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Carray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Carray); i++)
        maybe_copy_unified_arg(0, (void*)Carray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyDeviceToHost);
     return return_value;
@@ -30281,16 +30282,16 @@ cublasStatus_t cublasDgemmBatched(cublasHandle_t handle, cublasOperation_t trans
     maybe_copy_unified_arg(0, (void*)&k, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Barray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Barray); i++)
        maybe_copy_unified_arg(0, (void*)Barray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)beta, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Carray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Carray); i++)
        maybe_copy_unified_arg(0, (void*)Carray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyHostToDevice);
     cublasStatus_t return_value;
@@ -30324,16 +30325,16 @@ cublasStatus_t cublasDgemmBatched(cublasHandle_t handle, cublasOperation_t trans
     maybe_copy_unified_arg(0, (void*)&k, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Barray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Barray); i++)
        maybe_copy_unified_arg(0, (void*)Barray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)beta, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Carray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Carray); i++)
        maybe_copy_unified_arg(0, (void*)Carray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyDeviceToHost);
     return return_value;
@@ -30350,16 +30351,16 @@ cublasStatus_t cublasDgemmBatched_64(cublasHandle_t handle, cublasOperation_t tr
     maybe_copy_unified_arg(0, (void*)&k, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Barray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Barray); i++)
        maybe_copy_unified_arg(0, (void*)Barray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)beta, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Carray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Carray); i++)
        maybe_copy_unified_arg(0, (void*)Carray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyHostToDevice);
     cublasStatus_t return_value;
@@ -30393,16 +30394,16 @@ cublasStatus_t cublasDgemmBatched_64(cublasHandle_t handle, cublasOperation_t tr
     maybe_copy_unified_arg(0, (void*)&k, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Barray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Barray); i++)
        maybe_copy_unified_arg(0, (void*)Barray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)beta, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Carray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Carray); i++)
        maybe_copy_unified_arg(0, (void*)Carray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyDeviceToHost);
     return return_value;
@@ -30419,16 +30420,16 @@ cublasStatus_t cublasCgemmBatched(cublasHandle_t handle, cublasOperation_t trans
     maybe_copy_unified_arg(0, (void*)&k, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Barray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Barray); i++)
        maybe_copy_unified_arg(0, (void*)Barray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)beta, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Carray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Carray); i++)
        maybe_copy_unified_arg(0, (void*)Carray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyHostToDevice);
     cublasStatus_t return_value;
@@ -30462,16 +30463,16 @@ cublasStatus_t cublasCgemmBatched(cublasHandle_t handle, cublasOperation_t trans
     maybe_copy_unified_arg(0, (void*)&k, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Barray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Barray); i++)
        maybe_copy_unified_arg(0, (void*)Barray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)beta, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Carray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Carray); i++)
        maybe_copy_unified_arg(0, (void*)Carray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyDeviceToHost);
     return return_value;
@@ -30488,16 +30489,16 @@ cublasStatus_t cublasCgemmBatched_64(cublasHandle_t handle, cublasOperation_t tr
     maybe_copy_unified_arg(0, (void*)&k, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Barray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Barray); i++)
        maybe_copy_unified_arg(0, (void*)Barray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)beta, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Carray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Carray); i++)
        maybe_copy_unified_arg(0, (void*)Carray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyHostToDevice);
     cublasStatus_t return_value;
@@ -30531,16 +30532,16 @@ cublasStatus_t cublasCgemmBatched_64(cublasHandle_t handle, cublasOperation_t tr
     maybe_copy_unified_arg(0, (void*)&k, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Barray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Barray); i++)
        maybe_copy_unified_arg(0, (void*)Barray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)beta, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Carray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Carray); i++)
        maybe_copy_unified_arg(0, (void*)Carray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyDeviceToHost);
     return return_value;
@@ -30557,16 +30558,16 @@ cublasStatus_t cublasCgemm3mBatched(cublasHandle_t handle, cublasOperation_t tra
     maybe_copy_unified_arg(0, (void*)&k, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Barray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Barray); i++)
        maybe_copy_unified_arg(0, (void*)Barray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)beta, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Carray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Carray); i++)
        maybe_copy_unified_arg(0, (void*)Carray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyHostToDevice);
     cublasStatus_t return_value;
@@ -30600,16 +30601,16 @@ cublasStatus_t cublasCgemm3mBatched(cublasHandle_t handle, cublasOperation_t tra
     maybe_copy_unified_arg(0, (void*)&k, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Barray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Barray); i++)
        maybe_copy_unified_arg(0, (void*)Barray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)beta, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Carray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Carray); i++)
        maybe_copy_unified_arg(0, (void*)Carray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyDeviceToHost);
     return return_value;
@@ -30626,16 +30627,16 @@ cublasStatus_t cublasCgemm3mBatched_64(cublasHandle_t handle, cublasOperation_t 
     maybe_copy_unified_arg(0, (void*)&k, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Barray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Barray); i++)
        maybe_copy_unified_arg(0, (void*)Barray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)beta, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Carray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Carray); i++)
        maybe_copy_unified_arg(0, (void*)Carray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyHostToDevice);
     cublasStatus_t return_value;
@@ -30669,16 +30670,16 @@ cublasStatus_t cublasCgemm3mBatched_64(cublasHandle_t handle, cublasOperation_t 
     maybe_copy_unified_arg(0, (void*)&k, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Barray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Barray); i++)
        maybe_copy_unified_arg(0, (void*)Barray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)beta, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Carray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Carray); i++)
        maybe_copy_unified_arg(0, (void*)Carray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyDeviceToHost);
     return return_value;
@@ -30695,16 +30696,16 @@ cublasStatus_t cublasZgemmBatched(cublasHandle_t handle, cublasOperation_t trans
     maybe_copy_unified_arg(0, (void*)&k, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Barray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Barray); i++)
        maybe_copy_unified_arg(0, (void*)Barray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)beta, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Carray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Carray); i++)
        maybe_copy_unified_arg(0, (void*)Carray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyHostToDevice);
     cublasStatus_t return_value;
@@ -30738,16 +30739,16 @@ cublasStatus_t cublasZgemmBatched(cublasHandle_t handle, cublasOperation_t trans
     maybe_copy_unified_arg(0, (void*)&k, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Barray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Barray); i++)
        maybe_copy_unified_arg(0, (void*)Barray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)beta, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Carray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Carray); i++)
        maybe_copy_unified_arg(0, (void*)Carray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyDeviceToHost);
     return return_value;
@@ -30764,16 +30765,16 @@ cublasStatus_t cublasZgemmBatched_64(cublasHandle_t handle, cublasOperation_t tr
     maybe_copy_unified_arg(0, (void*)&k, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Barray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Barray); i++)
        maybe_copy_unified_arg(0, (void*)Barray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)beta, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Carray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Carray); i++)
        maybe_copy_unified_arg(0, (void*)Carray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyHostToDevice);
     cublasStatus_t return_value;
@@ -30807,16 +30808,16 @@ cublasStatus_t cublasZgemmBatched_64(cublasHandle_t handle, cublasOperation_t tr
     maybe_copy_unified_arg(0, (void*)&k, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Barray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Barray); i++)
        maybe_copy_unified_arg(0, (void*)Barray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)beta, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Carray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Carray); i++)
        maybe_copy_unified_arg(0, (void*)Carray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyDeviceToHost);
     return return_value;
@@ -31637,18 +31638,18 @@ cublasStatus_t cublasGemmBatchedEx_64(cublasHandle_t handle, cublasOperation_t t
     maybe_copy_unified_arg(0, (void*)&k, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&Atype, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Barray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Barray); i++)
        maybe_copy_unified_arg(0, (void*)Barray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&Btype, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)beta, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Carray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Carray); i++)
        maybe_copy_unified_arg(0, (void*)Carray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&Ctype, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyHostToDevice);
@@ -31690,18 +31691,18 @@ cublasStatus_t cublasGemmBatchedEx_64(cublasHandle_t handle, cublasOperation_t t
     maybe_copy_unified_arg(0, (void*)&k, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&Atype, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Barray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Barray); i++)
        maybe_copy_unified_arg(0, (void*)Barray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&Btype, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)beta, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Carray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)Carray); i++)
        maybe_copy_unified_arg(0, (void*)Carray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&Ctype, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyDeviceToHost);
@@ -32138,11 +32139,11 @@ cublasStatus_t cublasStrsmBatched(cublasHandle_t handle, cublasSideMode_t side, 
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)A, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)A); i++)
        maybe_copy_unified_arg(0, (void*)A[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)B, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)B); i++)
        maybe_copy_unified_arg(0, (void*)B[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyHostToDevice);
     cublasStatus_t return_value;
@@ -32174,11 +32175,11 @@ cublasStatus_t cublasStrsmBatched(cublasHandle_t handle, cublasSideMode_t side, 
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)A, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)A); i++)
        maybe_copy_unified_arg(0, (void*)A[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)B, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)B); i++)
        maybe_copy_unified_arg(0, (void*)B[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyDeviceToHost);
     return return_value;
@@ -32196,11 +32197,11 @@ cublasStatus_t cublasStrsmBatched_64(cublasHandle_t handle, cublasSideMode_t sid
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)A, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)A); i++)
        maybe_copy_unified_arg(0, (void*)A[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)B, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)B); i++)
        maybe_copy_unified_arg(0, (void*)B[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyHostToDevice);
     cublasStatus_t return_value;
@@ -32232,11 +32233,11 @@ cublasStatus_t cublasStrsmBatched_64(cublasHandle_t handle, cublasSideMode_t sid
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)A, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)A); i++)
        maybe_copy_unified_arg(0, (void*)A[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)B, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)B); i++)
        maybe_copy_unified_arg(0, (void*)B[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyDeviceToHost);
     return return_value;
@@ -32254,11 +32255,11 @@ cublasStatus_t cublasDtrsmBatched(cublasHandle_t handle, cublasSideMode_t side, 
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)A, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)A); i++)
        maybe_copy_unified_arg(0, (void*)A[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)B, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)B); i++)
        maybe_copy_unified_arg(0, (void*)B[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyHostToDevice);
     cublasStatus_t return_value;
@@ -32290,11 +32291,11 @@ cublasStatus_t cublasDtrsmBatched(cublasHandle_t handle, cublasSideMode_t side, 
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)A, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)A); i++)
        maybe_copy_unified_arg(0, (void*)A[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)B, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)B); i++)
        maybe_copy_unified_arg(0, (void*)B[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyDeviceToHost);
     return return_value;
@@ -32312,11 +32313,11 @@ cublasStatus_t cublasDtrsmBatched_64(cublasHandle_t handle, cublasSideMode_t sid
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)A, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)A); i++)
        maybe_copy_unified_arg(0, (void*)A[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)B, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)B); i++)
        maybe_copy_unified_arg(0, (void*)B[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyHostToDevice);
     cublasStatus_t return_value;
@@ -32348,11 +32349,11 @@ cublasStatus_t cublasDtrsmBatched_64(cublasHandle_t handle, cublasSideMode_t sid
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)A, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)A); i++)
        maybe_copy_unified_arg(0, (void*)A[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)B, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)B); i++)
        maybe_copy_unified_arg(0, (void*)B[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyDeviceToHost);
     return return_value;
@@ -32370,11 +32371,11 @@ cublasStatus_t cublasCtrsmBatched(cublasHandle_t handle, cublasSideMode_t side, 
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)A, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)A); i++)
        maybe_copy_unified_arg(0, (void*)A[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)B, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)B); i++)
        maybe_copy_unified_arg(0, (void*)B[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyHostToDevice);
     cublasStatus_t return_value;
@@ -32406,11 +32407,11 @@ cublasStatus_t cublasCtrsmBatched(cublasHandle_t handle, cublasSideMode_t side, 
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)A, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)A); i++)
        maybe_copy_unified_arg(0, (void*)A[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)B, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)B); i++)
        maybe_copy_unified_arg(0, (void*)B[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyDeviceToHost);
     return return_value;
@@ -32428,11 +32429,11 @@ cublasStatus_t cublasCtrsmBatched_64(cublasHandle_t handle, cublasSideMode_t sid
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)A, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)A); i++)
        maybe_copy_unified_arg(0, (void*)A[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)B, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)B); i++)
        maybe_copy_unified_arg(0, (void*)B[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyHostToDevice);
     cublasStatus_t return_value;
@@ -32464,11 +32465,11 @@ cublasStatus_t cublasCtrsmBatched_64(cublasHandle_t handle, cublasSideMode_t sid
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)A, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)A); i++)
        maybe_copy_unified_arg(0, (void*)A[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)B, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)B); i++)
        maybe_copy_unified_arg(0, (void*)B[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyDeviceToHost);
     return return_value;
@@ -32486,11 +32487,11 @@ cublasStatus_t cublasZtrsmBatched(cublasHandle_t handle, cublasSideMode_t side, 
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)A, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)A); i++)
        maybe_copy_unified_arg(0, (void*)A[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)B, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)B); i++)
        maybe_copy_unified_arg(0, (void*)B[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyHostToDevice);
     cublasStatus_t return_value;
@@ -32522,11 +32523,11 @@ cublasStatus_t cublasZtrsmBatched(cublasHandle_t handle, cublasSideMode_t side, 
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)A, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)A); i++)
        maybe_copy_unified_arg(0, (void*)A[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)B, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)B); i++)
        maybe_copy_unified_arg(0, (void*)B[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyDeviceToHost);
     return return_value;
@@ -32544,11 +32545,11 @@ cublasStatus_t cublasZtrsmBatched_64(cublasHandle_t handle, cublasSideMode_t sid
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)A, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)A); i++)
        maybe_copy_unified_arg(0, (void*)A[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)B, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)B); i++)
        maybe_copy_unified_arg(0, (void*)B[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyHostToDevice);
     cublasStatus_t return_value;
@@ -32580,11 +32581,11 @@ cublasStatus_t cublasZtrsmBatched_64(cublasHandle_t handle, cublasSideMode_t sid
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)alpha, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)A, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)A); i++)
        maybe_copy_unified_arg(0, (void*)A[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)B, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchCount); i++)
+    for (int i = 0; i < static_cast<int>(batchCount) && is_unified_pointer(0, (void*)B); i++)
        maybe_copy_unified_arg(0, (void*)B[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyDeviceToHost);
     return return_value;
@@ -32932,11 +32933,11 @@ cublasStatus_t cublasSmatinvBatched(cublasHandle_t handle, int n, const float* c
     maybe_copy_unified_arg(0, (void*)&handle, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)A, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)A); i++)
        maybe_copy_unified_arg(0, (void*)A[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Ainv, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Ainv); i++)
        maybe_copy_unified_arg(0, (void*)Ainv[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda_inv, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyHostToDevice);
@@ -32958,11 +32959,11 @@ cublasStatus_t cublasSmatinvBatched(cublasHandle_t handle, int n, const float* c
     maybe_copy_unified_arg(0, (void*)&handle, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)A, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)A); i++)
        maybe_copy_unified_arg(0, (void*)A[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Ainv, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Ainv); i++)
        maybe_copy_unified_arg(0, (void*)Ainv[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda_inv, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyDeviceToHost);
@@ -32975,11 +32976,11 @@ cublasStatus_t cublasDmatinvBatched(cublasHandle_t handle, int n, const double* 
     maybe_copy_unified_arg(0, (void*)&handle, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)A, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)A); i++)
        maybe_copy_unified_arg(0, (void*)A[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Ainv, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Ainv); i++)
        maybe_copy_unified_arg(0, (void*)Ainv[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda_inv, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyHostToDevice);
@@ -33001,11 +33002,11 @@ cublasStatus_t cublasDmatinvBatched(cublasHandle_t handle, int n, const double* 
     maybe_copy_unified_arg(0, (void*)&handle, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)A, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)A); i++)
        maybe_copy_unified_arg(0, (void*)A[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Ainv, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Ainv); i++)
        maybe_copy_unified_arg(0, (void*)Ainv[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda_inv, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyDeviceToHost);
@@ -33018,11 +33019,11 @@ cublasStatus_t cublasCmatinvBatched(cublasHandle_t handle, int n, const cuComple
     maybe_copy_unified_arg(0, (void*)&handle, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)A, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)A); i++)
        maybe_copy_unified_arg(0, (void*)A[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Ainv, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Ainv); i++)
        maybe_copy_unified_arg(0, (void*)Ainv[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda_inv, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyHostToDevice);
@@ -33044,11 +33045,11 @@ cublasStatus_t cublasCmatinvBatched(cublasHandle_t handle, int n, const cuComple
     maybe_copy_unified_arg(0, (void*)&handle, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)A, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)A); i++)
        maybe_copy_unified_arg(0, (void*)A[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Ainv, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Ainv); i++)
        maybe_copy_unified_arg(0, (void*)Ainv[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda_inv, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyDeviceToHost);
@@ -33061,11 +33062,11 @@ cublasStatus_t cublasZmatinvBatched(cublasHandle_t handle, int n, const cuDouble
     maybe_copy_unified_arg(0, (void*)&handle, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)A, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)A); i++)
        maybe_copy_unified_arg(0, (void*)A[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Ainv, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Ainv); i++)
        maybe_copy_unified_arg(0, (void*)Ainv[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda_inv, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyHostToDevice);
@@ -33087,11 +33088,11 @@ cublasStatus_t cublasZmatinvBatched(cublasHandle_t handle, int n, const cuDouble
     maybe_copy_unified_arg(0, (void*)&handle, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)A, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)A); i++)
        maybe_copy_unified_arg(0, (void*)A[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Ainv, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Ainv); i++)
        maybe_copy_unified_arg(0, (void*)Ainv[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda_inv, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyDeviceToHost);
@@ -33105,11 +33106,11 @@ cublasStatus_t cublasSgeqrfBatched(cublasHandle_t handle, int m, int n, float* c
     maybe_copy_unified_arg(0, (void*)&m, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)TauArray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)TauArray); i++)
        maybe_copy_unified_arg(0, (void*)TauArray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyHostToDevice);
     cublasStatus_t return_value;
@@ -33131,11 +33132,11 @@ cublasStatus_t cublasSgeqrfBatched(cublasHandle_t handle, int m, int n, float* c
     maybe_copy_unified_arg(0, (void*)&m, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)TauArray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)TauArray); i++)
        maybe_copy_unified_arg(0, (void*)TauArray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyDeviceToHost);
     return return_value;
@@ -33148,11 +33149,11 @@ cublasStatus_t cublasDgeqrfBatched(cublasHandle_t handle, int m, int n, double* 
     maybe_copy_unified_arg(0, (void*)&m, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)TauArray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)TauArray); i++)
        maybe_copy_unified_arg(0, (void*)TauArray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyHostToDevice);
     cublasStatus_t return_value;
@@ -33174,11 +33175,11 @@ cublasStatus_t cublasDgeqrfBatched(cublasHandle_t handle, int m, int n, double* 
     maybe_copy_unified_arg(0, (void*)&m, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)TauArray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)TauArray); i++)
        maybe_copy_unified_arg(0, (void*)TauArray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyDeviceToHost);
     return return_value;
@@ -33191,11 +33192,11 @@ cublasStatus_t cublasCgeqrfBatched(cublasHandle_t handle, int m, int n, cuComple
     maybe_copy_unified_arg(0, (void*)&m, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)TauArray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)TauArray); i++)
        maybe_copy_unified_arg(0, (void*)TauArray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyHostToDevice);
     cublasStatus_t return_value;
@@ -33217,11 +33218,11 @@ cublasStatus_t cublasCgeqrfBatched(cublasHandle_t handle, int m, int n, cuComple
     maybe_copy_unified_arg(0, (void*)&m, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)TauArray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)TauArray); i++)
        maybe_copy_unified_arg(0, (void*)TauArray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyDeviceToHost);
     return return_value;
@@ -33234,11 +33235,11 @@ cublasStatus_t cublasZgeqrfBatched(cublasHandle_t handle, int m, int n, cuDouble
     maybe_copy_unified_arg(0, (void*)&m, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)TauArray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)TauArray); i++)
        maybe_copy_unified_arg(0, (void*)TauArray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyHostToDevice);
     cublasStatus_t return_value;
@@ -33260,11 +33261,11 @@ cublasStatus_t cublasZgeqrfBatched(cublasHandle_t handle, int m, int n, cuDouble
     maybe_copy_unified_arg(0, (void*)&m, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)TauArray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)TauArray); i++)
        maybe_copy_unified_arg(0, (void*)TauArray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyDeviceToHost);
     return return_value;
@@ -33279,11 +33280,11 @@ cublasStatus_t cublasSgelsBatched(cublasHandle_t handle, cublasOperation_t trans
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&nrhs, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Carray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Carray); i++)
        maybe_copy_unified_arg(0, (void*)Carray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyHostToDevice);
@@ -33314,11 +33315,11 @@ cublasStatus_t cublasSgelsBatched(cublasHandle_t handle, cublasOperation_t trans
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&nrhs, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Carray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Carray); i++)
        maybe_copy_unified_arg(0, (void*)Carray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyDeviceToHost);
@@ -33335,11 +33336,11 @@ cublasStatus_t cublasDgelsBatched(cublasHandle_t handle, cublasOperation_t trans
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&nrhs, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Carray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Carray); i++)
        maybe_copy_unified_arg(0, (void*)Carray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyHostToDevice);
@@ -33370,11 +33371,11 @@ cublasStatus_t cublasDgelsBatched(cublasHandle_t handle, cublasOperation_t trans
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&nrhs, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Carray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Carray); i++)
        maybe_copy_unified_arg(0, (void*)Carray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyDeviceToHost);
@@ -33391,11 +33392,11 @@ cublasStatus_t cublasCgelsBatched(cublasHandle_t handle, cublasOperation_t trans
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&nrhs, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Carray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Carray); i++)
        maybe_copy_unified_arg(0, (void*)Carray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyHostToDevice);
@@ -33426,11 +33427,11 @@ cublasStatus_t cublasCgelsBatched(cublasHandle_t handle, cublasOperation_t trans
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&nrhs, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Carray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Carray); i++)
        maybe_copy_unified_arg(0, (void*)Carray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyDeviceToHost);
@@ -33447,11 +33448,11 @@ cublasStatus_t cublasZgelsBatched(cublasHandle_t handle, cublasOperation_t trans
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&nrhs, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Carray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Carray); i++)
        maybe_copy_unified_arg(0, (void*)Carray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyHostToDevice);
@@ -33482,11 +33483,11 @@ cublasStatus_t cublasZgelsBatched(cublasHandle_t handle, cublasOperation_t trans
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&nrhs, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Carray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Carray); i++)
        maybe_copy_unified_arg(0, (void*)Carray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyDeviceToHost);
@@ -33740,12 +33741,12 @@ cublasStatus_t cublasSgetriBatched(cublasHandle_t handle, int n, const float* co
     maybe_copy_unified_arg(0, (void*)&handle, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)A, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)A); i++)
        maybe_copy_unified_arg(0, (void*)A[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)P, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)C, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)C); i++)
        maybe_copy_unified_arg(0, (void*)C[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyHostToDevice);
@@ -33769,12 +33770,12 @@ cublasStatus_t cublasSgetriBatched(cublasHandle_t handle, int n, const float* co
     maybe_copy_unified_arg(0, (void*)&handle, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)A, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)A); i++)
        maybe_copy_unified_arg(0, (void*)A[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)P, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)C, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)C); i++)
        maybe_copy_unified_arg(0, (void*)C[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyDeviceToHost);
@@ -33787,12 +33788,12 @@ cublasStatus_t cublasDgetriBatched(cublasHandle_t handle, int n, const double* c
     maybe_copy_unified_arg(0, (void*)&handle, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)A, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)A); i++)
        maybe_copy_unified_arg(0, (void*)A[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)P, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)C, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)C); i++)
        maybe_copy_unified_arg(0, (void*)C[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyHostToDevice);
@@ -33816,12 +33817,12 @@ cublasStatus_t cublasDgetriBatched(cublasHandle_t handle, int n, const double* c
     maybe_copy_unified_arg(0, (void*)&handle, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)A, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)A); i++)
        maybe_copy_unified_arg(0, (void*)A[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)P, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)C, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)C); i++)
        maybe_copy_unified_arg(0, (void*)C[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyDeviceToHost);
@@ -33834,12 +33835,12 @@ cublasStatus_t cublasCgetriBatched(cublasHandle_t handle, int n, const cuComplex
     maybe_copy_unified_arg(0, (void*)&handle, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)A, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)A); i++)
        maybe_copy_unified_arg(0, (void*)A[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)P, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)C, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)C); i++)
        maybe_copy_unified_arg(0, (void*)C[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyHostToDevice);
@@ -33863,12 +33864,12 @@ cublasStatus_t cublasCgetriBatched(cublasHandle_t handle, int n, const cuComplex
     maybe_copy_unified_arg(0, (void*)&handle, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)A, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)A); i++)
        maybe_copy_unified_arg(0, (void*)A[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)P, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)C, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)C); i++)
        maybe_copy_unified_arg(0, (void*)C[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyDeviceToHost);
@@ -33881,12 +33882,12 @@ cublasStatus_t cublasZgetriBatched(cublasHandle_t handle, int n, const cuDoubleC
     maybe_copy_unified_arg(0, (void*)&handle, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)A, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)A); i++)
        maybe_copy_unified_arg(0, (void*)A[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)P, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)C, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)C); i++)
        maybe_copy_unified_arg(0, (void*)C[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyHostToDevice);
@@ -33910,12 +33911,12 @@ cublasStatus_t cublasZgetriBatched(cublasHandle_t handle, int n, const cuDoubleC
     maybe_copy_unified_arg(0, (void*)&handle, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)A, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)A); i++)
        maybe_copy_unified_arg(0, (void*)A[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)P, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)C, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)C); i++)
        maybe_copy_unified_arg(0, (void*)C[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldc, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyDeviceToHost);
@@ -33930,12 +33931,12 @@ cublasStatus_t cublasSgetrsBatched(cublasHandle_t handle, cublasOperation_t tran
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&nrhs, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)devIpiv, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Barray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Barray); i++)
        maybe_copy_unified_arg(0, (void*)Barray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyHostToDevice);
@@ -33963,12 +33964,12 @@ cublasStatus_t cublasSgetrsBatched(cublasHandle_t handle, cublasOperation_t tran
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&nrhs, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)devIpiv, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Barray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Barray); i++)
        maybe_copy_unified_arg(0, (void*)Barray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyDeviceToHost);
@@ -33983,12 +33984,12 @@ cublasStatus_t cublasDgetrsBatched(cublasHandle_t handle, cublasOperation_t tran
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&nrhs, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)devIpiv, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Barray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Barray); i++)
        maybe_copy_unified_arg(0, (void*)Barray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyHostToDevice);
@@ -34016,12 +34017,12 @@ cublasStatus_t cublasDgetrsBatched(cublasHandle_t handle, cublasOperation_t tran
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&nrhs, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)devIpiv, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Barray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Barray); i++)
        maybe_copy_unified_arg(0, (void*)Barray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyDeviceToHost);
@@ -34036,12 +34037,12 @@ cublasStatus_t cublasCgetrsBatched(cublasHandle_t handle, cublasOperation_t tran
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&nrhs, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)devIpiv, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Barray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Barray); i++)
        maybe_copy_unified_arg(0, (void*)Barray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyHostToDevice);
@@ -34068,12 +34069,12 @@ cublasStatus_t cublasCgetrsBatched(cublasHandle_t handle, cublasOperation_t tran
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&nrhs, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)devIpiv, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Barray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Barray); i++)
        maybe_copy_unified_arg(0, (void*)Barray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyDeviceToHost);
@@ -34088,12 +34089,12 @@ cublasStatus_t cublasZgetrsBatched(cublasHandle_t handle, cublasOperation_t tran
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&nrhs, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)devIpiv, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Barray, cudaMemcpyHostToDevice);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Barray); i++)
        maybe_copy_unified_arg(0, (void*)Barray[i], cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyHostToDevice);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyHostToDevice);
@@ -34121,12 +34122,12 @@ cublasStatus_t cublasZgetrsBatched(cublasHandle_t handle, cublasOperation_t tran
     maybe_copy_unified_arg(0, (void*)&n, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&nrhs, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Aarray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Aarray); i++)
        maybe_copy_unified_arg(0, (void*)Aarray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&lda, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)devIpiv, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)Barray, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < static_cast<int>(batchSize); i++)
+    for (int i = 0; i < static_cast<int>(batchSize) && is_unified_pointer(0, (void*)Barray); i++)
        maybe_copy_unified_arg(0, (void*)Barray[i], cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)&ldb, cudaMemcpyDeviceToHost);
     maybe_copy_unified_arg(0, (void*)info, cudaMemcpyDeviceToHost);
