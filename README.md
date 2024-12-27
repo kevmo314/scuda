@@ -10,7 +10,7 @@ to CPU-only machines.
 The below demo displays a NVIDIA GeForce RTX 4090 running on a remote machine (right pane).
 Left pane is a Mac running a docker container with nvidia utils installed.
 
-The docker container runs this [matrixMulCUBLAS](./deploy/cublas_unified.o) example. This example not only uses cuBLAS, but also takes advantage of unified memory.
+The docker container runs this [matrixMulCUBLAS](./test/cublas_unified.cu) example. This example not only uses cuBLAS, but also takes advantage of unified memory.
 
 You can view the docker image used [here](./deploy/Dockerfile.unified).
 

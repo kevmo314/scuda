@@ -104,6 +104,10 @@ class NullableOperation:
             )
         )
 
+    def client_unified_copy(self, f, direction, error):
+        f.write("    if (maybe_copy_unified_arg(0, (void*){name}, cudaMemcpyDeviceToHost) < 0)\n".format(name=self.parameter.name, direction=direction))
+        f.write("      return {error};\n".format(error=error))
+
     @property
     def server_declaration(self) -> str:
         c = self.ptr.ptr_to.const
@@ -209,6 +213,32 @@ class ArrayOperation:
                     length=length,
                 )
             )
+
+    def client_unified_copy(self, f, direction, error):
+        f.write("    if (maybe_copy_unified_arg(0, (void*){name}, {direction}) < 0)\n".format(name=self.parameter.name, direction=direction))
+        f.write("      return {error};\n".format(error=error))
+
+        if isinstance(self.length, int):
+            f.write("    for (int i = 0; i < {name} && is_unified_pointer(0, (void*){param}); i++)\n".format(param=self.parameter.name, name=self.length))
+            f.write("      if (maybe_copy_unified_arg(0, (void*)&{name}[i], {direction}) < 0 )\n".format(name=self.parameter.name, direction=direction))
+            f.write("        return {error};\n".format(error=error))
+
+            return
+
+        if hasattr(self.length.type, "ptr_to"):
+            # need to cast the int a bit differently here
+            f.write("    for (int i = 0; i < static_cast<int>(*{name}) && is_unified_pointer(0, (void*){param}); i++)\n".format(param=self.parameter.name, name=self.length.name))
+            f.write("      if (maybe_copy_unified_arg(0, (void*)&{name}[i], {direction}) < 0)\n".format(name=self.parameter.name, direction=direction))
+            f.write("        return {error};\n".format(error=error))
+        else:
+            if hasattr(self.parameter.type, "ptr_to"):
+                f.write("    for (int i = 0; i < static_cast<int>({name}) && is_unified_pointer(0, (void*){param}); i++)\n".format(param=self.parameter.name, name=self.length.name))
+                f.write("      if (maybe_copy_unified_arg(0, (void*)&{name}[i], {direction}) < 0)\n".format(name=self.parameter.name, direction=direction))
+                f.write("        return {error};\n".format(error=error))
+            else:
+                f.write("    for (int i = 0; i < static_cast<int>({name}) && is_unified_pointer(0, (void*){param}); i++)\n".format(param=self.parameter.name, name=self.length.name))
+                f.write("      if (maybe_copy_unified_arg(0, (void*){name}[i], {direction}) < 0)\n".format(name=self.parameter.name, direction=direction))
+                f.write("        return {error};\n".format(error=error))
             
 
     @property
@@ -330,6 +360,10 @@ class NullTerminatedOperation:
     def server_declaration(self) -> str:
         return f"    {self.ptr.format()} {self.parameter.name};\n" + \
                 f"    std::size_t {self.parameter.name}_len;\n"
+    
+    def client_unified_copy(self, f, direction, error):
+        f.write("    if (maybe_copy_unified_arg(0, (void*){name}, {direction}) < 0)\n".format(name=self.parameter.name, direction=direction))
+        f.write("      return {error};\n".format(error=error))
 
     def server_rpc_read(self, f, index) -> Optional[str]:
         if not self.send:
@@ -415,6 +449,14 @@ class OpaqueTypeOperation:
             return f"   {self.type_.format().replace("const", "")} {self.parameter.name};\n"
         else:
             return f"    {self.type_.format()} {self.parameter.name};\n"
+        
+    def client_unified_copy(self, f, direction, error):
+        if isinstance(self.type_, Pointer):
+            f.write("    if (maybe_copy_unified_arg(0, (void*){name}, {direction}) < 0)\n".format(name=self.parameter.name, direction=direction))
+            f.write("      return {error};\n".format(error=error))
+        else:
+            f.write("    if (maybe_copy_unified_arg(0, (void*)&{name}, {direction}) < 0)\n".format(name=self.parameter.name, direction=direction))
+            f.write("      return {error};\n".format(error=error))
 
     def server_rpc_read(self, f):
         if not self.send:
@@ -486,6 +528,10 @@ class DereferenceOperation:
                 param_type=self.type_.ptr_to.format(),
             )
         )
+    
+    def client_unified_copy(self, f, direction, error):
+        f.write("    if (maybe_copy_unified_arg(0, (void*){name}, {direction}) < 0)\n".format(name=self.parameter.name, direction=direction))
+        f.write("      return {error};\n".format(error=error))
 
     @property
     def server_reference(self) -> str:
@@ -759,8 +805,10 @@ def main():
             "extern int rpc_write(const int index, const void *data, const std::size_t size);\n"
             "extern int rpc_end_request(const int index);\n"
             "extern int rpc_wait_for_response(const int index);\n"
+            "extern int is_unified_pointer(const int index, void* arg);\n"
             "extern int rpc_read(const int index, void *data, const std::size_t size);\n"
             "extern int rpc_end_response(const int index, void *return_value);\n"
+            "int maybe_copy_unified_arg(const int index, void* arg, enum cudaMemcpyKind kind);\n"
             "extern int rpc_close();\n\n"
         )
         for function, annotation, operations, disabled in functions_with_annotations:
@@ -797,6 +845,9 @@ def main():
                 )
             )
             f.write("{\n")
+
+            for operation in operations:
+                operation.client_unified_copy(f, "cudaMemcpyHostToDevice", error_const(function.return_type.format()))
 
             f.write(
                 "    {return_type} return_value;\n".format(
@@ -841,12 +892,14 @@ def main():
                 )
             )
 
+            for operation in operations:
+                operation.client_unified_copy(f, "cudaMemcpyDeviceToHost", error_const(function.return_type.format()))
+
             if function.name.format() == "nvmlShutdown":
                 f.write("    if (rpc_close() < 0)\n")
                 f.write("        return {error_return};\n".format(error_return=error_const(function.return_type.format())))
 
             f.write("    return return_value;\n")
-
             f.write("}\n\n")
 
         f.write("std::unordered_map<std::string, void *> functionMap = {\n")
