@@ -5,3 +5,8 @@ venv/
 *.o
 *.so
 gdb.txt
+
+CMakeFiles
+cmake_*
+CMakeCache.txt
+Makefile

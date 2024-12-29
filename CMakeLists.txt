@@ -32,14 +32,36 @@ set(SERVER_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/codegen/manual_server.cpp
 )
 
-set(CLIENT_OUTPUT libscuda_${CUDAToolkit_VERSION_MAJOR}_${CUDAToolkit_VERSION_MINOR}.so)
+set(CLIENT_OUTPUT scuda_${CUDAToolkit_VERSION_MAJOR}_${CUDAToolkit_VERSION_MINOR})
 set(SERVER_OUTPUT server_${CUDAToolkit_VERSION_MAJOR}_${CUDAToolkit_VERSION_MINOR}.so)
 
-set(CUDA_LIBRARY_PATH /usr/local/cuda/lib64)
-set(CUBLAS_LIBRARY ${CUDA_LIBRARY_PATH}/libcublas.so)
-set(CUDNN_LIBRARY ${CUDA_LIBRARY_PATH}/libcudnn.so)
-set(CUDART_LIBRARY ${CUDA_LIBRARY_PATH}/libcudart.so)
-set(NVML_LIBRARY ${CUDA_LIBRARY_PATH}/libnvidia-ml.so)
+find_package(CUDAToolkit REQUIRED)
+
+find_library(CUBLAS_LIBRARY cublas HINTS ${CUDAToolkit_LIBRARY_DIR} PATHS /usr/local/cuda/lib64)
+find_library(CUDNN_LIBRARY cudnn HINTS ${CUDAToolkit_LIBRARY_DIR} PATHS /usr/local/cuda/lib64)
+find_library(CUDART_LIBRARY cudart HINTS ${CUDAToolkit_LIBRARY_DIR} PATHS /usr/local/cuda/lib64)
+find_library(NVML_LIBRARY nvidia-ml HINTS ${CUDAToolkit_LIBRARY_DIR} PATHS /usr/local/cuda/lib64)
+
+if (NOT CUBLAS_LIBRARY)
+    message(FATAL_ERROR "cuBLAS library not found. Ensure CUDA is installed and the library path is correct.")
+endif()
+
+if (NOT CUDNN_LIBRARY)
+    message(FATAL_ERROR "cuDNN library not found. Ensure CUDA is installed and the library path is correct.")
+endif()
+
+if (NOT CUDART_LIBRARY)
+    message(FATAL_ERROR "CUDA Runtime library (libcudart.so) not found. Ensure CUDA is installed and the library path is correct.")
+endif()
+
+if (NOT NVML_LIBRARY)
+    message(FATAL_ERROR "NVML library not found. Ensure CUDA is installed and the library path is correct.")
+endif()
+
+message(STATUS "Found cuBLAS library: ${CUBLAS_LIBRARY}")
+message(STATUS "Found cuDNN library: ${CUDNN_LIBRARY}")
+message(STATUS "Found CUDA Runtime library: ${CUDART_LIBRARY}")
+message(STATUS "Found NVML library: ${NVML_LIBRARY}")
 
 add_library(${CLIENT_OUTPUT} SHARED ${CLIENT_SOURCES})
 target_include_directories(${CLIENT_OUTPUT} PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
@@ -48,12 +70,16 @@ set_target_properties(${CLIENT_OUTPUT} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 add_executable(${SERVER_OUTPUT} ${SERVER_SOURCES})
 target_include_directories(${SERVER_OUTPUT} PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
+target_link_libraries(${SERVER_OUTPUT} PRIVATE PRIVATE ${CUDAToolkit_LIBRARIES} cuda)
 target_link_libraries(${SERVER_OUTPUT} PRIVATE ${CUDART_LIBRARY} ${CUBLAS_LIBRARY} ${CUDNN_LIBRARY} ${NVML_LIBRARY})
 
-set_source_files_properties(${SERVER_SOURCES} PROPERTIES LANGUAGE CUDA)
+set_source_files_properties(
+    ${SERVER_SOURCES}
+    PROPERTIES LANGUAGE CUDA
+)
 
 target_compile_options(${SERVER_OUTPUT} PRIVATE
-    $<$<COMPILE_LANGUAGE:CUDA>:--compiler-options=-fPIC -g -Wno-deprecated-declarations>
+    $<$<COMPILE_LANGUAGE:CUDA>: --compiler-options=-fPIC,-g,-Wno-deprecated-declarations>
 )
 
 message(STATUS "Building client output: ${CLIENT_OUTPUT}")
