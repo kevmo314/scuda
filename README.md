@@ -18,22 +18,28 @@ https://github.com/user-attachments/assets/b2db5d82-f214-41cf-8274-b913c04080f9
 
 ## Local development
 
-Make the local dev script executable
+Run cmake
 
 ```sh
-chmod +x local.sh
+cmake .
+cmake --build .
 ```
 
-Also helpful to alias this local script in your bash profile.
+Cmake will generate a server and a client file, depending on your cuda version.
 
-```sh
-alias s='/home/brodey/scuda-latest/local.sh'
-```
+Example:
+`libscuda_12_0.so`, `server_12_0.so`
 
 It's required to run scuda server before initiating client commands.
 
 ```sh
-s server
+./server_12_0.so
+```
+
+If successful, the server will start:
+
+```bash
+Server listening on port 14833...
 ```
 
 ## Running the client
@@ -41,10 +47,11 @@ s server
 If the server above is running:
 
 ```sh
-s run
-```
+# update to your desired IP/port
+export SCUDA_SERVER=0.0.0.0
 
-The above will rebuild the client and run nvidia-smi for you.
+LD_PRELOAD=./libscuda_12_0.s python3 -c "import torch; print(torch.cuda.is_available())"
+```
 
 ## Installation
 
@@ -58,26 +65,6 @@ Then, on the client, run:
 
 ```sh
 scuda <ip>:<port>
-```
-
-## Building from source
-
-```sh
-nvcc -shared -o libscuda.so client.c
-```
-
-This library can then be preloaded
-
-```sh
-LD_PRELOAD=libscuda.so nvidia-smi
-```
-
-By default, the client library passes calls through to the client. In other words,
-it does not connect to a server. To connect to a server, create a file with the
-host you wish to connect to
-
-```
-~/.config/scuda/host
 ```
 
 ## Motivations
