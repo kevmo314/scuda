@@ -1,0 +1,70 @@
+# Base image with CUDA 12.2 support
+FROM nvidia/cuda:12.6.2-devel-ubuntu22.04
+
+# Install necessary tools and libraries
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    cmake \
+    git \
+    wget \
+    curl \
+    libssl-dev \
+    libffi-dev \
+    python3 \
+    python3-pip \
+    ninja-build \
+    gdb \
+    software-properties-common \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install a modern C++ compiler (g++-11 and gcc-11)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    g++-11 \
+    gcc-11 \
+    && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 100 \
+    && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 100 \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Verify the installed version of g++
+RUN g++ --version && gcc --version
+
+# Install cuDNN
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    libcudnn8=8.9.5.* libcudnn8-dev=8.9.5.* && \
+    apt-mark hold libcudnn8 libcudnn8-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install NVIDIA drivers and NVML (via the NVIDIA Container Toolkit)
+RUN apt-get update && apt-get install -y \
+    nvidia-utils-525 \
+    nvidia-modprobe \
+    && rm -rf /var/lib/apt/lists/*
+
+# Ensure NVML library is correctly linked and accessible
+RUN ldconfig && \
+    ls /usr/lib/x86_64-linux-gnu/libnvidia-ml.so || echo "NVML not found!"
+
+# Enable GPU support via NVIDIA Container Toolkit
+ENV NVIDIA_VISIBLE_DEVICES=all
+ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility
+
+# Set ABI flag for consistency
+ENV CXXFLAGS="-D_GLIBCXX_USE_CXX11_ABI=0"
+
+# Create a user for non-root access (optional)
+ARG USERNAME=user
+ARG UID=1000
+ARG GID=1000
+RUN groupadd -g $GID $USERNAME && \
+    useradd -m -u $UID -g $GID -s /bin/bash $USERNAME && \
+    chown -R $USERNAME:$USERNAME /home/$USERNAME
+
+USER $USERNAME
+WORKDIR /home/$USERNAME
+
+COPY . .
+
+# Set CUDA and CUDNN versions for clarity
+RUN echo "CUDA Version: $(nvcc --version)" && \
+    echo "CUDNN Version: $(cat /usr/include/cudnn_version.h | grep CUDNN_MAJOR -A 2)"

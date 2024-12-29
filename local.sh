@@ -1,6 +1,6 @@
 #!/bin/bash
 
-libscuda_path="$(pwd)/libscuda.so"
+libscuda_path="$(pwd)/libscuda_12_0.so"
 client_path="$(pwd)/client.cpp $(pwd)/codegen/gen_client.cpp $(pwd)/codegen/manual_client.cpp"
 server_path="$(pwd)/server.cu $(pwd)/codegen/gen_server.cpp $(pwd)/codegen/manual_server.cpp"
 server_out_path="$(pwd)/server.so"
@@ -209,8 +209,9 @@ declare -A test_unified_mem=(
 tests=("test_cuda_avail" "test_tensor_to_cuda" "test_tensor_to_cuda_to_cpu" "test_vector_add" "test_cudnn" "test_cublas_batched" "test_unified_mem")
 
 test() {
-  build
+  # build
 
+  echo "running tests at: $libscuda_path"
   echo -e "\n\033[1mRunning test(s)...\033[0m"
 
   for test in "${tests[@]}"; do
