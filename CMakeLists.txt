@@ -5,6 +5,7 @@ project(ScudaProject LANGUAGES CXX CUDA)
 set(MIN_CUDA_VERSION 12.0)
 set(MAX_CUDA_VERSION 12.7)
 
+# Find and validate CUDA Toolkit
 find_package(CUDAToolkit REQUIRED)
 
 if (NOT CUDAToolkit_VERSION)
@@ -17,10 +18,16 @@ endif()
 
 message(STATUS "Found CUDA Toolkit version: ${CUDAToolkit_VERSION}")
 
+# Set C++ and CUDA standards
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CUDA_STANDARD 14)
 set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+set(CMAKE_CUDA_EXTENSIONS OFF)
+
+set(CMAKE_C_COMPILER "/usr/bin/gcc")
+set(CMAKE_CXX_COMPILER "/usr/bin/g++")
 
 # Add include directories
 include_directories(
@@ -29,6 +36,7 @@ include_directories(
     ${CUDAToolkit_INCLUDE_DIRS}
 )
 
+# Define source and header files
 set(CLIENT_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/client.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/codegen/gen_client.cpp
@@ -51,9 +59,11 @@ set(SERVER_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/codegen/manual_server.h
 )
 
+# Output names based on CUDA Toolkit version
 set(CLIENT_OUTPUT scuda_${CUDAToolkit_VERSION_MAJOR}_${CUDAToolkit_VERSION_MINOR})
 set(SERVER_OUTPUT server_${CUDAToolkit_VERSION_MAJOR}_${CUDAToolkit_VERSION_MINOR}.so)
 
+# Libraries
 find_library(CUBLAS_LIBRARY cublas HINTS ${CUDAToolkit_LIBRARY_DIR} PATHS /usr/local/cuda/lib64)
 find_library(CUDNN_LIBRARY cudnn HINTS ${CUDAToolkit_LIBRARY_DIR} PATHS /usr/local/cuda/lib64)
 find_library(CUDART_LIBRARY cudart HINTS ${CUDAToolkit_LIBRARY_DIR} PATHS /usr/local/cuda/lib64)
@@ -75,31 +85,29 @@ if (NOT NVML_LIBRARY)
     message(FATAL_ERROR "NVML library not found. Ensure CUDA is installed and the library path is correct.")
 endif()
 
-message(STATUS "Found cuBLAS library: ${CUBLAS_LIBRARY}")
-message(STATUS "Found cuDNN library: ${CUDNN_LIBRARY}")
-message(STATUS "Found CUDA Runtime library: ${CUDART_LIBRARY}")
-message(STATUS "Found NVML library: ${NVML_LIBRARY}")
-
+# Client library
 add_library(${CLIENT_OUTPUT} SHARED ${CLIENT_SOURCES} ${CLIENT_HEADERS})
 target_include_directories(${CLIENT_OUTPUT} PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
 target_link_libraries(${CLIENT_OUTPUT} PRIVATE ${CUDART_LIBRARY} ${CUBLAS_LIBRARY} stdc++)
 set_target_properties(${CLIENT_OUTPUT} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
+# Server executable
 add_executable(${SERVER_OUTPUT} ${SERVER_SOURCES} ${SERVER_HEADERS})
 target_include_directories(${SERVER_OUTPUT} PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
 target_link_libraries(${SERVER_OUTPUT} PRIVATE ${CUDAToolkit_LIBRARIES} cuda)
 target_link_libraries(${SERVER_OUTPUT} PRIVATE ${CUDART_LIBRARY} ${CUBLAS_LIBRARY} ${CUDNN_LIBRARY} ${NVML_LIBRARY})
 
-add_compile_definitions(_GLIBCXX_USE_CXX11_ABI=0)
-
+# Enable modular sources and headers
 set_source_files_properties(
     ${SERVER_SOURCES}
     PROPERTIES LANGUAGE CUDA
 )
 
+# Set compile options
 target_compile_options(${SERVER_OUTPUT} PRIVATE
     $<$<COMPILE_LANGUAGE:CUDA>: --compiler-options=-fPIC,-g,-Wno-deprecated-declarations>
 )
 
+# Print build messages
 message(STATUS "Building client output: ${CLIENT_OUTPUT}")
 message(STATUS "Building server output: ${SERVER_OUTPUT}")

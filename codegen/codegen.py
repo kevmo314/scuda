@@ -114,7 +114,7 @@ class NullableOperation:
         self.ptr.ptr_to.const = False
         # void is treated differently from non void pointer types
         s = f"    {self.ptr.format()} {self.parameter.name}_null_check;\n" + \
-            f"    {self.ptr.format() if self.ptr.ptr_to.format() == "void" else self.ptr.ptr_to.format()} {self.parameter.name};\n"
+            f"""    {self.ptr.format() if self.ptr.ptr_to.format() == "void" else self.ptr.ptr_to.format()} {self.parameter.name};\n"""
         self.ptr.ptr_to.const = c
         return s
     
@@ -247,7 +247,7 @@ class ArrayOperation:
             c = self.ptr.const
             self.ptr.const = False
             # const[] isn't a valid part of a variable declaration
-            s = f"    {self.ptr.format().replace("const[]", "")}* {self.parameter.name} = nullptr;\n"
+            s = f"""    {self.ptr.format().replace("const[]", "")}* {self.parameter.name} = nullptr;\n"""
             self.ptr.const = c
         else:
             c = self.ptr.ptr_to.const
@@ -446,7 +446,7 @@ class OpaqueTypeOperation:
         # ensure we don't have a const struct, otherwise we can't initialise it properly; ex: "const cudnnTensorDescriptor_t xDesc;" is invalid...
         # but "const cudnnTensorDescriptor_t *xDesc" IS valid. This subtle change carries reprecussions.
         elif "const " in self.type_.format() and not "void" in self.type_.format() and not "*" in self.type_.format():
-            return f"   {self.type_.format().replace("const", "")} {self.parameter.name};\n"
+            return f"   {self.type_.format().replace('const', '')} {self.parameter.name};\n"
         else:
             return f"    {self.type_.format()} {self.parameter.name};\n"
         

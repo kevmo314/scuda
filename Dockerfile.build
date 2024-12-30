@@ -9,6 +9,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     curl \
     libssl-dev \
+    libcgal-dev \
+    zlib1g-dev \
     libffi-dev \
     python3 \
     python3-pip \
@@ -16,6 +18,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gdb \
     software-properties-common \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install --no-cache-dir cxxheaderparser
 
 # Install a modern C++ compiler (g++-11 and gcc-11)
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -28,17 +32,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Verify the installed version of g++
 RUN g++ --version && gcc --version
 
-# Install cuDNN
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    libcudnn8=8.9.5.* libcudnn8-dev=8.9.5.* && \
-    apt-mark hold libcudnn8 libcudnn8-dev && \
-    rm -rf /var/lib/apt/lists/*
+RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb
+RUN dpkg -i cuda-keyring_1.1-1_all.deb
+RUN apt-get update
+RUN apt-get -y install cudnn
+RUN apt-get -y install cudnn-cuda-12
 
 # Install NVIDIA drivers and NVML (via the NVIDIA Container Toolkit)
 RUN apt-get update && apt-get install -y \
     nvidia-utils-525 \
     nvidia-modprobe \
+    libnvidia-compute-525 \
     && rm -rf /var/lib/apt/lists/*
 
 # Ensure NVML library is correctly linked and accessible
@@ -52,19 +56,14 @@ ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility
 # Set ABI flag for consistency
 ENV CXXFLAGS="-D_GLIBCXX_USE_CXX11_ABI=0"
 
-# Create a user for non-root access (optional)
-ARG USERNAME=user
-ARG UID=1000
-ARG GID=1000
-RUN groupadd -g $GID $USERNAME && \
-    useradd -m -u $UID -g $GID -s /bin/bash $USERNAME && \
-    chown -R $USERNAME:$USERNAME /home/$USERNAME
+WORKDIR /home
 
-USER $USERNAME
-WORKDIR /home/$USERNAME
-
+# Copy source code into the container
 COPY . .
 
-# Set CUDA and CUDNN versions for clarity
-RUN echo "CUDA Version: $(nvcc --version)" && \
-    echo "CUDNN Version: $(cat /usr/include/cudnn_version.h | grep CUDNN_MAJOR -A 2)"
+# Set working directory to codegen and execute the script, then build the project
+# Ensure the script is executable
+RUN chmod +x /home/build.sh
+
+# Run the build script
+RUN /home/build.sh
