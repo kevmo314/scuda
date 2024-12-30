@@ -3,7 +3,8 @@ from cxxheaderparser.preprocessor import make_gcc_preprocessor
 from cxxheaderparser.types import Type, Pointer, Parameter, Function, Array
 from typing import Optional
 from dataclasses import dataclass
-import copy
+import os
+import glob
 
 # this table is manually generated from the cuda.h headers
 MANUAL_REMAPPINGS = [
@@ -718,19 +719,47 @@ def prefix_std(type: str) -> str:
     #     return "std::size_t"
     return type
 
+# List of possible directories to search for header files
+COMMON_INCLUDE_DIRS = [
+    "./",
+    "/usr/include/",
+    "/usr/local/include/",
+    "/usr/local/cuda/include/",
+    "/opt/cuda/include/",
+    "/usr/include/nvidia/",
+]
+
+# Function to locate a file in common include directories
+def find_header_file(filename):
+    for include_dir in COMMON_INCLUDE_DIRS:
+        matches = glob.glob(os.path.join(include_dir, "**", filename), recursive=True)
+        if matches:
+            return matches[0]
+    raise FileNotFoundError(f"Header file '{filename}' not found in common include directories.")
 
 def main():
     options = ParserOptions(preprocessor=make_gcc_preprocessor(defines=["CUBLASAPI="]))
+    
+    try:
+        cudnn_graph_header = find_header_file("cudnn_graph.h")
+        cudnn_ops_header = find_header_file("cudnn_ops.h")
+        cuda_header = find_header_file("cuda.h")
+        cublas_header = find_header_file("cublas_api.h")
+        cudart_header = find_header_file("cuda_runtime_api.h")
+        annotations_header = find_header_file("annotations.h")
+        nvml_header = find_header_file("nvml.h")
+    except FileNotFoundError as e:
+        print(e)
+        return
 
-    nvml_ast: ParsedData = parse_file("/usr/include/nvml.h", options=options)
-    cudnn_graph_ast: ParsedData = parse_file("/usr/include/cudnn_graph.h", options=options)
-    cudnn_ops_ast: ParsedData = parse_file("/usr/include/cudnn_ops.h", options=options)
-    cuda_ast: ParsedData = parse_file("/usr/include/cuda.h", options=options)
-    cublas_ast: ParsedData = parse_file("/usr/include/cublas_api.h", options=options)
-    cudart_ast: ParsedData = parse_file(
-        "/usr/include/cuda_runtime_api.h", options=options
-    )
-    annotations: ParsedData = parse_file("annotations.h", options=options)
+    # Parse the files
+    nvml_ast: ParsedData = parse_file(nvml_header, options=options)
+    cudnn_graph_ast: ParsedData = parse_file(cudnn_graph_header, options=options)
+    cudnn_ops_ast: ParsedData = parse_file(cudnn_ops_header, options=options)
+    cuda_ast: ParsedData = parse_file(cuda_header, options=options)
+    cublas_ast: ParsedData = parse_file(cublas_header, options=options)
+    cudart_ast: ParsedData = parse_file(cudart_header, options=options)
+    annotations: ParsedData = parse_file(annotations_header, options=options)
 
     # any new parsed libaries should be appended to the END of this list.
     # this is to maintain proper ordering of our RPC calls.
