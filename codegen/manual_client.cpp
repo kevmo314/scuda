@@ -329,34 +329,20 @@ cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim,
                              void **args, size_t sharedMem,
                              cudaStream_t stream) {
   cudaError_t return_value;
+  cudaError_t memcpy_return;
 
-  cuda_memcpy_unified_ptrs(0, cudaMemcpyHostToDevice);
+  memcpy_return = cuda_memcpy_unified_ptrs(0, cudaMemcpyHostToDevice);
+  if (memcpy_return != cudaSuccess)
+    return memcpy_return;
 
   // Start the RPC request
   int request_id = rpc_start_request(0, RPC_cudaLaunchKernel);
-  if (request_id < 0) {
+  if (request_id < 0 || rpc_write(0, &func, sizeof(const void *)) < 0 ||
+      rpc_write(0, &gridDim, sizeof(dim3)) < 0 ||
+      rpc_write(0, &blockDim, sizeof(dim3)) < 0 ||
+      rpc_write(0, &sharedMem, sizeof(size_t)) < 0 ||
+      rpc_write(0, &stream, sizeof(cudaStream_t)) < 0)
     return cudaErrorDevicesUnavailable;
-  }
-
-  if (rpc_write(0, &func, sizeof(const void *)) < 0) {
-    return cudaErrorDevicesUnavailable;
-  }
-
-  if (rpc_write(0, &gridDim, sizeof(dim3)) < 0) {
-    return cudaErrorDevicesUnavailable;
-  }
-
-  if (rpc_write(0, &blockDim, sizeof(dim3)) < 0) {
-    return cudaErrorDevicesUnavailable;
-  }
-
-  if (rpc_write(0, &sharedMem, sizeof(size_t)) < 0) {
-    return cudaErrorDevicesUnavailable;
-  }
-
-  if (rpc_write(0, &stream, sizeof(cudaStream_t)) < 0) {
-    return cudaErrorDevicesUnavailable;
-  }
 
   Function *f = nullptr;
   for (auto &function : functions)
@@ -372,15 +358,13 @@ cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim,
       return cudaErrorDevicesUnavailable;
   }
 
-  if (rpc_wait_for_response(0) < 0) {
+  if (rpc_wait_for_response(0) < 0 || rpc_end_response(0, &return_value) < 0) {
     return cudaErrorDevicesUnavailable;
   }
 
-  if (rpc_end_response(0, &return_value) < 0) {
-    return cudaErrorDevicesUnavailable;
-  }
-
-  cuda_memcpy_unified_ptrs(0, cudaMemcpyDeviceToHost);
+  memcpy_return = cuda_memcpy_unified_ptrs(0, cudaMemcpyDeviceToHost);
+  if (memcpy_return != cudaSuccess)
+    return memcpy_return;
 
   return return_value;
 }
@@ -436,8 +420,6 @@ void parse_ptx_string(void *fatCubin, const char *ptx_string,
       i++;
 
     if (ptx_string[i] == '(') {
-      std::cout << "found function args" << std::endl;
-
       // parse out the args-list
       for (; arg_count < MAX_ARGS; arg_count++) {
         int arg_size = 0;
@@ -463,7 +445,6 @@ void parse_ptx_string(void *fatCubin, const char *ptx_string,
             i++;
 
           if (ptx_string[i] == '.') {
-            std::cout << "found arg type" << std::endl;
             // read the type, ignoring if it's not a valid type
             int type_size = get_type_size(ptx_string + (++i));
             if (type_size == 0)
@@ -673,10 +654,10 @@ extern "C" void __cudaRegisterFunction(void **fatCubinHandle,
       function.host_func = hostFun;
 }
 
-extern "C" {
-void __cudaRegisterVar(void **fatCubinHandle, char *hostVar,
-                       char *deviceAddress, const char *deviceName, int ext,
-                       size_t size, int constant, int global) {
+extern "C" void __cudaRegisterVar(void **fatCubinHandle, char *hostVar,
+                                  char *deviceAddress, const char *deviceName,
+                                  int ext, size_t size, int constant,
+                                  int global) {
   void *return_value;
 
   std::cout << "calling __cudaRegisterVar" << std::endl;
@@ -753,7 +734,6 @@ void __cudaRegisterVar(void **fatCubinHandle, char *hostVar,
     std::cerr << "Failed waiting for response" << std::endl;
     return;
   }
-}
 }
 
 cudaError_t cudaFree(void *devPtr) {
