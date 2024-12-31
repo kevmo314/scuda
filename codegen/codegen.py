@@ -3,7 +3,6 @@ from cxxheaderparser.preprocessor import make_gcc_preprocessor
 from cxxheaderparser.types import Type, Pointer, Parameter, Function, Array
 from typing import Optional
 from dataclasses import dataclass
-import copy
 
 # this table is manually generated from the cuda.h headers
 MANUAL_REMAPPINGS = [
@@ -105,7 +104,7 @@ class NullableOperation:
         )
 
     def client_unified_copy(self, f, direction, error):
-        f.write("    if (maybe_copy_unified_arg(0, (void*){name}, cudaMemcpyDeviceToHost) < 0)\n".format(name=self.parameter.name, direction=direction))
+        f.write("    if (maybe_copy_unified_arg(0, (void*){name}, cudaMemcpyDeviceToHost) < 0)\n".format(name=self.parameter.name))
         f.write("      return {error};\n".format(error=error))
 
     @property
@@ -256,13 +255,27 @@ class ArrayOperation:
             self.ptr.ptr_to.const = c
         return s
         
-    def server_rpc_read(self, f):
+    def server_rpc_read(self, f, index) -> Optional[str]:
         if not self.send:
+            # if this parameter is recv only and it's a type pointer, it needs to be malloc'd.
+            if isinstance(self.ptr, Pointer):
+                f.write("        false)\n")
+                f.write("        goto ERROR_{index};\n".format(index=index))
+                f.write(
+                    "    {param_name} = ({server_type})malloc({length} * sizeof({param_type}));\n".format(
+                        param_name=self.parameter.name,
+                        param_type=self.ptr.ptr_to.format(),
+                        server_type=self.ptr.format(),
+                        length=self.length if isinstance(self.length, int) else self.length.name,
+                    )
+                )
+                f.write("    if(")
+                return self.parameter.name
             return
         elif isinstance(self.length, int):
             f.write(
                 "        rpc_read(conn, &{param_name}, {size}) < 0 ||\n".format(
-                    param_name=self.parameter.name,
+                    param_name=self.parameter.name, 
                     size=self.length,
                 )
             )
@@ -445,7 +458,7 @@ class OpaqueTypeOperation:
             return f"    {self.type_.ptr_to.format()} {self.parameter.name};\n"
         # ensure we don't have a const struct, otherwise we can't initialise it properly; ex: "const cudnnTensorDescriptor_t xDesc;" is invalid...
         # but "const cudnnTensorDescriptor_t *xDesc" IS valid. This subtle change carries reprecussions.
-        elif "const " in self.type_.format() and not "void" in self.type_.format() and not "*" in self.type_.format():
+        elif "const " in self.type_.format() and "void" not in self.type_.format() and "*" not in self.type_.format():
             return f"   {self.type_.format().replace("const", "")} {self.parameter.name};\n"
         else:
             return f"    {self.type_.format()} {self.parameter.name};\n"
@@ -813,7 +826,8 @@ def main():
         )
         for function, annotation, operations, disabled in functions_with_annotations:
             # we don't generate client function definitions for disabled functions; only the RPC definitions.
-            if disabled: continue
+            if disabled:
+                continue
 
             params = []
 
@@ -913,7 +927,8 @@ def main():
             )
         f.write('    {"nvmlInit", (void *)nvmlInit_v2},\n')
         for function, _, _, disabled in functions_with_annotations:
-            if disabled: continue
+            if disabled:
+                continue
 
             f.write(
                 '    {{"{name}", (void *){name}}},\n'.format(
@@ -970,7 +985,8 @@ def main():
             "extern int rpc_end_response(const void *conn, void *return_value);\n\n"
         )
         for function, annotation, operations, disabled in functions_with_annotations:
-            if function.name.format() in MANUAL_IMPLEMENTATIONS or disabled: continue
+            if function.name.format() in MANUAL_IMPLEMENTATIONS or disabled:
+                continue
 
             # parse the annotation doxygen
             f.write(
@@ -991,11 +1007,11 @@ def main():
             if function.return_type.format() != "void":
                 f.write("    {return_type} scuda_intercept_result;\n".format(return_type=function.return_type.format()))
             else:
-                f.write("    void* scuda_intercept_result;\n".format(return_type=function.return_type.format()))
+                f.write("    void* scuda_intercept_result;\n")
 
             f.write("    if (\n")
             for operation in operations:
-                if isinstance(operation, NullTerminatedOperation):
+                if isinstance(operation, NullTerminatedOperation) or isinstance(operation, ArrayOperation):
                     if error := operation.server_rpc_read(f, len(defers)):
                         defers.append(error)
                 else:
@@ -1005,11 +1021,7 @@ def main():
 
             f.write("\n")
 
-            f.write(
-                "    request_id = rpc_end_request(conn);\n".format(
-                    name=function.name.format()
-                )
-            )
+            f.write("    request_id = rpc_end_request(conn);\n")
             f.write("    if (request_id < 0)\n")
             f.write("        goto ERROR_{index};\n".format(index=len(defers)))
 
