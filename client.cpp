@@ -43,7 +43,7 @@ typedef struct
     struct iovec write_iov[128];
     int write_iov_count = 0;
 
-    std::unordered_map<void*, size_t> unified_devices;
+    std::unordered_map<void *, size_t> unified_devices;
 } conn_t;
 
 pthread_mutex_t conn_mutex;
@@ -54,29 +54,27 @@ const char *DEFAULT_PORT = "14833";
 
 static int init = 0;
 static jmp_buf catch_segfault;
-static void* faulting_address = nullptr;
+static void *faulting_address = nullptr;
 
-static void segfault(int sig, siginfo_t* info, void* unused) {
-    faulting_address = info->si_addr; 
+static void segfault(int sig, siginfo_t *info, void *unused)
+{
+    faulting_address = info->si_addr;
 
-    std::cout << "Caught segfault at address: " << faulting_address << std::endl;
-
-    for (const auto & [ ptr, sz ] : conns[0].unified_devices)
+    for (const auto &[ptr, sz] : conns[0].unified_devices)
     {
         if (ptr <= faulting_address && faulting_address < (ptr + sz))
         {
             // ensure we assign memory as close to the faulting address as possible...
             // by masking via the allocated unified memory size.
-            void* aligned_address = (void*)((uintptr_t)faulting_address & ~(sz - 1));
+            uintptr_t aligned = (uintptr_t)faulting_address & ~(sz - 1);
 
             // Allocate memory at the faulting address
-            void* allocated = mmap(aligned_address, sz, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
-            if (allocated == MAP_FAILED) {
+            void *allocated = mmap((void *)aligned, sz + (uintptr_t)faulting_address - aligned, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+            if (allocated == MAP_FAILED)
+            {
                 perror("Failed to allocate memory at faulting address");
                 _exit(1);
             }
-
-            std::cout << "allocated dynamic memory at address: " << allocated << std::endl;
 
             return;
         }
@@ -88,7 +86,8 @@ static void segfault(int sig, siginfo_t* info, void* unused) {
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;
 
-    if (sigaction(SIGSEGV, &sa, nullptr) == -1) {
+    if (sigaction(SIGSEGV, &sa, nullptr) == -1)
+    {
         perror("Failed to reset SIGSEGV handler");
         _exit(EXIT_FAILURE);
     }
@@ -96,9 +95,9 @@ static void segfault(int sig, siginfo_t* info, void* unused) {
     raise(SIGSEGV);
 }
 
-int is_unified_pointer(const int index, void* arg)
+int is_unified_pointer(const int index, void *arg)
 {
-    auto& unified_devices = conns[index].unified_devices;
+    auto &unified_devices = conns[index].unified_devices;
     auto found = unified_devices.find(arg);
     if (found != unified_devices.end())
         return 1;
@@ -106,24 +105,27 @@ int is_unified_pointer(const int index, void* arg)
     return 0;
 }
 
-int maybe_copy_unified_arg(const int index, void* arg, enum cudaMemcpyKind kind)
+int maybe_copy_unified_arg(const int index, void *arg, enum cudaMemcpyKind kind)
 {
-    auto& unified_devices = conns[index].unified_devices;
+    auto &unified_devices = conns[index].unified_devices;
     auto found = unified_devices.find(arg);
     if (found != unified_devices.end())
     {
         std::cout << "found unified arg pointer; copying..." << std::endl;
 
-        void* ptr = found->first;
+        void *ptr = found->first;
         size_t size = found->second;
 
         cudaError_t res = cudaMemcpy(ptr, ptr, size, kind);
 
-        if (res != cudaSuccess) {
+        if (res != cudaSuccess)
+        {
             std::cerr << "cudaMemcpy failed: " << cudaGetErrorString(res) << std::endl;
 
             return -1;
-        } else {
+        }
+        else
+        {
             std::cout << "Successfully copied " << size << " bytes" << std::endl;
         }
     }
@@ -131,9 +133,10 @@ int maybe_copy_unified_arg(const int index, void* arg, enum cudaMemcpyKind kind)
     return 0;
 }
 
-
-static void set_segfault_handlers() {
-    if (init > 0) {
+static void set_segfault_handlers()
+{
+    if (init > 0)
+    {
         return;
     }
 
@@ -142,7 +145,8 @@ static void set_segfault_handlers() {
     sa.sa_flags = SA_SIGINFO;
     sa.sa_sigaction = segfault;
 
-    if (sigaction(SIGSEGV, &sa, NULL) == -1) {
+    if (sigaction(SIGSEGV, &sa, NULL) == -1)
+    {
         perror("sigaction");
         exit(EXIT_FAILURE);
     }
@@ -337,30 +341,31 @@ int rpc_read(const int index, void *data, size_t size)
 void allocate_unified_mem_pointer(const int index, void *dev_ptr, size_t size)
 {
     // allocate new space for pointer mapping
-    conns[index].unified_devices.insert({ dev_ptr, size });
+    conns[index].unified_devices.insert({dev_ptr, size});
 }
 
-void cuda_memcpy_unified_ptrs(const int index, cudaMemcpyKind kind)
+cudaError_t cuda_memcpy_unified_ptrs(const int index, cudaMemcpyKind kind)
 {
-    for (const auto & [ ptr, sz ] : conns[index].unified_devices) {
+    for (const auto &[ptr, sz] : conns[index].unified_devices)
+    {
         size_t size = reinterpret_cast<size_t>(sz);
 
         // ptr is the same on both host/device
         cudaError_t res = cudaMemcpy(ptr, ptr, size, kind);
-        if (res != cudaSuccess) {
-            std::cerr << "cudaMemcpy failed :" << cudaGetErrorString(res) << std::endl;
-        } else {
-            std::cout << "Successfully copied " << size << " bytes" << std::endl;
-        }
+        if (res != cudaSuccess)
+            return res;
     }
+    return cudaSuccess;
 }
 
 void maybe_free_unified_mem(const int index, void *ptr)
 {
-    for (const auto & [ dev_ptr, sz ] : conns[index].unified_devices) {
+    for (const auto &[dev_ptr, sz] : conns[index].unified_devices)
+    {
         size_t size = reinterpret_cast<size_t>(sz);
 
-        if (dev_ptr == ptr) {
+        if (dev_ptr == ptr)
+        {
             munmap(dev_ptr, size);
             return;
         }
