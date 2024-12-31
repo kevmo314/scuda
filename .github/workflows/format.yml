@@ -1,6 +1,5 @@
 name: clang-format Check
 on:
-  - push
   - pull_request
 jobs:
   formatting-check:
@@ -17,8 +16,7 @@ jobs:
         run: >
           # Get the diff of changed files
 
-          git diff --name-only origin/${{ github.base_ref }} | grep -E
-          '\\.(cpp|h|cu)$' > changed_files.txt
+          git diff --name-only origin/${{ github.base_ref }} | grep -E '\.(cpp|h|cu)$' > changed_files.txt
 
           # Check each changed file
 
