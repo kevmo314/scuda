@@ -1,9 +1,40 @@
 name: clang-format Check
-on: [push, pull_request]
+on:
+  - push
+  - pull_request
 jobs:
   formatting-check:
     name: Formatting Check
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: jidicula/clang-format-action@v4.14.0
+      - uses: actions/checkout@v4
+      - name: Install clang-format
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format
+      - name: Fetch base branch
+        run: >
+          git fetch origin ${{ github.base_ref }}:refs/remotes/origin/${{
+          github.base_ref }}
+      - name: Run clang-format on diff
+        run: >
+          # Get the diff of changed files
+
+          git diff --name-only origin/${{ github.base_ref }} | grep -E
+          '\\.(cpp|h|cu)$' > changed_files.txt
+
+          # Check each changed file
+
+          while read file; do
+            echo "Checking $file"
+            git diff origin/${{ github.base_ref }} -- $file | clang-format-diff -p1 -style=file > formatted.diff
+            if [ -s formatted.diff ]; then
+              echo "File $file is not properly formatted. Please run clang-format on your code."
+              cat formatted.diff              
+              cat formatted.diff >> "$GITHUB_OUTPUT"
+              exit 1
+            fi
+          done < changed_files.txt
+      - name: Show success message
+        if: success()
+        run: echo "All files are properly formatted!"
