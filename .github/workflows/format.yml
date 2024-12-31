@@ -9,13 +9,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install clang-format
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y clang-format
+        run: sudo apt-get install -y clang-format
       - name: Fetch base branch
         run: >
-          git fetch origin ${{ github.base_ref }}:refs/remotes/origin/${{
-          github.base_ref }}
+          git fetch origin ${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}
       - name: Run clang-format on diff
         run: >
           # Get the diff of changed files
