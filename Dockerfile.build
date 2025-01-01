@@ -1,69 +1,23 @@
-# Base image with CUDA 12.2 support
-FROM nvidia/cuda:12.6.2-devel-ubuntu22.04
+FROM nvidia/cuda:12.6.3-cudnn-devel-ubuntu24.04
 
-# Install necessary tools and libraries
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     cmake \
-    git \
-    wget \
-    curl \
-    libssl-dev \
-    libcgal-dev \
-    zlib1g-dev \
-    libffi-dev \
+    libnvidia-ml-dev \
     python3 \
     python3-pip \
+    python3-venv \
     ninja-build \
-    gdb \
-    software-properties-common \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-RUN pip3 install --no-cache-dir cxxheaderparser
-
-# Install a modern C++ compiler (g++-11 and gcc-11)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    g++-11 \
-    gcc-11 \
-    && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 100 \
-    && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 100 \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Verify the installed version of g++
-RUN g++ --version && gcc --version
-
-RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb
-RUN dpkg -i cuda-keyring_1.1-1_all.deb
-RUN apt-get update
-RUN apt-get -y install cudnn
-RUN apt-get -y install cudnn-cuda-12
-
-# Install NVIDIA drivers and NVML (via the NVIDIA Container Toolkit)
-RUN apt-get update && apt-get install -y \
-    nvidia-utils-525 \
-    nvidia-modprobe \
-    libnvidia-compute-525 \
-    && rm -rf /var/lib/apt/lists/*
-
-# Ensure NVML library is correctly linked and accessible
-RUN ldconfig && \
-    ls /usr/lib/x86_64-linux-gnu/libnvidia-ml.so || echo "NVML not found!"
-
-# Enable GPU support via NVIDIA Container Toolkit
-ENV NVIDIA_VISIBLE_DEVICES=all
-ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility
-
-# Set ABI flag for consistency
-ENV CXXFLAGS="-D_GLIBCXX_USE_CXX11_ABI=0"
 
 WORKDIR /home
 
-# Copy source code into the container
 COPY . .
 
-# Set working directory to codegen and execute the script, then build the project
-# Ensure the script is executable
-RUN chmod +x /home/build.sh
+RUN cd codegen && \
+    python3 -m venv venv && \
+    venv/bin/pip install -r requirements.txt && \
+    venv/bin/python3 ./codegen.py
 
-# Run the build script
-RUN /home/build.sh
+RUN cmake .
+RUN cmake --build .

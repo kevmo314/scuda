@@ -57,14 +57,14 @@ MANUAL_REMAPPINGS = [
 
 # These functions are not exposed in header files, but we need to make sure they are...
 # properly added to our client/server definitions.
-# These, ideally, should never be added or removed. 
+# These, ideally, should never be added or removed.
 INTERNAL_FUNCTIONS = [
     "__cudaRegisterVar",
     "__cudaRegisterFunction",
     "__cudaRegisterFatBinary",
     "__cudaRegisterFatBinaryEnd",
     "__cudaPushCallConfiguration",
-    "__cudaPopCallConfiguration"
+    "__cudaPopCallConfiguration",
 ]
 
 # a list of manually implemented cuda/nvml functions.
@@ -77,11 +77,13 @@ MANUAL_IMPLEMENTATIONS = [
     "cudaMallocManaged",
 ]
 
+
 @dataclass
 class NullableOperation:
     """
     Nullable operations are operations that are passed as a pointer that can be null.
     """
+
     send: bool
     recv: bool
     parameter: Parameter
@@ -101,12 +103,20 @@ class NullableOperation:
             "        ({param_name} != nullptr && rpc_write(0, {param_name}, sizeof({base_type})) < 0) ||\n".format(
                 param_name=self.parameter.name,
                 # void is treated differently from non void pointer types
-                base_type=(self.ptr.format() if self.ptr.ptr_to.format() == "const void" else self.ptr.ptr_to.format()),
+                base_type=(
+                    self.ptr.format()
+                    if self.ptr.ptr_to.format() == "const void"
+                    else self.ptr.ptr_to.format()
+                ),
             )
         )
 
     def client_unified_copy(self, f, direction, error):
-        f.write("    if (maybe_copy_unified_arg(0, (void*){name}, cudaMemcpyDeviceToHost) < 0)\n".format(name=self.parameter.name, direction=direction))
+        f.write(
+            "    if (maybe_copy_unified_arg(0, (void*){name}, cudaMemcpyDeviceToHost) < 0)\n".format(
+                name=self.parameter.name, direction=direction
+            )
+        )
         f.write("      return {error};\n".format(error=error))
 
     @property
@@ -114,11 +124,13 @@ class NullableOperation:
         c = self.ptr.ptr_to.const
         self.ptr.ptr_to.const = False
         # void is treated differently from non void pointer types
-        s = f"    {self.ptr.format()} {self.parameter.name}_null_check;\n" + \
-            f"""    {self.ptr.format() if self.ptr.ptr_to.format() == "void" else self.ptr.ptr_to.format()} {self.parameter.name};\n"""
+        s = (
+            f"    {self.ptr.format()} {self.parameter.name}_null_check;\n"
+            + f"""    {self.ptr.format() if self.ptr.ptr_to.format() == "void" else self.ptr.ptr_to.format()} {self.parameter.name};\n"""
+        )
         self.ptr.ptr_to.const = c
         return s
-    
+
     def server_rpc_read(self, f):
         if not self.send:
             return
@@ -132,7 +144,11 @@ class NullableOperation:
             "        ({param_name}_null_check && rpc_read(conn, &{param_name}, sizeof({base_type})) < 0) ||\n".format(
                 param_name=self.parameter.name,
                 # void is treated differently from non void pointer types
-                base_type=(self.ptr.format() if self.ptr.ptr_to.format() == "const void" else self.ptr.ptr_to.format()),
+                base_type=(
+                    self.ptr.format()
+                    if self.ptr.ptr_to.format() == "const void"
+                    else self.ptr.ptr_to.format()
+                ),
             )
         )
 
@@ -155,7 +171,7 @@ class NullableOperation:
                 base_type=self.ptr.ptr_to.format(),
             )
         )
-    
+
     def client_rpc_read(self, f):
         if not self.recv:
             return
@@ -171,18 +187,21 @@ class NullableOperation:
                 base_type=self.ptr.ptr_to.format(),
             )
         )
-    
+
 
 @dataclass
 class ArrayOperation:
     """
     Array operations are operations that are passed as a pointer to an array.
     """
+
     send: bool
     recv: bool
     parameter: Parameter
     ptr: Pointer
-    length: int | Parameter  # if int, it's a constant length, if Parameter, it's a variable length.
+    length: (
+        int | Parameter
+    )  # if int, it's a constant length, if Parameter, it's a variable length.
 
     def client_rpc_write(self, f):
         if not self.send:
@@ -216,31 +235,66 @@ class ArrayOperation:
             )
 
     def client_unified_copy(self, f, direction, error):
-        f.write("    if (maybe_copy_unified_arg(0, (void*){name}, {direction}) < 0)\n".format(name=self.parameter.name, direction=direction))
+        f.write(
+            "    if (maybe_copy_unified_arg(0, (void*){name}, {direction}) < 0)\n".format(
+                name=self.parameter.name, direction=direction
+            )
+        )
         f.write("      return {error};\n".format(error=error))
 
         if isinstance(self.length, int):
-            f.write("    for (int i = 0; i < {name} && is_unified_pointer(0, (void*){param}); i++)\n".format(param=self.parameter.name, name=self.length))
-            f.write("      if (maybe_copy_unified_arg(0, (void*)&{name}[i], {direction}) < 0 )\n".format(name=self.parameter.name, direction=direction))
+            f.write(
+                "    for (int i = 0; i < {name} && is_unified_pointer(0, (void*){param}); i++)\n".format(
+                    param=self.parameter.name, name=self.length
+                )
+            )
+            f.write(
+                "      if (maybe_copy_unified_arg(0, (void*)&{name}[i], {direction}) < 0 )\n".format(
+                    name=self.parameter.name, direction=direction
+                )
+            )
             f.write("        return {error};\n".format(error=error))
 
             return
 
         if hasattr(self.length.type, "ptr_to"):
             # need to cast the int a bit differently here
-            f.write("    for (int i = 0; i < static_cast<int>(*{name}) && is_unified_pointer(0, (void*){param}); i++)\n".format(param=self.parameter.name, name=self.length.name))
-            f.write("      if (maybe_copy_unified_arg(0, (void*)&{name}[i], {direction}) < 0)\n".format(name=self.parameter.name, direction=direction))
+            f.write(
+                "    for (int i = 0; i < static_cast<int>(*{name}) && is_unified_pointer(0, (void*){param}); i++)\n".format(
+                    param=self.parameter.name, name=self.length.name
+                )
+            )
+            f.write(
+                "      if (maybe_copy_unified_arg(0, (void*)&{name}[i], {direction}) < 0)\n".format(
+                    name=self.parameter.name, direction=direction
+                )
+            )
             f.write("        return {error};\n".format(error=error))
         else:
             if hasattr(self.parameter.type, "ptr_to"):
-                f.write("    for (int i = 0; i < static_cast<int>({name}) && is_unified_pointer(0, (void*){param}); i++)\n".format(param=self.parameter.name, name=self.length.name))
-                f.write("      if (maybe_copy_unified_arg(0, (void*)&{name}[i], {direction}) < 0)\n".format(name=self.parameter.name, direction=direction))
+                f.write(
+                    "    for (int i = 0; i < static_cast<int>({name}) && is_unified_pointer(0, (void*){param}); i++)\n".format(
+                        param=self.parameter.name, name=self.length.name
+                    )
+                )
+                f.write(
+                    "      if (maybe_copy_unified_arg(0, (void*)&{name}[i], {direction}) < 0)\n".format(
+                        name=self.parameter.name, direction=direction
+                    )
+                )
                 f.write("        return {error};\n".format(error=error))
             else:
-                f.write("    for (int i = 0; i < static_cast<int>({name}) && is_unified_pointer(0, (void*){param}); i++)\n".format(param=self.parameter.name, name=self.length.name))
-                f.write("      if (maybe_copy_unified_arg(0, (void*){name}[i], {direction}) < 0)\n".format(name=self.parameter.name, direction=direction))
+                f.write(
+                    "    for (int i = 0; i < static_cast<int>({name}) && is_unified_pointer(0, (void*){param}); i++)\n".format(
+                        param=self.parameter.name, name=self.length.name
+                    )
+                )
+                f.write(
+                    "      if (maybe_copy_unified_arg(0, (void*){name}[i], {direction}) < 0)\n".format(
+                        name=self.parameter.name, direction=direction
+                    )
+                )
                 f.write("        return {error};\n".format(error=error))
-            
 
     @property
     def server_declaration(self) -> str:
@@ -256,7 +310,7 @@ class ArrayOperation:
             s = f"    {self.ptr.format()} {self.parameter.name};\n"
             self.ptr.ptr_to.const = c
         return s
-        
+
     def server_rpc_read(self, f):
         if not self.send:
             return
@@ -333,11 +387,13 @@ class ArrayOperation:
                 )
             )
 
+
 @dataclass
 class NullTerminatedOperation:
     """
     Null terminated operations are operations that are passed as a null terminated string.
     """
+
     send: bool
     recv: bool
     parameter: Parameter
@@ -359,11 +415,17 @@ class NullTerminatedOperation:
 
     @property
     def server_declaration(self) -> str:
-        return f"    {self.ptr.format()} {self.parameter.name};\n" + \
-                f"    std::size_t {self.parameter.name}_len;\n"
-    
+        return (
+            f"    {self.ptr.format()} {self.parameter.name};\n"
+            + f"    std::size_t {self.parameter.name}_len;\n"
+        )
+
     def client_unified_copy(self, f, direction, error):
-        f.write("    if (maybe_copy_unified_arg(0, (void*){name}, {direction}) < 0)\n".format(name=self.parameter.name, direction=direction))
+        f.write(
+            "    if (maybe_copy_unified_arg(0, (void*){name}, {direction}) < 0)\n".format(
+                name=self.parameter.name, direction=direction
+            )
+        )
         f.write("      return {error};\n".format(error=error))
 
     def server_rpc_read(self, f, index) -> Optional[str]:
@@ -375,17 +437,19 @@ class NullTerminatedOperation:
             )
         )
         f.write("        goto ERROR_{index};\n".format(index=index))
-        f.write("    {param_name} = ({server_type})malloc({param_name}_len);\n".format(
-            param_name=self.parameter.name,
-            server_type=self.ptr.format(),
-        ))
+        f.write(
+            "    {param_name} = ({server_type})malloc({param_name}_len);\n".format(
+                param_name=self.parameter.name,
+                server_type=self.ptr.format(),
+            )
+        )
         f.write(
             "    if (rpc_read(conn, (void *){param_name}, {param_name}_len) < 0 ||\n".format(
                 param_name=self.parameter.name
             )
         )
         return self.parameter.name
-    
+
     @property
     def server_reference(self) -> str:
         return self.parameter.name
@@ -418,12 +482,14 @@ class NullTerminatedOperation:
             )
         )
 
+
 @dataclass
 class OpaqueTypeOperation:
     """
     Opaque type operations are operations that are passed as an opaque type. That is, the
     data is written directly without any additional dereferencing.
     """
+
     send: bool
     recv: bool
     parameter: Parameter
@@ -446,17 +512,29 @@ class OpaqueTypeOperation:
             return f"    {self.type_.ptr_to.format()} {self.parameter.name};\n"
         # ensure we don't have a const struct, otherwise we can't initialise it properly; ex: "const cudnnTensorDescriptor_t xDesc;" is invalid...
         # but "const cudnnTensorDescriptor_t *xDesc" IS valid. This subtle change carries reprecussions.
-        elif "const " in self.type_.format() and not "void" in self.type_.format() and not "*" in self.type_.format():
+        elif (
+            "const " in self.type_.format()
+            and not "void" in self.type_.format()
+            and not "*" in self.type_.format()
+        ):
             return f"   {self.type_.format().replace('const', '')} {self.parameter.name};\n"
         else:
             return f"    {self.type_.format()} {self.parameter.name};\n"
-        
+
     def client_unified_copy(self, f, direction, error):
         if isinstance(self.type_, Pointer):
-            f.write("    if (maybe_copy_unified_arg(0, (void*){name}, {direction}) < 0)\n".format(name=self.parameter.name, direction=direction))
+            f.write(
+                "    if (maybe_copy_unified_arg(0, (void*){name}, {direction}) < 0)\n".format(
+                    name=self.parameter.name, direction=direction
+                )
+            )
             f.write("      return {error};\n".format(error=error))
         else:
-            f.write("    if (maybe_copy_unified_arg(0, (void*)&{name}, {direction}) < 0)\n".format(name=self.parameter.name, direction=direction))
+            f.write(
+                "    if (maybe_copy_unified_arg(0, (void*)&{name}, {direction}) < 0)\n".format(
+                    name=self.parameter.name, direction=direction
+                )
+            )
             f.write("      return {error};\n".format(error=error))
 
     def server_rpc_read(self, f):
@@ -495,12 +573,14 @@ class OpaqueTypeOperation:
             )
         )
 
+
 @dataclass
 class DereferenceOperation:
     """
     Opaque type operations are operations that are passed as an opaque type. That is, the
     data is written directly without any additional dereferencing.
     """
+
     send: bool
     recv: bool
     parameter: Parameter
@@ -529,9 +609,13 @@ class DereferenceOperation:
                 param_type=self.type_.ptr_to.format(),
             )
         )
-    
+
     def client_unified_copy(self, f, direction, error):
-        f.write("    if (maybe_copy_unified_arg(0, (void*){name}, {direction}) < 0)\n".format(name=self.parameter.name, direction=direction))
+        f.write(
+            "    if (maybe_copy_unified_arg(0, (void*){name}, {direction}) < 0)\n".format(
+                name=self.parameter.name, direction=direction
+            )
+        )
         f.write("      return {error};\n".format(error=error))
 
     @property
@@ -559,12 +643,22 @@ class DereferenceOperation:
             )
         )
 
-Operation = NullableOperation | ArrayOperation | NullTerminatedOperation | OpaqueTypeOperation | DereferenceOperation
+
+Operation = (
+    NullableOperation
+    | ArrayOperation
+    | NullTerminatedOperation
+    | OpaqueTypeOperation
+    | DereferenceOperation
+)
+
 
 # parses a function annotation. if disabled is encountered, returns True for short circuiting.
-def parse_annotation(annotation: str, params: list[Parameter]) -> list[tuple[Operation, bool]]:
+def parse_annotation(
+    annotation: str, params: list[Parameter]
+) -> list[tuple[Operation, bool]]:
     operations: list[Operation] = []
-    
+
     if not annotation:
         return operations
     for line in annotation.split("\n"):
@@ -591,102 +685,125 @@ def parse_annotation(annotation: str, params: list[Parameter]) -> list[tuple[Ope
                 raise NotImplementedError(f"Parameter {parts[1]} not found")
             args = parts[3:]
             send = parts[2] == "SEND_ONLY" or parts[2] == "SEND_RECV"
-            recv = (parts[2] == "RECV_ONLY" or parts[2] == "SEND_RECV")
+            recv = parts[2] == "RECV_ONLY" or parts[2] == "SEND_RECV"
 
             # if there's a length or size arg, use the type, otherwise use the ptr_to type
-            length_arg = next(
-                (arg for arg in args if arg.startswith("LENGTH:")), None
-            )
+            length_arg = next((arg for arg in args if arg.startswith("LENGTH:")), None)
 
             if isinstance(param.type, Pointer):
                 if param.type.ptr_to.const:
                     recv = False
-                
+
                 size_arg = next((arg for arg in args if arg.startswith("SIZE:")), None)
                 null_terminated = "NULL_TERMINATED" in args
                 nullable = "NULLABLE" in args
 
                 # validate that only one of the arguments is present
-                if sum([bool(length_arg), bool(size_arg), null_terminated, nullable]) > 1:
+                if (
+                    sum([bool(length_arg), bool(size_arg), null_terminated, nullable])
+                    > 1
+                ):
                     raise NotImplementedError(
                         "Only one of LENGTH, SIZE, NULL_TERMINATED, or NULLABLE can be specified"
                     )
-            
+
                 if length_arg:
                     # if it has a length, it's an array operation with variable length
-                    length_param = next(p for p in params if p.name == length_arg.split(":")[1])
-                    operations.append(ArrayOperation(
+                    length_param = next(
+                        p for p in params if p.name == length_arg.split(":")[1]
+                    )
+                    operations.append(
+                        ArrayOperation(
+                            send=send,
+                            recv=recv,
+                            parameter=param,
+                            ptr=param.type,
+                            length=length_param,
+                        )
+                    )
+                elif size_arg:
+                    # if it has a size, it's an array operation with constant length
+                    operations.append(
+                        ArrayOperation(
+                            send=send,
+                            recv=recv,
+                            parameter=param,
+                            ptr=param.type,
+                            length=int(size_arg.split(":")[1]),
+                        )
+                    )
+                elif null_terminated:
+                    # if it's null terminated, it's a null terminated operation
+                    operations.append(
+                        NullTerminatedOperation(
+                            send=send,
+                            recv=recv,
+                            parameter=param,
+                            ptr=param.type,
+                        )
+                    )
+                elif nullable:
+                    # if it's nullable, it's a nullable operation
+                    operations.append(
+                        NullableOperation(
+                            send=send,
+                            recv=recv,
+                            parameter=param,
+                            ptr=param.type,
+                        )
+                    )
+                else:
+                    # otherwise, it's a pointer to a single value or another pointer
+                    if recv:
+                        if param.type.ptr_to.format() == "void":
+                            raise NotImplementedError(
+                                "Cannot dereference a void pointer"
+                            )
+                        # this is an out parameter so use the base type as the server declaration
+                        operations.append(
+                            DereferenceOperation(
+                                send=send,
+                                recv=recv,
+                                parameter=param,
+                                type_=param.type,
+                            )
+                        )
+                    else:
+                        # otherwise, treat it as an opaque type
+                        operations.append(
+                            OpaqueTypeOperation(
+                                send=send,
+                                recv=recv,
+                                parameter=param,
+                                type_=param.type,
+                            )
+                        )
+            elif isinstance(param.type, Type):
+                if param.type.const:
+                    recv = False
+                operations.append(
+                    OpaqueTypeOperation(
+                        send=send,
+                        recv=recv,
+                        parameter=param,
+                        type_=param.type,
+                    )
+                )
+            elif isinstance(param.type, Array):
+                length_param = next(
+                    p for p in params if p.name == length_arg.split(":")[1]
+                )
+                if param.type.const:
+                    recv = False
+                operations.append(
+                    ArrayOperation(
                         send=send,
                         recv=recv,
                         parameter=param,
                         ptr=param.type,
                         length=length_param,
-                    ))
-                elif size_arg:
-                    # if it has a size, it's an array operation with constant length
-                    operations.append(ArrayOperation(
-                        send=send,
-                        recv=recv,
-                        parameter=param,
-                        ptr=param.type,
-                        length=int(size_arg.split(":")[1]),
-                    ))
-                elif null_terminated:
-                    # if it's null terminated, it's a null terminated operation
-                    operations.append(NullTerminatedOperation(
-                        send=send,
-                        recv=recv,
-                        parameter=param,
-                        ptr=param.type,
-                    ))
-                elif nullable:
-                    # if it's nullable, it's a nullable operation
-                    operations.append(NullableOperation(
-                        send=send,
-                        recv=recv,
-                        parameter=param,
-                        ptr=param.type,
-                    ))
-                else:
-                    # otherwise, it's a pointer to a single value or another pointer
-                    if recv:
-                        if param.type.ptr_to.format() == "void":
-                            raise NotImplementedError("Cannot dereference a void pointer")
-                        # this is an out parameter so use the base type as the server declaration
-                        operations.append(DereferenceOperation(
-                            send=send,
-                            recv=recv,
-                            parameter=param,
-                            type_=param.type,
-                        ))
-                    else:
-                        # otherwise, treat it as an opaque type
-                        operations.append(OpaqueTypeOperation(
-                            send=send,
-                            recv=recv,
-                            parameter=param,
-                            type_=param.type,
-                        ))
-            elif isinstance(param.type, Type):
-                if param.type.const:
-                    recv = False
-                operations.append(OpaqueTypeOperation(
-                    send=send,
-                    recv=recv,
-                    parameter=param,
-                    type_=param.type,
-                ))
-            elif isinstance(param.type, Array):
-                length_param = next(p for p in params if p.name == length_arg.split(":")[1])
-                if param.type.const:
-                    recv = False
-                operations.append(ArrayOperation(
-                    send=send,
-                    recv=recv,
-                    parameter=param,
-                    ptr=param.type,
-                    length=length_param,
-                ))
+                    )
+                )
             else:
                 raise NotImplementedError("Unknown type")
     return operations, False
@@ -719,6 +836,7 @@ def prefix_std(type: str) -> str:
     #     return "std::size_t"
     return type
 
+
 # List of possible directories to search for header files
 COMMON_INCLUDE_DIRS = [
     "./",
@@ -729,17 +847,26 @@ COMMON_INCLUDE_DIRS = [
     "/usr/include/nvidia/",
 ]
 
+
 # Function to locate a file in common include directories
 def find_header_file(filename):
     for include_dir in COMMON_INCLUDE_DIRS:
         matches = glob.glob(os.path.join(include_dir, "**", filename), recursive=True)
         if matches:
             return matches[0]
-    raise FileNotFoundError(f"Header file '{filename}' not found in common include directories.")
+    raise FileNotFoundError(
+        f"Header file '{filename}' not found in common include directories."
+    )
+
 
 def main():
-    options = ParserOptions(preprocessor=make_gcc_preprocessor(defines=["CUBLASAPI="]))
-    
+    options = ParserOptions(
+        preprocessor=make_gcc_preprocessor(
+            defines=["CUBLASAPI="],
+            include_paths=["/usr/local/cuda/include"],
+        ),
+    )
+
     try:
         cudnn_graph_header = find_header_file("cudnn_graph.h")
         cudnn_ops_header = find_header_file("cudnn_ops.h")
@@ -791,11 +918,15 @@ def main():
             print(f"Annotation for {function.name} not found")
             continue
         try:
-            operations, is_func_disabled = parse_annotation(annotation.doxygen, function.parameters)
+            operations, is_func_disabled = parse_annotation(
+                annotation.doxygen, function.parameters
+            )
         except Exception as e:
             print(f"Error parsing annotation for {function.name}: {e}")
             continue
-        functions_with_annotations.append((function, annotation, operations, is_func_disabled))
+        functions_with_annotations.append(
+            (function, annotation, operations, is_func_disabled)
+        )
 
     with open("gen_api.h", "w") as f:
         lastIndex = 0
@@ -842,7 +973,8 @@ def main():
         )
         for function, annotation, operations, disabled in functions_with_annotations:
             # we don't generate client function definitions for disabled functions; only the RPC definitions.
-            if disabled: continue
+            if disabled:
+                continue
 
             params = []
 
@@ -870,13 +1002,17 @@ def main():
                 "{return_type} {name}({params})\n".format(
                     return_type=function.return_type.format(),
                     name=function.name.format(),
-                    params=joined_params
+                    params=joined_params,
                 )
             )
             f.write("{\n")
 
             for operation in operations:
-                operation.client_unified_copy(f, "cudaMemcpyHostToDevice", error_const(function.return_type.format()))
+                operation.client_unified_copy(
+                    f,
+                    "cudaMemcpyHostToDevice",
+                    error_const(function.return_type.format()),
+                )
 
             f.write(
                 "    {return_type} return_value;\n".format(
@@ -922,11 +1058,19 @@ def main():
             )
 
             for operation in operations:
-                operation.client_unified_copy(f, "cudaMemcpyDeviceToHost", error_const(function.return_type.format()))
+                operation.client_unified_copy(
+                    f,
+                    "cudaMemcpyDeviceToHost",
+                    error_const(function.return_type.format()),
+                )
 
             if function.name.format() == "nvmlShutdown":
                 f.write("    if (rpc_close() < 0)\n")
-                f.write("        return {error_return};\n".format(error_return=error_const(function.return_type.format())))
+                f.write(
+                    "        return {error_return};\n".format(
+                        error_return=error_const(function.return_type.format())
+                    )
+                )
 
             f.write("    return return_value;\n")
             f.write("}\n\n")
@@ -936,13 +1080,12 @@ def main():
         # we need the base nvmlInit, this is important and should be kept here in the codegen.
         for function in INTERNAL_FUNCTIONS:
             f.write(
-                '    {{"{name}", (void *){name}}},\n'.format(
-                    name=function.format()
-                )
+                '    {{"{name}", (void *){name}}},\n'.format(name=function.format())
             )
         f.write('    {"nvmlInit", (void *)nvmlInit_v2},\n')
         for function, _, _, disabled in functions_with_annotations:
-            if disabled: continue
+            if disabled:
+                continue
 
             f.write(
                 '    {{"{name}", (void *){name}}},\n'.format(
@@ -950,7 +1093,11 @@ def main():
                 )
             )
         # write manual overrides
-        function_names = set(f.name.format() for f, _, _, disabled in functions_with_annotations if not disabled)
+        function_names = set(
+            f.name.format()
+            for f, _, _, disabled in functions_with_annotations
+            if not disabled
+        )
         for x, y in MANUAL_REMAPPINGS:
             # ensure y exists in the function list
             if y not in function_names:
@@ -999,7 +1146,8 @@ def main():
             "extern int rpc_end_response(const void *conn, void *return_value);\n\n"
         )
         for function, annotation, operations, disabled in functions_with_annotations:
-            if function.name.format() in MANUAL_IMPLEMENTATIONS or disabled: continue
+            if function.name.format() in MANUAL_IMPLEMENTATIONS or disabled:
+                continue
 
             # parse the annotation doxygen
             f.write(
@@ -1018,9 +1166,17 @@ def main():
 
             # we only generate return from non-void types
             if function.return_type.format() != "void":
-                f.write("    {return_type} scuda_intercept_result;\n".format(return_type=function.return_type.format()))
+                f.write(
+                    "    {return_type} scuda_intercept_result;\n".format(
+                        return_type=function.return_type.format()
+                    )
+                )
             else:
-                f.write("    void* scuda_intercept_result;\n".format(return_type=function.return_type.format()))
+                f.write(
+                    "    void* scuda_intercept_result;\n".format(
+                        return_type=function.return_type.format()
+                    )
+                )
 
             f.write("    if (\n")
             for operation in operations:
@@ -1068,7 +1224,7 @@ def main():
 
             for operation in operations:
                 operation.server_rpc_write(f)
-            
+
             f.write("        rpc_end_response(conn, &scuda_intercept_result) < 0)\n")
             f.write("        goto ERROR_{index};\n".format(index=len(defers)))
             f.write("\n")
