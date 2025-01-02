@@ -201,14 +201,14 @@ build_tests() {
 }
 
 set_paths() {
-  scuda_path="$(ls | grep -E 'libscuda_[0-9]+_[0-9]+\.so' | head -n 1)"
+  scuda_path="$(ls | grep -E 'libscuda_[0-9]+\.[0-9]+\.[0-9]+\.so' | head -n 1)"
 
   if [[ -z "$scuda_path" ]]; then
     echo "Error: No matching libscuda file found in the current directory."
     exit 1
   fi
 
-  server_path="$(ls | grep -E 'server_[0-9]+_[0-9]+\.so' | head -n 1)"
+  server_path="$(ls | grep -E 'server_[0-9]+\.[0-9]+\.[0-9]+\.so' | head -n 1)"
 
   if [[ -z "$server_path" ]]; then
     echo "Error: No matching server file found in the current directory."
@@ -224,7 +224,7 @@ set_paths() {
 run() {
   export SCUDA_SERVER=0.0.0.0
   set_paths
-  LD_PRELOAD="$libscuda_path" python3 -c "import torch; print(torch.cuda.is_available())"
+  LD_PRELOAD="$libscuda_path" nvidia-smi
 }
 
 server() {
