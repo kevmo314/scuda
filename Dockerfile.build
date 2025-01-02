@@ -1,4 +1,8 @@
-FROM nvidia/cuda:12.6.3-cudnn-devel-ubuntu24.04
+ARG CUDA_VERSION=12.6.2
+ARG DISTRO_VERSION=24.04
+ARG OS_DISTRO=ubuntu
+
+FROM nvidia/cuda:${CUDA_VERSION}-devel-ubuntu${DISTRO_VERSION}
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \

@@ -1,48 +1,7 @@
 #!/bin/bash
 
 libscuda_path="$(pwd)/libscuda_12_0.so"
-client_path="$(pwd)/client.cpp $(pwd)/codegen/gen_client.cpp $(pwd)/codegen/manual_client.cpp"
-server_path="$(pwd)/server.cu $(pwd)/codegen/gen_server.cpp $(pwd)/codegen/manual_server.cpp"
-server_out_path="$(pwd)/server.so"
-
-build() {
-  echo "building client..."
-
-  if [[ "$(uname)" == "Linux" ]]; then
-    nvcc --cudart=shared -Xcompiler -fPIC -I/usr/local/cuda/include -o "$(pwd)/client.o" -c "$(pwd)/client.cpp"
-    nvcc --cudart=shared -Xcompiler -fPIC -I/usr/local/cuda/include -o "$(pwd)/codegen/gen_client.o" -c "$(pwd)/codegen/gen_client.cpp"
-    nvcc --cudart=shared -Xcompiler -fPIC -I/usr/local/cuda/include -o "$(pwd)/codegen/manual_client.o" -c "$(pwd)/codegen/manual_client.cpp"
-
-    echo "linking client files..."
-
-    g++ -shared -fPIC -o libscuda.so "$(pwd)/client.o" "$(pwd)/codegen/gen_client.o" "$(pwd)/codegen/manual_client.o" \
-        -L/usr/local/cuda/lib64 -lcudart -lcuda -lstdc++
-
-  else
-    echo "No compiler options set for os $(uname)"
-  fi
-
-  echo "building vector file for test..."
-
-  if [ ! -f "$libscuda_path" ]; then
-    echo "libscuda.so not found. build may have failed."
-    exit 1
-  fi
-}
-
-server() {
-  echo "building server..." 
-
-  if [[ "$(uname)" == "Linux" ]]; then
-    nvcc --compiler-options -g,-Wno-deprecated-declarations -o $server_out_path $server_path -lnvidia-ml -lcuda -lcublas -lcudnn --cudart=shared
-  else
-    echo "No compiler options set for os "$(uname)""
-  fi
-
-  echo "starting server... $server_out_path"
-
-  "$server_out_path"
-}
+server_out_path="$(pwd)/server_12_0.so"
 
 ansi_format() {
   case "$1" in
@@ -209,7 +168,10 @@ declare -A test_unified_mem=(
 tests=("test_cuda_avail" "test_tensor_to_cuda" "test_tensor_to_cuda_to_cpu" "test_vector_add" "test_cudnn" "test_cublas_batched" "test_unified_mem")
 
 test() {
-  # build
+  export SCUDA_SERVER=0.0.0.0
+  set_paths
+
+  build_tests
 
   echo "running tests at: $libscuda_path"
   echo -e "\n\033[1mRunning test(s)...\033[0m"
@@ -226,7 +188,7 @@ test() {
 }
 
 build_tests() {
-  build
+  echo "building test files..."
 
   nvcc --cudart=shared -lnvidia-ml -lcuda ./test/vector_add.cu -o vector.o
   nvcc --cudart=shared -lnvidia-ml -lcuda -lcudnn ./test/cudnn.cu -o cudnn.o
@@ -238,19 +200,40 @@ build_tests() {
   nvcc --cudart=shared -lnvidia-ml -lcuda -lcudnn -lcublas ./test/cudnn_managed.cu -o cudnn_managed.o
 }
 
+set_paths() {
+  scuda_path="$(ls | grep -E 'libscuda_[0-9]+_[0-9]+\.so' | head -n 1)"
+
+  if [[ -z "$scuda_path" ]]; then
+    echo "Error: No matching libscuda file found in the current directory."
+    exit 1
+  fi
+
+  server_path="$(ls | grep -E 'server_[0-9]+_[0-9]+\.so' | head -n 1)"
+
+  if [[ -z "$server_path" ]]; then
+    echo "Error: No matching server file found in the current directory."
+    exit 1
+  fi
+
+  server_out_path="./$server_path"
+  libscuda_path="./$scuda_path"
+
+  echo "Using client: $libscuda_path -- server: $server_out_path"
+}
+
 run() {
-  build
-
   export SCUDA_SERVER=0.0.0.0
-
+  set_paths
   LD_PRELOAD="$libscuda_path" python3 -c "import torch; print(torch.cuda.is_available())"
+}
+
+server() {
+  set_paths
+  $server_out_path
 }
 
 # Main script logic using a switch case
 case "$1" in
-  build)
-    build
-    ;;
   build_tests)
     build_tests
     ;;
