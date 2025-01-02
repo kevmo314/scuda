@@ -1,6 +1,6 @@
-#include <nvml.h>
 #include <cuda.h>
 #include <cuda_runtime.h>
+#include <nvml.h>
 
 int handle_cudaFree(void *conn);
 int handle_cudaMemcpy(void *conn);

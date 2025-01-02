@@ -112,11 +112,7 @@ class NullableOperation:
         )
 
     def client_unified_copy(self, f, direction, error):
-        f.write(
-            "    if (maybe_copy_unified_arg(0, (void*){name}, cudaMemcpyDeviceToHost) < 0)\n".format(
-                name=self.parameter.name, direction=direction
-            )
-        )
+        f.write("    if (maybe_copy_unified_arg(0, (void*){name}, cudaMemcpyDeviceToHost) < 0)\n".format(name=self.parameter.name))
         f.write("      return {error};\n".format(error=error))
 
     @property
@@ -310,14 +306,28 @@ class ArrayOperation:
             s = f"    {self.ptr.format()} {self.parameter.name};\n"
             self.ptr.ptr_to.const = c
         return s
-
-    def server_rpc_read(self, f):
+        
+    def server_rpc_read(self, f, index) -> Optional[str]:
         if not self.send:
+            # if this parameter is recv only and it's a type pointer, it needs to be malloc'd.
+            if isinstance(self.ptr, Pointer):
+                f.write("        false)\n")
+                f.write("        goto ERROR_{index};\n".format(index=index))
+                f.write(
+                    "    {param_name} = ({server_type})malloc({length} * sizeof({param_type}));\n".format(
+                        param_name=self.parameter.name,
+                        param_type=self.ptr.ptr_to.format(),
+                        server_type=self.ptr.format(),
+                        length=self.length if isinstance(self.length, int) else self.length.name,
+                    )
+                )
+                f.write("    if(")
+                return self.parameter.name
             return
         elif isinstance(self.length, int):
             f.write(
                 "        rpc_read(conn, &{param_name}, {size}) < 0 ||\n".format(
-                    param_name=self.parameter.name,
+                    param_name=self.parameter.name, 
                     size=self.length,
                 )
             )
@@ -1172,15 +1182,11 @@ def main():
                     )
                 )
             else:
-                f.write(
-                    "    void* scuda_intercept_result;\n".format(
-                        return_type=function.return_type.format()
-                    )
-                )
+                f.write("    void* scuda_intercept_result;\n")
 
             f.write("    if (\n")
             for operation in operations:
-                if isinstance(operation, NullTerminatedOperation):
+                if isinstance(operation, NullTerminatedOperation) or isinstance(operation, ArrayOperation):
                     if error := operation.server_rpc_read(f, len(defers)):
                         defers.append(error)
                 else:
@@ -1190,11 +1196,7 @@ def main():
 
             f.write("\n")
 
-            f.write(
-                "    request_id = rpc_end_request(conn);\n".format(
-                    name=function.name.format()
-                )
-            )
+            f.write("    request_id = rpc_end_request(conn);\n")
             f.write("    if (request_id < 0)\n")
             f.write("        goto ERROR_{index};\n".format(index=len(defers)))
 
