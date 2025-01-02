@@ -1,0 +1,99 @@
+name: Scuda CI
+
+# on:
+#   push:
+#     branches:
+#       - main
+
+on:
+  pull_request:
+    branches: [main]
+
+  workflow_dispatch:
+    inputs:
+      cuda_version:
+        description: "CUDA version for the Docker build"
+        required: true
+        default: "12.4.0"
+      distro_version:
+        description: "Distribution version for the Docker build"
+        required: true
+        default: "22.04"
+  
+concurrency:
+  group: ci
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          oauth-client-id: k4oU8AFYf121CNTRL
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci,tag:production
+
+      - name: Verify Tailscale IP
+        run: tailscale ip
+
+      - name: Run tests
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa root@100.118.7.128 'bash -s' <<'EOF'
+          #!/bin/bash
+
+          cd /home/brodey/scuda-latest
+          ls
+
+          SCUDA_PORT=14834 ./local.sh server &
+
+          sleep 5
+
+          export SCUDA_SERVER=0.0.0.0:14834
+          test_output=$(./local.sh test)
+          test_exit_code=$?
+
+          if [ $test_exit_code -eq 0 ]; then
+            echo "Tests passed successfully!"
+          fi
+
+          kill $(ps aux | grep '[s]cuda' | awk '{print $2}')
+          echo "server process and its children terminated. exiting..."
+
+          exit $test_exit_code
+
+          EOF
+          
+  build-and-artifacts:
+    runs-on: ubuntu-latest
+    needs: tests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build Docker Image with Custom Args
+        run: |
+          docker build . -f Dockerfile.build -t scuda-builder \
+            --build-arg CUDA_VERSION=${{ github.event.inputs.cuda_version }} \
+            --build-arg DISTRO_VERSION=${{ github.event.inputs.distro_version }}
+
+      - name: Extract Artifacts from Docker
+        run: |
+          container_id=$(docker create scuda-builder)
+          docker cp $container_id:/home/libscuda_${{ github.event.inputs.cuda_version }}.so ./libscuda_${{ github.event.inputs.cuda_version }}.so
+          docker cp $container_id:/home/server_${{ github.event.inputs.cuda_version }}.so ./server_${{ github.event.inputs.cuda_version }}.so
+          docker rm $container_id
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: scuda-artifacts
+          path: |
+            ./libscuda_${{ github.event.inputs.cuda_version }}.so
+            ./server_${{ github.event.inputs.cuda_version }}.so

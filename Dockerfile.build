@@ -1,10 +1,11 @@
 ARG CUDA_VERSION=12.6.2
 ARG DISTRO_VERSION=24.04
 ARG OS_DISTRO=ubuntu
+ARG CUDNN_TAG=cudnn
 
-FROM nvidia/cuda:${CUDA_VERSION}-devel-ubuntu${DISTRO_VERSION}
+FROM nvidia/cuda:${CUDA_VERSION}-${CUDNN_TAG}-devel-${OS_DISTRO}${DISTRO_VERSION}
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     cmake \
     libnvidia-ml-dev \
