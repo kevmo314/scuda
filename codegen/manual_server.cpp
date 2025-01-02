@@ -370,7 +370,7 @@ int handle___cudaRegisterFatBinaryEnd(void *conn) {
 }
 
 // Function pointer type for __cudaPushCallConfiguration
-extern "C" unsigned int __cudaPushCallConfiguration(dim3 gridDim, dim3 blockDim,
+extern "C" cudaError_t __cudaPushCallConfiguration(dim3 gridDim, dim3 blockDim,
                                                    size_t sharedMem,
                                                    cudaStream_t stream);
 
@@ -390,7 +390,7 @@ int handle___cudaPushCallConfiguration(void *conn) {
   if (request_id < 0)
     return -1;
 
-  unsigned int result =
+  cudaError_t result =
       __cudaPushCallConfiguration(gridDim, blockDim, sharedMem, stream);
 
   if (rpc_start_response(conn, request_id) < 0 ||
@@ -429,11 +429,11 @@ int handle___cudaPopCallConfiguration(void *conn) {
   return 0;
 }
 
-// typedef void (*__cudaInitModule_type)(void **fatCubinHandle);
+typedef void (*__cudaInitModule_type)(void **fatCubinHandle);
 
-// void __cudaInitModule(void **fatCubinHandle) {
-//   std::cerr << "calling __cudaInitModule" << std::endl;
-// }
+void __cudaInitModule(void **fatCubinHandle) {
+  std::cerr << "calling __cudaInitModule" << std::endl;
+}
 
 extern "C" void __cudaRegisterVar(void **fatCubinHandle, char *hostVar,
                                   char *deviceAddress, const char *deviceName,
