@@ -197,7 +197,7 @@ class ArrayOperation:
             f.write(
                 "        rpc_write(0, &{param_name}, sizeof({param_type})) < 0 ||\n".format(
                     param_name=self.parameter.name,
-                    param_type=self.parameter.name,
+                    param_type=self.ptr.array_of.format(),
                 )
             )
         else:
@@ -243,11 +243,10 @@ class ArrayOperation:
     @property
     def server_declaration(self) -> str:
         if isinstance(self.ptr, Array):
-            c = self.ptr.const
-            self.ptr.const = False
-            # const[] isn't a valid part of a variable declaration
-            s = f"    {self.ptr.format().replace("const[]", "")}* {self.parameter.name} = nullptr;\n"
-            self.ptr.const = c
+            c = self.ptr.array_of.const
+            self.ptr.array_of.const = False
+            s = f"    {self.ptr.array_of.format()}* {self.parameter.name} = nullptr;\n"
+            self.ptr.array_of.const = c
         else:
             c = self.ptr.ptr_to.const
             self.ptr.ptr_to.const = False
@@ -281,9 +280,9 @@ class ArrayOperation:
             )
         elif isinstance(self.ptr, Array):
             f.write(
-                "        rpc_read(conn, &{param_name}, sizeof({param_type})) < 0 ||\n".format(
+                "        rpc_read(conn, &{param_name}, sizeof({param_type}*)) < 0 ||\n".format(
                     param_name=self.parameter.name,
-                    param_type=self.ptr.format().replace("[]", ""),
+                    param_type=self.ptr.array_of.format(),
                 )
             )
         else:
@@ -690,7 +689,7 @@ def parse_annotation(annotation: str, params: list[Parameter]) -> list[tuple[Ope
                 ))
             elif isinstance(param.type, Array):
                 length_param = next(p for p in params if p.name == length_arg.split(":")[1])
-                if param.type.const:
+                if param.type.array_of.const:
                     recv = False
                 operations.append(ArrayOperation(
                     send=send,
