@@ -18,33 +18,63 @@ https://github.com/user-attachments/assets/b2db5d82-f214-41cf-8274-b913c04080f9
 
 ## Local development
 
-Make the local dev script executable
+Building the binaries requires running codegen first. Scuda codegen reads the cuda dependency header files in order to generate rpc calls.
 
-```sh
-chmod +x local.sh
+### Run codegen
+
+```bash
+cd codegen && ./python3 ./codegen.py
 ```
 
-Also helpful to alias this local script in your bash profile.
+Ensure there are no errors in the output of the codegen.
+
+### Run cmake
 
 ```sh
-alias s='/home/brodey/scuda-latest/local.sh'
+cmake .
+cmake --build .
 ```
+
+Cmake will generate a server and a client file depending on your cuda version.
+
+Example:
+`libscuda_12_0.so`, `server_12_0.so`
 
 It's required to run scuda server before initiating client commands.
 
 ```sh
-s server
+./local.sh server
+```
+
+The above command will grep for the generated libscuda + server files. You can also run the binaries directly.
+
+
+```sh
+./server_12_0.so
+```
+
+If successful, the server will start:
+
+```bash
+Server listening on port 14833...
 ```
 
 ## Running the client
 
-If the server above is running:
+Once the server above is running:
 
 ```sh
-s run
+# update to your desired IP/port
+export SCUDA_SERVER=0.0.0.0
+
+LD_PRELOAD=./libscuda_12_0.s python3 -c "import torch; print(torch.cuda.is_available())"
 ```
 
-The above will rebuild the client and run nvidia-smi for you.
+You can also use the local shell script to run your commands.
+
+```
+./local.sh run
+```
 
 ## Installation
 
@@ -58,26 +88,6 @@ Then, on the client, run:
 
 ```sh
 scuda <ip>:<port>
-```
-
-## Building from source
-
-```sh
-nvcc -shared -o libscuda.so client.c
-```
-
-This library can then be preloaded
-
-```sh
-LD_PRELOAD=libscuda.so nvidia-smi
-```
-
-By default, the client library passes calls through to the client. In other words,
-it does not connect to a server. To connect to a server, create a file with the
-host you wish to connect to
-
-```
-~/.config/scuda/host
 ```
 
 ## Motivations

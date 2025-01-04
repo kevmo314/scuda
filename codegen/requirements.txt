@@ -1,1 +1,1 @@
-pycparser==2.22
+cxxheaderparser
