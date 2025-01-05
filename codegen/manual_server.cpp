@@ -371,8 +371,8 @@ int handle___cudaRegisterFatBinaryEnd(void *conn) {
 
 // Function pointer type for __cudaPushCallConfiguration
 extern "C" unsigned int __cudaPushCallConfiguration(dim3 gridDim, dim3 blockDim,
-                                                   size_t sharedMem,
-                                                   cudaStream_t stream);
+                                                    size_t sharedMem,
+                                                    cudaStream_t stream);
 
 int handle___cudaPushCallConfiguration(void *conn) {
   dim3 gridDim, blockDim;
