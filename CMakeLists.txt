@@ -55,8 +55,8 @@ set(SERVER_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/codegen/manual_server.h
 )
 
-set(CLIENT_OUTPUT scuda_${CUDAToolkit_VERSION_MAJOR}.${CUDAToolkit_VERSION_MINOR}.${CUDAToolkit_VERSION_PATCH})
-set(SERVER_OUTPUT server_${CUDAToolkit_VERSION_MAJOR}.${CUDAToolkit_VERSION_MINOR}.${CUDAToolkit_VERSION_PATCH}.so)
+set(CLIENT_OUTPUT scuda_${CUDAToolkit_VERSION_MAJOR}.${CUDAToolkit_VERSION_MINOR})
+set(SERVER_OUTPUT server_${CUDAToolkit_VERSION_MAJOR}.${CUDAToolkit_VERSION_MINOR}.so)
 
 find_library(CUBLAS_LIBRARY cublas HINTS ${CUDAToolkit_LIBRARY_DIR} PATHS /usr/local/cuda/lib64)
 find_library(CUDNN_LIBRARY cudnn HINTS ${CUDAToolkit_LIBRARY_DIR} PATHS /usr/local/cuda/lib64)
