@@ -92,12 +92,16 @@ jobs:
           ls -al
 
       - name: Upload Artifacts
+        run: |
+          major_minor_version=$(echo "${{ matrix.cuda_version }}" | awk -F. '{print $1 "." $2}')
+
+          tar -czf scuda-artifacts-${major_minor_version}-${{ matrix.distro_version }}.tar.gz \
+            ./libscuda_${major_minor_version}_${{ matrix.os_distro }}_${{ matrix.distro_version }}.so \
+            ./server_${major_minor_version}_${{ matrix.os_distro }}_${{ matrix.distro_version }}.so
         uses: actions/upload-artifact@v4
         with:
           name: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.distro_version }}
-          path: |
-            ./libscuda_${major_minor_version}_${{ matrix.os_distro }}_${{ matrix.distro_version }}.so
-            ./server_${major_minor_version}_${{ matrix.os_distro }}_${{ matrix.distro_version }}.so
+          path: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.distro_version }}.tar.gz
 
   build-artifacts-cudnn-8:
     runs-on: ubuntu-latest
@@ -139,9 +143,13 @@ jobs:
           ls -al
 
       - name: Upload Artifacts
+        run: |
+          major_minor_version=$(echo "${{ matrix.cuda_version }}" | awk -F. '{print $1 "." $2}')
+
+          tar -czf scuda-artifacts-${major_minor_version}-${{ matrix.distro_version }}.tar.gz \
+            ./libscuda_${major_minor_version}_${{ matrix.os_distro }}_${{ matrix.distro_version }}.so \
+            ./server_${major_minor_version}_${{ matrix.os_distro }}_${{ matrix.distro_version }}.so
         uses: actions/upload-artifact@v4
         with:
           name: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.distro_version }}
-          path: |
-            ./libscuda_${major_minor_version}_${{ matrix.os_distro }}_${{ matrix.distro_version }}.so
-            ./server_${major_minor_version}_${{ matrix.os_distro }}_${{ matrix.distro_version }}.so
+          path: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.distro_version }}.tar.gz
