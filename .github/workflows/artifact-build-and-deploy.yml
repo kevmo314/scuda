@@ -78,20 +78,26 @@ jobs:
         run: |
           container_id=$(docker create scuda-builder-${{ matrix.cuda_version }})
 
+          # Extract major and minor version from CUDA version
           major_minor_version=$(echo "${{ matrix.cuda_version }}" | awk -F. '{print $1 "." $2}')
 
-          docker cp $container_id:/home/libscuda_${major_minor_version}.so ./libscuda_${major_minor_version}.so
-          docker cp $container_id:/home/server_${major_minor_version}.so ./server_${major_minor_version}.so
+          # Copy files from the container using major and minor version
+          docker cp $container_id:/home/libscuda_${major_minor_version}.so ./libscuda_${major_minor_version}_${{ matrix.os_distro }}_${{ matrix.distro_version }}.so
+          docker cp $container_id:/home/server_${major_minor_version}.so ./server_${major_minor_version}_${{ matrix.os_distro }}_${{ matrix.distro_version }}.so
 
+          # Remove the temporary container
           docker rm $container_id
+
+          # List the files to verify they exist
+          ls -al
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.distro_version }}
           path: |
-            ./libscuda_${{ matrix.cuda_version }}_${{ matrix.distro_version }}.so
-            ./server_${{ matrix.cuda_version }}_${{ matrix.distro_version }}.so
+            ./libscuda_${major_minor_version}_${{ matrix.os_distro }}_${{ matrix.distro_version }}.so
+            ./server_${major_minor_version}_${{ matrix.os_distro }}_${{ matrix.distro_version }}.so
 
   build-artifacts-cudnn-8:
     runs-on: ubuntu-latest
