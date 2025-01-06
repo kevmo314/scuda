@@ -55,7 +55,7 @@ jobs:
     strategy:
       matrix:
         cuda_version: [12.6.0]
-        distro_version: [22.04, 22.04]
+        distro_version: [22.04, 24.04]
         os_distro: [ubuntu]
         cudnn_tag: [cudnn]
 
@@ -135,8 +135,11 @@ jobs:
           # list the files to verify they exist
           ls -al
 
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
+      - name: Release artifacts
+        uses: softprops/action-gh-release@v1
         with:
+          prerelease: true
           name: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.distro_version }}
-          path: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.distro_version }}.tar.gz
+          tag_name: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.distro_version }}-latest
+          files: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.distro_version }}.tar.gz
+          fail_on_unmatched_files: true
