@@ -4,6 +4,10 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ci
+  cancel-in-progress: true
+
 jobs:
   tests:
     runs-on: ubuntu-latest
