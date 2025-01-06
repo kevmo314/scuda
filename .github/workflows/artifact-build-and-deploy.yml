@@ -49,13 +49,13 @@ jobs:
 
           EOF
 
-  build-and-artifacts:
+  build-artifacts-cudnn-9:
     runs-on: ubuntu-latest
     needs: tests
     strategy:
       matrix:
-        cuda_version: [12.0.0, 12.1.0, 12.2.0, 12.3.0, 12.4.0]
-        distro_version: [22.04]
+        cuda_version: [12.6.0]
+        distro_version: [22.04, 22.04]
         os_distro: [ubuntu]
         cudnn_tag: [cudnn]
 
@@ -81,7 +81,44 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: scuda-artifacts-${{ matrix.cuda_version }}
+          name: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.distro_version }}
           path: |
-            ./libscuda_${{ matrix.cuda_version }}.so
-            ./server_${{ matrix.cuda_version }}.so
+            ./libscuda_${{ matrix.cuda_version }}_${{ matrix.distro_version }}.so
+            ./server_${{ matrix.cuda_version }}_${{ matrix.distro_version }}.so
+
+  build-artifacts-cudnn-8:
+    runs-on: ubuntu-latest
+    needs: tests
+    strategy:
+      matrix:
+        cuda_version: [12.0.0, 12.1.0, 12.2.2]
+        distro_version: [22.04]
+        os_distro: [ubuntu]
+        cudnn_tag: [cudnn8]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build Docker Image
+        run: |
+          docker build . -f Dockerfile.build -t scuda-builder-${{ matrix.cuda_version }} \
+            --build-arg CUDA_VERSION=${{ matrix.cuda_version }} \
+            --build-arg DISTRO_VERSION=${{ matrix.distro_version }} \
+            --build-arg OS_DISTRO=${{ matrix.os_distro }} \
+            --build-arg CUDNN_TAG=${{ matrix.cudnn_tag }}
+
+      - name: Extract Artifacts from Docker
+        run: |
+          container_id=$(docker create scuda-builder-${{ matrix.cuda_version }})
+          docker cp $container_id:/home/libscuda_${{ matrix.cuda_version }}.so ./libscuda_${{ matrix.cuda_version }}.so
+          docker cp $container_id:/home/server_${{ matrix.cuda_version }}.so ./server_${{ matrix.cuda_version }}.so
+          docker rm $container_id
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.distro_version }}
+          path: |
+            ./libscuda_${{ matrix.cuda_version }}_${{ matrix.distro_version }}.so
+            ./server_${{ matrix.cuda_version }}_${{ matrix.distro_version }}.so
