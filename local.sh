@@ -168,7 +168,6 @@ declare -A test_unified_mem=(
 tests=("test_cuda_avail" "test_tensor_to_cuda" "test_tensor_to_cuda_to_cpu" "test_vector_add" "test_cudnn" "test_cublas_batched" "test_unified_mem")
 
 test() {
-  export SCUDA_SERVER=0.0.0.0
   set_paths
 
   build_tests
@@ -234,8 +233,6 @@ test_ci() {
   set_paths
   
   build_tests
-
-  export SCUDA_SERVER=0.0.0.0
 
   echo "running tests at: $libscuda_path"
   echo -e "\n\033[1mRunning test(s)...\033[0m"
