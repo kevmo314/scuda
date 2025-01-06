@@ -4,9 +4,6 @@ on:
   pull_request:
     branches: [main]
 
-concurrency:
-  group: ci
-
 jobs:
   tests:
     runs-on: ubuntu-latest
@@ -129,26 +126,21 @@ jobs:
         run: |
           container_id=$(docker create scuda-builder-${{ matrix.cuda_version }})
 
-          # Extract major and minor version from CUDA version
           major_minor_version=$(echo "${{ matrix.cuda_version }}" | awk -F. '{print $1 "." $2}')
 
-          # Copy files from the container using major and minor version
           docker cp $container_id:/home/libscuda_${major_minor_version}.so ./libscuda_${major_minor_version}_${{ matrix.os_distro }}_${{ matrix.distro_version }}.so
           docker cp $container_id:/home/server_${major_minor_version}.so ./server_${major_minor_version}_${{ matrix.os_distro }}_${{ matrix.distro_version }}.so
 
-          # Remove the temporary container
           docker rm $container_id
 
-          # List the files to verify they exist
+          tar -czf scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.distro_version }}.tar.gz \
+            ./libscuda_${major_minor_version}_${{ matrix.os_distro }}_${{ matrix.distro_version }}.so \
+            ./server_${major_minor_version}_${{ matrix.os_distro }}_${{ matrix.distro_version }}.so
+
+          # list the files to verify they exist
           ls -al
 
       - name: Upload Artifacts
-        run: |
-          major_minor_version=$(echo "${{ matrix.cuda_version }}" | awk -F. '{print $1 "." $2}')
-
-          tar -czf scuda-artifacts-${major_minor_version}-${{ matrix.distro_version }}.tar.gz \
-            ./libscuda_${major_minor_version}_${{ matrix.os_distro }}_${{ matrix.distro_version }}.so \
-            ./server_${major_minor_version}_${{ matrix.os_distro }}_${{ matrix.distro_version }}.so
         uses: actions/upload-artifact@v4
         with:
           name: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.distro_version }}
