@@ -1,4 +1,4 @@
-name: Artifact Build + Deploy
+name: Artifact deploy
 
 on:
   pull_request:
