@@ -16,7 +16,7 @@ jobs:
         run: >
           # Get the diff of changed files
 
-          git diff --name-only origin/${{ github.base_ref }} | grep -E '\.(cpp|h|cu)$' > changed_files.txt
+          git diff --name-only origin/${{ github.base_ref }} | grep -E '\.(cpp|h|cu)$' > changed_files.txt || true
 
           # Check each changed file
 

@@ -18813,6 +18813,60 @@ ERROR_0:
   return -1;
 }
 
+int handle_cudaMemset(void *conn) {
+  void *devPtr;
+  int value;
+  size_t count;
+  int request_id;
+  cudaError_t scuda_intercept_result;
+  if (rpc_read(conn, &devPtr, sizeof(void *)) < 0 ||
+      rpc_read(conn, &value, sizeof(int)) < 0 ||
+      rpc_read(conn, &count, sizeof(size_t)) < 0 || false)
+    goto ERROR_0;
+
+  request_id = rpc_end_request(conn);
+  if (request_id < 0)
+    goto ERROR_0;
+  scuda_intercept_result = cudaMemset(devPtr, value, count);
+
+  if (rpc_start_response(conn, request_id) < 0 ||
+      rpc_end_response(conn, &scuda_intercept_result) < 0)
+    goto ERROR_0;
+
+  return 0;
+ERROR_0:
+  return -1;
+}
+
+int handle_cudaMemset2D(void *conn) {
+  void *devPtr;
+  size_t pitch;
+  int value;
+  size_t width;
+  size_t height;
+  int request_id;
+  cudaError_t scuda_intercept_result;
+  if (rpc_read(conn, &devPtr, sizeof(void *)) < 0 ||
+      rpc_read(conn, &pitch, sizeof(size_t)) < 0 ||
+      rpc_read(conn, &value, sizeof(int)) < 0 ||
+      rpc_read(conn, &width, sizeof(size_t)) < 0 ||
+      rpc_read(conn, &height, sizeof(size_t)) < 0 || false)
+    goto ERROR_0;
+
+  request_id = rpc_end_request(conn);
+  if (request_id < 0)
+    goto ERROR_0;
+  scuda_intercept_result = cudaMemset2D(devPtr, pitch, value, width, height);
+
+  if (rpc_start_response(conn, request_id) < 0 ||
+      rpc_end_response(conn, &scuda_intercept_result) < 0)
+    goto ERROR_0;
+
+  return 0;
+ERROR_0:
+  return -1;
+}
+
 int handle_cudaMemset3D(void *conn) {
   struct cudaPitchedPtr pitchedDevPtr;
   int value;
@@ -18828,6 +18882,65 @@ int handle_cudaMemset3D(void *conn) {
   if (request_id < 0)
     goto ERROR_0;
   scuda_intercept_result = cudaMemset3D(pitchedDevPtr, value, extent);
+
+  if (rpc_start_response(conn, request_id) < 0 ||
+      rpc_end_response(conn, &scuda_intercept_result) < 0)
+    goto ERROR_0;
+
+  return 0;
+ERROR_0:
+  return -1;
+}
+
+int handle_cudaMemsetAsync(void *conn) {
+  void *devPtr;
+  int value;
+  size_t count;
+  cudaStream_t stream;
+  int request_id;
+  cudaError_t scuda_intercept_result;
+  if (rpc_read(conn, &devPtr, sizeof(void *)) < 0 ||
+      rpc_read(conn, &value, sizeof(int)) < 0 ||
+      rpc_read(conn, &count, sizeof(size_t)) < 0 ||
+      rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 || false)
+    goto ERROR_0;
+
+  request_id = rpc_end_request(conn);
+  if (request_id < 0)
+    goto ERROR_0;
+  scuda_intercept_result = cudaMemsetAsync(devPtr, value, count, stream);
+
+  if (rpc_start_response(conn, request_id) < 0 ||
+      rpc_end_response(conn, &scuda_intercept_result) < 0)
+    goto ERROR_0;
+
+  return 0;
+ERROR_0:
+  return -1;
+}
+
+int handle_cudaMemset2DAsync(void *conn) {
+  void *devPtr;
+  size_t pitch;
+  int value;
+  size_t width;
+  size_t height;
+  cudaStream_t stream;
+  int request_id;
+  cudaError_t scuda_intercept_result;
+  if (rpc_read(conn, &devPtr, sizeof(void *)) < 0 ||
+      rpc_read(conn, &pitch, sizeof(size_t)) < 0 ||
+      rpc_read(conn, &value, sizeof(int)) < 0 ||
+      rpc_read(conn, &width, sizeof(size_t)) < 0 ||
+      rpc_read(conn, &height, sizeof(size_t)) < 0 ||
+      rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 || false)
+    goto ERROR_0;
+
+  request_id = rpc_end_request(conn);
+  if (request_id < 0)
+    goto ERROR_0;
+  scuda_intercept_result =
+      cudaMemset2DAsync(devPtr, pitch, value, width, height, stream);
 
   if (rpc_start_response(conn, request_id) < 0 ||
       rpc_end_response(conn, &scuda_intercept_result) < 0)
@@ -42837,7 +42950,11 @@ static RequestHandler opHandlers[] = {
     handle_cudaMemcpyAsync,
     handle_cudaMemcpy2DToArrayAsync,
     handle_cudaMemcpyToSymbolAsync,
+    handle_cudaMemset,
+    handle_cudaMemset2D,
     handle_cudaMemset3D,
+    handle_cudaMemsetAsync,
+    handle_cudaMemset2DAsync,
     handle_cudaMemset3DAsync,
     handle_cudaGetSymbolAddress,
     handle_cudaGetSymbolSize,
