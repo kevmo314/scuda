@@ -232,7 +232,23 @@ test_ci() {
   cmake --build .
 
   set_paths
-  test
+  
+  build_tests
+
+  export SCUDA_SERVER=0.0.0.0
+
+  echo "running tests at: $libscuda_path"
+  echo -e "\n\033[1mRunning test(s)...\033[0m"
+
+  for test in "${tests[@]}"; do
+    func_name=$(eval "echo \${${test}[function]}")
+    pass_message=$(eval "echo \${${test}[pass]}")
+
+    if ! eval "$func_name \"$pass_message\""; then
+      echo -e "\033[31mTest failed. Exiting...\033[0m"
+      return 1
+    fi
+  done
 }
 
 server() {
