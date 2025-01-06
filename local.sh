@@ -227,6 +227,14 @@ run() {
   LD_PRELOAD="$libscuda_path" nvidia-smi
 }
 
+test_ci() {
+  cmake .
+  cmake --build .
+
+  set_paths
+  test
+}
+
 server() {
   set_paths
   $server_out_path
@@ -242,6 +250,9 @@ case "$1" in
     ;;
   server)
     server
+    ;;
+  test_ci)
+    test_ci
     ;;
   test)
     test
