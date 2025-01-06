@@ -6,7 +6,6 @@ on:
 
 concurrency:
   group: ci
-  cancel-in-progress: true
 
 jobs:
   tests:
