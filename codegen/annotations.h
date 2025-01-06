@@ -5536,13 +5536,13 @@ cudaError_t cudaMemcpyFromSymbolAsync(void *dst, const void *symbol,
                                       enum cudaMemcpyKind kind,
                                       cudaStream_t stream);
 /**
- * @param devPtr SEND_RECV
+ * @param devPtr SEND_ONLY
  * @param value SEND_ONLY
  * @param count SEND_ONLY
  */
 cudaError_t cudaMemset(void *devPtr, int value, size_t count);
 /**
- * @param devPtr SEND_RECV
+ * @param devPtr SEND_ONLY
  * @param pitch SEND_ONLY
  * @param value SEND_ONLY
  * @param width SEND_ONLY
@@ -5558,7 +5558,7 @@ cudaError_t cudaMemset2D(void *devPtr, size_t pitch, int value, size_t width,
 cudaError_t cudaMemset3D(struct cudaPitchedPtr pitchedDevPtr, int value,
                          struct cudaExtent extent);
 /**
- * @param devPtr SEND_RECV
+ * @param devPtr SEND_ONLY
  * @param value SEND_ONLY
  * @param count SEND_ONLY
  * @param stream SEND_ONLY
@@ -5566,7 +5566,7 @@ cudaError_t cudaMemset3D(struct cudaPitchedPtr pitchedDevPtr, int value,
 cudaError_t cudaMemsetAsync(void *devPtr, int value, size_t count,
                             cudaStream_t stream);
 /**
- * @param devPtr SEND_RECV
+ * @param devPtr SEND_ONLY
  * @param pitch SEND_ONLY
  * @param value SEND_ONLY
  * @param width SEND_ONLY

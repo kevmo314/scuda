@@ -18518,6 +18518,63 @@ cudaError_t cudaMemcpyToSymbolAsync(const void *symbol, const void *src,
   return return_value;
 }
 
+cudaError_t cudaMemset(void *devPtr, int value, size_t count) {
+  if (maybe_copy_unified_arg(0, (void *)devPtr, cudaMemcpyHostToDevice) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(0, (void *)&value, cudaMemcpyHostToDevice) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(0, (void *)&count, cudaMemcpyHostToDevice) < 0)
+    return cudaErrorDevicesUnavailable;
+  cudaError_t return_value;
+  if (rpc_start_request(0, RPC_cudaMemset) < 0 ||
+      rpc_write(0, &devPtr, sizeof(void *)) < 0 ||
+      rpc_write(0, &value, sizeof(int)) < 0 ||
+      rpc_write(0, &count, sizeof(size_t)) < 0 ||
+      rpc_wait_for_response(0) < 0 || rpc_end_response(0, &return_value) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(0, (void *)devPtr, cudaMemcpyDeviceToHost) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(0, (void *)&value, cudaMemcpyDeviceToHost) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(0, (void *)&count, cudaMemcpyDeviceToHost) < 0)
+    return cudaErrorDevicesUnavailable;
+  return return_value;
+}
+
+cudaError_t cudaMemset2D(void *devPtr, size_t pitch, int value, size_t width,
+                         size_t height) {
+  if (maybe_copy_unified_arg(0, (void *)devPtr, cudaMemcpyHostToDevice) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(0, (void *)&pitch, cudaMemcpyHostToDevice) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(0, (void *)&value, cudaMemcpyHostToDevice) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(0, (void *)&width, cudaMemcpyHostToDevice) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(0, (void *)&height, cudaMemcpyHostToDevice) < 0)
+    return cudaErrorDevicesUnavailable;
+  cudaError_t return_value;
+  if (rpc_start_request(0, RPC_cudaMemset2D) < 0 ||
+      rpc_write(0, &devPtr, sizeof(void *)) < 0 ||
+      rpc_write(0, &pitch, sizeof(size_t)) < 0 ||
+      rpc_write(0, &value, sizeof(int)) < 0 ||
+      rpc_write(0, &width, sizeof(size_t)) < 0 ||
+      rpc_write(0, &height, sizeof(size_t)) < 0 ||
+      rpc_wait_for_response(0) < 0 || rpc_end_response(0, &return_value) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(0, (void *)devPtr, cudaMemcpyDeviceToHost) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(0, (void *)&pitch, cudaMemcpyDeviceToHost) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(0, (void *)&value, cudaMemcpyDeviceToHost) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(0, (void *)&width, cudaMemcpyDeviceToHost) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(0, (void *)&height, cudaMemcpyDeviceToHost) < 0)
+    return cudaErrorDevicesUnavailable;
+  return return_value;
+}
+
 cudaError_t cudaMemset3D(struct cudaPitchedPtr pitchedDevPtr, int value,
                          struct cudaExtent extent) {
   if (maybe_copy_unified_arg(0, (void *)&pitchedDevPtr,
@@ -18540,6 +18597,75 @@ cudaError_t cudaMemset3D(struct cudaPitchedPtr pitchedDevPtr, int value,
   if (maybe_copy_unified_arg(0, (void *)&value, cudaMemcpyDeviceToHost) < 0)
     return cudaErrorDevicesUnavailable;
   if (maybe_copy_unified_arg(0, (void *)&extent, cudaMemcpyDeviceToHost) < 0)
+    return cudaErrorDevicesUnavailable;
+  return return_value;
+}
+
+cudaError_t cudaMemsetAsync(void *devPtr, int value, size_t count,
+                            cudaStream_t stream) {
+  if (maybe_copy_unified_arg(0, (void *)devPtr, cudaMemcpyHostToDevice) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(0, (void *)&value, cudaMemcpyHostToDevice) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(0, (void *)&count, cudaMemcpyHostToDevice) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(0, (void *)&stream, cudaMemcpyHostToDevice) < 0)
+    return cudaErrorDevicesUnavailable;
+  cudaError_t return_value;
+  if (rpc_start_request(0, RPC_cudaMemsetAsync) < 0 ||
+      rpc_write(0, &devPtr, sizeof(void *)) < 0 ||
+      rpc_write(0, &value, sizeof(int)) < 0 ||
+      rpc_write(0, &count, sizeof(size_t)) < 0 ||
+      rpc_write(0, &stream, sizeof(cudaStream_t)) < 0 ||
+      rpc_wait_for_response(0) < 0 || rpc_end_response(0, &return_value) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(0, (void *)devPtr, cudaMemcpyDeviceToHost) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(0, (void *)&value, cudaMemcpyDeviceToHost) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(0, (void *)&count, cudaMemcpyDeviceToHost) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(0, (void *)&stream, cudaMemcpyDeviceToHost) < 0)
+    return cudaErrorDevicesUnavailable;
+  return return_value;
+}
+
+cudaError_t cudaMemset2DAsync(void *devPtr, size_t pitch, int value,
+                              size_t width, size_t height,
+                              cudaStream_t stream) {
+  if (maybe_copy_unified_arg(0, (void *)devPtr, cudaMemcpyHostToDevice) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(0, (void *)&pitch, cudaMemcpyHostToDevice) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(0, (void *)&value, cudaMemcpyHostToDevice) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(0, (void *)&width, cudaMemcpyHostToDevice) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(0, (void *)&height, cudaMemcpyHostToDevice) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(0, (void *)&stream, cudaMemcpyHostToDevice) < 0)
+    return cudaErrorDevicesUnavailable;
+  cudaError_t return_value;
+  if (rpc_start_request(0, RPC_cudaMemset2DAsync) < 0 ||
+      rpc_write(0, &devPtr, sizeof(void *)) < 0 ||
+      rpc_write(0, &pitch, sizeof(size_t)) < 0 ||
+      rpc_write(0, &value, sizeof(int)) < 0 ||
+      rpc_write(0, &width, sizeof(size_t)) < 0 ||
+      rpc_write(0, &height, sizeof(size_t)) < 0 ||
+      rpc_write(0, &stream, sizeof(cudaStream_t)) < 0 ||
+      rpc_wait_for_response(0) < 0 || rpc_end_response(0, &return_value) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(0, (void *)devPtr, cudaMemcpyDeviceToHost) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(0, (void *)&pitch, cudaMemcpyDeviceToHost) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(0, (void *)&value, cudaMemcpyDeviceToHost) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(0, (void *)&width, cudaMemcpyDeviceToHost) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(0, (void *)&height, cudaMemcpyDeviceToHost) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(0, (void *)&stream, cudaMemcpyDeviceToHost) < 0)
     return cudaErrorDevicesUnavailable;
   return return_value;
 }
@@ -53323,7 +53449,11 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cudaMemcpyToSymbol", (void *)cudaMemcpyToSymbol},
     {"cudaMemcpy2DToArrayAsync", (void *)cudaMemcpy2DToArrayAsync},
     {"cudaMemcpyToSymbolAsync", (void *)cudaMemcpyToSymbolAsync},
+    {"cudaMemset", (void *)cudaMemset},
+    {"cudaMemset2D", (void *)cudaMemset2D},
     {"cudaMemset3D", (void *)cudaMemset3D},
+    {"cudaMemsetAsync", (void *)cudaMemsetAsync},
+    {"cudaMemset2DAsync", (void *)cudaMemset2DAsync},
     {"cudaMemset3DAsync", (void *)cudaMemset3DAsync},
     {"cudaGetSymbolAddress", (void *)cudaGetSymbolAddress},
     {"cudaGetSymbolSize", (void *)cudaGetSymbolSize},
