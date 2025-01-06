@@ -95,8 +95,8 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           prerelease: true
-          name: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.distro_version }}
-          tag_name: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.distro_version }}-latest
+          name: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.os_distro }}-${{ matrix.distro_version }}
+          tag_name: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.os_distro }}-${{ matrix.distro_version }}-latest
           files: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.distro_version }}.tar.gz
           fail_on_unmatched_files: true
 
@@ -146,7 +146,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           prerelease: true
-          name: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.distro_version }}
-          tag_name: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.distro_version }}-latest
+          name: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.os_distro }}-${{ matrix.distro_version }}
+          tag_name: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.os_distro }}-${{ matrix.distro_version }}-latest
           files: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.distro_version }}.tar.gz
           fail_on_unmatched_files: true
