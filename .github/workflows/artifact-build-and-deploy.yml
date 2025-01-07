@@ -25,7 +25,7 @@ jobs:
 
       - name: Run tests
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa root@100.118.7.128 'bash -s' <<'EOF'
+          ssh -o StrictHostKeyChecking=no root@100.118.7.128 'bash -s' <<'EOF'
           #!/bin/bash
 
           cd /home/brodey/scuda-latest
@@ -43,7 +43,7 @@ jobs:
             echo "Tests passed successfully!"
           fi
 
-          ps aux | grep 'server_[0-9]\+\.[0-9]\+' | grep -v grep | awk '{print $2}' | xargs kill
+          ps aux | grep -E 'server_[0-9]+\.[0-9]+' | grep -v grep | awk '{print $2}' | xargs -r kill -TERM
           echo "server process and its children terminated. exiting..."
 
           exit $test_exit_code
