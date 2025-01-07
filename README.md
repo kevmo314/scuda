@@ -18,66 +18,81 @@ https://github.com/user-attachments/assets/b2db5d82-f214-41cf-8274-b913c04080f9
 
 ## Local development
 
-Make the local dev script executable
+Building the binaries requires running codegen first. Scuda codegen reads the cuda dependency header files in order to generate rpc calls.
 
-```sh
-chmod +x local.sh
+To ensure codegen works properly, the proper cuda packages are installed on your OS. Take a look at our [Dockerfile](./Dockerfile.build) to see an example.
+
+Codegen requires cuBLAS, cuDNN, NVML, etc:
+
+```py
+cudnn_graph_header = find_header_file("cudnn_graph.h")
+cudnn_ops_header   = find_header_file("cudnn_ops.h")
+cuda_header        = find_header_file("cuda.h")
+cublas_header      = find_header_file("cublas_api.h")
+cudart_header      = find_header_file("cuda_runtime_api.h")
+annotations_header = find_header_file("annotations.h")
 ```
 
-Also helpful to alias this local script in your bash profile.
+### Run codegen
+
+```bash
+cd codegen && python3 ./codegen.py
+```
+
+Ensure there are no errors in the output of the codegen.
+
+### Run cmake
 
 ```sh
-alias s='/home/brodey/scuda-latest/local.sh'
+cmake .
+cmake --build .
 ```
+
+Cmake will generate a server and a client file depending on your cuda version.
+
+Example:
+`libscuda_12_0.so`, `server_12_0.so`
 
 It's required to run scuda server before initiating client commands.
 
 ```sh
-s server
+./local.sh server
+```
+
+The above command will grep for the generated libscuda + server files. You can also run the binaries directly.
+
+
+```sh
+./server_12_0.so
+```
+
+If successful, the server will start:
+
+```bash
+Server listening on port 14833...
 ```
 
 ## Running the client
 
-If the server above is running:
+Scuda requires you to preload the libscuda binary before executing any cuda commands.
+
+Once the server above is running:
 
 ```sh
-s run
+# update to your desired IP/port
+export SCUDA_SERVER=0.0.0.0
+
+LD_PRELOAD=./libscuda_12_0.so python3 -c "import torch; print(torch.cuda.is_available())"
+
+# or
+
+LD_PRELOAD=./libscuda_12_0.so nvidia-smi
 ```
 
-The above will rebuild the client and run nvidia-smi for you.
-
-## Installation
-
-To install SCUDA, run the server binary on the GPU host:
-
-```sh
-scuda -l 0.0.0.0:0
-```
-
-Then, on the client, run:
-
-```sh
-scuda <ip>:<port>
-```
-
-## Building from source
-
-```sh
-nvcc -shared -o libscuda.so client.c
-```
-
-This library can then be preloaded
-
-```sh
-LD_PRELOAD=libscuda.so nvidia-smi
-```
-
-By default, the client library passes calls through to the client. In other words,
-it does not connect to a server. To connect to a server, create a file with the
-host you wish to connect to
+You can also use the local shell script to run your commands.
 
 ```
-~/.config/scuda/host
+./local.sh run
 ```
 
 ## Motivations
