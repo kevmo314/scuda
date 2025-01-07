@@ -43523,7 +43523,6 @@ static RequestHandler opHandlers[] = {
     nullptr,
     nullptr,
     nullptr,
-    nullptr,
     handle_cudnnGetProperty,
     handle_cudnnCreate,
     handle_cudnnDestroy,

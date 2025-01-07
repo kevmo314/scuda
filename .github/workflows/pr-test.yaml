@@ -6,7 +6,6 @@ on:
   
 concurrency:
   group: ci
-  cancel-in-progress: true
 
 jobs:
   tailscale_job:
@@ -28,7 +27,7 @@ jobs:
 
       - name: Run tests
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa root@100.118.7.128 'bash -s' <<'EOF'
+          ssh -o StrictHostKeyChecking=no root@100.118.7.128 'bash -s' <<'EOF'
           #!/bin/bash
 
           cd /home/brodey/scuda-latest
@@ -39,14 +38,14 @@ jobs:
           sleep 5
 
           export SCUDA_SERVER=0.0.0.0:14834
-          test_output=$(./local.sh test)
+          test_output=$(./local.sh test_ci)
           test_exit_code=$?
 
           if [ $test_exit_code -eq 0 ]; then
             echo "Tests passed successfully!"
           fi
 
-          kill $(ps aux | grep '[s]cuda' | awk '{print $2}')
+          ps aux | grep -E 'server_[0-9]+\.[0-9]+' | grep -v grep | awk '{print $2}' | xargs -r kill -TERM
           echo "server process and its children terminated. exiting..."
 
           exit $test_exit_code

@@ -1,0 +1,153 @@
+name: Artifact deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          oauth-client-id: k4oU8AFYf121CNTRL
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci,tag:production
+
+      - name: Verify Tailscale IP
+        run: tailscale ip
+
+      - name: Run tests
+        run: |
+          ssh -o StrictHostKeyChecking=no root@100.118.7.128 'bash -s' <<'EOF'
+          #!/bin/bash
+
+          cd /home/brodey/scuda-latest
+          ls
+
+          SCUDA_PORT=14834 ./local.sh server &
+
+          sleep 5
+
+          export SCUDA_SERVER=0.0.0.0:14834
+          test_output=$(./local.sh test_ci)
+          test_exit_code=$?
+
+          if [ $test_exit_code -eq 0 ]; then
+            echo "Tests passed successfully!"
+          fi
+
+          ps aux | grep -E 'server_[0-9]+\.[0-9]+' | grep -v grep | awk '{print $2}' | xargs -r kill -TERM
+          echo "server process and its children terminated. exiting..."
+
+          exit $test_exit_code
+
+          EOF
+
+  build-artifacts-cudnn-9:
+    runs-on: ubuntu-latest
+    needs: tests
+    permissions: 
+      contents: write
+    strategy:
+      matrix:
+        cuda_version: [12.6.0]
+        distro_version: [22.04, 24.04]
+        os_distro: [ubuntu]
+        cudnn_tag: [cudnn]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build Docker Image
+        run: |
+          docker build . -f Dockerfile.build -t scuda-builder-${{ matrix.cuda_version }} \
+            --build-arg CUDA_VERSION=${{ matrix.cuda_version }} \
+            --build-arg DISTRO_VERSION=${{ matrix.distro_version }} \
+            --build-arg OS_DISTRO=${{ matrix.os_distro }} \
+            --build-arg CUDNN_TAG=${{ matrix.cudnn_tag }}
+
+      - name: Extract Artifacts from Docker
+        run: |
+          container_id=$(docker create scuda-builder-${{ matrix.cuda_version }})
+
+          major_minor_version=$(echo "${{ matrix.cuda_version }}" | awk -F. '{print $1 "." $2}')
+
+          docker cp $container_id:/home/libscuda_${major_minor_version}.so ./libscuda_${major_minor_version}_${{ matrix.os_distro }}_${{ matrix.distro_version }}.so
+          docker cp $container_id:/home/server_${major_minor_version}.so ./server_${major_minor_version}_${{ matrix.os_distro }}_${{ matrix.distro_version }}.so
+
+          docker rm $container_id
+
+          tar -czf scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.distro_version }}.tar.gz \
+            ./libscuda_${major_minor_version}_${{ matrix.os_distro }}_${{ matrix.distro_version }}.so \
+            ./server_${major_minor_version}_${{ matrix.os_distro }}_${{ matrix.distro_version }}.so
+
+          # list the files to verify they exist
+          ls -al
+
+      - name: Release artifacts
+        uses: softprops/action-gh-release@v1
+        with:
+          prerelease: true
+          name: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.os_distro }}-${{ matrix.distro_version }}
+          tag_name: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.os_distro }}-${{ matrix.distro_version }}-latest
+          files: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.distro_version }}.tar.gz
+          fail_on_unmatched_files: true
+
+  build-artifacts-cudnn-8:
+    runs-on: ubuntu-latest
+    permissions: 
+      contents: write
+    needs: tests
+    strategy:
+      matrix:
+        cuda_version: [12.0.0, 12.1.0, 12.2.2]
+        distro_version: [22.04]
+        os_distro: [ubuntu]
+        cudnn_tag: [cudnn8]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build Docker Image
+        run: |
+          docker build . -f Dockerfile.build -t scuda-builder-${{ matrix.cuda_version }} \
+            --build-arg CUDA_VERSION=${{ matrix.cuda_version }} \
+            --build-arg DISTRO_VERSION=${{ matrix.distro_version }} \
+            --build-arg OS_DISTRO=${{ matrix.os_distro }} \
+            --build-arg CUDNN_TAG=${{ matrix.cudnn_tag }}
+
+      - name: Extract Artifacts from Docker
+        run: |
+          container_id=$(docker create scuda-builder-${{ matrix.cuda_version }})
+
+          major_minor_version=$(echo "${{ matrix.cuda_version }}" | awk -F. '{print $1 "." $2}')
+
+          docker cp $container_id:/home/libscuda_${major_minor_version}.so ./libscuda_${major_minor_version}_${{ matrix.os_distro }}_${{ matrix.distro_version }}.so
+          docker cp $container_id:/home/server_${major_minor_version}.so ./server_${major_minor_version}_${{ matrix.os_distro }}_${{ matrix.distro_version }}.so
+
+          docker rm $container_id
+
+          tar -czf scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.distro_version }}.tar.gz \
+            ./libscuda_${major_minor_version}_${{ matrix.os_distro }}_${{ matrix.distro_version }}.so \
+            ./server_${major_minor_version}_${{ matrix.os_distro }}_${{ matrix.distro_version }}.so
+
+          # list the files to verify they exist
+          ls -al
+
+      - name: Release artifacts
+        uses: softprops/action-gh-release@v1
+        with:
+          prerelease: true
+          name: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.os_distro }}-${{ matrix.distro_version }}
+          tag_name: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.os_distro }}-${{ matrix.distro_version }}-latest
+          files: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.distro_version }}.tar.gz
+          fail_on_unmatched_files: true
