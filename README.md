@@ -16,6 +16,8 @@ You can view the docker image used [here](./deploy/Dockerfile.unified).
 
 https://github.com/user-attachments/assets/b2db5d82-f214-41cf-8274-b913c04080f9
 
+You can see a list of some currently working examples in the [test folder](./test/).
+
 ## Local development
 
 Building the binaries requires running codegen first. Scuda codegen reads the cuda dependency header files in order to generate rpc calls.
