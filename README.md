@@ -20,7 +20,7 @@ https://github.com/user-attachments/assets/b2db5d82-f214-41cf-8274-b913c04080f9
 
 Building the binaries requires running codegen first. Scuda codegen reads the cuda dependency header files in order to generate rpc calls.
 
-To ensure codegen works properly, the the proper cuda packages need to be installed on your OS. Take a look at our [Dockerfile](./Dockerfile.build) to see an example.
+To ensure codegen works properly, the proper cuda packages need to be installed on your OS. Take a look at our [Dockerfile](./Dockerfile.build) to see an example.
 
 Codegen requires cuBLAS, cuDNN, NVML, etc:
 
