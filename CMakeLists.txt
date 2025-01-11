@@ -98,5 +98,9 @@ target_compile_options(${SERVER_OUTPUT} PRIVATE
     $<$<COMPILE_LANGUAGE:CUDA>: --compiler-options=-fPIC,-g,-Wno-deprecated-declarations>
 )
 
+target_compile_options(${CLIENT_OUTPUT} PRIVATE
+    $<$<COMPILE_LANGUAGE:CXX>: -Wno-deprecated-declarations>
+)
+
 message(STATUS "Building client output: ${CLIENT_OUTPUT}")
 message(STATUS "Building server output: ${SERVER_OUTPUT}")
