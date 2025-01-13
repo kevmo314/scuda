@@ -295,7 +295,6 @@ extern "C" void __cudaRegisterFunction(void **fatCubinHandle,
                                        dim3 *gDim, int *wSize);
 
 int handle___cudaRegisterFunction(void *conn) {
-  void *res;
   void **fatCubinHandle;
   char *hostFun;
   size_t deviceFunLen;
@@ -353,7 +352,6 @@ ERROR_0:
 extern "C" void __cudaRegisterFatBinaryEnd(void **fatCubinHandle);
 
 int handle___cudaRegisterFatBinaryEnd(void *conn) {
-  void *res;
   void **fatCubinHandle;
 
   // Read the fatCubinHandle from the client
@@ -441,7 +439,6 @@ extern "C" void __cudaRegisterVar(void **fatCubinHandle, char *hostVar,
                                   int global);
 
 int handle___cudaRegisterVar(void *conn) {
-  void *res;
   void **fatCubinHandle;
   char *hostVar;
   char *deviceAddress;

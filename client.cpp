@@ -1,4 +1,3 @@
-
 #include <arpa/inet.h>
 #include <cstring>
 #include <cuda.h>
@@ -59,7 +58,8 @@ static void segfault(int sig, siginfo_t *info, void *unused) {
   faulting_address = info->si_addr;
 
   for (const auto &[ptr, sz] : conns[0].unified_devices) {
-    if (ptr <= faulting_address && faulting_address < (ptr + sz)) {
+    if ((uintptr_t)ptr <= (uintptr_t)faulting_address &&
+        (uintptr_t)faulting_address < ((uintptr_t)ptr + sz)) {
       // ensure we assign memory as close to the faulting address as possible...
       // by masking via the allocated unified memory size.
       uintptr_t aligned = (uintptr_t)faulting_address & ~(sz - 1);

@@ -96,8 +96,8 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           prerelease: true
-          name: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.os_distro }}-${{ matrix.distro_version }}-$(date +%Y-%m-%d-%H-%M)
-          tag_name: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.os_distro }}-${{ matrix.distro_version }}-latest-$(date +%Y-%m-%d-%H-%M)
+          name: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.os_distro }}-${{ matrix.distro_version }}
+          tag_name: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.os_distro }}-${{ matrix.distro_version }}
           files: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.distro_version }}.tar.gz
           fail_on_unmatched_files: true
 
@@ -147,7 +147,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           prerelease: true
-          name: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.os_distro }}-${{ matrix.distro_version }}-$(date +%Y-%m-%d-%H-%M)
-          tag_name: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.os_distro }}-${{ matrix.distro_version }}-latest-$(date +%Y-%m-%d-%H-%M)
+          name: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.os_distro }}-${{ matrix.distro_version }}
+          tag_name: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.os_distro }}-${{ matrix.distro_version }}
           files: scuda-artifacts-${{ matrix.cuda_version }}-${{ matrix.distro_version }}.tar.gz
           fail_on_unmatched_files: true
