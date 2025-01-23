@@ -773,7 +773,7 @@ cudaError_t cudaHostUnregister(void* ptr) {
    *  "automatically accelerate calls to functions such as cudaMemcpy().
    *  Since the memory can be accessed directly by the device, it can be read or written with much higher bandwidth than pageable memory that has not been registered".
    * 
-   * Given that Scuda memcpy's happen over the wire, so there's no real inherint benefit to creating page-locked memory on scuda clients.
+   * Given that Scuda memcpy's happen over the wire, so there's no real benefit to creating page-locked memory on scuda clients.
    * @TODO: ponder this more down the road.
    */
   return cudaSuccess;
