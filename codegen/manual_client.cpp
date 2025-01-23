@@ -31,10 +31,6 @@ extern void *maybe_free_unified_mem(const int index, void *ptr);
 extern void allocate_unified_mem_pointer(const int index, void *dev_ptr,
                                          size_t size);
 
-extern void allocate_host_registers(const int index, void *host_ptr);
-
-extern void* maybe_free_host_register(const int index,void *dev_ptr);
-
 #define MAX_FUNCTION_NAME 1024
 #define MAX_ARGS 128
 
@@ -772,30 +768,17 @@ cudaError_t cudaMallocManaged(void **devPtr, size_t size, unsigned int flags) {
 }
 
 cudaError_t cudaHostUnregister(void* ptr) {
-  void *dev_ptr = maybe_free_host_register(0, ptr);
-
-  cudaError_t res = cudaFree(dev_ptr);
-
-  if (res != cudaSuccess)
-    return res;
-
+  /**
+   * The benefit of page-locked mem is to:
+   *  "automatically accelerate calls to functions such as cudaMemcpy().
+   *  Since the memory can be accessed directly by the device, it can be read or written with much higher bandwidth than pageable memory that has not been registered".
+   * 
+   * Given that Scuda memcpy's happen over the wire, so there's no real inherint benefit to creating page-locked memory on scuda clients.
+   * @TODO: ponder this more down the road.
+   */
   return cudaSuccess;
 }
 
 cudaError_t cudaHostRegister(void *devPtr, size_t size, unsigned int flags) {
-  /**
-   * @TODO: Not exactly sure this is quite useful right now. Need to ponder this.
-   */
-  cudaError_t err = cudaMalloc((void **)&devPtr, size);
-  if (err != cudaSuccess) {
-    std::cerr << "cudaMalloc failed: " << cudaGetErrorString(err) << std::endl;
-    return err;
-  }
-
-  std::cout << "allocated host register " << devPtr << " size: " << size
-            << std::endl;
-
-  allocate_host_registers(0, devPtr);
-
   return cudaSuccess;
 }
