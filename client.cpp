@@ -8,6 +8,7 @@
 #include <netdb.h>
 #include <netinet/tcp.h>
 #include <nvml.h>
+#include <list>
 #include <pthread.h>
 #include <stdio.h>
 #include <string.h>
@@ -42,6 +43,7 @@ typedef struct {
   int write_iov_count = 0;
 
   std::unordered_map<void *, size_t> unified_devices;
+  std::list<void *> host_registers;
 } conn_t;
 
 pthread_mutex_t conn_mutex;
@@ -322,6 +324,11 @@ void allocate_unified_mem_pointer(const int index, void *dev_ptr, size_t size) {
   conns[index].unified_devices.insert({dev_ptr, size});
 }
 
+void allocate_host_registers(const int index, void *host_ptr) {
+  // allocate new space for pointer mapping
+  conns[index].host_registers.push_back({host_ptr});
+}
+
 cudaError_t cuda_memcpy_unified_ptrs(const int index, cudaMemcpyKind kind) {
   for (const auto &[ptr, sz] : conns[index].unified_devices) {
     size_t size = reinterpret_cast<size_t>(sz);
@@ -332,6 +339,18 @@ cudaError_t cuda_memcpy_unified_ptrs(const int index, cudaMemcpyKind kind) {
       return res;
   }
   return cudaSuccess;
+}
+
+void* maybe_free_host_register(const int index, void *ptr) {
+  auto &regs = conns[index].host_registers;
+  
+  for (auto it = regs.begin(); it != regs.end(); ++it) {
+    if (*it == ptr) {
+      return ptr;
+    }
+  }
+
+  return nullptr;
 }
 
 void maybe_free_unified_mem(const int index, void *ptr) {
