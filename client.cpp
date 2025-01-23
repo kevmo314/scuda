@@ -8,7 +8,6 @@
 #include <netdb.h>
 #include <netinet/tcp.h>
 #include <nvml.h>
-#include <list>
 #include <pthread.h>
 #include <stdio.h>
 #include <string.h>
