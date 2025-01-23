@@ -767,13 +767,16 @@ cudaError_t cudaMallocManaged(void **devPtr, size_t size, unsigned int flags) {
   return cudaSuccess;
 }
 
-cudaError_t cudaHostUnregister(void* ptr) {
+cudaError_t cudaHostUnregister(void *ptr) {
   /**
    * The benefit of page-locked mem is to:
    *  "automatically accelerate calls to functions such as cudaMemcpy().
-   *  Since the memory can be accessed directly by the device, it can be read or written with much higher bandwidth than pageable memory that has not been registered".
-   * 
-   * Given that Scuda memcpy's happen over the wire, so there's no real benefit to creating page-locked memory on scuda clients.
+   *  Since the memory can be accessed directly by the device, it can be read or
+   * written with much higher bandwidth than pageable memory that has not been
+   * registered".
+   *
+   * Given that Scuda memcpy's happen over the wire, so there's no real benefit
+   * to creating page-locked memory on scuda clients.
    * @TODO: ponder this more down the road.
    */
   return cudaSuccess;
