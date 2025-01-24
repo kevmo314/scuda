@@ -2840,31 +2840,6 @@ ERROR_0:
   return -1;
 }
 
-int handle_nvmlDeviceGetDriverModel(void *conn) {
-  nvmlDevice_t device;
-  nvmlDriverModel_t current;
-  nvmlDriverModel_t pending;
-  int request_id;
-  nvmlReturn_t scuda_intercept_result;
-  if (rpc_read(conn, &device, sizeof(nvmlDevice_t)) < 0 || false)
-    goto ERROR_0;
-
-  request_id = rpc_end_request(conn);
-  if (request_id < 0)
-    goto ERROR_0;
-  scuda_intercept_result = nvmlDeviceGetDriverModel(device, &current, &pending);
-
-  if (rpc_start_response(conn, request_id) < 0 ||
-      rpc_write(conn, &current, sizeof(nvmlDriverModel_t)) < 0 ||
-      rpc_write(conn, &pending, sizeof(nvmlDriverModel_t)) < 0 ||
-      rpc_end_response(conn, &scuda_intercept_result) < 0)
-    goto ERROR_0;
-
-  return 0;
-ERROR_0:
-  return -1;
-}
-
 int handle_nvmlDeviceGetVbiosVersion(void *conn) {
   nvmlDevice_t device;
   unsigned int length;
@@ -18074,30 +18049,6 @@ ERROR_0:
   return -1;
 }
 
-int handle_cudaMallocHost(void *conn) {
-  void *ptr;
-  size_t size;
-  int request_id;
-  cudaError_t scuda_intercept_result;
-  if (rpc_read(conn, &ptr, sizeof(void *)) < 0 ||
-      rpc_read(conn, &size, sizeof(size_t)) < 0 || false)
-    goto ERROR_0;
-
-  request_id = rpc_end_request(conn);
-  if (request_id < 0)
-    goto ERROR_0;
-  scuda_intercept_result = cudaMallocHost(&ptr, size);
-
-  if (rpc_start_response(conn, request_id) < 0 ||
-      rpc_write(conn, &ptr, sizeof(void *)) < 0 ||
-      rpc_end_response(conn, &scuda_intercept_result) < 0)
-    goto ERROR_0;
-
-  return 0;
-ERROR_0:
-  return -1;
-}
-
 int handle_cudaMallocPitch(void *conn) {
   void *devPtr;
   size_t pitch;
@@ -19989,19 +19940,27 @@ ERROR_0:
 }
 
 int handle_cudaGraphAddKernelNode(void *conn) {
+  size_t numDependencies;
   cudaGraphNode_t pGraphNode;
   cudaGraph_t graph;
-  const cudaGraphNode_t *pDependencies;
-  size_t numDependencies;
-  const struct cudaKernelNodeParams *pNodeParams;
+  cudaGraphNode_t *pDependencies_null_check;
+  cudaGraphNode_t pDependencies;
+  struct cudaKernelNodeParams *pNodeParams_null_check;
+  struct cudaKernelNodeParams pNodeParams;
   int request_id;
   cudaError_t scuda_intercept_result;
-  if (rpc_read(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+  if (rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+      rpc_read(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
       rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
-      rpc_read(conn, &pDependencies, sizeof(const cudaGraphNode_t *)) < 0 ||
-      rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
-      rpc_read(conn, &pNodeParams,
+      rpc_read(conn, &pDependencies_null_check,
+               sizeof(const cudaGraphNode_t *)) < 0 ||
+      (pDependencies_null_check &&
+       rpc_read(conn, &pDependencies, sizeof(const cudaGraphNode_t)) < 0) ||
+      rpc_read(conn, &pNodeParams_null_check,
                sizeof(const struct cudaKernelNodeParams *)) < 0 ||
+      (pNodeParams_null_check &&
+       rpc_read(conn, &pNodeParams, sizeof(const struct cudaKernelNodeParams)) <
+           0) ||
       false)
     goto ERROR_0;
 
@@ -20009,7 +19968,7 @@ int handle_cudaGraphAddKernelNode(void *conn) {
   if (request_id < 0)
     goto ERROR_0;
   scuda_intercept_result = cudaGraphAddKernelNode(
-      &pGraphNode, graph, pDependencies, numDependencies, pNodeParams);
+      &pGraphNode, graph, &pDependencies, numDependencies, &pNodeParams);
 
   if (rpc_start_response(conn, request_id) < 0 ||
       rpc_write(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
@@ -20148,19 +20107,27 @@ ERROR_0:
 }
 
 int handle_cudaGraphAddMemcpyNode(void *conn) {
+  size_t numDependencies;
   cudaGraphNode_t pGraphNode;
   cudaGraph_t graph;
-  const cudaGraphNode_t *pDependencies;
-  size_t numDependencies;
-  const struct cudaMemcpy3DParms *pCopyParams;
+  cudaGraphNode_t *pDependencies_null_check;
+  cudaGraphNode_t pDependencies;
+  struct cudaMemcpy3DParms *pCopyParams_null_check;
+  struct cudaMemcpy3DParms pCopyParams;
   int request_id;
   cudaError_t scuda_intercept_result;
-  if (rpc_read(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+  if (rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+      rpc_read(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
       rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
-      rpc_read(conn, &pDependencies, sizeof(const cudaGraphNode_t *)) < 0 ||
-      rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
-      rpc_read(conn, &pCopyParams, sizeof(const struct cudaMemcpy3DParms *)) <
-          0 ||
+      rpc_read(conn, &pDependencies_null_check,
+               sizeof(const cudaGraphNode_t *)) < 0 ||
+      (pDependencies_null_check &&
+       rpc_read(conn, &pDependencies, sizeof(const cudaGraphNode_t)) < 0) ||
+      rpc_read(conn, &pCopyParams_null_check,
+               sizeof(const struct cudaMemcpy3DParms *)) < 0 ||
+      (pCopyParams_null_check &&
+       rpc_read(conn, &pCopyParams, sizeof(const struct cudaMemcpy3DParms)) <
+           0) ||
       false)
     goto ERROR_0;
 
@@ -20168,7 +20135,7 @@ int handle_cudaGraphAddMemcpyNode(void *conn) {
   if (request_id < 0)
     goto ERROR_0;
   scuda_intercept_result = cudaGraphAddMemcpyNode(
-      &pGraphNode, graph, pDependencies, numDependencies, pCopyParams);
+      &pGraphNode, graph, &pDependencies, numDependencies, &pCopyParams);
 
   if (rpc_start_response(conn, request_id) < 0 ||
       rpc_write(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
@@ -20303,19 +20270,27 @@ ERROR_0:
 }
 
 int handle_cudaGraphAddMemsetNode(void *conn) {
+  size_t numDependencies;
   cudaGraphNode_t pGraphNode;
   cudaGraph_t graph;
-  const cudaGraphNode_t *pDependencies;
-  size_t numDependencies;
-  const struct cudaMemsetParams *pMemsetParams;
+  cudaGraphNode_t *pDependencies_null_check;
+  cudaGraphNode_t pDependencies;
+  struct cudaMemsetParams *pMemsetParams_null_check;
+  struct cudaMemsetParams pMemsetParams;
   int request_id;
   cudaError_t scuda_intercept_result;
-  if (rpc_read(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+  if (rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+      rpc_read(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
       rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
-      rpc_read(conn, &pDependencies, sizeof(const cudaGraphNode_t *)) < 0 ||
-      rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
-      rpc_read(conn, &pMemsetParams, sizeof(const struct cudaMemsetParams *)) <
-          0 ||
+      rpc_read(conn, &pDependencies_null_check,
+               sizeof(const cudaGraphNode_t *)) < 0 ||
+      (pDependencies_null_check &&
+       rpc_read(conn, &pDependencies, sizeof(const cudaGraphNode_t)) < 0) ||
+      rpc_read(conn, &pMemsetParams_null_check,
+               sizeof(const struct cudaMemsetParams *)) < 0 ||
+      (pMemsetParams_null_check &&
+       rpc_read(conn, &pMemsetParams, sizeof(const struct cudaMemsetParams)) <
+           0) ||
       false)
     goto ERROR_0;
 
@@ -20323,7 +20298,7 @@ int handle_cudaGraphAddMemsetNode(void *conn) {
   if (request_id < 0)
     goto ERROR_0;
   scuda_intercept_result = cudaGraphAddMemsetNode(
-      &pGraphNode, graph, pDependencies, numDependencies, pMemsetParams);
+      &pGraphNode, graph, &pDependencies, numDependencies, &pMemsetParams);
 
   if (rpc_start_response(conn, request_id) < 0 ||
       rpc_write(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
@@ -42297,7 +42272,6 @@ static RequestHandler opHandlers[] = {
     handle_nvmlDeviceGetDecoderUtilization,
     handle_nvmlDeviceGetFBCStats,
     handle_nvmlDeviceGetFBCSessions,
-    handle_nvmlDeviceGetDriverModel,
     handle_nvmlDeviceGetVbiosVersion,
     handle_nvmlDeviceGetBridgeChipInfo,
     handle_nvmlDeviceGetComputeRunningProcesses_v3,

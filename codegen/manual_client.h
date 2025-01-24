@@ -4,6 +4,7 @@
 #include <nvml.h>
 
 cudaError_t cudaFree(void *devPtr);
+cudaError_t cudaMallocHost(void **ptr, size_t size);
 cudaError_t cudaMallocManaged(void **devPtr, size_t size, unsigned int flags);
 cudaError_t cudaMemcpy(void *dst, const void *src, size_t count,
                        enum cudaMemcpyKind kind);

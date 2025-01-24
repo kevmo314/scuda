@@ -1,7 +1,7 @@
 #include <cassert>
 #include <cublas_v2.h>
 #include <cuda.h>
-#include <cuda_runtime_api.h>
+#include <cuda_runtime.h>
 #include <dlfcn.h>
 #include <iostream>
 #include <nvml.h>
@@ -783,5 +783,14 @@ cudaError_t cudaHostUnregister(void *ptr) {
 }
 
 cudaError_t cudaHostRegister(void *devPtr, size_t size, unsigned int flags) {
+  return cudaSuccess;
+}
+
+cudaError_t cudaMallocHost(void **ptr, size_t size) {
+  std::cout << "allocated cudaMallocHost device mem " << std::endl;
+  void *host = (void *)malloc(size);
+
+  *ptr = host;
+
   return cudaSuccess;
 }

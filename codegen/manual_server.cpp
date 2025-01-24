@@ -573,3 +573,5 @@ int handle_cudaMallocManaged(void *conn) {
 ERROR_0:
   return -1;
 }
+
+int handle_cudaMallocHost(void *conn) { return 0; }

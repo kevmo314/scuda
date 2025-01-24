@@ -2831,32 +2831,6 @@ nvmlReturn_t nvmlDeviceGetFBCSessions(nvmlDevice_t device,
   return return_value;
 }
 
-nvmlReturn_t nvmlDeviceGetDriverModel(nvmlDevice_t device,
-                                      nvmlDriverModel_t *current,
-                                      nvmlDriverModel_t *pending) {
-  if (maybe_copy_unified_arg(0, (void *)&device, cudaMemcpyHostToDevice) < 0)
-    return NVML_ERROR_GPU_IS_LOST;
-  if (maybe_copy_unified_arg(0, (void *)current, cudaMemcpyHostToDevice) < 0)
-    return NVML_ERROR_GPU_IS_LOST;
-  if (maybe_copy_unified_arg(0, (void *)pending, cudaMemcpyHostToDevice) < 0)
-    return NVML_ERROR_GPU_IS_LOST;
-  nvmlReturn_t return_value;
-  if (rpc_start_request(0, RPC_nvmlDeviceGetDriverModel) < 0 ||
-      rpc_write(0, &device, sizeof(nvmlDevice_t)) < 0 ||
-      rpc_wait_for_response(0) < 0 ||
-      rpc_read(0, current, sizeof(nvmlDriverModel_t)) < 0 ||
-      rpc_read(0, pending, sizeof(nvmlDriverModel_t)) < 0 ||
-      rpc_end_response(0, &return_value) < 0)
-    return NVML_ERROR_GPU_IS_LOST;
-  if (maybe_copy_unified_arg(0, (void *)&device, cudaMemcpyDeviceToHost) < 0)
-    return NVML_ERROR_GPU_IS_LOST;
-  if (maybe_copy_unified_arg(0, (void *)current, cudaMemcpyDeviceToHost) < 0)
-    return NVML_ERROR_GPU_IS_LOST;
-  if (maybe_copy_unified_arg(0, (void *)pending, cudaMemcpyDeviceToHost) < 0)
-    return NVML_ERROR_GPU_IS_LOST;
-  return return_value;
-}
-
 nvmlReturn_t nvmlDeviceGetVbiosVersion(nvmlDevice_t device, char *version,
                                        unsigned int length) {
   if (maybe_copy_unified_arg(0, (void *)&device, cudaMemcpyHostToDevice) < 0)
@@ -17734,25 +17708,6 @@ cudaError_t cudaMalloc(void **devPtr, size_t size) {
   return return_value;
 }
 
-cudaError_t cudaMallocHost(void **ptr, size_t size) {
-  if (maybe_copy_unified_arg(0, (void *)ptr, cudaMemcpyHostToDevice) < 0)
-    return cudaErrorDevicesUnavailable;
-  if (maybe_copy_unified_arg(0, (void *)&size, cudaMemcpyHostToDevice) < 0)
-    return cudaErrorDevicesUnavailable;
-  cudaError_t return_value;
-  if (rpc_start_request(0, RPC_cudaMallocHost) < 0 ||
-      rpc_write(0, ptr, sizeof(void *)) < 0 ||
-      rpc_write(0, &size, sizeof(size_t)) < 0 || rpc_wait_for_response(0) < 0 ||
-      rpc_read(0, ptr, sizeof(void *)) < 0 ||
-      rpc_end_response(0, &return_value) < 0)
-    return cudaErrorDevicesUnavailable;
-  if (maybe_copy_unified_arg(0, (void *)ptr, cudaMemcpyDeviceToHost) < 0)
-    return cudaErrorDevicesUnavailable;
-  if (maybe_copy_unified_arg(0, (void *)&size, cudaMemcpyDeviceToHost) < 0)
-    return cudaErrorDevicesUnavailable;
-  return return_value;
-}
-
 cudaError_t cudaMallocPitch(void **devPtr, size_t *pitch, size_t width,
                             size_t height) {
   if (maybe_copy_unified_arg(0, (void *)devPtr, cudaMemcpyHostToDevice) < 0)
@@ -19691,30 +19646,38 @@ cudaGraphAddKernelNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph,
                        const cudaGraphNode_t *pDependencies,
                        size_t numDependencies,
                        const struct cudaKernelNodeParams *pNodeParams) {
+  if (maybe_copy_unified_arg(0, (void *)&numDependencies,
+                             cudaMemcpyHostToDevice) < 0)
+    return cudaErrorDevicesUnavailable;
   if (maybe_copy_unified_arg(0, (void *)pGraphNode, cudaMemcpyHostToDevice) < 0)
     return cudaErrorDevicesUnavailable;
   if (maybe_copy_unified_arg(0, (void *)&graph, cudaMemcpyHostToDevice) < 0)
     return cudaErrorDevicesUnavailable;
-  if (maybe_copy_unified_arg(0, (void *)pDependencies, cudaMemcpyHostToDevice) <
+  if (maybe_copy_unified_arg(0, (void *)pDependencies, cudaMemcpyDeviceToHost) <
       0)
     return cudaErrorDevicesUnavailable;
-  if (maybe_copy_unified_arg(0, (void *)&numDependencies,
-                             cudaMemcpyHostToDevice) < 0)
-    return cudaErrorDevicesUnavailable;
-  if (maybe_copy_unified_arg(0, (void *)pNodeParams, cudaMemcpyHostToDevice) <
+  if (maybe_copy_unified_arg(0, (void *)pNodeParams, cudaMemcpyDeviceToHost) <
       0)
     return cudaErrorDevicesUnavailable;
   cudaError_t return_value;
   if (rpc_start_request(0, RPC_cudaGraphAddKernelNode) < 0 ||
+      rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
       rpc_write(0, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
       rpc_write(0, &graph, sizeof(cudaGraph_t)) < 0 ||
       rpc_write(0, &pDependencies, sizeof(const cudaGraphNode_t *)) < 0 ||
-      rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
+      (pDependencies != nullptr &&
+       rpc_write(0, pDependencies, sizeof(const cudaGraphNode_t)) < 0) ||
       rpc_write(0, &pNodeParams, sizeof(const struct cudaKernelNodeParams *)) <
           0 ||
+      (pNodeParams != nullptr &&
+       rpc_write(0, pNodeParams, sizeof(const struct cudaKernelNodeParams)) <
+           0) ||
       rpc_wait_for_response(0) < 0 ||
       rpc_read(0, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
       rpc_end_response(0, &return_value) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(0, (void *)&numDependencies,
+                             cudaMemcpyDeviceToHost) < 0)
     return cudaErrorDevicesUnavailable;
   if (maybe_copy_unified_arg(0, (void *)pGraphNode, cudaMemcpyDeviceToHost) < 0)
     return cudaErrorDevicesUnavailable;
@@ -19722,9 +19685,6 @@ cudaGraphAddKernelNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph,
     return cudaErrorDevicesUnavailable;
   if (maybe_copy_unified_arg(0, (void *)pDependencies, cudaMemcpyDeviceToHost) <
       0)
-    return cudaErrorDevicesUnavailable;
-  if (maybe_copy_unified_arg(0, (void *)&numDependencies,
-                             cudaMemcpyDeviceToHost) < 0)
     return cudaErrorDevicesUnavailable;
   if (maybe_copy_unified_arg(0, (void *)pNodeParams, cudaMemcpyDeviceToHost) <
       0)
@@ -19857,30 +19817,37 @@ cudaGraphAddMemcpyNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph,
                        const cudaGraphNode_t *pDependencies,
                        size_t numDependencies,
                        const struct cudaMemcpy3DParms *pCopyParams) {
+  if (maybe_copy_unified_arg(0, (void *)&numDependencies,
+                             cudaMemcpyHostToDevice) < 0)
+    return cudaErrorDevicesUnavailable;
   if (maybe_copy_unified_arg(0, (void *)pGraphNode, cudaMemcpyHostToDevice) < 0)
     return cudaErrorDevicesUnavailable;
   if (maybe_copy_unified_arg(0, (void *)&graph, cudaMemcpyHostToDevice) < 0)
     return cudaErrorDevicesUnavailable;
-  if (maybe_copy_unified_arg(0, (void *)pDependencies, cudaMemcpyHostToDevice) <
+  if (maybe_copy_unified_arg(0, (void *)pDependencies, cudaMemcpyDeviceToHost) <
       0)
     return cudaErrorDevicesUnavailable;
-  if (maybe_copy_unified_arg(0, (void *)&numDependencies,
-                             cudaMemcpyHostToDevice) < 0)
-    return cudaErrorDevicesUnavailable;
-  if (maybe_copy_unified_arg(0, (void *)pCopyParams, cudaMemcpyHostToDevice) <
+  if (maybe_copy_unified_arg(0, (void *)pCopyParams, cudaMemcpyDeviceToHost) <
       0)
     return cudaErrorDevicesUnavailable;
   cudaError_t return_value;
   if (rpc_start_request(0, RPC_cudaGraphAddMemcpyNode) < 0 ||
+      rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
       rpc_write(0, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
       rpc_write(0, &graph, sizeof(cudaGraph_t)) < 0 ||
       rpc_write(0, &pDependencies, sizeof(const cudaGraphNode_t *)) < 0 ||
-      rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
+      (pDependencies != nullptr &&
+       rpc_write(0, pDependencies, sizeof(const cudaGraphNode_t)) < 0) ||
       rpc_write(0, &pCopyParams, sizeof(const struct cudaMemcpy3DParms *)) <
           0 ||
+      (pCopyParams != nullptr &&
+       rpc_write(0, pCopyParams, sizeof(const struct cudaMemcpy3DParms)) < 0) ||
       rpc_wait_for_response(0) < 0 ||
       rpc_read(0, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
       rpc_end_response(0, &return_value) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(0, (void *)&numDependencies,
+                             cudaMemcpyDeviceToHost) < 0)
     return cudaErrorDevicesUnavailable;
   if (maybe_copy_unified_arg(0, (void *)pGraphNode, cudaMemcpyDeviceToHost) < 0)
     return cudaErrorDevicesUnavailable;
@@ -19888,9 +19855,6 @@ cudaGraphAddMemcpyNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph,
     return cudaErrorDevicesUnavailable;
   if (maybe_copy_unified_arg(0, (void *)pDependencies, cudaMemcpyDeviceToHost) <
       0)
-    return cudaErrorDevicesUnavailable;
-  if (maybe_copy_unified_arg(0, (void *)&numDependencies,
-                             cudaMemcpyDeviceToHost) < 0)
     return cudaErrorDevicesUnavailable;
   if (maybe_copy_unified_arg(0, (void *)pCopyParams, cudaMemcpyDeviceToHost) <
       0)
@@ -20057,30 +20021,38 @@ cudaGraphAddMemsetNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph,
                        const cudaGraphNode_t *pDependencies,
                        size_t numDependencies,
                        const struct cudaMemsetParams *pMemsetParams) {
+  if (maybe_copy_unified_arg(0, (void *)&numDependencies,
+                             cudaMemcpyHostToDevice) < 0)
+    return cudaErrorDevicesUnavailable;
   if (maybe_copy_unified_arg(0, (void *)pGraphNode, cudaMemcpyHostToDevice) < 0)
     return cudaErrorDevicesUnavailable;
   if (maybe_copy_unified_arg(0, (void *)&graph, cudaMemcpyHostToDevice) < 0)
     return cudaErrorDevicesUnavailable;
-  if (maybe_copy_unified_arg(0, (void *)pDependencies, cudaMemcpyHostToDevice) <
+  if (maybe_copy_unified_arg(0, (void *)pDependencies, cudaMemcpyDeviceToHost) <
       0)
     return cudaErrorDevicesUnavailable;
-  if (maybe_copy_unified_arg(0, (void *)&numDependencies,
-                             cudaMemcpyHostToDevice) < 0)
-    return cudaErrorDevicesUnavailable;
-  if (maybe_copy_unified_arg(0, (void *)pMemsetParams, cudaMemcpyHostToDevice) <
+  if (maybe_copy_unified_arg(0, (void *)pMemsetParams, cudaMemcpyDeviceToHost) <
       0)
     return cudaErrorDevicesUnavailable;
   cudaError_t return_value;
   if (rpc_start_request(0, RPC_cudaGraphAddMemsetNode) < 0 ||
+      rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
       rpc_write(0, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
       rpc_write(0, &graph, sizeof(cudaGraph_t)) < 0 ||
       rpc_write(0, &pDependencies, sizeof(const cudaGraphNode_t *)) < 0 ||
-      rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
+      (pDependencies != nullptr &&
+       rpc_write(0, pDependencies, sizeof(const cudaGraphNode_t)) < 0) ||
       rpc_write(0, &pMemsetParams, sizeof(const struct cudaMemsetParams *)) <
           0 ||
+      (pMemsetParams != nullptr &&
+       rpc_write(0, pMemsetParams, sizeof(const struct cudaMemsetParams)) <
+           0) ||
       rpc_wait_for_response(0) < 0 ||
       rpc_read(0, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
       rpc_end_response(0, &return_value) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(0, (void *)&numDependencies,
+                             cudaMemcpyDeviceToHost) < 0)
     return cudaErrorDevicesUnavailable;
   if (maybe_copy_unified_arg(0, (void *)pGraphNode, cudaMemcpyDeviceToHost) < 0)
     return cudaErrorDevicesUnavailable;
@@ -20088,9 +20060,6 @@ cudaGraphAddMemsetNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph,
     return cudaErrorDevicesUnavailable;
   if (maybe_copy_unified_arg(0, (void *)pDependencies, cudaMemcpyDeviceToHost) <
       0)
-    return cudaErrorDevicesUnavailable;
-  if (maybe_copy_unified_arg(0, (void *)&numDependencies,
-                             cudaMemcpyDeviceToHost) < 0)
     return cudaErrorDevicesUnavailable;
   if (maybe_copy_unified_arg(0, (void *)pMemsetParams, cudaMemcpyDeviceToHost) <
       0)
@@ -52717,7 +52686,6 @@ std::unordered_map<std::string, void *> functionMap = {
      (void *)nvmlDeviceGetDecoderUtilization},
     {"nvmlDeviceGetFBCStats", (void *)nvmlDeviceGetFBCStats},
     {"nvmlDeviceGetFBCSessions", (void *)nvmlDeviceGetFBCSessions},
-    {"nvmlDeviceGetDriverModel", (void *)nvmlDeviceGetDriverModel},
     {"nvmlDeviceGetVbiosVersion", (void *)nvmlDeviceGetVbiosVersion},
     {"nvmlDeviceGetBridgeChipInfo", (void *)nvmlDeviceGetBridgeChipInfo},
     {"nvmlDeviceGetComputeRunningProcesses_v3",
@@ -53420,7 +53388,6 @@ std::unordered_map<std::string, void *> functionMap = {
      (void *)cudaOccupancyMaxPotentialClusterSize},
     {"cudaOccupancyMaxActiveClusters", (void *)cudaOccupancyMaxActiveClusters},
     {"cudaMalloc", (void *)cudaMalloc},
-    {"cudaMallocHost", (void *)cudaMallocHost},
     {"cudaMallocPitch", (void *)cudaMallocPitch},
     {"cudaMallocArray", (void *)cudaMallocArray},
     {"cudaFreeHost", (void *)cudaFreeHost},
@@ -54175,6 +54142,7 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cuMemAllocFromPoolAsync_ptsz", (void *)cuMemAllocFromPoolAsync},
     {"cudaFree", (void *)cudaFree},
     {"cudaMemcpy", (void *)cudaMemcpy},
+    {"cudaMallocHost", (void *)cudaMallocHost},
     {"cudaMemcpyAsync", (void *)cudaMemcpyAsync},
     {"cudaLaunchKernel", (void *)cudaLaunchKernel},
     {"cudaMallocManaged", (void *)cudaMallocManaged},

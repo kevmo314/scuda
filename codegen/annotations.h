@@ -5179,6 +5179,7 @@ cudaError_t cudaMallocManaged(void **devPtr, size_t size, unsigned int flags);
  */
 cudaError_t cudaMalloc(void **devPtr, size_t size);
 /**
+ * @disabled
  * @param ptr SEND_RECV
  * @param size SEND_ONLY
  */
@@ -5941,12 +5942,21 @@ cudaError_t cudaRuntimeGetVersion(int *runtimeVersion);
  * @param flags SEND_ONLY
  */
 cudaError_t cudaGraphCreate(cudaGraph_t *pGraph, unsigned int flags);
+
+// /**
+//  * @param numDependencies SEND_ONLY
+//  * @param pGraphNode SEND_RECV
+//  * @param graph SEND_ONLY
+//  * @param pDependencies SEND_RECV NULLABLE
+//  * @param pCopyParams SEND_RECV NULLABLE
+//  */
+
 /**
+ * @param numDependencies SEND_ONLY 
  * @param pGraphNode SEND_RECV
  * @param graph SEND_ONLY
- * @param pDependencies SEND_RECV
- * @param numDependencies SEND_ONLY
- * @param pNodeParams SEND_RECV
+ * @param pDependencies SEND_ONLY NULLABLE
+ * @param pNodeParams SEND_ONLY NULLABLE
  */
 cudaError_t
 cudaGraphAddKernelNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph,
@@ -5991,12 +6001,13 @@ cudaError_t
 cudaGraphKernelNodeSetAttribute(cudaGraphNode_t hNode,
                                 cudaLaunchAttributeID attr,
                                 const cudaLaunchAttributeValue *value);
+
 /**
+ * @param numDependencies SEND_ONLY
  * @param pGraphNode SEND_RECV
  * @param graph SEND_ONLY
- * @param pDependencies SEND_RECV
- * @param numDependencies SEND_ONLY
- * @param pCopyParams SEND_RECV
+ * @param pDependencies SEND_RECV NULLABLE
+ * @param pCopyParams SEND_RECV NULLABLE
  */
 cudaError_t cudaGraphAddMemcpyNode(cudaGraphNode_t *pGraphNode,
                                    cudaGraph_t graph,
@@ -6101,12 +6112,13 @@ cudaError_t cudaGraphMemcpyNodeSetParamsFromSymbol(cudaGraphNode_t node,
 cudaError_t cudaGraphMemcpyNodeSetParams1D(cudaGraphNode_t node, void *dst,
                                            const void *src, size_t count,
                                            enum cudaMemcpyKind kind);
+
 /**
+ * @param numDependencies SEND_ONLY
  * @param pGraphNode SEND_RECV
  * @param graph SEND_ONLY
- * @param pDependencies SEND_RECV
- * @param numDependencies SEND_ONLY
- * @param pMemsetParams SEND_RECV
+ * @param pDependencies SEND_RECV NULLABLE
+ * @param pMemsetParams SEND_RECV NULLABLE
  */
 cudaError_t
 cudaGraphAddMemsetNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph,

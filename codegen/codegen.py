@@ -72,6 +72,7 @@ INTERNAL_FUNCTIONS = [
 MANUAL_IMPLEMENTATIONS = [
     "cudaFree",
     "cudaMemcpy",
+    "cudaMallocHost",
     "cudaMemcpyAsync",
     "cudaLaunchKernel",
     "cudaMallocManaged",
