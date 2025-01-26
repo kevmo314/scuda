@@ -200,7 +200,7 @@ class ArrayOperation:
     parameter: Parameter
     ptr: Pointer
     # if int, it's a constant length, if Parameter, it's a variable length.
-    length: Union[int | Parameter]
+    length: Union[int, Parameter]
 
     def client_rpc_write(self, f):
         if not self.send:
