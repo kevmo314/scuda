@@ -1,0 +1,26 @@
+name: Codegen Test
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  codegen:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
+        architecture: ['x86', 'arm64']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: ${{ matrix.architecture }}
+          cache: 'pip' # caching pip dependencies
+      - working-directory: codegen
+        run: pip install -r requirements.txt && python codegen.py
+        
