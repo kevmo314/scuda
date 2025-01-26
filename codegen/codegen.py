@@ -507,7 +507,7 @@ class OpaqueTypeOperation:
     send: bool
     recv: bool
     parameter: Parameter
-    type_: Type | Pointer
+    type_: Union[Type, Pointer]
 
     def client_rpc_write(self, f):
         if not self.send:
