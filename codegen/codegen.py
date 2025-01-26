@@ -1,7 +1,7 @@
 from cxxheaderparser.simple import parse_file, ParsedData, ParserOptions
 from cxxheaderparser.preprocessor import make_gcc_preprocessor
 from cxxheaderparser.types import Type, Pointer, Parameter, Function, Array
-from typing import Optional
+from typing import Optional, Union
 from dataclasses import dataclass
 import os
 import glob
@@ -112,7 +112,11 @@ class NullableOperation:
         )
 
     def client_unified_copy(self, f, direction, error):
-        f.write("    if (maybe_copy_unified_arg(0, (void*){name}, cudaMemcpyDeviceToHost) < 0)\n".format(name=self.parameter.name))
+        f.write(
+            "    if (maybe_copy_unified_arg(0, (void*){name}, cudaMemcpyDeviceToHost) < 0)\n".format(
+                name=self.parameter.name
+            )
+        )
         f.write("      return {error};\n".format(error=error))
 
     @property
@@ -195,9 +199,8 @@ class ArrayOperation:
     recv: bool
     parameter: Parameter
     ptr: Pointer
-    length: (
-        int | Parameter
-    )  # if int, it's a constant length, if Parameter, it's a variable length.
+    # if int, it's a constant length, if Parameter, it's a variable length.
+    length: Union[int, Parameter]
 
     def client_rpc_write(self, f):
         if not self.send:
@@ -305,7 +308,7 @@ class ArrayOperation:
             s = f"    {self.ptr.format()} {self.parameter.name};\n"
             self.ptr.ptr_to.const = c
         return s
-        
+
     def server_rpc_read(self, f, index) -> Optional[str]:
         if not self.send:
             # if this parameter is recv only and it's a type pointer, it needs to be malloc'd.
@@ -317,7 +320,9 @@ class ArrayOperation:
                         param_name=self.parameter.name,
                         param_type=self.ptr.ptr_to.format(),
                         server_type=self.ptr.format(),
-                        length=self.length if isinstance(self.length, int) else self.length.name,
+                        length=self.length
+                        if isinstance(self.length, int)
+                        else self.length.name,
                     )
                 )
                 f.write("    if(")
@@ -326,7 +331,7 @@ class ArrayOperation:
         elif isinstance(self.length, int):
             f.write(
                 "        rpc_read(conn, &{param_name}, {size}) < 0 ||\n".format(
-                    param_name=self.parameter.name, 
+                    param_name=self.parameter.name,
                     size=self.length,
                 )
             )
@@ -502,7 +507,7 @@ class OpaqueTypeOperation:
     send: bool
     recv: bool
     parameter: Parameter
-    type_: Type | Pointer
+    type_: Union[Type, Pointer]
 
     def client_rpc_write(self, f):
         if not self.send:
@@ -523,8 +528,8 @@ class OpaqueTypeOperation:
         # but "const cudnnTensorDescriptor_t *xDesc" IS valid. This subtle change carries reprecussions.
         elif (
             "const " in self.type_.format()
-            and not "void" in self.type_.format()
-            and not "*" in self.type_.format()
+            and "void" not in self.type_.format()
+            and "*" not in self.type_.format()
         ):
             return f"   {self.type_.format().replace('const', '')} {self.parameter.name};\n"
         else:
@@ -653,13 +658,13 @@ class DereferenceOperation:
         )
 
 
-Operation = (
-    NullableOperation
-    | ArrayOperation
-    | NullTerminatedOperation
-    | OpaqueTypeOperation
-    | DereferenceOperation
-)
+Operation = Union[
+    NullableOperation,
+    ArrayOperation,
+    NullTerminatedOperation,
+    OpaqueTypeOperation,
+    DereferenceOperation,
+]
 
 
 # parses a function annotation. if disabled is encountered, returns True for short circuiting.
@@ -811,72 +816,87 @@ def parse_annotation(
                         parameter=param,
                         ptr=param.type,
                         length=length_param,
-                    ))
+                    )
+                )
             elif size_arg:
                 # if it has a size, it's an array operation with constant length
-                operations.append(ArrayOperation(
-                    send=send,
-                    recv=recv,
-                    parameter=param,
-                    ptr=param.type,
-                    length=int(size_arg.split(":")[1]),
-                ))
+                operations.append(
+                    ArrayOperation(
+                        send=send,
+                        recv=recv,
+                        parameter=param,
+                        ptr=param.type,
+                        length=int(size_arg.split(":")[1]),
+                    )
+                )
             elif null_terminated:
                 # if it's null terminated, it's a null terminated operation
-                operations.append(NullTerminatedOperation(
-                    send=send,
-                    recv=recv,
-                    parameter=param,
-                    ptr=param.type,
-                ))
+                operations.append(
+                    NullTerminatedOperation(
+                        send=send,
+                        recv=recv,
+                        parameter=param,
+                        ptr=param.type,
+                    )
+                )
             elif nullable:
                 # if it's nullable, it's a nullable operation
-                operations.append(NullableOperation(
-                    send=send,
-                    recv=recv,
-                    parameter=param,
-                    ptr=param.type,
-                ))
+                operations.append(
+                    NullableOperation(
+                        send=send,
+                        recv=recv,
+                        parameter=param,
+                        ptr=param.type,
+                    )
+                )
             else:
                 # otherwise, it's a pointer to a single value or another pointer
                 if recv:
                     if param.type.ptr_to.format() == "void":
                         raise NotImplementedError("Cannot dereference a void pointer")
                     # this is an out parameter so use the base type as the server declaration
-                    operations.append(DereferenceOperation(
-                        send=send,
-                        recv=recv,
-                        parameter=param,
-                        type_=param.type,
-                    ))
+                    operations.append(
+                        DereferenceOperation(
+                            send=send,
+                            recv=recv,
+                            parameter=param,
+                            type_=param.type,
+                        )
+                    )
                 else:
                     # otherwise, treat it as an opaque type
-                    operations.append(OpaqueTypeOperation(
-                        send=send,
-                        recv=recv,
-                        parameter=param,
-                        type_=param.type,
-                    ))
+                    operations.append(
+                        OpaqueTypeOperation(
+                            send=send,
+                            recv=recv,
+                            parameter=param,
+                            type_=param.type,
+                        )
+                    )
         elif isinstance(param.type, Type):
             if param.type.const:
                 recv = False
-            operations.append(OpaqueTypeOperation(
-                send=send,
-                recv=recv,
-                parameter=param,
-                type_=param.type,
-            ))
+            operations.append(
+                OpaqueTypeOperation(
+                    send=send,
+                    recv=recv,
+                    parameter=param,
+                    type_=param.type,
+                )
+            )
         elif isinstance(param.type, Array):
             length_param = next(p for p in params if p.name == length_arg.split(":")[1])
             if param.type.array_of.const:
                 recv = False
-            operations.append(ArrayOperation(
-                send=send,
-                recv=recv,
-                parameter=param,
-                ptr=param.type,
-                length=length_param,
-            ))
+            operations.append(
+                ArrayOperation(
+                    send=send,
+                    recv=recv,
+                    parameter=param,
+                    ptr=param.type,
+                    length=length_param,
+                )
+            )
         else:
             raise NotImplementedError("Unknown type")
     return operations, False
@@ -1249,7 +1269,9 @@ def main():
 
             f.write("    if (\n")
             for operation in operations:
-                if isinstance(operation, NullTerminatedOperation) or isinstance(operation, ArrayOperation):
+                if isinstance(operation, NullTerminatedOperation) or isinstance(
+                    operation, ArrayOperation
+                ):
                     if error := operation.server_rpc_read(f, len(defers)):
                         defers.append(error)
                 else:
