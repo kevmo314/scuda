@@ -6,11 +6,11 @@ on:
 
 jobs:
   codegen:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
-        architecture: ['x64', 'arm64']
 
     steps:
       - name: Checkout code
@@ -19,7 +19,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          architecture: ${{ matrix.architecture }}
           cache: 'pip' # caching pip dependencies
       - working-directory: codegen
         run: pip install -r requirements.txt && python codegen.py
