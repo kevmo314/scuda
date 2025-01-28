@@ -864,10 +864,7 @@ cudaError_t cudaHostRegister(void *devPtr, size_t size, unsigned int flags) {
 }
 
 cudaError_t cudaMallocHost(void **ptr, size_t size) {
-  std::cout << "allocated cudaMallocHost device mem " << std::endl;
-  void *host = (void *)malloc(size);
-
-  *ptr = host;
+  *ptr = (void *)malloc(size);
 
   return cudaSuccess;
 }

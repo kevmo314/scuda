@@ -5943,19 +5943,12 @@ cudaError_t cudaRuntimeGetVersion(int *runtimeVersion);
  */
 cudaError_t cudaGraphCreate(cudaGraph_t *pGraph, unsigned int flags);
 
-// /**
-//  * @param numDependencies SEND_ONLY
-//  * @param pGraphNode SEND_RECV
-//  * @param graph SEND_ONLY
-//  * @param pDependencies SEND_RECV NULLABLE
-//  * @param pCopyParams SEND_RECV NULLABLE
-//  */
-
 /**
+ * @DISABLED
  * @param numDependencies SEND_ONLY 
- * @param pGraphNode SEND_RECV
+ * @param pGraphNode RECV_ONLY
  * @param graph SEND_ONLY
- * @param pDependencies SEND_ONLY NULLABLE
+ * @param pDependencies SEND_ONLY LENGTH:numDependencies
  * @param pNodeParams SEND_ONLY NULLABLE
  */
 cudaError_t
@@ -6004,10 +5997,10 @@ cudaGraphKernelNodeSetAttribute(cudaGraphNode_t hNode,
 
 /**
  * @param numDependencies SEND_ONLY
- * @param pGraphNode SEND_RECV
+ * @param pGraphNode RECV_ONLY
  * @param graph SEND_ONLY
- * @param pDependencies SEND_RECV NULLABLE
- * @param pCopyParams SEND_RECV NULLABLE
+ * @param pDependencies SEND_ONLY LENGTH:numDependencies
+ * @param pCopyParams SEND_ONLY NULLABLE
  */
 cudaError_t cudaGraphAddMemcpyNode(cudaGraphNode_t *pGraphNode,
                                    cudaGraph_t graph,
@@ -6115,10 +6108,10 @@ cudaError_t cudaGraphMemcpyNodeSetParams1D(cudaGraphNode_t node, void *dst,
 
 /**
  * @param numDependencies SEND_ONLY
- * @param pGraphNode SEND_RECV
+ * @param pGraphNode RECV_ONLY
  * @param graph SEND_ONLY
- * @param pDependencies SEND_RECV NULLABLE
- * @param pMemsetParams SEND_RECV NULLABLE
+ * @param pDependencies SEND_ONLY LENGTH:numDependencies
+ * @param pMemsetParams SEND_ONLY NULLABLE
  */
 cudaError_t
 cudaGraphAddMemsetNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph,
