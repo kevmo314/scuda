@@ -195,6 +195,7 @@ class ArrayOperation:
 
     send: bool
     recv: bool
+    iter: bool
     parameter: Parameter
     ptr: Pointer
     length: (
@@ -202,6 +203,26 @@ class ArrayOperation:
     )  # if int, it's a constant length, if Parameter, it's a variable length.
 
     def client_rpc_write(self, f):
+        if self.iter:
+            loop_template = """
+                [=]() -> bool {{
+                    for (size_t i = 0; i < {length}; ++i) {{
+                        if (rpc_write(0, &{param_name}[i], sizeof({param_type})) < 0) {{
+                            printf("Failed to write Dependency[%zu]\\n", i);
+                            return false;
+                        }}
+                    }}
+                    return true;
+                }}() == false ||
+                """.strip()
+
+            f.write(loop_template.format(
+                length=self.length.name,
+                param_type=self.ptr.ptr_to.format(),
+                param_name=self.parameter.name,
+            ))
+            return
+
         if not self.send:
             return
         elif isinstance(self.length, int):
@@ -301,6 +322,11 @@ class ArrayOperation:
             self.ptr.array_of.const = False
             s = f"    {self.ptr.array_of.format()}* {self.parameter.name} = nullptr;\n"
             self.ptr.array_of.const = c
+        elif self.iter:
+            c = self.ptr.ptr_to.const
+            self.ptr.ptr_to.const = False
+            s = f"    std::vector<{self.ptr.ptr_to.format()}> {self.parameter.name};\n"
+            self.ptr.ptr_to.const = c
         else:
             c = self.ptr.ptr_to.const
             self.ptr.ptr_to.const = False
@@ -309,6 +335,26 @@ class ArrayOperation:
         return s
         
     def server_rpc_read(self, f, index) -> Optional[str]:
+        if self.iter:
+            lambda_template = """
+            [=, &{param_name}]() -> bool {{
+                {param_name}.resize({length});  // Resize the dependencies vector
+                for (size_t i = 0; i < {length}; ++i) {{
+                    if (rpc_read(conn, &{param_name}[i], sizeof({param_type})) < 0) {{
+                        return false;
+                    }}
+                }}
+                return true;
+            }}() == false ||
+            """.strip()
+
+            f.write(lambda_template.format(
+                param_name=self.parameter.name,
+                length=self.length.name,
+                param_type=self.ptr.ptr_to.format(),
+            ))
+            return
+
         if not self.send:
             # if this parameter is recv only and it's a type pointer, it needs to be malloc'd.
             if isinstance(self.ptr, Pointer):
@@ -354,6 +400,9 @@ class ArrayOperation:
 
     @property
     def server_reference(self) -> str:
+        if self.iter:
+            return f"{self.parameter.name}.data()"
+
         return self.parameter.name
 
     def server_rpc_write(self, f):
@@ -706,6 +755,7 @@ def parse_annotation(
                     recv = False
 
                 size_arg = next((arg for arg in args if arg.startswith("SIZE:")), None)
+                iter_arg = next((arg for arg in args if arg.startswith("ITER:")), None)
                 null_terminated = "NULL_TERMINATED" in args
                 nullable = "NULLABLE" in args
 
@@ -730,6 +780,7 @@ def parse_annotation(
                             parameter=param,
                             ptr=param.type,
                             length=length_param,
+                            iter=False
                         )
                     )
                 elif size_arg:
@@ -741,6 +792,22 @@ def parse_annotation(
                             parameter=param,
                             ptr=param.type,
                             length=int(size_arg.split(":")[1]),
+                            iter=False
+                        )
+                    )
+                elif iter_arg:
+                    print(f"ITER FOUND!! {param}")
+                    length_param = next(
+                        p for p in params if p.name == iter_arg.split(":")[1]
+                    )
+                    operations.append(
+                        ArrayOperation(
+                            send=send,
+                            recv=recv,
+                            parameter=param,
+                            ptr=param.type,
+                            length=length_param,
+                            iter=True
                         )
                     )
                 elif null_terminated:
@@ -813,6 +880,7 @@ def parse_annotation(
                         parameter=param,
                         ptr=param.type,
                         length=length_param,
+                        iter=False
                     ))
             elif size_arg:
                 # if it has a size, it's an array operation with constant length
@@ -822,6 +890,7 @@ def parse_annotation(
                     parameter=param,
                     ptr=param.type,
                     length=int(size_arg.split(":")[1]),
+                    iter=False
                 ))
             elif null_terminated:
                 # if it's null terminated, it's a null terminated operation
@@ -878,6 +947,7 @@ def parse_annotation(
                 parameter=param,
                 ptr=param.type,
                 length=length_param,
+                iter=False
             ))
         else:
             raise NotImplementedError("Unknown type")
