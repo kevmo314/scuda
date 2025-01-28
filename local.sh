@@ -276,7 +276,7 @@ test() {
     # "./test/cuda-samples/bin/x86_64/linux/release/HSOpticalFlow"
     # "./test/cuda-samples/bin/x86_64/linux/release/simpleTexture"
     # "./test/cuda-samples/bin/x86_64/linux/release/concurrentKernels"
-    # "./test/cuda-samples/bin/x86_64/linux/release/simpleAssert"
+    "./test/cuda-samples/bin/x86_64/linux/release/simpleAssert"
     # "./test/cuda-samples/bin/x86_64/linux/release/MC_EstimatePiP"
     # "./test/cuda-samples/bin/x86_64/linux/release/simpleCUFFT_callback"
     # "./test/cuda-samples/bin/x86_64/linux/release/BlackScholes"
