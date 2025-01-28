@@ -1,9 +1,11 @@
 #include <cuda.h>
-#include <cuda_runtime.h>
+#include <cuda_runtime_api.h>
 #include <nvml.h>
 
+int handle_cudaGraphAddKernelNode(void *conn);
 int handle_cudaFree(void *conn);
 int handle_cudaMemcpy(void *conn);
+int handle_cudaMallocHost(void *conn);
 int handle_cudaMemcpyAsync(void *conn);
 int handle_cudaLaunchKernel(void *conn);
 int handle_cudaMallocManaged(void *conn);

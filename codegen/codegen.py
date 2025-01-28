@@ -72,9 +72,11 @@ INTERNAL_FUNCTIONS = [
 MANUAL_IMPLEMENTATIONS = [
     "cudaFree",
     "cudaMemcpy",
+    "cudaMallocHost",
     "cudaMemcpyAsync",
     "cudaLaunchKernel",
     "cudaMallocManaged",
+    "cudaGraphAddKernelNode",
 ]
 
 
@@ -207,7 +209,7 @@ class ArrayOperation:
             return
         elif isinstance(self.length, int):
             f.write(
-                "        rpc_write(0, {param_name}, {size}) < 0 ||\n".format(
+                "       ({param_name} != NULL && rpc_write(0, {param_name}, {size})) < 0 ||\n".format(
                     param_name=self.parameter.name,
                     size=self.length,
                 )
@@ -215,7 +217,7 @@ class ArrayOperation:
         # array length operations are handled differently than char
         elif isinstance(self.ptr, Array):
             f.write(
-                "        rpc_write(0, &{param_name}, sizeof({param_type})) < 0 ||\n".format(
+                "       ({param_name} != NULL && rpc_write(0, &{param_name}, sizeof({param_type}))) < 0 ||\n".format(
                     param_name=self.parameter.name,
                     param_type=self.ptr.array_of.format(),
                 )
@@ -226,7 +228,7 @@ class ArrayOperation:
             else:
                 length = self.length.name
             f.write(
-                "        rpc_write(0, {param_name}, {length} * sizeof({param_type})) < 0 ||\n".format(
+                "       ({param_name} != NULL && rpc_write(0, {param_name}, {length} * sizeof({param_type}))) < 0 ||\n".format(
                     param_name=self.parameter.name,
                     param_type=self.ptr.ptr_to.format(),
                     length=length,
@@ -1232,6 +1234,9 @@ def main():
             '#include "gen_api.h"\n\n'
             '#include "gen_server.h"\n\n'
             '#include "manual_server.h"\n\n'
+            '#include <vector>"\n\n'
+            '#include <cstdio>"\n\n'
+            '#include <cuda_runtime.h>"\n\n'
             "extern int rpc_read(const void *conn, void *data, const std::size_t size);\n"
             "extern int rpc_end_request(const void *conn);\n"
             "extern int rpc_start_response(const void *conn, const int request_id);\n"
