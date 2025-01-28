@@ -1,7 +1,7 @@
 #include <cassert>
 #include <cublas_v2.h>
 #include <cuda.h>
-#include <cuda_runtime.h>
+#include <cuda_runtime_api.h>
 #include <dlfcn.h>
 #include <iostream>
 #include <nvml.h>
@@ -30,6 +30,8 @@ extern cudaError_t cuda_memcpy_unified_ptrs(const int index,
 extern void *maybe_free_unified_mem(const int index, void *ptr);
 extern void allocate_unified_mem_pointer(const int index, void *dev_ptr,
                                          size_t size);
+extern int is_unified_pointer(const int index, void* arg);
+int maybe_copy_unified_arg(const int index, void* arg, enum cudaMemcpyKind kind);
 
 #define MAX_FUNCTION_NAME 1024
 #define MAX_ARGS 128
@@ -323,6 +325,81 @@ const char *cudaGetErrorString(cudaError_t error) {
   default:
     return "Unknown CUDA error";
   }
+}
+
+cudaError_t cudaGraphAddKernelNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies, const struct cudaKernelNodeParams *pNodeParams)
+{
+    if (maybe_copy_unified_arg(0, (void*)&numDependencies, cudaMemcpyHostToDevice) < 0)
+        return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(0, (void*)pGraphNode, cudaMemcpyHostToDevice) < 0)
+        return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(0, (void*)&graph, cudaMemcpyHostToDevice) < 0)
+        return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(0, (void*)pDependencies, cudaMemcpyHostToDevice) < 0)
+        return cudaErrorDevicesUnavailable;
+
+    for (size_t i = 0; i < numDependencies && is_unified_pointer(0, (void*)pDependencies); i++) {
+        if (maybe_copy_unified_arg(0, (void*)&pDependencies[i], cudaMemcpyHostToDevice) < 0)
+            return cudaErrorDevicesUnavailable;
+    }
+
+    if (maybe_copy_unified_arg(0, (void*)pNodeParams, cudaMemcpyDeviceToHost) < 0)
+        return cudaErrorDevicesUnavailable;
+
+    cudaError_t return_value;
+
+    if (rpc_start_request(0, RPC_cudaGraphAddKernelNode) < 0 ||
+        rpc_write(0, &numDependencies, sizeof(size_t)) < 0 ||
+        rpc_write(0, &graph, sizeof(cudaGraph_t)) < 0) 
+        return cudaErrorDevicesUnavailable;
+
+    // Send dependencies individually
+    for (size_t i = 0; i < numDependencies; ++i) {
+        if (rpc_write(0, &pDependencies[i], sizeof(cudaGraphNode_t)) < 0) {
+            printf("Failed to write Dependency[%zu]\n", i);
+            return cudaErrorDevicesUnavailable;
+        }
+    }
+
+    Function *f = nullptr;
+    for (auto &function : functions)
+      if (function.host_func == pNodeParams->func)
+        f = &function;
+
+    if (f == nullptr || rpc_write(0, &f->arg_count, sizeof(int)) < 0)
+      return cudaErrorDevicesUnavailable;
+
+    for (int i = 0; i < f->arg_count; ++i) {
+      if (rpc_write(0, &f->arg_sizes[i], sizeof(int)) < 0 ||
+          rpc_write(0, pNodeParams->kernelParams[i], f->arg_sizes[i]) < 0)
+        return cudaErrorDevicesUnavailable;
+    }
+
+    if (rpc_write(0, &pNodeParams, sizeof(const struct cudaKernelNodeParams*)) < 0 ||
+        (pNodeParams != nullptr && rpc_write(0, pNodeParams, sizeof(struct cudaKernelNodeParams)) < 0) ||
+        rpc_wait_for_response(0) < 0 ||
+        rpc_read(0, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+
+    if (maybe_copy_unified_arg(0, (void*)&numDependencies, cudaMemcpyDeviceToHost) < 0)
+        return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(0, (void*)pGraphNode, cudaMemcpyDeviceToHost) < 0)
+        return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(0, (void*)&graph, cudaMemcpyDeviceToHost) < 0)
+        return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(0, (void*)pDependencies, cudaMemcpyDeviceToHost) < 0)
+        return cudaErrorDevicesUnavailable;
+    
+    for (size_t i = 0; i < numDependencies && is_unified_pointer(0, (void*)pDependencies); i++) {
+        if (maybe_copy_unified_arg(0, (void*)&pDependencies[i], cudaMemcpyDeviceToHost) < 0)
+            return cudaErrorDevicesUnavailable;
+    }
+
+    if (maybe_copy_unified_arg(0, (void*)pNodeParams, cudaMemcpyDeviceToHost) < 0)
+        return cudaErrorDevicesUnavailable;
+
+    return return_value;
 }
 
 cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim,

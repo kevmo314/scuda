@@ -1,8 +1,9 @@
 #include <cublas_v2.h>
 #include <cuda.h>
-#include <cuda_runtime_api.h>
 #include <nvml.h>
+#include <cuda_runtime_api.h>
 
+cudaError_t cudaGraphAddKernelNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies, const struct cudaKernelNodeParams *pNodeParams);
 cudaError_t cudaFree(void *devPtr);
 cudaError_t cudaMallocHost(void **ptr, size_t size);
 cudaError_t cudaMallocManaged(void **devPtr, size_t size, unsigned int flags);

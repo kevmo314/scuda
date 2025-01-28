@@ -1,10 +1,13 @@
 #include <cublas_v2.h>
 #include <cuda.h>
-#include <cuda_runtime.h>
 #include <cuda_runtime_api.h>
 #include <dlfcn.h>
 #include <iostream>
 #include <nvml.h>
+
+#include <vector>
+#include <cstdio>
+#include <cuda_runtime.h>
 
 #include <cstring>
 #include <string>
@@ -163,6 +166,100 @@ int handle_cudaMemcpyAsync(void *conn) {
   ret = 0;
 ERROR_0:
   return ret;
+}
+
+int handle_cudaGraphAddKernelNode(void *conn) {
+    size_t numDependencies;
+    cudaGraphNode_t pGraphNode = nullptr;  // Initialize to nullptr
+    cudaGraph_t graph;
+    void **args;
+    cudaKernelNodeParams pNodeParams = {0};
+    std::vector<cudaGraphNode_t> dependencies;
+    const cudaKernelNodeParams* pNodeParams_null_check;
+    int request_id;
+    int num_args;
+    int arg_size;
+    cudaError_t scuda_intercept_result;
+
+    if (rpc_read(conn, &numDependencies, sizeof(size_t)) < 0) {
+        printf("Failed to read numDependencies\n");
+        return -1;
+    }
+
+    if (rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0) {
+        printf("Failed to read graph\n");
+        return -1;
+    }
+
+    dependencies.resize(numDependencies);
+    for (size_t i = 0; i < numDependencies; ++i) {
+        if (rpc_read(conn, &dependencies[i], sizeof(cudaGraphNode_t)) < 0) {
+            printf("Failed to read Dependency[%zu]\n", i);
+            return -1;
+        }
+    }
+
+    if (rpc_read(conn, &num_args, sizeof(int)) < 0) {
+      printf("Failed to read arg count\n");
+      return -1;
+    }
+
+    args = (void **)malloc(num_args * sizeof(void *));
+    if (args == NULL)
+      return -1;
+
+    for (int i = 0; i < num_args; ++i) {
+      if (rpc_read(conn, &arg_size, sizeof(int)) < 0)
+        return -1;
+
+      args[i] = malloc(arg_size);
+      if (args[i] == NULL)
+        return -1;
+
+      if (rpc_read(conn, args[i], arg_size) < 0)
+        return -1;
+    }
+
+    if (rpc_read(conn, &pNodeParams_null_check, sizeof(const cudaKernelNodeParams*)) < 0) {
+        return -1;
+    }
+
+    if (pNodeParams_null_check) {
+        if (rpc_read(conn, &pNodeParams, sizeof(const struct cudaKernelNodeParams)) < 0) {
+            return -1;
+        }
+    }
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0) {
+        return -1;
+    }
+
+    // make sure we write our kernel args properly
+    pNodeParams.kernelParams = args;
+
+    scuda_intercept_result = cudaGraphAddKernelNode(
+        &pGraphNode, 
+        graph, 
+        dependencies.data(),
+        numDependencies,
+        &pNodeParams
+    );
+
+    if (scuda_intercept_result != cudaSuccess) {
+        return -1;
+    }
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0) {
+        return -1;
+    }
+
+    if (rpc_end_response(conn, &scuda_intercept_result) < 0) {
+        return -1;
+    }
+
+    return 0;
 }
 
 int handle_cudaLaunchKernel(void *conn) {
