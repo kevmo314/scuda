@@ -6356,9 +6356,10 @@ cudaError_t cudaGraphNodeFindInClone(cudaGraphNode_t *pNode,
 cudaError_t cudaGraphNodeGetType(cudaGraphNode_t node,
                                  enum cudaGraphNodeType *pType);
 /**
+ * @disabled
  * @param graph SEND_ONLY
  * @param nodes SEND_RECV
- * @param numNodes SEND_ONLY
+ * @param numNodes SEND_RECV
  */
 cudaError_t cudaGraphGetNodes(cudaGraph_t graph, cudaGraphNode_t *nodes,
                               size_t *numNodes);
@@ -6586,8 +6587,8 @@ cudaError_t cudaGraphExecUpdate(cudaGraphExec_t hGraphExec, cudaGraph_t hGraph,
  */
 cudaError_t cudaGraphUpload(cudaGraphExec_t graphExec, cudaStream_t stream);
 /**
- * @param graphExec SEND_ONLY
- * @param stream SEND_ONLY
+ * @param graphExec SEND_ONLY NULLABLE
+ * @param stream SEND_ONLY NULLABLE
  */
 cudaError_t cudaGraphLaunch(cudaGraphExec_t graphExec, cudaStream_t stream);
 /**

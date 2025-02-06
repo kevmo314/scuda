@@ -26,6 +26,7 @@ extern int rpc_end_request(const void *conn);
 extern int rpc_start_response(const void *conn, const int request_id);
 extern int rpc_write(const void *conn, const void *data, const std::size_t size);
 extern int rpc_end_response(const void *conn, void *return_value);
+extern void append_managed_ptr(int connfd, void *ptr);
 
 int handle_nvmlInit_v2(void *conn)
 {
@@ -20569,6 +20570,8 @@ int handle_cudaMemsetAsync(void *conn)
     cudaStream_t stream;
     int request_id;
     cudaError_t scuda_intercept_result;
+
+    std::cout << "Callling cudaMemsetAsync..." << std::endl;
     if (
         rpc_read(conn, &devPtr, sizeof(void*)) < 0 ||
         rpc_read(conn, &value, sizeof(int)) < 0 ||
@@ -20580,7 +20583,10 @@ int handle_cudaMemsetAsync(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
+    std::cout << "Callling cudaMemsetAsync" << std::endl;
     scuda_intercept_result = cudaMemsetAsync(devPtr, value, count, stream);
+
+    std::cout << "result: " << scuda_intercept_result << std::endl;
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_end_response(conn, &scuda_intercept_result) < 0)
@@ -21924,6 +21930,8 @@ int handle_cudaGraphAddMemcpyNode(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
+
+    // append_managed_ptr(((conn_t *)conn)->connfd, (void*)pCopyParams.dstPtr);
     scuda_intercept_result = cudaGraphAddMemcpyNode(&pGraphNode, graph, pDependencies.data(), numDependencies, &pCopyParams);
 
     if (rpc_start_response(conn, request_id) < 0 ||
@@ -22949,36 +22957,6 @@ int handle_cudaGraphNodeGetType(void *conn)
 
     if (rpc_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &pType, sizeof(enum cudaGraphNodeType)) < 0 ||
-        rpc_end_response(conn, &scuda_intercept_result) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_cudaGraphGetNodes(void *conn)
-{
-    cudaGraph_t graph;
-    cudaGraphNode_t nodes;
-    size_t numNodes;
-    int request_id;
-    cudaError_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
-        rpc_read(conn, &nodes, sizeof(cudaGraphNode_t)) < 0 ||
-        rpc_read(conn, &numNodes, sizeof(size_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_end_request(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = cudaGraphGetNodes(graph, &nodes, &numNodes);
-
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &nodes, sizeof(cudaGraphNode_t)) < 0 ||
-        rpc_write(conn, &numNodes, sizeof(size_t)) < 0 ||
         rpc_end_response(conn, &scuda_intercept_result) < 0)
         goto ERROR_0;
 

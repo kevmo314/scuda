@@ -9,6 +9,7 @@ int handle_cudaMallocHost(void *conn);
 int handle_cudaMemcpyAsync(void *conn);
 int handle_cudaLaunchKernel(void *conn);
 int handle_cudaMallocManaged(void *conn);
+int handle_cudaGraphGetNodes(void *conn);
 int handle___cudaRegisterVar(void *conn);
 int handle___cudaRegisterFunction(void *conn);
 int handle___cudaRegisterFatBinary(void *conn);

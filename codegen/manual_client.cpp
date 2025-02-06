@@ -402,6 +402,30 @@ cudaError_t cudaGraphAddKernelNode(cudaGraphNode_t *pGraphNode, cudaGraph_t grap
     return return_value;
 }
 
+cudaError_t cudaGraphGetNodes(cudaGraph_t graph, cudaGraphNode_t* nodes, size_t* numNodes)
+{
+    if (maybe_copy_unified_arg(0, (void*)&graph, cudaMemcpyHostToDevice) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(0, (void*)nodes, cudaMemcpyHostToDevice) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(0, (void*)numNodes, cudaMemcpyHostToDevice) < 0)
+      return cudaErrorDevicesUnavailable;
+    cudaError_t return_value;
+    rpc_start_request(0, RPC_cudaGraphGetNodes);
+    rpc_write(0, &graph, sizeof(cudaGraph_t));
+    rpc_wait_for_response(0);
+    rpc_read(0, nodes, sizeof(cudaGraphNode_t));
+    rpc_read(0, numNodes, sizeof(size_t));
+    rpc_end_response(0, &return_value);
+    if (maybe_copy_unified_arg(0, (void*)&graph, cudaMemcpyDeviceToHost) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(0, (void*)nodes, cudaMemcpyDeviceToHost) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(0, (void*)numNodes, cudaMemcpyDeviceToHost) < 0)
+      return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
 cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim,
                              void **args, size_t sharedMem,
                              cudaStream_t stream) {

@@ -135,7 +135,9 @@ int handle_cudaMemcpyAsync(void *conn) {
       goto ERROR_0;
 
     if (rpc_read(conn, host_data, count) < 0)
+    {
       goto ERROR_0;
+    }
 
     request_id = rpc_end_request(conn);
     if (request_id < 0)
@@ -156,11 +158,13 @@ int handle_cudaMemcpyAsync(void *conn) {
       (kind == cudaMemcpyDeviceToHost &&
        rpc_write(conn, host_data, count) < 0) ||
       rpc_end_response(conn, &result) < 0 ||
-      (host_data != NULL && cudaStreamAddCallback(
+      (host_data != NULL && stream == 0 && cudaStreamAddCallback(
                                 stream,
                                 [](cudaStream_t stream, cudaError_t status,
                                    void *ptr) { free(ptr); },
                                 host_data, 0) != cudaSuccess))
+    {
+    }
     goto ERROR_0;
 
   ret = 0;
@@ -672,3 +676,31 @@ ERROR_0:
 }
 
 int handle_cudaMallocHost(void *conn) { return 0; }
+
+int handle_cudaGraphGetNodes(void *conn)
+{
+    cudaGraph_t graph;
+    cudaGraphNode_t *nodes = NULL;
+    size_t numNodes = 0;
+    int request_id;
+    cudaError_t scuda_intercept_result;
+    if (
+        rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_end_request(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    scuda_intercept_result = cudaGraphGetNodes(graph, nodes, &numNodes);
+
+    if (rpc_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &nodes, sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_write(conn, &numNodes, sizeof(size_t)) < 0 ||
+        rpc_end_response(conn, &scuda_intercept_result) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}

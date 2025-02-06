@@ -19798,33 +19798,6 @@ cudaError_t cudaGraphNodeGetType(cudaGraphNode_t node, enum cudaGraphNodeType* p
     return return_value;
 }
 
-cudaError_t cudaGraphGetNodes(cudaGraph_t graph, cudaGraphNode_t* nodes, size_t* numNodes)
-{
-    if (maybe_copy_unified_arg(0, (void*)&graph, cudaMemcpyHostToDevice) < 0)
-      return cudaErrorDevicesUnavailable;
-    if (maybe_copy_unified_arg(0, (void*)nodes, cudaMemcpyHostToDevice) < 0)
-      return cudaErrorDevicesUnavailable;
-    if (maybe_copy_unified_arg(0, (void*)numNodes, cudaMemcpyHostToDevice) < 0)
-      return cudaErrorDevicesUnavailable;
-    cudaError_t return_value;
-    if (rpc_start_request(0, RPC_cudaGraphGetNodes) < 0 ||
-        rpc_write(0, &graph, sizeof(cudaGraph_t)) < 0 ||
-        rpc_write(0, nodes, sizeof(cudaGraphNode_t)) < 0 ||
-        rpc_write(0, numNodes, sizeof(size_t)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_read(0, nodes, sizeof(cudaGraphNode_t)) < 0 ||
-        rpc_read(0, numNodes, sizeof(size_t)) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
-        return cudaErrorDevicesUnavailable;
-    if (maybe_copy_unified_arg(0, (void*)&graph, cudaMemcpyDeviceToHost) < 0)
-      return cudaErrorDevicesUnavailable;
-    if (maybe_copy_unified_arg(0, (void*)nodes, cudaMemcpyDeviceToHost) < 0)
-      return cudaErrorDevicesUnavailable;
-    if (maybe_copy_unified_arg(0, (void*)numNodes, cudaMemcpyDeviceToHost) < 0)
-      return cudaErrorDevicesUnavailable;
-    return return_value;
-}
-
 cudaError_t cudaGraphGetRootNodes(cudaGraph_t graph, cudaGraphNode_t* pRootNodes, size_t* pNumRootNodes)
 {
     if (maybe_copy_unified_arg(0, (void*)&graph, cudaMemcpyHostToDevice) < 0)
@@ -50841,7 +50814,6 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cudaGraphClone", (void *)cudaGraphClone},
     {"cudaGraphNodeFindInClone", (void *)cudaGraphNodeFindInClone},
     {"cudaGraphNodeGetType", (void *)cudaGraphNodeGetType},
-    {"cudaGraphGetNodes", (void *)cudaGraphGetNodes},
     {"cudaGraphGetRootNodes", (void *)cudaGraphGetRootNodes},
     {"cudaGraphGetEdges", (void *)cudaGraphGetEdges},
     {"cudaGraphNodeGetDependencies", (void *)cudaGraphNodeGetDependencies},
@@ -51436,6 +51408,7 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cudaMemcpyAsync", (void *)cudaMemcpyAsync},
     {"cudaLaunchKernel", (void *)cudaLaunchKernel},
     {"cudaMallocManaged", (void *)cudaMallocManaged},
+    {"cudaGraphGetNodes", (void *)cudaGraphGetNodes},
     {"cudaGraphAddKernelNode", (void *)cudaGraphAddKernelNode},
 };
 

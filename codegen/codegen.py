@@ -76,6 +76,7 @@ MANUAL_IMPLEMENTATIONS = [
     "cudaMemcpyAsync",
     "cudaLaunchKernel",
     "cudaMallocManaged",
+    "cudaGraphGetNodes",
     "cudaGraphAddKernelNode",
 ]
 

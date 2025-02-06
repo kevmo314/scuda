@@ -40,7 +40,7 @@ set(CLIENT_SOURCES
 )
 
 set(SERVER_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/server.cu
+    ${CMAKE_CURRENT_SOURCE_DIR}/server.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/codegen/gen_server.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/codegen/manual_server.cpp
 )

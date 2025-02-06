@@ -15,6 +15,18 @@
 #include <unistd.h>
 #include <unordered_map>
 
+#include <dlfcn.h>
+#include <netdb.h>
+#include <netinet/tcp.h>
+#include <vector>
+
+#include <unordered_map>
+
+#include <csignal>
+#include <setjmp.h>
+#include <signal.h>
+#include <sys/mman.h>
+
 #include "codegen/gen_server.h"
 
 #define DEFAULT_PORT 14833
@@ -28,6 +40,68 @@ typedef struct {
   struct iovec write_iov[128];
   int write_iov_count = 0;
 } conn_t;
+
+std::unordered_map<int, std::unordered_map<void *, size_t>> managed_ptrs;
+
+static jmp_buf catch_segfault;
+static void *faulting_address = nullptr;
+
+static void segfault(int sig, siginfo_t *info, void *unused) {
+  faulting_address = info->si_addr;
+
+  std::cout << "SEGFAULT!! " << std::endl;
+
+  for (const auto& entry : managed_ptrs) {
+    // if ((uintptr_t)entry.first <= (uintptr_t)faulting_address &&
+    //     (uintptr_t)faulting_address < ((uintptr_t)entry.first + entry.second.f)) {
+    //   // ensure we assign memory as close to the faulting address as possible...
+    //   // by masking via the allocated unified memory size.
+    //   uintptr_t aligned = (uintptr_t)faulting_address & ~(entry.second - 1);
+
+    //   // Allocate memory at the faulting address
+    //   void *allocated =
+    //       mmap((void *)aligned, entry.second + (uintptr_t)faulting_address - aligned,
+    //            PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+    //   if (allocated == MAP_FAILED) {
+    //     perror("Failed to allocate memory at faulting address");
+    //     _exit(1);
+    //   }
+
+    //   return;
+    // }
+  }
+
+  // raise our original segfault handler
+  struct sigaction sa;
+  sa.sa_handler = SIG_DFL;
+  sigemptyset(&sa.sa_mask);
+  sa.sa_flags = 0;
+
+  if (sigaction(SIGSEGV, &sa, nullptr) == -1) {
+    perror("Failed to reset SIGSEGV handler");
+    _exit(EXIT_FAILURE);
+  }
+
+  raise(SIGSEGV);
+}
+
+void append_managed_ptr(int connfd, void *ptr) {
+  managed_ptrs[connfd][ptr] = 0;
+}
+
+static void set_segfault_handlers() {
+  struct sigaction sa;
+  memset(&sa, 0, sizeof(sa));
+  sa.sa_flags = SA_SIGINFO;
+  sa.sa_sigaction = segfault;
+
+  if (sigaction(SIGSEGV, &sa, NULL) == -1) {
+    perror("sigaction");
+    exit(EXIT_FAILURE);
+  }
+
+  std::cout << "Segfault handler installed." << std::endl;
+}
 
 int request_handler(const conn_t *conn) {
   unsigned int op;
@@ -133,6 +207,8 @@ int main() {
     printf("Socket creation failed.\n");
     exit(EXIT_FAILURE);
   }
+
+  set_segfault_handlers();
 
   char *p = getenv("SCUDA_PORT");
 
