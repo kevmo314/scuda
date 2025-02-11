@@ -9,6 +9,7 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <string>
+#include <cuda_runtime_api.h>
 #include <sys/socket.h>
 #include <sys/uio.h>
 #include <thread>
@@ -20,7 +21,7 @@
 #include <netinet/tcp.h>
 #include <vector>
 
-#include <unordered_map>
+#include <map>
 
 #include <csignal>
 #include <setjmp.h>
@@ -41,35 +42,96 @@ typedef struct {
   int write_iov_count = 0;
 } conn_t;
 
-std::unordered_map<int, std::unordered_map<void *, size_t>> managed_ptrs;
+std::map<conn_t*, std::map<void*, size_t>> managed_ptrs;
+std::map<conn_t*, void*> host_funcs;
 
 static jmp_buf catch_segfault;
 static void *faulting_address = nullptr;
 
+int rpc_write(const void *conn, const void *data, const size_t size) {
+  ((conn_t *)conn)->write_iov[((conn_t *)conn)->write_iov_count++] =
+      (struct iovec){(void *)data, size};
+  return 0;
+}
+
 static void segfault(int sig, siginfo_t *info, void *unused) {
   faulting_address = info->si_addr;
 
-  std::cout << "SEGFAULT!! " << std::endl;
+  int found = -1;
+  void* ptr;
+  size_t size;
 
-  for (const auto& entry : managed_ptrs) {
-    // if ((uintptr_t)entry.first <= (uintptr_t)faulting_address &&
-    //     (uintptr_t)faulting_address < ((uintptr_t)entry.first + entry.second.f)) {
-    //   // ensure we assign memory as close to the faulting address as possible...
-    //   // by masking via the allocated unified memory size.
-    //   uintptr_t aligned = (uintptr_t)faulting_address & ~(entry.second - 1);
+  std::cout << "segfault!!" << faulting_address << std::endl;
 
-    //   // Allocate memory at the faulting address
-    //   void *allocated =
-    //       mmap((void *)aligned, entry.second + (uintptr_t)faulting_address - aligned,
-    //            PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
-    //   if (allocated == MAP_FAILED) {
-    //     perror("Failed to allocate memory at faulting address");
-    //     _exit(1);
-    //   }
+  for (const auto& conn_entry : host_funcs) {
+    if (conn_entry.second == faulting_address) {
+      std::cout << "Faulting address matches stored pointer in host_funcs!" << std::endl;
+      uintptr_t aligned = (uintptr_t)faulting_address;
 
-    //   return;
-    // }
+      uintptr_t page_size = sysconf(_SC_PAGESIZE);
+      uintptr_t aligned_address = (uintptr_t)faulting_address & ~(page_size - 1);
+
+      // Ensure that mmap covers the full page
+      void *allocated = mmap((void *)aligned_address, page_size,
+                              PROT_READ | PROT_WRITE | PROT_EXEC,
+                              MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, -1, 0);
+
+      if (allocated == MAP_FAILED) {
+          perror("Failed to allocate memory at faulting address");
+          _exit(1);
+      }
+
+      printf("The address of x is: %p\n", (void*)allocated);
+
+      found = 1;
+
+      break;
+    }
   }
+  
+  if (found == 1) {
+    return;
+  };
+
+  for (const auto& conn_entry : managed_ptrs) {
+    for (const auto& mem_entry : conn_entry.second) {
+      size_t allocated_size = mem_entry.second;
+
+      // Check if faulting address is inside this allocated region
+      if ((uintptr_t)mem_entry.first <= (uintptr_t)faulting_address &&
+      (uintptr_t)faulting_address < ((uintptr_t)mem_entry.first + allocated_size)) {
+          found = 1;
+          size = allocated_size;
+
+          // Align memory allocation to the closest possible address
+          uintptr_t aligned = (uintptr_t)faulting_address & ~(allocated_size - 1);
+
+          // Allocate memory at the faulting address
+          void *allocated =
+            mmap((void *)aligned, allocated_size + (uintptr_t)faulting_address - aligned, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+
+          if (allocated == MAP_FAILED) {
+              perror("Failed to allocate memory at faulting address");
+              _exit(1);
+          }
+
+          printf("The address of x is: %p\n", (void*)allocated);
+
+          // if (rpc_write(conn_entry.first, (void*)&allocated, sizeof(void*)) < 0) {
+          //   std::cout << "failed to write memory: " << &faulting_address << std::endl;
+          // }
+
+          // printf("wrote data...\n");
+
+          break;
+      }
+    }
+  }
+
+  if (found == 1) {
+    printf("FOUND!!\n");
+    return;
+  };
 
   // raise our original segfault handler
   struct sigaction sa;
@@ -85,8 +147,17 @@ static void segfault(int sig, siginfo_t *info, void *unused) {
   raise(SIGSEGV);
 }
 
-void append_managed_ptr(int connfd, void *ptr) {
-  managed_ptrs[connfd][ptr] = 0;
+void append_host_func_ptr(const void *conn, cudaHostNodeParams params) {
+  conn_t *connfd = (conn_t*)conn;
+
+  host_funcs[connfd] = (void*)params.fn;
+}
+
+void append_managed_ptr(const void *conn, cudaPitchedPtr ptr) {
+  conn_t *connfd = (conn_t*)conn;
+
+  // Ensure the inner map exists before inserting the cudaPitchedPtr
+  managed_ptrs[connfd][ptr.ptr] = ptr.pitch;
 }
 
 static void set_segfault_handlers() {
@@ -163,12 +234,6 @@ void client_handler(int connfd) {
 
 int rpc_read(const void *conn, void *data, size_t size) {
   return recv(((conn_t *)conn)->connfd, data, size, MSG_WAITALL);
-}
-
-int rpc_write(const void *conn, const void *data, const size_t size) {
-  ((conn_t *)conn)->write_iov[((conn_t *)conn)->write_iov_count++] =
-      (struct iovec){(void *)data, size};
-  return 0;
 }
 
 // signal from the handler that the request read is complete.

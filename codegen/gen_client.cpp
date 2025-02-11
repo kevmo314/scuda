@@ -1,4 +1,5 @@
 #include <nvml.h>
+#include <iostream>
 #include <cuda.h>
 #include <cudnn.h>
 #include <cublas_v2.h>
@@ -21,6 +22,7 @@ extern int is_unified_pointer(const int index, void* arg);
 extern int rpc_read(const int index, void *data, const std::size_t size);
 extern int rpc_end_response(const int index, void *return_value);
 int maybe_copy_unified_arg(const int index, void* arg, enum cudaMemcpyKind kind);
+extern void allocate_host_function(const int index, const struct cudaHostNodeParams* params);
 extern int rpc_close();
 
 nvmlReturn_t nvmlInit_v2()
@@ -19030,6 +19032,8 @@ cudaError_t cudaGraphMemsetNodeSetParams(cudaGraphNode_t node, const struct cuda
 
 cudaError_t cudaGraphAddHostNode(cudaGraphNode_t* pGraphNode, cudaGraph_t graph, const cudaGraphNode_t* pDependencies, size_t numDependencies, const struct cudaHostNodeParams* pNodeParams)
 {
+    allocate_host_function(0, pNodeParams);
+
     if (maybe_copy_unified_arg(0, (void*)&numDependencies, cudaMemcpyHostToDevice) < 0)
       return cudaErrorDevicesUnavailable;
     if (maybe_copy_unified_arg(0, (void*)pGraphNode, cudaMemcpyHostToDevice) < 0)
@@ -20456,21 +20460,52 @@ cudaError_t cudaGraphUpload(cudaGraphExec_t graphExec, cudaStream_t stream)
 
 cudaError_t cudaGraphLaunch(cudaGraphExec_t graphExec, cudaStream_t stream)
 {
+    // Copy arguments to the device
     if (maybe_copy_unified_arg(0, (void*)&graphExec, cudaMemcpyHostToDevice) < 0)
-      return cudaErrorDevicesUnavailable;
-    if (maybe_copy_unified_arg(0, (void*)&stream, cudaMemcpyHostToDevice) < 0)
-      return cudaErrorDevicesUnavailable;
-    cudaError_t return_value;
-    if (rpc_start_request(0, RPC_cudaGraphLaunch) < 0 ||
-        rpc_write(0, &graphExec, sizeof(cudaGraphExec_t)) < 0 ||
-        rpc_write(0, &stream, sizeof(cudaStream_t)) < 0 ||
-        rpc_wait_for_response(0) < 0 ||
-        rpc_end_response(0, &return_value) < 0)
         return cudaErrorDevicesUnavailable;
+
+    if (maybe_copy_unified_arg(0, (void*)&stream, cudaMemcpyHostToDevice) < 0)
+        return cudaErrorDevicesUnavailable;
+
+    // Start RPC request
+    if (rpc_start_request(0, RPC_cudaGraphLaunch) < 0)
+        return cudaErrorDevicesUnavailable;
+
+    // Write graphExec argument
+    if (rpc_write(0, &graphExec, sizeof(cudaGraphExec_t)) < 0)
+        return cudaErrorDevicesUnavailable;
+
+    // Write stream argument
+    if (rpc_write(0, &stream, sizeof(cudaStream_t)) < 0)
+        return cudaErrorDevicesUnavailable;
+
+    // Wait for response
+    if (rpc_wait_for_response(0) < 0)
+        return cudaErrorDevicesUnavailable;
+
+    void* mem;
+
+    // if (rpc_read(0, &mem, sizeof(void*)) < 0)
+    // {
+    //   std::cout << "FAILED: " << &mem << std::endl;
+    //   return cudaErrorDevicesUnavailable;
+    // }
+
+    std::cout << "!!!: " << mem << std::endl;
+
+    cudaError_t return_value;
+    
+    // Read return value from response
+    if (rpc_end_response(0, &return_value) < 0)
+        return cudaErrorDevicesUnavailable;
+
+    // Copy arguments back to the host
     if (maybe_copy_unified_arg(0, (void*)&graphExec, cudaMemcpyDeviceToHost) < 0)
-      return cudaErrorDevicesUnavailable;
+        return cudaErrorDevicesUnavailable;
+
     if (maybe_copy_unified_arg(0, (void*)&stream, cudaMemcpyDeviceToHost) < 0)
-      return cudaErrorDevicesUnavailable;
+        return cudaErrorDevicesUnavailable;
+
     return return_value;
 }
 

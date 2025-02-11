@@ -42,6 +42,7 @@ typedef struct {
   int write_iov_count = 0;
 
   std::unordered_map<void *, size_t> unified_devices;
+  std::unordered_map<cudaHostFn_t, void*> host_functions;
 } conn_t;
 
 pthread_mutex_t conn_mutex;
@@ -68,6 +69,7 @@ static void segfault(int sig, siginfo_t *info, void *unused) {
       void *allocated =
           mmap((void *)aligned, sz + (uintptr_t)faulting_address - aligned,
                PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+
       if (allocated == MAP_FAILED) {
         perror("Failed to allocate memory at faulting address");
         _exit(1);
@@ -320,6 +322,11 @@ int rpc_read(const int index, void *data, size_t size) {
 void allocate_unified_mem_pointer(const int index, void *dev_ptr, size_t size) {
   // allocate new space for pointer mapping
   conns[index].unified_devices.insert({dev_ptr, size});
+}
+
+void allocate_host_function(const int index, const struct cudaHostNodeParams* params) {
+  // allocate new space for pointer mapping
+  conns[index].host_functions.insert({params->fn, (void*)params->userData});
 }
 
 cudaError_t cuda_memcpy_unified_ptrs(const int index, cudaMemcpyKind kind) {

@@ -15,18 +15,17 @@
 
 #include "manual_server.h"
 
-#include <vector>"
-
-#include <cstdio>"
-
-#include <cuda_runtime.h>"
+#include <vector>
+#include <cstdio>
+#include <cuda_runtime.h>
 
 extern int rpc_read(const void *conn, void *data, const std::size_t size);
 extern int rpc_end_request(const void *conn);
 extern int rpc_start_response(const void *conn, const int request_id);
 extern int rpc_write(const void *conn, const void *data, const std::size_t size);
 extern int rpc_end_response(const void *conn, void *return_value);
-extern void append_managed_ptr(int connfd, void *ptr);
+void append_managed_ptr(const void *conn, cudaPitchedPtr ptr);
+void append_host_func_ptr(const void *conn, cudaHostNodeParams params);
 
 int handle_nvmlInit_v2(void *conn)
 {
@@ -21931,7 +21930,13 @@ int handle_cudaGraphAddMemcpyNode(void *conn)
     if (request_id < 0)
         goto ERROR_0;
 
-    // append_managed_ptr(((conn_t *)conn)->connfd, (void*)pCopyParams.dstPtr);
+    // destination ptr is the host pointer in this copy kind
+    if (pCopyParams.kind == cudaMemcpyDeviceToHost) {
+        append_managed_ptr(conn, pCopyParams.dstPtr);
+    } else if (pCopyParams.kind == cudaMemcpyHostToDevice) {
+        append_managed_ptr(conn, pCopyParams.srcPtr);
+    }
+
     scuda_intercept_result = cudaGraphAddMemcpyNode(&pGraphNode, graph, pDependencies.data(), numDependencies, &pCopyParams);
 
     if (rpc_start_response(conn, request_id) < 0 ||
@@ -22203,6 +22208,7 @@ int handle_cudaGraphAddHostNode(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
+    append_host_func_ptr(conn, pNodeParams);
     scuda_intercept_result = cudaGraphAddHostNode(&pGraphNode, graph, pDependencies.data(), numDependencies, &pNodeParams);
 
     if (rpc_start_response(conn, request_id) < 0 ||
@@ -23702,10 +23708,12 @@ int handle_cudaGraphLaunch(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
+    printf(">>>>>>>>>>>>>>>>>\n");
+    rpc_start_response(conn, request_id);
     scuda_intercept_result = cudaGraphLaunch(graphExec, stream);
+    printf("starting response\n");
 
-    if (rpc_start_response(conn, request_id) < 0 ||
-        rpc_end_response(conn, &scuda_intercept_result) < 0)
+    if (rpc_end_response(conn, &scuda_intercept_result) < 0)
         goto ERROR_0;
 
     return 0;
