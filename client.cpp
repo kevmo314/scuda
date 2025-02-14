@@ -32,10 +32,13 @@
 
 typedef struct {
   int connfd;
-  int read_request_id;
-  int active_response_id;
-  int write_request_id;
-  unsigned int write_request_op;
+
+  int read_id;
+  int request_id;
+  int write_id;
+  int write_op;
+
+  pthread_t read_thread;
   pthread_mutex_t read_mutex, write_mutex;
   pthread_cond_t read_cond;
   struct iovec write_iov[128];
@@ -212,9 +215,13 @@ int rpc_open() {
                        0,
                        0,
                        0,
+                       0,
                        PTHREAD_MUTEX_INITIALIZER,
                        PTHREAD_MUTEX_INITIALIZER,
                        PTHREAD_COND_INITIALIZER};
+
+    pthread_create(&conns[nconns].read_thread, NULL, rpc_read_thread,
+                   (void *)&conns[nconns]);
   }
 
   if (pthread_mutex_unlock(&conn_mutex) < 0)
@@ -226,75 +233,129 @@ int rpc_open() {
 
 int rpc_size() { return nconns; }
 
-int rpc_start_request(const int index, const unsigned int op) {
+void *rpc_read_thread(void *arg) {
+  conn_t *conn = (conn_t *)arg;
+  // this thread's job is to read from the connection and set the read id.
+
+  if (pthread_mutex_lock(&conn->read_mutex) < 0) {
+    std::cerr << "rpc_read_thread failed to lock read mutex" << std::endl;
+    return;
+  }
+
+  while (true) {
+    while (conn->read_id != 0)
+      pthread_cond_wait(&conn->read_cond, &conn->read_mutex);
+
+    // the read id is zero so it's our turn to read the next int
+    if (read(conn->connfd, &conn->read_id, sizeof(int)) < 0) {
+      std::cerr << "read failed" << std::endl;
+      pthread_mutex_unlock(&conn->read_mutex);
+      return;
+    }
+    if (conn->read_id != 0 && pthread_cond_broadcast(&conn->read_cond) < 0) {
+      std::cerr << "rpc_read_thread failed to broadcast read_cond" << std::endl;
+      pthread_mutex_unlock(&conn->read_mutex);
+      return;
+    }
+  }
+}
+
+// rpc_write_start_request starts a new request builder on the given connection
+// index with a specific op code.
+//
+// only one request can be active at a time, so this function will take the
+// request lock from the connection.
+int rpc_write_start_request(const int index, const unsigned int op) {
   if (rpc_open() < 0 || pthread_mutex_lock(&conns[index].write_mutex) < 0) {
 #ifdef VERBOSE
-    std::cout << "rpc_start_request failed due to rpc_open() < 0 || "
+    std::cout << "rpc_write_start failed due to rpc_open() < 0 || "
                  "conns[index].write_mutex lock"
               << std::endl;
 #endif
     return -1;
   }
 
-  conns[index].write_iov_count = 2;
-  conns[index].write_request_op = op;
+  conns[index].write_iov_count = 2; // skip 2 for the header
+  conns[index].write_id = ++(conns[index].request_id);
+  conns[index].write_op = op;
+  return 0;
+}
+// rpc_write_start_request starts a new request builder on the given connection
+// index with a specific op code.
+//
+// only one request can be active at a time, so this function will take the
+// request lock from the connection.
+int rpc_write_start_response(const int index, const int read_id) {
+  if (rpc_open() < 0 || pthread_mutex_lock(&conns[index].write_mutex) < 0) {
+#ifdef VERBOSE
+    std::cout << "rpc_write_start failed due to rpc_open() < 0 || "
+                 "conns[index].write_mutex lock"
+              << std::endl;
+#endif
+    return -1;
+  }
+
+  conns[index].write_iov_count = 1; // skip 2 for the header
+  conns[index].write_id = read_id;
+  conns[index].write_op = -1;
   return 0;
 }
 
+// rpc_write writes data to the current request builder on the given connection
 int rpc_write(const int index, const void *data, const size_t size) {
   conns[index].write_iov[conns[index].write_iov_count++] = {
       const_cast<void *>(data), size};
   return 0;
 }
 
-int rpc_end_request(const int index) {
-  int write_request_id = ++(conns[index].write_request_id);
-
-  conns[index].write_iov[0] = {&write_request_id, sizeof(int)};
-  conns[index].write_iov[1] = {&conns[index].write_request_op,
-                               sizeof(unsigned int)};
+// rpc_write_end finalizes the current request builder on the given connection
+// index and sends the request to the server.
+//
+// the request lock is released after the request is sent and the function
+// returns the request id which can be used to wait for a response.
+int rpc_write_end(const int index) {
+  conn_t conn = conns[index];
+  conn.write_iov[0] = {&conn.write_id, sizeof(int)};
+  if (conn.write_op != -1) {
+    conn.write_iov[1] = {&conn.write_op, sizeof(unsigned int)};
+  }
 
   // write the request to the server
-  if (writev(conns[index].connfd, conns[index].write_iov,
-             conns[index].write_iov_count) < 0 ||
-      pthread_mutex_unlock(&conns[index].write_mutex) < 0)
+  if (writev(conn.connfd, conn.write_iov, conn.write_iov_count) < 0 ||
+      pthread_mutex_unlock(&conn.write_mutex) < 0)
     return -1;
-  return write_request_id;
+  return conn.write_id;
 }
 
+// rpc_wait_for_response is a convenience function that sends the current
+// request and then waits for the corresponding response. this pattern is
+// so common that having this function keeps the codegen much cleaner.
 int rpc_wait_for_response(const int index) {
-  int wait_for_request_id = rpc_end_request(index);
+  int wait_for_request_id = rpc_write_end(index);
   if (wait_for_request_id < 0)
     return -1;
+  if (rpc_read_start(index, wait_for_request_id) < 0)
+    return -1;
+  return 0;
+}
 
+// rpc_read_start waits for a response with a specific request id on the
+// given connection. this function is used to wait for a response to a request
+// that was sent with rpc_write_end.
+int rpc_read_start(const int index, const int write_id) {
   if (pthread_mutex_lock(&conns[index].read_mutex) < 0)
     return -1;
 
-  // wait for the response
-  while (true) {
-    while (conns[index].active_response_id != wait_for_request_id &&
-           conns[index].active_response_id != 0)
-      pthread_cond_wait(&conns[index].read_cond, &conns[index].read_mutex);
+  // wait for the active read id to be the request id we are waiting for
+  while (conns[index].read_id != write_id)
+    if (pthread_cond_wait(&conns[index].read_cond, &conns[index].read_mutex) <
+        0)
+      return -1;
 
-    // we currently own mutex. if active response id is 0, read the response id
-    if (conns[index].active_response_id == 0) {
-      if (read(conns[index].connfd, &conns[index].active_response_id,
-               sizeof(int)) < 0) {
-        pthread_mutex_unlock(&conns[index].read_mutex);
-        return -1;
-      }
-
-      if (conns[index].active_response_id != wait_for_request_id) {
-        pthread_cond_broadcast(&conns[index].read_cond);
-        continue;
-      }
-    }
-
-    conns[index].active_response_id = 0;
-    return 0;
-  }
+  return 0;
 }
 
+// rpc_read reads data from the current response on the given connection.
 int rpc_read(const int index, void *data, size_t size) {
   if (data == nullptr) {
     // temp buffer to discard data
@@ -315,6 +376,24 @@ int rpc_read(const int index, void *data, size_t size) {
   if (n < 0)
     pthread_mutex_unlock(&conns[index].read_mutex);
   return n;
+}
+
+// rpc_read_end releases the response lock on the given connection.
+int rpc_read_end(const int index) {
+  int read_id = conns[index].read_id;
+  conns[index].read_id = 0;
+  if (pthread_cond_broadcast(&conns[index].read_cond) < 0 ||
+      pthread_mutex_unlock(&conns[index].read_mutex) < 0)
+    return -1;
+  return read_id;
+}
+
+void rpc_close() {
+  if (pthread_mutex_lock(&conn_mutex) < 0)
+    return;
+  while (--nconns >= 0)
+    close(conns[nconns].connfd);
+  pthread_mutex_unlock(&conn_mutex);
 }
 
 void allocate_unified_mem_pointer(const int index, void *dev_ptr, size_t size) {
@@ -343,21 +422,6 @@ void maybe_free_unified_mem(const int index, void *ptr) {
       return;
     }
   }
-}
-
-int rpc_end_response(const int index, void *result) {
-  if (read(conns[index].connfd, result, sizeof(int)) < 0 ||
-      pthread_mutex_unlock(&conns[index].read_mutex) < 0)
-    return -1;
-  return 0;
-}
-
-void rpc_close() {
-  if (pthread_mutex_lock(&conn_mutex) < 0)
-    return;
-  while (--nconns >= 0)
-    close(conns[nconns].connfd);
-  pthread_mutex_unlock(&conn_mutex);
 }
 
 CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion,
