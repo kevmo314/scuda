@@ -21,8 +21,9 @@ extern int rpc_wait_for_response(const int index);
 extern int is_unified_pointer(const int index, void* arg);
 extern int rpc_read(const int index, void *data, const std::size_t size);
 extern int rpc_end_response(const int index, void *return_value);
+void invoke_host_funcs(const int index, void* udata);
 int maybe_copy_unified_arg(const int index, void* arg, enum cudaMemcpyKind kind);
-extern void allocate_host_function(const int index, const struct cudaHostNodeParams* params);
+void allocate_host_function(const int index, void* ptr, void* userdata);
 extern int rpc_close();
 
 nvmlReturn_t nvmlInit_v2()
@@ -19032,7 +19033,8 @@ cudaError_t cudaGraphMemsetNodeSetParams(cudaGraphNode_t node, const struct cuda
 
 cudaError_t cudaGraphAddHostNode(cudaGraphNode_t* pGraphNode, cudaGraph_t graph, const cudaGraphNode_t* pDependencies, size_t numDependencies, const struct cudaHostNodeParams* pNodeParams)
 {
-    allocate_host_function(0, pNodeParams);
+    printf("hmmmm %p\n", pNodeParams->fn);
+    allocate_host_function(0, (void*)pNodeParams->fn, (void*)pNodeParams->userData);
 
     if (maybe_copy_unified_arg(0, (void*)&numDependencies, cudaMemcpyHostToDevice) < 0)
       return cudaErrorDevicesUnavailable;
@@ -20483,7 +20485,7 @@ cudaError_t cudaGraphLaunch(cudaGraphExec_t graphExec, cudaStream_t stream)
     if (rpc_wait_for_response(0) < 0)
         return cudaErrorDevicesUnavailable;
 
-    void* mem;
+    // void* mem;
 
     // if (rpc_read(0, &mem, sizeof(void*)) < 0)
     // {
@@ -20491,7 +20493,29 @@ cudaError_t cudaGraphLaunch(cudaGraphExec_t graphExec, cudaStream_t stream)
     //   return cudaErrorDevicesUnavailable;
     // }
 
-    std::cout << "!!!: " << mem << std::endl;
+    while (true) {
+      printf("looping..\n");
+      int kind;
+      rpc_read(0, &kind, sizeof(int));
+
+      printf("Received kind: %u\n", kind);
+      
+      // invoke function
+      if (kind == 100) {
+        printf("GOT TRIGGER TO INVOKE!\n");
+
+        void *func;
+        printf("CHECKING FUNC BEFORE: %p\n", func);
+        rpc_read(0, func, sizeof(void *));
+
+        printf("CHECKING FUNC: %p\n", func);
+        invoke_host_funcs(0, func);
+        break;
+      } else if (kind == 105) {
+        printf("GOT TRIGGER TO END!\n");
+        break;
+      }
+    }
 
     cudaError_t return_value;
     

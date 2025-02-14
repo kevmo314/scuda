@@ -25,7 +25,8 @@ extern int rpc_start_response(const void *conn, const int request_id);
 extern int rpc_write(const void *conn, const void *data, const std::size_t size);
 extern int rpc_end_response(const void *conn, void *return_value);
 void append_managed_ptr(const void *conn, cudaPitchedPtr ptr);
-void append_host_func_ptr(const void *conn, cudaHostNodeParams params);
+void append_host_func_ptr(const void *conn, void* ptr);
+void invoke_host_func(void* data);
 
 int handle_nvmlInit_v2(void *conn)
 {
@@ -22177,6 +22178,9 @@ int handle_cudaGraphMemsetNodeSetParams(void *conn)
 ERROR_0:
     return -1;
 }
+typedef struct callBackData {
+  void *data;
+} callBackData_t;
 
 int handle_cudaGraphAddHostNode(void *conn)
 {
@@ -22208,7 +22212,16 @@ int handle_cudaGraphAddHostNode(void *conn)
     request_id = rpc_end_request(conn);
     if (request_id < 0)
         goto ERROR_0;
-    append_host_func_ptr(conn, pNodeParams);
+
+
+    append_host_func_ptr(conn, (void*)pNodeParams.fn);
+
+    callBackData_t hostFnData;
+    // assign the previous function pointer so we can map back to it
+    hostFnData.data = (void*)pNodeParams.fn;
+    pNodeParams.userData = &hostFnData;
+
+    pNodeParams.fn = invoke_host_func;
     scuda_intercept_result = cudaGraphAddHostNode(&pGraphNode, graph, pDependencies.data(), numDependencies, &pNodeParams);
 
     if (rpc_start_response(conn, request_id) < 0 ||
@@ -23695,6 +23708,7 @@ ERROR_0:
 
 int handle_cudaGraphLaunch(void *conn)
 {
+    int kind_end = 100;
     cudaGraphExec_t graphExec;
     cudaStream_t stream;
     int request_id;
@@ -23713,8 +23727,16 @@ int handle_cudaGraphLaunch(void *conn)
     scuda_intercept_result = cudaGraphLaunch(graphExec, stream);
     printf("starting response\n");
 
-    if (rpc_end_response(conn, &scuda_intercept_result) < 0)
-        goto ERROR_0;
+    // rpc_write(conn, (void*)&kind_end, sizeof(int));
+
+    scuda_intercept_result = (cudaError_t)5;
+
+    while (true) {}
+
+    // if (rpc_end_response(conn, &scuda_intercept_result) < 0)
+    //     goto ERROR_0;
+
+    printf("!@#!@#\n");
 
     return 0;
 ERROR_0:

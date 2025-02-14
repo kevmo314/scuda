@@ -63,36 +63,6 @@ static void segfault(int sig, siginfo_t *info, void *unused) {
 
   std::cout << "segfault!!" << faulting_address << std::endl;
 
-  for (const auto& conn_entry : host_funcs) {
-    if (conn_entry.second == faulting_address) {
-      std::cout << "Faulting address matches stored pointer in host_funcs!" << std::endl;
-      uintptr_t aligned = (uintptr_t)faulting_address;
-
-      uintptr_t page_size = sysconf(_SC_PAGESIZE);
-      uintptr_t aligned_address = (uintptr_t)faulting_address & ~(page_size - 1);
-
-      // Ensure that mmap covers the full page
-      void *allocated = mmap((void *)aligned_address, page_size,
-                              PROT_READ | PROT_WRITE | PROT_EXEC,
-                              MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, -1, 0);
-
-      if (allocated == MAP_FAILED) {
-          perror("Failed to allocate memory at faulting address");
-          _exit(1);
-      }
-
-      printf("The address of x is: %p\n", (void*)allocated);
-
-      found = 1;
-
-      break;
-    }
-  }
-  
-  if (found == 1) {
-    return;
-  };
-
   for (const auto& conn_entry : managed_ptrs) {
     for (const auto& mem_entry : conn_entry.second) {
       size_t allocated_size = mem_entry.second;
@@ -147,10 +117,51 @@ static void segfault(int sig, siginfo_t *info, void *unused) {
   raise(SIGSEGV);
 }
 
-void append_host_func_ptr(const void *conn, cudaHostNodeParams params) {
-  conn_t *connfd = (conn_t*)conn;
+int rpc_end_response(const void *conn, void *result) {
+  ((conn_t *)conn)->write_iov[0] =
+      (struct iovec){&((conn_t *)conn)->write_request_id, sizeof(int)};
+  ((conn_t *)conn)->write_iov[((conn_t *)conn)->write_iov_count++] =
+      (struct iovec){result, sizeof(int)};
+  if (writev(((conn_t *)conn)->connfd, ((conn_t *)conn)->write_iov,
+             ((conn_t *)conn)->write_iov_count) < 0 ||
+      pthread_mutex_unlock(&((conn_t *)conn)->write_mutex) < 0)
+    return -1;
+  return 0;
+}
 
-  host_funcs[connfd] = (void*)params.fn;
+typedef struct callBackData {
+  void *data;
+} callBackData_t;
+
+void invoke_host_func(void* data) {
+  callBackData_t *tmp = (callBackData_t *)(data);
+  void * res;
+
+  for (const auto& conn_entry : host_funcs) {
+    if (conn_entry.second == tmp->data) {
+      printf("MATCH!!\n");
+      int kind_invoke = 100;
+      if (rpc_write(conn_entry.first, (void*)&kind_invoke, sizeof(int)) < 0) {
+        std::cout << "failed to write kind: " << &faulting_address << std::endl;
+      }
+
+      if (rpc_write(conn_entry.first, (void*)tmp->data, sizeof(void*)) < 0) {
+        std::cout << "failed to write memory: " << &faulting_address << std::endl;
+      }
+
+      printf("wrote mem... %p\n", tmp->data);
+
+      if (rpc_end_response(conn_entry.first, &res) < 0){
+
+      }
+    }
+  }
+}
+
+void append_host_func_ptr(const void *conn, void* ptr) {
+  printf("storing... %p\n", ptr);
+
+  host_funcs[(conn_t*)conn] = ptr;
 }
 
 void append_managed_ptr(const void *conn, cudaPitchedPtr ptr) {
@@ -249,18 +260,6 @@ int rpc_start_response(const void *conn, const int request_id) {
     return -1;
   ((conn_t *)conn)->write_request_id = request_id;
   ((conn_t *)conn)->write_iov_count = 1;
-  return 0;
-}
-
-int rpc_end_response(const void *conn, void *result) {
-  ((conn_t *)conn)->write_iov[0] =
-      (struct iovec){&((conn_t *)conn)->write_request_id, sizeof(int)};
-  ((conn_t *)conn)->write_iov[((conn_t *)conn)->write_iov_count++] =
-      (struct iovec){result, sizeof(int)};
-  if (writev(((conn_t *)conn)->connfd, ((conn_t *)conn)->write_iov,
-             ((conn_t *)conn)->write_iov_count) < 0 ||
-      pthread_mutex_unlock(&((conn_t *)conn)->write_mutex) < 0)
-    return -1;
   return 0;
 }
 

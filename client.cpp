@@ -42,7 +42,7 @@ typedef struct {
   int write_iov_count = 0;
 
   std::unordered_map<void *, size_t> unified_devices;
-  std::unordered_map<cudaHostFn_t, void*> host_functions;
+  std::unordered_map<void*, void*> host_functions;
 } conn_t;
 
 pthread_mutex_t conn_mutex;
@@ -243,6 +243,16 @@ int rpc_start_request(const int index, const unsigned int op) {
   return 0;
 }
 
+void invoke_host_funcs(const int index, void* udata) {
+  for (const auto& ptr : conns[index].host_functions) {
+    printf("CHECKING MEM IN INVOKE: %p\n", ptr.first);
+    printf("CHECKING MEM IN INVOKE: %p\n", udata);
+    if (ptr.first == udata) {
+      printf("HOST PTR MATCH!!!\n");
+    }
+  }
+}
+
 int rpc_write(const int index, const void *data, const size_t size) {
   conns[index].write_iov[conns[index].write_iov_count++] = {
       const_cast<void *>(data), size};
@@ -324,9 +334,10 @@ void allocate_unified_mem_pointer(const int index, void *dev_ptr, size_t size) {
   conns[index].unified_devices.insert({dev_ptr, size});
 }
 
-void allocate_host_function(const int index, const struct cudaHostNodeParams* params) {
+void allocate_host_function(const int index, void* ptr, void* userdata) {
   // allocate new space for pointer mapping
-  conns[index].host_functions.insert({params->fn, (void*)params->userData});
+  printf("STORING UDATA: %p\n", ptr);
+  conns[index].host_functions.insert({ptr, userdata});
 }
 
 cudaError_t cuda_memcpy_unified_ptrs(const int index, cudaMemcpyKind kind) {
