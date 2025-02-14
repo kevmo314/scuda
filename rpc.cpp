@@ -2,6 +2,33 @@
 
 #include "rpc.h"
 
+void *rpc_read_thread(void *arg) {
+  conn_t *conn = (conn_t *)arg;
+  // this thread's job is to read from the connection and set the read id.
+
+  if (pthread_mutex_lock(&conn->read_mutex) < 0) {
+    std::cerr << "rpc_read_thread failed to lock read mutex" << std::endl;
+    return;
+  }
+
+  while (true) {
+    while (conn->read_id != 0)
+      pthread_cond_wait(&conn->read_cond, &conn->read_mutex);
+
+    // the read id is zero so it's our turn to read the next int
+    if (read(conn->connfd, &conn->read_id, sizeof(int)) < 0) {
+      std::cerr << "read failed" << std::endl;
+      pthread_mutex_unlock(&conn->read_mutex);
+      return;
+    }
+    if (conn->read_id != 0 && pthread_cond_broadcast(&conn->read_cond) < 0) {
+      std::cerr << "rpc_read_thread failed to broadcast read_cond" << std::endl;
+      pthread_mutex_unlock(&conn->read_mutex);
+      return;
+    }
+  }
+}
+
 // rpc_read_start waits for a response with a specific request id on the
 // given connection. this function is used to wait for a response to a request
 // that was sent with rpc_write_end.
@@ -59,8 +86,9 @@ int rpc_write_start_request(conn_t *conn, const unsigned int op) {
     return -1;
   }
 
-  conn->write_iov_count = 2; // skip 2 for the header
-  conn->write_id = ++(conn->request_id);
+  conn->write_iov_count = 2;               // skip 2 for the header
+  conn->request_id = conn->request_id + 2; // leave the last bit the same
+  conn->write_id = conn->request_id;
   conn->write_op = op;
   return 0;
 }

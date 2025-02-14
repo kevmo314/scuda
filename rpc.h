@@ -19,6 +19,7 @@ typedef struct {
   int write_iov_count = 0;
 } conn_t;
 
+void *rpc_read_thread(void *arg);
 int rpc_read_start(conn_t *conn, int write_id);
 int rpc_read(conn_t *conn, void *data, size_t size);
 int rpc_read_end(conn_t *conn);
