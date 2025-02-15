@@ -109,7 +109,7 @@ int rpc_write_start_response(conn_t *conn, const int read_id) {
 
   conn->write_iov_count = 1; // skip 1 for the header
   conn->write_id = read_id;
-  conn->write_op = 0;
+  conn->write_op = -1;
   return 0;
 }
 
