@@ -41,10 +41,16 @@ static int init = 0;
 static jmp_buf catch_segfault;
 static void *faulting_address = nullptr;
 
+conn_t* rpc_client_get_connection(unsigned int index) {
+  return &conns[index];
+}
+
+std::unordered_map<void *, size_t> unified_devices;
+
 static void segfault(int sig, siginfo_t *info, void *unused) {
   faulting_address = info->si_addr;
 
-  for (const auto &[ptr, sz] : conns[0].unified_devices) {
+  for (const auto &[ptr, sz] : unified_devices) {
     if ((uintptr_t)ptr <= (uintptr_t)faulting_address &&
         (uintptr_t)faulting_address < ((uintptr_t)ptr + sz)) {
       // ensure we assign memory as close to the faulting address as possible...
@@ -79,7 +85,7 @@ static void segfault(int sig, siginfo_t *info, void *unused) {
 }
 
 int is_unified_pointer(const int index, void *arg) {
-  auto &unified_devices = conns[index].unified_devices;
+  auto &devices = unified_devices;
   auto found = unified_devices.find(arg);
   if (found != unified_devices.end())
     return 1;
@@ -89,7 +95,7 @@ int is_unified_pointer(const int index, void *arg) {
 
 int maybe_copy_unified_arg(const int index, void *arg,
                            enum cudaMemcpyKind kind) {
-  auto &unified_devices = conns[index].unified_devices;
+  auto &devices = unified_devices;
   auto found = unified_devices.find(arg);
   if (found != unified_devices.end()) {
     std::cout << "found unified arg pointer; copying..." << std::endl;
@@ -219,11 +225,11 @@ int rpc_size() { return nconns; }
 
 void allocate_unified_mem_pointer(const int index, void *dev_ptr, size_t size) {
   // allocate new space for pointer mapping
-  conns[index].unified_devices.insert({dev_ptr, size});
+  unified_devices.insert({dev_ptr, size});
 }
 
 cudaError_t cuda_memcpy_unified_ptrs(const int index, cudaMemcpyKind kind) {
-  for (const auto &[ptr, sz] : conns[index].unified_devices) {
+  for (const auto &[ptr, sz] : unified_devices) {
     size_t size = reinterpret_cast<size_t>(sz);
 
     // ptr is the same on both host/device
@@ -235,7 +241,7 @@ cudaError_t cuda_memcpy_unified_ptrs(const int index, cudaMemcpyKind kind) {
 }
 
 void maybe_free_unified_mem(const int index, void *ptr) {
-  for (const auto &[dev_ptr, sz] : conns[index].unified_devices) {
+  for (const auto &[dev_ptr, sz] : unified_devices) {
     size_t size = reinterpret_cast<size_t>(sz);
 
     if (dev_ptr == ptr) {
@@ -291,6 +297,7 @@ CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion,
 }
 
 void *dlsym(void *handle, const char *name) __THROW {
+  rpc_open();
   void *func = get_function_pointer(name);
 
   /** proc address function calls are basically dlsym; we should handle this

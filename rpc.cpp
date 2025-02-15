@@ -1,6 +1,8 @@
 #include <sys/socket.h>
 
 #include "rpc.h"
+#include <iostream>
+#include <unistd.h>
 
 void *rpc_read_thread(void *arg) {
   conn_t *conn = (conn_t *)arg;
@@ -8,7 +10,7 @@ void *rpc_read_thread(void *arg) {
 
   if (pthread_mutex_lock(&conn->read_mutex) < 0) {
     std::cerr << "rpc_read_thread failed to lock read mutex" << std::endl;
-    return;
+    return NULL;
   }
 
   while (true) {
@@ -19,12 +21,12 @@ void *rpc_read_thread(void *arg) {
     if (read(conn->connfd, &conn->read_id, sizeof(int)) < 0) {
       std::cerr << "read failed" << std::endl;
       pthread_mutex_unlock(&conn->read_mutex);
-      return;
+      return NULL;
     }
     if (conn->read_id != 0 && pthread_cond_broadcast(&conn->read_cond) < 0) {
       std::cerr << "rpc_read_thread failed to broadcast read_cond" << std::endl;
       pthread_mutex_unlock(&conn->read_mutex);
-      return;
+      return NULL;
     }
   }
 }
@@ -38,6 +40,10 @@ void *rpc_read_thread(void *arg) {
 int rpc_read_start(conn_t *conn, int write_id) {
   if (pthread_mutex_lock(&conn->read_mutex) < 0)
     return -1;
+
+  printf("about to wait...\n");
+
+  std::cout << "readiddd " << conn->read_id << std::endl;
 
   // wait for the active read id to be the request id we are waiting for
   while (conn->read_id != write_id)
@@ -66,6 +72,7 @@ int rpc_read_end(conn_t *conn) {
 // so common that having this function keeps the codegen much cleaner.
 int rpc_wait_for_response(conn_t *conn) {
   int write_id = rpc_write_end(conn);
+  std::cout << "writeIDIDD " << write_id << std::endl;
   if (write_id < 0 || rpc_read_start(conn, write_id) < 0)
     return -1;
   return 0;
@@ -124,6 +131,7 @@ int rpc_write(conn_t *conn, const void *data, const size_t size) {
 // the request lock is released after the request is sent and the function
 // returns the request id which can be used to wait for a response.
 int rpc_write_end(conn_t *conn) {
+  std::cout << "ASDFASDF " << conn->write_id << std::endl;
   conn->write_iov[0] = {&conn->write_id, sizeof(int)};
   if (conn->write_op != -1) {
     conn->write_iov[1] = {&conn->write_op, sizeof(unsigned int)};

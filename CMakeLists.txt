@@ -34,12 +34,14 @@ include_directories(
 )
 
 set(CLIENT_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/rpc.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/client.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/codegen/gen_client.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/codegen/manual_client.cpp
 )
 
 set(SERVER_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/rpc.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/server.cu
     ${CMAKE_CURRENT_SOURCE_DIR}/codegen/gen_server.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/codegen/manual_server.cpp
@@ -52,6 +54,7 @@ set(CLIENT_HEADERS
 
 set(SERVER_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/codegen/gen_server.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rpc.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/codegen/manual_server.h
 )
 
