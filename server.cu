@@ -21,7 +21,7 @@
 #define DEFAULT_PORT 14833
 #define MAX_CLIENTS 10
 
-int request_handler(const conn_t *conn) {
+int request_handler(conn_t *conn) {
   unsigned int op;
 
   // Attempt to read the operation code from the client
@@ -35,7 +35,7 @@ int request_handler(const conn_t *conn) {
     return -1;
   }
 
-  return opHandler((void *)conn);
+  return opHandler(conn);
 }
 
 void client_handler(int connfd) {

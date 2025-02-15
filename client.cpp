@@ -41,9 +41,7 @@ static int init = 0;
 static jmp_buf catch_segfault;
 static void *faulting_address = nullptr;
 
-conn_t* rpc_client_get_connection(unsigned int index) {
-  return &conns[index];
-}
+conn_t *rpc_client_get_connection(unsigned int index) { return &conns[index]; }
 
 std::unordered_map<void *, size_t> unified_devices;
 
@@ -200,18 +198,22 @@ int rpc_open() {
       exit(1);
     }
 
-    conns[nconns++] = {sockfd,
-                       0,
-                       0,
-                       0,
-                       0,
-                       0,
-                       PTHREAD_MUTEX_INITIALIZER,
-                       PTHREAD_MUTEX_INITIALIZER,
-                       PTHREAD_COND_INITIALIZER};
+    std::cout << "connected on " << sockfd << std::endl;
+
+    conns[nconns] = {sockfd,
+                     0,
+                     0,
+                     0,
+                     0,
+                     0,
+                     PTHREAD_MUTEX_INITIALIZER,
+                     PTHREAD_MUTEX_INITIALIZER,
+                     PTHREAD_COND_INITIALIZER};
 
     pthread_create(&conns[nconns].read_thread, NULL, rpc_read_thread,
                    (void *)&conns[nconns]);
+
+    nconns++;
   }
 
   if (pthread_mutex_unlock(&conn_mutex) < 0)

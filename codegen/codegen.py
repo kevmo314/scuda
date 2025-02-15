@@ -1053,14 +1053,9 @@ def main():
             "#include <unordered_map>\n\n"
             '#include "gen_api.h"\n\n'
             '#include "manual_client.h"\n\n'
+            '#include "rpc.h"\n\n'
             "extern int rpc_size();\n"
-            "extern int rpc_start_request(const int index, const unsigned int request);\n"
-            "extern int rpc_write(const int index, const void *data, const std::size_t size);\n"
-            "extern int rpc_end_request(const int index);\n"
-            "extern int rpc_wait_for_response(const int index);\n"
             "extern int is_unified_pointer(const int index, void* arg);\n"
-            "extern int rpc_read(const int index, void *data, const std::size_t size);\n"
-            "extern int rpc_end_response(const int index, void *return_value);\n"
             "int maybe_copy_unified_arg(const int index, void* arg, enum cudaMemcpyKind kind);\n"
             "extern int rpc_close();\n\n"
         )
@@ -1130,7 +1125,7 @@ def main():
                         )
 
             f.write(
-                "    if (rpc_start_request(0, RPC_{name}) < 0 ||\n".format(
+                "    if (rpc_write_start_request(0, RPC_{name}) < 0 ||\n".format(
                     name=function.name.format()
                 )
             )
@@ -1143,7 +1138,12 @@ def main():
             for operation in operations:
                 operation.client_rpc_read(f)
 
-            f.write("        rpc_end_response(0, &return_value) < 0)\n")
+            f.write(
+                "        rpc_write(0, &return_value, sizeof({return_type})) < 0 ||\n".format(
+                    return_type=function.return_type.format()
+                )
+            )
+            f.write("        rpc_write_end(0) < 0)\n")
             f.write(
                 "        return {error_return};\n".format(
                     error_return=error_const(function.return_type.format())
@@ -1232,11 +1232,7 @@ def main():
             '#include "gen_api.h"\n\n'
             '#include "gen_server.h"\n\n'
             '#include "manual_server.h"\n\n'
-            "extern int rpc_read(const void *conn, void *data, const std::size_t size);\n"
-            "extern int rpc_end_request(const void *conn);\n"
-            "extern int rpc_start_response(const void *conn, const int request_id);\n"
-            "extern int rpc_write(const void *conn, const void *data, const std::size_t size);\n"
-            "extern int rpc_end_response(const void *conn, void *return_value);\n\n"
+            '#include "rpc.h"\n\n'
         )
         for function, annotation, operations, disabled in functions_with_annotations:
             if function.name.format() in MANUAL_IMPLEMENTATIONS or disabled:
@@ -1244,7 +1240,7 @@ def main():
 
             # parse the annotation doxygen
             f.write(
-                "int handle_{name}(void *conn)\n".format(
+                "int handle_{name}(conn_t *conn)\n".format(
                     name=function.name.format(),
                 )
             )
@@ -1281,7 +1277,7 @@ def main():
 
             f.write("\n")
 
-            f.write("    request_id = rpc_end_request(conn);\n")
+            f.write("    request_id = rpc_read_end(conn);\n")
             f.write("    if (request_id < 0)\n")
             f.write("        goto ERROR_{index};\n".format(index=len(defers)))
 
@@ -1307,12 +1303,17 @@ def main():
                     )
                 )
 
-            f.write("    if (rpc_start_response(conn, request_id) < 0 ||\n")
+            f.write("    if (rpc_write_start_response(conn, request_id) < 0 ||\n")
 
             for operation in operations:
                 operation.server_rpc_write(f)
 
-            f.write("        rpc_end_response(conn, &scuda_intercept_result) < 0)\n")
+            f.write(
+                "        rpc_write(conn, &scuda_intercept_result, sizeof({return_type})) < 0 ||\n".format(
+                    return_type=function.return_type.format()
+                )
+            )
+            f.write("        rpc_write_end(conn) < 0)\n")
             f.write("        goto ERROR_{index};\n".format(index=len(defers)))
             f.write("\n")
             f.write("    return 0;\n")
