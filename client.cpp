@@ -131,8 +131,6 @@ static void set_segfault_handlers() {
     exit(EXIT_FAILURE);
   }
 
-  std::cout << "Segfault handler installed." << std::endl;
-
   init = 1;
 }
 
