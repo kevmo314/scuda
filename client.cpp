@@ -16,10 +16,8 @@
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <unistd.h>
-#include <unordered_map>
+#include <map>
 #include <vector>
-
-#include <unordered_map>
 
 #include <csignal>
 #include <cstdlib>
@@ -43,28 +41,30 @@ static void *faulting_address = nullptr;
 
 conn_t *rpc_client_get_connection(unsigned int index) { return &conns[index]; }
 
-std::unordered_map<void *, size_t> unified_devices;
+std::map<conn_t*, std::map<void *, size_t>> unified_devices;
 
 static void segfault(int sig, siginfo_t *info, void *unused) {
   faulting_address = info->si_addr;
 
-  for (const auto &[ptr, sz] : unified_devices) {
-    if ((uintptr_t)ptr <= (uintptr_t)faulting_address &&
-        (uintptr_t)faulting_address < ((uintptr_t)ptr + sz)) {
-      // ensure we assign memory as close to the faulting address as possible...
-      // by masking via the allocated unified memory size.
-      uintptr_t aligned = (uintptr_t)faulting_address & ~(sz - 1);
+  for (const auto& conn_entry : unified_devices) {
+    for (const auto &[ptr, sz] : conn_entry.second) {
+      if ((uintptr_t)ptr <= (uintptr_t)faulting_address &&
+          (uintptr_t)faulting_address < ((uintptr_t)ptr + sz)) {
+        // ensure we assign memory as close to the faulting address as possible...
+        // by masking via the allocated unified memory size.
+        uintptr_t aligned = (uintptr_t)faulting_address & ~(sz - 1);
 
-      // Allocate memory at the faulting address
-      void *allocated =
-          mmap((void *)aligned, sz + (uintptr_t)faulting_address - aligned,
-               PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
-      if (allocated == MAP_FAILED) {
-        perror("Failed to allocate memory at faulting address");
-        _exit(1);
+        // Allocate memory at the faulting address
+        void *allocated =
+            mmap((void *)aligned, sz + (uintptr_t)faulting_address - aligned,
+                PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+        if (allocated == MAP_FAILED) {
+          perror("Failed to allocate memory at faulting address");
+          _exit(1);
+        }
+
+        return;
       }
-
-      return;
     }
   }
 
@@ -82,33 +82,44 @@ static void segfault(int sig, siginfo_t *info, void *unused) {
   raise(SIGSEGV);
 }
 
-int is_unified_pointer(void *arg) {
-  auto &devices = unified_devices;
-  auto found = unified_devices.find(arg);
-  if (found != unified_devices.end())
-    return 1;
+int is_unified_pointer(conn_t *conn, void *arg) {
+  auto conn_it = unified_devices.find(conn);
+  if (conn_it == unified_devices.end()) {
+    return 0;
+  }
+
+  // now check if the argument exists in the connection's mapped devices
+  auto &devices = conn_it->second;
+  if (devices.find(arg) != devices.end()) {
+      return 1;
+  }
 
   return 0;
 }
 
-int maybe_copy_unified_arg(void *arg, enum cudaMemcpyKind kind) {
-  auto &devices = unified_devices;
-  auto found = unified_devices.find(arg);
-  if (found != unified_devices.end()) {
-    std::cout << "found unified arg pointer; copying..." << std::endl;
 
-    void *ptr = found->first;
-    size_t size = found->second;
+int maybe_copy_unified_arg(conn_t *conn, void *arg, enum cudaMemcpyKind kind) {
+  // find the connection in the map first
+  auto conn_it = unified_devices.find(conn);
+  if (conn_it == unified_devices.end()) {
+    return 0;
+  }
+
+  // now find the argument in the sub-map for this connection
+  auto &devices = conn_it->second;
+  auto device_it = devices.find(arg);
+  if (device_it != devices.end()) {
+    std::cout << "Found unified arg pointer; copying..." << std::endl;
+
+    void *ptr = device_it->first;
+    size_t size = device_it->second;
 
     cudaError_t res = cudaMemcpy(ptr, ptr, size, kind);
-
     if (res != cudaSuccess) {
-      std::cerr << "cudaMemcpy failed: " << cudaGetErrorString(res)
-                << std::endl;
-
-      return -1;
+        std::cerr << "cudaMemcpy failed: " << cudaGetErrorString(res) << std::endl;
+        return -1;
     } else {
-      std::cout << "Successfully copied " << size << " bytes" << std::endl;
+        std::cout << "Successfully copied " << size << " bytes" << std::endl;
     }
   }
 
@@ -230,13 +241,20 @@ int rpc_open() {
 
 int rpc_size() { return nconns; }
 
-void allocate_unified_mem_pointer(const int index, void *dev_ptr, size_t size) {
+void allocate_unified_mem_pointer(conn_t *conn, const int index, void *dev_ptr, size_t size) {
   // allocate new space for pointer mapping
-  unified_devices.insert({dev_ptr, size});
+  unified_devices[conn][dev_ptr] = size;
 }
 
-cudaError_t cuda_memcpy_unified_ptrs(const int index, cudaMemcpyKind kind) {
-  for (const auto &[ptr, sz] : unified_devices) {
+cudaError_t cuda_memcpy_unified_ptrs(conn_t *conn, const int index, cudaMemcpyKind kind) {
+  auto &conns = unified_devices;
+  auto found = conns.find(conn);
+
+  // see if the conn mapping exists
+  if (found != conns.end())
+    return cudaSuccess;
+
+  for (const auto &[ptr, sz] : found->second) {
     size_t size = reinterpret_cast<size_t>(sz);
 
     // ptr is the same on both host/device
@@ -247,8 +265,15 @@ cudaError_t cuda_memcpy_unified_ptrs(const int index, cudaMemcpyKind kind) {
   return cudaSuccess;
 }
 
-void maybe_free_unified_mem(const int index, void *ptr) {
-  for (const auto &[dev_ptr, sz] : unified_devices) {
+void maybe_free_unified_mem(conn_t *conn, const int index, void *ptr) {
+  auto &conns = unified_devices;
+  auto found = conns.find(conn);
+
+  // see if the conn mapping exists
+  if (found != conns.end())
+    return;
+
+  for (const auto &[dev_ptr, sz] : found->second) {
     size_t size = reinterpret_cast<size_t>(sz);
 
     if (dev_ptr == ptr) {
