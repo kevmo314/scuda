@@ -82,7 +82,7 @@ static void segfault(int sig, siginfo_t *info, void *unused) {
   raise(SIGSEGV);
 }
 
-int is_unified_pointer(const int index, void *arg) {
+int is_unified_pointer(void *arg) {
   auto &devices = unified_devices;
   auto found = unified_devices.find(arg);
   if (found != unified_devices.end())
@@ -91,8 +91,7 @@ int is_unified_pointer(const int index, void *arg) {
   return 0;
 }
 
-int maybe_copy_unified_arg(const int index, void *arg,
-                           enum cudaMemcpyKind kind) {
+int maybe_copy_unified_arg(void *arg, enum cudaMemcpyKind kind) {
   auto &devices = unified_devices;
   auto found = unified_devices.find(arg);
   if (found != unified_devices.end()) {
@@ -132,6 +131,14 @@ static void set_segfault_handlers() {
   }
 
   init = 1;
+}
+
+void rpc_close(conn_t *conn) {
+  if (pthread_mutex_lock(&conn_mutex) < 0)
+    return;
+  while (--nconns >= 0)
+    close(conn->connfd);
+  pthread_mutex_unlock(&conn_mutex);
 }
 
 int rpc_open() {

@@ -113,7 +113,7 @@ class NullableOperation:
 
     def client_unified_copy(self, f, direction, error):
         f.write(
-            "    if (maybe_copy_unified_arg(conn, (void*){name}, cudaMemcpyDeviceToHost) < 0)\n".format(
+            "    if (maybe_copy_unified_arg((void*){name}, cudaMemcpyDeviceToHost) < 0)\n".format(
                 name=self.parameter.name
             )
         )
@@ -235,7 +235,7 @@ class ArrayOperation:
 
     def client_unified_copy(self, f, direction, error):
         f.write(
-            "    if (maybe_copy_unified_arg(conn, (void*){name}, {direction}) < 0)\n".format(
+            "    if (maybe_copy_unified_arg((void*){name}, {direction}) < 0)\n".format(
                 name=self.parameter.name, direction=direction
             )
         )
@@ -243,12 +243,12 @@ class ArrayOperation:
 
         if isinstance(self.length, int):
             f.write(
-                "    for (int i = 0; i < {name} && is_unified_pointer(conn, (void*){param}); i++)\n".format(
+                "    for (int i = 0; i < {name} && is_unified_pointer((void*){param}); i++)\n".format(
                     param=self.parameter.name, name=self.length
                 )
             )
             f.write(
-                "      if (maybe_copy_unified_arg(conn, (void*)&{name}[i], {direction}) < 0 )\n".format(
+                "      if (maybe_copy_unified_arg((void*)&{name}[i], {direction}) < 0 )\n".format(
                     name=self.parameter.name, direction=direction
                 )
             )
@@ -259,12 +259,12 @@ class ArrayOperation:
         if hasattr(self.length.type, "ptr_to"):
             # need to cast the int a bit differently here
             f.write(
-                "    for (int i = 0; i < static_cast<int>(*{name}) && is_unified_pointer(conn, (void*){param}); i++)\n".format(
+                "    for (int i = 0; i < static_cast<int>(*{name}) && is_unified_pointer((void*){param}); i++)\n".format(
                     param=self.parameter.name, name=self.length.name
                 )
             )
             f.write(
-                "      if (maybe_copy_unified_arg(conn, (void*)&{name}[i], {direction}) < 0)\n".format(
+                "      if (maybe_copy_unified_arg((void*)&{name}[i], {direction}) < 0)\n".format(
                     name=self.parameter.name, direction=direction
                 )
             )
@@ -272,24 +272,24 @@ class ArrayOperation:
         else:
             if hasattr(self.parameter.type, "ptr_to"):
                 f.write(
-                    "    for (int i = 0; i < static_cast<int>({name}) && is_unified_pointer(conn, (void*){param}); i++)\n".format(
+                    "    for (int i = 0; i < static_cast<int>({name}) && is_unified_pointer((void*){param}); i++)\n".format(
                         param=self.parameter.name, name=self.length.name
                     )
                 )
                 f.write(
-                    "      if (maybe_copy_unified_arg(conn, (void*)&{name}[i], {direction}) < 0)\n".format(
+                    "      if (maybe_copy_unified_arg((void*)&{name}[i], {direction}) < 0)\n".format(
                         name=self.parameter.name, direction=direction
                     )
                 )
                 f.write("        return {error};\n".format(error=error))
             else:
                 f.write(
-                    "    for (int i = 0; i < static_cast<int>({name}) && is_unified_pointer(conn, (void*){param}); i++)\n".format(
+                    "    for (int i = 0; i < static_cast<int>({name}) && is_unified_pointer((void*){param}); i++)\n".format(
                         param=self.parameter.name, name=self.length.name
                     )
                 )
                 f.write(
-                    "      if (maybe_copy_unified_arg(conn, (void*){name}[i], {direction}) < 0)\n".format(
+                    "      if (maybe_copy_unified_arg((void*){name}[i], {direction}) < 0)\n".format(
                         name=self.parameter.name, direction=direction
                     )
                 )
@@ -436,7 +436,7 @@ class NullTerminatedOperation:
 
     def client_unified_copy(self, f, direction, error):
         f.write(
-            "    if (maybe_copy_unified_arg(conn, (void*){name}, {direction}) < 0)\n".format(
+            "    if (maybe_copy_unified_arg((void*){name}, {direction}) < 0)\n".format(
                 name=self.parameter.name, direction=direction
             )
         )
@@ -538,14 +538,14 @@ class OpaqueTypeOperation:
     def client_unified_copy(self, f, direction, error):
         if isinstance(self.type_, Pointer):
             f.write(
-                "    if (maybe_copy_unified_arg(conn, (void*){name}, {direction}) < 0)\n".format(
+                "    if (maybe_copy_unified_arg((void*){name}, {direction}) < 0)\n".format(
                     name=self.parameter.name, direction=direction
                 )
             )
             f.write("      return {error};\n".format(error=error))
         else:
             f.write(
-                "    if (maybe_copy_unified_arg(conn, (void*)&{name}, {direction}) < 0)\n".format(
+                "    if (maybe_copy_unified_arg((void*)&{name}, {direction}) < 0)\n".format(
                     name=self.parameter.name, direction=direction
                 )
             )
@@ -626,7 +626,7 @@ class DereferenceOperation:
 
     def client_unified_copy(self, f, direction, error):
         f.write(
-            "    if (maybe_copy_unified_arg(conn, (void*){name}, {direction}) < 0)\n".format(
+            "    if (maybe_copy_unified_arg((void*){name}, {direction}) < 0)\n".format(
                 name=self.parameter.name, direction=direction
             )
         )
@@ -1056,9 +1056,9 @@ def main():
             '#include "rpc.h"\n\n'
             "extern int rpc_size();\n"
             "extern conn_t *rpc_client_get_connection(unsigned int index);\n"
-            "extern int is_unified_pointer(conn_t *conn, void* arg);\n"
-            "int maybe_copy_unified_arg(conn_t *conn, void* arg, enum cudaMemcpyKind kind);\n"
-            "extern int rpc_close();\n\n"
+            "extern int is_unified_pointer(void* arg);\n"
+            "int maybe_copy_unified_arg(void *arg, enum cudaMemcpyKind kind);\n"
+            "extern void rpc_close(conn_t *conn);\n\n"
         )
         for function, annotation, operations, disabled in functions_with_annotations:
             # we don't generate client function definitions for disabled functions; only the RPC definitions.
@@ -1142,11 +1142,11 @@ def main():
                 operation.client_rpc_read(f)
 
             f.write(
-                "        rpc_write(conn, &return_value, sizeof({return_type})) < 0 ||\n".format(
+                "        rpc_read(conn, &return_value, sizeof({return_type})) < 0 ||\n".format(
                     return_type=function.return_type.format()
                 )
             )
-            f.write("        rpc_write_end(conn) < 0)\n")
+            f.write("        rpc_read_end(conn) < 0)\n")
             f.write(
                 "        return {error_return};\n".format(
                     error_return=error_const(function.return_type.format())
@@ -1161,12 +1161,7 @@ def main():
                 )
 
             if function.name.format() == "nvmlShutdown":
-                f.write("    if (rpc_close() < 0)\n")
-                f.write(
-                    "        return {error_return};\n".format(
-                        error_return=error_const(function.return_type.format())
-                    )
-                )
+                f.write("    rpc_close(conn);\n")
 
             f.write("    return return_value;\n")
             f.write("}\n\n")
