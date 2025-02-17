@@ -1,7 +1,7 @@
 from cxxheaderparser.simple import parse_file, ParsedData, ParserOptions
 from cxxheaderparser.preprocessor import make_gcc_preprocessor
 from cxxheaderparser.types import Type, Pointer, Parameter, Function, Array
-from typing import Optional
+from typing import Optional, Union
 from dataclasses import dataclass
 import os
 import glob
@@ -96,14 +96,14 @@ class NullableOperation:
         if not self.send:
             return
         f.write(
-            "        rpc_write(0, &{param_name}, sizeof({server_type})) < 0 ||\n".format(
+            "        rpc_write(conn, &{param_name}, sizeof({server_type})) < 0 ||\n".format(
                 param_name=self.parameter.name,
                 server_type=self.ptr.format(),
             )
         )
 
         f.write(
-            "        ({param_name} != nullptr && rpc_write(0, {param_name}, sizeof({base_type})) < 0) ||\n".format(
+            "        ({param_name} != nullptr && rpc_write(conn, {param_name}, sizeof({base_type})) < 0) ||\n".format(
                 param_name=self.parameter.name,
                 # void is treated differently from non void pointer types
                 base_type=(
@@ -115,7 +115,11 @@ class NullableOperation:
         )
 
     def client_unified_copy(self, f, direction, error):
-        f.write("    if (maybe_copy_unified_arg(0, (void*){name}, cudaMemcpyDeviceToHost) < 0)\n".format(name=self.parameter.name))
+        f.write(
+            "    if (maybe_copy_unified_arg(conn, (void*){name}, cudaMemcpyDeviceToHost) < 0)\n".format(
+                name=self.parameter.name
+            )
+        )
         f.write("      return {error};\n".format(error=error))
 
     @property
@@ -175,13 +179,13 @@ class NullableOperation:
         if not self.recv:
             return
         f.write(
-            "        rpc_read(0, &{param_name}_null_check, sizeof({server_type})) < 0 ||\n".format(
+            "        rpc_read(conn, &{param_name}_null_check, sizeof({server_type})) < 0 ||\n".format(
                 param_name=self.parameter.name,
                 server_type=self.ptr.format(),
             )
         )
         f.write(
-            "        ({param_name}_null_check && rpc_read(0, {param_name}, sizeof({base_type})) < 0) ||\n".format(
+            "        ({param_name}_null_check && rpc_read(conn, {param_name}, sizeof({base_type})) < 0) ||\n".format(
                 param_name=self.parameter.name,
                 base_type=self.ptr.ptr_to.format(),
             )
@@ -199,9 +203,8 @@ class ArrayOperation:
     iter: bool
     parameter: Parameter
     ptr: Pointer
-    length: (
-        int | Parameter
-    )  # if int, it's a constant length, if Parameter, it's a variable length.
+    # if int, it's a constant length, if Parameter, it's a variable length.
+    length: Union[int, Parameter]
 
     def client_rpc_write(self, f):
         if self.iter:
@@ -228,7 +231,7 @@ class ArrayOperation:
             return
         elif isinstance(self.length, int):
             f.write(
-                "       ({param_name} != NULL && rpc_write(0, {param_name}, {size})) < 0 ||\n".format(
+                "        rpc_write(conn, {param_name}, {size}) < 0 ||\n".format(
                     param_name=self.parameter.name,
                     size=self.length,
                 )
@@ -236,7 +239,7 @@ class ArrayOperation:
         # array length operations are handled differently than char
         elif isinstance(self.ptr, Array):
             f.write(
-                "       ({param_name} != NULL && rpc_write(0, &{param_name}, sizeof({param_type}))) < 0 ||\n".format(
+                "        rpc_write(conn, &{param_name}, sizeof({param_type})) < 0 ||\n".format(
                     param_name=self.parameter.name,
                     param_type=self.ptr.array_of.format(),
                 )
@@ -247,7 +250,7 @@ class ArrayOperation:
             else:
                 length = self.length.name
             f.write(
-                "       ({param_name} != NULL && rpc_write(0, {param_name}, {length} * sizeof({param_type}))) < 0 ||\n".format(
+                "        rpc_write(conn, {param_name}, {length} * sizeof({param_type})) < 0 ||\n".format(
                     param_name=self.parameter.name,
                     param_type=self.ptr.ptr_to.format(),
                     length=length,
@@ -256,7 +259,7 @@ class ArrayOperation:
 
     def client_unified_copy(self, f, direction, error):
         f.write(
-            "    if (maybe_copy_unified_arg(0, (void*){name}, {direction}) < 0)\n".format(
+            "    if (maybe_copy_unified_arg(conn, (void*){name}, {direction}) < 0)\n".format(
                 name=self.parameter.name, direction=direction
             )
         )
@@ -264,12 +267,12 @@ class ArrayOperation:
 
         if isinstance(self.length, int):
             f.write(
-                "    for (int i = 0; i < {name} && is_unified_pointer(0, (void*){param}); i++)\n".format(
+                "    for (int i = 0; i < {name} && is_unified_pointer(conn, (void*){param}); i++)\n".format(
                     param=self.parameter.name, name=self.length
                 )
             )
             f.write(
-                "      if (maybe_copy_unified_arg(0, (void*)&{name}[i], {direction}) < 0 )\n".format(
+                "      if (maybe_copy_unified_arg(conn, (void*)&{name}[i], {direction}) < 0 )\n".format(
                     name=self.parameter.name, direction=direction
                 )
             )
@@ -280,12 +283,12 @@ class ArrayOperation:
         if hasattr(self.length.type, "ptr_to"):
             # need to cast the int a bit differently here
             f.write(
-                "    for (int i = 0; i < static_cast<int>(*{name}) && is_unified_pointer(0, (void*){param}); i++)\n".format(
+                "    for (int i = 0; i < static_cast<int>(*{name}) && is_unified_pointer(conn, (void*){param}); i++)\n".format(
                     param=self.parameter.name, name=self.length.name
                 )
             )
             f.write(
-                "      if (maybe_copy_unified_arg(0, (void*)&{name}[i], {direction}) < 0)\n".format(
+                "      if (maybe_copy_unified_arg(conn, (void*)&{name}[i], {direction}) < 0)\n".format(
                     name=self.parameter.name, direction=direction
                 )
             )
@@ -293,24 +296,24 @@ class ArrayOperation:
         else:
             if hasattr(self.parameter.type, "ptr_to"):
                 f.write(
-                    "    for (int i = 0; i < static_cast<int>({name}) && is_unified_pointer(0, (void*){param}); i++)\n".format(
+                    "    for (int i = 0; i < static_cast<int>({name}) && is_unified_pointer(conn, (void*){param}); i++)\n".format(
                         param=self.parameter.name, name=self.length.name
                     )
                 )
                 f.write(
-                    "      if (maybe_copy_unified_arg(0, (void*)&{name}[i], {direction}) < 0)\n".format(
+                    "      if (maybe_copy_unified_arg(conn, (void*)&{name}[i], {direction}) < 0)\n".format(
                         name=self.parameter.name, direction=direction
                     )
                 )
                 f.write("        return {error};\n".format(error=error))
             else:
                 f.write(
-                    "    for (int i = 0; i < static_cast<int>({name}) && is_unified_pointer(0, (void*){param}); i++)\n".format(
+                    "    for (int i = 0; i < static_cast<int>({name}) && is_unified_pointer(conn, (void*){param}); i++)\n".format(
                         param=self.parameter.name, name=self.length.name
                     )
                 )
                 f.write(
-                    "      if (maybe_copy_unified_arg(0, (void*){name}[i], {direction}) < 0)\n".format(
+                    "      if (maybe_copy_unified_arg(conn, (void*){name}[i], {direction}) < 0)\n".format(
                         name=self.parameter.name, direction=direction
                     )
                 )
@@ -334,7 +337,7 @@ class ArrayOperation:
             s = f"    {self.ptr.format()} {self.parameter.name};\n"
             self.ptr.ptr_to.const = c
         return s
-        
+
     def server_rpc_read(self, f, index) -> Optional[str]:
         if self.iter:
             lambda_template = """
@@ -366,7 +369,9 @@ class ArrayOperation:
                         param_name=self.parameter.name,
                         param_type=self.ptr.ptr_to.format(),
                         server_type=self.ptr.format(),
-                        length=self.length if isinstance(self.length, int) else self.length.name,
+                        length=self.length
+                        if isinstance(self.length, int)
+                        else self.length.name,
                     )
                 )
                 f.write("    if(")
@@ -375,7 +380,7 @@ class ArrayOperation:
         elif isinstance(self.length, int):
             f.write(
                 "        rpc_read(conn, &{param_name}, {size}) < 0 ||\n".format(
-                    param_name=self.parameter.name, 
+                    param_name=self.parameter.name,
                     size=self.length,
                 )
             )
@@ -430,7 +435,7 @@ class ArrayOperation:
             return
         if isinstance(self.length, int):
             f.write(
-                "        rpc_read(0, {param_name}, {size}) < 0 ||\n".format(
+                "        rpc_read(conn, {param_name}, {size}) < 0 ||\n".format(
                     param_name=self.parameter.name,
                     size=self.length,
                 )
@@ -441,7 +446,7 @@ class ArrayOperation:
             else:
                 length = self.length.name
             f.write(
-                "        rpc_read(0, {param_name}, {length} * sizeof({param_type})) < 0 ||\n".format(
+                "        rpc_read(conn, {param_name}, {length} * sizeof({param_type})) < 0 ||\n".format(
                     param_name=self.parameter.name,
                     param_type=self.ptr.ptr_to.format(),
                     length=length,
@@ -464,12 +469,12 @@ class NullTerminatedOperation:
         if not self.send:
             return
         f.write(
-            "        rpc_write(0, &{param_name}_len, sizeof(std::size_t)) < 0 ||\n".format(
+            "        rpc_write(conn, &{param_name}_len, sizeof(std::size_t)) < 0 ||\n".format(
                 param_name=self.parameter.name,
             )
         )
         f.write(
-            "        rpc_write(0, {param_name}, {param_name}_len) < 0 ||\n".format(
+            "        rpc_write(conn, {param_name}, {param_name}_len) < 0 ||\n".format(
                 param_name=self.parameter.name,
             )
         )
@@ -483,7 +488,7 @@ class NullTerminatedOperation:
 
     def client_unified_copy(self, f, direction, error):
         f.write(
-            "    if (maybe_copy_unified_arg(0, (void*){name}, {direction}) < 0)\n".format(
+            "    if (maybe_copy_unified_arg(conn, (void*){name}, {direction}) < 0)\n".format(
                 name=self.parameter.name, direction=direction
             )
         )
@@ -533,12 +538,12 @@ class NullTerminatedOperation:
         if not self.recv:
             return
         f.write(
-            "        rpc_read(0, &{param_name}_len, sizeof(std::size_t)) < 0 ||\n".format(
+            "        rpc_read(conn, &{param_name}_len, sizeof(std::size_t)) < 0 ||\n".format(
                 param_name=self.parameter.name
             )
         )
         f.write(
-            "        rpc_read(0, {param_name}, {param_name}_len) < 0 ||\n".format(
+            "        rpc_read(conn, {param_name}, {param_name}_len) < 0 ||\n".format(
                 param_name=self.parameter.name
             )
         )
@@ -554,14 +559,14 @@ class OpaqueTypeOperation:
     send: bool
     recv: bool
     parameter: Parameter
-    type_: Type | Pointer
+    type_: Union[Type, Pointer]
 
     def client_rpc_write(self, f):
         if not self.send:
             return
         else:
             f.write(
-                "        rpc_write(0, &{param_name}, sizeof({param_type})) < 0 ||\n".format(
+                "        rpc_write(conn, &{param_name}, sizeof({param_type})) < 0 ||\n".format(
                     param_name=self.parameter.name,
                     param_type=self.type_.format(),
                 )
@@ -575,8 +580,8 @@ class OpaqueTypeOperation:
         # but "const cudnnTensorDescriptor_t *xDesc" IS valid. This subtle change carries reprecussions.
         elif (
             "const " in self.type_.format()
-            and not "void" in self.type_.format()
-            and not "*" in self.type_.format()
+            and "void" not in self.type_.format()
+            and "*" not in self.type_.format()
         ):
             return f"   {self.type_.format().replace('const', '')} {self.parameter.name};\n"
         else:
@@ -585,14 +590,14 @@ class OpaqueTypeOperation:
     def client_unified_copy(self, f, direction, error):
         if isinstance(self.type_, Pointer):
             f.write(
-                "    if (maybe_copy_unified_arg(0, (void*){name}, {direction}) < 0)\n".format(
+                "    if (maybe_copy_unified_arg(conn, (void*){name}, {direction}) < 0)\n".format(
                     name=self.parameter.name, direction=direction
                 )
             )
             f.write("      return {error};\n".format(error=error))
         else:
             f.write(
-                "    if (maybe_copy_unified_arg(0, (void*)&{name}, {direction}) < 0)\n".format(
+                "    if (maybe_copy_unified_arg(conn, (void*)&{name}, {direction}) < 0)\n".format(
                     name=self.parameter.name, direction=direction
                 )
             )
@@ -628,7 +633,7 @@ class OpaqueTypeOperation:
         if not self.recv:
             return
         f.write(
-            "        rpc_read(0, &{param_name}, sizeof({param_type})) < 0 ||\n".format(
+            "        rpc_read(conn, &{param_name}, sizeof({param_type})) < 0 ||\n".format(
                 param_name=self.parameter.name,
                 param_type=self.type_.format(),
             )
@@ -651,7 +656,7 @@ class DereferenceOperation:
         if not self.send:
             return
         f.write(
-            "        rpc_write(0, {param_name}, sizeof({param_type})) < 0 ||\n".format(
+            "        rpc_write(conn, {param_name}, sizeof({param_type})) < 0 ||\n".format(
                 param_name=self.parameter.name,
                 param_type=self.type_.ptr_to.format(),
             )
@@ -673,7 +678,7 @@ class DereferenceOperation:
 
     def client_unified_copy(self, f, direction, error):
         f.write(
-            "    if (maybe_copy_unified_arg(0, (void*){name}, {direction}) < 0)\n".format(
+            "    if (maybe_copy_unified_arg(conn, (void*){name}, {direction}) < 0)\n".format(
                 name=self.parameter.name, direction=direction
             )
         )
@@ -698,20 +703,20 @@ class DereferenceOperation:
             return
         # if this parameter is recv only then dereference it.
         f.write(
-            "        rpc_read(0, {param_name}, sizeof({param_type})) < 0 ||\n".format(
+            "        rpc_read(conn, {param_name}, sizeof({param_type})) < 0 ||\n".format(
                 param_name=self.parameter.name,
                 param_type=self.type_.ptr_to.format(),
             )
         )
 
 
-Operation = (
-    NullableOperation
-    | ArrayOperation
-    | NullTerminatedOperation
-    | OpaqueTypeOperation
-    | DereferenceOperation
-)
+Operation = Union[
+    NullableOperation,
+    ArrayOperation,
+    NullTerminatedOperation,
+    OpaqueTypeOperation,
+    DereferenceOperation,
+]
 
 
 # parses a function annotation. if disabled is encountered, returns True for short circuiting.
@@ -881,75 +886,87 @@ def parse_annotation(
                         parameter=param,
                         ptr=param.type,
                         length=length_param,
-                        iter=False
-                    ))
+                    )
+                )
             elif size_arg:
                 # if it has a size, it's an array operation with constant length
-                operations.append(ArrayOperation(
-                    send=send,
-                    recv=recv,
-                    parameter=param,
-                    ptr=param.type,
-                    length=int(size_arg.split(":")[1]),
-                    iter=False
-                ))
+                operations.append(
+                    ArrayOperation(
+                        send=send,
+                        recv=recv,
+                        parameter=param,
+                        ptr=param.type,
+                        length=int(size_arg.split(":")[1]),
+                    )
+                )
             elif null_terminated:
                 # if it's null terminated, it's a null terminated operation
-                operations.append(NullTerminatedOperation(
-                    send=send,
-                    recv=recv,
-                    parameter=param,
-                    ptr=param.type,
-                ))
+                operations.append(
+                    NullTerminatedOperation(
+                        send=send,
+                        recv=recv,
+                        parameter=param,
+                        ptr=param.type,
+                    )
+                )
             elif nullable:
                 # if it's nullable, it's a nullable operation
-                operations.append(NullableOperation(
-                    send=send,
-                    recv=recv,
-                    parameter=param,
-                    ptr=param.type,
-                ))
+                operations.append(
+                    NullableOperation(
+                        send=send,
+                        recv=recv,
+                        parameter=param,
+                        ptr=param.type,
+                    )
+                )
             else:
                 # otherwise, it's a pointer to a single value or another pointer
                 if recv:
                     if param.type.ptr_to.format() == "void":
                         raise NotImplementedError("Cannot dereference a void pointer")
                     # this is an out parameter so use the base type as the server declaration
-                    operations.append(DereferenceOperation(
-                        send=send,
-                        recv=recv,
-                        parameter=param,
-                        type_=param.type,
-                    ))
+                    operations.append(
+                        DereferenceOperation(
+                            send=send,
+                            recv=recv,
+                            parameter=param,
+                            type_=param.type,
+                        )
+                    )
                 else:
                     # otherwise, treat it as an opaque type
-                    operations.append(OpaqueTypeOperation(
-                        send=send,
-                        recv=recv,
-                        parameter=param,
-                        type_=param.type,
-                    ))
+                    operations.append(
+                        OpaqueTypeOperation(
+                            send=send,
+                            recv=recv,
+                            parameter=param,
+                            type_=param.type,
+                        )
+                    )
         elif isinstance(param.type, Type):
             if param.type.const:
                 recv = False
-            operations.append(OpaqueTypeOperation(
-                send=send,
-                recv=recv,
-                parameter=param,
-                type_=param.type,
-            ))
+            operations.append(
+                OpaqueTypeOperation(
+                    send=send,
+                    recv=recv,
+                    parameter=param,
+                    type_=param.type,
+                )
+            )
         elif isinstance(param.type, Array):
             length_param = next(p for p in params if p.name == length_arg.split(":")[1])
             if param.type.array_of.const:
                 recv = False
-            operations.append(ArrayOperation(
-                send=send,
-                recv=recv,
-                parameter=param,
-                ptr=param.type,
-                length=length_param,
-                iter=False
-            ))
+            operations.append(
+                ArrayOperation(
+                    send=send,
+                    recv=recv,
+                    parameter=param,
+                    ptr=param.type,
+                    length=length_param,
+                )
+            )
         else:
             raise NotImplementedError("Unknown type")
     return operations, False
@@ -1106,16 +1123,12 @@ def main():
             "#include <unordered_map>\n\n"
             '#include "gen_api.h"\n\n'
             '#include "manual_client.h"\n\n'
+            '#include "rpc.h"\n\n'
             "extern int rpc_size();\n"
-            "extern int rpc_start_request(const int index, const unsigned int request);\n"
-            "extern int rpc_write(const int index, const void *data, const std::size_t size);\n"
-            "extern int rpc_end_request(const int index);\n"
-            "extern int rpc_wait_for_response(const int index);\n"
-            "extern int is_unified_pointer(const int index, void* arg);\n"
-            "extern int rpc_read(const int index, void *data, const std::size_t size);\n"
-            "extern int rpc_end_response(const int index, void *return_value);\n"
-            "int maybe_copy_unified_arg(const int index, void* arg, enum cudaMemcpyKind kind);\n"
-            "extern int rpc_close();\n\n"
+            "extern conn_t *rpc_client_get_connection(unsigned int index);\n"
+            "int is_unified_pointer(conn_t *conn, void *arg);\n"
+            "int maybe_copy_unified_arg(conn_t *conn, void *arg, enum cudaMemcpyKind kind);\n"
+            "extern void rpc_close(conn_t *conn);\n\n"
         )
         for function, annotation, operations, disabled in functions_with_annotations:
             # we don't generate client function definitions for disabled functions; only the RPC definitions.
@@ -1153,6 +1166,8 @@ def main():
             )
             f.write("{\n")
 
+            f.write("    conn_t *conn = rpc_client_get_connection(0);\n")
+
             for operation in operations:
                 operation.client_unified_copy(
                     f,
@@ -1183,7 +1198,7 @@ def main():
                         )
 
             f.write(
-                "    if (rpc_start_request(0, RPC_{name}) < 0 ||\n".format(
+                "    if (rpc_write_start_request(conn, RPC_{name}) < 0 ||\n".format(
                     name=function.name.format()
                 )
             )
@@ -1191,12 +1206,17 @@ def main():
             for operation in operations:
                 operation.client_rpc_write(f)
 
-            f.write("        rpc_wait_for_response(0) < 0 ||\n")
+            f.write("        rpc_wait_for_response(conn) < 0 ||\n")
 
             for operation in operations:
                 operation.client_rpc_read(f)
 
-            f.write("        rpc_end_response(0, &return_value) < 0)\n")
+            f.write(
+                "        rpc_read(conn, &return_value, sizeof({return_type})) < 0 ||\n".format(
+                    return_type=function.return_type.format()
+                )
+            )
+            f.write("        rpc_read_end(conn) < 0)\n")
             f.write(
                 "        return {error_return};\n".format(
                     error_return=error_const(function.return_type.format())
@@ -1211,12 +1231,7 @@ def main():
                 )
 
             if function.name.format() == "nvmlShutdown":
-                f.write("    if (rpc_close() < 0)\n")
-                f.write(
-                    "        return {error_return};\n".format(
-                        error_return=error_const(function.return_type.format())
-                    )
-                )
+                f.write("    rpc_close(conn);\n")
 
             f.write("    return return_value;\n")
             f.write("}\n\n")
@@ -1283,16 +1298,14 @@ def main():
             "#include <string>\n"
             "#include <unordered_map>\n\n"
             '#include "gen_api.h"\n\n'
+            '#include <vector>\n\n'
+            '#include <cstdio>\n\n'
+            '#include <cuda_runtime.h>\n\n'
             '#include "gen_server.h"\n\n'
             '#include "manual_server.h"\n\n'
-            '#include <vector>"\n\n'
-            '#include <cstdio>"\n\n'
-            '#include <cuda_runtime.h>"\n\n'
-            "extern int rpc_read(const void *conn, void *data, const std::size_t size);\n"
-            "extern int rpc_end_request(const void *conn);\n"
-            "extern int rpc_start_response(const void *conn, const int request_id);\n"
-            "extern int rpc_write(const void *conn, const void *data, const std::size_t size);\n"
-            "extern int rpc_end_response(const void *conn, void *return_value);\n\n"
+            '#include <cstdio>\n\n'
+            '#include <cuda_runtime.h>\n\n'
+            '#include "rpc.h"\n\n'
         )
         for function, annotation, operations, disabled in functions_with_annotations:
             if function.name.format() in MANUAL_IMPLEMENTATIONS or disabled:
@@ -1300,7 +1313,7 @@ def main():
 
             # parse the annotation doxygen
             f.write(
-                "int handle_{name}(void *conn)\n".format(
+                "int handle_{name}(conn_t *conn)\n".format(
                     name=function.name.format(),
                 )
             )
@@ -1325,7 +1338,9 @@ def main():
 
             f.write("    if (\n")
             for operation in operations:
-                if isinstance(operation, NullTerminatedOperation) or isinstance(operation, ArrayOperation):
+                if isinstance(operation, NullTerminatedOperation) or isinstance(
+                    operation, ArrayOperation
+                ):
                     if error := operation.server_rpc_read(f, len(defers)):
                         defers.append(error)
                 else:
@@ -1335,7 +1350,7 @@ def main():
 
             f.write("\n")
 
-            f.write("    request_id = rpc_end_request(conn);\n")
+            f.write("    request_id = rpc_read_end(conn);\n")
             f.write("    if (request_id < 0)\n")
             f.write("        goto ERROR_{index};\n".format(index=len(defers)))
 
@@ -1361,12 +1376,17 @@ def main():
                     )
                 )
 
-            f.write("    if (rpc_start_response(conn, request_id) < 0 ||\n")
+            f.write("    if (rpc_write_start_response(conn, request_id) < 0 ||\n")
 
             for operation in operations:
                 operation.server_rpc_write(f)
 
-            f.write("        rpc_end_response(conn, &scuda_intercept_result) < 0)\n")
+            f.write(
+                "        rpc_write(conn, &scuda_intercept_result, sizeof({return_type})) < 0 ||\n".format(
+                    return_type=function.return_type.format()
+                )
+            )
+            f.write("        rpc_write_end(conn) < 0)\n")
             f.write("        goto ERROR_{index};\n".format(index=len(defers)))
             f.write("\n")
             f.write("    return 0;\n")

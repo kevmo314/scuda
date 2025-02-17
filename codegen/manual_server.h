@@ -1,18 +1,24 @@
+#ifndef __MANUAL_SERVER_H__
+#define __MANUAL_SERVER_H__
+
+#include "rpc.h"
 #include <cuda.h>
 #include <cuda_runtime_api.h>
 #include <nvml.h>
 
-int handle_cudaGraphAddKernelNode(void *conn);
-int handle_cudaFree(void *conn);
-int handle_cudaMemcpy(void *conn);
-int handle_cudaMallocHost(void *conn);
-int handle_cudaMemcpyAsync(void *conn);
-int handle_cudaLaunchKernel(void *conn);
-int handle_cudaMallocManaged(void *conn);
-int handle_cudaGraphGetNodes(void *conn);
-int handle___cudaRegisterVar(void *conn);
-int handle___cudaRegisterFunction(void *conn);
-int handle___cudaRegisterFatBinary(void *conn);
-int handle___cudaRegisterFatBinaryEnd(void *conn);
-int handle___cudaPushCallConfiguration(void *conn);
-int handle___cudaPopCallConfiguration(void *conn);
+int handle_cudaMallocHost(conn_t *conn);
+int handle_cudaGraphAddKernelNode(conn_t *conn);
+int handle_cudaGraphGetNodes(conn_t *conn);
+int handle_cudaFree(conn_t *conn);
+int handle_cudaMemcpy(conn_t *conn);
+int handle_cudaMemcpyAsync(conn_t *conn);
+int handle_cudaLaunchKernel(conn_t *conn);
+int handle_cudaMallocManaged(conn_t *conn);
+int handle___cudaRegisterVar(conn_t *conn);
+int handle___cudaRegisterFunction(conn_t *conn);
+int handle___cudaRegisterFatBinary(conn_t *conn);
+int handle___cudaRegisterFatBinaryEnd(conn_t *conn);
+int handle___cudaPushCallConfiguration(conn_t *conn);
+int handle___cudaPopCallConfiguration(conn_t *conn);
+
+#endif
