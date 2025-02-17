@@ -26,7 +26,8 @@ int maybe_copy_unified_arg(conn_t *conn, void *arg, enum cudaMemcpyKind kind);
 extern void rpc_close(conn_t *conn);
 extern cudaError_t cuda_memcpy_unified_ptrs(conn_t *conn, cudaMemcpyKind kind);
 extern void maybe_free_unified_mem(conn_t *conn, void *ptr);
-extern void allocate_unified_mem_pointer(conn_t *conn, void *dev_ptr, size_t size);
+extern void allocate_unified_mem_pointer(conn_t *conn, void *dev_ptr,
+                                         size_t size);
 
 #define MAX_FUNCTION_NAME 1024
 #define MAX_ARGS 128
@@ -208,7 +209,8 @@ cudaError_t cudaMemcpyAsync(void *dst, const void *src, size_t count,
 
   int request_id = rpc_write_start_request(conn, RPC_cudaMemcpyAsync);
   int stream_null_check = stream == 0 ? 1 : 0;
-  if (request_id < 0 || rpc_write(conn, &kind, sizeof(enum cudaMemcpyKind)) < 0 ||
+  if (request_id < 0 ||
+      rpc_write(conn, &kind, sizeof(enum cudaMemcpyKind)) < 0 ||
       rpc_write(conn, &stream_null_check, sizeof(int)) < 0 ||
       (stream_null_check == 0 &&
        rpc_write(conn, &stream, sizeof(cudaStream_t)) < 0))
@@ -569,8 +571,7 @@ extern "C" void **__cudaRegisterFatBinary(void *fatCubin) {
   }
 
   if (rpc_wait_for_response(conn) < 0 ||
-    rpc_read(conn, &p, sizeof(void **)) < 0 ||
-    rpc_read_end(conn) < 0)
+      rpc_read(conn, &p, sizeof(void **)) < 0 || rpc_read_end(conn) < 0)
     return nullptr;
 
   return p;
@@ -583,11 +584,11 @@ extern "C" void __cudaRegisterFatBinaryEnd(void **fatCubinHandle) {
 
   conn_t *conn = rpc_client_get_connection(0);
 
-  int request_id = rpc_write_start_request(conn, RPC___cudaRegisterFatBinaryEnd);
+  int request_id =
+      rpc_write_start_request(conn, RPC___cudaRegisterFatBinaryEnd);
   if (request_id < 0 ||
       rpc_write(conn, &fatCubinHandle, sizeof(const void *)) < 0 ||
-      rpc_wait_for_response(conn) < 0 ||
-      rpc_read_end(conn) < 0)
+      rpc_wait_for_response(conn) < 0 || rpc_read_end(conn) < 0)
     return;
 }
 
@@ -609,13 +610,12 @@ extern "C" cudaError_t __cudaPushCallConfiguration(dim3 gridDim, dim3 blockDim,
   conn_t *conn = rpc_client_get_connection(0);
 
   if (rpc_write_start_request(conn, RPC___cudaPushCallConfiguration) < 0 ||
-    rpc_write(conn, &gridDim, sizeof(dim3)) < 0 ||
-    rpc_write(conn, &blockDim, sizeof(dim3)) < 0 ||
-    rpc_write(conn, &sharedMem, sizeof(size_t)) < 0 ||
-    rpc_write(conn, &stream, sizeof(cudaStream_t)) < 0 ||
-    rpc_wait_for_response(conn) < 0 ||
-    rpc_read(conn, &res, sizeof(cudaError_t)) < 0 ||
-    rpc_read_end(conn) < 0) {
+      rpc_write(conn, &gridDim, sizeof(dim3)) < 0 ||
+      rpc_write(conn, &blockDim, sizeof(dim3)) < 0 ||
+      rpc_write(conn, &sharedMem, sizeof(size_t)) < 0 ||
+      rpc_write(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+      rpc_wait_for_response(conn) < 0 ||
+      rpc_read(conn, &res, sizeof(cudaError_t)) < 0 || rpc_read_end(conn) < 0) {
     return cudaErrorDevicesUnavailable;
   }
 
@@ -630,13 +630,13 @@ extern "C" cudaError_t __cudaPopCallConfiguration(dim3 *gridDim, dim3 *blockDim,
 
   conn_t *conn = rpc_client_get_connection(0);
 
-    if (rpc_write_start_request(conn, RPC___cudaPopCallConfiguration) < 0 ||
-      rpc_wait_for_response(conn) < 0 || rpc_read(conn, gridDim, sizeof(dim3)) < 0 ||
+  if (rpc_write_start_request(conn, RPC___cudaPopCallConfiguration) < 0 ||
+      rpc_wait_for_response(conn) < 0 ||
+      rpc_read(conn, gridDim, sizeof(dim3)) < 0 ||
       rpc_read(conn, blockDim, sizeof(dim3)) < 0 ||
       rpc_read(conn, sharedMem, sizeof(size_t)) < 0 ||
       rpc_read(conn, stream, sizeof(cudaStream_t)) < 0 ||
-      rpc_read(conn, &res, sizeof(cudaError_t)) < 0 ||
-      rpc_read_end(conn) < 0)
+      rpc_read(conn, &res, sizeof(cudaError_t)) < 0 || rpc_read_end(conn) < 0)
     return cudaErrorDevicesUnavailable;
 
   return res;
@@ -681,8 +681,7 @@ extern "C" void __cudaRegisterFunction(void **fatCubinHandle,
       (bDim != nullptr && rpc_write(conn, bDim, sizeof(dim3)) < 0) ||
       (gDim != nullptr && rpc_write(conn, gDim, sizeof(dim3)) < 0) ||
       (wSize != nullptr && rpc_write(conn, wSize, sizeof(int)) < 0) ||
-      rpc_wait_for_response(conn) < 0 ||
-      rpc_read_end(conn) < 0)
+      rpc_wait_for_response(conn) < 0 || rpc_read_end(conn) < 0)
     return;
 
   // also memorize the host pointer function

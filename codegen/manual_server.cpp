@@ -523,8 +523,7 @@ int handle___cudaRegisterVar(conn_t *conn) {
     return -1;
   }
 
-  if (rpc_write_start_response(conn, request_id) < 0 ||
-      rpc_write_end(conn) < 0)
+  if (rpc_write_start_response(conn, request_id) < 0 || rpc_write_end(conn) < 0)
     return -1;
 
   return 0;
