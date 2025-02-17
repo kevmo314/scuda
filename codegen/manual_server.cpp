@@ -158,7 +158,8 @@ int handle_cudaMemcpyAsync(conn_t *conn) {
       (kind == cudaMemcpyDeviceToHost &&
       rpc_write(conn, host_data, count) < 0) ||
       rpc_write(conn, &result, sizeof(cudaError_t)) < 0 ||
-      (host_data != NULL && cudaStreamAddCallback(
+      rpc_write_end(conn) < 0 ||
+      (host_data != NULL && stream == 0 && cudaStreamAddCallback(
                                 stream,
                                 [](cudaStream_t stream, cudaError_t status,
                                    void *ptr) { free(ptr); },
