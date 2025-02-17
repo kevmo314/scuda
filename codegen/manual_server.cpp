@@ -334,6 +334,9 @@ int handle___cudaRegisterFunction(conn_t *conn) {
       mask & 1 << 2 ? &bDim : nullptr, mask & 1 << 3 ? &gDim : nullptr,
       mask & 1 << 4 ? &wSize : nullptr);
 
+  if (rpc_write_start_response(conn, request_id) < 0 || rpc_write_end(conn) < 0)
+    return -1;
+
   return 0;
 ERROR_2:
   free((void *)deviceName);
@@ -348,7 +351,6 @@ extern "C" void __cudaRegisterFatBinaryEnd(void **fatCubinHandle);
 int handle___cudaRegisterFatBinaryEnd(conn_t *conn) {
   void **fatCubinHandle;
 
-  // Read the fatCubinHandle from the client
   if (rpc_read(conn, &fatCubinHandle, sizeof(void **)) < 0)
     return -1;
 
@@ -357,6 +359,9 @@ int handle___cudaRegisterFatBinaryEnd(conn_t *conn) {
     return -1;
 
   __cudaRegisterFatBinaryEnd(fatCubinHandle);
+
+  if (rpc_write_start_response(conn, request_id) < 0 || rpc_write_end(conn) < 0)
+    return -1;
 
   return 0;
 }
@@ -401,8 +406,6 @@ int handle___cudaPopCallConfiguration(conn_t *conn) {
   dim3 gridDim, blockDim;
   size_t sharedMem;
   cudaStream_t stream;
-
-  std::cout << "received handle___cudaPopCallConfiguration" << std::endl;
 
   int request_id = rpc_read_end(conn);
   if (request_id < 0)
@@ -519,6 +522,10 @@ int handle___cudaRegisterVar(conn_t *conn) {
     std::cerr << "rpc_read_end failed" << std::endl;
     return -1;
   }
+
+  if (rpc_write_start_response(conn, request_id) < 0 ||
+      rpc_write_end(conn) < 0)
+    return -1;
 
   return 0;
 }

@@ -241,20 +241,18 @@ int rpc_open() {
 
 int rpc_size() { return nconns; }
 
-void allocate_unified_mem_pointer(conn_t *conn, const int index, void *dev_ptr, size_t size) {
+void allocate_unified_mem_pointer(conn_t *conn, void *dev_ptr, size_t size) {
   // allocate new space for pointer mapping
   unified_devices[conn][dev_ptr] = size;
 }
 
-cudaError_t cuda_memcpy_unified_ptrs(conn_t *conn, const int index, cudaMemcpyKind kind) {
-  auto &conns = unified_devices;
-  auto found = conns.find(conn);
-
-  // see if the conn mapping exists
-  if (found != conns.end())
+cudaError_t cuda_memcpy_unified_ptrs(conn_t *conn, cudaMemcpyKind kind) {
+  auto conn_it = unified_devices.find(conn);
+  if (conn_it == unified_devices.end()) {
     return cudaSuccess;
+  }
 
-  for (const auto &[ptr, sz] : found->second) {
+  for (const auto &[ptr, sz] : conn_it->second) {
     size_t size = reinterpret_cast<size_t>(sz);
 
     // ptr is the same on both host/device
@@ -265,15 +263,13 @@ cudaError_t cuda_memcpy_unified_ptrs(conn_t *conn, const int index, cudaMemcpyKi
   return cudaSuccess;
 }
 
-void maybe_free_unified_mem(conn_t *conn, const int index, void *ptr) {
-  auto &conns = unified_devices;
-  auto found = conns.find(conn);
-
-  // see if the conn mapping exists
-  if (found != conns.end())
+void maybe_free_unified_mem(conn_t *conn, void *ptr) {
+  auto conn_it = unified_devices.find(conn);
+  if (conn_it == unified_devices.end()) {
     return;
+  }
 
-  for (const auto &[dev_ptr, sz] : found->second) {
+  for (const auto &[dev_ptr, sz] : conn_it->second) {
     size_t size = reinterpret_cast<size_t>(sz);
 
     if (dev_ptr == ptr) {
@@ -329,7 +325,6 @@ CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion,
 }
 
 void *dlsym(void *handle, const char *name) __THROW {
-  rpc_open();
   void *func = get_function_pointer(name);
 
   /** proc address function calls are basically dlsym; we should handle this
