@@ -16,20 +16,12 @@
 #include <unordered_map>
 
 #include "codegen/gen_server.h"
+#include "rpc.h"
 
 #define DEFAULT_PORT 14833
 #define MAX_CLIENTS 10
 
-typedef struct {
-  int connfd;
-  int read_request_id;
-  int write_request_id;
-  pthread_mutex_t read_mutex, write_mutex;
-  struct iovec write_iov[128];
-  int write_iov_count = 0;
-} conn_t;
-
-int request_handler(const conn_t *conn) {
+int request_handler(conn_t *conn) {
   unsigned int op;
 
   // Attempt to read the operation code from the client
@@ -43,7 +35,7 @@ int request_handler(const conn_t *conn) {
     return -1;
   }
 
-  return opHandler((void *)conn);
+  return opHandler(conn);
 }
 
 void client_handler(int connfd) {
@@ -58,12 +50,14 @@ void client_handler(int connfd) {
   printf("Client connected.\n");
 #endif
 
+  if (pthread_mutex_lock(&conn.read_mutex) < 0) {
+    std::cerr << "Error locking mutex." << std::endl;
+  }
   while (1) {
-    if (pthread_mutex_lock(&conn.read_mutex) < 0) {
-      std::cerr << "Error locking mutex." << std::endl;
-      break;
-    }
-    int n = read(connfd, &conn.read_request_id, sizeof(int));
+    while (conn.read_id != 0)
+      pthread_cond_wait(&conn.read_cond, &conn.read_mutex);
+
+    int n = read(connfd, &conn.read_id, sizeof(int));
     if (n == 0) {
       printf("client disconnected, loop continuing. \n");
       break;
@@ -72,57 +66,30 @@ void client_handler(int connfd) {
       break;
     }
 
-    // TODO: this can't be multithreaded as some of the __cuda* functions
-    // assume that they are running in the same thread as the one that
-    // calls cudaLaunchKernel. we'll need to find a better way to map
-    // function calls to threads. maybe each rpc maps to an optional
-    // thread id that is passed to the handler?
-    if (request_handler(&conn) < 0)
-      std::cerr << "Error handling request." << std::endl;
+    if (conn.read_id < 0) {
+      // this is a response to an existing request, notify everyone else
+      // and spin again.
+      if (pthread_cond_broadcast(&conn.read_cond) < 0) {
+        std::cerr << "Error broadcasting condition or unlocking mutex."
+                  << std::endl;
+        break;
+      }
+      continue;
+    } else {
+      // TODO: this can't be multithreaded as some of the __cuda* functions
+      // assume that they are running in the same thread as the one that
+      // calls cudaLaunchKernel. we'll need to find a better way to map
+      // function calls to threads. maybe each rpc maps to an optional
+      // thread id that is passed to the handler?
+      if (request_handler(&conn) < 0)
+        std::cerr << "Error handling request." << std::endl;
+    }
   }
 
   if (pthread_mutex_destroy(&conn.read_mutex) < 0 ||
       pthread_mutex_destroy(&conn.write_mutex) < 0)
     std::cerr << "Error destroying mutex." << std::endl;
   close(connfd);
-}
-
-int rpc_read(const void *conn, void *data, size_t size) {
-  return recv(((conn_t *)conn)->connfd, data, size, MSG_WAITALL);
-}
-
-int rpc_write(const void *conn, const void *data, const size_t size) {
-  ((conn_t *)conn)->write_iov[((conn_t *)conn)->write_iov_count++] =
-      (struct iovec){(void *)data, size};
-  return 0;
-}
-
-// signal from the handler that the request read is complete.
-int rpc_end_request(const void *conn) {
-  int request_id = ((conn_t *)conn)->read_request_id;
-  if (pthread_mutex_unlock(&((conn_t *)conn)->read_mutex) < 0)
-    return -1;
-  return request_id;
-}
-
-int rpc_start_response(const void *conn, const int request_id) {
-  if (pthread_mutex_lock(&((conn_t *)conn)->write_mutex) < 0)
-    return -1;
-  ((conn_t *)conn)->write_request_id = request_id;
-  ((conn_t *)conn)->write_iov_count = 1;
-  return 0;
-}
-
-int rpc_end_response(const void *conn, void *result) {
-  ((conn_t *)conn)->write_iov[0] =
-      (struct iovec){&((conn_t *)conn)->write_request_id, sizeof(int)};
-  ((conn_t *)conn)->write_iov[((conn_t *)conn)->write_iov_count++] =
-      (struct iovec){result, sizeof(int)};
-  if (writev(((conn_t *)conn)->connfd, ((conn_t *)conn)->write_iov,
-             ((conn_t *)conn)->write_iov_count) < 0 ||
-      pthread_mutex_unlock(&((conn_t *)conn)->write_mutex) < 0)
-    return -1;
-  return 0;
 }
 
 int main() {

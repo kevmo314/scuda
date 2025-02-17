@@ -15,16 +15,16 @@
 #include "gen_server.h"
 #include "ptx_fatbin.hpp"
 
-extern int rpc_read(const void *conn, void *data, const std::size_t size);
-extern int rpc_end_request(const void *conn);
-extern int rpc_start_response(const void *conn, const int request_id);
-extern int rpc_write(const void *conn, const void *data,
+extern int rpc_read(const conn_t *conn, void *data, const std::size_t size);
+extern int rpc_read_end(const conn_t *conn);
+extern int rpc_write_start_response(const conn_t *conn, const int request_id);
+extern int rpc_write(const conn_t *conn, const void *data,
                      const std::size_t size);
-extern int rpc_end_response(const void *conn, void *return_value);
+extern int rpc_end_response(const conn_t *conn, void *return_value);
 
 FILE *__cudart_trace_output_stream = stdout;
 
-int handle_cudaMemcpy(void *conn) {
+int handle_cudaMemcpy(conn_t *conn) {
   int request_id;
   cudaError_t result;
   void *src;
@@ -48,7 +48,7 @@ int handle_cudaMemcpy(void *conn) {
     if (host_data == NULL)
       goto ERROR_0;
 
-    request_id = rpc_end_request(conn);
+    request_id = rpc_read_end(conn);
     if (request_id < 0)
       goto ERROR_1;
 
@@ -62,14 +62,14 @@ int handle_cudaMemcpy(void *conn) {
     if (rpc_read(conn, host_data, count) < 0)
       goto ERROR_1;
 
-    request_id = rpc_end_request(conn);
+    request_id = rpc_read_end(conn);
     if (request_id < 0)
       goto ERROR_1;
 
     result = cudaMemcpy(dst, host_data, count, kind);
     break;
   case cudaMemcpyDeviceToDevice:
-    request_id = rpc_end_request(conn);
+    request_id = rpc_read_end(conn);
     if (request_id < 0)
       goto ERROR_0;
 
@@ -77,10 +77,11 @@ int handle_cudaMemcpy(void *conn) {
     break;
   }
 
-  if (rpc_start_response(conn, request_id) < 0 ||
+  if (rpc_write_start_response(conn, request_id) < 0 ||
       (kind == cudaMemcpyDeviceToHost &&
        rpc_write(conn, host_data, count) < 0) ||
-      rpc_end_response(conn, &result) < 0)
+      rpc_write(conn, &result, sizeof(cudaError_t)) < 0 ||
+      rpc_write_end(conn) < 0)
     goto ERROR_1;
 
   ret = 0;
@@ -91,7 +92,7 @@ ERROR_0:
   return ret;
 }
 
-int handle_cudaMemcpyAsync(void *conn) {
+int handle_cudaMemcpyAsync(conn_t *conn) {
   int request_id;
   cudaError_t result;
   void *src;
@@ -120,7 +121,7 @@ int handle_cudaMemcpyAsync(void *conn) {
     if (host_data == NULL)
       goto ERROR_0;
 
-    request_id = rpc_end_request(conn);
+    request_id = rpc_read_end(conn);
     if (request_id < 0)
       goto ERROR_0;
 
@@ -134,14 +135,14 @@ int handle_cudaMemcpyAsync(void *conn) {
     if (rpc_read(conn, host_data, count) < 0)
       goto ERROR_0;
 
-    request_id = rpc_end_request(conn);
+    request_id = rpc_read_end(conn);
     if (request_id < 0)
       goto ERROR_0;
 
     result = cudaMemcpyAsync(dst, host_data, count, kind, stream);
     break;
   case cudaMemcpyDeviceToDevice:
-    request_id = rpc_end_request(conn);
+    request_id = rpc_read_end(conn);
     if (request_id < 0)
       goto ERROR_0;
 
@@ -149,10 +150,11 @@ int handle_cudaMemcpyAsync(void *conn) {
     break;
   }
 
-  if (rpc_start_response(conn, request_id) < 0 ||
+  if (rpc_write_start_response(conn, request_id) < 0 ||
       (kind == cudaMemcpyDeviceToHost &&
        rpc_write(conn, host_data, count) < 0) ||
-      rpc_end_response(conn, &result) < 0 ||
+      rpc_write(conn, &result, sizeof(cudaError_t)) < 0 ||
+      rpc_write_end(conn) < 0 ||
       (host_data != NULL && cudaStreamAddCallback(
                                 stream,
                                 [](cudaStream_t stream, cudaError_t status,
@@ -165,7 +167,7 @@ ERROR_0:
   return ret;
 }
 
-int handle_cudaLaunchKernel(void *conn) {
+int handle_cudaLaunchKernel(conn_t *conn) {
   int request_id;
   cudaError_t result;
   const void *func;
@@ -203,7 +205,7 @@ int handle_cudaLaunchKernel(void *conn) {
       goto ERROR_1;
   }
 
-  request_id = rpc_end_request(conn);
+  request_id = rpc_read_end(conn);
   if (request_id < 0)
     goto ERROR_1;
 
@@ -211,8 +213,9 @@ int handle_cudaLaunchKernel(void *conn) {
 
   std::cout << "Launch kern result: " << result << std::endl;
 
-  if (rpc_start_response(conn, request_id) < 0 ||
-      rpc_end_response(conn, &result) < 0)
+  if (rpc_write_start_response(conn, request_id) < 0 ||
+      rpc_write(conn, &result, sizeof(cudaError_t)) < 0 ||
+      rpc_write_end(conn) < 0)
     goto ERROR_1;
 
   return 0;
@@ -229,7 +232,7 @@ std::unordered_map<void **, __cudaFatCudaBinary2 *> fat_binary_map;
 
 extern "C" void **__cudaRegisterFatBinary(void *fatCubin);
 
-int handle___cudaRegisterFatBinary(void *conn) {
+int handle___cudaRegisterFatBinary(conn_t *conn) {
   __cudaFatCudaBinary2 *fatCubin =
       (__cudaFatCudaBinary2 *)malloc(sizeof(__cudaFatCudaBinary2));
   unsigned long long size;
@@ -244,19 +247,16 @@ int handle___cudaRegisterFatBinary(void *conn) {
 
   fatCubin->text = (uint64_t)cubin;
 
-  int request_id = rpc_end_request(conn);
+  int request_id = rpc_read_end(conn);
   if (request_id < 0)
     return -1;
 
   void **p = __cudaRegisterFatBinary(fatCubin);
 
-  int return_value = 0;
-
   fat_binary_map[p] = fatCubin;
 
-  if (rpc_start_response(conn, request_id) < 0 ||
-      rpc_write(conn, &p, sizeof(void **)) < 0 ||
-      rpc_end_response(conn, &return_value) < 0)
+  if (rpc_write_start_response(conn, request_id) < 0 ||
+      rpc_write(conn, &p, sizeof(void **)) < 0 || rpc_write_end(conn) < 0)
     return -1;
 
   return 0;
@@ -264,12 +264,12 @@ int handle___cudaRegisterFatBinary(void *conn) {
 
 extern "C" void __cudaUnregisterFatBinary(void **fatCubin);
 
-int handle___cudaUnregisterFatBinary(void *conn) {
+int handle___cudaUnregisterFatBinary(conn_t *conn) {
   void **fatCubin;
   if (rpc_read(conn, &fatCubin, sizeof(void **)) < 0)
     return -1;
 
-  int request_id = rpc_end_request(conn);
+  int request_id = rpc_read_end(conn);
   if (request_id < 0)
     return -1;
 
@@ -278,12 +278,6 @@ int handle___cudaUnregisterFatBinary(void *conn) {
   fat_binary_map.erase(fatCubin);
 
   __cudaUnregisterFatBinary(fatCubin);
-
-  int return_value = 0;
-
-  if (rpc_start_response(conn, request_id) < 0 ||
-      rpc_end_response(conn, &return_value) < 0)
-    return -1;
 
   return 0;
 }
@@ -294,7 +288,7 @@ extern "C" void __cudaRegisterFunction(void **fatCubinHandle,
                                        uint3 *tid, uint3 *bid, dim3 *bDim,
                                        dim3 *gDim, int *wSize);
 
-int handle___cudaRegisterFunction(void *conn) {
+int handle___cudaRegisterFunction(conn_t *conn) {
   void **fatCubinHandle;
   char *hostFun;
   size_t deviceFunLen;
@@ -330,7 +324,7 @@ int handle___cudaRegisterFunction(void *conn) {
       (mask & 1 << 4 && rpc_read(conn, &wSize, sizeof(int)) < 0))
     goto ERROR_2;
 
-  request_id = rpc_end_request(conn);
+  request_id = rpc_read_end(conn);
   if (request_id < 0)
     goto ERROR_2;
 
@@ -339,6 +333,9 @@ int handle___cudaRegisterFunction(void *conn) {
       mask & 1 << 0 ? &tid : nullptr, mask & 1 << 1 ? &bid : nullptr,
       mask & 1 << 2 ? &bDim : nullptr, mask & 1 << 3 ? &gDim : nullptr,
       mask & 1 << 4 ? &wSize : nullptr);
+
+  if (rpc_write_start_response(conn, request_id) < 0 || rpc_write_end(conn) < 0)
+    return -1;
 
   return 0;
 ERROR_2:
@@ -351,18 +348,20 @@ ERROR_0:
 
 extern "C" void __cudaRegisterFatBinaryEnd(void **fatCubinHandle);
 
-int handle___cudaRegisterFatBinaryEnd(void *conn) {
+int handle___cudaRegisterFatBinaryEnd(conn_t *conn) {
   void **fatCubinHandle;
 
-  // Read the fatCubinHandle from the client
   if (rpc_read(conn, &fatCubinHandle, sizeof(void **)) < 0)
     return -1;
 
-  int request_id = rpc_end_request(conn);
+  int request_id = rpc_read_end(conn);
   if (request_id < 0)
     return -1;
 
   __cudaRegisterFatBinaryEnd(fatCubinHandle);
+
+  if (rpc_write_start_response(conn, request_id) < 0 || rpc_write_end(conn) < 0)
+    return -1;
 
   return 0;
 }
@@ -372,7 +371,7 @@ extern "C" unsigned int __cudaPushCallConfiguration(dim3 gridDim, dim3 blockDim,
                                                     size_t sharedMem,
                                                     cudaStream_t stream);
 
-int handle___cudaPushCallConfiguration(void *conn) {
+int handle___cudaPushCallConfiguration(conn_t *conn) {
   dim3 gridDim, blockDim;
   size_t sharedMem;
   cudaStream_t stream;
@@ -384,15 +383,16 @@ int handle___cudaPushCallConfiguration(void *conn) {
       rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0)
     return -1;
 
-  int request_id = rpc_end_request(conn);
+  int request_id = rpc_read_end(conn);
   if (request_id < 0)
     return -1;
 
   unsigned int result =
       __cudaPushCallConfiguration(gridDim, blockDim, sharedMem, stream);
 
-  if (rpc_start_response(conn, request_id) < 0 ||
-      rpc_end_response(conn, &result) < 0)
+  if (rpc_write_start_response(conn, request_id) < 0 ||
+      rpc_write(conn, &result, sizeof(unsigned int)) < 0 ||
+      rpc_write_end(conn) < 0)
     return -1;
 
   return 0;
@@ -402,26 +402,25 @@ extern "C" cudaError_t __cudaPopCallConfiguration(dim3 *gridDim, dim3 *blockDim,
                                                   size_t *sharedMem,
                                                   void *stream);
 
-int handle___cudaPopCallConfiguration(void *conn) {
+int handle___cudaPopCallConfiguration(conn_t *conn) {
   dim3 gridDim, blockDim;
   size_t sharedMem;
   cudaStream_t stream;
 
-  std::cout << "received handle___cudaPopCallConfiguration" << std::endl;
-
-  int request_id = rpc_end_request(conn);
+  int request_id = rpc_read_end(conn);
   if (request_id < 0)
     return -1;
 
   cudaError_t result =
       __cudaPopCallConfiguration(&gridDim, &blockDim, &sharedMem, &stream);
 
-  if (rpc_start_response(conn, request_id) < 0 ||
+  if (rpc_write_start_response(conn, request_id) < 0 ||
       rpc_write(conn, &gridDim, sizeof(dim3)) < 0 ||
       rpc_write(conn, &blockDim, sizeof(dim3)) < 0 ||
       rpc_write(conn, &sharedMem, sizeof(size_t)) < 0 ||
       rpc_write(conn, &stream, sizeof(cudaStream_t)) < 0 ||
-      rpc_end_response(conn, &result) < 0)
+      rpc_write(conn, &result, sizeof(cudaError_t)) < 0 ||
+      rpc_write_end(conn) < 0)
     return -1;
 
   return 0;
@@ -438,7 +437,7 @@ extern "C" void __cudaRegisterVar(void **fatCubinHandle, char *hostVar,
                                   int ext, size_t size, int constant,
                                   int global);
 
-int handle___cudaRegisterVar(void *conn) {
+int handle___cudaRegisterVar(conn_t *conn) {
   void **fatCubinHandle;
   char *hostVar;
   char *deviceAddress;
@@ -518,29 +517,33 @@ int handle___cudaRegisterVar(void *conn) {
                     size, constant, global);
 
   // End request phase
-  int request_id = rpc_end_request(conn);
+  int request_id = rpc_read_end(conn);
   if (request_id < 0) {
-    std::cerr << "rpc_end_request failed" << std::endl;
+    std::cerr << "rpc_read_end failed" << std::endl;
     return -1;
   }
+
+  if (rpc_write_start_response(conn, request_id) < 0 || rpc_write_end(conn) < 0)
+    return -1;
 
   return 0;
 }
 
-int handle_cudaFree(void *conn) {
+int handle_cudaFree(conn_t *conn) {
   void *devPtr;
   int request_id;
   cudaError_t scuda_intercept_result;
   if (rpc_read(conn, &devPtr, sizeof(void *)) < 0 || false)
     goto ERROR_0;
 
-  request_id = rpc_end_request(conn);
+  request_id = rpc_read_end(conn);
   if (request_id < 0)
     goto ERROR_0;
   scuda_intercept_result = cudaFree(devPtr);
 
-  if (rpc_start_response(conn, request_id) < 0 ||
-      rpc_end_response(conn, &scuda_intercept_result) < 0)
+  if (rpc_write_start_response(conn, request_id) < 0 ||
+      rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
+      rpc_write_end(conn) < 0)
     goto ERROR_0;
 
   return 0;
@@ -548,7 +551,7 @@ ERROR_0:
   return -1;
 }
 
-int handle_cudaMallocManaged(void *conn) {
+int handle_cudaMallocManaged(conn_t *conn) {
   void *devPtr;
   size_t size;
   unsigned int flags;
@@ -559,14 +562,15 @@ int handle_cudaMallocManaged(void *conn) {
       rpc_read(conn, &flags, sizeof(unsigned int)) < 0 || false)
     goto ERROR_0;
 
-  request_id = rpc_end_request(conn);
+  request_id = rpc_read_end(conn);
   if (request_id < 0)
     goto ERROR_0;
   scuda_intercept_result = cudaMallocManaged(&devPtr, size, flags);
 
-  if (rpc_start_response(conn, request_id) < 0 ||
+  if (rpc_write_start_response(conn, request_id) < 0 ||
       rpc_write(conn, &devPtr, sizeof(void *)) < 0 ||
-      rpc_end_response(conn, &scuda_intercept_result) < 0)
+      rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
+      rpc_write_end(conn) < 0)
     goto ERROR_0;
 
   return 0;
