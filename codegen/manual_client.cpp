@@ -336,6 +336,7 @@ const char *cudaGetErrorString(cudaError_t error) {
 
 cudaError_t cudaGraphAddKernelNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies, const struct cudaKernelNodeParams *pNodeParams)
 {
+    rpc_open();
     conn_t *conn = rpc_client_get_connection(0);
     if (maybe_copy_unified_arg(conn, (void*)&numDependencies, cudaMemcpyHostToDevice) < 0)
         return cudaErrorDevicesUnavailable;
@@ -347,7 +348,7 @@ cudaError_t cudaGraphAddKernelNode(cudaGraphNode_t *pGraphNode, cudaGraph_t grap
         return cudaErrorDevicesUnavailable;
 
     for (size_t i = 0; i < numDependencies && is_unified_pointer(conn, (void*)pDependencies); i++) {
-        if (maybe_copy_unified_arg(0, (void*)&pDependencies[i], cudaMemcpyHostToDevice) < 0)
+        if (maybe_copy_unified_arg(conn, (void*)&pDependencies[i], cudaMemcpyHostToDevice) < 0)
             return cudaErrorDevicesUnavailable;
     }
 
@@ -368,6 +369,8 @@ cudaError_t cudaGraphAddKernelNode(cudaGraphNode_t *pGraphNode, cudaGraph_t grap
             return cudaErrorDevicesUnavailable;
         }
     }
+
+    std::cout << "callin cudaGraphAddKernelNode" << std::endl;
 
     Function *f = nullptr;
     for (auto &function : functions)
@@ -391,6 +394,8 @@ cudaError_t cudaGraphAddKernelNode(cudaGraphNode_t *pGraphNode, cudaGraph_t grap
         rpc_read_end(conn) < 0)
         return cudaErrorDevicesUnavailable;
 
+    std::cout << "!!!! " << return_value << std::endl;
+
     if (maybe_copy_unified_arg(conn, (void*)&numDependencies, cudaMemcpyDeviceToHost) < 0)
         return cudaErrorDevicesUnavailable;
     if (maybe_copy_unified_arg(conn, (void*)pGraphNode, cudaMemcpyDeviceToHost) < 0)
@@ -411,29 +416,45 @@ cudaError_t cudaGraphAddKernelNode(cudaGraphNode_t *pGraphNode, cudaGraph_t grap
     return return_value;
 }
 
+#include <iostream>
+
 cudaError_t cudaGraphGetNodes(cudaGraph_t graph, cudaGraphNode_t* nodes, size_t* numNodes)
 {
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&graph, cudaMemcpyHostToDevice) < 0)
-      return cudaErrorDevicesUnavailable;
-    if (maybe_copy_unified_arg(conn, (void*)nodes, cudaMemcpyHostToDevice) < 0)
-      return cudaErrorDevicesUnavailable;
-    if (maybe_copy_unified_arg(conn, (void*)numNodes, cudaMemcpyHostToDevice) < 0)
-      return cudaErrorDevicesUnavailable;
+    rpc_open();
     cudaError_t return_value;
+    conn_t *conn = rpc_client_get_connection(0);
+
+    if (maybe_copy_unified_arg(conn, (void*)&graph, cudaMemcpyHostToDevice) < 0)
+        return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)nodes, cudaMemcpyHostToDevice) < 0)
+        return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)numNodes, cudaMemcpyHostToDevice) < 0)
+        return cudaErrorDevicesUnavailable;
+
     rpc_write_start_request(conn, RPC_cudaGraphGetNodes);
     rpc_write(conn, &graph, sizeof(cudaGraph_t));
     rpc_wait_for_response(conn);
-    rpc_read(conn, nodes, sizeof(cudaGraphNode_t));
+
+    // Read values
+    rpc_read(conn, &nodes, sizeof(cudaGraphNode_t));
     rpc_read(conn, numNodes, sizeof(size_t));
     rpc_read(conn, &return_value, sizeof(cudaError_t));
     rpc_read_end(conn);
+
+    // Log values after reading
+    std::cout << "cudaGraphGetNodes response:" << std::endl;
+    std::cout << "  - Graph: " << graph << std::endl;
+    std::cout << "  - Nodes pointer: " << nodes << std::endl;
+    std::cout << "  - Number of nodes: " << *numNodes << std::endl;
+    std::cout << "  - Return value: " << return_value << std::endl;
+
     if (maybe_copy_unified_arg(conn, (void*)&graph, cudaMemcpyDeviceToHost) < 0)
-      return cudaErrorDevicesUnavailable;
+        return cudaErrorDevicesUnavailable;
     if (maybe_copy_unified_arg(conn, (void*)nodes, cudaMemcpyDeviceToHost) < 0)
-      return cudaErrorDevicesUnavailable;
+        return cudaErrorDevicesUnavailable;
     if (maybe_copy_unified_arg(conn, (void*)numNodes, cudaMemcpyDeviceToHost) < 0)
-      return cudaErrorDevicesUnavailable;
+        return cudaErrorDevicesUnavailable;
+
     return return_value;
 }
 

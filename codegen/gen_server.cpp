@@ -27,6 +27,11 @@
 
 #include "rpc.h"
 
+void append_host_func_ptr(void* ptr);
+void invoke_host_func(void* data);
+void store_conn(const void *conn);
+void append_managed_ptr(const void *conn, cudaPitchedPtr ptr);
+
 int handle_nvmlInit_v2(conn_t *conn)
 {
     int request_id;
@@ -22701,6 +22706,13 @@ int handle_cudaGraphAddMemcpyNode(conn_t *conn)
     request_id = rpc_read_end(conn);
     if (request_id < 0)
         goto ERROR_0;
+
+    // destination ptr is the host pointer in this copy kind
+    if (pCopyParams.kind == cudaMemcpyDeviceToHost) {
+        append_managed_ptr(conn, pCopyParams.dstPtr);
+    } else if (pCopyParams.kind == cudaMemcpyHostToDevice) {
+        append_managed_ptr(conn, pCopyParams.srcPtr);
+    }
     scuda_intercept_result = cudaGraphAddMemcpyNode(&pGraphNode, graph, pDependencies.data(), numDependencies, &pCopyParams);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
@@ -22708,6 +22720,8 @@ int handle_cudaGraphAddMemcpyNode(conn_t *conn)
         rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
+
+    std::cout << "DONE handle_cudaGraphAddMemcpyNode" << std::endl;
 
     return 0;
 ERROR_0:
@@ -22853,6 +22867,10 @@ ERROR_0:
     return -1;
 }
 
+typedef struct callBackData {
+  void *data;
+} callBackData_t;
+
 int handle_cudaGraphAddMemsetNode(conn_t *conn)
 {
     size_t numDependencies;
@@ -22889,6 +22907,8 @@ int handle_cudaGraphAddMemsetNode(conn_t *conn)
         rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;
+
+    std::cout << "DONE handle_cudaGraphAddMemcpyNode" << std::endl;
 
     return 0;
 ERROR_0:
@@ -22950,6 +22970,7 @@ ERROR_0:
     return -1;
 }
 
+
 int handle_cudaGraphAddHostNode(conn_t *conn)
 {
     size_t numDependencies;
@@ -22980,6 +23001,14 @@ int handle_cudaGraphAddHostNode(conn_t *conn)
     request_id = rpc_read_end(conn);
     if (request_id < 0)
         goto ERROR_0;
+    append_host_func_ptr((void*)pNodeParams.fn);
+
+    callBackData_t hostFnData;
+    // assign the previous function pointer so we can map back to it
+    hostFnData.data = (void*)pNodeParams.fn;
+    pNodeParams.userData = &hostFnData;
+
+    pNodeParams.fn = invoke_host_func;
     scuda_intercept_result = cudaGraphAddHostNode(&pGraphNode, graph, pDependencies.data(), numDependencies, &pNodeParams);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
@@ -24529,11 +24558,12 @@ int handle_cudaGraphLaunch(conn_t *conn)
     request_id = rpc_read_end(conn);
     if (request_id < 0)
         goto ERROR_0;
+    store_conn(conn);
+    printf(">>>>>>>>>>>>>>>>>\n");
+    rpc_write_start_response(conn, request_id);
     scuda_intercept_result = cudaGraphLaunch(graphExec, stream);
 
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
-        rpc_write_end(conn) < 0)
+    if (rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0)
         goto ERROR_0;
 
     return 0;

@@ -164,8 +164,6 @@ int handle_cudaMemcpyAsync(conn_t *conn) {
                                 [](cudaStream_t stream, cudaError_t status,
                                    void *ptr) { free(ptr); },
                                 host_data, 0) != cudaSuccess))
-    {
-    }
     goto ERROR_0;
 
   ret = 0;
@@ -256,7 +254,7 @@ int handle_cudaGraphAddKernelNode(conn_t *conn) {
     }
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 || rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) || rpc_write_end(conn)) {
+        rpc_write(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 || rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) || rpc_write_end(conn) < 0) {
         return -1;
     }
 
@@ -697,7 +695,7 @@ int handle_cudaGraphGetNodes(conn_t *conn)
         rpc_write(conn, &nodes, sizeof(cudaGraphNode_t)) < 0 ||
         rpc_write(conn, &numNodes, sizeof(size_t)) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
-        rpc_write_end(conn))
+        rpc_write_end(conn) < 0)
         goto ERROR_0;
 
     return 0;
