@@ -39,8 +39,6 @@ static int init = 0;
 static jmp_buf catch_segfault;
 static void *faulting_address = nullptr;
 
-conn_t *rpc_client_get_connection(unsigned int index) { return &conns[index]; }
-
 std::map<conn_t *, std::map<void *, size_t>> unified_devices;
 
 static void segfault(int sig, siginfo_t *info, void *unused) {
@@ -152,6 +150,16 @@ void rpc_close(conn_t *conn) {
   pthread_mutex_unlock(&conn_mutex);
 }
 
+void *rpc_client_dispatch_thread(void *arg) {
+  conn_t *conn = (conn_t *)arg;
+  unsigned int op;
+
+  while (true) {
+    unsigned int op = rpc_dispatch(conn, 1);
+    std::cout << "Got op " << op << std::endl;
+  }
+}
+
 int rpc_open() {
   set_segfault_handlers();
 
@@ -165,6 +173,8 @@ int rpc_open() {
       return -1;
     return 0;
   }
+
+  std::cout << "Opening connection to server" << std::endl;
 
   char *server_ips = getenv("SCUDA_SERVER");
   if (server_ips == NULL) {
@@ -214,19 +224,13 @@ int rpc_open() {
       exit(1);
     }
 
-    std::cout << "connected on " << sockfd << std::endl;
+    conns[nconns] = {sockfd, 0};
+    if (pthread_mutex_init(&conns[nconns].read_mutex, NULL) < 0 ||
+        pthread_mutex_init(&conns[nconns].write_mutex, NULL) < 0) {
+      return -1;
+    }
 
-    conns[nconns] = {sockfd,
-                     0,
-                     0,
-                     0,
-                     0,
-                     0,
-                     PTHREAD_MUTEX_INITIALIZER,
-                     PTHREAD_MUTEX_INITIALIZER,
-                     PTHREAD_COND_INITIALIZER};
-
-    pthread_create(&conns[nconns].read_thread, NULL, rpc_read_thread,
+    pthread_create(&conns[nconns].read_thread, NULL, rpc_client_dispatch_thread,
                    (void *)&conns[nconns]);
 
     nconns++;
@@ -237,6 +241,12 @@ int rpc_open() {
   if (nconns == 0)
     return -1;
   return 0;
+}
+
+conn_t *rpc_client_get_connection(unsigned int index) {
+  if (rpc_open() < 0)
+    return nullptr;
+  return &conns[index];
 }
 
 int rpc_size() { return nconns; }
@@ -325,6 +335,8 @@ CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion,
 }
 
 void *dlsym(void *handle, const char *name) __THROW {
+  std::cout << "dlsym: " << name << std::endl;
+
   void *func = get_function_pointer(name);
 
   /** proc address function calls are basically dlsym; we should handle this
@@ -335,8 +347,8 @@ void *dlsym(void *handle, const char *name) __THROW {
   }
 
   if (func != nullptr) {
-    // std::cout << "[dlsym] Function address from cudaFunctionMap: " << func <<
-    // " " << name << std::endl;
+    // std::cout << "[dlsym] Function address from cudaFunctionMap: " << func
+    // << " " << name << std::endl;
     return func;
   }
 

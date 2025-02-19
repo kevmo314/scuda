@@ -1,6 +1,7 @@
 #include <arpa/inet.h>
 #include <cstdlib>
 #include <cstring>
+#include <cuda_runtime_api.h>
 #include <functional>
 #include <future>
 #include <iostream>
@@ -9,7 +10,6 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <string>
-#include <cuda_runtime_api.h>
 #include <sys/socket.h>
 #include <sys/uio.h>
 #include <thread>
@@ -34,8 +34,8 @@
 #define DEFAULT_PORT 14833
 #define MAX_CLIENTS 10
 
-std::map<conn_t*, std::map<void*, size_t>> managed_ptrs;
-std::map<conn_t*, void*> host_funcs;
+std::map<conn_t *, std::map<void *, size_t>> managed_ptrs;
+std::map<conn_t *, void *> host_funcs;
 
 static jmp_buf catch_segfault;
 static void *faulting_address = nullptr;
@@ -50,42 +50,47 @@ static void segfault(int sig, siginfo_t *info, void *unused) {
   faulting_address = info->si_addr;
 
   int found = -1;
-  void* ptr;
+  void *ptr;
   size_t size;
 
   std::cout << "segfault!!" << faulting_address << std::endl;
 
-  for (const auto& conn_entry : managed_ptrs) {
-    for (const auto& mem_entry : conn_entry.second) {
+  for (const auto &conn_entry : managed_ptrs) {
+    for (const auto &mem_entry : conn_entry.second) {
       size_t allocated_size = mem_entry.second;
 
       // Check if faulting address is inside this allocated region
       if ((uintptr_t)mem_entry.first <= (uintptr_t)faulting_address &&
-      (uintptr_t)faulting_address < ((uintptr_t)mem_entry.first + allocated_size)) {
-          found = 1;
-          size = allocated_size;
+          (uintptr_t)faulting_address <
+              ((uintptr_t)mem_entry.first + allocated_size)) {
+        found = 1;
+        size = allocated_size;
 
-          // Align memory allocation to the closest possible address
-          uintptr_t aligned = (uintptr_t)faulting_address & ~(allocated_size - 1);
+        // Align memory allocation to the closest possible address
+        uintptr_t aligned = (uintptr_t)faulting_address & ~(allocated_size - 1);
 
-          // Allocate memory at the faulting address
-          void *allocated =
-            mmap((void *)aligned, allocated_size + (uintptr_t)faulting_address - aligned, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+        // Allocate memory at the faulting address
+        void *allocated =
+            mmap((void *)aligned,
+                 allocated_size + (uintptr_t)faulting_address - aligned,
+                 PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
 
-          if (allocated == MAP_FAILED) {
-              perror("Failed to allocate memory at faulting address");
-              _exit(1);
-          }
+        if (allocated == MAP_FAILED) {
+          perror("Failed to allocate memory at faulting address");
+          _exit(1);
+        }
 
-          printf("The address of x is: %p\n", (void*)allocated);
+        printf("The address of x is: %p\n", (void *)allocated);
 
-          // if (rpc_write(conn_entry.first, (void*)&allocated, sizeof(void*)) < 0) {
-          //   std::cout << "failed to write memory: " << &faulting_address << std::endl;
-          // }
+        // if (rpc_write(conn_entry.first, (void*)&allocated, sizeof(void*)) <
+        // 0) {
+        //   std::cout << "failed to write memory: " << &faulting_address <<
+        //   std::endl;
+        // }
 
-          // printf("wrote data...\n");
+        // printf("wrote data...\n");
 
-          break;
+        break;
       }
     }
   }
@@ -110,42 +115,31 @@ static void segfault(int sig, siginfo_t *info, void *unused) {
 }
 
 typedef struct callBackData {
+  conn_t *conn;
+  void (*callback)(void *);
   void *data;
 } callBackData_t;
 
-void invoke_host_func(void* data) {
+void invoke_host_func(void *data) {
+  printf("invoking host function %p\n", data);
   callBackData_t *tmp = (callBackData_t *)(data);
-  void * res;
+  void *res;
 
-  for (const auto& conn_entry : host_funcs) {
-    if (conn_entry.second == tmp->data) {
-      printf("MATCH!!\n");
-      int kind_invoke = 100;
-      if (rpc_write(conn_entry.first, (void*)&kind_invoke, sizeof(int)) < 0) {
-        std::cout << "failed to write kind: " << &faulting_address << std::endl;
-      }
-
-      if (rpc_write(conn_entry.first, (void*)tmp->data, sizeof(void*)) < 0) {
-        std::cout << "failed to write memory: " << &faulting_address << std::endl;
-      }
-
-      printf("wrote mem... %p\n", tmp->data);
-
-      // if (rpc_end_response(conn_entry.first, &res) < 0){
-
-      // }
-    }
-  }
+  if (rpc_write_start_request(tmp->conn, 1) < 0 ||
+      rpc_write(tmp->conn, &tmp->callback, sizeof(void *)) < 0 ||
+      rpc_write(tmp->conn, &tmp->data, sizeof(void *)) < 0 ||
+      rpc_wait_for_response(tmp->conn) < 0 || rpc_read_end(tmp->conn) < 0)
+    std::cout << "failed to write memory: " << &faulting_address << std::endl;
 }
 
-void append_host_func_ptr(const void *conn, void* ptr) {
+void append_host_func_ptr(const void *conn, void *ptr) {
   printf("storing... %p\n", ptr);
 
-  host_funcs[(conn_t*)conn] = ptr;
+  host_funcs[(conn_t *)conn] = ptr;
 }
 
 void append_managed_ptr(const void *conn, cudaPitchedPtr ptr) {
-  conn_t *connfd = (conn_t*)conn;
+  conn_t *connfd = (conn_t *)conn;
 
   // Ensure the inner map exists before inserting the cudaPitchedPtr
   managed_ptrs[connfd][ptr.ptr] = ptr.pitch;
@@ -165,68 +159,23 @@ static void set_segfault_handlers() {
   std::cout << "Segfault handler installed." << std::endl;
 }
 
-int request_handler(conn_t *conn) {
-  unsigned int op;
-
-  // Attempt to read the operation code from the client
-  if (read(conn->connfd, &op, sizeof(unsigned int)) < 0)
-    return -1;
-
-  auto opHandler = get_handler(op);
-
-  if (opHandler == NULL) {
-    std::cerr << "Unknown or unsupported operation: " << op << std::endl;
-    return -1;
-  }
-
-  return opHandler(conn);
-}
-
 void client_handler(int connfd) {
-  conn_t conn = {connfd};
+  conn_t conn = {connfd, 1};
+  conn.request_id = 1;
   if (pthread_mutex_init(&conn.read_mutex, NULL) < 0 ||
       pthread_mutex_init(&conn.write_mutex, NULL) < 0) {
     std::cerr << "Error initializing mutex." << std::endl;
     return;
   }
 
-#ifdef VERBOSE
   printf("Client connected.\n");
-#endif
 
-  if (pthread_mutex_lock(&conn.read_mutex) < 0) {
-    std::cerr << "Error locking mutex." << std::endl;
-  }
   while (1) {
-    while (conn.read_id != 0)
-      pthread_cond_wait(&conn.read_cond, &conn.read_mutex);
+    unsigned int op = rpc_dispatch(&conn, 0);
 
-    int n = read(connfd, &conn.read_id, sizeof(int));
-    if (n == 0) {
-      printf("client disconnected, loop continuing. \n");
-      break;
-    } else if (n < 0) {
-      printf("error reading from client.\n");
-      break;
-    }
-
-    if (conn.read_id < 0) {
-      // this is a response to an existing request, notify everyone else
-      // and spin again.
-      if (pthread_cond_broadcast(&conn.read_cond) < 0) {
-        std::cerr << "Error broadcasting condition or unlocking mutex."
-                  << std::endl;
-        break;
-      }
-      continue;
-    } else {
-      // TODO: this can't be multithreaded as some of the __cuda* functions
-      // assume that they are running in the same thread as the one that
-      // calls cudaLaunchKernel. we'll need to find a better way to map
-      // function calls to threads. maybe each rpc maps to an optional
-      // thread id that is passed to the handler?
-      if (request_handler(&conn) < 0)
-        std::cerr << "Error handling request." << std::endl;
+    auto opHandler = get_handler(op);
+    if (opHandler(&conn) < 0) {
+      std::cerr << "Error handling request." << std::endl;
     }
   }
 

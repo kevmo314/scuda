@@ -18,7 +18,6 @@
 size_t decompress(const uint8_t *input, size_t input_size, uint8_t *output,
                   size_t output_size);
 
-extern int rpc_open();
 extern int rpc_size();
 extern conn_t *rpc_client_get_connection(unsigned int index);
 int is_unified_pointer(conn_t *conn, void *arg);
@@ -28,8 +27,9 @@ extern cudaError_t cuda_memcpy_unified_ptrs(conn_t *conn, cudaMemcpyKind kind);
 extern void maybe_free_unified_mem(conn_t *conn, void *ptr);
 extern void allocate_unified_mem_pointer(conn_t *conn, void *dev_ptr,
                                          size_t size);
-extern int is_unified_pointer(const int index, void* arg);
-int maybe_copy_unified_arg(const int index, void* arg, enum cudaMemcpyKind kind);
+extern int is_unified_pointer(const int index, void *arg);
+int maybe_copy_unified_arg(const int index, void *arg,
+                           enum cudaMemcpyKind kind);
 
 #define MAX_FUNCTION_NAME 1024
 #define MAX_ARGS 128
@@ -334,134 +334,152 @@ const char *cudaGetErrorString(cudaError_t error) {
   }
 }
 
-cudaError_t cudaGraphAddKernelNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies, const struct cudaKernelNodeParams *pNodeParams)
-{
-    rpc_open();
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&numDependencies, cudaMemcpyHostToDevice) < 0)
-        return cudaErrorDevicesUnavailable;
-    if (maybe_copy_unified_arg(conn, (void*)pGraphNode, cudaMemcpyHostToDevice) < 0)
-        return cudaErrorDevicesUnavailable;
-    if (maybe_copy_unified_arg(conn, (void*)&graph, cudaMemcpyHostToDevice) < 0)
-        return cudaErrorDevicesUnavailable;
-    if (maybe_copy_unified_arg(conn, (void*)pDependencies, cudaMemcpyHostToDevice) < 0)
-        return cudaErrorDevicesUnavailable;
+cudaError_t
+cudaGraphAddKernelNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph,
+                       const cudaGraphNode_t *pDependencies,
+                       size_t numDependencies,
+                       const struct cudaKernelNodeParams *pNodeParams) {
+  conn_t *conn = rpc_client_get_connection(0);
+  if (maybe_copy_unified_arg(conn, (void *)&numDependencies,
+                             cudaMemcpyHostToDevice) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(conn, (void *)pGraphNode, cudaMemcpyHostToDevice) <
+      0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(conn, (void *)&graph, cudaMemcpyHostToDevice) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(conn, (void *)pDependencies,
+                             cudaMemcpyHostToDevice) < 0)
+    return cudaErrorDevicesUnavailable;
 
-    for (size_t i = 0; i < numDependencies && is_unified_pointer(conn, (void*)pDependencies); i++) {
-        if (maybe_copy_unified_arg(conn, (void*)&pDependencies[i], cudaMemcpyHostToDevice) < 0)
-            return cudaErrorDevicesUnavailable;
-    }
-
-    if (maybe_copy_unified_arg(conn, (void*)pNodeParams, cudaMemcpyDeviceToHost) < 0)
-        return cudaErrorDevicesUnavailable;
-
-    cudaError_t return_value;
-
-    if (rpc_write_start_request(conn, RPC_cudaGraphAddKernelNode) < 0 ||
-        rpc_write(conn, &numDependencies, sizeof(size_t)) < 0 ||
-        rpc_write(conn, &graph, sizeof(cudaGraph_t)) < 0) 
-        return cudaErrorDevicesUnavailable;
-
-    // Send dependencies individually
-    for (size_t i = 0; i < numDependencies; ++i) {
-        if (rpc_write(conn, &pDependencies[i], sizeof(cudaGraphNode_t)) < 0) {
-            printf("Failed to write Dependency[%zu]\n", i);
-            return cudaErrorDevicesUnavailable;
-        }
-    }
-
-    std::cout << "callin cudaGraphAddKernelNode" << std::endl;
-
-    Function *f = nullptr;
-    for (auto &function : functions)
-      if (function.host_func == pNodeParams->func)
-        f = &function;
-
-    if (f == nullptr || rpc_write(conn, &f->arg_count, sizeof(int)) < 0)
+  for (size_t i = 0;
+       i < numDependencies && is_unified_pointer(conn, (void *)pDependencies);
+       i++) {
+    if (maybe_copy_unified_arg(conn, (void *)&pDependencies[i],
+                               cudaMemcpyHostToDevice) < 0)
       return cudaErrorDevicesUnavailable;
+  }
 
-    for (int i = 0; i < f->arg_count; ++i) {
-      if (rpc_write(conn, &f->arg_sizes[i], sizeof(int)) < 0 ||
-          rpc_write(conn, pNodeParams->kernelParams[i], f->arg_sizes[i]) < 0)
-        return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(conn, (void *)pNodeParams,
+                             cudaMemcpyDeviceToHost) < 0)
+    return cudaErrorDevicesUnavailable;
+
+  cudaError_t return_value;
+
+  if (rpc_write_start_request(conn, RPC_cudaGraphAddKernelNode) < 0 ||
+      rpc_write(conn, &numDependencies, sizeof(size_t)) < 0 ||
+      rpc_write(conn, &graph, sizeof(cudaGraph_t)) < 0)
+    return cudaErrorDevicesUnavailable;
+
+  // Send dependencies individually
+  for (size_t i = 0; i < numDependencies; ++i) {
+    if (rpc_write(conn, &pDependencies[i], sizeof(cudaGraphNode_t)) < 0) {
+      printf("Failed to write Dependency[%zu]\n", i);
+      return cudaErrorDevicesUnavailable;
     }
+  }
 
-    if (rpc_write(conn, &pNodeParams, sizeof(const struct cudaKernelNodeParams*)) < 0 ||
-        (pNodeParams != nullptr && rpc_write(conn, pNodeParams, sizeof(struct cudaKernelNodeParams)) < 0) ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(cudaError_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return cudaErrorDevicesUnavailable;
+  std::cout << "callin cudaGraphAddKernelNode" << std::endl;
 
-    std::cout << "!!!! " << return_value << std::endl;
+  Function *f = nullptr;
+  for (auto &function : functions)
+    if (function.host_func == pNodeParams->func)
+      f = &function;
 
-    if (maybe_copy_unified_arg(conn, (void*)&numDependencies, cudaMemcpyDeviceToHost) < 0)
-        return cudaErrorDevicesUnavailable;
-    if (maybe_copy_unified_arg(conn, (void*)pGraphNode, cudaMemcpyDeviceToHost) < 0)
-        return cudaErrorDevicesUnavailable;
-    if (maybe_copy_unified_arg(conn, (void*)&graph, cudaMemcpyDeviceToHost) < 0)
-        return cudaErrorDevicesUnavailable;
-    if (maybe_copy_unified_arg(conn, (void*)pDependencies, cudaMemcpyDeviceToHost) < 0)
-        return cudaErrorDevicesUnavailable;
-    
-    for (size_t i = 0; i < numDependencies && is_unified_pointer(conn, (void*)pDependencies); i++) {
-        if (maybe_copy_unified_arg(conn, (void*)&pDependencies[i], cudaMemcpyDeviceToHost) < 0)
-            return cudaErrorDevicesUnavailable;
-    }
+  if (f == nullptr || rpc_write(conn, &f->arg_count, sizeof(int)) < 0)
+    return cudaErrorDevicesUnavailable;
 
-    if (maybe_copy_unified_arg(conn, (void*)pNodeParams, cudaMemcpyDeviceToHost) < 0)
-        return cudaErrorDevicesUnavailable;
+  for (int i = 0; i < f->arg_count; ++i) {
+    if (rpc_write(conn, &f->arg_sizes[i], sizeof(int)) < 0 ||
+        rpc_write(conn, pNodeParams->kernelParams[i], f->arg_sizes[i]) < 0)
+      return cudaErrorDevicesUnavailable;
+  }
 
-    return return_value;
+  if (rpc_write(conn, &pNodeParams,
+                sizeof(const struct cudaKernelNodeParams *)) < 0 ||
+      (pNodeParams != nullptr &&
+       rpc_write(conn, pNodeParams, sizeof(struct cudaKernelNodeParams)) < 0) ||
+      rpc_wait_for_response(conn) < 0 ||
+      rpc_read(conn, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+      rpc_read(conn, &return_value, sizeof(cudaError_t)) < 0 ||
+      rpc_read_end(conn) < 0)
+    return cudaErrorDevicesUnavailable;
+
+  std::cout << "!!!! " << return_value << std::endl;
+
+  if (maybe_copy_unified_arg(conn, (void *)&numDependencies,
+                             cudaMemcpyDeviceToHost) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(conn, (void *)pGraphNode, cudaMemcpyDeviceToHost) <
+      0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(conn, (void *)&graph, cudaMemcpyDeviceToHost) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(conn, (void *)pDependencies,
+                             cudaMemcpyDeviceToHost) < 0)
+    return cudaErrorDevicesUnavailable;
+
+  for (size_t i = 0;
+       i < numDependencies && is_unified_pointer(conn, (void *)pDependencies);
+       i++) {
+    if (maybe_copy_unified_arg(conn, (void *)&pDependencies[i],
+                               cudaMemcpyDeviceToHost) < 0)
+      return cudaErrorDevicesUnavailable;
+  }
+
+  if (maybe_copy_unified_arg(conn, (void *)pNodeParams,
+                             cudaMemcpyDeviceToHost) < 0)
+    return cudaErrorDevicesUnavailable;
+
+  return return_value;
 }
 
 #include <iostream>
 
-cudaError_t cudaGraphGetNodes(cudaGraph_t graph, cudaGraphNode_t* nodes, size_t* numNodes)
-{
-    rpc_open();
-    cudaError_t return_value;
-    conn_t *conn = rpc_client_get_connection(0);
+cudaError_t cudaGraphGetNodes(cudaGraph_t graph, cudaGraphNode_t *nodes,
+                              size_t *numNodes) {
+  cudaError_t return_value;
+  conn_t *conn = rpc_client_get_connection(0);
 
-    if (maybe_copy_unified_arg(conn, (void*)&graph, cudaMemcpyHostToDevice) < 0)
-        return cudaErrorDevicesUnavailable;
-    if (maybe_copy_unified_arg(conn, (void*)nodes, cudaMemcpyHostToDevice) < 0)
-        return cudaErrorDevicesUnavailable;
-    if (maybe_copy_unified_arg(conn, (void*)numNodes, cudaMemcpyHostToDevice) < 0)
-        return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(conn, (void *)&graph, cudaMemcpyHostToDevice) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(conn, (void *)nodes, cudaMemcpyHostToDevice) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(conn, (void *)numNodes, cudaMemcpyHostToDevice) <
+      0)
+    return cudaErrorDevicesUnavailable;
 
-    rpc_write_start_request(conn, RPC_cudaGraphGetNodes);
-    rpc_write(conn, &graph, sizeof(cudaGraph_t));
-    rpc_wait_for_response(conn);
+  rpc_write_start_request(conn, RPC_cudaGraphGetNodes);
+  rpc_write(conn, &graph, sizeof(cudaGraph_t));
+  rpc_wait_for_response(conn);
 
-    // Read values
-    rpc_read(conn, &nodes, sizeof(cudaGraphNode_t));
-    rpc_read(conn, numNodes, sizeof(size_t));
-    rpc_read(conn, &return_value, sizeof(cudaError_t));
-    rpc_read_end(conn);
+  // Read values
+  rpc_read(conn, &nodes, sizeof(cudaGraphNode_t));
+  rpc_read(conn, numNodes, sizeof(size_t));
+  rpc_read(conn, &return_value, sizeof(cudaError_t));
+  rpc_read_end(conn);
 
-    // Log values after reading
-    std::cout << "cudaGraphGetNodes response:" << std::endl;
-    std::cout << "  - Graph: " << graph << std::endl;
-    std::cout << "  - Nodes pointer: " << nodes << std::endl;
-    std::cout << "  - Number of nodes: " << *numNodes << std::endl;
-    std::cout << "  - Return value: " << return_value << std::endl;
+  // Log values after reading
+  std::cout << "cudaGraphGetNodes response:" << std::endl;
+  std::cout << "  - Graph: " << graph << std::endl;
+  std::cout << "  - Nodes pointer: " << nodes << std::endl;
+  std::cout << "  - Number of nodes: " << *numNodes << std::endl;
+  std::cout << "  - Return value: " << return_value << std::endl;
 
-    if (maybe_copy_unified_arg(conn, (void*)&graph, cudaMemcpyDeviceToHost) < 0)
-        return cudaErrorDevicesUnavailable;
-    if (maybe_copy_unified_arg(conn, (void*)nodes, cudaMemcpyDeviceToHost) < 0)
-        return cudaErrorDevicesUnavailable;
-    if (maybe_copy_unified_arg(conn, (void*)numNodes, cudaMemcpyDeviceToHost) < 0)
-        return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(conn, (void *)&graph, cudaMemcpyDeviceToHost) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(conn, (void *)nodes, cudaMemcpyDeviceToHost) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(conn, (void *)numNodes, cudaMemcpyDeviceToHost) <
+      0)
+    return cudaErrorDevicesUnavailable;
 
-    return return_value;
+  return return_value;
 }
 
 cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim,
                              void **args, size_t sharedMem,
                              cudaStream_t stream) {
-  rpc_open();
   cudaError_t return_value;
   cudaError_t memcpy_return;
 
@@ -625,8 +643,6 @@ extern "C" void **__cudaRegisterFatBinary(void *fatCubin) {
   void **p;
   int return_value;
 
-  rpc_open();
-
   conn_t *conn = rpc_client_get_connection(0);
 
   if (rpc_write_start_request(conn, RPC___cudaRegisterFatBinary) < 0)
@@ -706,8 +722,6 @@ extern "C" void **__cudaRegisterFatBinary(void *fatCubin) {
 extern "C" void __cudaRegisterFatBinaryEnd(void **fatCubinHandle) {
   void *return_value;
 
-  rpc_open();
-
   conn_t *conn = rpc_client_get_connection(0);
 
   int request_id =
@@ -751,7 +765,6 @@ extern "C" cudaError_t __cudaPushCallConfiguration(dim3 gridDim, dim3 blockDim,
 extern "C" cudaError_t __cudaPopCallConfiguration(dim3 *gridDim, dim3 *blockDim,
                                                   size_t *sharedMem,
                                                   cudaStream_t *stream) {
-  rpc_open();
   cudaError_t res;
 
   conn_t *conn = rpc_client_get_connection(0);
@@ -774,7 +787,6 @@ extern "C" void __cudaRegisterFunction(void **fatCubinHandle,
                                        uint3 *tid, uint3 *bid, dim3 *bDim,
                                        dim3 *gDim, int *wSize) {
   void *return_value;
-  rpc_open();
 
   size_t deviceFunLen = strlen(deviceFun) + 1;
   size_t deviceNameLen = strlen(deviceName) + 1;
@@ -820,7 +832,6 @@ extern "C" void __cudaRegisterVar(void **fatCubinHandle, char *hostVar,
                                   char *deviceAddress, const char *deviceName,
                                   int ext, size_t size, int constant,
                                   int global) {
-  rpc_open();
   void *return_value;
 
   conn_t *conn = rpc_client_get_connection(0);

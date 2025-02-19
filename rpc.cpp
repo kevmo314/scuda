@@ -4,27 +4,50 @@
 #include <iostream>
 #include <unistd.h>
 
-void *rpc_read_thread(void *arg) {
-  conn_t *conn = (conn_t *)arg;
-  // this thread's job is to read from the connection and set the read id.
-
+// rpc_read_start waits for a response with a specific request id on the
+// given connection. this function is used to wait for a response to a request
+// that was sent with rpc_write_end.
+//
+// it is not necessary to call rpc_read_start() if it is the first call in
+// the sequence because by convention, the handler owns the read lock on entry.
+unsigned int rpc_dispatch(conn_t *conn, int parity) {
   if (pthread_mutex_lock(&conn->read_mutex) < 0) {
-    return NULL;
+    return -1;
   }
 
   while (true) {
+    std::cout << "rpc_dispatch: waiting for read id" << std::endl;
+
     while (conn->read_id != 0)
       pthread_cond_wait(&conn->read_cond, &conn->read_mutex);
 
-    // the read id is zero so it's our turn to read the next int
+    // the read id is zero so it's our turn to read the next int which is the
+    // request id of the next request.
     if (rpc_read(conn, &conn->read_id, sizeof(int)) < 0) {
       pthread_mutex_unlock(&conn->read_mutex);
-      return NULL;
+      return -1;
     }
 
-    if (conn->read_id != 0 && pthread_cond_broadcast(&conn->read_cond) < 0) {
+    std::cout << "rpc_dispatch: read id: " << conn->read_id << std::endl;
+
+    if (conn->read_id % 2 == parity) {
+      std::cout << "rpc_dispatch: new read id: " << conn->read_id << std::endl;
+      // this request is the one to be dispatched, read the op and return it
+      unsigned int op;
+      if (rpc_read(conn, &op, sizeof(unsigned int)) < 0) {
+        pthread_mutex_unlock(&conn->read_mutex);
+        return -1;
+      }
+
       pthread_mutex_unlock(&conn->read_mutex);
-      return NULL;
+      return op;
+    } else {
+      // this is a response to a request that so signal the update and wait for
+      // the next request.
+      if (pthread_cond_broadcast(&conn->read_cond) < 0) {
+        pthread_mutex_unlock(&conn->read_mutex);
+        return -1;
+      }
     }
   }
 }
@@ -124,6 +147,8 @@ int rpc_write(conn_t *conn, const void *data, const size_t size) {
 // the request lock is released after the request is sent and the function
 // returns the request id which can be used to wait for a response.
 int rpc_write_end(conn_t *conn) {
+  std::cout << "write id: " << conn->write_id << std::endl;
+  std::cout << "write op: " << conn->write_op << std::endl;
   conn->write_iov[0] = {&conn->write_id, sizeof(int)};
   if (conn->write_op != -1) {
     conn->write_iov[1] = {&conn->write_op, sizeof(unsigned int)};
