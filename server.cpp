@@ -121,9 +121,10 @@ typedef struct callBackData {
 } callBackData_t;
 
 void invoke_host_func(void *data) {
-  printf("invoking host function %p\n", data);
   callBackData_t *tmp = (callBackData_t *)(data);
   void *res;
+
+  printf("invoking host function %p\n", tmp->callback);
 
   if (rpc_write_start_request(tmp->conn, 1) < 0 ||
       rpc_write(tmp->conn, &tmp->callback, sizeof(void *)) < 0 ||

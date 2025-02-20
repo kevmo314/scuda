@@ -150,13 +150,34 @@ void rpc_close(conn_t *conn) {
   pthread_mutex_unlock(&conn_mutex);
 }
 
+typedef void (*func)(void *data);
+
 void *rpc_client_dispatch_thread(void *arg) {
   conn_t *conn = (conn_t *)arg;
   unsigned int op;
 
   while (true) {
     unsigned int op = rpc_dispatch(conn, 1);
-    std::cout << "Got op " << op << std::endl;
+
+    void* mem;
+    void* udata;
+    rpc_read(conn, &mem, sizeof(void*));
+    rpc_read(conn, &udata, sizeof(void*));
+    std::cout << "Got mem " << mem << std::endl;
+    std::cout << "Got udata " << udata << std::endl;
+
+    func f = reinterpret_cast<func>(mem);
+    try {
+      f(&udata);
+    } catch (...) {
+      std::cerr << "Exception occurred while calling function pointer!" << std::endl;
+    }
+
+    rpc_write_start_response(conn, 1);
+    rpc_write_end(conn);
+
+    std::cout << "Function executed successfully!" << std::endl;
+    return NULL;
   }
 }
 
