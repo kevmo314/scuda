@@ -20899,8 +20899,6 @@ int handle_cudaGraphAddMemcpyNode(conn_t *conn) {
       rpc_write_end(conn) < 0)
     goto ERROR_0;
 
-  std::cout << "DONE handle_cudaGraphAddMemcpyNode" << std::endl;
-
   return 0;
 ERROR_0:
   return -1;
