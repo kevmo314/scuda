@@ -170,62 +170,138 @@ void invoke_host_func(void* fn) {
   }
 }
 
-void increment_host_nodes() {
-  funcs++;
-}
-
-void wait_for_callbacks() {
-  while (funcs > 0) {}
-
-  funcs++;
-}
+typedef cudaError_t (*cudaMemcpy_t)(void*, const void*, size_t, cudaMemcpyKind);
 
 void *rpc_client_dispatch_thread(void *arg) {
   conn_t *conn = (conn_t *)arg;
   int op;
 
   while (true) {
-    op = rpc_dispatch(conn, 1);  // Removed shadowing issue
+    op = rpc_dispatch(conn, 1);
 
-    void* temp_mem;
-    void* temp_udata;
+    if (op == 1) {
+      void* temp_mem;
 
-    if (rpc_read(conn, &temp_mem, sizeof(void*)) <= 0) {
-        std::cerr << "rpc_read failed for mem. Closing connection." << std::endl;
+      if (rpc_read(conn, &temp_mem, sizeof(void*)) <= 0) {
+          std::cerr << "rpc_read failed for mem. Closing connection." << std::endl;
+          break;
+      }
+
+      int request_id = rpc_read_end(conn);
+      void* mem = temp_mem;
+
+      if (mem == nullptr) {
+          std::cerr << "Invalid function pointer!" << std::endl;
+          continue;
+      }
+
+      invoke_host_func(mem);
+
+      void *res = nullptr;
+
+      if (rpc_write_start_response(conn, request_id) < 0 ||
+          rpc_write(conn, &res, sizeof(void*)) < 0 ||
+          rpc_write_end(conn) < 0) {
+          std::cerr << "rpc_write failed. Closing connection." << std::endl;
+          break;
+      }
+    } else if (op == 3) {
+      std::cout << "Transferring memory..." << std::endl;
+
+      void *mem;
+      void *host_data = nullptr;
+      void *dst = nullptr;
+      const void *src = nullptr;
+      size_t count = 0;
+      cudaError_t result;
+      int request_id;
+      enum cudaMemcpyKind kind;
+
+      void* handle = nullptr;
+      cudaMemcpy_t cudaMemcpy_fn = nullptr;
+
+      if (rpc_read(conn, &kind, sizeof(enum cudaMemcpyKind)) < 0 ||
+          (kind != cudaMemcpyHostToDevice && rpc_read(conn, &src, sizeof(void *)) < 0) ||
+          (kind != cudaMemcpyDeviceToHost && rpc_read(conn, &dst, sizeof(void *)) < 0) ||
+          rpc_read(conn, &count, sizeof(size_t)) < 0) {
         break;
-    }
+      }
 
-    int request_id = rpc_read_end(conn);
+      std::cout << "KIND: " << kind << std::endl;
+      std::cout << "COUNT: " << count << std::endl;
 
-    void* mem = temp_mem;
+      switch (kind) {
+        case cudaMemcpyDeviceToHost:
+          host_data = malloc(count);
+          if (host_data == nullptr) break;
 
-    if (mem == nullptr) {
-        std::cerr << "Invalid function pointer!" << std::endl;
-        continue;
-    }
+          request_id = rpc_read_end(conn);
+          if (request_id < 0) break;
 
-    invoke_host_func(mem);
+          result = cudaMemcpy(host_data, src, count, kind);
+          break;
 
-    void * res;
+        case cudaMemcpyHostToDevice:
+          std::cout << "Copying from Host to Device..." << std::endl;
+          host_data = malloc(count);
+          if (host_data == nullptr) break;
 
-    if (rpc_write_start_response(conn, request_id) < 0) {
-        std::cerr << "rpc_write_start_response failed. Closing connection." << std::endl;
+          if (rpc_read(conn, host_data, count) < 0) {
+            std::cerr << "Failed to read host data!" << std::endl;
+            break;
+          }
+
+          request_id = rpc_read_end(conn);
+          if (request_id < 0) break;
+
+          std::cout << "Request ID: " << request_id << std::endl;
+
+          static void *(*real_dlsym)(void *, const char *) = NULL;
+          real_dlsym = (void *(*)(void *, const char *))dlvsym(RTLD_NEXT, "dlsym",
+                                                         "GLIBC_2.2.5");
+          if (!handle) {
+              std::cerr << "Failed to load CUDA runtime library: " << dlerror() << std::endl;
+              break;
+          }
+
+          cudaMemcpy_fn = (cudaMemcpy_t)real_dlsym(handle, "cudaMemcpy");
+          if (!cudaMemcpy_fn) {
+              std::cerr << "Failed to resolve cudaMemcpy: " << dlerror() << std::endl;
+              dlclose(handle);
+              break;
+          }
+
+          result = cudaMemcpy_fn(dst, host_data, count, kind);
+          if (result != cudaSuccess) {
+            std::cerr << "cudaMemcpy failed: " << cudaGetErrorString(result) << std::endl;
+          }
+
+          dlclose(handle);
+          std::cout << "CUDA Memcpy Result: " << result << std::endl;
+          break;
+
+        case cudaMemcpyDeviceToDevice:
+          request_id = rpc_read_end(conn);
+          if (request_id < 0) break;
+
+          result = cudaMemcpy(dst, src, count, kind);
+          break;
+      }
+
+      std::cout << "Memory transfer complete..." << std::endl;
+
+      if (rpc_write_start_response(conn, request_id) < 0 ||
+          (kind == cudaMemcpyDeviceToHost && rpc_write(conn, host_data, count) < 0) ||
+          rpc_write(conn, &result, sizeof(cudaError_t)) < 0 ||
+          rpc_write_end(conn) < 0) {
         break;
-    }
-    if (rpc_write(conn, &res, sizeof(void*)) < 0) {
-        std::cerr << "rpc_write failed. Closing connection." << std::endl;
-        break;
-    }
-    if (rpc_write_end(conn) < 0) {
-        std::cerr << "rpc_write_end failed. Closing connection." << std::endl;
-        break;
+      }
     }
   }
 
   std::cerr << "Exiting dispatch thread due to an error." << std::endl;
   return nullptr;
 }
-
 
 int rpc_open() {
   set_segfault_handlers();

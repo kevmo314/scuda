@@ -23093,8 +23093,6 @@ cudaError_t cudaGraphAddHostNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph,
                                  const struct cudaHostNodeParams *pNodeParams) {
   conn_t *conn = rpc_client_get_connection(0);
   add_host_node((void*)pNodeParams->fn, (void*)pNodeParams->userData);
-  increment_host_nodes();
-  printf("hmmmm %p\n", pNodeParams->fn);
   if (maybe_copy_unified_arg(conn, (void *)&numDependencies,
                              cudaMemcpyHostToDevice) < 0)
     return cudaErrorDevicesUnavailable;

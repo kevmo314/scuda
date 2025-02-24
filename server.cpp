@@ -22,6 +22,7 @@
 #include <vector>
 
 #include <map>
+#include <list>
 
 #include <csignal>
 #include <setjmp.h>
@@ -34,7 +35,20 @@
 #define DEFAULT_PORT 14833
 #define MAX_CLIENTS 10
 
-std::map<conn_t *, std::map<void *, size_t>> managed_ptrs;
+struct ManagedPtr {
+    void* src;
+    void* dst;
+    size_t size;
+    cudaMemcpyKind kind;
+
+    ManagedPtr() : src(nullptr), dst(nullptr), size(0), kind(cudaMemcpyHostToDevice) {}
+
+    ManagedPtr(void* src, void* dst, size_t s, cudaMemcpyKind k) 
+        : src(src), dst(dst), size(s), kind(k) {}
+};
+
+
+std::map<conn_t *, ManagedPtr> managed_ptrs;
 std::map<conn_t *, void *> host_funcs;
 
 static jmp_buf catch_segfault;
@@ -55,43 +69,83 @@ static void segfault(int sig, siginfo_t *info, void *unused) {
 
   std::cout << "segfault!!" << faulting_address << std::endl;
 
-  for (const auto &conn_entry : managed_ptrs) {
-    for (const auto &mem_entry : conn_entry.second) {
-      size_t allocated_size = mem_entry.second;
+  for (const auto& conn_entry : managed_ptrs) {
+    const ManagedPtr& mem_entry = conn_entry.second;
 
-      // Check if faulting address is inside this allocated region
-      if ((uintptr_t)mem_entry.first <= (uintptr_t)faulting_address &&
-          (uintptr_t)faulting_address <
-              ((uintptr_t)mem_entry.first + allocated_size)) {
-        found = 1;
-        size = allocated_size;
+    void* allocated_ptr;
+    size_t allocated_size = mem_entry.size;
 
-        // Align memory allocation to the closest possible address
-        uintptr_t aligned = (uintptr_t)faulting_address & ~(allocated_size - 1);
+    if (mem_entry.kind == cudaMemcpyDeviceToHost) {
+      allocated_ptr = mem_entry.dst;
+    } else if (mem_entry.kind == cudaMemcpyHostToDevice) {
+      allocated_ptr = mem_entry.src;
+    }
 
-        // Allocate memory at the faulting address
-        void *allocated =
-            mmap((void *)aligned,
-                 allocated_size + (uintptr_t)faulting_address - aligned,
-                 PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+    // Check if faulting address is within allocated memory
+    if ((uintptr_t)allocated_ptr <= (uintptr_t)faulting_address &&
+        (uintptr_t)faulting_address < (uintptr_t)allocated_ptr + allocated_size) {
+      found = 1;
+      size = allocated_size;
 
-        if (allocated == MAP_FAILED) {
+      // Align to system page size
+      size_t page_size = sysconf(_SC_PAGE_SIZE);
+      uintptr_t aligned_addr = (uintptr_t)faulting_address & ~(page_size - 1);
+
+      // Allocate memory at the faulting address
+      void* allocated = mmap((void*)aligned_addr, allocated_size,
+                              PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+
+      if (allocated == MAP_FAILED) {
           perror("Failed to allocate memory at faulting address");
           _exit(1);
-        }
-
-        printf("The address of x is: %p\n", (void *)allocated);
-
-        // if (rpc_write(conn_entry.first, (void*)&allocated, sizeof(void*)) <
-        // 0) {
-        //   std::cout << "failed to write memory: " << &faulting_address <<
-        //   std::endl;
-        // }
-
-        // printf("wrote data...\n");
-
-        break;
       }
+
+      char msg[128];
+      snprintf(msg, sizeof(msg), "Allocated memory at: %p\n", allocated);
+      write(STDERR_FILENO, msg, strlen(msg));
+
+      void* scuda_intercept_result;
+
+      // Validate connection
+      if (!conn_entry.first) {
+          std::cerr << "Error: Connection is NULL in invoke_host_func" << std::endl;
+          return;
+      }
+
+      printf("sending memory %p\n", allocated_ptr);
+
+      if (rpc_write_start_request(conn_entry.first, 3) < 0 || rpc_write(conn_entry.first, &mem_entry.kind, sizeof(enum cudaMemcpyKind)) < 0)
+        return;
+
+      // we need to swap device directions in this case
+      switch (mem_entry.kind) {
+      case cudaMemcpyDeviceToHost:
+        if (rpc_write(conn_entry.first, &mem_entry.src, sizeof(void *)) < 0 ||
+            rpc_write(conn_entry.first, &size, sizeof(size_t)) < 0 ||
+            rpc_wait_for_response(conn_entry.first) < 0 || rpc_read(conn_entry.first, mem_entry.dst, size) < 0)
+          return;
+      case cudaMemcpyHostToDevice:
+        if (rpc_write(conn_entry.first, &mem_entry.dst, sizeof(void *)) < 0 ||
+            rpc_write(conn_entry.first, &size, sizeof(size_t)) < 0 ||
+            rpc_write(conn_entry.first, allocated, size) < 0 || rpc_wait_for_response(conn_entry.first) < 0) {
+              return;
+            }
+        break;
+      case cudaMemcpyDeviceToDevice:
+        if (rpc_write(conn_entry.first, &mem_entry.dst, sizeof(void *)) < 0 ||
+            rpc_write(conn_entry.first, &mem_entry.src, sizeof(void *)) < 0 ||
+            rpc_write(conn_entry.first, &size, sizeof(size_t)) < 0 ||
+            rpc_wait_for_response(conn_entry.first) < 0)
+          break;
+      }
+
+      cudaError_t return_value;
+
+      if (rpc_read(conn_entry.first, &return_value, sizeof(cudaError_t)) < 0 ||
+        rpc_read_end(conn_entry.first) < 0)
+        return;
+
+      return;
     }
   }
 
@@ -169,11 +223,10 @@ void append_host_func_ptr(const void *conn, void *ptr) {
   host_funcs[(conn_t *)conn] = ptr;
 }
 
-void append_managed_ptr(const void *conn, cudaPitchedPtr ptr) {
+void append_managed_ptr(const void *conn, void* srcPtr, void* dstPtr, size_t size, cudaMemcpyKind kind) {
   conn_t *connfd = (conn_t *)conn;
 
-  // Ensure the inner map exists before inserting the cudaPitchedPtr
-  managed_ptrs[connfd][ptr.ptr] = ptr.pitch;
+  managed_ptrs[connfd] = ManagedPtr(srcPtr, dstPtr, size, kind);
 }
 
 static void set_segfault_handlers() {

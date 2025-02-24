@@ -30,7 +30,7 @@
 void append_host_func_ptr(void *ptr);
 void invoke_host_func(void *data);
 void store_conn(const void *conn);
-void append_managed_ptr(const void *conn, cudaPitchedPtr ptr);
+void append_managed_ptr(const void *conn, void* srcPtr, void* dstPtr, size_t size, cudaMemcpyKind kind);
 
 int handle_nvmlInit_v2(conn_t *conn) {
   int request_id;
@@ -20888,11 +20888,8 @@ int handle_cudaGraphAddMemcpyNode(conn_t *conn) {
     goto ERROR_0;
 
   // destination ptr is the host pointer in this copy kind
-  if (pCopyParams.kind == cudaMemcpyDeviceToHost) {
-    append_managed_ptr(conn, pCopyParams.dstPtr);
-  } else if (pCopyParams.kind == cudaMemcpyHostToDevice) {
-    append_managed_ptr(conn, pCopyParams.srcPtr);
-  }
+  append_managed_ptr(conn, (void*)pCopyParams.srcPtr.ptr, (void*)pCopyParams.dstPtr.ptr, pCopyParams.extent.width, pCopyParams.kind);
+  
   scuda_intercept_result = cudaGraphAddMemcpyNode(
       &pGraphNode, graph, pDependencies.data(), numDependencies, &pCopyParams);
 
@@ -22714,14 +22711,10 @@ int handle_cudaGraphLaunch(conn_t *conn) {
 
   scuda_intercept_result = cudaGraphLaunch(graphExec, stream);
 
-  std::cout << "RESPONDING TO CUDAGRAPH" << std::endl;
-
   if (rpc_write_start_response(conn, request_id) < 0 ||
       rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
       rpc_write_end(conn) < 0)
     goto ERROR_0;
-
-  std::cout << "DONE CUDAGRAPH" << std::endl;
 
   return 0;
 ERROR_0:
