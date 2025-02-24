@@ -21194,8 +21194,8 @@ int handle_cudaGraphAddHostNode(conn_t *conn) {
 
   hostFnData = (callBackData_t *)malloc(sizeof(callBackData_t));
   // assign the previous function pointer so we can map back to it
+  store_conn(conn);
   hostFnData->callback = pNodeParams.fn;
-  hostFnData->conn = conn;
   hostFnData->data = pNodeParams.userData;
 
   pNodeParams.fn = invoke_host_func;
@@ -22714,10 +22714,14 @@ int handle_cudaGraphLaunch(conn_t *conn) {
 
   scuda_intercept_result = cudaGraphLaunch(graphExec, stream);
 
+  std::cout << "RESPONDING TO CUDAGRAPH" << std::endl;
+
   if (rpc_write_start_response(conn, request_id) < 0 ||
       rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
       rpc_write_end(conn) < 0)
     goto ERROR_0;
+
+  std::cout << "DONE CUDAGRAPH" << std::endl;
 
   return 0;
 ERROR_0:

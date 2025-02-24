@@ -19,6 +19,8 @@ extern conn_t *rpc_client_get_connection(unsigned int index);
 int is_unified_pointer(conn_t *conn, void *arg);
 int maybe_copy_unified_arg(conn_t *conn, void *arg, enum cudaMemcpyKind kind);
 extern void rpc_close(conn_t *conn);
+extern void increment_host_nodes();
+extern void wait_for_callbacks();
 void invoke_host_funcs(const int index, void *udata);
 
 nvmlReturn_t nvmlInit_v2() {
@@ -23092,6 +23094,7 @@ cudaError_t cudaGraphAddHostNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph,
                                  size_t numDependencies,
                                  const struct cudaHostNodeParams *pNodeParams) {
   conn_t *conn = rpc_client_get_connection(0);
+  increment_host_nodes();
   printf("hmmmm %p\n", pNodeParams->fn);
   if (maybe_copy_unified_arg(conn, (void *)&numDependencies,
                              cudaMemcpyHostToDevice) < 0)
@@ -24971,6 +24974,8 @@ cudaError_t cudaGraphLaunch(cudaGraphExec_t graphExec, cudaStream_t stream) {
       rpc_read(conn, &return_value, sizeof(cudaError_t)) < 0 ||
       rpc_read_end(conn) < 0)
     return cudaErrorDevicesUnavailable;
+
+  wait_for_callbacks();
 
   if (maybe_copy_unified_arg(conn, (void *)&graphExec, cudaMemcpyDeviceToHost) <
       0)

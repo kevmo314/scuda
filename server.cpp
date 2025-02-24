@@ -114,6 +114,12 @@ static void segfault(int sig, siginfo_t *info, void *unused) {
   raise(SIGSEGV);
 }
 
+conn_t* stored_conn;
+
+void store_conn(const void *conn) {
+  stored_conn = (conn_t *)conn;
+}
+
 typedef struct callBackData {
   conn_t *conn;
   void (*callback)(void *);
@@ -122,15 +128,53 @@ typedef struct callBackData {
 
 void invoke_host_func(void *data) {
   callBackData_t *tmp = (callBackData_t *)(data);
-  void *res;
+  void* scuda_intercept_result;
 
-  printf("invoking host function %p\n", tmp->callback);
+  // Validate connection
+  if (!stored_conn) {
+      std::cerr << "Error: Connection is NULL in invoke_host_func" << std::endl;
+      return;
+  }
 
-  if (rpc_write_start_request(tmp->conn, 1) < 0 ||
-      rpc_write(tmp->conn, &tmp->callback, sizeof(void *)) < 0 ||
-      rpc_write(tmp->conn, &tmp->data, sizeof(void *)) < 0 ||
-      rpc_wait_for_response(tmp->conn) < 0 || rpc_read_end(tmp->conn) < 0)
-    std::cout << "failed to write memory: " << &faulting_address << std::endl;
+  printf("Invoking host function %p\n", tmp->callback);
+
+  if (rpc_write_start_request(stored_conn, 1) < 0) {
+      std::cerr << "Error: rpc_write_start_request failed" << std::endl;
+      return;
+  }
+  if (rpc_write(stored_conn, &tmp->callback, sizeof(void *)) < 0) {
+      std::cerr << "Error: rpc_write failed on callback" << std::endl;
+      return;
+  }
+  if (rpc_write(stored_conn, &tmp->data, sizeof(void *)) < 0) {
+      std::cerr << "Error: rpc_write failed on data" << std::endl;
+      return;
+  }
+
+  // Ensure request is fully sent before waiting for response
+  if (rpc_write_end(stored_conn) < 0) {
+      std::cerr << "Error: rpc_write_end failed" << std::endl;
+      return;
+  }
+
+  printf("hereeee %p\n", tmp->callback);
+
+  if (rpc_wait_for_response(stored_conn) < 0) {
+      std::cerr << "Error: rpc_wait_for_response failed" << std::endl;
+      return;
+  }
+
+  if (rpc_read(stored_conn, &scuda_intercept_result, sizeof(void*)) < 0) {
+      std::cerr << "Error: rpc_read failed on scuda_intercept_result" << std::endl;
+      return;
+  }
+
+  if (rpc_read_end(stored_conn) < 0) {
+      std::cerr << "Error: rpc_read_end failed" << std::endl;
+      return;
+  }
+
+  std::cout << "RESULT IS: " << scuda_intercept_result << std::endl;
 }
 
 void append_host_func_ptr(const void *conn, void *ptr) {
@@ -172,7 +216,9 @@ void client_handler(int connfd) {
   printf("Client connected.\n");
 
   while (1) {
-    unsigned int op = rpc_dispatch(&conn, 0);
+    int op = rpc_dispatch(&conn, 0);
+
+    std::cout << "GOT OP: " << op << std::endl;
 
     auto opHandler = get_handler(op);
     if (opHandler(&conn) < 0) {
@@ -183,6 +229,7 @@ void client_handler(int connfd) {
   if (pthread_mutex_destroy(&conn.read_mutex) < 0 ||
       pthread_mutex_destroy(&conn.write_mutex) < 0)
     std::cerr << "Error destroying mutex." << std::endl;
+
   close(connfd);
 }
 

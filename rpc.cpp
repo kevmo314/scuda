@@ -1,6 +1,7 @@
 #include <sys/socket.h>
 
 #include "rpc.h"
+#include <string.h>
 #include <iostream>
 #include <unistd.h>
 
@@ -10,16 +11,18 @@
 //
 // it is not necessary to call rpc_read_start() if it is the first call in
 // the sequence because by convention, the handler owns the read lock on entry.
-unsigned int rpc_dispatch(conn_t *conn, int parity) {
+int rpc_dispatch(conn_t *conn, int parity) {
   if (pthread_mutex_lock(&conn->read_mutex) < 0) {
     return -1;
   }
 
-  while (true) {
+  while (1) {
     std::cout << "rpc_dispatch: waiting for read id" << std::endl;
 
     while (conn->read_id != 0)
       pthread_cond_wait(&conn->read_cond, &conn->read_mutex);
+
+    std::cout << "reading req id... " << std::endl;
 
     // the read id is zero so it's our turn to read the next int which is the
     // request id of the next request.
@@ -33,13 +36,12 @@ unsigned int rpc_dispatch(conn_t *conn, int parity) {
     if (conn->read_id % 2 == parity) {
       std::cout << "rpc_dispatch: new read id: " << conn->read_id << std::endl;
       // this request is the one to be dispatched, read the op and return it
-      unsigned int op;
-      if (rpc_read(conn, &op, sizeof(unsigned int)) < 0) {
+      int op;
+      if (rpc_read(conn, &op, sizeof(int)) < 0) {
         pthread_mutex_unlock(&conn->read_mutex);
         return -1;
       }
 
-      pthread_mutex_unlock(&conn->read_mutex);
       return op;
     } else {
       // this is a response to a request that so signal the update and wait for
@@ -62,6 +64,7 @@ int rpc_read_start(conn_t *conn, int write_id) {
   if (pthread_mutex_lock(&conn->read_mutex) < 0)
     return -1;
 
+
   // wait for the active read id to be the request id we are waiting for
   while (conn->read_id != write_id)
     if (pthread_cond_wait(&conn->read_cond, &conn->read_mutex) < 0)
@@ -71,7 +74,11 @@ int rpc_read_start(conn_t *conn, int write_id) {
 }
 
 int rpc_read(conn_t *conn, void *data, size_t size) {
-  return recv(conn->connfd, data, size, MSG_WAITALL);
+    int bytes_read = recv(conn->connfd, data, size, MSG_WAITALL);
+    if (bytes_read == -1) {
+        printf("recv error: %s\n", strerror(errno));
+    }
+    return bytes_read;
 }
 
 // rpc_read_end releases the response lock on the given connection.
@@ -99,7 +106,7 @@ int rpc_wait_for_response(conn_t *conn) {
 //
 // only one request can be active at a time, so this function will take the
 // request lock from the connection.
-int rpc_write_start_request(conn_t *conn, const unsigned int op) {
+int rpc_write_start_request(conn_t *conn, const int op) {
   if (pthread_mutex_lock(&conn->write_mutex) < 0) {
 #ifdef VERBOSE
     std::cout << "rpc_write_start failed due to rpc_open() < 0 || "
