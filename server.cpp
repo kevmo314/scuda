@@ -151,12 +151,6 @@ void invoke_host_func(void *data) {
       return;
   }
 
-  // Ensure request is fully sent before waiting for response
-  if (rpc_write_end(stored_conn) < 0) {
-      std::cerr << "Error: rpc_write_end failed" << std::endl;
-      return;
-  }
-
   printf("hereeee %p\n", tmp->callback);
 
   if (rpc_wait_for_response(stored_conn) < 0) {

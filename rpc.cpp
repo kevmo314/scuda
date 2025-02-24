@@ -5,53 +5,56 @@
 #include <iostream>
 #include <unistd.h>
 
+pthread_t tid;
+
+void *_rpc_read_id_dispatch(void *p) {
+  conn_t *conn = (conn_t *)p;
+
+  if (pthread_mutex_lock(&conn->read_mutex) < 0)
+    return NULL;
+
+  while (1) {
+    while (conn->read_id != 0)
+      pthread_cond_wait(&conn->read_cond, &conn->read_mutex);
+
+    // the read id is zero so it's our turn to read the next int which is the
+    // request id of the next request.
+    if (rpc_read(conn, &conn->read_id, sizeof(int)) < 0 || conn->read_id == 0 ||
+        pthread_cond_broadcast(&conn->read_cond) < 0)
+      break;
+  }
+  pthread_mutex_unlock(&conn->read_mutex);
+  return NULL;
+}
+
 // rpc_read_start waits for a response with a specific request id on the
-// given connection. this function is used to wait for a response to a request
-// that was sent with rpc_write_end.
+// given connection. this function is used to wait for a response to a
+// request that was sent with rpc_write_end.
 //
 // it is not necessary to call rpc_read_start() if it is the first call in
-// the sequence because by convention, the handler owns the read lock on entry.
+// the sequence because by convention, the handler owns the read lock on
+// entry.
 int rpc_dispatch(conn_t *conn, int parity) {
+  if (tid == 0 &&
+      pthread_create(&tid, nullptr, _rpc_read_id_dispatch, (void *)conn) < 0) {
+    return -1;
+  }
+
   if (pthread_mutex_lock(&conn->read_mutex) < 0) {
     return -1;
   }
 
-  while (1) {
-    std::cout << "rpc_dispatch: waiting for read id" << std::endl;
+  int op;
 
-    while (conn->read_id != 0)
-      pthread_cond_wait(&conn->read_cond, &conn->read_mutex);
+  while (conn->read_id < 2 || conn->read_id % 2 != parity)
+    pthread_cond_wait(&conn->read_cond, &conn->read_mutex);
 
-    std::cout << "reading req id... " << std::endl;
-
-    // the read id is zero so it's our turn to read the next int which is the
-    // request id of the next request.
-    if (rpc_read(conn, &conn->read_id, sizeof(int)) < 0) {
-      pthread_mutex_unlock(&conn->read_mutex);
-      return -1;
-    }
-
-    std::cout << "rpc_dispatch: read id: " << conn->read_id << std::endl;
-
-    if (conn->read_id % 2 == parity) {
-      std::cout << "rpc_dispatch: new read id: " << conn->read_id << std::endl;
-      // this request is the one to be dispatched, read the op and return it
-      int op;
-      if (rpc_read(conn, &op, sizeof(int)) < 0) {
-        pthread_mutex_unlock(&conn->read_mutex);
-        return -1;
-      }
-
-      return op;
-    } else {
-      // this is a response to a request that so signal the update and wait for
-      // the next request.
-      if (pthread_cond_broadcast(&conn->read_cond) < 0) {
-        pthread_mutex_unlock(&conn->read_mutex);
-        return -1;
-      }
-    }
+  if (rpc_read(conn, &op, sizeof(int)) < 0) {
+    pthread_mutex_unlock(&conn->read_mutex);
+    return -1;
   }
+
+  return op;
 }
 
 // rpc_read_start waits for a response with a specific request id on the
