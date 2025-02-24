@@ -40,6 +40,7 @@ static jmp_buf catch_segfault;
 static void *faulting_address = nullptr;
 
 std::map<conn_t *, std::map<void *, size_t>> unified_devices;
+std::map<void *, void *> host_funcs;
 
 static void segfault(int sig, siginfo_t *info, void *unused) {
   faulting_address = info->si_addr;
@@ -150,18 +151,33 @@ void rpc_close(conn_t *conn) {
   pthread_mutex_unlock(&conn_mutex);
 }
 
-typedef void (*func)(void *data);
+typedef void (*func_t)(void*);
 
-int host_funcs = 0;
+int funcs = 0;
+
+void add_host_node(void* fn, void* udata) {
+  host_funcs[fn] = udata;
+}
+
+void invoke_host_func(void* fn) {
+  for (const auto& pair : host_funcs) {
+      if (pair.first == fn) {
+        func_t func = reinterpret_cast<func_t>(pair.first);
+        std::cout << "Invoking function at: " << pair.first << std::endl;
+        func(pair.second);
+        return;
+      }
+  }
+}
 
 void increment_host_nodes() {
-  host_funcs++;
+  funcs++;
 }
 
 void wait_for_callbacks() {
-  while (host_funcs > 0) {}
+  while (funcs > 0) {}
 
-  host_funcs++;
+  funcs++;
 }
 
 void *rpc_client_dispatch_thread(void *arg) {
@@ -178,34 +194,17 @@ void *rpc_client_dispatch_thread(void *arg) {
         std::cerr << "rpc_read failed for mem. Closing connection." << std::endl;
         break;
     }
-    if (rpc_read(conn, &temp_udata, sizeof(void*)) <= 0) {
-        std::cerr << "rpc_read failed for udata. Closing connection." << std::endl;
-        break;
-    }
 
     int request_id = rpc_read_end(conn);
 
     void* mem = temp_mem;
-    void* udata = temp_udata;
-
-    std::cout << "Got mem " << mem << std::endl;
-    std::cout << "Got udata " << udata << std::endl;
 
     if (mem == nullptr) {
         std::cerr << "Invalid function pointer!" << std::endl;
         continue;
     }
 
-    // func f = reinterpret_cast<func>(mem);
-    try {
-      // f(&udata);
-    } catch (const std::exception& e) {
-      std::cerr << "Exception: " << e.what() << std::endl;
-      continue;
-    } catch (...) {
-      std::cerr << "Unknown exception occurred!" << std::endl;
-      continue;
-    }
+    invoke_host_func(mem);
 
     void * res;
 
@@ -213,7 +212,6 @@ void *rpc_client_dispatch_thread(void *arg) {
         std::cerr << "rpc_write_start_response failed. Closing connection." << std::endl;
         break;
     }
-    std::cout << "responding..." << std::endl;
     if (rpc_write(conn, &res, sizeof(void*)) < 0) {
         std::cerr << "rpc_write failed. Closing connection." << std::endl;
         break;
@@ -222,10 +220,6 @@ void *rpc_client_dispatch_thread(void *arg) {
         std::cerr << "rpc_write_end failed. Closing connection." << std::endl;
         break;
     }
-
-    host_funcs--;
-
-    std::cout << "Function executed successfully!" << std::endl;
   }
 
   std::cerr << "Exiting dispatch thread due to an error." << std::endl;
@@ -436,3 +430,4 @@ void *dlsym(void *handle, const char *name) __THROW {
   // std::endl;
   return real_dlsym(handle, name);
 }
+

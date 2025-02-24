@@ -146,12 +146,6 @@ void invoke_host_func(void *data) {
       std::cerr << "Error: rpc_write failed on callback" << std::endl;
       return;
   }
-  if (rpc_write(stored_conn, &tmp->data, sizeof(void *)) < 0) {
-      std::cerr << "Error: rpc_write failed on data" << std::endl;
-      return;
-  }
-
-  printf("hereeee %p\n", tmp->callback);
 
   if (rpc_wait_for_response(stored_conn) < 0) {
       std::cerr << "Error: rpc_wait_for_response failed" << std::endl;
@@ -167,8 +161,6 @@ void invoke_host_func(void *data) {
       std::cerr << "Error: rpc_read_end failed" << std::endl;
       return;
   }
-
-  std::cout << "RESULT IS: " << scuda_intercept_result << std::endl;
 }
 
 void append_host_func_ptr(const void *conn, void *ptr) {
@@ -211,8 +203,6 @@ void client_handler(int connfd) {
 
   while (1) {
     int op = rpc_dispatch(&conn, 0);
-
-    std::cout << "GOT OP: " << op << std::endl;
 
     auto opHandler = get_handler(op);
     if (opHandler(&conn) < 0) {
