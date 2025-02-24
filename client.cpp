@@ -152,34 +152,86 @@ void rpc_close(conn_t *conn) {
 
 typedef void (*func)(void *data);
 
+int host_funcs = 0;
+
+void increment_host_nodes() {
+  host_funcs++;
+}
+
+void wait_for_callbacks() {
+  while (host_funcs > 0) {}
+
+  host_funcs++;
+}
+
 void *rpc_client_dispatch_thread(void *arg) {
   conn_t *conn = (conn_t *)arg;
-  unsigned int op;
+  int op;
 
   while (true) {
-    unsigned int op = rpc_dispatch(conn, 1);
+    op = rpc_dispatch(conn, 1);  // Removed shadowing issue
 
-    void* mem;
-    void* udata;
-    rpc_read(conn, &mem, sizeof(void*));
-    rpc_read(conn, &udata, sizeof(void*));
+    void* temp_mem;
+    void* temp_udata;
+
+    if (rpc_read(conn, &temp_mem, sizeof(void*)) <= 0) {
+        std::cerr << "rpc_read failed for mem. Closing connection." << std::endl;
+        break;
+    }
+    if (rpc_read(conn, &temp_udata, sizeof(void*)) <= 0) {
+        std::cerr << "rpc_read failed for udata. Closing connection." << std::endl;
+        break;
+    }
+
+    int request_id = rpc_read_end(conn);
+
+    void* mem = temp_mem;
+    void* udata = temp_udata;
+
     std::cout << "Got mem " << mem << std::endl;
     std::cout << "Got udata " << udata << std::endl;
 
-    func f = reinterpret_cast<func>(mem);
-    try {
-      f(&udata);
-    } catch (...) {
-      std::cerr << "Exception occurred while calling function pointer!" << std::endl;
+    if (mem == nullptr) {
+        std::cerr << "Invalid function pointer!" << std::endl;
+        continue;
     }
 
-    rpc_write_start_response(conn, 1);
-    rpc_write_end(conn);
+    // func f = reinterpret_cast<func>(mem);
+    try {
+      // f(&udata);
+    } catch (const std::exception& e) {
+      std::cerr << "Exception: " << e.what() << std::endl;
+      continue;
+    } catch (...) {
+      std::cerr << "Unknown exception occurred!" << std::endl;
+      continue;
+    }
+
+    void * res;
+
+    if (rpc_write_start_response(conn, request_id) < 0) {
+        std::cerr << "rpc_write_start_response failed. Closing connection." << std::endl;
+        break;
+    }
+    std::cout << "responding..." << std::endl;
+    if (rpc_write(conn, &res, sizeof(void*)) < 0) {
+        std::cerr << "rpc_write failed. Closing connection." << std::endl;
+        break;
+    }
+    if (rpc_write_end(conn) < 0) {
+        std::cerr << "rpc_write_end failed. Closing connection." << std::endl;
+        break;
+    }
+
+    host_funcs--;
 
     std::cout << "Function executed successfully!" << std::endl;
-    return NULL;
   }
+
+  std::cerr << "Exiting dispatch thread due to an error." << std::endl;
+  return nullptr;
 }
+
 
 int rpc_open() {
   set_segfault_handlers();
