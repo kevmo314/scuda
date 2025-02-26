@@ -196,8 +196,6 @@ void *rpc_client_dispatch_thread(void *arg) {
                   break;
               }
 
-              printf("DST pointer address... %p\n", dst);
-
               host_data = malloc(count);
               if (!host_data) {
                   std::cerr << "Memory allocation failed." << std::endl;
@@ -213,8 +211,6 @@ void *rpc_client_dispatch_thread(void *arg) {
 
               // Copy received data to the destination (dst) on the host
               memcpy(dst, host_data, count);
-
-              std::cout << "Memory transfer complete..." << std::endl;
             }
 
             void *temp_mem;
