@@ -128,6 +128,17 @@ test_unified_mem() {
   fi
 }
 
+test_graphs() {
+  output=$(LD_PRELOAD="$libscuda_path" ./cuda_graphs_host_func.o | tail -n 1)
+
+  if [[ "$output" == "[cudaGraphsManual] Host callback final reduced sum = 1.000000" ]]; then
+    ansi_format "pass" "$pass_message"
+  else
+    ansi_format "fail" "vector_add failed. Got [$output]."
+    return 1
+  fi
+}
+
 #---- declare test cases ----#
 declare -A test_cuda_avail=(
   ["function"]="test_cuda_available"
@@ -164,8 +175,13 @@ declare -A test_unified_mem=(
   ["pass"]="Unified memory works as expected."
 )
 
+declare -A test_graphs=(
+  ["function"]="test_graphs"
+  ["pass"]="Graphs works as expected."
+)
+
 #---- assign them to our associative array ----#
-tests=("test_cuda_avail" "test_tensor_to_cuda" "test_tensor_to_cuda_to_cpu" "test_vector_add" "test_cudnn" "test_cublas_batched" "test_unified_mem")
+tests=("test_cuda_avail" "test_tensor_to_cuda" "test_tensor_to_cuda_to_cpu" "test_vector_add" "test_cudnn" "test_cublas_batched" "test_unified_mem" "test_graphs")
 
 test() {
   set_paths
@@ -381,6 +397,7 @@ build_tests() {
   nvcc --cudart=shared -lnvidia-ml -lcuda -lcudnn -lcublas ./test/unified_linked.cu -o unified_linked.o
   nvcc --cudart=shared -lnvidia-ml -lcuda -lcudnn -lcublas ./test/cublas_unified.cu -o cublas_unified.o
   nvcc --cudart=shared -lnvidia-ml -lcuda -lcudnn -lcublas ./test/cudnn_managed.cu -o cudnn_managed.o
+  nvcc --cudart=shared -lnvidia-ml -lcuda -lcudnn -lcublas ./test/cuda_graphs_host_func.cu -o cuda_graphs_host_func.o
 }
 
 set_paths() {

@@ -229,8 +229,6 @@ void *rpc_client_dispatch_thread(void *arg) {
 
             invoke_host_func(mem);
 
-            std::cout << "invoked host func" << std::endl;
-
             void *res = nullptr;
             if (rpc_write_start_response(conn, request_id) < 0 ||
                 rpc_write(conn, &res, sizeof(void *)) < 0 ||
