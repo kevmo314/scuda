@@ -20,5 +20,8 @@ int handle___cudaRegisterFatBinary(conn_t *conn);
 int handle___cudaRegisterFatBinaryEnd(conn_t *conn);
 int handle___cudaPushCallConfiguration(conn_t *conn);
 int handle___cudaPopCallConfiguration(conn_t *conn);
+int handle_cudaGraphAddHostNode(conn_t *conn);
+int handle_cudaGraphAddMemcpyNode(conn_t *conn);
+int handle_cudaGraphDestroy(conn_t *conn);
 
 #endif

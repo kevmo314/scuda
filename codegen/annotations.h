@@ -5996,6 +5996,7 @@ cudaGraphKernelNodeSetAttribute(cudaGraphNode_t hNode,
                                 const cudaLaunchAttributeValue *value);
 
 /**
+ * @DISABLED
  * @param numDependencies SEND_ONLY
  * @param pGraphNode RECV_ONLY
  * @param graph SEND_ONLY
@@ -6132,6 +6133,7 @@ cudaError_t
 cudaGraphMemsetNodeSetParams(cudaGraphNode_t node,
                              const struct cudaMemsetParams *pNodeParams);
 /**
+ * @DISABLED
  * @param numDependencies SEND_ONLY
  * @param pGraphNode SEND_RECV
  * @param graph SEND_ONLY
@@ -6356,7 +6358,7 @@ cudaError_t cudaGraphNodeFindInClone(cudaGraphNode_t *pNode,
 cudaError_t cudaGraphNodeGetType(cudaGraphNode_t node,
                                  enum cudaGraphNodeType *pType);
 /**
- * @disabled
+ * @DISABLED
  * @param graph SEND_ONLY
  * @param nodes SEND_RECV
  * @param numNodes SEND_RECV
@@ -6596,6 +6598,7 @@ cudaError_t cudaGraphLaunch(cudaGraphExec_t graphExec, cudaStream_t stream);
  */
 cudaError_t cudaGraphExecDestroy(cudaGraphExec_t graphExec);
 /**
+ * @DISABLED
  * @param graph SEND_ONLY
  */
 cudaError_t cudaGraphDestroy(cudaGraph_t graph);

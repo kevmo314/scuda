@@ -40,16 +40,16 @@ struct ManagedPtr {
     void* dst;
     size_t size;
     cudaMemcpyKind kind;
+    void* graph;
 
-    ManagedPtr() : src(nullptr), dst(nullptr), size(0), kind(cudaMemcpyHostToDevice) {}
+    ManagedPtr() : src(nullptr), dst(nullptr), size(0), kind(cudaMemcpyHostToDevice), graph(graph) {}
 
-    ManagedPtr(void* src, void* dst, size_t s, cudaMemcpyKind k) 
-        : src(src), dst(dst), size(s), kind(k) {}
+    ManagedPtr(void* src, void* dst, size_t s, cudaMemcpyKind k, void* graph) 
+        : src(src), dst(dst), size(s), kind(k), graph(graph) {}
 };
 
 
 std::map<conn_t *, std::list<ManagedPtr>> managed_ptrs;
-std::map<conn_t *, void *> host_funcs;
 
 static jmp_buf catch_segfault;
 static void *faulting_address = nullptr;
@@ -65,93 +65,41 @@ static void segfault(int sig, siginfo_t *info, void *unused) {
     int found = -1;
     size_t size = 0;
 
-    write(STDERR_FILENO, "Segfault detected!\n", 19);
+    printf("Segfault detected %p\n", faulting_address);
 
-    for (const auto& conn_entry : managed_ptrs) {
-        for (const auto& mem_entry : conn_entry.second) {
+    for (auto& conn_entry : managed_ptrs) {  // Remove `const` to modify values
+      for (auto& mem_entry : conn_entry.second) {  // Remove `const` to modify mem_entry
+        void* allocated_ptr;
+        size_t allocated_size = mem_entry.size;
 
-            void* allocated_ptr = mem_entry.src;
-            size_t allocated_size = mem_entry.size;
-
-            std::cout << "KIND: " << mem_entry.kind << std::endl;
-
-            // // Determine the correct pointer to check
-            // if (mem_entry.kind == cudaMemcpyDeviceToHost) {
-            //     allocated_ptr = mem_entry.src;
-            // } else if (mem_entry.kind == cudaMemcpyHostToDevice) {
-            //     allocated_ptr = ;
-            // } else if (mem_entry.kind == cudaMemcpyDeviceToDevice) {
-            //     allocated_ptr = mem_entry.src;  // Default to source
-            // }
-
-            if ((uintptr_t)allocated_ptr <= (uintptr_t)faulting_address &&
-                (uintptr_t)faulting_address < (uintptr_t)allocated_ptr + allocated_size) {
-                
-                found = 1;
-                size = allocated_size;
-
-                size_t page_size = sysconf(_SC_PAGE_SIZE);
-                uintptr_t aligned_addr = (uintptr_t)faulting_address & ~(page_size - 1);
-
-                // 🛠 Allocate memory at the faulting address
-                void* allocated = mmap((void*)aligned_addr, allocated_size,
-                                       PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-
-                if (allocated == MAP_FAILED) {
-                    perror("Failed to allocate memory at faulting address");
-                    continue;  // Instead of exiting, allow other entries to be checked
-                }
-
-                char msg[128];
-                snprintf(msg, sizeof(msg), "Allocated memory at: %p\n", allocated);
-                write(STDERR_FILENO, msg, strlen(msg));
-
-                printf("Sending memory %p\n", allocated_ptr);
-
-                if (!conn_entry.first) {
-                    std::cerr << "Error: Connection is NULL" << std::endl;
-                    return;
-                }
-
-                if (rpc_write_start_request(conn_entry.first, 3) < 0 ||
-                    rpc_write(conn_entry.first, &mem_entry.kind, sizeof(enum cudaMemcpyKind)) < 0)
-                    return;
-
-                switch (mem_entry.kind) {
-                    case cudaMemcpyDeviceToHost:
-                        if (rpc_write(conn_entry.first, &mem_entry.src, sizeof(void *)) < 0 ||
-                            rpc_write(conn_entry.first, &size, sizeof(size_t)) < 0 ||
-                            rpc_wait_for_response(conn_entry.first) < 0 ||
-                            rpc_read(conn_entry.first, mem_entry.dst, size) < 0)
-                            return;
-                        break;  // 🔥 Added missing break
-
-                    case cudaMemcpyHostToDevice:
-                        if (rpc_write(conn_entry.first, &mem_entry.dst, sizeof(void *)) < 0 ||
-                            rpc_write(conn_entry.first, &size, sizeof(size_t)) < 0 ||
-                            rpc_write(conn_entry.first, allocated, size) < 0 ||
-                            rpc_wait_for_response(conn_entry.first) < 0)
-                            return;
-                        break;
-
-                    case cudaMemcpyDeviceToDevice:
-                        if (rpc_write(conn_entry.first, &mem_entry.dst, sizeof(void *)) < 0 ||
-                            rpc_write(conn_entry.first, &mem_entry.src, sizeof(void *)) < 0 ||
-                            rpc_write(conn_entry.first, &size, sizeof(size_t)) < 0 ||
-                            rpc_wait_for_response(conn_entry.first) < 0)
-                            return;
-                        break;
-                }
-
-                // 🔄 Read CUDA error response
-                cudaError_t return_value;
-                if (rpc_read(conn_entry.first, &return_value, sizeof(cudaError_t)) < 0 ||
-                    rpc_read_end(conn_entry.first) < 0)
-                    return;
-
-                return;
-            }
+        if ((uintptr_t)mem_entry.src <= (uintptr_t)faulting_address &&
+            (uintptr_t)faulting_address < (uintptr_t)mem_entry.src + allocated_size) {
+            allocated_ptr = mem_entry.src;
+        } else if ((uintptr_t)mem_entry.dst <= (uintptr_t)faulting_address &&
+                  (uintptr_t)faulting_address < (uintptr_t)mem_entry.dst + allocated_size) {
+            allocated_ptr = mem_entry.dst;
+        } else {
+            printf("no pointer match, returning.\n");
+            continue;
         }
+
+        found = 1;
+        size = allocated_size;
+
+        size_t page_size = sysconf(_SC_PAGE_SIZE);
+        uintptr_t aligned_addr = (uintptr_t)faulting_address;
+
+        // Allocate memory at the faulting address
+        void* allocated = mmap((void*)faulting_address, allocated_size,
+                              PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+
+        if (allocated == MAP_FAILED) {
+            perror("Failed to allocate memory at faulting address");
+            continue;
+        }
+
+        return;
+      }
     }
 
     if (found == 1) {
@@ -167,13 +115,6 @@ static void segfault(int sig, siginfo_t *info, void *unused) {
     raise(SIGSEGV);
 }
 
-
-conn_t* stored_conn;
-
-void store_conn(const void *conn) {
-  stored_conn = (conn_t *)conn;
-}
-
 typedef struct callBackData {
   conn_t *conn;
   void (*callback)(void *);
@@ -183,47 +124,82 @@ typedef struct callBackData {
 void invoke_host_func(void *data) {
   callBackData_t *tmp = (callBackData_t *)(data);
   void* scuda_intercept_result;
+  ManagedPtr copy;
+  int found = 0;
 
-  // Validate connection
-  if (!stored_conn) {
-      std::cerr << "Error: Connection is NULL in invoke_host_func" << std::endl;
-      return;
+  if (!tmp->conn) {
+    std::cerr << "Error: Connection is NULL in invoke_host_func" << std::endl;
+    return;
   }
 
   printf("Invoking host function %p\n", tmp->callback);
 
-  if (rpc_write_start_request(stored_conn, 1) < 0) {
-      std::cerr << "Error: rpc_write_start_request failed" << std::endl;
-      return;
+  if (rpc_write_start_request(tmp->conn, 1) < 0) {
+    std::cerr << "Error: rpc_write_start_request failed" << std::endl;
+    return;
   }
-  if (rpc_write(stored_conn, &tmp->callback, sizeof(void *)) < 0) {
+
+  for (const auto& conn_entry : managed_ptrs) {
+    for (const auto& mem_entry : conn_entry.second) {
+      if (mem_entry.kind == cudaMemcpyDeviceToHost) {
+        copy = mem_entry;
+        found = 1;
+      }
+    }
+  }
+
+  rpc_write(tmp->conn, &found, sizeof(int));
+
+  if (found > 0) {
+    if (rpc_write(tmp->conn, &copy.dst, sizeof(void *)) < 0 ||
+      rpc_write(tmp->conn, &copy.size, sizeof(size_t)) < 0)
+      return;
+
+    double *result = (double *)(copy.dst);
+
+    if (rpc_write(tmp->conn, copy.dst, copy.size) < 0) {
+      std::cerr << "Error: rpc_write failed on memory" << std::endl;
+      return;
+    }
+  }
+
+  if (rpc_write(tmp->conn, &tmp->callback, sizeof(void *)) < 0) {
       std::cerr << "Error: rpc_write failed on callback" << std::endl;
       return;
   }
 
-  if (rpc_wait_for_response(stored_conn) < 0) {
-      std::cerr << "Error: rpc_wait_for_response failed" << std::endl;
-      return;
+  if (rpc_wait_for_response(tmp->conn) < 0) {
+    std::cerr << "Error: rpc_wait_for_response failed" << std::endl;
+    return;
   }
 
-  if (rpc_read(stored_conn, &scuda_intercept_result, sizeof(void*)) < 0) {
+  if (rpc_read(tmp->conn, &scuda_intercept_result, sizeof(void*)) < 0) {
       std::cerr << "Error: rpc_read failed on scuda_intercept_result" << std::endl;
       return;
   }
 
-  if (rpc_read_end(stored_conn) < 0) {
+  if (rpc_read_end(tmp->conn) < 0) {
       std::cerr << "Error: rpc_read_end failed" << std::endl;
       return;
   }
 }
 
-void append_host_func_ptr(const void *conn, void *ptr) {
-  printf("storing... %p\n", ptr);
+void maybe_destroy_graph_resources(void* graph) {
+  for (auto& conn_entry : managed_ptrs) {
+    auto& mem_list = conn_entry.second;
 
-  host_funcs[(conn_t *)conn] = ptr;
+    for (auto it = mem_list.begin(); it != mem_list.end(); ) {
+      if (it->graph == graph) {
+        printf("destroying mem_entry for graph\n");
+        it = mem_list.erase(it);  // Safe erasure while iterating
+      } else {
+        ++it;  // Move to the next entry
+      }
+    }
+  }
 }
 
-void append_managed_ptr(const void *conn, void* srcPtr, void* dstPtr, size_t size, cudaMemcpyKind kind) {
+void append_managed_ptr(const void *conn, void* srcPtr, void* dstPtr, size_t size, cudaMemcpyKind kind, void* graph) {
   conn_t *connfd = (conn_t *)conn;
 
   // Ensure connfd is not null
@@ -237,7 +213,7 @@ void append_managed_ptr(const void *conn, void* srcPtr, void* dstPtr, size_t siz
       managed_ptrs[connfd] = std::list<ManagedPtr>();  // Initialize empty list
   }
 
-  managed_ptrs[connfd].push_back(ManagedPtr(srcPtr, dstPtr, size, kind));
+  managed_ptrs[connfd].push_back(ManagedPtr(srcPtr, dstPtr, size, kind, graph));
 }
 
 static void set_segfault_handlers() {

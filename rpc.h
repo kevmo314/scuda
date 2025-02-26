@@ -16,7 +16,7 @@ typedef struct {
   pthread_mutex_t read_mutex, write_mutex;
   pthread_cond_t read_cond;
   struct iovec write_iov[128];
-  int write_iov_count = 0;
+  int write_iov_count;
 } conn_t;
 
 extern int rpc_dispatch(conn_t *conn, int parity);

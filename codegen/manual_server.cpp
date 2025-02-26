@@ -24,6 +24,10 @@ extern int rpc_write_start_response(const conn_t *conn, const int request_id);
 extern int rpc_write(const conn_t *conn, const void *data,
                      const std::size_t size);
 
+void invoke_host_func(void *data);
+void append_managed_ptr(const void *conn, void* srcPtr, void* dstPtr, size_t size, cudaMemcpyKind kind, void* graph);
+void maybe_destroy_graph_resources(void* graph);
+
 FILE *__cudart_trace_output_stream = stdout;
 
 int handle_cudaMemcpy(conn_t *conn) {
@@ -694,6 +698,149 @@ int handle_cudaGraphGetNodes(conn_t *conn)
     if (rpc_write_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &nodes, sizeof(cudaGraphNode_t)) < 0 ||
         rpc_write(conn, &numNodes, sizeof(size_t)) < 0 ||
+        rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
+        rpc_write_end(conn) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
+
+typedef struct callBackData {
+  conn_t *conn;
+  void (*callback)(void *);
+  void *data;
+} callBackData_t;
+
+int handle_cudaGraphAddHostNode(conn_t *conn) {
+  size_t numDependencies;
+  cudaGraphNode_t pGraphNode;
+  cudaGraph_t graph;
+  std::vector<cudaGraphNode_t> pDependencies;
+  struct cudaHostNodeParams *pNodeParams_null_check;
+  struct cudaHostNodeParams pNodeParams;
+  int request_id;
+  cudaError_t scuda_intercept_result;
+  callBackData_t *hostFnData;
+
+  if (rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+          rpc_read(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+          rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+          [=, &pDependencies]()
+          -> bool {
+        pDependencies.resize(numDependencies); // Resize the dependencies vector
+        for (size_t i = 0; i < numDependencies; ++i) {
+          if (rpc_read(conn, &pDependencies[i], sizeof(const cudaGraphNode_t)) <
+              0) {
+            return false;
+          }
+        }
+        return true;
+      }() == false ||
+                 rpc_read(conn, &pNodeParams_null_check,
+                          sizeof(const struct cudaHostNodeParams *)) < 0 ||
+                 (pNodeParams_null_check &&
+                  rpc_read(conn, &pNodeParams,
+                           sizeof(const struct cudaHostNodeParams)) < 0) ||
+                 false)
+    goto ERROR_0;
+
+  request_id = rpc_read_end(conn);
+  if (request_id < 0)
+    goto ERROR_0;
+
+  hostFnData = (callBackData_t *)malloc(sizeof(callBackData_t));
+  // assign the previous function pointer so we can map back to it
+  hostFnData->callback = pNodeParams.fn;
+  hostFnData->data = pNodeParams.userData;
+  hostFnData->conn = conn;
+
+  pNodeParams.fn = invoke_host_func;
+  pNodeParams.userData = hostFnData;
+
+  scuda_intercept_result = cudaGraphAddHostNode(
+      &pGraphNode, graph, pDependencies.data(), numDependencies, &pNodeParams);
+
+  if (rpc_write_start_response(conn, request_id) < 0 ||
+      rpc_write(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+      rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
+      rpc_write_end(conn) < 0)
+    goto ERROR_0;
+
+  return 0;
+ERROR_0:
+  return -1;
+}
+
+int handle_cudaGraphAddMemcpyNode(conn_t *conn) {
+  size_t numDependencies;
+  cudaGraphNode_t pGraphNode;
+  cudaGraph_t graph;
+  std::vector<cudaGraphNode_t> pDependencies;
+  struct cudaMemcpy3DParms *pCopyParams_null_check;
+  struct cudaMemcpy3DParms pCopyParams;
+  int request_id;
+  cudaError_t scuda_intercept_result;
+  if (rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+          rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+          [=, &pDependencies]()
+          -> bool {
+        pDependencies.resize(numDependencies); // Resize the dependencies vector
+        for (size_t i = 0; i < numDependencies; ++i) {
+          if (rpc_read(conn, &pDependencies[i], sizeof(const cudaGraphNode_t)) <
+              0) {
+            return false;
+          }
+        }
+        return true;
+      }() == false ||
+                 rpc_read(conn, &pCopyParams_null_check,
+                          sizeof(const struct cudaMemcpy3DParms *)) < 0 ||
+                 (pCopyParams_null_check &&
+                  rpc_read(conn, &pCopyParams,
+                           sizeof(const struct cudaMemcpy3DParms)) < 0) ||
+                 false)
+    goto ERROR_0;
+
+  request_id = rpc_read_end(conn);
+  if (request_id < 0)
+    goto ERROR_0;
+
+  append_managed_ptr(conn, (void*)pCopyParams.srcPtr.ptr, (void*)pCopyParams.dstPtr.ptr, pCopyParams.extent.width, pCopyParams.kind, graph);
+  
+  scuda_intercept_result = cudaGraphAddMemcpyNode(
+      &pGraphNode, graph, pDependencies.data(), numDependencies, &pCopyParams);
+
+  if (rpc_write_start_response(conn, request_id) < 0 ||
+      rpc_write(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+      rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
+      rpc_write_end(conn) < 0)
+    goto ERROR_0;
+
+  return 0;
+ERROR_0:
+  return -1;
+}
+
+int handle_cudaGraphDestroy(conn_t *conn)
+{
+    cudaGraph_t graph;
+    int request_id;
+    cudaError_t scuda_intercept_result;
+    if (
+        rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_read_end(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    scuda_intercept_result = cudaGraphDestroy(graph);
+
+    maybe_destroy_graph_resources(graph);
+
+    if (rpc_write_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
         rpc_write_end(conn) < 0)
         goto ERROR_0;

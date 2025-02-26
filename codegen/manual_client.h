@@ -14,7 +14,6 @@ cudaError_t cudaMemcpyAsync(void *dst, const void *src, size_t count,
 cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim,
                              void **args, size_t sharedMem,
                              cudaStream_t stream);
-cudaError_t cudaGraphGetNodes(cudaGraph_t graph, cudaGraphNode_t* nodes, size_t* numNodes);
 extern "C" void **__cudaRegisterFatBinary(void **fatCubin);
 extern "C" void __cudaRegisterFunction(void **fatCubinHandle,
                                        const char *hostFun, char *deviceFun,
@@ -32,3 +31,15 @@ extern "C" void __cudaRegisterVar(void **fatCubinHandle, char *hostVar,
                                   char *deviceAddress, const char *deviceName,
                                   int ext, size_t size, int constant,
                                   int global);
+cudaError_t cudaGraphAddHostNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph,
+                                 const cudaGraphNode_t *pDependencies,
+                                 size_t numDependencies,
+                                 const struct cudaHostNodeParams *pNodeParams);
+cudaError_t
+cudaGraphAddMemcpyNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph,
+                       const cudaGraphNode_t *pDependencies,
+                       size_t numDependencies,
+                       const struct cudaMemcpy3DParms *pCopyParams);
+cudaError_t cudaGraphGetNodes(cudaGraph_t graph, cudaGraphNode_t *nodes,
+                              size_t *numNodes);
+cudaError_t cudaGraphDestroy(cudaGraph_t graph);
