@@ -21,8 +21,8 @@
 #include <netinet/tcp.h>
 #include <vector>
 
-#include <map>
 #include <list>
+#include <map>
 
 #include <csignal>
 #include <setjmp.h>
@@ -36,18 +36,19 @@
 #define MAX_CLIENTS 10
 
 struct ManagedPtr {
-    void* src;
-    void* dst;
-    size_t size;
-    cudaMemcpyKind kind;
-    void* graph;
+  void *src;
+  void *dst;
+  size_t size;
+  cudaMemcpyKind kind;
+  void *graph;
 
-    ManagedPtr() : src(nullptr), dst(nullptr), size(0), kind(cudaMemcpyHostToDevice), graph(graph) {}
+  ManagedPtr()
+      : src(nullptr), dst(nullptr), size(0), kind(cudaMemcpyHostToDevice),
+        graph(graph) {}
 
-    ManagedPtr(void* src, void* dst, size_t s, cudaMemcpyKind k, void* graph) 
-        : src(src), dst(dst), size(s), kind(k), graph(graph) {}
+  ManagedPtr(void *src, void *dst, size_t s, cudaMemcpyKind k, void *graph)
+      : src(src), dst(dst), size(s), kind(k), graph(graph) {}
 };
-
 
 std::map<conn_t *, std::list<ManagedPtr>> managed_ptrs;
 
@@ -61,58 +62,62 @@ int rpc_write(const void *conn, const void *data, const size_t size) {
 }
 
 static void segfault(int sig, siginfo_t *info, void *unused) {
-    void* faulting_address = info->si_addr;
-    int found = -1;
-    size_t size = 0;
+  void *faulting_address = info->si_addr;
+  int found = -1;
+  size_t size = 0;
 
-    printf("Segfault detected %p\n", faulting_address);
+  printf("Segfault detected %p\n", faulting_address);
 
-    for (auto& conn_entry : managed_ptrs) {  // Remove `const` to modify values
-      for (auto& mem_entry : conn_entry.second) {  // Remove `const` to modify mem_entry
-        void* allocated_ptr;
-        size_t allocated_size = mem_entry.size;
+  for (auto &conn_entry : managed_ptrs) { // Remove `const` to modify values
+    for (auto &mem_entry :
+         conn_entry.second) { // Remove `const` to modify mem_entry
+      void *allocated_ptr;
+      size_t allocated_size = mem_entry.size;
 
-        if ((uintptr_t)mem_entry.src <= (uintptr_t)faulting_address &&
-            (uintptr_t)faulting_address < (uintptr_t)mem_entry.src + allocated_size) {
-            allocated_ptr = mem_entry.src;
-        } else if ((uintptr_t)mem_entry.dst <= (uintptr_t)faulting_address &&
-                  (uintptr_t)faulting_address < (uintptr_t)mem_entry.dst + allocated_size) {
-            allocated_ptr = mem_entry.dst;
-        } else {
-            printf("no pointer match, returning.\n");
-            continue;
-        }
-
-        found = 1;
-        size = allocated_size;
-
-        size_t page_size = sysconf(_SC_PAGE_SIZE);
-        uintptr_t aligned_addr = (uintptr_t)faulting_address;
-
-        // Allocate memory at the faulting address
-        void* allocated = mmap((void*)faulting_address, allocated_size,
-                              PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-
-        if (allocated == MAP_FAILED) {
-            perror("Failed to allocate memory at faulting address");
-            continue;
-        }
-
-        return;
+      if ((uintptr_t)mem_entry.src <= (uintptr_t)faulting_address &&
+          (uintptr_t)faulting_address <
+              (uintptr_t)mem_entry.src + allocated_size) {
+        allocated_ptr = mem_entry.src;
+      } else if ((uintptr_t)mem_entry.dst <= (uintptr_t)faulting_address &&
+                 (uintptr_t)faulting_address <
+                     (uintptr_t)mem_entry.dst + allocated_size) {
+        allocated_ptr = mem_entry.dst;
+      } else {
+        printf("no pointer match, returning.\n");
+        continue;
       }
-    }
 
-    if (found == 1) {
-        write(STDERR_FILENO, "FOUND!!\n", 8);
-        return;
-    }
+      found = 1;
+      size = allocated_size;
 
-    struct sigaction sa;
-    sa.sa_handler = SIG_DFL;
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = 0;
-    sigaction(SIGSEGV, &sa, nullptr);
-    raise(SIGSEGV);
+      size_t page_size = sysconf(_SC_PAGE_SIZE);
+      uintptr_t aligned_addr = (uintptr_t)faulting_address;
+
+      // Allocate memory at the faulting address
+      void *allocated =
+          mmap((void *)faulting_address, allocated_size, PROT_READ | PROT_WRITE,
+               MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+
+      if (allocated == MAP_FAILED) {
+        perror("Failed to allocate memory at faulting address");
+        continue;
+      }
+
+      return;
+    }
+  }
+
+  if (found == 1) {
+    write(STDERR_FILENO, "FOUND!!\n", 8);
+    return;
+  }
+
+  struct sigaction sa;
+  sa.sa_handler = SIG_DFL;
+  sigemptyset(&sa.sa_mask);
+  sa.sa_flags = 0;
+  sigaction(SIGSEGV, &sa, nullptr);
+  raise(SIGSEGV);
 }
 
 typedef struct callBackData {
@@ -123,7 +128,7 @@ typedef struct callBackData {
 
 void invoke_host_func(void *data) {
   callBackData_t *tmp = (callBackData_t *)(data);
-  void* scuda_intercept_result;
+  void *scuda_intercept_result;
   ManagedPtr copy;
   int found = 0;
 
@@ -139,8 +144,8 @@ void invoke_host_func(void *data) {
     return;
   }
 
-  for (const auto& conn_entry : managed_ptrs) {
-    for (const auto& mem_entry : conn_entry.second) {
+  for (const auto &conn_entry : managed_ptrs) {
+    for (const auto &mem_entry : conn_entry.second) {
       if (mem_entry.kind == cudaMemcpyDeviceToHost) {
         copy = mem_entry;
         found = 1;
@@ -152,7 +157,7 @@ void invoke_host_func(void *data) {
 
   if (found > 0) {
     if (rpc_write(tmp->conn, &copy.dst, sizeof(void *)) < 0 ||
-      rpc_write(tmp->conn, &copy.size, sizeof(size_t)) < 0)
+        rpc_write(tmp->conn, &copy.size, sizeof(size_t)) < 0)
       return;
 
     double *result = (double *)(copy.dst);
@@ -164,8 +169,8 @@ void invoke_host_func(void *data) {
   }
 
   if (rpc_write(tmp->conn, &tmp->callback, sizeof(void *)) < 0) {
-      std::cerr << "Error: rpc_write failed on callback" << std::endl;
-      return;
+    std::cerr << "Error: rpc_write failed on callback" << std::endl;
+    return;
   }
 
   if (rpc_wait_for_response(tmp->conn) < 0) {
@@ -173,44 +178,46 @@ void invoke_host_func(void *data) {
     return;
   }
 
-  if (rpc_read(tmp->conn, &scuda_intercept_result, sizeof(void*)) < 0) {
-      std::cerr << "Error: rpc_read failed on scuda_intercept_result" << std::endl;
-      return;
+  if (rpc_read(tmp->conn, &scuda_intercept_result, sizeof(void *)) < 0) {
+    std::cerr << "Error: rpc_read failed on scuda_intercept_result"
+              << std::endl;
+    return;
   }
 
   if (rpc_read_end(tmp->conn) < 0) {
-      std::cerr << "Error: rpc_read_end failed" << std::endl;
-      return;
+    std::cerr << "Error: rpc_read_end failed" << std::endl;
+    return;
   }
 }
 
-void maybe_destroy_graph_resources(void* graph) {
-  for (auto& conn_entry : managed_ptrs) {
-    auto& mem_list = conn_entry.second;
+void maybe_destroy_graph_resources(void *graph) {
+  for (auto &conn_entry : managed_ptrs) {
+    auto &mem_list = conn_entry.second;
 
-    for (auto it = mem_list.begin(); it != mem_list.end(); ) {
+    for (auto it = mem_list.begin(); it != mem_list.end();) {
       if (it->graph == graph) {
         printf("destroying mem_entry for graph\n");
-        it = mem_list.erase(it);  // Safe erasure while iterating
+        it = mem_list.erase(it); // Safe erasure while iterating
       } else {
-        ++it;  // Move to the next entry
+        ++it; // Move to the next entry
       }
     }
   }
 }
 
-void append_managed_ptr(const void *conn, void* srcPtr, void* dstPtr, size_t size, cudaMemcpyKind kind, void* graph) {
+void append_managed_ptr(const void *conn, void *srcPtr, void *dstPtr,
+                        size_t size, cudaMemcpyKind kind, void *graph) {
   conn_t *connfd = (conn_t *)conn;
 
   // Ensure connfd is not null
   if (!connfd) {
-      std::cerr << "Error: connfd is null!" << std::endl;
-      return;
+    std::cerr << "Error: connfd is null!" << std::endl;
+    return;
   }
 
   // Ensure the key exists before inserting
   if (managed_ptrs.find(connfd) == managed_ptrs.end()) {
-      managed_ptrs[connfd] = std::list<ManagedPtr>();  // Initialize empty list
+    managed_ptrs[connfd] = std::list<ManagedPtr>(); // Initialize empty list
   }
 
   managed_ptrs[connfd].push_back(ManagedPtr(srcPtr, dstPtr, size, kind, graph));

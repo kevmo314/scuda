@@ -15,7 +15,7 @@
 #include "ptx_fatbin.hpp"
 #include "rpc.h"
 
-extern void add_host_node(void *, void*);
+extern void add_host_node(void *, void *);
 
 size_t decompress(const uint8_t *input, size_t input_size, uint8_t *output,
                   size_t output_size);
@@ -386,8 +386,8 @@ cudaGraphAddKernelNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph,
   Function *f = nullptr;
   for (auto &function : functions)
     if (function.host_func == pNodeParams->func) {
-        f = &function;
-      }
+      f = &function;
+    }
 
   if (f == nullptr || rpc_write(conn, &f->arg_count, sizeof(int)) < 0)
     return cudaErrorDevicesUnavailable;
@@ -1053,7 +1053,7 @@ cudaError_t cudaGraphAddHostNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph,
                                  size_t numDependencies,
                                  const struct cudaHostNodeParams *pNodeParams) {
   conn_t *conn = rpc_client_get_connection(0);
-  add_host_node((void*)pNodeParams->fn, (void*)pNodeParams->userData);
+  add_host_node((void *)pNodeParams->fn, (void *)pNodeParams->userData);
   if (maybe_copy_unified_arg(conn, (void *)&numDependencies,
                              cudaMemcpyHostToDevice) < 0)
     return cudaErrorDevicesUnavailable;
@@ -1122,19 +1122,18 @@ cudaError_t cudaGraphAddHostNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph,
   return return_value;
 }
 
-cudaError_t cudaGraphDestroy(cudaGraph_t graph)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&graph, cudaMemcpyHostToDevice) < 0)
-      return cudaErrorDevicesUnavailable;
-    cudaError_t return_value;
-    if (rpc_write_start_request(conn, RPC_cudaGraphDestroy) < 0 ||
-        rpc_write(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, &return_value, sizeof(cudaError_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return cudaErrorDevicesUnavailable;
-    if (maybe_copy_unified_arg(conn, (void*)&graph, cudaMemcpyDeviceToHost) < 0)
-      return cudaErrorDevicesUnavailable;
-    return return_value;
+cudaError_t cudaGraphDestroy(cudaGraph_t graph) {
+  conn_t *conn = rpc_client_get_connection(0);
+  if (maybe_copy_unified_arg(conn, (void *)&graph, cudaMemcpyHostToDevice) < 0)
+    return cudaErrorDevicesUnavailable;
+  cudaError_t return_value;
+  if (rpc_write_start_request(conn, RPC_cudaGraphDestroy) < 0 ||
+      rpc_write(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+      rpc_wait_for_response(conn) < 0 ||
+      rpc_read(conn, &return_value, sizeof(cudaError_t)) < 0 ||
+      rpc_read_end(conn) < 0)
+    return cudaErrorDevicesUnavailable;
+  if (maybe_copy_unified_arg(conn, (void *)&graph, cudaMemcpyDeviceToHost) < 0)
+    return cudaErrorDevicesUnavailable;
+  return return_value;
 }

@@ -5,9 +5,9 @@
 #include <iostream>
 #include <nvml.h>
 
-#include <vector>
 #include <cstdio>
 #include <cuda_runtime.h>
+#include <vector>
 
 #include <cstring>
 #include <string>
@@ -25,8 +25,9 @@ extern int rpc_write(const conn_t *conn, const void *data,
                      const std::size_t size);
 
 void invoke_host_func(void *data);
-void append_managed_ptr(const void *conn, void* srcPtr, void* dstPtr, size_t size, cudaMemcpyKind kind, void* graph);
-void maybe_destroy_graph_resources(void* graph);
+void append_managed_ptr(const void *conn, void *srcPtr, void *dstPtr,
+                        size_t size, cudaMemcpyKind kind, void *graph);
+void maybe_destroy_graph_resources(void *graph);
 
 FILE *__cudart_trace_output_stream = stdout;
 
@@ -138,8 +139,7 @@ int handle_cudaMemcpyAsync(conn_t *conn) {
     if (host_data == NULL)
       goto ERROR_0;
 
-    if (rpc_read(conn, host_data, count) < 0)
-    {
+    if (rpc_read(conn, host_data, count) < 0) {
       goto ERROR_0;
     }
 
@@ -160,14 +160,16 @@ int handle_cudaMemcpyAsync(conn_t *conn) {
 
   if (rpc_write_start_response(conn, request_id) < 0 ||
       (kind == cudaMemcpyDeviceToHost &&
-      rpc_write(conn, host_data, count) < 0) ||
+       rpc_write(conn, host_data, count) < 0) ||
       rpc_write(conn, &result, sizeof(cudaError_t)) < 0 ||
       rpc_write_end(conn) < 0 ||
-      (host_data != NULL && stream == 0 && cudaStreamAddCallback(
-                                stream,
-                                [](cudaStream_t stream, cudaError_t status,
-                                   void *ptr) { free(ptr); },
-                                host_data, 0) != cudaSuccess))
+      (host_data != NULL && stream == 0 &&
+       cudaStreamAddCallback(
+           stream,
+           [](cudaStream_t stream, cudaError_t status, void *ptr) {
+             free(ptr);
+           },
+           host_data, 0) != cudaSuccess))
     goto ERROR_0;
 
   ret = 0;
@@ -176,93 +178,92 @@ ERROR_0:
 }
 
 int handle_cudaGraphAddKernelNode(conn_t *conn) {
-    size_t numDependencies;
-    cudaGraphNode_t pGraphNode = nullptr;  // Initialize to nullptr
-    cudaGraph_t graph;
-    void **args;
-    cudaKernelNodeParams pNodeParams = {0};
-    std::vector<cudaGraphNode_t> dependencies;
-    const cudaKernelNodeParams* pNodeParams_null_check;
-    int request_id;
-    int num_args;
-    int arg_size;
-    cudaError_t scuda_intercept_result;
+  size_t numDependencies;
+  cudaGraphNode_t pGraphNode = nullptr; // Initialize to nullptr
+  cudaGraph_t graph;
+  void **args;
+  cudaKernelNodeParams pNodeParams = {0};
+  std::vector<cudaGraphNode_t> dependencies;
+  const cudaKernelNodeParams *pNodeParams_null_check;
+  int request_id;
+  int num_args;
+  int arg_size;
+  cudaError_t scuda_intercept_result;
 
-    if (rpc_read(conn, &numDependencies, sizeof(size_t)) < 0) {
-        printf("Failed to read numDependencies\n");
-        return -1;
-    }
+  if (rpc_read(conn, &numDependencies, sizeof(size_t)) < 0) {
+    printf("Failed to read numDependencies\n");
+    return -1;
+  }
 
-    if (rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0) {
-        printf("Failed to read graph\n");
-        return -1;
-    }
+  if (rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0) {
+    printf("Failed to read graph\n");
+    return -1;
+  }
 
-    dependencies.resize(numDependencies);
-    for (size_t i = 0; i < numDependencies; ++i) {
-        if (rpc_read(conn, &dependencies[i], sizeof(cudaGraphNode_t)) < 0) {
-            printf("Failed to read Dependency[%zu]\n", i);
-            return -1;
-        }
-    }
-
-    if (rpc_read(conn, &num_args, sizeof(int)) < 0) {
-      printf("Failed to read arg count\n");
+  dependencies.resize(numDependencies);
+  for (size_t i = 0; i < numDependencies; ++i) {
+    if (rpc_read(conn, &dependencies[i], sizeof(cudaGraphNode_t)) < 0) {
+      printf("Failed to read Dependency[%zu]\n", i);
       return -1;
     }
+  }
 
-    args = (void **)malloc(num_args * sizeof(void *));
-    if (args == NULL)
+  if (rpc_read(conn, &num_args, sizeof(int)) < 0) {
+    printf("Failed to read arg count\n");
+    return -1;
+  }
+
+  args = (void **)malloc(num_args * sizeof(void *));
+  if (args == NULL)
+    return -1;
+
+  for (int i = 0; i < num_args; ++i) {
+    if (rpc_read(conn, &arg_size, sizeof(int)) < 0)
       return -1;
 
-    for (int i = 0; i < num_args; ++i) {
-      if (rpc_read(conn, &arg_size, sizeof(int)) < 0)
-        return -1;
+    args[i] = malloc(arg_size);
+    if (args[i] == NULL)
+      return -1;
 
-      args[i] = malloc(arg_size);
-      if (args[i] == NULL)
-        return -1;
+    if (rpc_read(conn, args[i], arg_size) < 0)
+      return -1;
+  }
 
-      if (rpc_read(conn, args[i], arg_size) < 0)
-        return -1;
+  if (rpc_read(conn, &pNodeParams_null_check,
+               sizeof(const cudaKernelNodeParams *)) < 0) {
+    return -1;
+  }
+
+  if (pNodeParams_null_check) {
+    if (rpc_read(conn, &pNodeParams,
+                 sizeof(const struct cudaKernelNodeParams)) < 0) {
+      return -1;
     }
+  }
 
-    if (rpc_read(conn, &pNodeParams_null_check, sizeof(const cudaKernelNodeParams*)) < 0) {
-        return -1;
-    }
+  request_id = rpc_read_end(conn);
+  if (request_id < 0) {
+    return -1;
+  }
 
-    if (pNodeParams_null_check) {
-        if (rpc_read(conn, &pNodeParams, sizeof(const struct cudaKernelNodeParams)) < 0) {
-            return -1;
-        }
-    }
+  // make sure we write our kernel args properly
+  pNodeParams.kernelParams = args;
 
-    request_id = rpc_read_end(conn);
-    if (request_id < 0) {
-        return -1;
-    }
+  scuda_intercept_result = cudaGraphAddKernelNode(
+      &pGraphNode, graph, dependencies.data(), numDependencies, &pNodeParams);
 
-    // make sure we write our kernel args properly
-    pNodeParams.kernelParams = args;
+  if (scuda_intercept_result != cudaSuccess) {
+    return -1;
+  }
 
-    scuda_intercept_result = cudaGraphAddKernelNode(
-        &pGraphNode, 
-        graph, 
-        dependencies.data(),
-        numDependencies,
-        &pNodeParams
-    );
+  if (rpc_write_start_response(conn, request_id) < 0 ||
+      rpc_write(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+      rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) ||
+      rpc_write_end(conn) < 0) {
+    return -1;
+  }
 
-    if (scuda_intercept_result != cudaSuccess) {
-        return -1;
-    }
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 || rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) || rpc_write_end(conn) < 0) {
-        return -1;
-    }
-
-    return 0;
+  return 0;
 }
 
 int handle_cudaLaunchKernel(conn_t *conn) {
@@ -678,33 +679,30 @@ ERROR_0:
 
 int handle_cudaMallocHost(conn_t *conn) { return 0; }
 
-int handle_cudaGraphGetNodes(conn_t *conn)
-{
-    cudaGraph_t graph;
-    cudaGraphNode_t *nodes = NULL;
-    size_t numNodes = 0;
-    int request_id;
-    cudaError_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
-        false)
-        goto ERROR_0;
+int handle_cudaGraphGetNodes(conn_t *conn) {
+  cudaGraph_t graph;
+  cudaGraphNode_t *nodes = NULL;
+  size_t numNodes = 0;
+  int request_id;
+  cudaError_t scuda_intercept_result;
+  if (rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 || false)
+    goto ERROR_0;
 
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = cudaGraphGetNodes(graph, nodes, &numNodes);
+  request_id = rpc_read_end(conn);
+  if (request_id < 0)
+    goto ERROR_0;
+  scuda_intercept_result = cudaGraphGetNodes(graph, nodes, &numNodes);
 
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &nodes, sizeof(cudaGraphNode_t)) < 0 ||
-        rpc_write(conn, &numNodes, sizeof(size_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
+  if (rpc_write_start_response(conn, request_id) < 0 ||
+      rpc_write(conn, &nodes, sizeof(cudaGraphNode_t)) < 0 ||
+      rpc_write(conn, &numNodes, sizeof(size_t)) < 0 ||
+      rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
+      rpc_write_end(conn) < 0)
+    goto ERROR_0;
 
-    return 0;
+  return 0;
 ERROR_0:
-    return -1;
+  return -1;
 }
 
 typedef struct callBackData {
@@ -807,8 +805,10 @@ int handle_cudaGraphAddMemcpyNode(conn_t *conn) {
   if (request_id < 0)
     goto ERROR_0;
 
-  append_managed_ptr(conn, (void*)pCopyParams.srcPtr.ptr, (void*)pCopyParams.dstPtr.ptr, pCopyParams.extent.width, pCopyParams.kind, graph);
-  
+  append_managed_ptr(conn, (void *)pCopyParams.srcPtr.ptr,
+                     (void *)pCopyParams.dstPtr.ptr, pCopyParams.extent.width,
+                     pCopyParams.kind, graph);
+
   scuda_intercept_result = cudaGraphAddMemcpyNode(
       &pGraphNode, graph, pDependencies.data(), numDependencies, &pCopyParams);
 
@@ -823,29 +823,26 @@ ERROR_0:
   return -1;
 }
 
-int handle_cudaGraphDestroy(conn_t *conn)
-{
-    cudaGraph_t graph;
-    int request_id;
-    cudaError_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
-        false)
-        goto ERROR_0;
+int handle_cudaGraphDestroy(conn_t *conn) {
+  cudaGraph_t graph;
+  int request_id;
+  cudaError_t scuda_intercept_result;
+  if (rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 || false)
+    goto ERROR_0;
 
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = cudaGraphDestroy(graph);
+  request_id = rpc_read_end(conn);
+  if (request_id < 0)
+    goto ERROR_0;
+  scuda_intercept_result = cudaGraphDestroy(graph);
 
-    maybe_destroy_graph_resources(graph);
+  maybe_destroy_graph_resources(graph);
 
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
+  if (rpc_write_start_response(conn, request_id) < 0 ||
+      rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
+      rpc_write_end(conn) < 0)
+    goto ERROR_0;
 
-    return 0;
+  return 0;
 ERROR_0:
-    return -1;
+  return -1;
 }

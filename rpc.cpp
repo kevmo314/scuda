@@ -1,8 +1,8 @@
 #include <sys/socket.h>
 
 #include "rpc.h"
-#include <string.h>
 #include <iostream>
+#include <string.h>
 #include <unistd.h>
 
 pthread_t tid;
@@ -67,7 +67,6 @@ int rpc_read_start(conn_t *conn, int write_id) {
   if (pthread_mutex_lock(&conn->read_mutex) < 0)
     return -1;
 
-
   // wait for the active read id to be the request id we are waiting for
   while (conn->read_id != write_id)
     if (pthread_cond_wait(&conn->read_cond, &conn->read_mutex) < 0)
@@ -77,11 +76,11 @@ int rpc_read_start(conn_t *conn, int write_id) {
 }
 
 int rpc_read(conn_t *conn, void *data, size_t size) {
-    int bytes_read = recv(conn->connfd, data, size, MSG_WAITALL);
-    if (bytes_read == -1) {
-        printf("recv error: %s\n", strerror(errno));
-    }
-    return bytes_read;
+  int bytes_read = recv(conn->connfd, data, size, MSG_WAITALL);
+  if (bytes_read == -1) {
+    printf("recv error: %s\n", strerror(errno));
+  }
+  return bytes_read;
 }
 
 // rpc_read_end releases the response lock on the given connection.
