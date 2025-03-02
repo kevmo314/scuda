@@ -1,10 +1,13 @@
 #include <cublas_v2.h>
 #include <cuda.h>
-#include <cuda_runtime.h>
 #include <cuda_runtime_api.h>
 #include <dlfcn.h>
 #include <iostream>
 #include <nvml.h>
+
+#include <cstdio>
+#include <cuda_runtime.h>
+#include <vector>
 
 #include <cstring>
 #include <string>
@@ -20,7 +23,11 @@ extern int rpc_read_end(const conn_t *conn);
 extern int rpc_write_start_response(const conn_t *conn, const int request_id);
 extern int rpc_write(const conn_t *conn, const void *data,
                      const std::size_t size);
-extern int rpc_end_response(const conn_t *conn, void *return_value);
+
+void invoke_host_func(void *data);
+void append_managed_ptr(const void *conn, void *srcPtr, void *dstPtr,
+                        size_t size, cudaMemcpyKind kind, void *graph);
+void maybe_destroy_graph_resources(void *graph);
 
 FILE *__cudart_trace_output_stream = stdout;
 
@@ -132,8 +139,9 @@ int handle_cudaMemcpyAsync(conn_t *conn) {
     if (host_data == NULL)
       goto ERROR_0;
 
-    if (rpc_read(conn, host_data, count) < 0)
+    if (rpc_read(conn, host_data, count) < 0) {
       goto ERROR_0;
+    }
 
     request_id = rpc_read_end(conn);
     if (request_id < 0)
@@ -155,16 +163,107 @@ int handle_cudaMemcpyAsync(conn_t *conn) {
        rpc_write(conn, host_data, count) < 0) ||
       rpc_write(conn, &result, sizeof(cudaError_t)) < 0 ||
       rpc_write_end(conn) < 0 ||
-      (host_data != NULL && cudaStreamAddCallback(
-                                stream,
-                                [](cudaStream_t stream, cudaError_t status,
-                                   void *ptr) { free(ptr); },
-                                host_data, 0) != cudaSuccess))
+      (host_data != NULL && stream == 0 &&
+       cudaStreamAddCallback(
+           stream,
+           [](cudaStream_t stream, cudaError_t status, void *ptr) {
+             free(ptr);
+           },
+           host_data, 0) != cudaSuccess))
     goto ERROR_0;
 
   ret = 0;
 ERROR_0:
   return ret;
+}
+
+int handle_cudaGraphAddKernelNode(conn_t *conn) {
+  size_t numDependencies;
+  cudaGraphNode_t pGraphNode = nullptr; // Initialize to nullptr
+  cudaGraph_t graph;
+  void **args;
+  cudaKernelNodeParams pNodeParams = {0};
+  std::vector<cudaGraphNode_t> dependencies;
+  const cudaKernelNodeParams *pNodeParams_null_check;
+  int request_id;
+  int num_args;
+  int arg_size;
+  cudaError_t scuda_intercept_result;
+
+  if (rpc_read(conn, &numDependencies, sizeof(size_t)) < 0) {
+    printf("Failed to read numDependencies\n");
+    return -1;
+  }
+
+  if (rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0) {
+    printf("Failed to read graph\n");
+    return -1;
+  }
+
+  dependencies.resize(numDependencies);
+  for (size_t i = 0; i < numDependencies; ++i) {
+    if (rpc_read(conn, &dependencies[i], sizeof(cudaGraphNode_t)) < 0) {
+      printf("Failed to read Dependency[%zu]\n", i);
+      return -1;
+    }
+  }
+
+  if (rpc_read(conn, &num_args, sizeof(int)) < 0) {
+    printf("Failed to read arg count\n");
+    return -1;
+  }
+
+  args = (void **)malloc(num_args * sizeof(void *));
+  if (args == NULL)
+    return -1;
+
+  for (int i = 0; i < num_args; ++i) {
+    if (rpc_read(conn, &arg_size, sizeof(int)) < 0)
+      return -1;
+
+    args[i] = malloc(arg_size);
+    if (args[i] == NULL)
+      return -1;
+
+    if (rpc_read(conn, args[i], arg_size) < 0)
+      return -1;
+  }
+
+  if (rpc_read(conn, &pNodeParams_null_check,
+               sizeof(const cudaKernelNodeParams *)) < 0) {
+    return -1;
+  }
+
+  if (pNodeParams_null_check) {
+    if (rpc_read(conn, &pNodeParams,
+                 sizeof(const struct cudaKernelNodeParams)) < 0) {
+      return -1;
+    }
+  }
+
+  request_id = rpc_read_end(conn);
+  if (request_id < 0) {
+    return -1;
+  }
+
+  // make sure we write our kernel args properly
+  pNodeParams.kernelParams = args;
+
+  scuda_intercept_result = cudaGraphAddKernelNode(
+      &pGraphNode, graph, dependencies.data(), numDependencies, &pNodeParams);
+
+  if (scuda_intercept_result != cudaSuccess) {
+    return -1;
+  }
+
+  if (rpc_write_start_response(conn, request_id) < 0 ||
+      rpc_write(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+      rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) ||
+      rpc_write_end(conn) < 0) {
+    return -1;
+  }
+
+  return 0;
 }
 
 int handle_cudaLaunchKernel(conn_t *conn) {
@@ -569,6 +668,176 @@ int handle_cudaMallocManaged(conn_t *conn) {
 
   if (rpc_write_start_response(conn, request_id) < 0 ||
       rpc_write(conn, &devPtr, sizeof(void *)) < 0 ||
+      rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
+      rpc_write_end(conn) < 0)
+    goto ERROR_0;
+
+  return 0;
+ERROR_0:
+  return -1;
+}
+
+int handle_cudaMallocHost(conn_t *conn) { return 0; }
+
+int handle_cudaGraphGetNodes(conn_t *conn) {
+  cudaGraph_t graph;
+  cudaGraphNode_t *nodes = NULL;
+  size_t numNodes = 0;
+  int request_id;
+  cudaError_t scuda_intercept_result;
+  if (rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 || false)
+    goto ERROR_0;
+
+  request_id = rpc_read_end(conn);
+  if (request_id < 0)
+    goto ERROR_0;
+  scuda_intercept_result = cudaGraphGetNodes(graph, nodes, &numNodes);
+
+  if (rpc_write_start_response(conn, request_id) < 0 ||
+      rpc_write(conn, &nodes, sizeof(cudaGraphNode_t)) < 0 ||
+      rpc_write(conn, &numNodes, sizeof(size_t)) < 0 ||
+      rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
+      rpc_write_end(conn) < 0)
+    goto ERROR_0;
+
+  return 0;
+ERROR_0:
+  return -1;
+}
+
+typedef struct callBackData {
+  conn_t *conn;
+  void (*callback)(void *);
+  void *data;
+} callBackData_t;
+
+int handle_cudaGraphAddHostNode(conn_t *conn) {
+  size_t numDependencies;
+  cudaGraphNode_t pGraphNode;
+  cudaGraph_t graph;
+  std::vector<cudaGraphNode_t> pDependencies;
+  struct cudaHostNodeParams *pNodeParams_null_check;
+  struct cudaHostNodeParams pNodeParams;
+  int request_id;
+  cudaError_t scuda_intercept_result;
+  callBackData_t *hostFnData;
+
+  if (rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+          rpc_read(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+          rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+          [=, &pDependencies]()
+          -> bool {
+        pDependencies.resize(numDependencies); // Resize the dependencies vector
+        for (size_t i = 0; i < numDependencies; ++i) {
+          if (rpc_read(conn, &pDependencies[i], sizeof(const cudaGraphNode_t)) <
+              0) {
+            return false;
+          }
+        }
+        return true;
+      }() == false ||
+                 rpc_read(conn, &pNodeParams_null_check,
+                          sizeof(const struct cudaHostNodeParams *)) < 0 ||
+                 (pNodeParams_null_check &&
+                  rpc_read(conn, &pNodeParams,
+                           sizeof(const struct cudaHostNodeParams)) < 0) ||
+                 false)
+    goto ERROR_0;
+
+  request_id = rpc_read_end(conn);
+  if (request_id < 0)
+    goto ERROR_0;
+
+  hostFnData = (callBackData_t *)malloc(sizeof(callBackData_t));
+  // assign the previous function pointer so we can map back to it
+  hostFnData->callback = pNodeParams.fn;
+  hostFnData->data = pNodeParams.userData;
+  hostFnData->conn = conn;
+
+  pNodeParams.fn = invoke_host_func;
+  pNodeParams.userData = hostFnData;
+
+  scuda_intercept_result = cudaGraphAddHostNode(
+      &pGraphNode, graph, pDependencies.data(), numDependencies, &pNodeParams);
+
+  if (rpc_write_start_response(conn, request_id) < 0 ||
+      rpc_write(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+      rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
+      rpc_write_end(conn) < 0)
+    goto ERROR_0;
+
+  return 0;
+ERROR_0:
+  return -1;
+}
+
+int handle_cudaGraphAddMemcpyNode(conn_t *conn) {
+  size_t numDependencies;
+  cudaGraphNode_t pGraphNode;
+  cudaGraph_t graph;
+  std::vector<cudaGraphNode_t> pDependencies;
+  struct cudaMemcpy3DParms *pCopyParams_null_check;
+  struct cudaMemcpy3DParms pCopyParams;
+  int request_id;
+  cudaError_t scuda_intercept_result;
+  if (rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+          rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+          [=, &pDependencies]()
+          -> bool {
+        pDependencies.resize(numDependencies); // Resize the dependencies vector
+        for (size_t i = 0; i < numDependencies; ++i) {
+          if (rpc_read(conn, &pDependencies[i], sizeof(const cudaGraphNode_t)) <
+              0) {
+            return false;
+          }
+        }
+        return true;
+      }() == false ||
+                 rpc_read(conn, &pCopyParams_null_check,
+                          sizeof(const struct cudaMemcpy3DParms *)) < 0 ||
+                 (pCopyParams_null_check &&
+                  rpc_read(conn, &pCopyParams,
+                           sizeof(const struct cudaMemcpy3DParms)) < 0) ||
+                 false)
+    goto ERROR_0;
+
+  request_id = rpc_read_end(conn);
+  if (request_id < 0)
+    goto ERROR_0;
+
+  append_managed_ptr(conn, (void *)pCopyParams.srcPtr.ptr,
+                     (void *)pCopyParams.dstPtr.ptr, pCopyParams.extent.width,
+                     pCopyParams.kind, graph);
+
+  scuda_intercept_result = cudaGraphAddMemcpyNode(
+      &pGraphNode, graph, pDependencies.data(), numDependencies, &pCopyParams);
+
+  if (rpc_write_start_response(conn, request_id) < 0 ||
+      rpc_write(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+      rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
+      rpc_write_end(conn) < 0)
+    goto ERROR_0;
+
+  return 0;
+ERROR_0:
+  return -1;
+}
+
+int handle_cudaGraphDestroy(conn_t *conn) {
+  cudaGraph_t graph;
+  int request_id;
+  cudaError_t scuda_intercept_result;
+  if (rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 || false)
+    goto ERROR_0;
+
+  request_id = rpc_read_end(conn);
+  if (request_id < 0)
+    goto ERROR_0;
+  scuda_intercept_result = cudaGraphDestroy(graph);
+
+  maybe_destroy_graph_resources(graph);
+
+  if (rpc_write_start_response(conn, request_id) < 0 ||
       rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
       rpc_write_end(conn) < 0)
     goto ERROR_0;

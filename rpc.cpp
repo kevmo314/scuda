@@ -2,31 +2,59 @@
 
 #include "rpc.h"
 #include <iostream>
+#include <string.h>
 #include <unistd.h>
 
-void *rpc_read_thread(void *arg) {
-  conn_t *conn = (conn_t *)arg;
-  // this thread's job is to read from the connection and set the read id.
+pthread_t tid;
 
-  if (pthread_mutex_lock(&conn->read_mutex) < 0) {
+void *_rpc_read_id_dispatch(void *p) {
+  conn_t *conn = (conn_t *)p;
+
+  if (pthread_mutex_lock(&conn->read_mutex) < 0)
     return NULL;
-  }
 
-  while (true) {
+  while (1) {
     while (conn->read_id != 0)
       pthread_cond_wait(&conn->read_cond, &conn->read_mutex);
 
-    // the read id is zero so it's our turn to read the next int
-    if (rpc_read(conn, &conn->read_id, sizeof(int)) < 0) {
-      pthread_mutex_unlock(&conn->read_mutex);
-      return NULL;
-    }
-
-    if (conn->read_id != 0 && pthread_cond_broadcast(&conn->read_cond) < 0) {
-      pthread_mutex_unlock(&conn->read_mutex);
-      return NULL;
-    }
+    // the read id is zero so it's our turn to read the next int which is the
+    // request id of the next request.
+    if (rpc_read(conn, &conn->read_id, sizeof(int)) < 0 || conn->read_id == 0 ||
+        pthread_cond_broadcast(&conn->read_cond) < 0)
+      break;
   }
+  pthread_mutex_unlock(&conn->read_mutex);
+  return NULL;
+}
+
+// rpc_read_start waits for a response with a specific request id on the
+// given connection. this function is used to wait for a response to a
+// request that was sent with rpc_write_end.
+//
+// it is not necessary to call rpc_read_start() if it is the first call in
+// the sequence because by convention, the handler owns the read lock on
+// entry.
+int rpc_dispatch(conn_t *conn, int parity) {
+  if (tid == 0 &&
+      pthread_create(&tid, nullptr, _rpc_read_id_dispatch, (void *)conn) < 0) {
+    return -1;
+  }
+
+  if (pthread_mutex_lock(&conn->read_mutex) < 0) {
+    return -1;
+  }
+
+  int op;
+
+  while (conn->read_id < 2 || conn->read_id % 2 != parity)
+    pthread_cond_wait(&conn->read_cond, &conn->read_mutex);
+
+  if (rpc_read(conn, &op, sizeof(int)) < 0) {
+    pthread_mutex_unlock(&conn->read_mutex);
+    return -1;
+  }
+
+  return op;
 }
 
 // rpc_read_start waits for a response with a specific request id on the
@@ -48,7 +76,11 @@ int rpc_read_start(conn_t *conn, int write_id) {
 }
 
 int rpc_read(conn_t *conn, void *data, size_t size) {
-  return recv(conn->connfd, data, size, MSG_WAITALL);
+  int bytes_read = recv(conn->connfd, data, size, MSG_WAITALL);
+  if (bytes_read == -1) {
+    printf("recv error: %s\n", strerror(errno));
+  }
+  return bytes_read;
 }
 
 // rpc_read_end releases the response lock on the given connection.
@@ -76,7 +108,7 @@ int rpc_wait_for_response(conn_t *conn) {
 //
 // only one request can be active at a time, so this function will take the
 // request lock from the connection.
-int rpc_write_start_request(conn_t *conn, const unsigned int op) {
+int rpc_write_start_request(conn_t *conn, const int op) {
   if (pthread_mutex_lock(&conn->write_mutex) < 0) {
 #ifdef VERBOSE
     std::cout << "rpc_write_start failed due to rpc_open() < 0 || "
