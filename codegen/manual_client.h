@@ -1,9 +1,11 @@
 #include <cublas_v2.h>
 #include <cuda.h>
-#include <cuda_runtime_api.h>
 #include <nvml.h>
+#include <cuda_runtime_api.h>
 
+cudaError_t cudaGraphAddKernelNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies, const struct cudaKernelNodeParams *pNodeParams);
 cudaError_t cudaFree(void *devPtr);
+cudaError_t cudaMallocHost(void **ptr, size_t size);
 cudaError_t cudaMallocManaged(void **devPtr, size_t size, unsigned int flags);
 cudaError_t cudaMemcpy(void *dst, const void *src, size_t count,
                        enum cudaMemcpyKind kind);
@@ -29,3 +31,15 @@ extern "C" void __cudaRegisterVar(void **fatCubinHandle, char *hostVar,
                                   char *deviceAddress, const char *deviceName,
                                   int ext, size_t size, int constant,
                                   int global);
+cudaError_t cudaGraphAddHostNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph,
+                                 const cudaGraphNode_t *pDependencies,
+                                 size_t numDependencies,
+                                 const struct cudaHostNodeParams *pNodeParams);
+cudaError_t
+cudaGraphAddMemcpyNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph,
+                       const cudaGraphNode_t *pDependencies,
+                       size_t numDependencies,
+                       const struct cudaMemcpy3DParms *pCopyParams);
+cudaError_t cudaGraphGetNodes(cudaGraph_t graph, cudaGraphNode_t *nodes,
+                              size_t *numNodes);
+cudaError_t cudaGraphDestroy(cudaGraph_t graph);

@@ -39,9 +39,8 @@ static int init = 0;
 static jmp_buf catch_segfault;
 static void *faulting_address = nullptr;
 
-conn_t *rpc_client_get_connection(unsigned int index) { return &conns[index]; }
-
 std::map<conn_t *, std::map<void *, size_t>> unified_devices;
+std::map<void *, void *> host_funcs;
 
 static void segfault(int sig, siginfo_t *info, void *unused) {
   faulting_address = info->si_addr;
@@ -152,6 +151,98 @@ void rpc_close(conn_t *conn) {
   pthread_mutex_unlock(&conn_mutex);
 }
 
+typedef void (*func_t)(void *);
+
+void add_host_node(void *fn, void *udata) { host_funcs[fn] = udata; }
+
+void invoke_host_func(void *fn) {
+  for (const auto &pair : host_funcs) {
+    if (pair.first == fn) {
+      func_t func = reinterpret_cast<func_t>(pair.first);
+      std::cout << "Invoking function at: " << pair.first << std::endl;
+      func(pair.second);
+      return;
+    }
+  }
+}
+
+void *rpc_client_dispatch_thread(void *arg) {
+  conn_t *conn = (conn_t *)arg;
+  int op;
+
+  while (true) {
+    op = rpc_dispatch(conn, 1);
+
+    if (op == 1) {
+      std::cout << "Transferring memory..." << std::endl;
+
+      int found = 0;
+
+      rpc_read(conn, &found, sizeof(int));
+
+      if (found > 0) {
+        void *host_data = nullptr;
+        void *dst = nullptr;
+        const void *src = nullptr;
+        size_t count = 0;
+        cudaError_t result;
+        int request_id;
+
+        if (rpc_read(conn, &dst, sizeof(void *)) < 0 ||
+            rpc_read(conn, &count, sizeof(size_t)) < 0) {
+          std::cerr << "Failed to read transfer parameters." << std::endl;
+          break;
+        }
+
+        host_data = malloc(count);
+        if (!host_data) {
+          std::cerr << "Memory allocation failed." << std::endl;
+          break;
+        }
+
+        // Read the actual data from the server (sent from `src` in device
+        // memory)
+        if (rpc_read(conn, host_data, count) < 0) {
+          std::cerr << "Failed to read device data from server." << std::endl;
+          free(host_data);
+          break;
+        }
+
+        // Copy received data to the destination (dst) on the host
+        memcpy(dst, host_data, count);
+      }
+
+      void *temp_mem;
+      if (rpc_read(conn, &temp_mem, sizeof(void *)) <= 0) {
+        std::cerr << "rpc_read failed for mem. Closing connection."
+                  << std::endl;
+        break;
+      }
+
+      int request_id = rpc_read_end(conn);
+      void *mem = temp_mem;
+
+      if (mem == nullptr) {
+        std::cerr << "Invalid function pointer!" << std::endl;
+        continue;
+      }
+
+      invoke_host_func(mem);
+
+      void *res = nullptr;
+      if (rpc_write_start_response(conn, request_id) < 0 ||
+          rpc_write(conn, &res, sizeof(void *)) < 0 ||
+          rpc_write_end(conn) < 0) {
+        std::cerr << "rpc_write failed. Closing connection." << std::endl;
+        break;
+      }
+    }
+  }
+
+  std::cerr << "Exiting dispatch thread due to an error." << std::endl;
+  return nullptr;
+}
+
 int rpc_open() {
   set_segfault_handlers();
 
@@ -165,6 +256,8 @@ int rpc_open() {
       return -1;
     return 0;
   }
+
+  std::cout << "Opening connection to server" << std::endl;
 
   char *server_ips = getenv("SCUDA_SERVER");
   if (server_ips == NULL) {
@@ -214,19 +307,13 @@ int rpc_open() {
       exit(1);
     }
 
-    std::cout << "connected on " << sockfd << std::endl;
+    conns[nconns] = {sockfd, 0};
+    if (pthread_mutex_init(&conns[nconns].read_mutex, NULL) < 0 ||
+        pthread_mutex_init(&conns[nconns].write_mutex, NULL) < 0) {
+      return -1;
+    }
 
-    conns[nconns] = {sockfd,
-                     0,
-                     0,
-                     0,
-                     0,
-                     0,
-                     PTHREAD_MUTEX_INITIALIZER,
-                     PTHREAD_MUTEX_INITIALIZER,
-                     PTHREAD_COND_INITIALIZER};
-
-    pthread_create(&conns[nconns].read_thread, NULL, rpc_read_thread,
+    pthread_create(&conns[nconns].read_thread, NULL, rpc_client_dispatch_thread,
                    (void *)&conns[nconns]);
 
     nconns++;
@@ -237,6 +324,12 @@ int rpc_open() {
   if (nconns == 0)
     return -1;
   return 0;
+}
+
+conn_t *rpc_client_get_connection(unsigned int index) {
+  if (rpc_open() < 0)
+    return nullptr;
+  return &conns[index];
 }
 
 int rpc_size() { return nconns; }
@@ -325,6 +418,8 @@ CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion,
 }
 
 void *dlsym(void *handle, const char *name) __THROW {
+  std::cout << "dlsym: " << name << std::endl;
+
   void *func = get_function_pointer(name);
 
   /** proc address function calls are basically dlsym; we should handle this
@@ -335,8 +430,8 @@ void *dlsym(void *handle, const char *name) __THROW {
   }
 
   if (func != nullptr) {
-    // std::cout << "[dlsym] Function address from cudaFunctionMap: " << func <<
-    // " " << name << std::endl;
+    // std::cout << "[dlsym] Function address from cudaFunctionMap: " << func
+    // << " " << name << std::endl;
     return func;
   }
 
