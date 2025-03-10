@@ -22737,6 +22737,14 @@ cudaError_t cudaGraphAddMemcpyNodeToSymbol(cudaGraphNode_t *pGraphNode,
           rpc_write(conn, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
           rpc_write(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
           [=]() -> bool {
+        if (numDependencies == 1) {
+          if (rpc_write(0, &pDependencies, sizeof(const cudaGraphNode_t)) < 0) {
+            printf("Failed to write Dependency\n");
+            return false;
+          }
+          return true;
+        }
+
         for (size_t i = 0; i < numDependencies; ++i) {
           if (rpc_write(0, &pDependencies[i], sizeof(const cudaGraphNode_t)) <
               0) {
@@ -22916,6 +22924,14 @@ cudaGraphAddMemsetNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph,
           rpc_write(conn, &numDependencies, sizeof(size_t)) < 0 ||
           rpc_write(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
           [=]() -> bool {
+        if (numDependencies == 1) {
+          if (rpc_write(0, &pDependencies, sizeof(const cudaGraphNode_t)) < 0) {
+            printf("Failed to write Dependency\n");
+            return false;
+          }
+          return true;
+        }
+
         for (size_t i = 0; i < numDependencies; ++i) {
           if (rpc_write(0, &pDependencies[i], sizeof(const cudaGraphNode_t)) <
               0) {
@@ -23093,6 +23109,14 @@ cudaError_t cudaGraphAddChildGraphNode(cudaGraphNode_t *pGraphNode,
           rpc_write(conn, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
           rpc_write(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
           [=]() -> bool {
+        if (numDependencies == 1) {
+          if (rpc_write(0, &pDependencies, sizeof(const cudaGraphNode_t)) < 0) {
+            printf("Failed to write Dependency\n");
+            return false;
+          }
+          return true;
+        }
+
         for (size_t i = 0; i < numDependencies; ++i) {
           if (rpc_write(0, &pDependencies[i], sizeof(const cudaGraphNode_t)) <
               0) {
@@ -23182,6 +23206,14 @@ cudaError_t cudaGraphAddEmptyNode(cudaGraphNode_t *pGraphNode,
           rpc_write(conn, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
           rpc_write(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
           [=]() -> bool {
+        if (numDependencies == 1) {
+          if (rpc_write(0, &pDependencies, sizeof(const cudaGraphNode_t)) < 0) {
+            printf("Failed to write Dependency\n");
+            return false;
+          }
+          return true;
+        }
+
         for (size_t i = 0; i < numDependencies; ++i) {
           if (rpc_write(0, &pDependencies[i], sizeof(const cudaGraphNode_t)) <
               0) {
@@ -23247,6 +23279,14 @@ cudaError_t cudaGraphAddEventRecordNode(cudaGraphNode_t *pGraphNode,
           rpc_write(conn, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
           rpc_write(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
           [=]() -> bool {
+        if (numDependencies == 1) {
+          if (rpc_write(0, &pDependencies, sizeof(const cudaGraphNode_t)) < 0) {
+            printf("Failed to write Dependency\n");
+            return false;
+          }
+          return true;
+        }
+
         for (size_t i = 0; i < numDependencies; ++i) {
           if (rpc_write(0, &pDependencies[i], sizeof(const cudaGraphNode_t)) <
               0) {
@@ -23362,6 +23402,14 @@ cudaError_t cudaGraphAddEventWaitNode(cudaGraphNode_t *pGraphNode,
           rpc_write(conn, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
           rpc_write(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
           [=]() -> bool {
+        if (numDependencies == 1) {
+          if (rpc_write(0, &pDependencies, sizeof(const cudaGraphNode_t)) < 0) {
+            printf("Failed to write Dependency\n");
+            return false;
+          }
+          return true;
+        }
+
         for (size_t i = 0; i < numDependencies; ++i) {
           if (rpc_write(0, &pDependencies[i], sizeof(const cudaGraphNode_t)) <
               0) {
@@ -23478,6 +23526,14 @@ cudaError_t cudaGraphAddExternalSemaphoresSignalNode(
           rpc_write(conn, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
           rpc_write(conn, &graph, sizeof(cudaGraph_t)) < 0 || [=]()
           -> bool {
+        if (numDependencies == 1) {
+          if (rpc_write(0, &pDependencies, sizeof(const cudaGraphNode_t)) < 0) {
+            printf("Failed to write Dependency\n");
+            return false;
+          }
+          return true;
+        }
+
         for (size_t i = 0; i < numDependencies; ++i) {
           if (rpc_write(0, &pDependencies[i], sizeof(const cudaGraphNode_t)) <
               0) {
@@ -23614,6 +23670,14 @@ cudaError_t cudaGraphAddExternalSemaphoresWaitNode(
           rpc_write(conn, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
           rpc_write(conn, &graph, sizeof(cudaGraph_t)) < 0 || [=]()
           -> bool {
+        if (numDependencies == 1) {
+          if (rpc_write(0, &pDependencies, sizeof(const cudaGraphNode_t)) < 0) {
+            printf("Failed to write Dependency\n");
+            return false;
+          }
+          return true;
+        }
+
         for (size_t i = 0; i < numDependencies; ++i) {
           if (rpc_write(0, &pDependencies[i], sizeof(const cudaGraphNode_t)) <
               0) {
@@ -23720,81 +23784,6 @@ cudaError_t cudaGraphExternalSemaphoresWaitNodeSetParams(
 }
 
 cudaError_t
-cudaGraphAddMemAllocNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph,
-                         const cudaGraphNode_t *pDependencies,
-                         size_t numDependencies,
-                         struct cudaMemAllocNodeParams *nodeParams) {
-  conn_t *conn = rpc_client_get_connection(0);
-  if (maybe_copy_unified_arg(conn, (void *)&numDependencies,
-                             cudaMemcpyHostToDevice) < 0)
-    return cudaErrorDevicesUnavailable;
-  if (maybe_copy_unified_arg(conn, (void *)pGraphNode, cudaMemcpyHostToDevice) <
-      0)
-    return cudaErrorDevicesUnavailable;
-  if (maybe_copy_unified_arg(conn, (void *)&graph, cudaMemcpyHostToDevice) < 0)
-    return cudaErrorDevicesUnavailable;
-  if (maybe_copy_unified_arg(conn, (void *)pDependencies,
-                             cudaMemcpyHostToDevice) < 0)
-    return cudaErrorDevicesUnavailable;
-  for (int i = 0; i < static_cast<int>(numDependencies) &&
-                  is_unified_pointer(conn, (void *)pDependencies);
-       i++)
-    if (maybe_copy_unified_arg(conn, (void *)&pDependencies[i],
-                               cudaMemcpyHostToDevice) < 0)
-      return cudaErrorDevicesUnavailable;
-  if (maybe_copy_unified_arg(conn, (void *)nodeParams, cudaMemcpyDeviceToHost) <
-      0)
-    return cudaErrorDevicesUnavailable;
-  cudaError_t return_value;
-  if (rpc_write_start_request(conn, RPC_cudaGraphAddMemAllocNode) < 0 ||
-          rpc_write(conn, &numDependencies, sizeof(size_t)) < 0 ||
-          rpc_write(conn, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
-          rpc_write(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
-          [=]() -> bool {
-        for (size_t i = 0; i < numDependencies; ++i) {
-          if (rpc_write(0, &pDependencies[i], sizeof(const cudaGraphNode_t)) <
-              0) {
-            printf("Failed to write Dependency[%zu]\n", i);
-            return false;
-          }
-        }
-        return true;
-      }() == false ||
-                       rpc_write(conn, &nodeParams,
-                                 sizeof(struct cudaMemAllocNodeParams *)) < 0 ||
-                       (nodeParams != nullptr &&
-                        rpc_write(conn, nodeParams,
-                                  sizeof(struct cudaMemAllocNodeParams)) < 0) ||
-                       rpc_wait_for_response(conn) < 0 ||
-                       rpc_read(conn, pGraphNode, sizeof(cudaGraphNode_t)) <
-                           0 ||
-                       rpc_read(conn, &return_value, sizeof(cudaError_t)) < 0 ||
-                       rpc_read_end(conn) < 0)
-    return cudaErrorDevicesUnavailable;
-  if (maybe_copy_unified_arg(conn, (void *)&numDependencies,
-                             cudaMemcpyDeviceToHost) < 0)
-    return cudaErrorDevicesUnavailable;
-  if (maybe_copy_unified_arg(conn, (void *)pGraphNode, cudaMemcpyDeviceToHost) <
-      0)
-    return cudaErrorDevicesUnavailable;
-  if (maybe_copy_unified_arg(conn, (void *)&graph, cudaMemcpyDeviceToHost) < 0)
-    return cudaErrorDevicesUnavailable;
-  if (maybe_copy_unified_arg(conn, (void *)pDependencies,
-                             cudaMemcpyDeviceToHost) < 0)
-    return cudaErrorDevicesUnavailable;
-  for (int i = 0; i < static_cast<int>(numDependencies) &&
-                  is_unified_pointer(conn, (void *)pDependencies);
-       i++)
-    if (maybe_copy_unified_arg(conn, (void *)&pDependencies[i],
-                               cudaMemcpyDeviceToHost) < 0)
-      return cudaErrorDevicesUnavailable;
-  if (maybe_copy_unified_arg(conn, (void *)nodeParams, cudaMemcpyDeviceToHost) <
-      0)
-    return cudaErrorDevicesUnavailable;
-  return return_value;
-}
-
-cudaError_t
 cudaGraphMemAllocNodeGetParams(cudaGraphNode_t node,
                                struct cudaMemAllocNodeParams *params_out) {
   conn_t *conn = rpc_client_get_connection(0);
@@ -23816,73 +23805,6 @@ cudaGraphMemAllocNodeGetParams(cudaGraphNode_t node,
     return cudaErrorDevicesUnavailable;
   if (maybe_copy_unified_arg(conn, (void *)params_out, cudaMemcpyDeviceToHost) <
       0)
-    return cudaErrorDevicesUnavailable;
-  return return_value;
-}
-
-cudaError_t cudaGraphAddMemFreeNode(cudaGraphNode_t *pGraphNode,
-                                    cudaGraph_t graph,
-                                    const cudaGraphNode_t *pDependencies,
-                                    size_t numDependencies, void *dptr) {
-  conn_t *conn = rpc_client_get_connection(0);
-  if (maybe_copy_unified_arg(conn, (void *)&numDependencies,
-                             cudaMemcpyHostToDevice) < 0)
-    return cudaErrorDevicesUnavailable;
-  if (maybe_copy_unified_arg(conn, (void *)pGraphNode, cudaMemcpyHostToDevice) <
-      0)
-    return cudaErrorDevicesUnavailable;
-  if (maybe_copy_unified_arg(conn, (void *)&graph, cudaMemcpyHostToDevice) < 0)
-    return cudaErrorDevicesUnavailable;
-  if (maybe_copy_unified_arg(conn, (void *)pDependencies,
-                             cudaMemcpyHostToDevice) < 0)
-    return cudaErrorDevicesUnavailable;
-  for (int i = 0; i < static_cast<int>(numDependencies) &&
-                  is_unified_pointer(conn, (void *)pDependencies);
-       i++)
-    if (maybe_copy_unified_arg(conn, (void *)&pDependencies[i],
-                               cudaMemcpyHostToDevice) < 0)
-      return cudaErrorDevicesUnavailable;
-  if (maybe_copy_unified_arg(conn, (void *)dptr, cudaMemcpyHostToDevice) < 0)
-    return cudaErrorDevicesUnavailable;
-  cudaError_t return_value;
-  if (rpc_write_start_request(conn, RPC_cudaGraphAddMemFreeNode) < 0 ||
-          rpc_write(conn, &numDependencies, sizeof(size_t)) < 0 ||
-          rpc_write(conn, pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
-          rpc_write(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
-          [=]() -> bool {
-        for (size_t i = 0; i < numDependencies; ++i) {
-          if (rpc_write(0, &pDependencies[i], sizeof(const cudaGraphNode_t)) <
-              0) {
-            printf("Failed to write Dependency[%zu]\n", i);
-            return false;
-          }
-        }
-        return true;
-      }() == false || rpc_write(conn, &dptr, sizeof(void *)) < 0 ||
-                       rpc_wait_for_response(conn) < 0 ||
-                       rpc_read(conn, pGraphNode, sizeof(cudaGraphNode_t)) <
-                           0 ||
-                       rpc_read(conn, &return_value, sizeof(cudaError_t)) < 0 ||
-                       rpc_read_end(conn) < 0)
-    return cudaErrorDevicesUnavailable;
-  if (maybe_copy_unified_arg(conn, (void *)&numDependencies,
-                             cudaMemcpyDeviceToHost) < 0)
-    return cudaErrorDevicesUnavailable;
-  if (maybe_copy_unified_arg(conn, (void *)pGraphNode, cudaMemcpyDeviceToHost) <
-      0)
-    return cudaErrorDevicesUnavailable;
-  if (maybe_copy_unified_arg(conn, (void *)&graph, cudaMemcpyDeviceToHost) < 0)
-    return cudaErrorDevicesUnavailable;
-  if (maybe_copy_unified_arg(conn, (void *)pDependencies,
-                             cudaMemcpyDeviceToHost) < 0)
-    return cudaErrorDevicesUnavailable;
-  for (int i = 0; i < static_cast<int>(numDependencies) &&
-                  is_unified_pointer(conn, (void *)pDependencies);
-       i++)
-    if (maybe_copy_unified_arg(conn, (void *)&pDependencies[i],
-                               cudaMemcpyDeviceToHost) < 0)
-      return cudaErrorDevicesUnavailable;
-  if (maybe_copy_unified_arg(conn, (void *)dptr, cudaMemcpyDeviceToHost) < 0)
     return cudaErrorDevicesUnavailable;
   return return_value;
 }
@@ -54035,9 +53957,7 @@ std::unordered_map<std::string, void *> functionMap = {
      (void *)cudaGraphExternalSemaphoresWaitNodeGetParams},
     {"cudaGraphExternalSemaphoresWaitNodeSetParams",
      (void *)cudaGraphExternalSemaphoresWaitNodeSetParams},
-    {"cudaGraphAddMemAllocNode", (void *)cudaGraphAddMemAllocNode},
     {"cudaGraphMemAllocNodeGetParams", (void *)cudaGraphMemAllocNodeGetParams},
-    {"cudaGraphAddMemFreeNode", (void *)cudaGraphAddMemFreeNode},
     {"cudaDeviceGraphMemTrim", (void *)cudaDeviceGraphMemTrim},
     {"cudaGraphClone", (void *)cudaGraphClone},
     {"cudaGraphNodeFindInClone", (void *)cudaGraphNodeFindInClone},
@@ -54628,6 +54548,9 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cudaGraphAddKernelNode", (void *)cudaGraphAddKernelNode},
     {"cudaGraphAddMemcpyNode", (void *)cudaGraphAddMemcpyNode},
     {"cudaGraphAddHostNode", (void *)cudaGraphAddHostNode},
+    {"cudaGraphAddMemFreeNode", (void *)cudaGraphAddMemFreeNode},
+    {"cudaGraphAddMemAllocNode", (void *)cudaGraphAddMemAllocNode},
+    {"cudaDeviceGetGraphMemAttribute", (void *)cudaDeviceGetGraphMemAttribute},
 };
 
 void *get_function_pointer(const char *name) {

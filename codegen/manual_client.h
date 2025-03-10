@@ -4,6 +4,10 @@
 #include <cuda_runtime_api.h>
 
 cudaError_t cudaGraphAddKernelNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph, const cudaGraphNode_t *pDependencies, size_t numDependencies, const struct cudaKernelNodeParams *pNodeParams);
+cudaError_t cudaGraphAddMemAllocNode(cudaGraphNode_t* pGraphNode, cudaGraph_t graph, const cudaGraphNode_t* pDependencies, size_t numDependencies, struct cudaMemAllocNodeParams* nodeParams);
+cudaError_t cudaGraphAddMemFreeNode(cudaGraphNode_t* pGraphNode, cudaGraph_t graph,
+                                    const cudaGraphNode_t* pDependencies, size_t numDependencies, void* dptr);
+cudaError_t cudaDeviceGetGraphMemAttribute(int device, enum cudaGraphMemAttributeType attr, void* value);
 cudaError_t cudaFree(void *devPtr);
 cudaError_t cudaMallocHost(void **ptr, size_t size);
 cudaError_t cudaMallocManaged(void **devPtr, size_t size, unsigned int flags);

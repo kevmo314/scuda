@@ -6284,6 +6284,7 @@ cudaError_t cudaGraphExternalSemaphoresWaitNodeSetParams(
     cudaGraphNode_t hNode,
     const struct cudaExternalSemaphoreWaitNodeParams *nodeParams);
 /**
+ * @disabled
  * @param numDependencies SEND_ONLY
  * @param pGraphNode SEND_RECV
  * @param graph SEND_ONLY
@@ -6303,6 +6304,7 @@ cudaError_t
 cudaGraphMemAllocNodeGetParams(cudaGraphNode_t node,
                                struct cudaMemAllocNodeParams *params_out);
 /**
+ * @disabled
  * @param numDependencies SEND_ONLY
  * @param pGraphNode SEND_RECV
  * @param graph SEND_ONLY
@@ -6322,10 +6324,12 @@ cudaError_t cudaGraphMemFreeNodeGetParams(cudaGraphNode_t node, void *dptr_out);
  * @param device SEND_ONLY
  */
 cudaError_t cudaDeviceGraphMemTrim(int device);
+
 /**
+ * @disabled
  * @param device SEND_ONLY
  * @param attr SEND_ONLY
- * @param value SEND_RECV
+ * @param value RECV_ONLY
  */
 cudaError_t cudaDeviceGetGraphMemAttribute(int device,
                                            enum cudaGraphMemAttributeType attr,

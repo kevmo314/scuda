@@ -3,7 +3,6 @@ on:
   - pull_request
 jobs:
   formatting-check:
-    if: false
     name: Formatting Check
     runs-on: ubuntu-latest
     steps:
@@ -15,22 +14,20 @@ jobs:
           git fetch origin ${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}
       - name: Run clang-format on diff
         run: >
-          # Get the diff of changed files
-
           git diff --name-only origin/${{ github.base_ref }} | grep -E '\.(cpp|h|cu)$' > changed_files.txt || true
-
-          # Check each changed file
 
           while read file; do
             echo "Checking $file"
+            
+            # Get diff in unified format
             git diff origin/${{ github.base_ref }} -- $file | clang-format-diff -p1 -style=file > formatted.diff
+            
             if [ -s formatted.diff ]; then
-              echo "File $file is not properly formatted. Please run clang-format on your code."
-              cat formatted.diff              
-              cat formatted.diff >> "$GITHUB_OUTPUT"
+              echo "File $file is not properly formatted. Please run format on your code."
+              cat formatted.diff
               exit 1
             fi
-          done < changed_files.txt
+          done
       - name: Show success message
         if: success()
         run: echo "All files are properly formatted!"
