@@ -14,7 +14,7 @@ jobs:
           git fetch origin ${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}
       - name: Run clang-format on diff
         run: >
-          git diff -U0 --name-only origin/${{ github.base_ref }} | grep -E '\.(cpp|h|cu)$' > changed_files.txt || true
+          git diff --name-only origin/${{ github.base_ref }} | grep -E '\.(cpp|h|cu)$' > changed_files.txt || true
 
           if [ ! -s changed_files.txt ]; then
             echo "No files changed, skipping format check."
@@ -25,7 +25,7 @@ jobs:
             echo "Checking $file"
             
             # Get diff in unified format
-            git diff -U0 origin/${{ github.base_ref }} -- "$file" | clang-format-diff -p1 -style=file > formatted.diff
+            git diff origin/${{ github.base_ref }} -- $file | clang-format-diff -p1 -style=file > formatted.diff
             
             if [ -s formatted.diff ]; then
               echo "File $file is not properly formatted. Please run format on your code."
