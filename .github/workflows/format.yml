@@ -32,7 +32,7 @@ jobs:
               cat formatted.diff
               exit 1
             fi
-          done < changed_files.txt
+          done
       - name: Show success message
         if: success()
         run: echo "All files are properly formatted!"
