@@ -16,12 +16,7 @@ jobs:
         run: >
           git diff --name-only origin/${{ github.base_ref }} | grep -E '\.(cpp|h|cu)$' > changed_files.txt || true
 
-          if [ ! -s changed_files.txt ]; then
-            echo "No files changed, skipping format check."
-            exit 0
-          fi
-
-          while read -r file; do
+          while read file; do
             echo "Checking $file"
             
             # Get diff in unified format
