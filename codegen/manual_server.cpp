@@ -847,145 +847,143 @@ ERROR_0:
   return -1;
 }
 
-int handle_cudaGraphAddMemFreeNode(conn_t *conn)
-{
-    size_t numDependencies;
-    cudaGraphNode_t pGraphNode;
-    cudaGraphNode_t pGraphNodeP;
-    cudaGraph_t graph;
-    cudaGraphNode_t* singleDependency = nullptr;
-    std::vector<cudaGraphNode_t> pDependencies;
-    void* dptr;
-    int request_id;
-    cudaError_t scuda_intercept_result;
+int handle_cudaGraphAddMemFreeNode(conn_t *conn) {
+  size_t numDependencies;
+  cudaGraphNode_t pGraphNode;
+  cudaGraphNode_t pGraphNodeP;
+  cudaGraph_t graph;
+  cudaGraphNode_t *singleDependency = nullptr;
+  std::vector<cudaGraphNode_t> pDependencies;
+  void *dptr;
+  int request_id;
+  cudaError_t scuda_intercept_result;
 
-    if (rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
-        rpc_read(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
-        rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0)
-        goto ERROR_0;
+  if (rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+      rpc_read(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+      rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0)
+    goto ERROR_0;
 
-    if (numDependencies == 1) {
-        if (rpc_read(conn, &pGraphNodeP, sizeof(cudaGraphNode_t)) < 0) {
-            goto ERROR_1;
-        }
-    } else if (numDependencies > 1) {
-        pDependencies.resize(numDependencies);
-        for (size_t i = 0; i < numDependencies; ++i) {
-            if (rpc_read(conn, &pDependencies[i], sizeof(cudaGraphNode_t)) < 0) {
-                goto ERROR_0;
-            }
-        }
+  if (numDependencies == 1) {
+    if (rpc_read(conn, &pGraphNodeP, sizeof(cudaGraphNode_t)) < 0) {
+      goto ERROR_1;
     }
+  } else if (numDependencies > 1) {
+    pDependencies.resize(numDependencies);
+    for (size_t i = 0; i < numDependencies; ++i) {
+      if (rpc_read(conn, &pDependencies[i], sizeof(cudaGraphNode_t)) < 0) {
+        goto ERROR_0;
+      }
+    }
+  }
 
-    if (rpc_read(conn, &dptr, sizeof(void*)) < 0)
-        goto ERROR_1;
+  if (rpc_read(conn, &dptr, sizeof(void *)) < 0)
+    goto ERROR_1;
 
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_1;
+  request_id = rpc_read_end(conn);
+  if (request_id < 0)
+    goto ERROR_1;
 
-    scuda_intercept_result = cudaGraphAddMemFreeNode(
-        &pGraphNode, 
-        graph, 
-        (numDependencies == 1) ? &pGraphNodeP : pDependencies.data(), 
-        numDependencies, 
-        dptr
-    );
-    
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_1;
+  scuda_intercept_result = cudaGraphAddMemFreeNode(
+      &pGraphNode, graph,
+      (numDependencies == 1) ? &pGraphNodeP : pDependencies.data(),
+      numDependencies, dptr);
 
-    if (singleDependency)
-        free(singleDependency);
+  if (rpc_write_start_response(conn, request_id) < 0 ||
+      rpc_write(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+      rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
+      rpc_write_end(conn) < 0)
+    goto ERROR_1;
 
-    return 0;
+  if (singleDependency)
+    free(singleDependency);
+
+  return 0;
 
 ERROR_1:
-    if (singleDependency)
-        free(singleDependency);
+  if (singleDependency)
+    free(singleDependency);
 ERROR_0:
-    return -1;
+  return -1;
 }
 
-int handle_cudaGraphAddMemAllocNode(conn_t *conn)
-{
-    size_t numDependencies;
-    cudaGraphNode_t pGraphNode;
-    cudaGraphNode_t pGraphNodeP;
-    cudaGraph_t graph;
-    std::vector<cudaGraphNode_t> pDependencies;
-    struct cudaMemAllocNodeParams* nodeParams_null_check;
-    struct cudaMemAllocNodeParams nodeParams;
-    int request_id;
-    cudaError_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
-        rpc_read(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
-        rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
-        rpc_read(conn, &nodeParams_null_check, sizeof(struct cudaMemAllocNodeParams*)) < 0 ||
-        (nodeParams_null_check && rpc_read(conn, &nodeParams, sizeof(struct cudaMemAllocNodeParams)) < 0) ||
-        false)
-        goto ERROR_0;
+int handle_cudaGraphAddMemAllocNode(conn_t *conn) {
+  size_t numDependencies;
+  cudaGraphNode_t pGraphNode;
+  cudaGraphNode_t pGraphNodeP;
+  cudaGraph_t graph;
+  std::vector<cudaGraphNode_t> pDependencies;
+  struct cudaMemAllocNodeParams *nodeParams_null_check;
+  struct cudaMemAllocNodeParams nodeParams;
+  int request_id;
+  cudaError_t scuda_intercept_result;
+  if (rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+      rpc_read(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+      rpc_read(conn, &graph, sizeof(cudaGraph_t)) < 0 ||
+      rpc_read(conn, &nodeParams_null_check,
+               sizeof(struct cudaMemAllocNodeParams *)) < 0 ||
+      (nodeParams_null_check &&
+       rpc_read(conn, &nodeParams, sizeof(struct cudaMemAllocNodeParams)) <
+           0) ||
+      false)
+    goto ERROR_0;
 
-    if (numDependencies == 1) {
-      if (rpc_read(conn, &pGraphNodeP, sizeof(cudaGraphNode_t)) < 0) {
-        goto ERROR_0; 
-      }
-    } else if (numDependencies > 1) {
-      pDependencies.resize(numDependencies);
-      for (size_t i = 0; i < numDependencies; ++i) {
-        if (rpc_read(conn, &pDependencies[i], sizeof(cudaGraphNode_t)) < 0) {
-            goto ERROR_0;
-        }
+  if (numDependencies == 1) {
+    if (rpc_read(conn, &pGraphNodeP, sizeof(cudaGraphNode_t)) < 0) {
+      goto ERROR_0;
+    }
+  } else if (numDependencies > 1) {
+    pDependencies.resize(numDependencies);
+    for (size_t i = 0; i < numDependencies; ++i) {
+      if (rpc_read(conn, &pDependencies[i], sizeof(cudaGraphNode_t)) < 0) {
+        goto ERROR_0;
       }
     }
+  }
 
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
+  request_id = rpc_read_end(conn);
+  if (request_id < 0)
+    goto ERROR_0;
 
-    scuda_intercept_result = cudaGraphAddMemAllocNode(&pGraphNode, graph, (numDependencies == 1) ? &pGraphNodeP : pDependencies.data(), numDependencies, &nodeParams);
+  scuda_intercept_result = cudaGraphAddMemAllocNode(
+      &pGraphNode, graph,
+      (numDependencies == 1) ? &pGraphNodeP : pDependencies.data(),
+      numDependencies, &nodeParams);
 
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
-        rpc_write(conn, &nodeParams.dptr, sizeof(void *)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
+  if (rpc_write_start_response(conn, request_id) < 0 ||
+      rpc_write(conn, &pGraphNode, sizeof(cudaGraphNode_t)) < 0 ||
+      rpc_write(conn, &nodeParams.dptr, sizeof(void *)) < 0 ||
+      rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
+      rpc_write_end(conn) < 0)
+    goto ERROR_0;
 
-    return 0;
+  return 0;
 ERROR_0:
-    return -1;
+  return -1;
 }
 
-int handle_cudaDeviceGetGraphMemAttribute(conn_t *conn)
-{
-    int device;
-    enum cudaGraphMemAttributeType attr;
-    void *value;
-    int request_id;
-    cudaError_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &device, sizeof(int)) < 0 ||
-        rpc_read(conn, &attr, sizeof(enum cudaGraphMemAttributeType)) < 0 ||
-        false)
-        goto ERROR_0;
+int handle_cudaDeviceGetGraphMemAttribute(conn_t *conn) {
+  int device;
+  enum cudaGraphMemAttributeType attr;
+  void *value;
+  int request_id;
+  cudaError_t scuda_intercept_result;
+  if (rpc_read(conn, &device, sizeof(int)) < 0 ||
+      rpc_read(conn, &attr, sizeof(enum cudaGraphMemAttributeType)) < 0 ||
+      false)
+    goto ERROR_0;
 
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = cudaDeviceGetGraphMemAttribute(device, attr, &value);
+  request_id = rpc_read_end(conn);
+  if (request_id < 0)
+    goto ERROR_0;
+  scuda_intercept_result = cudaDeviceGetGraphMemAttribute(device, attr, &value);
 
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &value, sizeof(void *)) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
+  if (rpc_write_start_response(conn, request_id) < 0 ||
+      rpc_write(conn, &value, sizeof(void *)) < 0 ||
+      rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
+      rpc_write_end(conn) < 0)
+    goto ERROR_0;
 
-    return 0;
+  return 0;
 ERROR_0:
-    return -1;
+  return -1;
 }

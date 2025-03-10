@@ -80,7 +80,10 @@ MANUAL_IMPLEMENTATIONS = [
     "cudaGraphDestroy",
     "cudaGraphAddKernelNode",
     "cudaGraphAddMemcpyNode",
-    "cudaGraphAddHostNode"
+    "cudaGraphAddHostNode",
+    "cudaGraphAddMemFreeNode",
+    "cudaGraphAddMemAllocNode",
+    "cudaDeviceGetGraphMemAttribute"
 ]
 
 
