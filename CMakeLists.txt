@@ -37,6 +37,7 @@ set(CLIENT_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/rpc.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/client.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/codegen/gen_client.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/codegen/parse_elf.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/codegen/manual_client.cpp
 )
 
@@ -50,6 +51,7 @@ set(SERVER_SOURCES
 set(CLIENT_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/codegen/gen_client.h
     ${CMAKE_CURRENT_SOURCE_DIR}/codegen/manual_client.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/codegen/parse_elf.h    
 )
 
 set(SERVER_HEADERS
@@ -84,7 +86,7 @@ endif()
 
 add_library(${CLIENT_OUTPUT} SHARED ${CLIENT_SOURCES} ${CLIENT_HEADERS})
 target_include_directories(${CLIENT_OUTPUT} PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
-target_link_libraries(${CLIENT_OUTPUT} PRIVATE ${CUDART_LIBRARY} ${CUBLAS_LIBRARY} stdc++)
+target_link_libraries(${CLIENT_OUTPUT} PRIVATE ${CUDART_LIBRARY} ${CUBLAS_LIBRARY} stdc++ lz4)
 set_target_properties(${CLIENT_OUTPUT} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 add_executable(${SERVER_OUTPUT} ${SERVER_SOURCES} ${SERVER_HEADERS})

@@ -1,3 +1,6 @@
 [submodule "test/cuda-samples"]
 	path = test/cuda-samples
 	url = https://github.com/NVIDIA/cuda-samples
+[submodule "ELFIO"]
+	path = ELFIO
+	url = https://github.com/serge1/ELFIO.git

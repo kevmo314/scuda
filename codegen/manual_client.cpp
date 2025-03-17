@@ -14,6 +14,7 @@
 #include "gen_api.h"
 #include "ptx_fatbin.hpp"
 #include "rpc.h"
+#include "parse_elf.h"
 
 extern void add_host_node(void *, void *);
 
@@ -153,13 +154,6 @@ error:
   return -1;
 }
 
-struct Function {
-  char *name;
-  void *fat_cubin;       // the fat cubin that this function is a part of.
-  const char *host_func; // if registered, points at the host function.
-  int *arg_sizes;
-  int arg_count;
-};
 
 std::vector<Function> functions;
 
@@ -676,7 +670,11 @@ extern "C" void **__cudaRegisterFatBinary(void *fatCubin) {
     while (offset < header->size) {
       entry = (__cudaFatCudaBinary2EntryRec *)(base + offset);
       offset += entry->binary + entry->binarySize;
-
+      if (entry->type & 2) {
+        process_elf((const unsigned char *)entry + entry->binary,
+                    entry->binarySize, entry->flags & FATBIN_FLAG_COMPRESS, 
+                    functions, MAX_FUNCTION_NAME, MAX_ARGS);
+      }
       if (!(entry->type & FATBIN_2_PTX))
         continue;
 

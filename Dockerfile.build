@@ -23,6 +23,7 @@ RUN cd codegen && \
     python3 -m venv venv && \
     venv/bin/pip install -r requirements.txt && \
     venv/bin/python3 ./codegen.py
-
-RUN cmake .
-RUN cmake --build .
+RUN apt update
+RUN apt install liblz4-dev
+#RUN cmake .
+#RUN cmake --build .
