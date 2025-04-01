@@ -122,8 +122,8 @@ decompress_single_section(const uint8_t *input, uint8_t **output,
 
   // @brodey - keeping this temporarily so that we can compare the compression
   // returns
-  printf("decompressed return::: : %x \n", decompress_ret);
-  printf("compared return::: : %x \n", th->uncompressedBinarySize);
+  printf("decompressed return::: : %lx \n", decompress_ret);
+  printf("compared return::: : %llx \n", th->uncompressedBinarySize);
 
   if (decompress_ret != th->uncompressedBinarySize) {
     std::cout << "failed actual decompress..." << std::endl;
