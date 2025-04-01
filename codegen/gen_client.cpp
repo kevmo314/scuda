@@ -4904,6 +4904,7 @@ nvmlReturn_t nvmlVgpuTypeGetClass(nvmlVgpuTypeId_t vgpuTypeId, char* vgpuTypeCla
     nvmlReturn_t return_value;
     if (rpc_write_start_request(conn, RPC_nvmlVgpuTypeGetClass) < 0 ||
         rpc_write(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
+        rpc_write(conn, size, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, size, sizeof(unsigned int)) < 0 ||
         rpc_read(conn, vgpuTypeClass, *size * sizeof(char)) < 0 ||

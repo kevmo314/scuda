@@ -5516,6 +5516,7 @@ int handle_nvmlVgpuTypeGetClass(conn_t *conn)
     nvmlReturn_t scuda_intercept_result;
     if (
         rpc_read(conn, &vgpuTypeId, sizeof(nvmlVgpuTypeId_t)) < 0 ||
+        rpc_read(conn, &size, sizeof(unsigned int)) < 0 ||
         false)
         goto ERROR_0;
     vgpuTypeClass = (char*)malloc(size * sizeof(char));
