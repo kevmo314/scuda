@@ -52,9 +52,6 @@ struct ManagedPtr {
 
 std::map<conn_t *, std::list<ManagedPtr>> managed_ptrs;
 
-static jmp_buf catch_segfault;
-static void *faulting_address = nullptr;
-
 int rpc_write(const void *conn, const void *data, const size_t size) {
   ((conn_t *)conn)->write_iov[((conn_t *)conn)->write_iov_count++] =
       (struct iovec){(void *)data, size};
@@ -78,10 +75,12 @@ static void segfault(int sig, siginfo_t *info, void *unused) {
           (uintptr_t)faulting_address <
               (uintptr_t)mem_entry.src + allocated_size) {
         allocated_ptr = mem_entry.src;
+        printf("src. allocated_ptr = %p\n", allocated_ptr);
       } else if ((uintptr_t)mem_entry.dst <= (uintptr_t)faulting_address &&
                  (uintptr_t)faulting_address <
                      (uintptr_t)mem_entry.dst + allocated_size) {
         allocated_ptr = mem_entry.dst;
+        printf("dst. allocated_ptr = %p\n", allocated_ptr);
       } else {
         printf("no pointer match, returning.\n");
         continue;
@@ -92,6 +91,7 @@ static void segfault(int sig, siginfo_t *info, void *unused) {
 
       size_t page_size = sysconf(_SC_PAGE_SIZE);
       uintptr_t aligned_addr = (uintptr_t)faulting_address;
+      printf("size= %lu, aligned_addr = %lx\n", size, aligned_addr);
 
       // Allocate memory at the faulting address
       void *allocated =
@@ -159,8 +159,6 @@ void invoke_host_func(void *data) {
     if (rpc_write(tmp->conn, &copy.dst, sizeof(void *)) < 0 ||
         rpc_write(tmp->conn, &copy.size, sizeof(size_t)) < 0)
       return;
-
-    double *result = (double *)(copy.dst);
 
     if (rpc_write(tmp->conn, copy.dst, copy.size) < 0) {
       std::cerr << "Error: rpc_write failed on memory" << std::endl;
