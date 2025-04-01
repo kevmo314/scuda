@@ -1119,17 +1119,17 @@ def main():
 
     with open("gen_client.cpp", "w") as f:
         f.write(
-            "#include <nvml.h>\n"
-            "#include <cuda.h>\n"
-            "#include <cudnn.h>\n"
-            "#include <cublas_v2.h>\n"
-            "#include <cuda_runtime_api.h>\n\n"
             "#include <cstring>\n"
             "#include <string>\n"
             "#include <unordered_map>\n\n"
-            '#include "gen_api.h"\n\n'
+            "#include <cuda.h>\n"
+            "#include <cuda_runtime_api.h>\n"
+            "#include <cublas_v2.h>\n"
+            "#include <cudnn.h>\n"
+            "#include <nvml.h>\n\n"
+            '#include "rpc.h"\n'
+            '#include "gen_api.h"\n'
             '#include "manual_client.h"\n\n'
-            '#include "rpc.h"\n\n'
             "extern int rpc_size();\n"
             "extern conn_t *rpc_client_get_connection(unsigned int index);\n"
             "int is_unified_pointer(conn_t *conn, void *arg);\n"
@@ -1294,24 +1294,22 @@ def main():
 
     with open("gen_server.cpp", "w") as f:
         f.write(
-            "#include <nvml.h>\n"
-            "#include <iostream>\n"
-            "#include <cuda.h>\n"
-            "#include <cudnn.h>\n"
-            "#include <cublas_v2.h>\n"
-            "#include <cuda_runtime_api.h>\n\n"
+            "#include <cstdio>\n"
             "#include <cstring>\n"
             "#include <string>\n"
-            "#include <unordered_map>\n\n"
-            '#include "gen_api.h"\n\n'
-            '#include <vector>\n\n'
-            '#include <cstdio>\n\n'
-            '#include <cuda_runtime.h>\n\n'
-            '#include "gen_server.h"\n\n'
+            "#include <vector>\n"
+            "#include <unordered_map>\n"
+            "#include <iostream>\n\n"
+            "#include <cuda.h>\n"
+            "#include <cuda_runtime.h>\n"
+            "#include <cuda_runtime_api.h>\n"
+            "#include <cublas_v2.h>\n"
+            "#include <cudnn.h>\n"
+            "#include <nvml.h>\n\n"
+            '#include "rpc.h"\n'
+            '#include "gen_api.h"\n'
+            '#include "gen_server.h"\n'
             '#include "manual_server.h"\n\n'
-            '#include <cstdio>\n\n'
-            '#include <cuda_runtime.h>\n\n'
-            '#include "rpc.h"\n\n'
         )
         for function, annotation, operations, disabled in functions_with_annotations:
             if function.name.format() in MANUAL_IMPLEMENTATIONS or disabled:
