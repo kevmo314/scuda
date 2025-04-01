@@ -28,9 +28,9 @@ set(CMAKE_C_COMPILER "/usr/bin/gcc")
 set(CMAKE_CXX_COMPILER "/usr/bin/g++")
 
 include_directories(
+    ${CUDAToolkit_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/codegen
-    ${CUDAToolkit_INCLUDE_DIRS}
 )
 
 set(CLIENT_SOURCES
@@ -41,8 +41,8 @@ set(CLIENT_SOURCES
 )
 
 set(SERVER_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/server.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rpc.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/server.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/codegen/gen_server.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/codegen/manual_server.cpp
 )
@@ -53,8 +53,8 @@ set(CLIENT_HEADERS
 )
 
 set(SERVER_HEADERS
-    ${CMAKE_CURRENT_SOURCE_DIR}/codegen/gen_server.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rpc.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/codegen/gen_server.h
     ${CMAKE_CURRENT_SOURCE_DIR}/codegen/manual_server.h
 )
 
@@ -69,18 +69,22 @@ find_library(NVML_LIBRARY nvidia-ml HINTS ${CUDAToolkit_LIBRARY_DIR} PATHS /usr/
 if (NOT CUBLAS_LIBRARY)
     message(FATAL_ERROR "cuBLAS library not found. Ensure CUDA is installed and the library path is correct.")
 endif()
+message("CUBLAS_LIBRARY=${CUBLAS_LIBRARY}") # CUBLAS_LIBRARY=/usr/local/cuda/lib64/libcublas.so
 
 if (NOT CUDNN_LIBRARY)
     message(FATAL_ERROR "cuDNN library not found. Ensure CUDA is installed and the library path is correct.")
 endif()
+message("CUDNN_LIBRARY=${CUDNN_LIBRARY}") # CUDNN_LIBRARY=/usr/lib/x86_64-linux-gnu/libcudnn.so
 
 if (NOT CUDART_LIBRARY)
     message(FATAL_ERROR "CUDA Runtime library (libcudart.so) not found. Ensure CUDA is installed and the library path is correct.")
 endif()
+message("CUDART_LIBRARY=${CUDART_LIBRARY}") # CUDART_LIBRARY=/usr/local/cuda/lib64/libcudart.so
 
 if (NOT NVML_LIBRARY)
     message(FATAL_ERROR "NVML library not found. Ensure CUDA is installed and the library path is correct.")
 endif()
+message("NVML_LIBRARY=${NVML_LIBRARY}") # NVML_LIBRARY=/usr/lib/x86_64-linux-gnu/libnvidia-ml.so
 
 add_library(${CLIENT_OUTPUT} SHARED ${CLIENT_SOURCES} ${CLIENT_HEADERS})
 target_include_directories(${CLIENT_OUTPUT} PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
