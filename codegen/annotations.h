@@ -4937,6 +4937,7 @@ cudaError_t cudaStreamGetCaptureInfo_v2(
     unsigned long long *id_out, cudaGraph_t *graph_out,
     const cudaGraphNode_t **dependencies_out, size_t *numDependencies_out);
 /**
+ * @disabled
  * @param stream SEND_ONLY
  * @param numDependencies SEND_ONLY
  * @param dependencies SEND_ONLY LENGTH:numDependencies
