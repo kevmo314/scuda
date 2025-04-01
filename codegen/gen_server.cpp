@@ -1,31 +1,21 @@
-#include <cublas_v2.h>
-#include <cuda.h>
-#include <cuda_runtime_api.h>
-#include <cudnn.h>
-#include <iostream>
-#include <nvml.h>
-
+#include <cstdio>
 #include <cstring>
 #include <string>
+#include <iostream>
 #include <unordered_map>
-
-#include "gen_api.h"
-
 #include <vector>
 
-#include <cstdio>
-
+#include <cuda.h>
 #include <cuda_runtime.h>
-
-#include "gen_server.h"
-
-#include "manual_server.h"
-
-#include <cstdio>
-
-#include <cuda_runtime.h>
+#include <cuda_runtime_api.h>
+#include <cublas_v2.h>
+#include <cudnn.h>
+#include <nvml.h>
 
 #include "rpc.h"
+#include "gen_api.h"
+#include "gen_server.h"
+#include "manual_server.h"
 
 int handle_nvmlInit_v2(conn_t *conn) {
   int request_id;

@@ -1,18 +1,17 @@
-#include <cublas_v2.h>
-#include <cuda.h>
-#include <cuda_runtime_api.h>
-#include <cudnn.h>
-#include <nvml.h>
-
 #include <cstring>
 #include <string>
 #include <unordered_map>
 
-#include "gen_api.h"
-
-#include "manual_client.h"
+#include <cuda.h>
+#include <cuda_runtime_api.h>
+#include <cublas_v2.h>
+#include <cudnn.h>
+#include <nvml.h>
 
 #include "rpc.h"
+#include "gen_api.h"
+#include "manual_client.h"
+
 
 extern int rpc_size();
 extern conn_t *rpc_client_get_connection(unsigned int index);
