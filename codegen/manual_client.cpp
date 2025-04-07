@@ -1361,3 +1361,54 @@ cudaError_t cudaStreamUpdateCaptureDependencies(cudaStream_t stream, cudaGraphNo
       return cudaErrorDevicesUnavailable;
     return return_value;
 }
+
+
+cudaError_t cudaStreamGetCaptureInfo_v2(cudaStream_t stream, enum cudaStreamCaptureStatus* captureStatus_out, 
+    unsigned long long* id_out, cudaGraph_t* graph_out, const cudaGraphNode_t** dependencies_out, 
+    size_t* numDependencies_out)
+{
+    conn_t *conn = rpc_client_get_connection(0);
+    if (maybe_copy_unified_arg(conn, (void*)&stream, cudaMemcpyHostToDevice) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)captureStatus_out, cudaMemcpyHostToDevice) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)id_out, cudaMemcpyHostToDevice) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)graph_out, cudaMemcpyHostToDevice) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)numDependencies_out, cudaMemcpyHostToDevice) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)dependencies_out, cudaMemcpyHostToDevice) < 0)
+      return cudaErrorDevicesUnavailable;
+    for (int i = 0; i < static_cast<int>(*numDependencies_out) && is_unified_pointer(conn, (void*)dependencies_out); i++)
+      if (maybe_copy_unified_arg(conn, (void*)&dependencies_out[i], cudaMemcpyHostToDevice) < 0)
+        return cudaErrorDevicesUnavailable;
+    cudaError_t return_value;
+    if (rpc_write_start_request(conn, RPC_cudaStreamGetCaptureInfo_v2) < 0 ||
+        rpc_write(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, captureStatus_out, sizeof(enum cudaStreamCaptureStatus)) < 0 ||
+        rpc_read(conn, id_out, sizeof(unsigned long long)) < 0 ||
+        rpc_read(conn, graph_out, sizeof(cudaGraph_t)) < 0 ||
+        rpc_read(conn, numDependencies_out, sizeof(size_t)) < 0 ||
+        rpc_read(conn, dependencies_out, *numDependencies_out * sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_read(conn, &return_value, sizeof(cudaError_t)) < 0 ||
+        rpc_read_end(conn) < 0)
+        return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)&stream, cudaMemcpyDeviceToHost) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)captureStatus_out, cudaMemcpyDeviceToHost) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)id_out, cudaMemcpyDeviceToHost) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)graph_out, cudaMemcpyDeviceToHost) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)numDependencies_out, cudaMemcpyDeviceToHost) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)dependencies_out, cudaMemcpyDeviceToHost) < 0)
+      return cudaErrorDevicesUnavailable;
+    for (int i = 0; i < static_cast<int>(*numDependencies_out) && is_unified_pointer(conn, (void*)dependencies_out); i++)
+      if (maybe_copy_unified_arg(conn, (void*)&dependencies_out[i], cudaMemcpyDeviceToHost) < 0)
+        return cudaErrorDevicesUnavailable;
+    return return_value;
+}

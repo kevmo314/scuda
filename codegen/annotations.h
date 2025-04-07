@@ -3255,20 +3255,7 @@ CUresult cuStreamEndCapture(CUstream hStream, CUgraph *phGraph);
  */
 CUresult cuStreamIsCapturing(CUstream hStream,
                              CUstreamCaptureStatus *captureStatus);
-/**
- * @disabled
- * @param hStream SEND_ONLY
- * @param captureStatus_out RECV_ONLY
- * @param id_out RECV_ONLY
- * @param graph_out RECV_ONLY
- * @param numDependencies_out RECV_ONLY
- * @param dependencies_out RECV_ONLY LENGTH:numDependencies_out
- */
-CUresult cuStreamGetCaptureInfo_v2(CUstream hStream,
-                                   CUstreamCaptureStatus *captureStatus_out,
-                                   cuuint64_t *id_out, CUgraph *graph_out,
-                                   const CUgraphNode **dependencies_out,
-                                   size_t *numDependencies_out);
+
 /**
  * @param hStream SEND_ONLY
  * @param dependencies SEND_RECV
@@ -4925,6 +4912,7 @@ cudaError_t cudaStreamEndCapture(cudaStream_t stream, cudaGraph_t *pGraph);
 cudaError_t cudaStreamIsCapturing(cudaStream_t stream,
                                   enum cudaStreamCaptureStatus *pCaptureStatus);
 /**
+ * @disabled
  * @param stream SEND_ONLY
  * @param captureStatus_out RECV_ONLY
  * @param id_out RECV_ONLY

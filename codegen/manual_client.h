@@ -12,6 +12,9 @@ cudaError_t cudaGraphAddMemFreeNode(cudaGraphNode_t* pGraphNode, cudaGraph_t gra
 cudaError_t cudaDeviceGetGraphMemAttribute(int device, enum cudaGraphMemAttributeType attr, void* value);
 cudaError_t cudaStreamUpdateCaptureDependencies(cudaStream_t stream, cudaGraphNode_t* dependencies,
     size_t numDependencies, unsigned int flags);
+cudaError_t cudaStreamGetCaptureInfo_v2(cudaStream_t stream, enum cudaStreamCaptureStatus* captureStatus_out, 
+    unsigned long long* id_out, cudaGraph_t* graph_out, const cudaGraphNode_t** dependencies_out, 
+    size_t* numDependencies_out);
 cudaError_t cudaFree(void *devPtr);
 cudaError_t cudaMallocHost(void **ptr, size_t size);
 cudaError_t cudaMallocManaged(void **devPtr, size_t size, unsigned int flags);

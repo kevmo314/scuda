@@ -1022,3 +1022,40 @@ ERROR_1:
 ERROR_0:
     return -1;
 }
+
+
+int handle_cudaStreamGetCaptureInfo_v2(conn_t *conn)
+{
+    cudaStream_t stream;
+    enum cudaStreamCaptureStatus captureStatus_out;
+    unsigned long long id_out;
+    cudaGraph_t graph_out;
+    size_t numDependencies_out;
+    const cudaGraphNode_t* dependencies_out;
+    int request_id;
+    cudaError_t scuda_intercept_result;
+    if (
+        rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+        false)
+        goto ERROR_0;
+
+    request_id = rpc_read_end(conn);
+    if (request_id < 0)
+        goto ERROR_0;
+    scuda_intercept_result = cudaStreamGetCaptureInfo_v2(stream, &captureStatus_out, 
+      &id_out, &graph_out, &dependencies_out, &numDependencies_out);
+
+    if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &captureStatus_out, sizeof(enum cudaStreamCaptureStatus)) < 0 ||
+        rpc_write(conn, &id_out, sizeof(unsigned long long)) < 0 ||
+        rpc_write(conn, &graph_out, sizeof(cudaGraph_t)) < 0 ||
+        rpc_write(conn, &numDependencies_out, sizeof(size_t)) < 0 ||
+        rpc_write(conn, dependencies_out, numDependencies_out * sizeof(const cudaGraphNode_t*)) < 0 ||
+        rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
+        rpc_write_end(conn) < 0)
+        goto ERROR_0;
+
+    return 0;
+ERROR_0:
+    return -1;
+}
