@@ -5,7 +5,6 @@
 #include <string.h>
 #include <unistd.h>
 
-pthread_t tid;
 
 void *_rpc_read_id_dispatch(void *p) {
   conn_t *conn = (conn_t *)p;
@@ -24,6 +23,7 @@ void *_rpc_read_id_dispatch(void *p) {
       break;
   }
   pthread_mutex_unlock(&conn->read_mutex);
+  conn->rpc_thread = 0;
   return NULL;
 }
 
@@ -35,8 +35,8 @@ void *_rpc_read_id_dispatch(void *p) {
 // the sequence because by convention, the handler owns the read lock on
 // entry.
 int rpc_dispatch(conn_t *conn, int parity) {
-  if (tid == 0 &&
-      pthread_create(&tid, nullptr, _rpc_read_id_dispatch, (void *)conn) < 0) {
+  if (conn->rpc_thread == 0 &&
+      pthread_create(&conn->rpc_thread, nullptr, _rpc_read_id_dispatch, (void *)conn) < 0) {
     return -1;
   }
 

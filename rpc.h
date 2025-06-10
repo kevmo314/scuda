@@ -13,6 +13,7 @@ typedef struct {
   int write_op;
 
   pthread_t read_thread;
+  pthread_t rpc_thread;
   pthread_mutex_t read_mutex, write_mutex;
   pthread_cond_t read_cond;
   struct iovec write_iov[128];
