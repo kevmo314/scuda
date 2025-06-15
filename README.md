@@ -26,7 +26,7 @@ To ensure codegen works properly, the proper cuda packages need to be installed 
 
 Take a look [here to install CUDA Toolkit](https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&Distribution=WSL-Ubuntu&target_version=2.0&target_type=deb_network) (choose your system)
 
-Codegen requires cuBLAS, cuDNN, NVML, etc:
+Codegen requires [cuBLAS](https://developer.nvidia.com/hpc-sdk-downloads), [cuDNN](https://developer.nvidia.com/cudnn-downloads?target_os=Linux&target_arch=x86_64&Distribution=Ubuntu&target_version=24.04&target_type=deb_network), [NVML](https://developer.nvidia.com/management-library-nvml), etc:
 
 ```py
 cudnn_graph_header = find_header_file("cudnn_graph.h")
