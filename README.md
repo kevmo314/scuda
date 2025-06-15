@@ -24,7 +24,7 @@ Building the binaries requires running codegen first. Scuda codegen reads the cu
 
 To ensure codegen works properly, the proper cuda packages need to be installed on your OS. Take a look at our [Dockerfile](./Dockerfile.build) to see an example.
 
-Take a look here to install CUDA Toolkit (choose your system): `https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&Distribution=WSL-Ubuntu&target_version=2.0&target_type=deb_network`
+Take a look [here to install CUDA Toolkit](https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&Distribution=WSL-Ubuntu&target_version=2.0&target_type=deb_network) (choose your system)
 
 Codegen requires cuBLAS, cuDNN, NVML, etc:
 
