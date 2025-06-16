@@ -83,7 +83,8 @@ MANUAL_IMPLEMENTATIONS = [
     "cudaGraphAddHostNode",
     "cudaGraphAddMemFreeNode",
     "cudaGraphAddMemAllocNode",
-    "cudaDeviceGetGraphMemAttribute"
+    "cudaDeviceGetGraphMemAttribute",
+    "cudaStreamUpdateCaptureDependencies"
 ]
 
 

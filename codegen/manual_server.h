@@ -11,6 +11,7 @@ int handle_cudaGraphAddKernelNode(conn_t *conn);
 int handle_cudaGraphGetNodes(conn_t *conn);
 int handle_cudaGraphAddMemAllocNode(conn_t *conn);
 int handle_cudaDeviceGetGraphMemAttribute(conn_t *conn);
+int handle_cudaStreamUpdateCaptureDependencies(conn_t *conn);
 int handle_cudaGraphAddMemFreeNode(conn_t *conn);
 int handle_cudaFree(conn_t *conn);
 int handle_cudaMemcpy(conn_t *conn);
