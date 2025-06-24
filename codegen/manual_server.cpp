@@ -987,3 +987,38 @@ int handle_cudaDeviceGetGraphMemAttribute(conn_t *conn) {
 ERROR_0:
   return -1;
 }
+
+int handle_cudaStreamUpdateCaptureDependencies(conn_t *conn)
+{
+    cudaStream_t stream;
+    size_t numDependencies;
+    cudaGraphNode_t* dependencies;
+    unsigned int flags;
+    int request_id;
+    cudaError_t scuda_intercept_result;
+    if (rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_read(conn, &numDependencies, sizeof(size_t)) < 0 ||
+        false)
+        goto ERROR_0;
+    dependencies = (cudaGraphNode_t*)malloc(numDependencies * sizeof(cudaGraphNode_t));
+    if (rpc_read(conn, dependencies, numDependencies * sizeof(cudaGraphNode_t)) < 0 ||
+        rpc_read(conn, &flags, sizeof(unsigned int)) < 0 ||
+        false)
+        goto ERROR_1;
+
+    request_id = rpc_read_end(conn);
+    if (request_id < 0)
+        goto ERROR_1;
+    scuda_intercept_result = cudaStreamUpdateCaptureDependencies(stream, dependencies, numDependencies, flags);
+
+    if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
+        rpc_write_end(conn) < 0)
+        goto ERROR_1;
+    return 0;
+ERROR_1:
+  if (dependencies)
+    free(dependencies);
+ERROR_0:
+    return -1;
+}
