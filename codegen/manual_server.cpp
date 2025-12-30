@@ -36,7 +36,7 @@ int handle_cudaMemcpy(conn_t *conn) {
   cudaError_t result;
   void *src;
   void *dst;
-  void *host_data;
+  void *host_data = NULL;  // Must initialize - freed at end
   std::size_t count;
   enum cudaMemcpyKind kind;
   int ret = -1;
@@ -104,7 +104,7 @@ int handle_cudaMemcpyAsync(conn_t *conn) {
   cudaError_t result;
   void *src;
   void *dst;
-  void *host_data;
+  void *host_data = NULL;  // Must initialize
   std::size_t count;
   enum cudaMemcpyKind kind;
   int stream_null_check;
@@ -310,8 +310,6 @@ int handle_cudaLaunchKernel(conn_t *conn) {
 
   result = cudaLaunchKernel(func, gridDim, blockDim, args, sharedMem, stream);
 
-  std::cout << "Launch kern result: " << result << std::endl;
-
   if (rpc_write_start_response(conn, request_id) < 0 ||
       rpc_write(conn, &result, sizeof(cudaError_t)) < 0 ||
       rpc_write_end(conn) < 0)
@@ -401,6 +399,9 @@ int handle___cudaRegisterFunction(conn_t *conn) {
   int wSize;
 
   int request_id;
+  int param_count = 0;
+  size_t param_offset, param_size;
+  int param_sizes[64];
 
   if (rpc_read(conn, &fatCubinHandle, sizeof(void **)) < 0 ||
       rpc_read(conn, &hostFun, sizeof(const char *)) < 0 ||
@@ -433,7 +434,28 @@ int handle___cudaRegisterFunction(conn_t *conn) {
       mask & 1 << 2 ? &bDim : nullptr, mask & 1 << 3 ? &gDim : nullptr,
       mask & 1 << 4 ? &wSize : nullptr);
 
-  if (rpc_write_start_response(conn, request_id) < 0 || rpc_write_end(conn) < 0)
+  // Query param info using cudaFuncGetParamInfo
+  while (param_count < 64) {
+    cudaError_t err = cudaFuncGetParamInfo(hostFun, param_count, &param_offset, &param_size);
+    if (err != cudaSuccess) {
+      // Clear the error state so it doesn't affect subsequent cudaGetLastError calls
+      cudaGetLastError();
+      break;
+    }
+    param_sizes[param_count] = (int)param_size;
+    param_count++;
+  }
+
+  if (rpc_write_start_response(conn, request_id) < 0 ||
+      rpc_write(conn, &param_count, sizeof(int)) < 0)
+    return -1;
+
+  for (int i = 0; i < param_count; i++) {
+    if (rpc_write(conn, &param_sizes[i], sizeof(int)) < 0)
+      return -1;
+  }
+
+  if (rpc_write_end(conn) < 0)
     return -1;
 
   return 0;
@@ -552,31 +574,19 @@ int handle___cudaRegisterVar(conn_t *conn) {
     return -1;
   }
 
-  // Read hostVar
-  size_t hostVarLen;
-  if (rpc_read(conn, &hostVarLen, sizeof(size_t)) < 0) {
-    std::cerr << "Failed to read hostVar length" << std::endl;
-    return -1;
-  }
-  hostVar = (char *)malloc(hostVarLen);
-  if (rpc_read(conn, hostVar, hostVarLen) < 0) {
+  // Read hostVar as pointer value (not a string - it's a client-side address)
+  if (rpc_read(conn, &hostVar, sizeof(void *)) < 0) {
     std::cerr << "Failed to read hostVar" << std::endl;
     return -1;
   }
 
-  // Read deviceAddress
-  size_t deviceAddressLen;
-  if (rpc_read(conn, &deviceAddressLen, sizeof(size_t)) < 0) {
-    std::cerr << "Failed to read deviceAddress length" << std::endl;
-    return -1;
-  }
-  deviceAddress = (char *)malloc(deviceAddressLen);
-  if (rpc_read(conn, deviceAddress, deviceAddressLen) < 0) {
+  // Read deviceAddress as pointer value (not a string - it's a client-side address)
+  if (rpc_read(conn, &deviceAddress, sizeof(void *)) < 0) {
     std::cerr << "Failed to read deviceAddress" << std::endl;
     return -1;
   }
 
-  // Read deviceName
+  // Read deviceName (this IS a string)
   size_t deviceNameLen;
   if (rpc_read(conn, &deviceNameLen, sizeof(size_t)) < 0) {
     std::cerr << "Failed to read deviceName length" << std::endl;
@@ -585,35 +595,40 @@ int handle___cudaRegisterVar(conn_t *conn) {
   deviceName = (char *)malloc(deviceNameLen);
   if (rpc_read(conn, deviceName, deviceNameLen) < 0) {
     std::cerr << "Failed to read deviceName" << std::endl;
+    free(deviceName);
     return -1;
   }
 
   // Read ext, size, constant, global
   if (rpc_read(conn, &ext, sizeof(int)) < 0) {
     std::cerr << "Failed reading ext" << std::endl;
+    free(deviceName);
     return -1;
   }
 
   if (rpc_read(conn, &size, sizeof(size_t)) < 0) {
     std::cerr << "Failed reading size" << std::endl;
+    free(deviceName);
     return -1;
   }
 
   if (rpc_read(conn, &constant, sizeof(int)) < 0) {
     std::cerr << "Failed reading constant" << std::endl;
+    free(deviceName);
     return -1;
   }
 
   if (rpc_read(conn, &global, sizeof(int)) < 0) {
     std::cerr << "Failed reading global" << std::endl;
+    free(deviceName);
     return -1;
   }
 
-  std::cout << "Received __cudaRegisterVar with deviceName: " << deviceName
-            << std::endl;
+  // Note: We don't call __cudaRegisterVar here because hostVar and deviceAddress
+  // are client-side pointers that are meaningless on the server. The symbol
+  // registration is handled via cuModuleGetGlobal when cudaMemcpyToSymbol is called.
 
-  __cudaRegisterVar(fatCubinHandle, hostVar, deviceAddress, deviceName, ext,
-                    size, constant, global);
+  free(deviceName);
 
   // End request phase
   int request_id = rpc_read_end(conn);
@@ -677,7 +692,79 @@ ERROR_0:
   return -1;
 }
 
-int handle_cudaMallocHost(conn_t *conn) { return 0; }
+int handle_cudaMallocHost(conn_t *conn) {
+  void *ptr;
+  size_t size;
+  int request_id;
+  cudaError_t scuda_intercept_result;
+  if (rpc_read(conn, &size, sizeof(size_t)) < 0 || false)
+    goto ERROR_0;
+
+  request_id = rpc_read_end(conn);
+  if (request_id < 0)
+    goto ERROR_0;
+  scuda_intercept_result = cudaMallocHost(&ptr, size);
+
+  if (rpc_write_start_response(conn, request_id) < 0 ||
+      rpc_write(conn, &ptr, sizeof(void *)) < 0 ||
+      rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
+      rpc_write_end(conn) < 0)
+    goto ERROR_0;
+
+  return 0;
+ERROR_0:
+  return -1;
+}
+
+int handle_cudaHostAlloc(conn_t *conn) {
+  std::cerr << "SERVER: handle_cudaHostAlloc entered" << std::endl;
+  void *pHost;
+  size_t size;
+  unsigned int flags;
+  int request_id;
+  cudaError_t scuda_intercept_result;
+  if (rpc_read(conn, &size, sizeof(size_t)) < 0 ||
+      rpc_read(conn, &flags, sizeof(unsigned int)) < 0 || false)
+    goto ERROR_0;
+  std::cerr << "SERVER: cudaHostAlloc size=" << size << " flags=" << flags << std::endl;
+
+  request_id = rpc_read_end(conn);
+  if (request_id < 0)
+    goto ERROR_0;
+  scuda_intercept_result = cudaHostAlloc(&pHost, size, flags);
+
+  if (rpc_write_start_response(conn, request_id) < 0 ||
+      rpc_write(conn, &pHost, sizeof(void *)) < 0 ||
+      rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
+      rpc_write_end(conn) < 0)
+    goto ERROR_0;
+
+  return 0;
+ERROR_0:
+  return -1;
+}
+
+int handle_cudaFreeHost(conn_t *conn) {
+  void *ptr;
+  int request_id;
+  cudaError_t scuda_intercept_result;
+  if (rpc_read(conn, &ptr, sizeof(void *)) < 0 || false)
+    goto ERROR_0;
+
+  request_id = rpc_read_end(conn);
+  if (request_id < 0)
+    goto ERROR_0;
+  scuda_intercept_result = cudaFreeHost(ptr);
+
+  if (rpc_write_start_response(conn, request_id) < 0 ||
+      rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
+      rpc_write_end(conn) < 0)
+    goto ERROR_0;
+
+  return 0;
+ERROR_0:
+  return -1;
+}
 
 int handle_cudaGraphGetNodes(conn_t *conn) {
   cudaGraph_t graph;
@@ -979,6 +1066,110 @@ int handle_cudaDeviceGetGraphMemAttribute(conn_t *conn) {
 
   if (rpc_write_start_response(conn, request_id) < 0 ||
       rpc_write(conn, &value, sizeof(void *)) < 0 ||
+      rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
+      rpc_write_end(conn) < 0)
+    goto ERROR_0;
+
+  return 0;
+ERROR_0:
+  return -1;
+}
+
+int handle_cudaMemcpy3D(conn_t *conn) {
+  struct cudaMemcpy3DParms p;
+  size_t src_data_size;
+  std::vector<char> src_buffer;
+  int request_id;
+  cudaError_t scuda_intercept_result;
+
+  if (rpc_read(conn, &p, sizeof(struct cudaMemcpy3DParms)) < 0 ||
+      rpc_read(conn, &src_data_size, sizeof(size_t)) < 0)
+    goto ERROR_0;
+
+  // If source data was sent, read it into a temporary buffer
+  if (src_data_size > 0 &&
+      (p.kind == cudaMemcpyHostToDevice || p.kind == cudaMemcpyHostToHost)) {
+    src_buffer.resize(src_data_size);
+    if (rpc_read(conn, src_buffer.data(), src_data_size) < 0)
+      goto ERROR_0;
+    // Point srcPtr to our local buffer
+    p.srcPtr.ptr = src_buffer.data();
+  }
+
+  request_id = rpc_read_end(conn);
+  if (request_id < 0)
+    goto ERROR_0;
+
+  scuda_intercept_result = cudaMemcpy3D(&p);
+
+  if (rpc_write_start_response(conn, request_id) < 0 ||
+      rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0)
+    goto ERROR_0;
+
+  // If copying to host memory, send destination data back
+  if (p.dstPtr.ptr != nullptr && scuda_intercept_result == cudaSuccess &&
+      (p.kind == cudaMemcpyDeviceToHost || p.kind == cudaMemcpyHostToHost)) {
+    size_t dst_data_size = p.dstPtr.pitch * p.extent.height * p.extent.depth;
+    if (rpc_write(conn, p.dstPtr.ptr, dst_data_size) < 0)
+      goto ERROR_0;
+  }
+
+  if (rpc_write_end(conn) < 0)
+    goto ERROR_0;
+
+  return 0;
+ERROR_0:
+  return -1;
+}
+
+int handle_cudaCreateTextureObject(conn_t *conn) {
+  const struct cudaResourceDesc *pResDescPtr;
+  struct cudaResourceDesc resDesc;
+  const struct cudaTextureDesc *pTexDescPtr;
+  struct cudaTextureDesc texDesc;
+  const struct cudaResourceViewDesc *pResViewDescPtr;
+  struct cudaResourceViewDesc resViewDesc;
+  cudaTextureObject_t texObject;
+  int request_id;
+  cudaError_t scuda_intercept_result;
+
+  // Read pResDesc pointer to check if null
+  if (rpc_read(conn, &pResDescPtr, sizeof(const struct cudaResourceDesc*)) < 0)
+    goto ERROR_0;
+  if (pResDescPtr != nullptr) {
+    if (rpc_read(conn, &resDesc, sizeof(struct cudaResourceDesc)) < 0)
+      goto ERROR_0;
+  }
+
+  // Read pTexDesc pointer to check if null
+  if (rpc_read(conn, &pTexDescPtr, sizeof(const struct cudaTextureDesc*)) < 0)
+    goto ERROR_0;
+  if (pTexDescPtr != nullptr) {
+    if (rpc_read(conn, &texDesc, sizeof(struct cudaTextureDesc)) < 0)
+      goto ERROR_0;
+  }
+
+  // Read pResViewDesc pointer to check if null
+  if (rpc_read(conn, &pResViewDescPtr, sizeof(const struct cudaResourceViewDesc*)) < 0)
+    goto ERROR_0;
+  if (pResViewDescPtr != nullptr) {
+    if (rpc_read(conn, &resViewDesc, sizeof(struct cudaResourceViewDesc)) < 0)
+      goto ERROR_0;
+  }
+
+  request_id = rpc_read_end(conn);
+  if (request_id < 0)
+    goto ERROR_0;
+
+  // Call with NULL or pointer based on what client sent
+  scuda_intercept_result = cudaCreateTextureObject(
+      &texObject,
+      pResDescPtr != nullptr ? &resDesc : nullptr,
+      pTexDescPtr != nullptr ? &texDesc : nullptr,
+      pResViewDescPtr != nullptr ? &resViewDesc : nullptr);
+
+  if (rpc_write_start_response(conn, request_id) < 0 ||
+      rpc_write(conn, &texObject, sizeof(cudaTextureObject_t)) < 0 ||
       rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
       rpc_write_end(conn) < 0)
     goto ERROR_0;

@@ -29,6 +29,10 @@ extern cudaError_t cuda_memcpy_unified_ptrs(conn_t *conn, cudaMemcpyKind kind);
 extern void maybe_free_unified_mem(conn_t *conn, void *ptr);
 extern void allocate_unified_mem_pointer(conn_t *conn, void *dev_ptr,
                                          size_t size);
+extern void allocate_pinned_host_pointer(conn_t *conn, void *host_ptr,
+                                          size_t size);
+extern void maybe_free_pinned_host(conn_t *conn, void *ptr);
+extern bool ensure_unified_ptr_mapped(conn_t *conn, void *ptr);
 extern int is_unified_pointer(const int index, void *arg);
 int maybe_copy_unified_arg(const int index, void *arg,
                            enum cudaMemcpyKind kind);
@@ -178,6 +182,8 @@ cudaError_t cudaMemcpy(void *dst, const void *src, size_t count,
   // we need to swap device directions in this case
   switch (kind) {
   case cudaMemcpyDeviceToHost:
+    // Ensure destination is mapped if it's a unified pointer
+    ensure_unified_ptr_mapped(conn, dst);
     if (rpc_write(conn, &src, sizeof(void *)) < 0 ||
         rpc_write(conn, &count, sizeof(size_t)) < 0 ||
         rpc_wait_for_response(conn) < 0 || rpc_read(conn, dst, count) < 0)
@@ -223,6 +229,8 @@ cudaError_t cudaMemcpyAsync(void *dst, const void *src, size_t count,
   // we need to swap device directions in this case
   switch (kind) {
   case cudaMemcpyDeviceToHost:
+    // Ensure destination is mapped if it's a unified pointer
+    ensure_unified_ptr_mapped(conn, dst);
     if (rpc_write(conn, &src, sizeof(void *)) < 0 ||
         rpc_write(conn, &count, sizeof(size_t)) < 0 ||
         rpc_wait_for_response(conn) < 0 || rpc_read(conn, dst, count) < 0)
@@ -486,6 +494,18 @@ cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim,
   cudaError_t return_value;
   cudaError_t memcpy_return;
 
+  // First check if function is registered before making any RPC calls
+  Function *f = nullptr;
+  for (auto &function : functions) {
+    if (function.host_func == func)
+      f = &function;
+  }
+
+  if (f == nullptr) {
+    // Return error without making RPC call - function not registered
+    return cudaErrorInvalidDeviceFunction;
+  }
+
   conn_t *conn = rpc_client_get_connection(0);
 
   memcpy_return = cuda_memcpy_unified_ptrs(conn, cudaMemcpyHostToDevice);
@@ -501,12 +521,7 @@ cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim,
       rpc_write(conn, &stream, sizeof(cudaStream_t)) < 0)
     return cudaErrorDevicesUnavailable;
 
-  Function *f = nullptr;
-  for (auto &function : functions)
-    if (function.host_func == func)
-      f = &function;
-
-  if (f == nullptr || rpc_write(conn, &f->arg_count, sizeof(int)) < 0)
+  if (rpc_write(conn, &f->arg_count, sizeof(int)) < 0)
     return cudaErrorDevicesUnavailable;
 
   for (int i = 0; i < f->arg_count; ++i) {
@@ -524,10 +539,18 @@ cudaError_t cudaLaunchKernel(const void *func, dim3 gridDim, dim3 blockDim,
     return cudaErrorDevicesUnavailable;
 
   memcpy_return = cuda_memcpy_unified_ptrs(conn, cudaMemcpyDeviceToHost);
-  if (memcpy_return != cudaSuccess)
+  if (memcpy_return != cudaSuccess) {
     return memcpy_return;
+  }
 
   return return_value;
+}
+
+// Wrapper for __cudaLaunchKernel which is used by CUDA 13.x compiled binaries
+extern "C" cudaError_t __cudaLaunchKernel(
+    const void *kernel, dim3 gridDim, dim3 blockDim,
+    void **args, size_t sharedMem, cudaStream_t stream) {
+  return cudaLaunchKernel(kernel, gridDim, blockDim, args, sharedMem, stream);
 }
 
 // Function to calculate byte size based on PTX data type
@@ -695,20 +718,8 @@ extern "C" void **__cudaRegisterFatBinary(void *fatCubin) {
           return nullptr;
         }
 
-        // verify the decompressed output looks right; we should run
-        // --no-compress with nvcc before running this decompression logic to
-        // compare outputs.
-        for (int i = 0; i < text_data_size; i++)
-          std::cout << *(char *)((char *)text_data + i);
-        std::cout << std::endl;
-
         parse_ptx_string(fatCubin, (char *)text_data, text_data_size);
       } else {
-        // print the entire ptx file for debugging
-        for (int i = 0; i < entry->binarySize; i++)
-          std::cout << *(char *)((char *)entry + entry->binary + i);
-        std::cout << std::endl;
-
         parse_ptx_string(fatCubin, (char *)entry + entry->binary,
                          entry->binarySize);
       }
@@ -723,6 +734,7 @@ extern "C" void **__cudaRegisterFatBinary(void *fatCubin) {
 }
 
 extern "C" void __cudaRegisterFatBinaryEnd(void **fatCubinHandle) {
+  fprintf(stderr, "SCUDA: __cudaRegisterFatBinaryEnd called\n");
   void *return_value;
 
   conn_t *conn = rpc_client_get_connection(0);
@@ -733,10 +745,11 @@ extern "C" void __cudaRegisterFatBinaryEnd(void **fatCubinHandle) {
       rpc_write(conn, &fatCubinHandle, sizeof(const void *)) < 0 ||
       rpc_wait_for_response(conn) < 0 || rpc_read_end(conn) < 0)
     return;
+  fprintf(stderr, "SCUDA: __cudaRegisterFatBinaryEnd done\n");
 }
 
 extern "C" void __cudaInitModule(void **fatCubinHandle) {
-  std::cout << "__cudaInitModule writing data..." << std::endl;
+  // No-op - CUDA runtime initializes modules internally
 }
 
 extern "C" void __cudaUnregisterFatBinary(void **fatCubinHandle) {
@@ -748,7 +761,7 @@ extern "C" cudaError_t __cudaPushCallConfiguration(dim3 gridDim, dim3 blockDim,
                                                    cudaStream_t stream) {
   cudaError_t res;
 
-  std::cout << "Calling __cudaPushCallConfiguration" << std::endl;
+  // Debug: Calling __cudaPushCallConfiguration
 
   conn_t *conn = rpc_client_get_connection(0);
 
@@ -822,13 +835,41 @@ extern "C" void __cudaRegisterFunction(void **fatCubinHandle,
       (bDim != nullptr && rpc_write(conn, bDim, sizeof(dim3)) < 0) ||
       (gDim != nullptr && rpc_write(conn, gDim, sizeof(dim3)) < 0) ||
       (wSize != nullptr && rpc_write(conn, wSize, sizeof(int)) < 0) ||
-      rpc_wait_for_response(conn) < 0 || rpc_read_end(conn) < 0)
+      rpc_wait_for_response(conn) < 0)
     return;
 
-  // also memorize the host pointer function
-  for (auto &function : functions)
-    if (strcmp(function.name, deviceName) == 0)
-      function.host_func = hostFun;
+  // Receive param count and sizes from server
+  int param_count = 0;
+  if (rpc_read(conn, &param_count, sizeof(int)) < 0) {
+    rpc_read_end(conn);
+    return;
+  }
+
+  int *arg_sizes = new int[param_count > 0 ? param_count : 1];
+  for (int i = 0; i < param_count; i++) {
+    if (rpc_read(conn, &arg_sizes[i], sizeof(int)) < 0) {
+      delete[] arg_sizes;
+      rpc_read_end(conn);
+      return;
+    }
+  }
+
+  if (rpc_read_end(conn) < 0) {
+    delete[] arg_sizes;
+    return;
+  }
+
+  // Store the function info received from server
+  char *name = new char[strlen(deviceName) + 1];
+  strcpy(name, deviceName);
+
+  functions.push_back(Function{
+      .name = name,
+      .fat_cubin = fatCubinHandle,
+      .host_func = hostFun,
+      .arg_sizes = arg_sizes,
+      .arg_count = param_count,
+  });
 }
 
 extern "C" void __cudaRegisterVar(void **fatCubinHandle, char *hostVar,
@@ -850,29 +891,19 @@ extern "C" void __cudaRegisterVar(void **fatCubinHandle, char *hostVar,
     return;
   }
 
-  // Send hostVar length and data
-  size_t hostVarLen = strlen(hostVar) + 1;
-  if (rpc_write(conn, &hostVarLen, sizeof(size_t)) < 0) {
-    std::cerr << "Failed to send hostVar length" << std::endl;
-    return;
-  }
-  if (rpc_write(conn, hostVar, hostVarLen) < 0) {
+  // Send hostVar as pointer value (not as string - it's a memory address)
+  if (rpc_write(conn, &hostVar, sizeof(void *)) < 0) {
     std::cerr << "Failed writing hostVar" << std::endl;
     return;
   }
 
-  // Send deviceAddress length and data
-  size_t deviceAddressLen = strlen(deviceAddress) + 1;
-  if (rpc_write(conn, &deviceAddressLen, sizeof(size_t)) < 0) {
-    std::cerr << "Failed to send deviceAddress length" << std::endl;
-    return;
-  }
-  if (rpc_write(conn, deviceAddress, deviceAddressLen) < 0) {
+  // Send deviceAddress as pointer value (not as string - it's a memory address)
+  if (rpc_write(conn, &deviceAddress, sizeof(void *)) < 0) {
     std::cerr << "Failed writing deviceAddress" << std::endl;
     return;
   }
 
-  // Send deviceName length and data
+  // Send deviceName length and data (this IS a string)
   size_t deviceNameLen = strlen(deviceName) + 1;
   if (rpc_write(conn, &deviceNameLen, sizeof(size_t)) < 0) {
     std::cerr << "Failed to send deviceName length" << std::endl;
@@ -968,11 +999,68 @@ cudaError_t cudaHostRegister(void *devPtr, size_t size, unsigned int flags) {
   return cudaSuccess;
 }
 
-cudaError_t cudaMallocHost(void **ptr, size_t size) {
-  *ptr = (void *)malloc(size);
+cudaError_t cudaHostAlloc(void** pHost, size_t size, unsigned int flags)
+{
+    conn_t *conn = rpc_client_get_connection(0);
+    if (maybe_copy_unified_arg(conn, (void*)pHost, cudaMemcpyHostToDevice) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)&size, cudaMemcpyHostToDevice) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)&flags, cudaMemcpyHostToDevice) < 0)
+      return cudaErrorDevicesUnavailable;
+    cudaError_t return_value;
+    if (rpc_write_start_request(conn, RPC_cudaHostAlloc) < 0 ||
+        rpc_write(conn, &size, sizeof(size_t)) < 0 ||
+        rpc_write(conn, &flags, sizeof(unsigned int)) < 0 ||
+        rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, pHost, sizeof(void*)) < 0 ||
+        rpc_read(conn, &return_value, sizeof(cudaError_t)) < 0 ||
+        rpc_read_end(conn) < 0)
+        return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)pHost, cudaMemcpyDeviceToHost) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)&size, cudaMemcpyDeviceToHost) < 0)
+      return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)&flags, cudaMemcpyDeviceToHost) < 0)
+      return cudaErrorDevicesUnavailable;
 
-  return cudaSuccess;
+    // Register with pinned host memory tracking for segfault handling.
+    // This allows the client to access the memory on-demand via segfault handler.
+    // IMPORTANT: This is NOT unified memory - do NOT sync during kernel launches.
+    if (return_value == cudaSuccess) {
+      allocate_pinned_host_pointer(conn, *pHost, size);
+    }
+
+    return return_value;
 }
+
+cudaError_t cudaMallocHost(void** ptr, size_t size)
+{
+    return cudaHostAlloc(ptr, size, cudaHostAllocDefault);
+}
+
+cudaError_t cudaFreeHost(void* ptr)
+{
+    conn_t *conn = rpc_client_get_connection(0);
+
+    // Clean up memory tracking (both unified and pinned host)
+    maybe_free_unified_mem(conn, ptr);
+    maybe_free_pinned_host(conn, ptr);
+
+    if (maybe_copy_unified_arg(conn, (void*)&ptr, cudaMemcpyHostToDevice) < 0)
+      return cudaErrorDevicesUnavailable;
+    cudaError_t return_value;
+    if (rpc_write_start_request(conn, RPC_cudaFreeHost) < 0 ||
+        rpc_write(conn, &ptr, sizeof(void*)) < 0 ||
+        rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, &return_value, sizeof(cudaError_t)) < 0 ||
+        rpc_read_end(conn) < 0)
+        return cudaErrorDevicesUnavailable;
+    if (maybe_copy_unified_arg(conn, (void*)&ptr, cudaMemcpyDeviceToHost) < 0)
+      return cudaErrorDevicesUnavailable;
+    return return_value;
+}
+
 
 cudaError_t
 cudaGraphAddMemcpyNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph,
@@ -1320,5 +1408,74 @@ cudaError_t cudaDeviceGetGraphMemAttribute(int device,
     return cudaErrorDevicesUnavailable;
   if (maybe_copy_unified_arg(conn, (void *)value, cudaMemcpyDeviceToHost) < 0)
     return cudaErrorDevicesUnavailable;
+  return return_value;
+}
+
+cudaError_t cudaCreateTextureObject(cudaTextureObject_t *pTexObject,
+                                     const struct cudaResourceDesc *pResDesc,
+                                     const struct cudaTextureDesc *pTexDesc,
+                                     const struct cudaResourceViewDesc *pResViewDesc) {
+  conn_t *conn = rpc_client_get_connection(0);
+  cudaError_t return_value;
+
+  if (rpc_write_start_request(conn, RPC_cudaCreateTextureObject) < 0 ||
+      rpc_write(conn, &pResDesc, sizeof(const struct cudaResourceDesc*)) < 0 ||
+      (pResDesc != nullptr && rpc_write(conn, pResDesc, sizeof(struct cudaResourceDesc)) < 0) ||
+      rpc_write(conn, &pTexDesc, sizeof(const struct cudaTextureDesc*)) < 0 ||
+      (pTexDesc != nullptr && rpc_write(conn, pTexDesc, sizeof(struct cudaTextureDesc)) < 0) ||
+      rpc_write(conn, &pResViewDesc, sizeof(const struct cudaResourceViewDesc*)) < 0 ||
+      (pResViewDesc != nullptr && rpc_write(conn, pResViewDesc, sizeof(struct cudaResourceViewDesc)) < 0) ||
+      rpc_wait_for_response(conn) < 0 ||
+      rpc_read(conn, pTexObject, sizeof(cudaTextureObject_t)) < 0 ||
+      rpc_read(conn, &return_value, sizeof(cudaError_t)) < 0 ||
+      rpc_read_end(conn) < 0)
+    return cudaErrorDevicesUnavailable;
+
+  return return_value;
+}
+
+cudaError_t cudaMemcpy3D(const struct cudaMemcpy3DParms *p) {
+  conn_t *conn = rpc_client_get_connection(0);
+  cudaError_t return_value;
+
+  // Calculate data size for srcPtr if it has data
+  size_t src_data_size = 0;
+  if (p->srcPtr.ptr != nullptr) {
+    // Data size = pitch * height * depth
+    src_data_size = p->srcPtr.pitch * p->extent.height * p->extent.depth;
+  }
+
+  // Calculate data size for dstPtr if it will receive data
+  size_t dst_data_size = 0;
+  if (p->dstPtr.ptr != nullptr) {
+    dst_data_size = p->dstPtr.pitch * p->extent.height * p->extent.depth;
+  }
+
+  if (rpc_write_start_request(conn, RPC_cudaMemcpy3D) < 0 ||
+      rpc_write(conn, p, sizeof(struct cudaMemcpy3DParms)) < 0 ||
+      rpc_write(conn, &src_data_size, sizeof(size_t)) < 0)
+    return cudaErrorDevicesUnavailable;
+
+  // If copying from host memory, send the source data
+  if (src_data_size > 0 &&
+      (p->kind == cudaMemcpyHostToDevice || p->kind == cudaMemcpyHostToHost)) {
+    if (rpc_write(conn, p->srcPtr.ptr, src_data_size) < 0)
+      return cudaErrorDevicesUnavailable;
+  }
+
+  if (rpc_wait_for_response(conn) < 0 ||
+      rpc_read(conn, &return_value, sizeof(cudaError_t)) < 0)
+    return cudaErrorDevicesUnavailable;
+
+  // If copying to host memory, receive the destination data
+  if (dst_data_size > 0 && return_value == cudaSuccess &&
+      (p->kind == cudaMemcpyDeviceToHost || p->kind == cudaMemcpyHostToHost)) {
+    if (rpc_read(conn, p->dstPtr.ptr, dst_data_size) < 0)
+      return cudaErrorDevicesUnavailable;
+  }
+
+  if (rpc_read_end(conn) < 0)
+    return cudaErrorDevicesUnavailable;
+
   return return_value;
 }

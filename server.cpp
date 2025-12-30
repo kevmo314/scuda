@@ -224,25 +224,29 @@ void append_managed_ptr(const void *conn, void *srcPtr, void *dstPtr,
 }
 
 static void set_segfault_handlers() {
-  struct sigaction sa;
-  memset(&sa, 0, sizeof(sa));
-  sa.sa_flags = SA_SIGINFO;
-  sa.sa_sigaction = segfault;
+  // Disabled for debugging - the custom handler causes more problems than it solves
+  // struct sigaction sa;
+  // memset(&sa, 0, sizeof(sa));
+  // sa.sa_flags = SA_SIGINFO;
+  // sa.sa_sigaction = segfault;
+  //
+  // if (sigaction(SIGSEGV, &sa, NULL) == -1) {
+  //   perror("sigaction");
+  //   exit(EXIT_FAILURE);
+  // }
 
-  if (sigaction(SIGSEGV, &sa, NULL) == -1) {
-    perror("sigaction");
-    exit(EXIT_FAILURE);
-  }
-
-  std::cout << "Segfault handler installed." << std::endl;
+  // Segfault handler disabled - was causing crashes due to unsafe signal handling
 }
 
 void client_handler(int connfd) {
   conn_t conn = {connfd, 1};
   conn.request_id = 1;
+  conn.rpc_thread = 0;
+  conn.shutdown = 0;
   if (pthread_mutex_init(&conn.read_mutex, NULL) < 0 ||
-      pthread_mutex_init(&conn.write_mutex, NULL) < 0) {
-    std::cerr << "Error initializing mutex." << std::endl;
+      pthread_mutex_init(&conn.write_mutex, NULL) < 0 ||
+      pthread_cond_init(&conn.read_cond, NULL) < 0) {
+    std::cerr << "Error initializing mutex/cond." << std::endl;
     return;
   }
 
@@ -250,23 +254,54 @@ void client_handler(int connfd) {
 
   while (1) {
     int op = rpc_dispatch(&conn, 0);
-
-    auto opHandler = get_handler(op);
-    if (opHandler(&conn) < 0) {
-      std::cerr << "Error handling request." << std::endl;
+    if (op < 0) {
+      // Client disconnected or error
+      break;
     }
+
+    fprintf(stderr, "SERVER: handling op=%d\n", op);
+    fflush(stderr);
+    auto opHandler = get_handler(op);
+    if (opHandler == nullptr) {
+      std::cerr << "Unknown opcode: " << op << std::endl;
+      break;
+    }
+    if (opHandler(&conn) < 0) {
+      std::cerr << "Error handling request op=" << op << std::endl;
+      break;
+    }
+    fprintf(stderr, "SERVER: op=%d done\n", op);
+    fflush(stderr);
   }
 
-  if (pthread_mutex_destroy(&conn.read_mutex) < 0 ||
-      pthread_mutex_destroy(&conn.write_mutex) < 0)
-    std::cerr << "Error destroying mutex." << std::endl;
+  // Signal shutdown to rpc_thread
+  conn.shutdown = 1;
+  pthread_cond_broadcast(&conn.read_cond);
 
+  // Close socket to unblock any waiting recv() in rpc_thread
   close(connfd);
+
+  // Wait for rpc_thread to exit
+  if (conn.rpc_thread != 0) {
+    pthread_join(conn.rpc_thread, NULL);
+  }
+
+  // Cleanup managed_ptrs for this connection (before conn goes out of scope)
+  managed_ptrs.erase(&conn);
+
+  // Cleanup
+  pthread_cond_destroy(&conn.read_cond);
+  pthread_mutex_destroy(&conn.read_mutex);
+  pthread_mutex_destroy(&conn.write_mutex);
 }
 
 int main() {
   int port = DEFAULT_PORT;
   struct sockaddr_in servaddr, cli;
+
+  // Ignore SIGPIPE - when client disconnects abruptly, we don't want to crash
+  signal(SIGPIPE, SIG_IGN);
+
   int sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (sockfd == -1) {
     printf("Socket creation failed.\n");

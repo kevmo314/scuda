@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.18)
 project(ScudaProject LANGUAGES CXX CUDA)
 
 set(MIN_CUDA_VERSION 12.0)
-set(MAX_CUDA_VERSION 12.7)
+set(MAX_CUDA_VERSION 13.9)
 
 find_package(CUDAToolkit REQUIRED)
 

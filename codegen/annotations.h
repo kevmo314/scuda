@@ -3135,18 +3135,12 @@ CUresult cuMemPoolImportPointer(CUdeviceptr *ptr_out, CUmemoryPool pool,
 CUresult cuPointerGetAttribute(void *data, CUpointer_attribute attribute,
                                CUdeviceptr ptr);
 /**
- * @param devPtr SEND_ONLY
- * @param count SEND_ONLY
- * @param dstDevice SEND_ONLY
- * @param hStream SEND_ONLY
+ * @disabled CUDA 13.x changed signature
  */
 CUresult cuMemPrefetchAsync(CUdeviceptr devPtr, size_t count,
                             CUdevice dstDevice, CUstream hStream);
 /**
- * @param devPtr SEND_ONLY
- * @param count SEND_ONLY
- * @param advice SEND_ONLY
- * @param device SEND_ONLY
+ * @disabled CUDA 13.x changed signature
  */
 CUresult cuMemAdvise(CUdeviceptr devPtr, size_t count, CUmem_advise advice,
                      CUdevice device);
@@ -3270,10 +3264,7 @@ CUresult cuStreamGetCaptureInfo_v2(CUstream hStream,
                                    const CUgraphNode **dependencies_out,
                                    size_t *numDependencies_out);
 /**
- * @param hStream SEND_ONLY
- * @param dependencies SEND_RECV
- * @param numDependencies SEND_ONLY
- * @param flags SEND_ONLY
+ * @disabled CUDA 13.x changed signature
  */
 CUresult cuStreamUpdateCaptureDependencies(CUstream hStream,
                                            CUgraphNode *dependencies,
@@ -3928,42 +3919,29 @@ CUresult cuGraphGetNodes(CUgraph hGraph, CUgraphNode *nodes, size_t *numNodes);
 CUresult cuGraphGetRootNodes(CUgraph hGraph, CUgraphNode *rootNodes,
                              size_t *numRootNodes);
 /**
- * @param hGraph SEND_ONLY
- * @param from SEND_RECV
- * @param to SEND_RECV
- * @param numEdges SEND_RECV
+ * @disabled CUDA 13.x changed signature
  */
 CUresult cuGraphGetEdges(CUgraph hGraph, CUgraphNode *from, CUgraphNode *to,
                          size_t *numEdges);
 /**
- * @param hNode SEND_ONLY
- * @param dependencies SEND_RECV
- * @param numDependencies SEND_RECV
+ * @disabled CUDA 13.x changed signature
  */
 CUresult cuGraphNodeGetDependencies(CUgraphNode hNode,
                                     CUgraphNode *dependencies,
                                     size_t *numDependencies);
 /**
- * @param hNode SEND_ONLY
- * @param dependentNodes SEND_RECV
- * @param numDependentNodes SEND_RECV
+ * @disabled CUDA 13.x changed signature
  */
 CUresult cuGraphNodeGetDependentNodes(CUgraphNode hNode,
                                       CUgraphNode *dependentNodes,
                                       size_t *numDependentNodes);
 /**
- * @param hGraph SEND_ONLY
- * @param from SEND_RECV
- * @param to SEND_RECV
- * @param numDependencies SEND_ONLY
+ * @disabled CUDA 13.x changed signature
  */
 CUresult cuGraphAddDependencies(CUgraph hGraph, const CUgraphNode *from,
                                 const CUgraphNode *to, size_t numDependencies);
 /**
- * @param hGraph SEND_ONLY
- * @param from SEND_RECV
- * @param to SEND_RECV
- * @param numDependencies SEND_ONLY
+ * @disabled CUDA 13.x changed signature
  */
 CUresult cuGraphRemoveDependencies(CUgraph hGraph, const CUgraphNode *from,
                                    const CUgraphNode *to,
@@ -4739,7 +4717,7 @@ cudaError_t cudaGetDeviceCount(int *count);
  * @param prop RECV_ONLY
  * @param device SEND_ONLY
  */
-cudaError_t cudaGetDeviceProperties_v2(struct cudaDeviceProp *prop, int device);
+cudaError_t cudaGetDeviceProperties(struct cudaDeviceProp *prop, int device);
 /**
  * @param value SEND_RECV
  * @param attr SEND_ONLY
@@ -4937,10 +4915,7 @@ cudaError_t cudaStreamGetCaptureInfo_v2(
     unsigned long long *id_out, cudaGraph_t *graph_out,
     const cudaGraphNode_t **dependencies_out, size_t *numDependencies_out);
 /**
- * @param stream SEND_ONLY
- * @param numDependencies SEND_ONLY
- * @param dependencies SEND_ONLY LENGTH:numDependencies
- * @param flags SEND_ONLY
+ * @disabled CUDA 13.x changed signature
  */
 cudaError_t cudaStreamUpdateCaptureDependencies(cudaStream_t stream,
                                                 cudaGraphNode_t *dependencies,
@@ -5208,6 +5183,7 @@ cudaError_t cudaMallocArray(cudaArray_t *array,
  */
 cudaError_t cudaFree(void *devPtr);
 /**
+ * @disabled
  * @param ptr SEND_ONLY
  */
 cudaError_t cudaFreeHost(void *ptr);
@@ -5220,7 +5196,8 @@ cudaError_t cudaFreeArray(cudaArray_t array);
  */
 cudaError_t cudaFreeMipmappedArray(cudaMipmappedArray_t mipmappedArray);
 /**
- * @param pHost SEND_RECV
+ * @disabled
+ * @param pHost RECV_ONLY
  * @param size SEND_ONLY
  * @param flags SEND_ONLY
  */
@@ -5255,7 +5232,7 @@ cudaError_t cudaMalloc3D(struct cudaPitchedPtr *pitchedDevPtr,
                          struct cudaExtent extent);
 /**
  * @param array SEND_RECV
- * @param desc SEND_RECV
+ * @param desc SEND_ONLY NULLABLE
  * @param extent SEND_ONLY
  * @param flags SEND_ONLY
  */
@@ -5284,7 +5261,7 @@ cudaGetMipmappedArrayLevel(cudaArray_t *levelArray,
                            cudaMipmappedArray_const_t mipmappedArray,
                            unsigned int level);
 /**
- * @param p SEND_RECV
+ * @disabled - manually implemented (nested pointers need deep serialization)
  */
 cudaError_t cudaMemcpy3D(const struct cudaMemcpy3DParms *p);
 /**
@@ -5880,10 +5857,7 @@ cudaError_t cudaGetChannelDesc(struct cudaChannelFormatDesc *desc,
 struct cudaChannelFormatDesc
 cudaCreateChannelDesc(int x, int y, int z, int w, enum cudaChannelFormatKind f);
 /**
- * @param pTexObject SEND_RECV
- * @param pResDesc SEND_RECV
- * @param pTexDesc SEND_RECV
- * @param pResViewDesc SEND_RECV
+ * @disabled - manually implemented (nullable params need special handling)
  */
 cudaError_t
 cudaCreateTextureObject(cudaTextureObject_t *pTexObject,
@@ -6378,44 +6352,31 @@ cudaError_t cudaGraphGetRootNodes(cudaGraph_t graph,
                                   cudaGraphNode_t *pRootNodes,
                                   size_t *pNumRootNodes);
 /**
- * @param graph SEND_ONLY
- * @param from SEND_RECV
- * @param to SEND_RECV
- * @param numEdges SEND_RECV
+ * @disabled CUDA 13.x changed signature
  */
 cudaError_t cudaGraphGetEdges(cudaGraph_t graph, cudaGraphNode_t *from,
                               cudaGraphNode_t *to, size_t *numEdges);
 /**
- * @param node SEND_ONLY
- * @param pDependencies SEND_RECV
- * @param pNumDependencies SEND_RECV
+ * @disabled CUDA 13.x changed signature
  */
 cudaError_t cudaGraphNodeGetDependencies(cudaGraphNode_t node,
                                          cudaGraphNode_t *pDependencies,
                                          size_t *pNumDependencies);
 /**
- * @param node SEND_ONLY
- * @param pDependentNodes SEND_RECV
- * @param pNumDependentNodes SEND_RECV
+ * @disabled CUDA 13.x changed signature
  */
 cudaError_t cudaGraphNodeGetDependentNodes(cudaGraphNode_t node,
                                            cudaGraphNode_t *pDependentNodes,
                                            size_t *pNumDependentNodes);
 /**
- * @param graph SEND_ONLY
- * @param from SEND_RECV
- * @param to SEND_RECV
- * @param numDependencies SEND_ONLY
+ * @disabled CUDA 13.x changed signature
  */
 cudaError_t cudaGraphAddDependencies(cudaGraph_t graph,
                                      const cudaGraphNode_t *from,
                                      const cudaGraphNode_t *to,
                                      size_t numDependencies);
 /**
- * @param graph SEND_ONLY
- * @param from SEND_RECV
- * @param to SEND_RECV
- * @param numDependencies SEND_ONLY
+ * @disabled CUDA 13.x changed signature
  */
 cudaError_t cudaGraphRemoveDependencies(cudaGraph_t graph,
                                         const cudaGraphNode_t *from,

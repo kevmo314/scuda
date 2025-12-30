@@ -40,34 +40,139 @@ static jmp_buf catch_segfault;
 static void *faulting_address = nullptr;
 
 std::map<conn_t *, std::map<void *, size_t>> unified_devices;
+// Track pinned host memory separately - needs segfault handling but NOT kernel launch sync
+std::map<conn_t *, std::map<void *, size_t>> pinned_host_devices;
+// Track which pointers have local memory (volatile for signal handler safety)
+volatile void *mapped_ptrs[1024];
+volatile int mapped_ptr_count = 0;
 std::map<void *, void *> host_funcs;
+
+static bool is_ptr_mapped(void *ptr) {
+  for (int i = 0; i < mapped_ptr_count; i++) {
+    if (mapped_ptrs[i] == ptr) return true;
+  }
+  return false;
+}
+
+static void mark_ptr_mapped(void *ptr) {
+  if (mapped_ptr_count < 1024) {
+    mapped_ptrs[mapped_ptr_count++] = ptr;
+  }
+}
+
+// Ensure a unified or pinned host pointer has local memory mapped (for receiving DeviceToHost data)
+bool ensure_unified_ptr_mapped(conn_t *conn, void *ptr) {
+  size_t page_size = sysconf(_SC_PAGESIZE);
+
+  // Check unified devices first
+  auto conn_it = unified_devices.find(conn);
+  if (conn_it != unified_devices.end()) {
+    auto &devices = conn_it->second;
+    auto device_it = devices.find(ptr);
+    if (device_it != devices.end()) {
+      if (is_ptr_mapped(ptr)) {
+        return true;
+      }
+      size_t size = device_it->second;
+      // Page-align the pointer for mmap
+      void *aligned_ptr = (void *)((uintptr_t)ptr & ~(page_size - 1));
+      size_t offset = (uintptr_t)ptr - (uintptr_t)aligned_ptr;
+      size_t aligned_size = ((size + offset + page_size - 1) & ~(page_size - 1));
+
+      void *allocated = mmap(aligned_ptr, aligned_size, PROT_READ | PROT_WRITE,
+                             MAP_FIXED | MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+      if (allocated == MAP_FAILED) {
+        return false;
+      }
+      mark_ptr_mapped(ptr);
+      return true;
+    }
+  }
+
+  // Check pinned host devices
+  auto pinned_it = pinned_host_devices.find(conn);
+  if (pinned_it != pinned_host_devices.end()) {
+    auto &devices = pinned_it->second;
+    auto device_it = devices.find(ptr);
+    if (device_it != devices.end()) {
+      if (is_ptr_mapped(ptr)) {
+        return true;
+      }
+      size_t size = device_it->second;
+      // Page-align the pointer for mmap
+      void *aligned_ptr = (void *)((uintptr_t)ptr & ~(page_size - 1));
+      size_t offset = (uintptr_t)ptr - (uintptr_t)aligned_ptr;
+      size_t aligned_size = ((size + offset + page_size - 1) & ~(page_size - 1));
+
+      void *allocated = mmap(aligned_ptr, aligned_size, PROT_READ | PROT_WRITE,
+                             MAP_FIXED | MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+      if (allocated == MAP_FAILED) {
+        return false;
+      }
+      mark_ptr_mapped(ptr);
+      return true;
+    }
+  }
+
+  return false;
+}
 
 static void segfault(int sig, siginfo_t *info, void *unused) {
   faulting_address = info->si_addr;
 
+  // Check unified memory pointers
   for (const auto &conn_entry : unified_devices) {
     for (const auto &[ptr, sz] : conn_entry.second) {
       if ((uintptr_t)ptr <= (uintptr_t)faulting_address &&
           (uintptr_t)faulting_address < ((uintptr_t)ptr + sz)) {
-        // ensure we assign memory as close to the faulting address as
-        // possible... by masking via the allocated unified memory size.
-        uintptr_t aligned = (uintptr_t)faulting_address & ~(sz - 1);
+        // Page-align the pointer for mmap
+        size_t page_size = sysconf(_SC_PAGESIZE);
+        void *aligned_ptr = (void *)((uintptr_t)ptr & ~(page_size - 1));
+        size_t offset = (uintptr_t)ptr - (uintptr_t)aligned_ptr;
+        size_t aligned_size = sz + offset;
+        // Round up to page boundary
+        aligned_size = (aligned_size + page_size - 1) & ~(page_size - 1);
 
-        // Allocate memory at the faulting address
         void *allocated =
-            mmap((void *)aligned, sz + (uintptr_t)faulting_address - aligned,
-                 PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+            mmap(aligned_ptr, aligned_size, PROT_READ | PROT_WRITE,
+                 MAP_FIXED | MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
         if (allocated == MAP_FAILED) {
           perror("Failed to allocate memory at faulting address");
           _exit(1);
         }
-
+        mark_ptr_mapped(ptr);
         return;
       }
     }
   }
 
-  // raise our original segfault handler
+  // Check pinned host memory pointers
+  for (const auto &conn_entry : pinned_host_devices) {
+    for (const auto &[ptr, sz] : conn_entry.second) {
+      if ((uintptr_t)ptr <= (uintptr_t)faulting_address &&
+          (uintptr_t)faulting_address < ((uintptr_t)ptr + sz)) {
+        // Page-align the pointer for mmap
+        size_t page_size = sysconf(_SC_PAGESIZE);
+        void *aligned_ptr = (void *)((uintptr_t)ptr & ~(page_size - 1));
+        size_t offset = (uintptr_t)ptr - (uintptr_t)aligned_ptr;
+        size_t aligned_size = sz + offset;
+        // Round up to page boundary
+        aligned_size = (aligned_size + page_size - 1) & ~(page_size - 1);
+
+        void *allocated =
+            mmap(aligned_ptr, aligned_size, PROT_READ | PROT_WRITE,
+                 MAP_FIXED | MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+        if (allocated == MAP_FAILED) {
+          perror("Failed to allocate memory at faulting address");
+          _exit(1);
+        }
+        mark_ptr_mapped(ptr);
+        return;
+      }
+    }
+  }
+
+  // Not a tracked pointer - restore default handler and re-raise
   struct sigaction sa;
   sa.sa_handler = SIG_DFL;
   sigemptyset(&sa.sa_mask);
@@ -339,6 +444,11 @@ void allocate_unified_mem_pointer(conn_t *conn, void *dev_ptr, size_t size) {
   unified_devices[conn][dev_ptr] = size;
 }
 
+void allocate_pinned_host_pointer(conn_t *conn, void *host_ptr, size_t size) {
+  // Track pinned host memory for segfault handling (but NOT for kernel launch sync)
+  pinned_host_devices[conn][host_ptr] = size;
+}
+
 cudaError_t cuda_memcpy_unified_ptrs(conn_t *conn, cudaMemcpyKind kind) {
   auto conn_it = unified_devices.find(conn);
   if (conn_it == unified_devices.end()) {
@@ -346,12 +456,18 @@ cudaError_t cuda_memcpy_unified_ptrs(conn_t *conn, cudaMemcpyKind kind) {
   }
 
   for (const auto &[ptr, sz] : conn_it->second) {
+    // Only sync pointers that have been locally mapped
+    if (!is_ptr_mapped(ptr)) {
+      continue;
+    }
+
     size_t size = reinterpret_cast<size_t>(sz);
 
     // ptr is the same on both host/device
     cudaError_t res = cudaMemcpy(ptr, ptr, size, kind);
-    if (res != cudaSuccess)
+    if (res != cudaSuccess) {
       return res;
+    }
   }
   return cudaSuccess;
 }
@@ -372,16 +488,29 @@ void maybe_free_unified_mem(conn_t *conn, void *ptr) {
   }
 }
 
+void maybe_free_pinned_host(conn_t *conn, void *ptr) {
+  auto conn_it = pinned_host_devices.find(conn);
+  if (conn_it == pinned_host_devices.end()) {
+    return;
+  }
+
+  for (const auto &[host_ptr, sz] : conn_it->second) {
+    size_t size = reinterpret_cast<size_t>(sz);
+
+    if (host_ptr == ptr) {
+      munmap(host_ptr, size);
+      pinned_host_devices[conn].erase(host_ptr);
+      return;
+    }
+  }
+}
+
 CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion,
                              cuuint64_t flags,
                              CUdriverProcAddressQueryResult *symbolStatus) {
-  std::cout << "cuGetProcAddress getting symbol: " << symbol << std::endl;
-
   auto it = get_function_pointer(symbol);
   if (it != nullptr) {
     *pfn = (void *)(&it);
-    std::cout << "cuGetProcAddress: Mapped symbol '" << symbol
-              << "' to function: " << *pfn << std::endl;
     return CUDA_SUCCESS;
   }
 
@@ -390,9 +519,6 @@ CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion,
     *pfn = (void *)&cuGetProcAddress_v2;
     return CUDA_SUCCESS;
   }
-
-  std::cout << "cuGetProcAddress: Symbol '" << symbol
-            << "' not found in cudaFunctionMap." << std::endl;
 
   // fall back to dlsym
   static void *(*real_dlsym)(void *, const char *) = NULL;
@@ -409,8 +535,6 @@ CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion,
 
   *pfn = real_dlsym(libCudaHandle, symbol);
   if (!(*pfn)) {
-    std::cerr << "Error: Could not resolve symbol '" << symbol
-              << "' using dlsym." << std::endl;
     return CUDA_ERROR_UNKNOWN;
   }
 
@@ -418,7 +542,6 @@ CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion,
 }
 
 void *dlsym(void *handle, const char *name) __THROW {
-  std::cout << "dlsym: " << name << std::endl;
 
   void *func = get_function_pointer(name);
 
@@ -442,7 +565,5 @@ void *dlsym(void *handle, const char *name) __THROW {
                                                          "GLIBC_2.2.5");
   }
 
-  // std::cout << "[dlsym] Falling back to real_dlsym for name: " << name <<
-  // std::endl;
   return real_dlsym(handle, name);
 }

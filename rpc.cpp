@@ -12,9 +12,12 @@ void *_rpc_read_id_dispatch(void *p) {
   if (pthread_mutex_lock(&conn->read_mutex) < 0)
     return NULL;
 
-  while (1) {
-    while (conn->read_id != 0)
+  while (!conn->shutdown) {
+    while (conn->read_id != 0 && !conn->shutdown)
       pthread_cond_wait(&conn->read_cond, &conn->read_mutex);
+
+    if (conn->shutdown)
+      break;
 
     // the read id is zero so it's our turn to read the next int which is the
     // request id of the next request.
@@ -22,6 +25,11 @@ void *_rpc_read_id_dispatch(void *p) {
         pthread_cond_broadcast(&conn->read_cond) < 0)
       break;
   }
+
+  // Signal shutdown and wake up anyone waiting on condition
+  conn->shutdown = 1;
+  pthread_cond_broadcast(&conn->read_cond);
+
   pthread_mutex_unlock(&conn->read_mutex);
   conn->rpc_thread = 0;
   return NULL;
@@ -46,8 +54,13 @@ int rpc_dispatch(conn_t *conn, int parity) {
 
   int op;
 
-  while (conn->read_id < 2 || conn->read_id % 2 != parity)
+  while ((conn->read_id < 2 || conn->read_id % 2 != parity) && !conn->shutdown)
     pthread_cond_wait(&conn->read_cond, &conn->read_mutex);
+
+  if (conn->shutdown) {
+    pthread_mutex_unlock(&conn->read_mutex);
+    return -1;
+  }
 
   if (rpc_read(conn, &op, sizeof(int)) < 0) {
     pthread_mutex_unlock(&conn->read_mutex);

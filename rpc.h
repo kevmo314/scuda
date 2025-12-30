@@ -11,6 +11,7 @@ typedef struct {
   int read_id;
   int write_id;
   int write_op;
+  int shutdown;  // Flag to signal rpc_thread to exit
 
   pthread_t read_thread;
   pthread_t rpc_thread;
