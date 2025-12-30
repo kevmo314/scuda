@@ -4856,16 +4856,13 @@ cudaError_t cudaStreamDestroy(cudaStream_t stream);
 cudaError_t cudaStreamWaitEvent(cudaStream_t stream, cudaEvent_t event,
                                 unsigned int flags);
 /**
- * @param stream SEND_ONLY
- * @param callback SEND_ONLY
- * @param userData SEND_RECV
- * @param flags SEND_ONLY
+ * @disabled - manually implemented (callback requires bidirectional RPC)
  */
 cudaError_t cudaStreamAddCallback(cudaStream_t stream,
                                   cudaStreamCallback_t callback, void *userData,
                                   unsigned int flags);
 /**
- * @param stream SEND_ONLY
+ * @disabled - manually implemented (needs to poll for callbacks)
  */
 cudaError_t cudaStreamSynchronize(cudaStream_t stream);
 /**

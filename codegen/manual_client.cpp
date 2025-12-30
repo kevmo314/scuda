@@ -6,14 +6,171 @@
 #include <iostream>
 #include <nvml.h>
 
+#include <atomic>
+#include <chrono>
 #include <cstring>
+#include <mutex>
 #include <string>
+#include <thread>
 #include <unordered_map>
 #include <vector>
 
 #include "gen_api.h"
 #include "ptx_fatbin.hpp"
 #include "rpc.h"
+
+// SCUDA internal operation codes (not from codegen)
+#define RPC_SCUDA_POLL_CALLBACKS 1100
+
+// Forward declarations needed for callback infrastructure
+extern conn_t *rpc_client_get_connection(unsigned int index);
+
+// Stream callback infrastructure
+struct StreamCallbackInfo {
+  cudaStreamCallback_t callback;
+  void *userData;
+};
+
+// Pending D2H transfer tracking
+struct PendingD2HInfo {
+  void *dst;       // Client-side destination pointer
+  size_t size;     // Size of the transfer
+};
+
+static std::mutex g_callback_mutex;
+static std::unordered_map<uint64_t, StreamCallbackInfo> g_pending_callbacks;
+static std::unordered_map<uint64_t, PendingD2HInfo> g_pending_d2h_transfers;
+static std::atomic<uint64_t> g_callback_id_counter{1};
+static std::atomic<bool> g_callback_thread_running{false};
+static std::thread g_callback_thread;
+
+// Poll for and invoke pending stream callbacks
+static cudaError_t poll_stream_callbacks(conn_t *conn) {
+  if (rpc_write_start_request(conn, RPC_SCUDA_POLL_CALLBACKS) < 0 ||
+      rpc_wait_for_response(conn) < 0)
+    return cudaErrorDevicesUnavailable;
+
+  uint32_t num_callbacks;
+  if (rpc_read(conn, &num_callbacks, sizeof(uint32_t)) < 0)
+    return cudaErrorDevicesUnavailable;
+
+  // Collect callbacks to invoke (do RPC reads first, invoke later)
+  std::vector<std::pair<StreamCallbackInfo, std::pair<cudaStream_t, cudaError_t>>> callbacks_to_invoke;
+
+  for (uint32_t i = 0; i < num_callbacks; i++) {
+    uint64_t callback_id;
+    cudaStream_t stream;
+    cudaError_t status;
+
+    if (rpc_read(conn, &callback_id, sizeof(uint64_t)) < 0 ||
+        rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+        rpc_read(conn, &status, sizeof(cudaError_t)) < 0)
+      return cudaErrorDevicesUnavailable;
+
+    // Find the callback info
+    StreamCallbackInfo info = {nullptr, nullptr};
+    {
+      std::lock_guard<std::mutex> lock(g_callback_mutex);
+      auto it = g_pending_callbacks.find(callback_id);
+      if (it != g_pending_callbacks.end()) {
+        info = it->second;
+        g_pending_callbacks.erase(it);
+      }
+    }
+
+    if (info.callback) {
+      callbacks_to_invoke.push_back({info, {stream, status}});
+    }
+  }
+
+  // Read D2H transfer completions
+  uint32_t num_d2h_transfers;
+  if (rpc_read(conn, &num_d2h_transfers, sizeof(uint32_t)) < 0)
+    return cudaErrorDevicesUnavailable;
+
+  for (uint32_t i = 0; i < num_d2h_transfers; i++) {
+    uint64_t transfer_id;
+    size_t size;
+    cudaError_t status;
+
+    if (rpc_read(conn, &transfer_id, sizeof(uint64_t)) < 0 ||
+        rpc_read(conn, &size, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &status, sizeof(cudaError_t)) < 0)
+      return cudaErrorDevicesUnavailable;
+
+    // Find the pending D2H transfer
+    PendingD2HInfo d2h_info = {nullptr, 0};
+    {
+      std::lock_guard<std::mutex> lock(g_callback_mutex);
+      auto it = g_pending_d2h_transfers.find(transfer_id);
+      if (it != g_pending_d2h_transfers.end()) {
+        d2h_info = it->second;
+        g_pending_d2h_transfers.erase(it);
+      }
+    }
+
+    // Read the data if transfer succeeded
+    if (status == cudaSuccess && size > 0) {
+      if (d2h_info.dst != nullptr) {
+        // Read directly into destination buffer
+        if (rpc_read(conn, d2h_info.dst, size) < 0)
+          return cudaErrorDevicesUnavailable;
+      } else {
+        // Destination not found - read and discard
+        std::vector<char> discard(size);
+        if (rpc_read(conn, discard.data(), size) < 0)
+          return cudaErrorDevicesUnavailable;
+      }
+    }
+  }
+
+  if (rpc_read_end(conn) < 0)
+    return cudaErrorDevicesUnavailable;
+
+  // Now invoke callbacks outside of RPC transaction
+  for (auto &cb_pair : callbacks_to_invoke) {
+    cb_pair.first.callback(cb_pair.second.first, cb_pair.second.second,
+                           cb_pair.first.userData);
+  }
+
+  return cudaSuccess;
+}
+
+// Background thread that polls for callbacks
+static void callback_polling_thread() {
+  while (g_callback_thread_running.load()) {
+    // Check if there are any pending callbacks or D2H transfers to wait for
+    {
+      std::lock_guard<std::mutex> lock(g_callback_mutex);
+      if (g_pending_callbacks.empty() && g_pending_d2h_transfers.empty()) {
+        // Nothing pending, exit thread
+        g_callback_thread_running.store(false);
+        return;
+      }
+    }
+
+    // Poll for callbacks and D2H transfers
+    conn_t *conn = rpc_client_get_connection(0);
+    if (conn) {
+      poll_stream_callbacks(conn);
+    }
+
+    // Sleep for a bit before polling again
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  }
+}
+
+static void start_callback_thread() {
+  bool expected = false;
+  if (g_callback_thread_running.compare_exchange_strong(expected, true)) {
+    // Detach any previous thread
+    if (g_callback_thread.joinable()) {
+      g_callback_thread.detach();
+    }
+    g_callback_thread = std::thread(callback_polling_thread);
+    g_callback_thread.detach();
+  }
+}
 
 extern void add_host_node(void *, void *);
 
@@ -228,14 +385,31 @@ cudaError_t cudaMemcpyAsync(void *dst, const void *src, size_t count,
 
   // we need to swap device directions in this case
   switch (kind) {
-  case cudaMemcpyDeviceToHost:
+  case cudaMemcpyDeviceToHost: {
     // Ensure destination is mapped if it's a unified pointer
     ensure_unified_ptr_mapped(conn, dst);
+    // Server will return a transfer_id; data comes asynchronously via polling
+    uint64_t transfer_id;
     if (rpc_write(conn, &src, sizeof(void *)) < 0 ||
         rpc_write(conn, &count, sizeof(size_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 || rpc_read(conn, dst, count) < 0)
+        rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, &transfer_id, sizeof(uint64_t)) < 0)
       return cudaErrorDevicesUnavailable;
-    break;
+
+    if (rpc_read(conn, &return_value, sizeof(cudaError_t)) < 0 ||
+        rpc_read_end(conn) < 0)
+      return cudaErrorDevicesUnavailable;
+
+    // If successful, register the pending D2H transfer
+    if (return_value == cudaSuccess && transfer_id != 0) {
+      std::lock_guard<std::mutex> lock(g_callback_mutex);
+      g_pending_d2h_transfers[transfer_id] = {dst, count};
+      // Start polling thread to receive the data when ready
+      start_callback_thread();
+    }
+
+    return return_value;
+  }
   case cudaMemcpyHostToDevice:
     if (rpc_write(conn, &dst, sizeof(void *)) < 0 ||
         rpc_write(conn, &count, sizeof(size_t)) < 0 ||
@@ -1476,6 +1650,113 @@ cudaError_t cudaMemcpy3D(const struct cudaMemcpy3DParms *p) {
 
   if (rpc_read_end(conn) < 0)
     return cudaErrorDevicesUnavailable;
+
+  return return_value;
+}
+
+cudaError_t cudaStreamAddCallback(cudaStream_t stream,
+                                  cudaStreamCallback_t callback,
+                                  void *userData, unsigned int flags) {
+  fprintf(stderr, "SCUDA: cudaStreamAddCallback called stream=%p callback=%p\n",
+          (void *)stream, (void *)callback);
+  fflush(stderr);
+
+  conn_t *conn = rpc_client_get_connection(0);
+  cudaError_t return_value;
+
+  // Generate a unique callback ID
+  uint64_t callback_id = g_callback_id_counter.fetch_add(1);
+
+  // Store the callback info locally
+  {
+    std::lock_guard<std::mutex> lock(g_callback_mutex);
+    g_pending_callbacks[callback_id] = {callback, userData};
+  }
+
+  // Send to server: stream, callback_id, flags
+  if (rpc_write_start_request(conn, RPC_cudaStreamAddCallback) < 0 ||
+      rpc_write(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+      rpc_write(conn, &callback_id, sizeof(uint64_t)) < 0 ||
+      rpc_write(conn, &flags, sizeof(unsigned int)) < 0 ||
+      rpc_wait_for_response(conn) < 0 ||
+      rpc_read(conn, &return_value, sizeof(cudaError_t)) < 0 ||
+      rpc_read_end(conn) < 0) {
+    // Remove callback on failure
+    std::lock_guard<std::mutex> lock(g_callback_mutex);
+    g_pending_callbacks.erase(callback_id);
+    return cudaErrorDevicesUnavailable;
+  }
+
+  if (return_value != cudaSuccess) {
+    // Remove callback on failure
+    std::lock_guard<std::mutex> lock(g_callback_mutex);
+    g_pending_callbacks.erase(callback_id);
+  } else {
+    // Start background polling thread to handle async callbacks
+    start_callback_thread();
+  }
+
+  return return_value;
+}
+
+cudaError_t cudaStreamSynchronize(cudaStream_t stream) {
+  fprintf(stderr, "SCUDA: cudaStreamSynchronize called stream=%p\n", (void *)stream);
+  fflush(stderr);
+
+  conn_t *conn = rpc_client_get_connection(0);
+  cudaError_t return_value;
+
+  // First synchronize the stream on the server
+  if (rpc_write_start_request(conn, RPC_cudaStreamSynchronize) < 0 ||
+      rpc_write(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+      rpc_wait_for_response(conn) < 0 ||
+      rpc_read(conn, &return_value, sizeof(cudaError_t)) < 0 ||
+      rpc_read_end(conn) < 0)
+    return cudaErrorDevicesUnavailable;
+
+  // After synchronization, poll for any pending callbacks and D2H transfers
+  cudaError_t poll_result = poll_stream_callbacks(conn);
+  if (poll_result != cudaSuccess)
+    return poll_result;
+
+  return return_value;
+}
+
+cudaError_t cudaDeviceSynchronize() {
+  conn_t *conn = rpc_client_get_connection(0);
+  cudaError_t return_value;
+
+  // First synchronize the device on the server
+  if (rpc_write_start_request(conn, RPC_cudaDeviceSynchronize) < 0 ||
+      rpc_wait_for_response(conn) < 0 ||
+      rpc_read(conn, &return_value, sizeof(cudaError_t)) < 0 ||
+      rpc_read_end(conn) < 0)
+    return cudaErrorDevicesUnavailable;
+
+  // After synchronization, poll for any pending callbacks and D2H transfers
+  cudaError_t poll_result = poll_stream_callbacks(conn);
+  if (poll_result != cudaSuccess)
+    return poll_result;
+
+  return return_value;
+}
+
+cudaError_t cudaEventSynchronize(cudaEvent_t event) {
+  conn_t *conn = rpc_client_get_connection(0);
+  cudaError_t return_value;
+
+  // First synchronize the event on the server
+  if (rpc_write_start_request(conn, RPC_cudaEventSynchronize) < 0 ||
+      rpc_write(conn, &event, sizeof(cudaEvent_t)) < 0 ||
+      rpc_wait_for_response(conn) < 0 ||
+      rpc_read(conn, &return_value, sizeof(cudaError_t)) < 0 ||
+      rpc_read_end(conn) < 0)
+    return cudaErrorDevicesUnavailable;
+
+  // After synchronization, poll for any pending callbacks and D2H transfers
+  cudaError_t poll_result = poll_stream_callbacks(conn);
+  if (poll_result != cudaSuccess)
+    return poll_result;
 
   return return_value;
 }

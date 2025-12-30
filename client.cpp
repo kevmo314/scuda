@@ -42,22 +42,112 @@ static void *faulting_address = nullptr;
 std::map<conn_t *, std::map<void *, size_t>> unified_devices;
 // Track pinned host memory separately - needs segfault handling but NOT kernel launch sync
 std::map<conn_t *, std::map<void *, size_t>> pinned_host_devices;
-// Track which pointers have local memory (volatile for signal handler safety)
-volatile void *mapped_ptrs[1024];
-volatile int mapped_ptr_count = 0;
+// Track which page ranges have been mapped (start address, end address)
+// Using uintptr_t for atomic-safe access in signal handler
+struct MappedRange {
+  uintptr_t start;
+  uintptr_t end;
+};
+volatile MappedRange mapped_ranges[1024];
+volatile int mapped_range_count = 0;
 std::map<void *, void *> host_funcs;
 
 static bool is_ptr_mapped(void *ptr) {
-  for (int i = 0; i < mapped_ptr_count; i++) {
-    if (mapped_ptrs[i] == ptr) return true;
+  uintptr_t addr = (uintptr_t)ptr;
+  for (int i = 0; i < mapped_range_count; i++) {
+    if (addr >= mapped_ranges[i].start && addr < mapped_ranges[i].end) {
+      return true;
+    }
   }
   return false;
 }
 
-static void mark_ptr_mapped(void *ptr) {
-  if (mapped_ptr_count < 1024) {
-    mapped_ptrs[mapped_ptr_count++] = ptr;
+// Check if all pages from aligned_ptr to aligned_ptr+size are already mapped
+static bool is_range_fully_mapped(uintptr_t start, uintptr_t end) {
+  // Check if this range is fully covered by existing mappings
+  for (int i = 0; i < mapped_range_count; i++) {
+    if (mapped_ranges[i].start <= start && mapped_ranges[i].end >= end) {
+      return true;
+    }
   }
+  return false;
+}
+
+static void mark_range_mapped(uintptr_t start, uintptr_t end) {
+  if (mapped_range_count < 1024) {
+    // Try to extend an existing range if possible
+    for (int i = 0; i < mapped_range_count; i++) {
+      // Check for overlap or adjacency
+      if (start <= mapped_ranges[i].end && end >= mapped_ranges[i].start) {
+        // Extend the range
+        if (start < mapped_ranges[i].start) mapped_ranges[i].start = start;
+        if (end > mapped_ranges[i].end) mapped_ranges[i].end = end;
+        return;
+      }
+    }
+    // No overlap, add new range
+    mapped_ranges[mapped_range_count].start = start;
+    mapped_ranges[mapped_range_count].end = end;
+    mapped_range_count++;
+  }
+}
+
+static void mark_ptr_mapped(void *ptr) {
+  // Legacy function - not used anymore but kept for compatibility
+  (void)ptr;
+}
+
+// Helper to map a range, handling partial overlaps with existing mappings
+static bool map_range_safe(uintptr_t start, uintptr_t end) {
+  // Check if already fully mapped
+  if (is_range_fully_mapped(start, end)) {
+    return true;
+  }
+
+  // For simplicity, if any part is already mapped, just return true
+  // (the data should still be accessible for the overlapping parts)
+  // We only need to map pages that aren't already mapped
+
+  size_t page_size = sysconf(_SC_PAGESIZE);
+  uintptr_t current = start;
+
+  while (current < end) {
+    // Check if this page is already in a mapped range
+    bool page_mapped = false;
+    for (int i = 0; i < mapped_range_count; i++) {
+      if (current >= mapped_ranges[i].start && current < mapped_ranges[i].end) {
+        page_mapped = true;
+        // Skip to end of this mapped range
+        current = mapped_ranges[i].end;
+        break;
+      }
+    }
+
+    if (!page_mapped) {
+      // Find the extent of unmapped pages
+      uintptr_t unmapped_start = current;
+      uintptr_t unmapped_end = end;
+
+      // Check if there's a mapped range that starts before our end
+      for (int i = 0; i < mapped_range_count; i++) {
+        if (mapped_ranges[i].start > current && mapped_ranges[i].start < unmapped_end) {
+          unmapped_end = mapped_ranges[i].start;
+        }
+      }
+
+      size_t map_size = unmapped_end - unmapped_start;
+      void *allocated = mmap((void*)unmapped_start, map_size, PROT_READ | PROT_WRITE,
+                             MAP_FIXED | MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+      if (allocated == MAP_FAILED) {
+        return false;
+      }
+
+      mark_range_mapped(unmapped_start, unmapped_end);
+      current = unmapped_end;
+    }
+  }
+
+  return true;
 }
 
 // Ensure a unified or pinned host pointer has local memory mapped (for receiving DeviceToHost data)
@@ -70,22 +160,14 @@ bool ensure_unified_ptr_mapped(conn_t *conn, void *ptr) {
     auto &devices = conn_it->second;
     auto device_it = devices.find(ptr);
     if (device_it != devices.end()) {
-      if (is_ptr_mapped(ptr)) {
-        return true;
-      }
       size_t size = device_it->second;
       // Page-align the pointer for mmap
-      void *aligned_ptr = (void *)((uintptr_t)ptr & ~(page_size - 1));
-      size_t offset = (uintptr_t)ptr - (uintptr_t)aligned_ptr;
+      uintptr_t aligned_start = (uintptr_t)ptr & ~(page_size - 1);
+      size_t offset = (uintptr_t)ptr - aligned_start;
       size_t aligned_size = ((size + offset + page_size - 1) & ~(page_size - 1));
+      uintptr_t aligned_end = aligned_start + aligned_size;
 
-      void *allocated = mmap(aligned_ptr, aligned_size, PROT_READ | PROT_WRITE,
-                             MAP_FIXED | MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-      if (allocated == MAP_FAILED) {
-        return false;
-      }
-      mark_ptr_mapped(ptr);
-      return true;
+      return map_range_safe(aligned_start, aligned_end);
     }
   }
 
@@ -95,52 +177,102 @@ bool ensure_unified_ptr_mapped(conn_t *conn, void *ptr) {
     auto &devices = pinned_it->second;
     auto device_it = devices.find(ptr);
     if (device_it != devices.end()) {
-      if (is_ptr_mapped(ptr)) {
-        return true;
-      }
       size_t size = device_it->second;
       // Page-align the pointer for mmap
-      void *aligned_ptr = (void *)((uintptr_t)ptr & ~(page_size - 1));
-      size_t offset = (uintptr_t)ptr - (uintptr_t)aligned_ptr;
+      uintptr_t aligned_start = (uintptr_t)ptr & ~(page_size - 1);
+      size_t offset = (uintptr_t)ptr - aligned_start;
       size_t aligned_size = ((size + offset + page_size - 1) & ~(page_size - 1));
+      uintptr_t aligned_end = aligned_start + aligned_size;
 
-      void *allocated = mmap(aligned_ptr, aligned_size, PROT_READ | PROT_WRITE,
-                             MAP_FIXED | MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-      if (allocated == MAP_FAILED) {
-        return false;
-      }
-      mark_ptr_mapped(ptr);
-      return true;
+      return map_range_safe(aligned_start, aligned_end);
     }
   }
 
   return false;
 }
 
+// Signal-safe version of mapping - maps only the faulting page if not already mapped
+static void segfault_map_page(uintptr_t fault_addr, uintptr_t alloc_start, size_t alloc_size) {
+  size_t page_size = sysconf(_SC_PAGESIZE);
+
+  // Calculate the page-aligned start of the entire allocation
+  uintptr_t alloc_aligned_start = alloc_start & ~(page_size - 1);
+  size_t offset = alloc_start - alloc_aligned_start;
+  size_t alloc_aligned_size = ((alloc_size + offset + page_size - 1) & ~(page_size - 1));
+  uintptr_t alloc_aligned_end = alloc_aligned_start + alloc_aligned_size;
+
+  // Check if this entire range is already mapped
+  if (is_range_fully_mapped(alloc_aligned_start, alloc_aligned_end)) {
+    return; // Already mapped, nothing to do
+  }
+
+  // Find the page containing the fault
+  uintptr_t fault_page_start = fault_addr & ~(page_size - 1);
+
+  // Check if this specific page is already in a mapped range
+  for (int i = 0; i < mapped_range_count; i++) {
+    if (fault_page_start >= mapped_ranges[i].start &&
+        fault_page_start < mapped_ranges[i].end) {
+      // Page already mapped, but we got a segfault?
+      // This shouldn't happen, but just return
+      return;
+    }
+  }
+
+  // Map only the unmapped portion of this allocation
+  // For safety, map from alloc_aligned_start to alloc_aligned_end
+  // but only the pages that aren't already mapped
+
+  uintptr_t current = alloc_aligned_start;
+  while (current < alloc_aligned_end) {
+    // Check if current is already in a mapped range
+    bool page_mapped = false;
+    uintptr_t next_unmapped = current;
+
+    for (int i = 0; i < mapped_range_count; i++) {
+      if (current >= mapped_ranges[i].start && current < mapped_ranges[i].end) {
+        page_mapped = true;
+        next_unmapped = mapped_ranges[i].end;
+        break;
+      }
+    }
+
+    if (page_mapped) {
+      current = next_unmapped;
+      continue;
+    }
+
+    // Find end of unmapped region
+    uintptr_t unmapped_end = alloc_aligned_end;
+    for (int i = 0; i < mapped_range_count; i++) {
+      if (mapped_ranges[i].start > current && mapped_ranges[i].start < unmapped_end) {
+        unmapped_end = mapped_ranges[i].start;
+      }
+    }
+
+    size_t map_size = unmapped_end - current;
+    void *allocated = mmap((void*)current, map_size, PROT_READ | PROT_WRITE,
+                           MAP_FIXED | MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    if (allocated == MAP_FAILED) {
+      // Can't call perror in signal handler safely, just exit
+      _exit(1);
+    }
+
+    mark_range_mapped(current, unmapped_end);
+    current = unmapped_end;
+  }
+}
+
 static void segfault(int sig, siginfo_t *info, void *unused) {
   faulting_address = info->si_addr;
+  uintptr_t fault_addr = (uintptr_t)faulting_address;
 
   // Check unified memory pointers
   for (const auto &conn_entry : unified_devices) {
     for (const auto &[ptr, sz] : conn_entry.second) {
-      if ((uintptr_t)ptr <= (uintptr_t)faulting_address &&
-          (uintptr_t)faulting_address < ((uintptr_t)ptr + sz)) {
-        // Page-align the pointer for mmap
-        size_t page_size = sysconf(_SC_PAGESIZE);
-        void *aligned_ptr = (void *)((uintptr_t)ptr & ~(page_size - 1));
-        size_t offset = (uintptr_t)ptr - (uintptr_t)aligned_ptr;
-        size_t aligned_size = sz + offset;
-        // Round up to page boundary
-        aligned_size = (aligned_size + page_size - 1) & ~(page_size - 1);
-
-        void *allocated =
-            mmap(aligned_ptr, aligned_size, PROT_READ | PROT_WRITE,
-                 MAP_FIXED | MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-        if (allocated == MAP_FAILED) {
-          perror("Failed to allocate memory at faulting address");
-          _exit(1);
-        }
-        mark_ptr_mapped(ptr);
+      uintptr_t alloc_start = (uintptr_t)ptr;
+      if (alloc_start <= fault_addr && fault_addr < (alloc_start + sz)) {
+        segfault_map_page(fault_addr, alloc_start, sz);
         return;
       }
     }
@@ -149,24 +281,9 @@ static void segfault(int sig, siginfo_t *info, void *unused) {
   // Check pinned host memory pointers
   for (const auto &conn_entry : pinned_host_devices) {
     for (const auto &[ptr, sz] : conn_entry.second) {
-      if ((uintptr_t)ptr <= (uintptr_t)faulting_address &&
-          (uintptr_t)faulting_address < ((uintptr_t)ptr + sz)) {
-        // Page-align the pointer for mmap
-        size_t page_size = sysconf(_SC_PAGESIZE);
-        void *aligned_ptr = (void *)((uintptr_t)ptr & ~(page_size - 1));
-        size_t offset = (uintptr_t)ptr - (uintptr_t)aligned_ptr;
-        size_t aligned_size = sz + offset;
-        // Round up to page boundary
-        aligned_size = (aligned_size + page_size - 1) & ~(page_size - 1);
-
-        void *allocated =
-            mmap(aligned_ptr, aligned_size, PROT_READ | PROT_WRITE,
-                 MAP_FIXED | MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-        if (allocated == MAP_FAILED) {
-          perror("Failed to allocate memory at faulting address");
-          _exit(1);
-        }
-        mark_ptr_mapped(ptr);
+      uintptr_t alloc_start = (uintptr_t)ptr;
+      if (alloc_start <= fault_addr && fault_addr < (alloc_start + sz)) {
+        segfault_map_page(fault_addr, alloc_start, sz);
         return;
       }
     }
@@ -412,9 +529,12 @@ int rpc_open() {
       exit(1);
     }
 
-    conns[nconns] = {sockfd, 0};
+    memset(&conns[nconns], 0, sizeof(conn_t));
+    conns[nconns].connfd = sockfd;
+    conns[nconns].request_id = 0;
     if (pthread_mutex_init(&conns[nconns].read_mutex, NULL) < 0 ||
-        pthread_mutex_init(&conns[nconns].write_mutex, NULL) < 0) {
+        pthread_mutex_init(&conns[nconns].write_mutex, NULL) < 0 ||
+        pthread_cond_init(&conns[nconns].read_cond, NULL) < 0) {
       return -1;
     }
 

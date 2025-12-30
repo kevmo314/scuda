@@ -64,7 +64,7 @@ set(SERVER_OUTPUT server_${CUDAToolkit_VERSION_MAJOR}.${CUDAToolkit_VERSION_MINO
 find_library(CUBLAS_LIBRARY cublas HINTS ${CUDAToolkit_LIBRARY_DIR} PATHS /usr/local/cuda/lib64)
 find_library(CUDNN_LIBRARY cudnn HINTS ${CUDAToolkit_LIBRARY_DIR} PATHS /usr/local/cuda/lib64)
 find_library(CUDART_LIBRARY cudart HINTS ${CUDAToolkit_LIBRARY_DIR} PATHS /usr/local/cuda/lib64)
-find_library(NVML_LIBRARY nvidia-ml HINTS ${CUDAToolkit_LIBRARY_DIR} PATHS /usr/local/cuda/lib64)
+find_library(NVML_LIBRARY nvidia-ml HINTS ${CUDAToolkit_LIBRARY_DIR} PATHS /usr/local/cuda/lib64 /usr/local/cuda/targets/x86_64-linux/lib/stubs /usr/lib/wsl/lib)
 
 if (NOT CUBLAS_LIBRARY)
     message(FATAL_ERROR "cuBLAS library not found. Ensure CUDA is installed and the library path is correct.")

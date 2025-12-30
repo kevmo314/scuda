@@ -47,3 +47,6 @@ cudaGraphAddMemcpyNode(cudaGraphNode_t *pGraphNode, cudaGraph_t graph,
 cudaError_t cudaGraphGetNodes(cudaGraph_t graph, cudaGraphNode_t *nodes,
                               size_t *numNodes);
 cudaError_t cudaGraphDestroy(cudaGraph_t graph);
+cudaError_t cudaStreamSynchronize(cudaStream_t stream);
+cudaError_t cudaDeviceSynchronize();
+cudaError_t cudaEventSynchronize(cudaEvent_t event);

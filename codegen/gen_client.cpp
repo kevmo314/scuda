@@ -7357,18 +7357,6 @@ cudaError_t cudaDeviceReset()
     return return_value;
 }
 
-cudaError_t cudaDeviceSynchronize()
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    cudaError_t return_value;
-    if (rpc_write_start_request(conn, RPC_cudaDeviceSynchronize) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, &return_value, sizeof(cudaError_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return cudaErrorDevicesUnavailable;
-    return return_value;
-}
-
 cudaError_t cudaDeviceSetLimit(enum cudaLimit limit, size_t value)
 {
     conn_t *conn = rpc_client_get_connection(0);
@@ -8289,23 +8277,6 @@ cudaError_t cudaStreamWaitEvent(cudaStream_t stream, cudaEvent_t event, unsigned
     return return_value;
 }
 
-cudaError_t cudaStreamSynchronize(cudaStream_t stream)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&stream, cudaMemcpyHostToDevice) < 0)
-      return cudaErrorDevicesUnavailable;
-    cudaError_t return_value;
-    if (rpc_write_start_request(conn, RPC_cudaStreamSynchronize) < 0 ||
-        rpc_write(conn, &stream, sizeof(cudaStream_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, &return_value, sizeof(cudaError_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return cudaErrorDevicesUnavailable;
-    if (maybe_copy_unified_arg(conn, (void*)&stream, cudaMemcpyDeviceToHost) < 0)
-      return cudaErrorDevicesUnavailable;
-    return return_value;
-}
-
 cudaError_t cudaStreamQuery(cudaStream_t stream)
 {
     conn_t *conn = rpc_client_get_connection(0);
@@ -8504,23 +8475,6 @@ cudaError_t cudaEventQuery(cudaEvent_t event)
       return cudaErrorDevicesUnavailable;
     cudaError_t return_value;
     if (rpc_write_start_request(conn, RPC_cudaEventQuery) < 0 ||
-        rpc_write(conn, &event, sizeof(cudaEvent_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, &return_value, sizeof(cudaError_t)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return cudaErrorDevicesUnavailable;
-    if (maybe_copy_unified_arg(conn, (void*)&event, cudaMemcpyDeviceToHost) < 0)
-      return cudaErrorDevicesUnavailable;
-    return return_value;
-}
-
-cudaError_t cudaEventSynchronize(cudaEvent_t event)
-{
-    conn_t *conn = rpc_client_get_connection(0);
-    if (maybe_copy_unified_arg(conn, (void*)&event, cudaMemcpyHostToDevice) < 0)
-      return cudaErrorDevicesUnavailable;
-    cudaError_t return_value;
-    if (rpc_write_start_request(conn, RPC_cudaEventSynchronize) < 0 ||
         rpc_write(conn, &event, sizeof(cudaEvent_t)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, &return_value, sizeof(cudaError_t)) < 0 ||
@@ -39602,7 +39556,6 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cudaStreamSetAttribute", (void *)cudaStreamSetAttribute},
     {"cudaStreamDestroy", (void *)cudaStreamDestroy},
     {"cudaStreamWaitEvent", (void *)cudaStreamWaitEvent},
-    {"cudaStreamSynchronize", (void *)cudaStreamSynchronize},
     {"cudaStreamQuery", (void *)cudaStreamQuery},
     {"cudaStreamBeginCapture", (void *)cudaStreamBeginCapture},
     {"cudaThreadExchangeStreamCaptureMode", (void *)cudaThreadExchangeStreamCaptureMode},
@@ -40249,6 +40202,10 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cudaGraphAddMemFreeNode", (void *)cudaGraphAddMemFreeNode},
     {"cudaGraphAddMemAllocNode", (void *)cudaGraphAddMemAllocNode},
     {"cudaDeviceGetGraphMemAttribute", (void *)cudaDeviceGetGraphMemAttribute},
+    {"cudaStreamAddCallback", (void *)cudaStreamAddCallback},
+    {"cudaStreamSynchronize", (void *)cudaStreamSynchronize},
+    {"cudaDeviceSynchronize", (void *)cudaDeviceSynchronize},
+    {"cudaEventSynchronize", (void *)cudaEventSynchronize},
 };
 
 void *get_function_pointer(const char *name)

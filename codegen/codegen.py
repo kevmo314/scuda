@@ -87,7 +87,11 @@ MANUAL_IMPLEMENTATIONS = [
     "cudaGraphAddHostNode",
     "cudaGraphAddMemFreeNode",
     "cudaGraphAddMemAllocNode",
-    "cudaDeviceGetGraphMemAttribute"
+    "cudaDeviceGetGraphMemAttribute",
+    "cudaStreamAddCallback",
+    "cudaStreamSynchronize",
+    "cudaDeviceSynchronize",
+    "cudaEventSynchronize",
 ]
 
 
@@ -1141,8 +1145,8 @@ def main():
             "extern void rpc_close(conn_t *conn);\n\n"
         )
         for function, annotation, operations, disabled in functions_with_annotations:
-            # we don't generate client function definitions for disabled functions; only the RPC definitions.
-            if disabled:
+            # we don't generate client function definitions for disabled functions or manual implementations; only the RPC definitions.
+            if disabled or function.name.format() in MANUAL_IMPLEMENTATIONS:
                 continue
 
             params = []

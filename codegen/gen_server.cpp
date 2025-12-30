@@ -8279,29 +8279,6 @@ ERROR_0:
     return -1;
 }
 
-int handle_cudaDeviceSynchronize(conn_t *conn)
-{
-    int request_id;
-    cudaError_t scuda_intercept_result;
-    if (
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = cudaDeviceSynchronize();
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
 int handle_cudaDeviceSetLimit(conn_t *conn)
 {
     enum cudaLimit limit;
@@ -9450,31 +9427,6 @@ ERROR_0:
     return -1;
 }
 
-int handle_cudaStreamSynchronize(conn_t *conn)
-{
-    cudaStream_t stream;
-    int request_id;
-    cudaError_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = cudaStreamSynchronize(stream);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
 int handle_cudaStreamQuery(conn_t *conn)
 {
     cudaStream_t stream;
@@ -9731,31 +9683,6 @@ int handle_cudaEventQuery(conn_t *conn)
     if (request_id < 0)
         goto ERROR_0;
     scuda_intercept_result = cudaEventQuery(event);
-
-    if (rpc_write_start_response(conn, request_id) < 0 ||
-        rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
-        rpc_write_end(conn) < 0)
-        goto ERROR_0;
-
-    return 0;
-ERROR_0:
-    return -1;
-}
-
-int handle_cudaEventSynchronize(conn_t *conn)
-{
-    cudaEvent_t event;
-    int request_id;
-    cudaError_t scuda_intercept_result;
-    if (
-        rpc_read(conn, &event, sizeof(cudaEvent_t)) < 0 ||
-        false)
-        goto ERROR_0;
-
-    request_id = rpc_read_end(conn);
-    if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = cudaEventSynchronize(event);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
@@ -34103,6 +34030,7 @@ static RequestHandler opHandlers[] = {
     handle_cudaStreamSetAttribute,
     handle_cudaStreamDestroy,
     handle_cudaStreamWaitEvent,
+    handle_cudaStreamAddCallback,
     handle_cudaStreamSynchronize,
     handle_cudaStreamQuery,
     handle_cudaStreamBeginCapture,

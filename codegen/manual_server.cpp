@@ -5,8 +5,11 @@
 #include <iostream>
 #include <nvml.h>
 
+#include <atomic>
 #include <cstdio>
 #include <cuda_runtime.h>
+#include <list>
+#include <mutex>
 #include <vector>
 
 #include <cstring>
@@ -23,11 +26,75 @@ extern int rpc_read_end(const conn_t *conn);
 extern int rpc_write_start_response(const conn_t *conn, const int request_id);
 extern int rpc_write(const conn_t *conn, const void *data,
                      const std::size_t size);
+extern int rpc_write_end(const conn_t *conn);
 
 void invoke_host_func(void *data);
 void append_managed_ptr(const void *conn, void *srcPtr, void *dstPtr,
                         size_t size, cudaMemcpyKind kind, void *graph);
 void maybe_destroy_graph_resources(void *graph);
+
+// Stream callback infrastructure
+struct PendingCallback {
+  uint64_t callback_id;
+  cudaStream_t stream;
+  cudaError_t status;
+};
+
+struct CallbackProxyData {
+  conn_t *conn;
+  uint64_t callback_id;
+};
+
+static std::mutex g_callback_mutex;
+static std::unordered_map<conn_t *, std::list<PendingCallback>> g_pending_callbacks;
+
+// Proxy callback that gets called by CUDA runtime
+static void CUDART_CB stream_callback_proxy(cudaStream_t stream,
+                                            cudaError_t status, void *userData) {
+  CallbackProxyData *data = static_cast<CallbackProxyData *>(userData);
+
+  // Queue the callback for later retrieval by client
+  {
+    std::lock_guard<std::mutex> lock(g_callback_mutex);
+    g_pending_callbacks[data->conn].push_back(
+        {data->callback_id, stream, status});
+  }
+
+  delete data;
+}
+
+// Async D2H transfer infrastructure
+struct PendingD2HTransfer {
+  uint64_t transfer_id;
+  void *host_data;      // Server-side buffer with the data
+  size_t size;
+  cudaError_t status;
+};
+
+struct D2HTransferProxyData {
+  conn_t *conn;
+  uint64_t transfer_id;
+  void *host_data;
+  size_t size;
+};
+
+static std::unordered_map<conn_t *, std::list<PendingD2HTransfer>> g_pending_d2h_transfers;
+static std::atomic<uint64_t> g_d2h_transfer_id_counter{1};
+
+// Proxy callback for async D2H transfers
+static void CUDART_CB d2h_transfer_proxy(cudaStream_t stream,
+                                         cudaError_t status, void *userData) {
+  D2HTransferProxyData *data = static_cast<D2HTransferProxyData *>(userData);
+
+  // Queue the completed transfer for later retrieval by client
+  {
+    std::lock_guard<std::mutex> lock(g_callback_mutex);
+    g_pending_d2h_transfers[data->conn].push_back(
+        {data->transfer_id, data->host_data, data->size, status});
+  }
+
+  delete data;
+}
 
 FILE *__cudart_trace_output_stream = stdout;
 
@@ -110,6 +177,7 @@ int handle_cudaMemcpyAsync(conn_t *conn) {
   int stream_null_check;
   cudaStream_t stream = 0;
   int ret = -1;
+  uint64_t transfer_id = 0;
 
   if (rpc_read(conn, &kind, sizeof(enum cudaMemcpyKind)) < 0 ||
       rpc_read(conn, &stream_null_check, sizeof(int)) < 0 ||
@@ -123,7 +191,7 @@ int handle_cudaMemcpyAsync(conn_t *conn) {
     goto ERROR_0;
 
   switch (kind) {
-  case cudaMemcpyDeviceToHost:
+  case cudaMemcpyDeviceToHost: {
     host_data = malloc(count);
     if (host_data == NULL)
       goto ERROR_0;
@@ -132,8 +200,31 @@ int handle_cudaMemcpyAsync(conn_t *conn) {
     if (request_id < 0)
       goto ERROR_0;
 
+    // Queue the async copy
     result = cudaMemcpyAsync(host_data, src, count, kind, stream);
+
+    if (result == cudaSuccess) {
+      // Allocate transfer_id and register callback to queue data when ready
+      transfer_id = g_d2h_transfer_id_counter.fetch_add(1);
+
+      D2HTransferProxyData *proxy_data = new D2HTransferProxyData();
+      proxy_data->conn = conn;
+      proxy_data->transfer_id = transfer_id;
+      proxy_data->host_data = host_data;
+      proxy_data->size = count;
+
+      result = cudaStreamAddCallback(stream, d2h_transfer_proxy, proxy_data, 0);
+      if (result != cudaSuccess) {
+        delete proxy_data;
+        free(host_data);
+        host_data = NULL;
+      } else {
+        // Don't free host_data here - callback will handle it
+        host_data = NULL;
+      }
+    }
     break;
+  }
   case cudaMemcpyHostToDevice:
     host_data = malloc(count);
     if (host_data == NULL)
@@ -158,22 +249,29 @@ int handle_cudaMemcpyAsync(conn_t *conn) {
     break;
   }
 
+  // For D2H, send transfer_id instead of data (data comes later via polling)
   if (rpc_write_start_response(conn, request_id) < 0 ||
       (kind == cudaMemcpyDeviceToHost &&
-       rpc_write(conn, host_data, count) < 0) ||
+       rpc_write(conn, &transfer_id, sizeof(uint64_t)) < 0) ||
       rpc_write(conn, &result, sizeof(cudaError_t)) < 0 ||
-      rpc_write_end(conn) < 0 ||
-      (host_data != NULL && stream == 0 &&
-       cudaStreamAddCallback(
-           stream,
-           [](cudaStream_t stream, cudaError_t status, void *ptr) {
-             free(ptr);
-           },
-           host_data, 0) != cudaSuccess))
+      rpc_write_end(conn) < 0)
     goto ERROR_0;
+
+  // For H2D, register callback to free host_data when copy completes
+  if (kind == cudaMemcpyHostToDevice && host_data != NULL) {
+    cudaStreamAddCallback(
+        stream,
+        [](cudaStream_t stream, cudaError_t status, void *ptr) {
+          free(ptr);
+        },
+        host_data, 0);
+    host_data = NULL;  // Callback owns it now
+  }
 
   ret = 0;
 ERROR_0:
+  if (host_data != NULL)
+    free(host_data);
   return ret;
 }
 
@@ -1175,6 +1273,189 @@ int handle_cudaCreateTextureObject(conn_t *conn) {
     goto ERROR_0;
 
   return 0;
+ERROR_0:
+  return -1;
+}
+
+int handle_cudaStreamAddCallback(conn_t *conn) {
+  cudaStream_t stream;
+  uint64_t callback_id;
+  unsigned int flags;
+  int request_id;
+  cudaError_t scuda_intercept_result;
+
+  if (rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0 ||
+      rpc_read(conn, &callback_id, sizeof(uint64_t)) < 0 ||
+      rpc_read(conn, &flags, sizeof(unsigned int)) < 0)
+    goto ERROR_0;
+
+  request_id = rpc_read_end(conn);
+  if (request_id < 0)
+    goto ERROR_0;
+
+  {
+    // Create proxy data that will be passed to our callback
+    CallbackProxyData *proxy_data = new CallbackProxyData{conn, callback_id};
+
+    // Register proxy callback with CUDA
+    scuda_intercept_result =
+        cudaStreamAddCallback(stream, stream_callback_proxy, proxy_data, flags);
+
+    if (scuda_intercept_result != cudaSuccess) {
+      delete proxy_data;
+    }
+  }
+
+  if (rpc_write_start_response(conn, request_id) < 0 ||
+      rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
+      rpc_write_end(conn) < 0)
+    goto ERROR_0;
+
+  return 0;
+ERROR_0:
+  return -1;
+}
+
+int handle_cudaStreamSynchronize(conn_t *conn) {
+  cudaStream_t stream;
+  int request_id;
+  cudaError_t scuda_intercept_result;
+
+  if (rpc_read(conn, &stream, sizeof(cudaStream_t)) < 0)
+    goto ERROR_0;
+
+  request_id = rpc_read_end(conn);
+  if (request_id < 0)
+    goto ERROR_0;
+
+  scuda_intercept_result = cudaStreamSynchronize(stream);
+
+  if (rpc_write_start_response(conn, request_id) < 0 ||
+      rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
+      rpc_write_end(conn) < 0)
+    goto ERROR_0;
+
+  return 0;
+ERROR_0:
+  return -1;
+}
+
+int handle_cudaDeviceSynchronize(conn_t *conn) {
+  int request_id;
+  cudaError_t scuda_intercept_result;
+
+  request_id = rpc_read_end(conn);
+  if (request_id < 0)
+    goto ERROR_0;
+
+  scuda_intercept_result = cudaDeviceSynchronize();
+
+  if (rpc_write_start_response(conn, request_id) < 0 ||
+      rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
+      rpc_write_end(conn) < 0)
+    goto ERROR_0;
+
+  return 0;
+ERROR_0:
+  return -1;
+}
+
+int handle_cudaEventSynchronize(conn_t *conn) {
+  cudaEvent_t event;
+  int request_id;
+  cudaError_t scuda_intercept_result;
+
+  if (rpc_read(conn, &event, sizeof(cudaEvent_t)) < 0)
+    goto ERROR_0;
+
+  request_id = rpc_read_end(conn);
+  if (request_id < 0)
+    goto ERROR_0;
+
+  scuda_intercept_result = cudaEventSynchronize(event);
+
+  if (rpc_write_start_response(conn, request_id) < 0 ||
+      rpc_write(conn, &scuda_intercept_result, sizeof(cudaError_t)) < 0 ||
+      rpc_write_end(conn) < 0)
+    goto ERROR_0;
+
+  return 0;
+ERROR_0:
+  return -1;
+}
+
+int handle_SCUDA_POLL_CALLBACKS(conn_t *conn) {
+  int request_id;
+  std::list<PendingCallback> callbacks;
+  std::list<PendingD2HTransfer> d2h_transfers;
+
+  request_id = rpc_read_end(conn);
+  if (request_id < 0)
+    goto ERROR_0;
+
+  // Get pending callbacks and D2H transfers for this connection
+  {
+    std::lock_guard<std::mutex> lock(g_callback_mutex);
+    auto it = g_pending_callbacks.find(conn);
+    if (it != g_pending_callbacks.end()) {
+      callbacks = std::move(it->second);
+      it->second.clear();
+    }
+
+    auto d2h_it = g_pending_d2h_transfers.find(conn);
+    if (d2h_it != g_pending_d2h_transfers.end()) {
+      d2h_transfers = std::move(d2h_it->second);
+      d2h_it->second.clear();
+    }
+  }
+
+  {
+    uint32_t num_callbacks = static_cast<uint32_t>(callbacks.size());
+    uint32_t num_d2h_transfers = static_cast<uint32_t>(d2h_transfers.size());
+
+    if (rpc_write_start_response(conn, request_id) < 0 ||
+        rpc_write(conn, &num_callbacks, sizeof(uint32_t)) < 0)
+      goto ERROR_0;
+
+    for (const auto &cb : callbacks) {
+      if (rpc_write(conn, &cb.callback_id, sizeof(uint64_t)) < 0 ||
+          rpc_write(conn, &cb.stream, sizeof(cudaStream_t)) < 0 ||
+          rpc_write(conn, &cb.status, sizeof(cudaError_t)) < 0)
+        goto ERROR_0;
+    }
+
+    // Send D2H transfer completions
+    if (rpc_write(conn, &num_d2h_transfers, sizeof(uint32_t)) < 0)
+      goto ERROR_0;
+
+    for (auto &transfer : d2h_transfers) {
+      if (rpc_write(conn, &transfer.transfer_id, sizeof(uint64_t)) < 0 ||
+          rpc_write(conn, &transfer.size, sizeof(size_t)) < 0 ||
+          rpc_write(conn, &transfer.status, sizeof(cudaError_t)) < 0 ||
+          (transfer.status == cudaSuccess && transfer.size > 0 &&
+           rpc_write(conn, transfer.host_data, transfer.size) < 0))
+        goto ERROR_1;
+    }
+
+    if (rpc_write_end(conn) < 0)
+      goto ERROR_1;
+  }
+
+  // Free D2H transfer host buffers
+  for (auto &transfer : d2h_transfers) {
+    if (transfer.host_data != NULL) {
+      free(transfer.host_data);
+    }
+  }
+
+  return 0;
+ERROR_1:
+  // Free D2H transfer host buffers on error
+  for (auto &transfer : d2h_transfers) {
+    if (transfer.host_data != NULL) {
+      free(transfer.host_data);
+    }
+  }
 ERROR_0:
   return -1;
 }

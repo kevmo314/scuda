@@ -29,8 +29,13 @@
 #include <signal.h>
 #include <sys/mman.h>
 
+#include "codegen/gen_api.h"
 #include "codegen/gen_server.h"
+#include "codegen/manual_server.h"
 #include "rpc.h"
+
+// SCUDA internal operation codes (not from codegen)
+#define RPC_SCUDA_POLL_CALLBACKS 1100
 
 #define DEFAULT_PORT 14833
 #define MAX_CLIENTS 10
@@ -261,7 +266,15 @@ void client_handler(int connfd) {
 
     fprintf(stderr, "SERVER: handling op=%d\n", op);
     fflush(stderr);
-    auto opHandler = get_handler(op);
+
+    // Handle SCUDA internal operations
+    RequestHandler opHandler = nullptr;
+    if (op == RPC_SCUDA_POLL_CALLBACKS) {
+      opHandler = handle_SCUDA_POLL_CALLBACKS;
+    } else {
+      opHandler = get_handler(op);
+    }
+
     if (opHandler == nullptr) {
       std::cerr << "Unknown opcode: " << op << std::endl;
       break;

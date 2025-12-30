@@ -174,9 +174,12 @@ int rpc_write_end(conn_t *conn) {
     conn->write_iov[1] = {&conn->write_op, sizeof(unsigned int)};
   }
 
+  // Save write_id before releasing mutex (another thread may modify it)
+  int write_id = conn->write_id;
+
   // write the request to the server
   if (writev(conn->connfd, conn->write_iov, conn->write_iov_count) < 0 ||
       pthread_mutex_unlock(&conn->write_mutex) < 0)
     return -1;
-  return conn->write_id;
+  return write_id;
 }

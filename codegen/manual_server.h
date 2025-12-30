@@ -30,5 +30,10 @@ int handle_cudaGraphAddHostNode(conn_t *conn);
 int handle_cudaGraphAddMemcpyNode(conn_t *conn);
 int handle_cudaGraphDestroy(conn_t *conn);
 int handle_cudaCreateTextureObject(conn_t *conn);
+int handle_cudaStreamAddCallback(conn_t *conn);
+int handle_cudaStreamSynchronize(conn_t *conn);
+int handle_cudaDeviceSynchronize(conn_t *conn);
+int handle_cudaEventSynchronize(conn_t *conn);
+int handle_SCUDA_POLL_CALLBACKS(conn_t *conn);
 
 #endif
