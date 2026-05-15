@@ -86,9 +86,14 @@ int rpc_read(conn_t *conn, void *data, size_t size) {
 // rpc_read_end releases the response lock on the given connection.
 int rpc_read_end(conn_t *conn) {
   int read_id = conn->read_id;
+  bool completes_local_request =
+      read_id >= 2 && (read_id % 2) == conn->local_request_parity;
   conn->read_id = 0;
   if (pthread_cond_broadcast(&conn->read_cond) < 0 ||
       pthread_mutex_unlock(&conn->read_mutex) < 0)
+    return -1;
+  if (completes_local_request &&
+      pthread_mutex_unlock(&conn->call_mutex) < 0)
     return -1;
   return read_id;
 }
@@ -98,8 +103,10 @@ int rpc_read_end(conn_t *conn) {
 // so common that having this function keeps the codegen much cleaner.
 int rpc_wait_for_response(conn_t *conn) {
   int write_id = rpc_write_end(conn);
-  if (write_id < 0 || rpc_read_start(conn, write_id) < 0)
+  if (write_id < 0 || rpc_read_start(conn, write_id) < 0) {
+    pthread_mutex_unlock(&conn->call_mutex);
     return -1;
+  }
   return 0;
 }
 
@@ -109,12 +116,16 @@ int rpc_wait_for_response(conn_t *conn) {
 // only one request can be active at a time, so this function will take the
 // request lock from the connection.
 int rpc_write_start_request(conn_t *conn, const int op) {
+  if (pthread_mutex_lock(&conn->call_mutex) < 0) {
+    return -1;
+  }
   if (pthread_mutex_lock(&conn->write_mutex) < 0) {
 #ifdef VERBOSE
     std::cout << "rpc_write_start failed due to rpc_open() < 0 || "
                  "conns[index].write_mutex lock"
               << std::endl;
 #endif
+    pthread_mutex_unlock(&conn->call_mutex);
     return -1;
   }
 
