@@ -41,8 +41,14 @@ set(CLIENT_SOURCES
 set(SERVER_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/server.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/manual_server.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/nvml_server.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rpc.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/codegen/gen_server.cpp
+)
+
+set(NVML_CLIENT_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/rpc.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/nvml_client.cpp
 )
 
 set(CLIENT_HEADERS
@@ -52,10 +58,12 @@ set(CLIENT_HEADERS
 set(SERVER_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/codegen/gen_server.h
     ${CMAKE_CURRENT_SOURCE_DIR}/manual_server.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/nvml_server.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rpc.cpp
 )
 
 set(CLIENT_OUTPUT scuda_driver)
+set(NVML_CLIENT_OUTPUT scuda_nvml)
 set(SERVER_OUTPUT scuda_driver_server)
 
 add_library(${CLIENT_OUTPUT} SHARED ${CLIENT_SOURCES} ${CLIENT_HEADERS})
@@ -71,9 +79,22 @@ set_target_properties(${CLIENT_OUTPUT} PROPERTIES
     SOVERSION 1
 )
 
+add_library(${NVML_CLIENT_OUTPUT} SHARED ${NVML_CLIENT_SOURCES})
+target_include_directories(${NVML_CLIENT_OUTPUT} PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
+target_link_libraries(${NVML_CLIENT_OUTPUT} PRIVATE stdc++)
+target_link_options(${NVML_CLIENT_OUTPUT} PRIVATE
+    "LINKER:--version-script=${CMAKE_CURRENT_SOURCE_DIR}/nvml.exports"
+)
+set_target_properties(${NVML_CLIENT_OUTPUT} PROPERTIES
+    POSITION_INDEPENDENT_CODE ON
+    OUTPUT_NAME nvidia-ml
+    VERSION 1
+    SOVERSION 1
+)
+
 add_executable(${SERVER_OUTPUT} ${SERVER_SOURCES} ${SERVER_HEADERS})
 target_include_directories(${SERVER_OUTPUT} PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
-target_link_libraries(${SERVER_OUTPUT} PRIVATE ${CUDAToolkit_LIBRARIES} cuda)
+target_link_libraries(${SERVER_OUTPUT} PRIVATE ${CUDAToolkit_LIBRARIES} cuda dl)
 
 set_source_files_properties(
     ${SERVER_SOURCES}
@@ -88,5 +109,10 @@ target_compile_options(${CLIENT_OUTPUT} PRIVATE
     $<$<COMPILE_LANGUAGE:CXX>: -Wno-deprecated-declarations>
 )
 
+target_compile_options(${NVML_CLIENT_OUTPUT} PRIVATE
+    $<$<COMPILE_LANGUAGE:CXX>: -Wno-deprecated-declarations>
+)
+
 message(STATUS "Building client output: ${CLIENT_OUTPUT}")
+message(STATUS "Building NVML client output: ${NVML_CLIENT_OUTPUT}")
 message(STATUS "Building server output: ${SERVER_OUTPUT}")

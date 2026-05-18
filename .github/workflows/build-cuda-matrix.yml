@@ -93,7 +93,9 @@ jobs:
             docker run --rm --entrypoint bash "$image" -lc '
               set -euo pipefail
               test -e /opt/scuda/lib/libcuda.so.1
-              test "${LD_PRELOAD}" = /opt/scuda/lib/libcuda.so.1
+              test -e /opt/scuda/lib/libnvidia-ml.so.1
+              test -x /usr/bin/nvidia-smi
+              test "${LD_LIBRARY_PATH%%:*}" = /opt/scuda/lib
             '
           else
             docker run --rm --entrypoint bash "$image" -lc '
@@ -114,8 +116,10 @@ jobs:
           trap 'docker rm -f "$container" >/dev/null 2>&1 || true' EXIT
 
           docker cp "$container:/opt/scuda/lib/libcuda.so.1" "$out/libcuda.so.1"
+          docker cp "$container:/opt/scuda/lib/libnvidia-ml.so.1" "$out/libnvidia-ml.so.1"
           cp "$out/libcuda.so.1" "$out/libcuda.so"
-          (cd "$out" && sha256sum libcuda.so libcuda.so.1 > SHA256SUMS)
+          cp "$out/libnvidia-ml.so.1" "$out/libnvidia-ml.so"
+          (cd "$out" && sha256sum libcuda.so libcuda.so.1 libnvidia-ml.so libnvidia-ml.so.1 > SHA256SUMS)
 
       - name: Collect server artifacts
         if: matrix.component == 'server'

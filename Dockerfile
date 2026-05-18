@@ -46,10 +46,12 @@ RUN cmake -S /opt/scuda -B /opt/scuda/build \
 
 FROM builder AS client-build
 
-RUN cmake --build /opt/scuda/build --parallel --target scuda_driver
+RUN cmake --build /opt/scuda/build --parallel --target scuda_driver scuda_nvml
 
 RUN test -e /opt/scuda/build/libcuda.so.1 \
+    && test -e /opt/scuda/build/libnvidia-ml.so.1 \
     && ln -sf libcuda.so.1 /opt/scuda/build/libcuda.so \
+    && ln -sf libnvidia-ml.so.1 /opt/scuda/build/libnvidia-ml.so \
     && ! nm -D --defined-only /opt/scuda/build/libcuda.so.1 \
       | awk '{print $3}' \
       | grep -E '^cuda'
@@ -65,6 +67,8 @@ FROM nvidia/cuda:${CUDA_VERSION}-${CUDA_RUNTIME_IMAGE_FLAVOR}-ubuntu${UBUNTU_VER
 ARG DEBIAN_FRONTEND=noninteractive
 ARG CUDA_VERSION
 ARG UBUNTU_VERSION
+ARG NVIDIA_UTILS_PACKAGE=nvidia-utils-535
+ARG NVIDIA_UTILS_VERSION=
 
 LABEL org.opencontainers.image.title="scuda-client"
 LABEL org.opencontainers.image.description="SCUDA client runtime with driver-only libcuda shim"
@@ -76,14 +80,30 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=client-build /opt/scuda/build/libcuda.so.1 /opt/scuda/lib/libcuda.so.1
+RUN set -eux; \
+    apt-get update; \
+    mkdir -p /tmp/nvidia-utils; \
+    cd /tmp/nvidia-utils; \
+    if [ -n "$NVIDIA_UTILS_VERSION" ]; then \
+      apt-get download "${NVIDIA_UTILS_PACKAGE}=${NVIDIA_UTILS_VERSION}"; \
+    else \
+      apt-get download "${NVIDIA_UTILS_PACKAGE}"; \
+    fi; \
+    dpkg-deb -x ./*.deb /tmp/nvidia-utils/root; \
+    cp /tmp/nvidia-utils/root/usr/bin/nvidia-smi /usr/bin/nvidia-smi; \
+    chmod +x /usr/bin/nvidia-smi; \
+    rm -rf /var/lib/apt/lists/* /tmp/nvidia-utils
 
-RUN ln -sf /opt/scuda/lib/libcuda.so.1 /opt/scuda/lib/libcuda.so
+COPY --from=client-build /opt/scuda/build/libcuda.so.1 /opt/scuda/lib/libcuda.so.1
+COPY --from=client-build /opt/scuda/build/libnvidia-ml.so.1 /opt/scuda/lib/libnvidia-ml.so.1
+
+RUN ln -sf /opt/scuda/lib/libcuda.so.1 /opt/scuda/lib/libcuda.so \
+    && ln -sf /opt/scuda/lib/libnvidia-ml.so.1 /opt/scuda/lib/libnvidia-ml.so
 
 ENV SCUDA_LIB=/opt/scuda/lib/libcuda.so.1
 ENV LD_LIBRARY_PATH=/opt/scuda/lib:${LD_LIBRARY_PATH}
-ENV LD_PRELOAD=/opt/scuda/lib/libcuda.so.1
 
+ENTRYPOINT []
 CMD ["bash"]
 
 FROM nvidia/cuda:${CUDA_VERSION}-${CUDA_RUNTIME_IMAGE_FLAVOR}-ubuntu${UBUNTU_VERSION} AS server

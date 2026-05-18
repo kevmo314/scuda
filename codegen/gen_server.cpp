@@ -18,6 +18,7 @@
 #include <cstdio>
 
 #include "rpc.h"
+#include "nvml_server.h"
 
 struct scuda_kernel_param_layout {
     uint32_t count = 0;
@@ -9448,11 +9449,68 @@ static RequestHandler opHandlers[] = {
     handle_cuGraphicsUnmapResources,
     nullptr,
     nullptr,
+    handle_nvmlInit_v2,
+    handle_nvmlInitWithFlags,
+    handle_nvmlShutdown,
+    handle_nvmlSystemGetDriverVersion,
+    handle_nvmlSystemGetNVMLVersion,
+    handle_nvmlSystemGetCudaDriverVersion,
+    handle_nvmlSystemGetCudaDriverVersion_v2,
+    handle_nvmlDeviceGetCount_v2,
+    handle_nvmlDeviceGetHandleByIndex_v2,
+    handle_nvmlDeviceGetHandleByUUID,
+    handle_nvmlDeviceGetHandleByPciBusId_v2,
+    handle_nvmlDeviceGetName,
+    handle_nvmlDeviceGetUUID,
+    handle_nvmlDeviceGetIndex,
+    handle_nvmlDeviceGetMinorNumber,
+    handle_nvmlDeviceGetPciInfo_v3,
+    handle_nvmlDeviceGetMemoryInfo,
+    handle_nvmlDeviceGetUtilizationRates,
+    handle_nvmlDeviceGetTemperature,
+    handle_nvmlDeviceGetPowerUsage,
+    handle_nvmlDeviceGetPowerManagementLimit,
+    handle_nvmlDeviceGetClockInfo,
+    handle_nvmlDeviceGetMaxClockInfo,
+    handle_nvmlDeviceGetPerformanceState,
+    handle_nvmlDeviceGetComputeMode,
+    handle_nvmlDeviceGetPersistenceMode,
+    handle_nvmlDeviceGetFanSpeed,
+    handle_nvmlDeviceGetBrand,
+    handle_nvmlDeviceGetVbiosVersion,
+    handle_nvmlDeviceGetSerial,
+    handle_nvmlDeviceGetBoardPartNumber,
+    handle_nvmlDeviceGetDisplayMode,
+    handle_nvmlDeviceGetDisplayActive,
+    handle_nvmlDeviceGetCurrPcieLinkGeneration,
+    handle_nvmlDeviceGetCurrPcieLinkWidth,
+    handle_nvmlDeviceGetMaxPcieLinkGeneration,
+    handle_nvmlDeviceGetMaxPcieLinkWidth,
+    handle_nvmlDeviceGetPcieThroughput,
+    handle_nvmlDeviceGetPcieReplayCounter,
+    handle_nvmlDeviceGetComputeRunningProcesses,
+    handle_nvmlDeviceGetComputeRunningProcesses_v2,
+    handle_nvmlDeviceGetGraphicsRunningProcesses,
+    handle_nvmlDeviceGetGraphicsRunningProcesses_v2,
+    handle_nvmlDeviceGetMPSComputeRunningProcesses,
+    handle_nvmlDeviceGetMPSComputeRunningProcesses_v2,
+    handle_nvmlEventSetCreate,
+    handle_nvmlEventSetFree,
+    handle_nvmlEventSetWait_v2,
+    handle_nvmlDeviceRegisterEvents,
+    handle_nvmlDeviceGetMaxMigDeviceCount,
+    handle_nvmlDeviceGetEccMode,
+    handle_nvmlDeviceGetTemperatureV,
+    handle_nvmlDeviceGetEnforcedPowerLimit,
+    handle_nvmlDeviceGetMemoryInfo_v2,
+    handle_nvmlDeviceGetMigMode,
+    handle_nvmlDeviceGetVirtualizationMode,
+    handle_nvmlDeviceIsMigDeviceHandle,
 };
 
 RequestHandler get_handler(const int op)
 {
-    if (op > (sizeof(opHandlers) / sizeof(opHandlers[0])))
+    if (op < 0 || op >= static_cast<int>(sizeof(opHandlers) / sizeof(opHandlers[0])))
         return nullptr;
     return opHandlers[op];
 }

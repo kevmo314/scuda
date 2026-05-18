@@ -77,6 +77,66 @@ MANUAL_REMAPPINGS = [
     ("cuMemAllocFromPoolAsync_ptsz", "cuMemAllocFromPoolAsync"),
 ]
 
+NVML_RPC_FUNCTIONS = [
+    "nvmlInit_v2",
+    "nvmlInitWithFlags",
+    "nvmlShutdown",
+    "nvmlSystemGetDriverVersion",
+    "nvmlSystemGetNVMLVersion",
+    "nvmlSystemGetCudaDriverVersion",
+    "nvmlSystemGetCudaDriverVersion_v2",
+    "nvmlDeviceGetCount_v2",
+    "nvmlDeviceGetHandleByIndex_v2",
+    "nvmlDeviceGetHandleByUUID",
+    "nvmlDeviceGetHandleByPciBusId_v2",
+    "nvmlDeviceGetName",
+    "nvmlDeviceGetUUID",
+    "nvmlDeviceGetIndex",
+    "nvmlDeviceGetMinorNumber",
+    "nvmlDeviceGetPciInfo_v3",
+    "nvmlDeviceGetMemoryInfo",
+    "nvmlDeviceGetUtilizationRates",
+    "nvmlDeviceGetTemperature",
+    "nvmlDeviceGetPowerUsage",
+    "nvmlDeviceGetPowerManagementLimit",
+    "nvmlDeviceGetClockInfo",
+    "nvmlDeviceGetMaxClockInfo",
+    "nvmlDeviceGetPerformanceState",
+    "nvmlDeviceGetComputeMode",
+    "nvmlDeviceGetPersistenceMode",
+    "nvmlDeviceGetFanSpeed",
+    "nvmlDeviceGetBrand",
+    "nvmlDeviceGetVbiosVersion",
+    "nvmlDeviceGetSerial",
+    "nvmlDeviceGetBoardPartNumber",
+    "nvmlDeviceGetDisplayMode",
+    "nvmlDeviceGetDisplayActive",
+    "nvmlDeviceGetCurrPcieLinkGeneration",
+    "nvmlDeviceGetCurrPcieLinkWidth",
+    "nvmlDeviceGetMaxPcieLinkGeneration",
+    "nvmlDeviceGetMaxPcieLinkWidth",
+    "nvmlDeviceGetPcieThroughput",
+    "nvmlDeviceGetPcieReplayCounter",
+    "nvmlDeviceGetComputeRunningProcesses",
+    "nvmlDeviceGetComputeRunningProcesses_v2",
+    "nvmlDeviceGetGraphicsRunningProcesses",
+    "nvmlDeviceGetGraphicsRunningProcesses_v2",
+    "nvmlDeviceGetMPSComputeRunningProcesses",
+    "nvmlDeviceGetMPSComputeRunningProcesses_v2",
+    "nvmlEventSetCreate",
+    "nvmlEventSetFree",
+    "nvmlEventSetWait_v2",
+    "nvmlDeviceRegisterEvents",
+    "nvmlDeviceGetMaxMigDeviceCount",
+    "nvmlDeviceGetEccMode",
+    "nvmlDeviceGetTemperatureV",
+    "nvmlDeviceGetEnforcedPowerLimit",
+    "nvmlDeviceGetMemoryInfo_v2",
+    "nvmlDeviceGetMigMode",
+    "nvmlDeviceGetVirtualizationMode",
+    "nvmlDeviceIsMigDeviceHandle",
+]
+
 SKIP_FUNCTIONS = {
     "cuStreamUpdateCaptureDependencies_v2",
     "cuGraphGetEdges_v2",
@@ -1164,6 +1224,13 @@ def main():
                     value=i,
                 )
             )
+        for i, name in enumerate(NVML_RPC_FUNCTIONS, len(functions_with_annotations)):
+            f.write(
+                "#define RPC_{name} {value}\n".format(
+                    name=name,
+                    value=i,
+                )
+            )
 
     with open("gen_client.cpp", "w") as f:
         f.write(
@@ -1333,6 +1400,7 @@ def main():
             '#include "gen_server.h"\n\n'
             '#include <cstdio>\n\n'
             '#include "rpc.h"\n\n'
+            '#include "nvml_server.h"\n\n'
         )
         for function, annotation, operations, disabled in functions_with_annotations:
             if disabled:
@@ -1431,11 +1499,13 @@ def main():
                 f.write("    nullptr,\n")
             else:
                 f.write("    handle_{name},\n".format(name=function.name.format()))
+        for name in NVML_RPC_FUNCTIONS:
+            f.write("    handle_{name},\n".format(name=name))
         f.write("};\n\n")
 
         f.write("RequestHandler get_handler(const int op)\n")
         f.write("{\n")
-        f.write("    if (op > (sizeof(opHandlers) / sizeof(opHandlers[0])))\n")
+        f.write("    if (op < 0 || op >= static_cast<int>(sizeof(opHandlers) / sizeof(opHandlers[0])))\n")
         f.write("        return nullptr;\n")
         f.write("    return opHandlers[op];\n")
         f.write("}\n")

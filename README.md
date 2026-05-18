@@ -18,6 +18,146 @@ https://github.com/user-attachments/assets/b2db5d82-f214-41cf-8274-b913c04080f9
 
 You can see a list of some currently working examples in the [test folder](./test/).
 
+## Quick Start
+
+Build the images from the repo root. The client image includes the SCUDA
+`libcuda.so.1` shim, the SCUDA `libnvidia-ml.so.1` shim, and a real
+`nvidia-smi` binary extracted from Ubuntu's NVIDIA utils package.
+
+```bash
+docker build -f Dockerfile --target client -t scuda-client .
+docker build -f Dockerfile --target server -t scuda-server .
+```
+
+Run the server on the GPU machine:
+
+```bash
+docker run --rm --gpus all -p 14833:14833 scuda-server
+```
+
+Run the client pointing at that server:
+
+```bash
+docker run --rm -it \
+  -e SCUDA_SERVER=inferable-node-008:14833 \
+  scuda-client \
+  bash
+```
+
+Inside the client container, `LD_LIBRARY_PATH=/opt/scuda/lib` is already set,
+so CUDA driver users pick up the SCUDA `libcuda.so.1` shim and NVML users such
+as `nvidia-smi` pick up the SCUDA `libnvidia-ml.so.1` shim automatically.
+
+You can sanity-check both shims with:
+
+```bash
+docker run --rm \
+  -e SCUDA_SERVER=inferable-node-008:14833 \
+  scuda-client \
+  nvidia-smi
+```
+
+For a specific CUDA version:
+
+```bash
+docker build -f Dockerfile --target client \
+  --build-arg CUDA_VERSION=12.4.1 \
+  --build-arg UBUNTU_VERSION=22.04 \
+  -t scuda-client:cuda-12.4.1 .
+
+docker build -f Dockerfile --target server \
+  --build-arg CUDA_VERSION=12.4.1 \
+  --build-arg UBUNTU_VERSION=22.04 \
+  -t scuda-server:cuda-12.4.1 .
+```
+
+If you want `nvidia-smi` in the client image to match a particular GPU host,
+choose the NVIDIA utils package that matches the host driver. For example,
+`inferable-node-008` currently reports driver `590.48.01`, so this client build
+uses the matching Ubuntu package:
+
+```bash
+docker build -f Dockerfile --target client \
+  --build-arg CUDA_VERSION=13.1.0 \
+  --build-arg UBUNTU_VERSION=24.04 \
+  --build-arg NVIDIA_UTILS_PACKAGE=nvidia-utils-590 \
+  --build-arg NVIDIA_UTILS_VERSION=590.48.01-0ubuntu0.24.04.4 \
+  -t scuda-client:cuda-13.1-nvidia-590 .
+```
+
+## Slow Start for the Skeptics
+
+This path builds SCUDA, derives a small PyTorch client image, and runs the
+`microgpt_train` test against a remote GPU. It is intentionally explicit so it
+is easy to see which side is the CPU-only client and which side owns the GPU.
+
+Build matching SCUDA client and server images:
+
+```bash
+docker build -f Dockerfile --target client \
+  --build-arg CUDA_VERSION=13.1.0 \
+  --build-arg UBUNTU_VERSION=24.04 \
+  --build-arg NVIDIA_UTILS_PACKAGE=nvidia-utils-590 \
+  --build-arg NVIDIA_UTILS_VERSION=590.48.01-0ubuntu0.24.04.4 \
+  -t scuda-client:cuda-13.1-nvidia-590 .
+
+docker build -f Dockerfile --target server \
+  --build-arg CUDA_VERSION=13.1.0 \
+  --build-arg UBUNTU_VERSION=24.04 \
+  -t scuda-server:cuda-13.1 .
+```
+
+Create a PyTorch client Dockerfile in the repo root:
+
+```dockerfile
+# Dockerfile.pytorch-scuda
+FROM scuda-client:cuda-13.1-nvidia-590
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install --break-system-packages \
+    --index-url https://download.pytorch.org/whl/cu130 \
+    torch
+
+COPY test/pytorch_scuda_tests.py /opt/scuda/test/pytorch_scuda_tests.py
+
+ENV LD_LIBRARY_PATH=/opt/scuda/lib:${LD_LIBRARY_PATH}
+
+CMD ["python3", "/opt/scuda/test/pytorch_scuda_tests.py", "microgpt_train"]
+```
+
+Build it:
+
+```bash
+docker build -f Dockerfile.pytorch-scuda -t scuda-pytorch:cuda-13.1 .
+```
+
+Run the server on the GPU machine:
+
+```bash
+docker run --rm --gpus all -p 14833:14833 scuda-server:cuda-13.1
+```
+
+Run the PyTorch client from the CPU-only machine:
+
+```bash
+docker run --rm \
+  -e SCUDA_SERVER=inferable-node-008:14833 \
+  scuda-pytorch:cuda-13.1
+```
+
+Expected success looks like:
+
+```text
+microgpt first_loss=... last_loss=...
+microgpt_train: PASS
+```
+
 ## Local development
 
 Building the binaries requires running codegen first. Scuda codegen reads the cuda dependency header files in order to generate rpc calls.
