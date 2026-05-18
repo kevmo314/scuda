@@ -57,6 +57,50 @@ docker run --rm \
   nvidia-smi
 ```
 
+## Multi-GPU Across Multiple Servers
+
+The client accepts a comma-separated `SCUDA_SERVER` list. Devices are exposed as
+one local ordinal list in server order: all GPUs from the first server, then all
+GPUs from the next server, and so on.
+
+Run a server on each GPU machine:
+
+```bash
+# on gpu-host-a
+docker run --rm --gpus all -p 14833:14833 scuda-server
+
+# on gpu-host-b
+docker run --rm --gpus all -p 14833:14833 scuda-server
+```
+
+Point the client at both servers:
+
+```bash
+docker run --rm --network host \
+  -e SCUDA_SERVER=gpu-host-a:14833,gpu-host-b:14833 \
+  scuda-client \
+  nvidia-smi -L
+```
+
+Expected output lists both remote GPUs:
+
+```text
+GPU 0: NVIDIA GeForce RTX 4090 (UUID: GPU-...)
+GPU 1: NVIDIA GeForce RTX 4090 (UUID: GPU-...)
+```
+
+CUDA driver applications use the same `SCUDA_SERVER` value:
+
+```bash
+docker run --rm --network host \
+  -e SCUDA_SERVER=gpu-host-a:14833,gpu-host-b:14833 \
+  scuda-client \
+  ./your_cuda_program
+```
+
+Cross-server peer access and device-to-device copies are not implemented yet.
+Same-server operations route by handle ownership.
+
 For a specific CUDA version:
 
 ```bash
