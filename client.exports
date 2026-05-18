@@ -1,0 +1,7 @@
+{
+  global:
+    cu*;
+    dlsym;
+  local:
+    *;
+};

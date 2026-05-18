@@ -1,0 +1,153 @@
+name: Build CUDA Matrix
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - cuda-11-builder-support
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: ${{ matrix.component }} CUDA ${{ matrix.cuda }} / Ubuntu ${{ matrix.ubuntu }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - component: client
+            cuda: 13.1.0
+            ubuntu: "24.04"
+          - component: server
+            cuda: 13.1.0
+            ubuntu: "24.04"
+          - component: client
+            cuda: 13.0.2
+            ubuntu: "24.04"
+          - component: server
+            cuda: 13.0.2
+            ubuntu: "24.04"
+          - component: client
+            cuda: 12.9.1
+            ubuntu: "24.04"
+          - component: server
+            cuda: 12.9.1
+            ubuntu: "24.04"
+          - component: client
+            cuda: 12.8.1
+            ubuntu: "24.04"
+          - component: server
+            cuda: 12.8.1
+            ubuntu: "24.04"
+          - component: client
+            cuda: 12.6.2
+            ubuntu: "24.04"
+          - component: server
+            cuda: 12.6.2
+            ubuntu: "24.04"
+          - component: client
+            cuda: 12.5.1
+            ubuntu: "22.04"
+          - component: server
+            cuda: 12.5.1
+            ubuntu: "22.04"
+          - component: client
+            cuda: 12.4.1
+            ubuntu: "22.04"
+          - component: server
+            cuda: 12.4.1
+            ubuntu: "22.04"
+          - component: client
+            cuda: 11.8.0
+            ubuntu: "22.04"
+          - component: server
+            cuda: 11.8.0
+            ubuntu: "22.04"
+          - component: client
+            cuda: 11.7.1
+            ubuntu: "22.04"
+          - component: server
+            cuda: 11.7.1
+            ubuntu: "22.04"
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Build ${{ matrix.component }}
+        run: |
+          docker build \
+            -f Dockerfile \
+            --target "${{ matrix.component }}" \
+            --build-arg CUDA_VERSION="${{ matrix.cuda }}" \
+            --build-arg UBUNTU_VERSION="${{ matrix.ubuntu }}" \
+            -t "scuda-${{ matrix.component }}:cuda-${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}" \
+            .
+
+      - name: Verify build artifacts
+        run: |
+          image="scuda-${{ matrix.component }}:cuda-${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}"
+          if [ "${{ matrix.component }}" = "client" ]; then
+            docker run --rm --entrypoint bash "$image" -lc '
+              set -euo pipefail
+              test -e /opt/scuda/lib/libcuda.so.1
+              test -e /opt/scuda/lib/libnvidia-ml.so.1
+              test -x /usr/bin/nvidia-smi
+              test "${LD_LIBRARY_PATH%%:*}" = /opt/scuda/lib
+            '
+          else
+            docker run --rm --entrypoint bash "$image" -lc '
+              set -euo pipefail
+              test -x /opt/scuda/bin/scuda_driver_server
+            '
+          fi
+
+      - name: Collect client artifacts
+        if: matrix.component == 'client'
+        run: |
+          set -euo pipefail
+          image="scuda-client:cuda-${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}"
+          out="artifacts/scuda-client-cuda-${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}-x86_64"
+          mkdir -p "$out"
+
+          container="$(docker create "$image")"
+          trap 'docker rm -f "$container" >/dev/null 2>&1 || true' EXIT
+
+          docker cp "$container:/opt/scuda/lib/libcuda.so.1" "$out/libcuda.so.1"
+          docker cp "$container:/opt/scuda/lib/libnvidia-ml.so.1" "$out/libnvidia-ml.so.1"
+          cp "$out/libcuda.so.1" "$out/libcuda.so"
+          cp "$out/libnvidia-ml.so.1" "$out/libnvidia-ml.so"
+          (cd "$out" && sha256sum libcuda.so libcuda.so.1 libnvidia-ml.so libnvidia-ml.so.1 > SHA256SUMS)
+
+      - name: Collect server artifacts
+        if: matrix.component == 'server'
+        run: |
+          set -euo pipefail
+          image="scuda-server:cuda-${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}"
+          out="artifacts/scuda-server-cuda-${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}-x86_64"
+          mkdir -p "$out"
+
+          container="$(docker create "$image")"
+          trap 'docker rm -f "$container" >/dev/null 2>&1 || true' EXIT
+
+          docker cp "$container:/opt/scuda/bin/scuda_driver_server" "$out/scuda_driver_server"
+          chmod +x "$out/scuda_driver_server"
+          (cd "$out" && sha256sum scuda_driver_server > SHA256SUMS)
+
+      - name: Upload client artifacts
+        if: matrix.component == 'client'
+        uses: actions/upload-artifact@v4
+        with:
+          name: scuda-client-cuda-${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}-x86_64
+          path: artifacts/scuda-client-cuda-${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}-x86_64/
+          if-no-files-found: error
+
+      - name: Upload server artifacts
+        if: matrix.component == 'server'
+        uses: actions/upload-artifact@v4
+        with:
+          name: scuda-server-cuda-${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}-x86_64
+          path: artifacts/scuda-server-cuda-${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}-x86_64/
+          if-no-files-found: error

@@ -14,10 +14,12 @@ typedef struct {
 
   pthread_t read_thread;
   pthread_t rpc_thread;
-  pthread_mutex_t read_mutex, write_mutex;
+  pthread_mutex_t read_mutex, write_mutex, call_mutex;
   pthread_cond_t read_cond;
   struct iovec write_iov[128];
   int write_iov_count;
+  int local_request_parity;
+  int closed;
 } conn_t;
 
 extern int rpc_dispatch(conn_t *conn, int parity);

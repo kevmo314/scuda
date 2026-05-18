@@ -8,6 +8,28 @@ import glob
 
 # this table is manually generated from the cuda.h headers
 MANUAL_REMAPPINGS = [
+    ("cuDeviceTotalMem", "cuDeviceTotalMem_v2"),
+    ("cuDeviceGetUuid", "cuDeviceGetUuid_v2"),
+    ("cuDevicePrimaryCtxRelease", "cuDevicePrimaryCtxRelease_v2"),
+    ("cuDevicePrimaryCtxSetFlags", "cuDevicePrimaryCtxSetFlags_v2"),
+    ("cuDevicePrimaryCtxReset", "cuDevicePrimaryCtxReset_v2"),
+    ("cuCtxDestroy", "cuCtxDestroy_v2"),
+    ("cuCtxPopCurrent", "cuCtxPopCurrent_v2"),
+    ("cuCtxPushCurrent", "cuCtxPushCurrent_v2"),
+    ("cuModuleGetGlobal", "cuModuleGetGlobal_v2"),
+    ("cuMemAlloc", "cuMemAlloc_v2"),
+    ("cuMemAllocPitch", "cuMemAllocPitch_v2"),
+    ("cuMemFree", "cuMemFree_v2"),
+    ("cuMemcpyHtoD", "cuMemcpyHtoD_v2"),
+    ("cuMemcpyHtoDAsync", "cuMemcpyHtoDAsync_v2"),
+    ("cuMemcpyDtoH", "cuMemcpyDtoH_v2"),
+    ("cuMemcpyDtoHAsync", "cuMemcpyDtoHAsync_v2"),
+    ("cuMemcpyDtoD", "cuMemcpyDtoD_v2"),
+    ("cuMemcpyDtoDAsync", "cuMemcpyDtoDAsync_v2"),
+    ("cuMemsetD8", "cuMemsetD8_v2"),
+    ("cuStreamBeginCapture", "cuStreamBeginCapture_v2"),
+    ("cuGraphAddKernelNode", "cuGraphAddKernelNode_v2"),
+    ("cuGraphExecUpdate", "cuGraphExecUpdate_v2"),
     ("cuMemcpy_ptds", "cuMemcpy"),
     ("cuMemcpyAsync_ptsz", "cuMemcpyAsync"),
     ("cuMemcpyPeer_ptds", "cuMemcpyPeer"),
@@ -55,36 +77,74 @@ MANUAL_REMAPPINGS = [
     ("cuMemAllocFromPoolAsync_ptsz", "cuMemAllocFromPoolAsync"),
 ]
 
-# These functions are not exposed in header files, but we need to make sure they are...
-# properly added to our client/server definitions.
-# These, ideally, should never be added or removed.
-INTERNAL_FUNCTIONS = [
-    "__cudaRegisterVar",
-    "__cudaRegisterFunction",
-    "__cudaRegisterFatBinary",
-    "__cudaRegisterFatBinaryEnd",
-    "__cudaPushCallConfiguration",
-    "__cudaPopCallConfiguration",
+NVML_RPC_FUNCTIONS = [
+    "nvmlInit_v2",
+    "nvmlInitWithFlags",
+    "nvmlShutdown",
+    "nvmlSystemGetDriverVersion",
+    "nvmlSystemGetNVMLVersion",
+    "nvmlSystemGetCudaDriverVersion",
+    "nvmlSystemGetCudaDriverVersion_v2",
+    "nvmlDeviceGetCount_v2",
+    "nvmlDeviceGetHandleByIndex_v2",
+    "nvmlDeviceGetHandleByUUID",
+    "nvmlDeviceGetHandleByPciBusId_v2",
+    "nvmlDeviceGetName",
+    "nvmlDeviceGetUUID",
+    "nvmlDeviceGetIndex",
+    "nvmlDeviceGetMinorNumber",
+    "nvmlDeviceGetPciInfo_v3",
+    "nvmlDeviceGetMemoryInfo",
+    "nvmlDeviceGetUtilizationRates",
+    "nvmlDeviceGetTemperature",
+    "nvmlDeviceGetPowerUsage",
+    "nvmlDeviceGetPowerManagementLimit",
+    "nvmlDeviceGetClockInfo",
+    "nvmlDeviceGetMaxClockInfo",
+    "nvmlDeviceGetPerformanceState",
+    "nvmlDeviceGetComputeMode",
+    "nvmlDeviceGetPersistenceMode",
+    "nvmlDeviceGetFanSpeed",
+    "nvmlDeviceGetBrand",
+    "nvmlDeviceGetVbiosVersion",
+    "nvmlDeviceGetSerial",
+    "nvmlDeviceGetBoardPartNumber",
+    "nvmlDeviceGetDisplayMode",
+    "nvmlDeviceGetDisplayActive",
+    "nvmlDeviceGetCurrPcieLinkGeneration",
+    "nvmlDeviceGetCurrPcieLinkWidth",
+    "nvmlDeviceGetMaxPcieLinkGeneration",
+    "nvmlDeviceGetMaxPcieLinkWidth",
+    "nvmlDeviceGetPcieThroughput",
+    "nvmlDeviceGetPcieReplayCounter",
+    "nvmlDeviceGetComputeRunningProcesses",
+    "nvmlDeviceGetComputeRunningProcesses_v2",
+    "nvmlDeviceGetGraphicsRunningProcesses",
+    "nvmlDeviceGetGraphicsRunningProcesses_v2",
+    "nvmlDeviceGetMPSComputeRunningProcesses",
+    "nvmlDeviceGetMPSComputeRunningProcesses_v2",
+    "nvmlEventSetCreate",
+    "nvmlEventSetFree",
+    "nvmlEventSetWait_v2",
+    "nvmlDeviceRegisterEvents",
+    "nvmlDeviceGetMaxMigDeviceCount",
+    "nvmlDeviceGetEccMode",
+    "nvmlDeviceGetTemperatureV",
+    "nvmlDeviceGetEnforcedPowerLimit",
+    "nvmlDeviceGetMemoryInfo_v2",
+    "nvmlDeviceGetMigMode",
+    "nvmlDeviceGetVirtualizationMode",
+    "nvmlDeviceIsMigDeviceHandle",
 ]
 
-# a list of manually implemented cuda/nvml functions.
-# these are automatically appended to each file; operation order is maintained as well.
-MANUAL_IMPLEMENTATIONS = [
-    "cudaFree",
-    "cudaMemcpy",
-    "cudaMallocHost",
-    "cudaMemcpyAsync",
-    "cudaLaunchKernel",
-    "cudaMallocManaged",
-    "cudaGraphGetNodes",
-    "cudaGraphDestroy",
-    "cudaGraphAddKernelNode",
-    "cudaGraphAddMemcpyNode",
-    "cudaGraphAddHostNode",
-    "cudaGraphAddMemFreeNode",
-    "cudaGraphAddMemAllocNode",
-    "cudaDeviceGetGraphMemAttribute"
-]
+SKIP_FUNCTIONS = {
+    "cuStreamUpdateCaptureDependencies_v2",
+    "cuGraphGetEdges_v2",
+    "cuGraphNodeGetDependencies_v2",
+    "cuGraphNodeGetDependentNodes_v2",
+    "cuGraphAddDependencies_v2",
+    "cuGraphRemoveDependencies_v2",
+}
 
 
 @dataclass
@@ -212,6 +272,36 @@ class ArrayOperation:
     # if int, it's a constant length, if Parameter, it's a variable length.
     length: Union[int, Parameter]
 
+    @property
+    def is_void_bytes(self) -> bool:
+        return self.ptr.ptr_to.format() in ("void", "const void")
+
+    def byte_count_expr(self) -> str:
+        if isinstance(self.length, int):
+            return str(self.length)
+        if isinstance(self.length.type, Pointer):
+            return f"*{self.length.name}"
+        return self.length.name
+
+    def element_count_expr(self) -> str:
+        if isinstance(self.length, int):
+            return str(self.length)
+        if isinstance(self.length.type, Pointer):
+            return f"*{self.length.name}"
+        return self.length.name
+
+    def transfer_size_expr(self) -> str:
+        if self.is_void_bytes:
+            return self.byte_count_expr()
+        return f"{self.element_count_expr()} * sizeof({self.ptr.ptr_to.format()})"
+
+    def mutable_ptr_format(self) -> str:
+        c = self.ptr.ptr_to.const
+        self.ptr.ptr_to.const = False
+        result = self.ptr.format()
+        self.ptr.ptr_to.const = c
+        return result
+
     def client_rpc_write(self, f):
         if self.iter:
             loop_template = """
@@ -251,15 +341,10 @@ class ArrayOperation:
                 )
             )
         else:
-            if isinstance(self.length.type, Pointer):
-                length = "*" + self.length.name
-            else:
-                length = self.length.name
             f.write(
-                "        rpc_write(conn, {param_name}, {length} * sizeof({param_type})) < 0 ||\n".format(
+                "        rpc_write(conn, {param_name}, {size}) < 0 ||\n".format(
                     param_name=self.parameter.name,
-                    param_type=self.ptr.ptr_to.format(),
-                    length=length,
+                    size=self.transfer_size_expr(),
                 )
             )
 
@@ -371,18 +456,37 @@ class ArrayOperation:
                 f.write("        false)\n")
                 f.write("        goto ERROR_{index};\n".format(index=index))
                 f.write(
-                    "    {param_name} = ({server_type})malloc({length} * sizeof({param_type}));\n".format(
+                    "    {param_name} = ({server_type})malloc({size});\n".format(
                         param_name=self.parameter.name,
-                        param_type=self.ptr.ptr_to.format(),
                         server_type=self.ptr.format(),
-                        length=self.length
-                        if isinstance(self.length, int)
-                        else self.length.name,
+                        size=self.transfer_size_expr(),
                     )
                 )
                 f.write("    if(")
                 return self.parameter.name
             return
+        elif isinstance(self.ptr, Pointer):
+            f.write("        false)\n")
+            f.write("        goto ERROR_{index};\n".format(index=index))
+            f.write(
+                "    {param_name} = ({server_type})malloc({size});\n".format(
+                    param_name=self.parameter.name,
+                    server_type=self.mutable_ptr_format(),
+                    size=self.transfer_size_expr(),
+                )
+            )
+            f.write("    if ({param_name} == nullptr)\n".format(
+                param_name=self.parameter.name
+            ))
+            f.write("        goto ERROR_{index};\n".format(index=index))
+            f.write("    if(\n")
+            f.write(
+                "        rpc_read(conn, {param_name}, {size}) < 0 ||\n".format(
+                    param_name=self.parameter.name,
+                    size=self.transfer_size_expr(),
+                )
+            )
+            defer = self.parameter.name
         elif isinstance(self.length, int):
             f.write(
                 "        rpc_read(conn, &{param_name}, {size}) < 0 ||\n".format(
@@ -398,17 +502,14 @@ class ArrayOperation:
                 )
             )
         else:
-            if isinstance(self.length.type, Pointer):
-                length = "*" + self.length.name
-            else:
-                length = self.length.name
             f.write(
-                "        rpc_read(conn, {param_name}, {length} * sizeof({param_type})) < 0 ||\n".format(
+                "        rpc_read(conn, {param_name}, {size}) < 0 ||\n".format(
                     param_name=self.parameter.name,
-                    param_type=self.ptr.ptr_to.format(),
-                    length=length,
+                    size=self.transfer_size_expr(),
                 )
             )
+        if 'defer' in locals():
+            return defer
 
     @property
     def server_reference(self) -> str:
@@ -429,10 +530,9 @@ class ArrayOperation:
             )
         else:
             f.write(
-                "        rpc_write(conn, {param_name}, {length} * sizeof({param_type})) < 0 ||\n".format(
+                "        rpc_write(conn, {param_name}, {size}) < 0 ||\n".format(
                     param_name=self.parameter.name,
-                    param_type=self.ptr.ptr_to.format(),
-                    length=self.length.name,
+                    size=self.transfer_size_expr(),
                 )
             )
 
@@ -447,15 +547,10 @@ class ArrayOperation:
                 )
             )
         else:
-            if isinstance(self.length.type, Pointer):
-                length = "*" + self.length.name
-            else:
-                length = self.length.name
             f.write(
-                "        rpc_read(conn, {param_name}, {length} * sizeof({param_type})) < 0 ||\n".format(
+                "        rpc_read(conn, {param_name}, {size}) < 0 ||\n".format(
                     param_name=self.parameter.name,
-                    param_type=self.ptr.ptr_to.format(),
-                    length=length,
+                    size=self.transfer_size_expr(),
                 )
             )
 
@@ -670,7 +765,11 @@ class DereferenceOperation:
 
     @property
     def server_declaration(self) -> str:
-        return f"    {self.type_.ptr_to.format()} {self.parameter.name};\n"
+        c = self.type_.ptr_to.const
+        self.type_.ptr_to.const = False
+        result = f"    {self.type_.ptr_to.format()} {self.parameter.name};\n"
+        self.type_.ptr_to.const = c
+        return result
 
     def server_rpc_read(self, f):
         if not self.send:
@@ -770,6 +869,7 @@ def parse_annotation(
                 iter_arg = next((arg for arg in args if arg.startswith("ITER:")), None)
                 null_terminated = "NULL_TERMINATED" in args
                 nullable = "NULLABLE" in args
+                deref = "DEREF" in args
 
                 # validate that only one of the arguments is present
                 if (
@@ -780,7 +880,16 @@ def parse_annotation(
                         "Only one of LENGTH, SIZE, NULL_TERMINATED, or NULLABLE can be specified"
                     )
 
-                if length_arg:
+                if deref:
+                    operations.append(
+                        DereferenceOperation(
+                            send=send,
+                            recv=recv,
+                            parameter=param,
+                            type_=param.type,
+                        )
+                    )
+                elif length_arg:
                     # if it has a length, it's an array operation with variable length
                     length_param = next(
                         p for p in params if p.name == length_arg.split(":")[1]
@@ -1006,13 +1115,39 @@ def prefix_std(type: str) -> str:
     return type
 
 
+def format_function_params(function: Function) -> list[str]:
+    params = []
+    for param in function.parameters:
+        if param.name and "[]" in param.type.format():
+            params.append(
+                "{type} {name}".format(
+                    type=param.type.format().replace("[]", ""),
+                    name=param.name + "[]",
+                )
+            )
+        elif param.name:
+            params.append(
+                "{type} {name}".format(
+                    type=param.type.format(),
+                    name=param.name,
+                )
+            )
+        else:
+            params.append(param.type.format())
+    return params
+
+
+def format_call_args(function: Function) -> list[str]:
+    return [param.name for param in function.parameters if param.name]
+
+
 # List of possible directories to search for header files
 COMMON_INCLUDE_DIRS = [
     "./",
-    "/usr/include/",
-    "/usr/local/include/",
     "/usr/local/cuda/include/",
     "/opt/cuda/include/",
+    "/usr/local/include/",
+    "/usr/include/",
     "/usr/include/nvidia/",
 ]
 
@@ -1031,42 +1166,26 @@ def find_header_file(filename):
 def main():
     options = ParserOptions(
         preprocessor=make_gcc_preprocessor(
-            defines=["CUBLASAPI="],
             include_paths=["/usr/local/cuda/include"],
         ),
     )
 
     try:
-        cudnn_graph_header = find_header_file("cudnn_graph.h")
-        cudnn_ops_header = find_header_file("cudnn_ops.h")
         cuda_header = find_header_file("cuda.h")
-        cublas_header = find_header_file("cublas_api.h")
-        cudart_header = find_header_file("cuda_runtime_api.h")
         annotations_header = find_header_file("annotations.h")
-        nvml_header = find_header_file("nvml.h")
     except FileNotFoundError as e:
         print(e)
         return
 
     # Parse the files
-    nvml_ast: ParsedData = parse_file(nvml_header, options=options)
-    cudnn_graph_ast: ParsedData = parse_file(cudnn_graph_header, options=options)
-    cudnn_ops_ast: ParsedData = parse_file(cudnn_ops_header, options=options)
     cuda_ast: ParsedData = parse_file(cuda_header, options=options)
-    cublas_ast: ParsedData = parse_file(cublas_header, options=options)
-    cudart_ast: ParsedData = parse_file(cudart_header, options=options)
     annotations: ParsedData = parse_file(annotations_header, options=options)
-
-    # any new parsed libaries should be appended to the END of this list.
-    # this is to maintain proper ordering of our RPC calls.
-    functions = (
-        nvml_ast.namespace.functions
-        + cuda_ast.namespace.functions
-        + cudart_ast.namespace.functions
-        + cublas_ast.namespace.functions
-        + cudnn_graph_ast.namespace.functions
-        + cudnn_ops_ast.namespace.functions
-    )
+    functions = [
+        function
+        for function in cuda_ast.namespace.functions
+        if function.name.format().startswith("cu")
+        and function.name.format() not in SKIP_FUNCTIONS
+    ]
 
     functions_with_annotations: list[tuple[Function, Function, list[Operation]]] = []
 
@@ -1098,42 +1217,32 @@ def main():
         )
 
     with open("gen_api.h", "w") as f:
-        lastIndex = 0
-
-        for i, function in enumerate(INTERNAL_FUNCTIONS):
-            f.write(
-                "#define RPC_{name} {value}\n".format(
-                    name=function.format(),
-                    value=i,
-                )
-            )
-            lastIndex += 1
-
         for i, (function, _, _, _) in enumerate(functions_with_annotations):
             f.write(
                 "#define RPC_{name} {value}\n".format(
                     name=function.name.format(),
-                    value=i + lastIndex,
+                    value=i,
+                )
+            )
+        for i, name in enumerate(NVML_RPC_FUNCTIONS, len(functions_with_annotations)):
+            f.write(
+                "#define RPC_{name} {value}\n".format(
+                    name=name,
+                    value=i,
                 )
             )
 
     with open("gen_client.cpp", "w") as f:
         f.write(
-            "#include <nvml.h>\n"
             "#include <cuda.h>\n"
-            "#include <cudnn.h>\n"
-            "#include <cublas_v2.h>\n"
-            "#include <cuda_runtime_api.h>\n\n"
+            "\n"
             "#include <cstring>\n"
             "#include <string>\n"
             "#include <unordered_map>\n\n"
             '#include "gen_api.h"\n\n'
-            '#include "manual_client.h"\n\n'
             '#include "rpc.h"\n\n'
             "extern int rpc_size();\n"
             "extern conn_t *rpc_client_get_connection(unsigned int index);\n"
-            "int is_unified_pointer(conn_t *conn, void *arg);\n"
-            "int maybe_copy_unified_arg(conn_t *conn, void *arg, enum cudaMemcpyKind kind);\n"
             "extern void rpc_close(conn_t *conn);\n\n"
         )
         for function, annotation, operations, disabled in functions_with_annotations:
@@ -1141,27 +1250,7 @@ def main():
             if disabled:
                 continue
 
-            params = []
-
-            for param in function.parameters:
-                if param.name and "[]" in param.type.format():
-                    params.append(
-                        "{type} {name}".format(
-                            type=param.type.format().replace("[]", ""),
-                            name=param.name + "[]",
-                        )
-                    )
-                elif param.name:
-                    params.append(
-                        "{type} {name}".format(
-                            type=param.type.format(),
-                            name=param.name,
-                        )
-                    )
-                else:
-                    params.append(param.type.format())
-
-            joined_params = ", ".join(params)
+            joined_params = ", ".join(format_function_params(function))
 
             f.write(
                 "{return_type} {name}({params})\n".format(
@@ -1173,13 +1262,6 @@ def main():
             f.write("{\n")
 
             f.write("    conn_t *conn = rpc_client_get_connection(0);\n")
-
-            for operation in operations:
-                operation.client_unified_copy(
-                    f,
-                    "cudaMemcpyHostToDevice",
-                    error_const(function.return_type.format()),
-                )
 
             f.write(
                 "    {return_type} return_value;\n".format(
@@ -1229,27 +1311,45 @@ def main():
                 )
             )
 
-            for operation in operations:
-                operation.client_unified_copy(
-                    f,
-                    "cudaMemcpyDeviceToHost",
-                    error_const(function.return_type.format()),
-                )
-
-            if function.name.format() == "nvmlShutdown":
-                f.write("    rpc_close(conn);\n")
+            if function.name.format() == "cuDriverGetVersion":
+                f.write("    if (driverVersion != nullptr) {\n")
+                f.write("        const char *override_version = getenv(\"SCUDA_DRIVER_VERSION_OVERRIDE\");\n")
+                f.write("        if (override_version != nullptr) *driverVersion = atoi(override_version);\n")
+                f.write("    }\n")
 
             f.write("    return return_value;\n")
             f.write("}\n\n")
 
-        f.write("std::unordered_map<std::string, void *> functionMap = {\n")
-
-        # we need the base nvmlInit, this is important and should be kept here in the codegen.
-        for function in INTERNAL_FUNCTIONS:
+        function_by_name = {
+            function.name.format(): function
+            for function, _, _, disabled in functions_with_annotations
+            if not disabled
+        }
+        for alias, target in MANUAL_REMAPPINGS:
+            if alias in function_by_name or target not in function_by_name:
+                continue
+            target_function = function_by_name[target]
+            f.write("#ifdef {name}\n#undef {name}\n#endif\n".format(name=alias))
             f.write(
-                '    {{"{name}", (void *){name}}},\n'.format(name=function.format())
+                'extern "C" {return_type} {name}({params})\n'.format(
+                    return_type=target_function.return_type.format(),
+                    name=alias,
+                    params=", ".join(format_function_params(target_function)),
+                )
             )
-        f.write('    {"nvmlInit", (void *)nvmlInit_v2},\n')
+            f.write("{\n")
+            call = "{target}({args})".format(
+                target=target,
+                args=", ".join(format_call_args(target_function)),
+            )
+            if target_function.return_type.format() == "void":
+                f.write("    {call};\n".format(call=call))
+                f.write("}\n\n")
+            else:
+                f.write("    return {call};\n".format(call=call))
+                f.write("}\n\n")
+
+        f.write("std::unordered_map<std::string, void *> functionMap = {\n")
         for function, _, _, disabled in functions_with_annotations:
             if disabled:
                 continue
@@ -1276,12 +1376,6 @@ def main():
                     y=y,
                 )
             )
-        for x in MANUAL_IMPLEMENTATIONS:
-            f.write(
-                '    {{"{x}", (void *){x}}},\n'.format(
-                    x=x,
-                )
-            )
         f.write("};\n\n")
 
         f.write("void *get_function_pointer(const char *name)\n")
@@ -1294,27 +1388,22 @@ def main():
 
     with open("gen_server.cpp", "w") as f:
         f.write(
-            "#include <nvml.h>\n"
             "#include <iostream>\n"
             "#include <cuda.h>\n"
-            "#include <cudnn.h>\n"
-            "#include <cublas_v2.h>\n"
-            "#include <cuda_runtime_api.h>\n\n"
+            "\n"
             "#include <cstring>\n"
             "#include <string>\n"
             "#include <unordered_map>\n\n"
             '#include "gen_api.h"\n\n'
             '#include <vector>\n\n'
             '#include <cstdio>\n\n'
-            '#include <cuda_runtime.h>\n\n'
             '#include "gen_server.h"\n\n'
-            '#include "manual_server.h"\n\n'
             '#include <cstdio>\n\n'
-            '#include <cuda_runtime.h>\n\n'
             '#include "rpc.h"\n\n'
+            '#include "nvml_server.h"\n\n'
         )
         for function, annotation, operations, disabled in functions_with_annotations:
-            if function.name.format() in MANUAL_IMPLEMENTATIONS or disabled:
+            if disabled:
                 continue
 
             # parse the annotation doxygen
@@ -1405,18 +1494,18 @@ def main():
             f.write("}\n\n")
 
         f.write("static RequestHandler opHandlers[] = {\n")
-        for function in INTERNAL_FUNCTIONS:
-            f.write("    handle_{name},\n".format(name=function.format()))
         for function, _, _, disabled in functions_with_annotations:
-            if disabled and function.name.format() not in MANUAL_IMPLEMENTATIONS:
+            if disabled:
                 f.write("    nullptr,\n")
             else:
                 f.write("    handle_{name},\n".format(name=function.name.format()))
+        for name in NVML_RPC_FUNCTIONS:
+            f.write("    handle_{name},\n".format(name=name))
         f.write("};\n\n")
 
         f.write("RequestHandler get_handler(const int op)\n")
         f.write("{\n")
-        f.write("    if (op > (sizeof(opHandlers) / sizeof(opHandlers[0])))\n")
+        f.write("    if (op < 0 || op >= static_cast<int>(sizeof(opHandlers) / sizeof(opHandlers[0])))\n")
         f.write("        return nullptr;\n")
         f.write("    return opHandlers[op];\n")
         f.write("}\n")
