@@ -402,3 +402,4 @@
 #define RPC_nvmlDeviceGetVirtualizationMode 401
 #define RPC_nvmlDeviceIsMigDeviceHandle 402
 #define RPC_nvmlDeviceGetNvLinkRemoteDeviceType 403
+#define RPC_nvmlDeviceGetNvLinkRemotePciInfo_v2 404

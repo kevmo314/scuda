@@ -702,3 +702,8 @@ int handle_nvmlDeviceGetNvLinkRemoteDeviceType(conn_t *conn) {
   return handle_device_arg_value<unsigned int, nvmlIntNvLinkDeviceType_t>(
       conn, "nvmlDeviceGetNvLinkRemoteDeviceType");
 }
+
+int handle_nvmlDeviceGetNvLinkRemotePciInfo_v2(conn_t *conn) {
+  return handle_device_arg_value<unsigned int, nvmlPciInfo_t>(
+      conn, "nvmlDeviceGetNvLinkRemotePciInfo_v2");
+}

@@ -136,6 +136,7 @@ NVML_RPC_FUNCTIONS = [
     "nvmlDeviceGetVirtualizationMode",
     "nvmlDeviceIsMigDeviceHandle",
     "nvmlDeviceGetNvLinkRemoteDeviceType",
+    "nvmlDeviceGetNvLinkRemotePciInfo_v2",
 ]
 
 SKIP_FUNCTIONS = {

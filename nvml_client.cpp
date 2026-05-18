@@ -1019,3 +1019,9 @@ extern "C" nvmlReturn_t nvmlDeviceGetNvLinkRemoteDeviceType(
   return call_device_arg_value(RPC_nvmlDeviceGetNvLinkRemoteDeviceType, device,
                                link, pNvLinkDeviceType);
 }
+
+extern "C" nvmlReturn_t nvmlDeviceGetNvLinkRemotePciInfo_v2(
+    nvmlDevice_t device, unsigned int link, nvmlPciInfo_t *pci) {
+  return call_device_arg_value(RPC_nvmlDeviceGetNvLinkRemotePciInfo_v2, device,
+                               link, pci);
+}

@@ -9507,6 +9507,7 @@ static RequestHandler opHandlers[] = {
     handle_nvmlDeviceGetVirtualizationMode,
     handle_nvmlDeviceIsMigDeviceHandle,
     handle_nvmlDeviceGetNvLinkRemoteDeviceType,
+    handle_nvmlDeviceGetNvLinkRemotePciInfo_v2,
 };
 
 RequestHandler get_handler(const int op)
