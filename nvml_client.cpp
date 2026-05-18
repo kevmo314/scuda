@@ -10,8 +10,10 @@
 #include <algorithm>
 #include <cerrno>
 #include <cstdio>
+#include <cstdint>
 #include <cstdlib>
 #include <cstring>
+#include <string>
 #include <vector>
 
 #include "codegen/gen_api.h"
@@ -43,9 +45,11 @@ struct scuda_nvml_remote_device {
   unsigned int conn_index = 0;
   unsigned int remote_index = 0;
   nvmlDevice_t remote_device = nullptr;
+  std::string server_label;
 };
 
 std::vector<scuda_nvml_remote_device> devices;
+std::vector<std::string> conn_labels;
 bool devices_ready = false;
 
 nvmlReturn_t rpc_error() { return NVML_ERROR_UNKNOWN; }
@@ -119,6 +123,12 @@ int open_connection() {
           freeaddrinfo(res);
           break;
         }
+        std::string server_label(host);
+        if (strcmp(port, DEFAULT_PORT) != 0) {
+          server_label += ":";
+          server_label += port;
+        }
+
         conn_t *c = &conns[nconns];
         *c = {};
         c->connfd = sockfd;
@@ -134,6 +144,7 @@ int open_connection() {
           freeaddrinfo(res);
           continue;
         }
+        conn_labels.push_back(server_label);
         ++nconns;
         freeaddrinfo(res);
         continue;
@@ -162,6 +173,21 @@ conn_t *connection(unsigned int index = 0) {
     return nullptr;
   }
   return &conns[index];
+}
+
+scuda_nvml_remote_device *mapped_device(nvmlDevice_t device) {
+  if (device == nullptr || devices.empty()) {
+    return nullptr;
+  }
+  uintptr_t begin = reinterpret_cast<uintptr_t>(devices.data());
+  uintptr_t end =
+      begin + devices.size() * sizeof(scuda_nvml_remote_device);
+  uintptr_t value = reinterpret_cast<uintptr_t>(device);
+  if (value < begin || value >= end ||
+      (value - begin) % sizeof(scuda_nvml_remote_device) != 0) {
+    return nullptr;
+  }
+  return &devices[(value - begin) / sizeof(scuda_nvml_remote_device)];
 }
 
 nvmlReturn_t call_no_args_on(conn_t *c, int op) {
@@ -229,8 +255,11 @@ nvmlReturn_t ensure_devices() {
         devices.clear();
         return result;
       }
+      const std::string &server_label =
+          i < static_cast<int>(conn_labels.size()) ? conn_labels[i] : "";
       devices.push_back(scuda_nvml_remote_device{static_cast<unsigned int>(i),
-                                                 ordinal, remote});
+                                                 ordinal, remote,
+                                                 server_label});
     }
   }
   devices_ready = true;
@@ -244,8 +273,8 @@ conn_t *connection_for_device(nvmlDevice_t *device) {
   if (devices.empty()) {
     return nullptr;
   }
-  auto *mapped = reinterpret_cast<scuda_nvml_remote_device *>(*device);
-  if (mapped < devices.data() || mapped >= devices.data() + devices.size()) {
+  auto *mapped = mapped_device(*device);
+  if (mapped == nullptr) {
     return connection();
   }
   *device = mapped->remote_device;
@@ -752,7 +781,27 @@ extern "C" nvmlReturn_t nvmlDeviceGetHandleByPciBusId(const char *pciBusId,
 
 extern "C" nvmlReturn_t nvmlDeviceGetName(nvmlDevice_t device, char *name,
                                           unsigned int length) {
-  return call_device_string(RPC_nvmlDeviceGetName, device, name, length);
+  nvmlReturn_t result =
+      call_device_string(RPC_nvmlDeviceGetName, device, name, length);
+  if (result != NVML_SUCCESS || name == nullptr || length == 0) {
+    return result;
+  }
+
+  auto *mapped = mapped_device(device);
+  if (mapped == nullptr || mapped->server_label.empty()) {
+    return result;
+  }
+
+  size_t used = strnlen(name, length);
+  if (used >= length) {
+    name[length - 1] = '\0';
+    used = length - 1;
+  }
+  if (used + 1 < length) {
+    snprintf(name + used, length - used, " (via scuda %s)",
+             mapped->server_label.c_str());
+  }
+  return result;
 }
 
 extern "C" nvmlReturn_t nvmlDeviceGetUUID(nvmlDevice_t device, char *uuid,
@@ -769,8 +818,8 @@ extern "C" nvmlReturn_t nvmlDeviceGetIndex(nvmlDevice_t device,
   if (devices.empty() || index == nullptr) {
     return NVML_ERROR_INVALID_ARGUMENT;
   }
-  auto *mapped = reinterpret_cast<scuda_nvml_remote_device *>(device);
-  if (mapped < devices.data() || mapped >= devices.data() + devices.size()) {
+  auto *mapped = mapped_device(device);
+  if (mapped == nullptr) {
     return NVML_ERROR_INVALID_ARGUMENT;
   }
   *index = static_cast<unsigned int>(mapped - devices.data());
