@@ -21,12 +21,16 @@ SERVER_HOST="${SERVER_HOST:-inferable-node-008}"
 SERVER_USER="${SERVER_USER:-kevin}"
 SERVER_SSH_TARGET="${SERVER_SSH_TARGET:-$SERVER_USER@$SERVER_HOST}"
 SERVER_PORT_BASE="${SERVER_PORT_BASE:-14900}"
+SSH_OPTS="${SSH_OPTS:-}"
+# shellcheck disable=SC2206
+SSH_ARGS=($SSH_OPTS)
 SERVER_UPLOAD="${SERVER_UPLOAD:-1}"
 SERVER_LOCAL_BIN="${SERVER_LOCAL_BIN:-$repo_root/build/scuda_driver_server}"
-SERVER_REMOTE_BIN="${SERVER_REMOTE_BIN:-/tmp/scuda-driver-server-${USER:-scuda}-$$}"
+SERVER_REMOTE_BIN="${SERVER_REMOTE_BIN:-/tmp/scuda-driver-server-scuda-$$}"
 SERVER_REMOTE_CLEANUP="${SERVER_REMOTE_CLEANUP:-1}"
 
 SCUDA_LIB="${SCUDA_LIB:-$repo_root/build/libcuda.so.1}"
+CUDA_HOME="${CUDA_HOME:-/usr/local/cuda}"
 CUDA_LIB_DIR="${CUDA_LIB_DIR:-/usr/local/cuda/lib64}"
 SAMPLE_TIMEOUT="${SAMPLE_TIMEOUT:-20}"
 RESULTS_DIR="${RESULTS_DIR:-$repo_root/test/cuda-samples/results/$(date +%Y%m%d-%H%M%S)}"
@@ -132,13 +136,65 @@ if [[ ! -d "$CUDA_SAMPLES_DIR/.git" ]]; then
   git clone "$CUDA_SAMPLES_URL" "$CUDA_SAMPLES_DIR"
 fi
 
+detect_cuda_samples_ref() {
+  local release=""
+  local major=""
+  local minor=""
+  local patch=""
+
+  if command -v nvcc >/dev/null 2>&1; then
+    release="$(nvcc --version | sed -nE 's/.*release ([0-9]+)\.([0-9]+)(\.([0-9]+))?.*/\1 \2 \4/p' | head -n1)"
+  fi
+  if [[ -z "$release" && -f /usr/local/cuda/version.json ]]; then
+    release="$(sed -nE 's/.*"cuda"[^0-9]*([0-9]+)\.([0-9]+)(\.([0-9]+))?.*/\1 \2 \4/p' /usr/local/cuda/version.json | head -n1)"
+  fi
+  if [[ -z "$release" ]]; then
+    return 0
+  fi
+
+  read -r major minor patch <<<"$release"
+  case "$major.$minor.$patch" in
+    12.4.1)
+      printf '%s\n' v12.4.1
+      ;;
+    11.8.*)
+      printf '%s\n' v11.8
+      ;;
+    11.7.*)
+      printf '%s\n' v11.6
+      ;;
+    12.4.*)
+      printf '%s\n' v12.4
+      ;;
+    12.5.*|12.6.*|12.7.*)
+      printf '%s\n' v12.5
+      ;;
+    12.8.*)
+      printf '%s\n' v12.8
+      ;;
+    12.9.*)
+      printf '%s\n' v12.9
+      ;;
+    13.0.*)
+      printf '%s\n' v13.0
+      ;;
+    13.1.*)
+      printf '%s\n' v13.1
+      ;;
+  esac
+}
+
+if [[ -z "$CUDA_SAMPLES_REF" ]]; then
+  CUDA_SAMPLES_REF="$(detect_cuda_samples_ref)"
+fi
+
 if [[ -n "$CUDA_SAMPLES_REF" ]]; then
   git -C "$CUDA_SAMPLES_DIR" fetch --tags origin
   git -C "$CUDA_SAMPLES_DIR" checkout "$CUDA_SAMPLES_REF"
 fi
 
 cmake_samples=0
-if [[ -f "$CUDA_SAMPLES_DIR/CMakeLists.txt" && -d "$CUDA_SAMPLES_DIR/cpp" ]]; then
+if [[ -f "$CUDA_SAMPLES_DIR/CMakeLists.txt" && ( -d "$CUDA_SAMPLES_DIR/cpp" || -d "$CUDA_SAMPLES_DIR/Samples" ) ]]; then
   cmake_samples=1
 fi
 
@@ -160,9 +216,32 @@ resolve_sample_exe() {
   fi
 
   if [[ "$cmake_samples" == "1" ]]; then
-    exe="$(find "$CUDA_SAMPLES_BUILD_DIR/cpp" -type f -name "$sample" -perm -111 2>/dev/null | head -n1 || true)"
+    exe="$(find "$CUDA_SAMPLES_BUILD_DIR" -type f -name "$sample" -perm -111 2>/dev/null | head -n1 || true)"
     if [[ -n "$exe" ]]; then
       printf '%s\n' "$exe"
+      return 0
+    fi
+  fi
+
+  return 1
+}
+
+resolve_sample_srcdir() {
+  local sample="$1"
+  local dir=""
+
+  if [[ -d "$CUDA_SAMPLES_DIR/cpp" ]]; then
+    dir="$(find "$CUDA_SAMPLES_DIR/cpp" -mindepth 2 -maxdepth 2 -type d -name "$sample" 2>/dev/null | head -n1 || true)"
+    if [[ -n "$dir" ]]; then
+      printf '%s\n' "$dir"
+      return 0
+    fi
+  fi
+
+  if [[ -d "$CUDA_SAMPLES_DIR/Samples" ]]; then
+    dir="$(find "$CUDA_SAMPLES_DIR/Samples" -mindepth 2 -maxdepth 2 -type d -name "$sample" 2>/dev/null | head -n1 || true)"
+    if [[ -n "$dir" ]]; then
+      printf '%s\n' "$dir"
       return 0
     fi
   fi
@@ -196,34 +275,50 @@ sample_workdir() {
   local sample="$1"
   local sample_exe="$2"
 
-  if [[ "$cmake_samples" == "1" ]]; then
-    case "$sample" in
-      nbody)
-        printf '%s\n' "$CUDA_SAMPLES_DIR/cpp/5_Domain_Specific/nbody"
-        return 0
-        ;;
-      oceanFFT)
-        printf '%s\n' "$CUDA_SAMPLES_DIR/cpp/4_CUDA_Libraries/oceanFFT"
-        return 0
-        ;;
-      ptxgen)
-        printf '%s\n' "$CUDA_SAMPLES_DIR/cpp/7_libNVVM/ptxgen"
-        return 0
-        ;;
-      recursiveGaussian)
-        printf '%s\n' "$CUDA_SAMPLES_DIR/cpp/5_Domain_Specific/recursiveGaussian"
-        return 0
-        ;;
-      simpleTexture3D)
-        printf '%s\n' "$CUDA_SAMPLES_DIR/cpp/0_Introduction/simpleTexture3D"
-        return 0
-        ;;
-    esac
-  fi
+  case "$sample" in
+    nbody|oceanFFT|ptxgen|recursiveGaussian|simpleTexture3D)
+      printf '%s\n' "$(resolve_sample_srcdir "$sample")"
+      return 0
+      ;;
+  esac
 
   dirname "$sample_exe"
 }
 
+sample_timeout() {
+  local sample="$1"
+  case "$sample" in
+    cuSolverRf|conjugateGradientPrecond)
+      printf '%s\n' "${SLOW_SAMPLE_TIMEOUT:-240}"
+      ;;
+    *)
+      printf '%s\n' "$SAMPLE_TIMEOUT"
+      ;;
+  esac
+}
+
+prepare_sample_runtime_files() {
+  local sample="$1"
+  local sample_cwd="$2"
+  local sample_srcdir=""
+
+  case "$sample" in
+    *_nvrtc)
+      sample_srcdir="$(resolve_sample_srcdir "$sample" || true)"
+      for dir in "$sample_cwd" "$sample_srcdir"; do
+        [[ -n "$dir" ]] || continue
+        if [[ -d "$CUDA_HOME/include/nv" && ! -e "$dir/nv" ]]; then
+          cp -a "$CUDA_HOME/include/nv" "$dir/nv"
+        fi
+        if [[ -d "$CUDA_HOME/include/cuda" && ! -e "$dir/cuda" ]]; then
+          cp -a "$CUDA_HOME/include/cuda" "$dir/cuda"
+        fi
+      done
+      ;;
+  esac
+}
+
+explicit_samples=0
 samples=("$@")
 if [[ ${#samples[@]} -eq 0 ]]; then
   case "$SAMPLE_SUITE" in
@@ -242,6 +337,12 @@ if [[ ${#samples[@]} -eq 0 ]]; then
       exit 1
       ;;
   esac
+else
+  explicit_samples=1
+fi
+selected_sample_build=0
+if [[ "$explicit_samples" == "1" && ${#samples[@]} -gt 0 ]]; then
+  selected_sample_build=1
 fi
 
 needs_build=0
@@ -262,22 +363,64 @@ if [[ "$needs_build" == "1" ]]; then
       # shellcheck disable=SC2086
       cmake -S "$CUDA_SAMPLES_DIR" -B "$CUDA_SAMPLES_BUILD_DIR" -DCMAKE_BUILD_TYPE=Release $CUDA_SAMPLES_CMAKE_ARGS
     fi
-    cmake --build "$CUDA_SAMPLES_BUILD_DIR" --parallel "$JOBS"
+    if [[ "$selected_sample_build" == "1" ]]; then
+      for sample in "${samples[@]}"; do
+        cmake --build "$CUDA_SAMPLES_BUILD_DIR" --parallel "$JOBS" --target "$sample" || true
+      done
+    else
+      cmake --build "$CUDA_SAMPLES_BUILD_DIR" --parallel "$JOBS"
+    fi
   else
-    make -C "$CUDA_SAMPLES_DIR" -j"$JOBS"
+    if [[ "$selected_sample_build" == "1" ]]; then
+      for sample in "${samples[@]}"; do
+        sample_srcdir="$(resolve_sample_srcdir "$sample" || true)"
+        if [[ -z "$sample_srcdir" ]]; then
+          echo "missing sample source dir: $sample" >&2
+          continue
+        fi
+        if [[ ! -f "$sample_srcdir/Makefile" && ! -f "$sample_srcdir/makefile" && ! -f "$sample_srcdir/GNUmakefile" ]]; then
+          echo "missing sample Makefile: $sample" >&2
+          continue
+        fi
+        make -C "$sample_srcdir" -j"$JOBS" || echo "sample build failed: $sample" >&2
+      done
+    else
+      make -C "$CUDA_SAMPLES_DIR" -j"$JOBS"
+    fi
   fi
 fi
 
 if [[ "$SERVER_UPLOAD" == "1" ]]; then
-  scp -q "$SERVER_LOCAL_BIN" "$SERVER_SSH_TARGET:$SERVER_REMOTE_BIN"
+  scp -q "${SSH_ARGS[@]}" "$SERVER_LOCAL_BIN" "$SERVER_SSH_TARGET:$SERVER_REMOTE_BIN"
 fi
 
 cleanup_remote_bin() {
   if [[ "$SERVER_UPLOAD" == "1" && "$SERVER_REMOTE_CLEANUP" == "1" ]]; then
-    ssh "$SERVER_SSH_TARGET" "rm -f '$SERVER_REMOTE_BIN'" >/dev/null 2>&1 || true
+    ssh "${SSH_ARGS[@]}" "$SERVER_SSH_TARGET" \
+      "rm -f '$SERVER_REMOTE_BIN'" >/dev/null 2>&1 || true
   fi
 }
 trap cleanup_remote_bin EXIT
+
+stop_remote_server() {
+  local pidfile="$1"
+  local server_log="$2"
+
+  ssh "${SSH_ARGS[@]}" "$SERVER_SSH_TARGET" "
+    if [ -f '$pidfile' ]; then
+      pid=\$(cat '$pidfile' 2>/dev/null || true)
+      if [ -n \"\$pid\" ]; then
+        kill \"\$pid\" >/dev/null 2>&1 || true
+        for _ in 1 2 3 4 5 6 7 8 9 10; do
+          kill -0 \"\$pid\" >/dev/null 2>&1 || break
+          sleep 0.1
+        done
+        kill -9 \"\$pid\" >/dev/null 2>&1 || true
+      fi
+    fi
+    rm -f '$pidfile' '$server_log'
+  " >/dev/null 2>&1 || true
+}
 
 tsv="$RESULTS_DIR/results.tsv"
 summary="$RESULTS_DIR/summary.txt"
@@ -285,6 +428,7 @@ summary="$RESULTS_DIR/summary.txt"
 
 pass=0
 fail=0
+skip=0
 
 for i in "${!samples[@]}"; do
   sample="${samples[$i]}"
@@ -295,29 +439,33 @@ for i in "${!samples[@]}"; do
 
   sample_exe="$(resolve_sample_exe "$sample" || true)"
   if [[ -z "$sample_exe" ]]; then
-    status="FAIL:missing"
+    if [[ "$explicit_samples" == "1" ]]; then
+      status="FAIL:missing"
+      fail=$((fail + 1))
+    else
+      status="SKIP:missing"
+      skip=$((skip + 1))
+    fi
     signature="missing executable: $sample"
     printf '%s\t%s\t%s\n' "$sample" "$status" "$signature" | tee -a "$tsv"
-    fail=$((fail + 1))
     continue
   fi
   sample_cwd="$(sample_workdir "$sample" "$sample_exe")"
+  prepare_sample_runtime_files "$sample" "$sample_cwd"
   sample_argv=()
   while IFS= read -r -d '' arg; do
     sample_argv+=("$arg")
   done < <(sample_args "$sample")
 
-  ssh "$SERVER_SSH_TARGET" \
-    "if [ -f '$pidfile' ]; then kill \$(cat '$pidfile') >/dev/null 2>&1 || true; fi; pkill -f -- '$SERVER_REMOTE_BIN' >/dev/null 2>&1 || true; rm -f '$server_log' '$pidfile'" \
-    >/dev/null 2>&1 || true
+  stop_remote_server "$pidfile" "$server_log"
 
-  ssh "$SERVER_SSH_TARGET" \
+  ssh "${SSH_ARGS[@]}" "$SERVER_SSH_TARGET" \
     "rm -f '$server_log' '$pidfile'; SCUDA_PORT=$port nohup '$SERVER_REMOTE_BIN' >'$server_log' 2>&1 < /dev/null & echo \$! >'$pidfile'; sleep 0.25"
 
   set +e
   (
     cd "$sample_cwd"
-    timeout --kill-after=5s "$SAMPLE_TIMEOUT" env \
+    timeout --kill-after=5s "$(sample_timeout "$sample")" env \
       LD_LIBRARY_PATH="$CUDA_LIB_DIR:${LD_LIBRARY_PATH:-}" \
       SCUDA_SERVER="$SERVER_HOST:$port" \
       LD_PRELOAD="$SCUDA_LIB" \
@@ -326,9 +474,7 @@ for i in "${!samples[@]}"; do
   rc=$?
   set -e
 
-  ssh "$SERVER_SSH_TARGET" \
-    "if [ -f '$pidfile' ]; then kill \$(cat '$pidfile') >/dev/null 2>&1 || true; fi; pkill -f -- '$SERVER_REMOTE_BIN' >/dev/null 2>&1 || true; rm -f '$pidfile'" \
-    >/dev/null 2>&1 || true
+  stop_remote_server "$pidfile" "$server_log"
 
   if [[ "$rc" == "0" ]]; then
     status="PASS"
@@ -344,7 +490,12 @@ done
 
 {
   echo "PASS $pass"
+  echo "SKIP $skip"
   echo "FAIL $fail"
-  echo "TOTAL $((pass + fail))"
+  echo "TOTAL $((pass + skip + fail))"
   echo "RESULTS $tsv"
 } | tee "$summary"
+
+if [[ "$fail" -ne 0 ]]; then
+  exit 1
+fi

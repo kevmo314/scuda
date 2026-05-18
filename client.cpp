@@ -7,6 +7,7 @@
 #include <cudaProfiler.h>
 #include <dlfcn.h>
 #include <elf.h>
+#include <fstream>
 #include <functional>
 #include <iostream>
 #include <map>
@@ -28,6 +29,10 @@
 #include <unistd.h>
 #include <vector>
 
+#define SCUDA_CUDA_COMPAT_TYPES_ONLY
+#include "cuda_compat.h"
+#undef SCUDA_CUDA_COMPAT_TYPES_ONLY
+
 #include <cstdlib>
 #include <cstring>
 
@@ -38,6 +43,7 @@
 pthread_mutex_t conn_mutex;
 conn_t conns[16];
 int nconns = 0;
+static bool scuda_rpc_shutting_down = false;
 
 const char *DEFAULT_PORT = "14833";
 
@@ -145,7 +151,9 @@ static bool scuda_pointer_attribute_size(CUpointer_attribute attr,
   case CU_POINTER_ATTRIBUTE_MAPPED:
   case CU_POINTER_ATTRIBUTE_ACCESS_FLAGS:
   case CU_POINTER_ATTRIBUTE_IS_GPU_DIRECT_RDMA_CAPABLE:
+#if CUDA_VERSION >= 13000
   case CU_POINTER_ATTRIBUTE_IS_HW_DECOMPRESS_CAPABLE:
+#endif
     *size = sizeof(int);
     return true;
   case CU_POINTER_ATTRIBUTE_BUFFER_ID:
@@ -196,6 +204,15 @@ static bool scuda_symbol_looks_like_driver_api(const char *symbol) {
          symbol[2] >= 'A' && symbol[2] <= 'Z';
 }
 
+static void *scuda_real_dlsym(void *handle, const char *name) {
+  static void *(*real_dlsym)(void *, const char *) = nullptr;
+  if (real_dlsym == nullptr) {
+    real_dlsym = reinterpret_cast<void *(*)(void *, const char *)>(
+        dlvsym(RTLD_NEXT, "dlsym", "GLIBC_2.2.5"));
+  }
+  return real_dlsym != nullptr ? real_dlsym(handle, name) : nullptr;
+}
+
 extern "C" CUresult scuda_unsupported_driver_api() {
   std::cerr << "SCUDA unsupported generic Driver API called" << std::endl;
   return CUDA_ERROR_NOT_SUPPORTED;
@@ -218,6 +235,21 @@ static std::unordered_map<CUfunction, scuda_private_node_mapping>
   return mappings;
 }
 
+static std::unordered_map<CUfunction, CUfunction> &scuda_host_function_map() {
+  static std::unordered_map<CUfunction, CUfunction> mappings;
+  return mappings;
+}
+
+static std::vector<CUmodule> &scuda_loaded_modules() {
+  static std::vector<CUmodule> modules;
+  return modules;
+}
+
+static std::mutex &scuda_host_function_mutex() {
+  static std::mutex mutex;
+  return mutex;
+}
+
 static unsigned char (&scuda_private_6e16_node_pool())[16][0x500] {
   static unsigned char nodes[16][0x500] = {};
   return nodes;
@@ -233,11 +265,181 @@ static std::mutex &scuda_private_node_mutex() {
   return mutex;
 }
 
+static void scuda_remember_loaded_module(CUmodule module) {
+  if (module == nullptr) {
+    return;
+  }
+  std::lock_guard<std::mutex> lock(scuda_host_function_mutex());
+  auto &modules = scuda_loaded_modules();
+  if (std::find(modules.begin(), modules.end(), module) == modules.end()) {
+    modules.push_back(module);
+  }
+}
+
+extern "C" void scuda_remember_loaded_module_for_rpc(CUmodule module) {
+  scuda_remember_loaded_module(module);
+}
+
+static bool scuda_read_file_span(const char *path,
+                                 std::vector<unsigned char> *bytes) {
+  if (path == nullptr || bytes == nullptr) {
+    return false;
+  }
+  std::ifstream file(path, std::ios::binary | std::ios::ate);
+  if (!file) {
+    return false;
+  }
+  std::streamsize size = file.tellg();
+  if (size <= 0) {
+    return false;
+  }
+  file.seekg(0, std::ios::beg);
+  bytes->resize(static_cast<size_t>(size));
+  return file.read(reinterpret_cast<char *>(bytes->data()), size).good();
+}
+
+static bool scuda_lookup_elf_function_symbol(const char *path, uintptr_t offset,
+                                             std::string *symbol) {
+  std::vector<unsigned char> bytes;
+  if (symbol == nullptr || !scuda_read_file_span(path, &bytes) ||
+      bytes.size() < sizeof(Elf64_Ehdr)) {
+    return false;
+  }
+
+  const auto *ehdr = reinterpret_cast<const Elf64_Ehdr *>(bytes.data());
+  if (memcmp(ehdr->e_ident, ELFMAG, SELFMAG) != 0 ||
+      ehdr->e_ident[EI_CLASS] != ELFCLASS64 ||
+      ehdr->e_shentsize != sizeof(Elf64_Shdr) || ehdr->e_shoff == 0 ||
+      ehdr->e_shnum == 0) {
+    return false;
+  }
+  size_t shoff = static_cast<size_t>(ehdr->e_shoff);
+  size_t shnum = static_cast<size_t>(ehdr->e_shnum);
+  if (shoff > bytes.size() ||
+      shnum > (bytes.size() - shoff) / sizeof(Elf64_Shdr)) {
+    return false;
+  }
+  const auto *sections =
+      reinterpret_cast<const Elf64_Shdr *>(bytes.data() + shoff);
+
+  uintptr_t best_value = 0;
+  const char *best_name = nullptr;
+  for (size_t i = 0; i < shnum; ++i) {
+    if (sections[i].sh_type != SHT_SYMTAB &&
+        sections[i].sh_type != SHT_DYNSYM) {
+      continue;
+    }
+    if (sections[i].sh_link >= shnum) {
+      continue;
+    }
+    const Elf64_Shdr &symtab = sections[i];
+    const Elf64_Shdr &strtab = sections[symtab.sh_link];
+    if (symtab.sh_entsize != sizeof(Elf64_Sym) ||
+        symtab.sh_offset > bytes.size() || strtab.sh_offset > bytes.size() ||
+        symtab.sh_size > bytes.size() - symtab.sh_offset ||
+        strtab.sh_size > bytes.size() - strtab.sh_offset) {
+      continue;
+    }
+    const auto *syms =
+        reinterpret_cast<const Elf64_Sym *>(bytes.data() + symtab.sh_offset);
+    const char *strings =
+        reinterpret_cast<const char *>(bytes.data() + strtab.sh_offset);
+    size_t count = static_cast<size_t>(symtab.sh_size / sizeof(Elf64_Sym));
+    for (size_t j = 0; j < count; ++j) {
+      const Elf64_Sym &sym = syms[j];
+      if (ELF64_ST_TYPE(sym.st_info) != STT_FUNC ||
+          sym.st_name >= strtab.sh_size || sym.st_value == 0 ||
+          offset < sym.st_value ||
+          (sym.st_size != 0 && offset >= sym.st_value + sym.st_size)) {
+        continue;
+      }
+      if (best_name == nullptr || sym.st_value >= best_value) {
+        best_value = sym.st_value;
+        best_name = strings + sym.st_name;
+      }
+    }
+  }
+
+  if (best_name == nullptr || best_name[0] == '\0') {
+    return false;
+  }
+  *symbol = best_name;
+  return true;
+}
+
+static CUfunction scuda_resolve_host_function(CUfunction function) {
+  if (function == nullptr) {
+    return function;
+  }
+
+  {
+    std::lock_guard<std::mutex> lock(scuda_host_function_mutex());
+    auto mapped = scuda_host_function_map().find(function);
+    if (mapped != scuda_host_function_map().end()) {
+      return mapped->second;
+    }
+  }
+
+  Dl_info info = {};
+  if (dladdr(reinterpret_cast<void *>(function), &info) == 0) {
+    return function;
+  }
+  std::string symbol_name;
+  const char *kernel_name = info.dli_sname;
+  if (kernel_name == nullptr && info.dli_fname != nullptr &&
+      info.dli_fbase != nullptr) {
+    uintptr_t offset = reinterpret_cast<uintptr_t>(function) -
+                       reinterpret_cast<uintptr_t>(info.dli_fbase);
+    if (scuda_lookup_elf_function_symbol(info.dli_fname, offset,
+                                         &symbol_name)) {
+      kernel_name = symbol_name.c_str();
+    }
+  }
+  if (kernel_name == nullptr) {
+    if (scuda_trace_enabled()) {
+      std::cerr << "SCUDA could not resolve host kernel symbol for "
+                << reinterpret_cast<void *>(function) << std::endl;
+    }
+    return function;
+  }
+
+  std::vector<CUmodule> modules;
+  {
+    std::lock_guard<std::mutex> lock(scuda_host_function_mutex());
+    modules = scuda_loaded_modules();
+  }
+  for (CUmodule module : modules) {
+    CUfunction remote = nullptr;
+    CUresult result = cuModuleGetFunction(&remote, module, kernel_name);
+    if (result == CUDA_SUCCESS && remote != nullptr) {
+      std::lock_guard<std::mutex> lock(scuda_host_function_mutex());
+      scuda_host_function_map()[function] = remote;
+      if (scuda_trace_enabled()) {
+        std::cerr << "SCUDA mapped host kernel " << kernel_name
+                  << " host=" << reinterpret_cast<void *>(function)
+                  << " remote=" << remote << std::endl;
+      }
+      return remote;
+    }
+  }
+  if (scuda_trace_enabled()) {
+    std::cerr << "SCUDA host kernel " << kernel_name
+              << " was not found in " << modules.size() << " loaded modules"
+              << std::endl;
+  }
+
+  return function;
+}
+
 static CUfunction scuda_translate_private_function(CUfunction function) {
-  std::lock_guard<std::mutex> lock(scuda_private_node_mutex());
-  auto it = scuda_private_node_map().find(function);
-  return it == scuda_private_node_map().end() ? function
-                                               : it->second.server_function;
+  {
+    std::lock_guard<std::mutex> lock(scuda_private_node_mutex());
+    auto it = scuda_private_node_map().find(function);
+    if (it != scuda_private_node_map().end()) {
+      return it->second.server_function;
+    }
+  }
+  return scuda_resolve_host_function(function);
 }
 
 extern "C" CUfunction scuda_translate_private_function_for_rpc(
@@ -2078,6 +2280,7 @@ extern "C" CUresult cuCtxCreate_v2(CUcontext *pctx, unsigned int flags,
   return return_value;
 }
 
+#if CUDA_VERSION >= 12050
 extern "C" CUresult cuCtxCreate_v4(CUcontext *pctx,
                                    CUctxCreateParams *ctxCreateParams,
                                    unsigned int flags, CUdevice dev) {
@@ -2089,6 +2292,7 @@ extern "C" CUresult cuCtxCreate_v4(CUcontext *pctx,
   }
   return cuCtxCreate_v2(pctx, flags, dev);
 }
+#endif
 
 static CUresult scuda_occupancy_max_potential_block_size(
     int *minGridSize, int *blockSize, CUfunction func,
@@ -2243,6 +2447,9 @@ extern "C" CUresult cuModuleLoadData(CUmodule *module, const void *image) {
       rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
       rpc_read_end(conn) < 0) {
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
+  }
+  if (return_value == CUDA_SUCCESS) {
+    scuda_remember_loaded_module(*module);
   }
   return return_value;
 }
@@ -2863,9 +3070,12 @@ static CUresult scuda_pack_kernel_params(const CUDA_KERNEL_NODE_PARAMS *nodePara
   if (nodeParams->extra != nullptr) {
     return CUDA_ERROR_NOT_SUPPORTED;
   }
-  CUfunction func = nodeParams->func != nullptr
-                        ? nodeParams->func
-                        : reinterpret_cast<CUfunction>(nodeParams->kern);
+  CUfunction func = nodeParams->func;
+#if CUDA_VERSION >= 12000
+  if (func == nullptr) {
+    func = reinterpret_cast<CUfunction>(nodeParams->kern);
+  }
+#endif
   CUresult status = scuda_get_kernel_param_layout(func, layout);
   if (status != CUDA_SUCCESS) {
     return status;
@@ -2911,6 +3121,7 @@ extern "C" CUresult cuGraphAddKernelNode_v2(
   }
 
   CUDA_KERNEL_NODE_PARAMS serial_params = *nodeParams;
+  serial_params.func = scuda_translate_private_function(serial_params.func);
   serial_params.kernelParams = nullptr;
   serial_params.extra = nullptr;
 
@@ -3086,6 +3297,16 @@ extern "C" CUresult cuGraphAddNode_v2(
     }
     param_count = layout.count;
     packed_size = packed.size();
+    CUfunction translated =
+        serial_params.kernel.func != nullptr
+            ? scuda_translate_private_function(serial_params.kernel.func)
+            : scuda_translate_private_function(
+                  reinterpret_cast<CUfunction>(serial_params.kernel.kern));
+    if (serial_params.kernel.func != nullptr) {
+      serial_params.kernel.func = translated;
+    } else {
+      serial_params.kernel.kern = reinterpret_cast<CUkernel>(translated);
+    }
     serial_params.kernel.kernelParams = nullptr;
     serial_params.kernel.extra = nullptr;
   } else if (nodeParams->type == CU_GRAPH_NODE_TYPE_CONDITIONAL) {
@@ -3132,6 +3353,7 @@ extern "C" CUresult cuGraphAddNode_v2(
 #ifdef cuGraphAddNode
 #undef cuGraphAddNode
 #endif
+#if CUDA_VERSION >= 13000
 extern "C" CUresult cuGraphAddNode(
     CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies,
     const CUgraphEdgeData *dependencyData, size_t numDependencies,
@@ -3139,6 +3361,15 @@ extern "C" CUresult cuGraphAddNode(
   return cuGraphAddNode_v2(phGraphNode, hGraph, dependencies, dependencyData,
                            numDependencies, nodeParams);
 }
+#else
+extern "C" CUresult cuGraphAddNode(CUgraphNode *phGraphNode, CUgraph hGraph,
+                                   const CUgraphNode *dependencies,
+                                   size_t numDependencies,
+                                   CUgraphNodeParams *nodeParams) {
+  return cuGraphAddNode_v2(phGraphNode, hGraph, dependencies, nullptr,
+                           numDependencies, nodeParams);
+}
+#endif
 
 extern "C" CUresult cuGraphGetNodes(CUgraph hGraph, CUgraphNode *nodes,
                                     size_t *numNodes) {
@@ -3215,9 +3446,37 @@ extern "C" CUresult cuStreamAddCallback(CUstream hStream,
   return return_value;
 }
 
-extern "C" CUresult cuStreamGetCaptureInfo_v3(
-    CUstream stream, CUstreamCaptureStatus *captureStatus_out, cuuint64_t *id_out,
-    CUgraph *graph_out, const CUgraphNode **dependencies_out,
+static bool scuda_is_writable_user_pointer(const void *ptr, size_t size) {
+  if (ptr == nullptr || size == 0) {
+    return false;
+  }
+  uintptr_t start = reinterpret_cast<uintptr_t>(ptr);
+  uintptr_t end = start + size;
+  if (end < start) {
+    return false;
+  }
+
+  std::ifstream maps("/proc/self/maps");
+  std::string line;
+  while (std::getline(maps, line)) {
+    uintptr_t region_start = 0;
+    uintptr_t region_end = 0;
+    char perms[5] = {};
+    if (sscanf(line.c_str(), "%lx-%lx %4s", &region_start, &region_end,
+               perms) != 3) {
+      continue;
+    }
+    if (start >= region_start && end <= region_end && perms[1] == 'w') {
+      return true;
+    }
+  }
+  return false;
+}
+
+static CUresult scuda_cuStreamGetCaptureInfo(
+    CUstream stream, CUstreamCaptureStatus *captureStatus_out,
+    cuuint64_t *id_out, CUgraph *graph_out,
+    const CUgraphNode **dependencies_out,
     const CUgraphEdgeData **edgeData_out, size_t *numDependencies_out) {
   static thread_local std::vector<CUgraphNode> capture_dependencies;
   static thread_local std::vector<CUgraphEdgeData> capture_edge_data;
@@ -3259,6 +3518,26 @@ extern "C" CUresult cuStreamGetCaptureInfo_v3(
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
   }
 
+  bool num_dependencies_writable =
+      numDependencies_out != nullptr &&
+      scuda_is_writable_user_pointer(numDependencies_out,
+                                     sizeof(*numDependencies_out));
+  if (edgeData_out != nullptr &&
+      (numDependencies_out == nullptr || !num_dependencies_writable)) {
+    numDependencies_out = reinterpret_cast<size_t *>(edgeData_out);
+    edgeData_out = nullptr;
+    num_dependencies_writable =
+        scuda_is_writable_user_pointer(numDependencies_out,
+                                       sizeof(*numDependencies_out));
+  }
+  if (numDependencies_out != nullptr && !num_dependencies_writable) {
+    numDependencies_out = nullptr;
+  }
+  if (edgeData_out != nullptr &&
+      !scuda_is_writable_user_pointer(edgeData_out, sizeof(*edgeData_out))) {
+    edgeData_out = nullptr;
+  }
+
   if (captureStatus_out != nullptr) {
     *captureStatus_out = status;
   }
@@ -3282,27 +3561,46 @@ extern "C" CUresult cuStreamGetCaptureInfo_v3(
   return return_value;
 }
 
+extern "C" CUresult cuStreamGetCaptureInfo_v3(
+    CUstream stream, CUstreamCaptureStatus *captureStatus_out,
+    cuuint64_t *id_out, CUgraph *graph_out,
+    const CUgraphNode **dependencies_out,
+    const CUgraphEdgeData **edgeData_out, size_t *numDependencies_out) {
+  return scuda_cuStreamGetCaptureInfo(stream, captureStatus_out, id_out,
+                                      graph_out, dependencies_out,
+                                      edgeData_out, numDependencies_out);
+}
+
 extern "C" CUresult cuStreamGetCaptureInfo_v2(
     CUstream stream, CUstreamCaptureStatus *captureStatus_out,
     cuuint64_t *id_out, CUgraph *graph_out,
     const CUgraphNode **dependencies_out, size_t *numDependencies_out) {
-  return cuStreamGetCaptureInfo_v3(stream, captureStatus_out, id_out,
-                                   graph_out, dependencies_out, nullptr,
-                                   numDependencies_out);
+  return scuda_cuStreamGetCaptureInfo(stream, captureStatus_out, id_out,
+                                      graph_out, dependencies_out, nullptr,
+                                      numDependencies_out);
 }
 
 #ifdef cuStreamGetCaptureInfo
 #undef cuStreamGetCaptureInfo
 #endif
+#if CUDA_VERSION >= 12000
 extern "C" CUresult cuStreamGetCaptureInfo(
     CUstream stream, CUstreamCaptureStatus *captureStatus_out,
     cuuint64_t *id_out, CUgraph *graph_out,
     const CUgraphNode **dependencies_out,
     const CUgraphEdgeData **edgeData_out, size_t *numDependencies_out) {
-  return cuStreamGetCaptureInfo_v3(stream, captureStatus_out, id_out,
-                                   graph_out, dependencies_out, edgeData_out,
-                                   numDependencies_out);
+  return scuda_cuStreamGetCaptureInfo(stream, captureStatus_out, id_out,
+                                      graph_out, dependencies_out,
+                                      edgeData_out, numDependencies_out);
 }
+#else
+extern "C" CUresult cuStreamGetCaptureInfo(
+    CUstream stream, CUstreamCaptureStatus *captureStatus_out,
+    cuuint64_t *id_out) {
+  return scuda_cuStreamGetCaptureInfo(stream, captureStatus_out, id_out,
+                                      nullptr, nullptr, nullptr, nullptr);
+}
+#endif
 
 extern "C" CUresult cuStreamBeginCaptureToGraph(
     CUstream hStream, CUgraph hGraph, const CUgraphNode *dependencies,
@@ -3364,6 +3662,7 @@ extern "C" CUresult cuStreamUpdateCaptureDependencies_v2(
 #ifdef cuStreamUpdateCaptureDependencies
 #undef cuStreamUpdateCaptureDependencies
 #endif
+#if CUDA_VERSION >= 13000
 extern "C" CUresult cuStreamUpdateCaptureDependencies(
     CUstream hStream, CUgraphNode *dependencies,
     const CUgraphEdgeData *dependencyData, size_t numDependencies,
@@ -3371,7 +3670,16 @@ extern "C" CUresult cuStreamUpdateCaptureDependencies(
   return cuStreamUpdateCaptureDependencies_v2(
       hStream, dependencies, dependencyData, numDependencies, flags);
 }
+#else
+extern "C" CUresult cuStreamUpdateCaptureDependencies(
+    CUstream hStream, CUgraphNode *dependencies, size_t numDependencies,
+    unsigned int flags) {
+  return cuStreamUpdateCaptureDependencies_v2(hStream, dependencies, nullptr,
+                                              numDependencies, flags);
+}
+#endif
 
+#if CUDA_VERSION >= 13000
 extern "C" CUresult cuStreamUpdateCaptureDependencies_ptsz(
     CUstream hStream, CUgraphNode *dependencies,
     const CUgraphEdgeData *dependencyData, size_t numDependencies,
@@ -3379,6 +3687,14 @@ extern "C" CUresult cuStreamUpdateCaptureDependencies_ptsz(
   return cuStreamUpdateCaptureDependencies_v2(
       hStream, dependencies, dependencyData, numDependencies, flags);
 }
+#else
+extern "C" CUresult cuStreamUpdateCaptureDependencies_ptsz(
+    CUstream hStream, CUgraphNode *dependencies, size_t numDependencies,
+    unsigned int flags) {
+  return cuStreamUpdateCaptureDependencies_v2(hStream, dependencies, nullptr,
+                                              numDependencies, flags);
+}
+#endif
 
 static bool scuda_uuid_equals(const CUuuid *uuid, const unsigned char *bytes) {
   return uuid != nullptr && memcmp(uuid->bytes, bytes, 16) == 0;
@@ -3477,18 +3793,18 @@ struct scuda_context_storage_value {
 };
 
 static std::mutex &scuda_context_storage_mutex() {
-  static std::mutex mutex;
-  return mutex;
+  static auto *mutex = new std::mutex();
+  return *mutex;
 }
 
 static std::unordered_map<CUcontext,
                           std::unordered_map<void *, scuda_context_storage_value>>
     &scuda_context_storage() {
-  static std::unordered_map<CUcontext,
-                            std::unordered_map<void *,
-                                               scuda_context_storage_value>>
-      storage;
-  return storage;
+  static auto *storage =
+      new std::unordered_map<CUcontext,
+                             std::unordered_map<void *,
+                                                scuda_context_storage_value>>();
+  return *storage;
 }
 
 static CUresult scuda_normalize_context(CUcontext *ctx) {
@@ -4231,11 +4547,56 @@ static void *scuda_get_unsupported_stub(const char *symbol) {
 }
 
 void rpc_close(conn_t *conn) {
-  if (pthread_mutex_lock(&conn_mutex) < 0)
+  if (conn == nullptr) {
     return;
-  while (--nconns >= 0)
+  }
+
+  if (!conn->closed) {
+    conn->closed = 1;
+    shutdown(conn->connfd, SHUT_RDWR);
     close(conn->connfd);
+  }
+
+  pthread_mutex_lock(&conn->read_mutex);
+  pthread_cond_broadcast(&conn->read_cond);
+  pthread_mutex_unlock(&conn->read_mutex);
+}
+
+static void scuda_rpc_shutdown() {
+  if (pthread_mutex_lock(&conn_mutex) < 0) {
+    return;
+  }
+  if (scuda_rpc_shutting_down) {
+    pthread_mutex_unlock(&conn_mutex);
+    return;
+  }
+  scuda_rpc_shutting_down = true;
+  int count = nconns;
+  for (int i = 0; i < count; ++i) {
+    rpc_close(&conns[i]);
+  }
   pthread_mutex_unlock(&conn_mutex);
+
+  for (int i = 0; i < count; ++i) {
+    if (conns[i].read_thread != 0) {
+      pthread_join(conns[i].read_thread, nullptr);
+      conns[i].read_thread = 0;
+    }
+    if (conns[i].rpc_thread != 0) {
+      pthread_join(conns[i].rpc_thread, nullptr);
+      conns[i].rpc_thread = 0;
+    }
+  }
+
+  if (pthread_mutex_lock(&conn_mutex) == 0) {
+    nconns = 0;
+    scuda_rpc_shutting_down = false;
+    pthread_mutex_unlock(&conn_mutex);
+  }
+}
+
+__attribute__((destructor)) static void scuda_rpc_destructor() {
+  scuda_rpc_shutdown();
 }
 
 typedef void (*func_t)(void *);
@@ -4350,10 +4711,14 @@ void *rpc_client_dispatch_thread(void *arg) {
         std::cerr << "rpc_write failed. Closing connection." << std::endl;
         break;
       }
+    } else if (op < 0 || conn->closed) {
+      break;
     }
   }
 
-  std::cerr << "Exiting dispatch thread due to an error." << std::endl;
+  if (!conn->closed) {
+    std::cerr << "Exiting dispatch thread due to an error." << std::endl;
+  }
   return nullptr;
 }
 
@@ -4417,7 +4782,10 @@ int rpc_open() {
       exit(1);
     }
 
-    conns[nconns] = {sockfd, 0};
+    conns[nconns] = {};
+    conns[nconns].connfd = sockfd;
+    conns[nconns].request_id = 0;
+    conns[nconns].closed = 0;
     conns[nconns].local_request_parity = conns[nconns].request_id & 1;
     if (pthread_mutex_init(&conns[nconns].read_mutex, NULL) < 0 ||
         pthread_mutex_init(&conns[nconns].write_mutex, NULL) < 0 ||
@@ -4446,6 +4814,12 @@ conn_t *rpc_client_get_connection(unsigned int index) {
 }
 
 int rpc_size() { return nconns; }
+
+#ifdef cuGetProcAddress
+#undef cuGetProcAddress
+#endif
+extern "C" CUresult cuGetProcAddress(const char *symbol, void **pfn,
+                                     int cudaVersion, cuuint64_t flags);
 
 CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion,
                              cuuint64_t flags,
@@ -4502,9 +4876,13 @@ CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion,
   }
 
   static const std::unordered_map<std::string, void *> manual_function_map = {
+#if CUDA_VERSION >= 12050
       {"cuCtxCreate", (void *)cuCtxCreate_v4},
-      {"cuCtxCreate_v2", (void *)cuCtxCreate_v2},
       {"cuCtxCreate_v4", (void *)cuCtxCreate_v4},
+#else
+      {"cuCtxCreate", (void *)cuCtxCreate_v2},
+#endif
+      {"cuCtxCreate_v2", (void *)cuCtxCreate_v2},
       {"cuOccupancyMaxPotentialBlockSize",
        (void *)cuOccupancyMaxPotentialBlockSize},
       {"cuOccupancyMaxPotentialBlockSizeWithFlags",
@@ -4580,7 +4958,7 @@ CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion,
       {"cuGetErrorString", (void *)cuGetErrorString},
       {"cuGraphAddKernelNode", (void *)cuGraphAddKernelNode_v2},
       {"cuGraphAddKernelNode_v2", (void *)cuGraphAddKernelNode_v2},
-      {"cuGraphAddNode", (void *)cuGraphAddNode_v2},
+      {"cuGraphAddNode", (void *)cuGraphAddNode},
       {"cuGraphAddNode_v2", (void *)cuGraphAddNode_v2},
       {"cuGraphConditionalHandleCreate",
        (void *)cuGraphConditionalHandleCreate},
@@ -4609,11 +4987,11 @@ CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion,
       {"cuStreamBeginCaptureToGraph_ptsz",
        (void *)cuStreamBeginCaptureToGraph},
       {"cuStreamUpdateCaptureDependencies",
-       (void *)cuStreamUpdateCaptureDependencies_v2},
+       (void *)cuStreamUpdateCaptureDependencies},
       {"cuStreamUpdateCaptureDependencies_v2",
        (void *)cuStreamUpdateCaptureDependencies_v2},
       {"cuStreamUpdateCaptureDependencies_ptsz",
-       (void *)cuStreamUpdateCaptureDependencies_v2},
+       (void *)cuStreamUpdateCaptureDependencies_ptsz},
   };
   auto manual_it = manual_function_map.find(symbol);
   if (manual_it != manual_function_map.end()) {
@@ -4633,9 +5011,15 @@ CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion,
     return CUDA_SUCCESS;
   }
 
-  if (strcmp(symbol, "cuGetProcAddress_v2") == 0 ||
-      strcmp(symbol, "cuGetProcAddress") == 0) {
+  if (strcmp(symbol, "cuGetProcAddress_v2") == 0) {
     *pfn = (void *)&cuGetProcAddress_v2;
+    if (symbolStatus != nullptr) {
+      *symbolStatus = CU_GET_PROC_ADDRESS_SUCCESS;
+    }
+    return CUDA_SUCCESS;
+  }
+  if (strcmp(symbol, "cuGetProcAddress") == 0) {
+    *pfn = (void *)&cuGetProcAddress;
     if (symbolStatus != nullptr) {
       *symbolStatus = CU_GET_PROC_ADDRESS_SUCCESS;
     }
@@ -4706,9 +5090,6 @@ CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion,
   return CUDA_SUCCESS;
 }
 
-#ifdef cuGetProcAddress
-#undef cuGetProcAddress
-#endif
 extern "C" CUresult cuGetProcAddress(const char *symbol, void **pfn,
                                      int cudaVersion, cuuint64_t flags) {
   return cuGetProcAddress_v2(symbol, pfn, cudaVersion, flags, nullptr);
@@ -4717,6 +5098,10 @@ extern "C" CUresult cuGetProcAddress(const char *symbol, void **pfn,
 void *dlsym(void *handle, const char *name) __THROW {
   if (scuda_trace_enabled()) {
     std::cout << "dlsym: " << name << std::endl;
+  }
+
+  if (!scuda_symbol_looks_like_driver_api(name)) {
+    return scuda_real_dlsym(handle, name);
   }
 
   if (name != nullptr && strcmp(name, "cuFuncGetAttribute") == 0) {
@@ -4741,9 +5126,11 @@ void *dlsym(void *handle, const char *name) __THROW {
 
   /** proc address function calls are basically dlsym; we should handle this
    * differently at the top level. */
-  if (strcmp(name, "cuGetProcAddress_v2") == 0 ||
-      strcmp(name, "cuGetProcAddress") == 0) {
+  if (strcmp(name, "cuGetProcAddress_v2") == 0) {
     return (void *)&cuGetProcAddress_v2;
+  }
+  if (strcmp(name, "cuGetProcAddress") == 0) {
+    return (void *)&cuGetProcAddress;
   }
 
   if (func != nullptr) {
@@ -4753,9 +5140,13 @@ void *dlsym(void *handle, const char *name) __THROW {
   }
 
   static const std::unordered_map<std::string, void *> manual_function_map = {
+#if CUDA_VERSION >= 12050
       {"cuCtxCreate", (void *)cuCtxCreate_v4},
-      {"cuCtxCreate_v2", (void *)cuCtxCreate_v2},
       {"cuCtxCreate_v4", (void *)cuCtxCreate_v4},
+#else
+      {"cuCtxCreate", (void *)cuCtxCreate_v2},
+#endif
+      {"cuCtxCreate_v2", (void *)cuCtxCreate_v2},
       {"cuOccupancyMaxPotentialBlockSize",
        (void *)cuOccupancyMaxPotentialBlockSize},
       {"cuOccupancyMaxPotentialBlockSizeWithFlags",
@@ -4831,7 +5222,7 @@ void *dlsym(void *handle, const char *name) __THROW {
       {"cuGetErrorString", (void *)cuGetErrorString},
       {"cuGraphAddKernelNode", (void *)cuGraphAddKernelNode_v2},
       {"cuGraphAddKernelNode_v2", (void *)cuGraphAddKernelNode_v2},
-      {"cuGraphAddNode", (void *)cuGraphAddNode_v2},
+      {"cuGraphAddNode", (void *)cuGraphAddNode},
       {"cuGraphAddNode_v2", (void *)cuGraphAddNode_v2},
       {"cuGraphConditionalHandleCreate",
        (void *)cuGraphConditionalHandleCreate},
@@ -4860,11 +5251,11 @@ void *dlsym(void *handle, const char *name) __THROW {
       {"cuStreamBeginCaptureToGraph_ptsz",
        (void *)cuStreamBeginCaptureToGraph},
       {"cuStreamUpdateCaptureDependencies",
-       (void *)cuStreamUpdateCaptureDependencies_v2},
+       (void *)cuStreamUpdateCaptureDependencies},
       {"cuStreamUpdateCaptureDependencies_v2",
        (void *)cuStreamUpdateCaptureDependencies_v2},
       {"cuStreamUpdateCaptureDependencies_ptsz",
-       (void *)cuStreamUpdateCaptureDependencies_v2},
+       (void *)cuStreamUpdateCaptureDependencies_ptsz},
   };
   auto manual_it = manual_function_map.find(name);
   if (manual_it != manual_function_map.end()) {
@@ -4880,14 +5271,7 @@ void *dlsym(void *handle, const char *name) __THROW {
     return scuda_make_missing_stub(name);
   }
 
-  // Real dlsym lookup
-  static void *(*real_dlsym)(void *, const char *) = NULL;
-  if (real_dlsym == NULL) {
-    real_dlsym = (void *(*)(void *, const char *))dlvsym(RTLD_NEXT, "dlsym",
-                                                         "GLIBC_2.2.5");
-  }
-
   // std::cout << "[dlsym] Falling back to real_dlsym for name: " << name <<
   // std::endl;
-  return real_dlsym(handle, name);
+  return scuda_real_dlsym(handle, name);
 }

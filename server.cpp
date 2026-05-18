@@ -24,6 +24,8 @@
 #include <list>
 #include <map>
 
+#include "cuda_compat.h"
+
 #include "codegen/gen_server.h"
 #include "codegen/gen_api.h"
 #include "rpc.h"
@@ -105,7 +107,9 @@ static bool scuda_pointer_attribute_size(CUpointer_attribute attr,
   case CU_POINTER_ATTRIBUTE_MAPPED:
   case CU_POINTER_ATTRIBUTE_ACCESS_FLAGS:
   case CU_POINTER_ATTRIBUTE_IS_GPU_DIRECT_RDMA_CAPABLE:
+#if CUDA_VERSION >= 13000
   case CU_POINTER_ATTRIBUTE_IS_HW_DECOMPRESS_CAPABLE:
+#endif
     *size = sizeof(int);
     return true;
   case CU_POINTER_ATTRIBUTE_BUFFER_ID:
@@ -1579,9 +1583,12 @@ int handle_manual_cuGraphAddKernelNode(conn_t *conn) {
     return -1;
   }
 
-  CUfunction func = nodeParams.func != nullptr
-                        ? nodeParams.func
-                        : reinterpret_cast<CUfunction>(nodeParams.kern);
+  CUfunction func = nodeParams.func;
+#if CUDA_VERSION >= 12000
+  if (func == nullptr) {
+    func = reinterpret_cast<CUfunction>(nodeParams.kern);
+  }
+#endif
   scuda_kernel_param_layout layout;
   result = scuda_get_kernel_param_layout(func, &layout);
   if (result == CUDA_SUCCESS && layout.count == param_count) {
@@ -1762,6 +1769,22 @@ int handle_manual_cuGraphConditionalHandleCreate(conn_t *conn) {
   return 0;
 }
 
+static CUresult scuda_server_cuGraphAddNode(
+    CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies,
+    const CUgraphEdgeData *dependencyData, size_t numDependencies,
+    CUgraphNodeParams *nodeParams) {
+#if CUDA_VERSION >= 12060
+  return cuGraphAddNode_v2(phGraphNode, hGraph, dependencies, dependencyData,
+                           numDependencies, nodeParams);
+#else
+  if (dependencyData != nullptr) {
+    return CUDA_ERROR_NOT_SUPPORTED;
+  }
+  return cuGraphAddNode(phGraphNode, hGraph, dependencies, numDependencies,
+                        nodeParams);
+#endif
+}
+
 int handle_manual_cuGraphAddNode(conn_t *conn) {
   CUgraph hGraph = nullptr;
   std::vector<CUgraphNode> deps;
@@ -1792,9 +1815,9 @@ int handle_manual_cuGraphAddNode(conn_t *conn) {
     if (param_count == 0 && packed_size == 0) {
       nodeParams.kernel.kernelParams = nullptr;
       nodeParams.kernel.extra = nullptr;
-      result = cuGraphAddNode(&graphNode, hGraph,
-                              deps.empty() ? nullptr : deps.data(), nullptr,
-                              deps.size(), &nodeParams);
+      result = scuda_server_cuGraphAddNode(
+          &graphNode, hGraph, deps.empty() ? nullptr : deps.data(), nullptr,
+          deps.size(), &nodeParams);
     } else {
       CUfunction func =
           nodeParams.kernel.func != nullptr
@@ -1803,30 +1826,31 @@ int handle_manual_cuGraphAddNode(conn_t *conn) {
       scuda_kernel_param_layout layout;
       result = scuda_get_kernel_param_layout(func, &layout);
       if (result == CUDA_SUCCESS && layout.count == param_count) {
-      std::vector<void *> params(param_count);
-      for (uint32_t i = 0; i < param_count; ++i) {
-        if (layout.offsets[i] + layout.sizes[i] > packed.size()) {
-          result = CUDA_ERROR_INVALID_VALUE;
-          break;
+        std::vector<void *> params(param_count);
+        for (uint32_t i = 0; i < param_count; ++i) {
+          if (layout.offsets[i] + layout.sizes[i] > packed.size()) {
+            result = CUDA_ERROR_INVALID_VALUE;
+            break;
+          }
+          params[i] = packed.data() + layout.offsets[i];
         }
-        params[i] = packed.data() + layout.offsets[i];
+        if (result == CUDA_SUCCESS) {
+          nodeParams.kernel.kernelParams = params.data();
+          nodeParams.kernel.extra = nullptr;
+          result = scuda_server_cuGraphAddNode(
+              &graphNode, hGraph, deps.empty() ? nullptr : deps.data(), nullptr,
+              deps.size(), &nodeParams);
+        }
       }
-      if (result == CUDA_SUCCESS) {
-        nodeParams.kernel.kernelParams = params.data();
-        nodeParams.kernel.extra = nullptr;
-        result = cuGraphAddNode(&graphNode, hGraph,
-                                deps.empty() ? nullptr : deps.data(), nullptr,
-                                deps.size(), &nodeParams);
-      }
-    }
     }
   } else if (nodeParams.type == CU_GRAPH_NODE_TYPE_CONDITIONAL) {
     child_graphs.resize(nodeParams.conditional.size);
     nodeParams.conditional.phGraph_out = nullptr;
-    result = cuGraphAddNode(&graphNode, hGraph,
-                            deps.empty() ? nullptr : deps.data(), nullptr,
-                            deps.size(), &nodeParams);
-    if (result == CUDA_SUCCESS && nodeParams.conditional.phGraph_out != nullptr) {
+    result = scuda_server_cuGraphAddNode(
+        &graphNode, hGraph, deps.empty() ? nullptr : deps.data(), nullptr,
+        deps.size(), &nodeParams);
+    if (result == CUDA_SUCCESS &&
+        nodeParams.conditional.phGraph_out != nullptr) {
       for (size_t i = 0; i < child_graphs.size(); ++i) {
         child_graphs[i] = nodeParams.conditional.phGraph_out[i];
       }
@@ -2049,6 +2073,22 @@ int handle_manual_cuStreamBeginCaptureToGraph(conn_t *conn) {
   return 0;
 }
 
+static CUresult scuda_server_cuStreamUpdateCaptureDependencies(
+    CUstream stream, CUgraphNode *dependencies,
+    const CUgraphEdgeData *dependencyData, size_t numDependencies,
+    unsigned int flags) {
+#if CUDA_VERSION >= 12060
+  return cuStreamUpdateCaptureDependencies_v2(
+      stream, dependencies, dependencyData, numDependencies, flags);
+#else
+  if (dependencyData != nullptr) {
+    return CUDA_ERROR_NOT_SUPPORTED;
+  }
+  return cuStreamUpdateCaptureDependencies(stream, dependencies,
+                                           numDependencies, flags);
+#endif
+}
+
 int handle_manual_cuStreamUpdateCaptureDependencies(conn_t *conn) {
   CUstream stream = nullptr;
   std::vector<CUgraphNode> deps;
@@ -2065,7 +2105,7 @@ int handle_manual_cuStreamUpdateCaptureDependencies(conn_t *conn) {
     return -1;
   }
 
-  result = cuStreamUpdateCaptureDependencies_v2(
+  result = scuda_server_cuStreamUpdateCaptureDependencies(
       stream, deps.empty() ? nullptr : deps.data(), nullptr, deps.size(),
       flags);
   if (rpc_write_start_response(conn, request_id) < 0 ||

@@ -1,6 +1,8 @@
 #include <iostream>
 #include <cuda.h>
 
+#include "cuda_compat.h"
+
 #include <cstring>
 #include <string>
 #include <unordered_map>
@@ -4787,7 +4789,7 @@ int handle_cuEventElapsedTime_v2(conn_t *conn)
     request_id = rpc_read_end(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cuEventElapsedTime_v2(&pMilliseconds, hStart, hEnd);
+    scuda_intercept_result = cuEventElapsedTime(&pMilliseconds, hStart, hEnd);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &pMilliseconds, sizeof(float)) < 0 ||
@@ -6889,9 +6891,11 @@ int handle_cuGraphExecKernelNodeSetParams_v2(conn_t *conn)
     request_id = rpc_read_end(conn);
     if (request_id < 0)
         goto ERROR_0;
-    func = nodeParams.func != nullptr
-               ? nodeParams.func
-               : reinterpret_cast<CUfunction>(nodeParams.kern);
+    func = nodeParams.func;
+#if CUDA_VERSION >= 12000
+    if (func == nullptr)
+        func = reinterpret_cast<CUfunction>(nodeParams.kern);
+#endif
     scuda_intercept_result = scuda_get_kernel_param_layout(func, &layout);
     if (scuda_intercept_result == CUDA_SUCCESS && layout.count == param_count) {
         params.resize(param_count);

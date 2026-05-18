@@ -19,6 +19,7 @@ typedef struct {
   struct iovec write_iov[128];
   int write_iov_count;
   int local_request_parity;
+  int closed;
 } conn_t;
 
 extern int rpc_dispatch(conn_t *conn, int parity);

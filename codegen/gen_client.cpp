@@ -1,5 +1,9 @@
 #include <cuda.h>
 
+#define SCUDA_CUDA_COMPAT_TYPES_ONLY
+#include "cuda_compat.h"
+#undef SCUDA_CUDA_COMPAT_TYPES_ONLY
+
 #include <algorithm>
 #include <cstdint>
 #include <cstdio>
@@ -17,6 +21,7 @@ extern conn_t *rpc_client_get_connection(unsigned int index);
 extern void rpc_close(conn_t *conn);
 extern "C" void scuda_prepare_host_range_write(void *host, size_t size);
 extern "C" void scuda_mark_host_range_clean(void *host, size_t size);
+extern "C" void scuda_remember_loaded_module_for_rpc(CUmodule module);
 extern "C" CUresult
 scuda_cuArrayCreate_v2_safe(CUarray *pHandle,
                             const CUDA_ARRAY_DESCRIPTOR *pAllocateArray);
@@ -73,9 +78,11 @@ static CUresult scuda_pack_kernel_params_for_codegen(
         return CUDA_ERROR_INVALID_VALUE;
     if (nodeParams->extra != nullptr)
         return CUDA_ERROR_NOT_SUPPORTED;
-    CUfunction func = nodeParams->func != nullptr
-                          ? nodeParams->func
-                          : reinterpret_cast<CUfunction>(nodeParams->kern);
+    CUfunction func = nodeParams->func;
+#if CUDA_VERSION >= 12000
+    if (func == nullptr)
+        func = reinterpret_cast<CUfunction>(nodeParams->kern);
+#endif
     CUresult status = scuda_get_kernel_param_layout_for_codegen(func, layout);
     if (status != CUDA_SUCCESS)
         return status;
@@ -1035,6 +1042,8 @@ CUresult cuLibraryGetModule(CUmodule* pMod, CUlibrary library)
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    if (return_value == CUDA_SUCCESS)
+        scuda_remember_loaded_module_for_rpc(*pMod);
     return return_value;
 }
 
@@ -5141,10 +5150,23 @@ extern "C" CUresult cuStreamBeginCapture(CUstream hStream, CUstreamCaptureMode m
 #ifdef cuGraphExecUpdate
 #undef cuGraphExecUpdate
 #endif
+#if CUDA_VERSION >= 12000
 extern "C" CUresult cuGraphExecUpdate(CUgraphExec hGraphExec, CUgraph hGraph, CUgraphExecUpdateResultInfo* resultInfo)
 {
     return cuGraphExecUpdate_v2(hGraphExec, hGraph, resultInfo);
 }
+#else
+extern "C" CUresult cuGraphExecUpdate(CUgraphExec hGraphExec, CUgraph hGraph, CUgraphNode* hErrorNode_out, CUgraphExecUpdateResult* updateResult_out)
+{
+    CUgraphExecUpdateResultInfo resultInfo = {};
+    CUresult result = cuGraphExecUpdate_v2(hGraphExec, hGraph, &resultInfo);
+    if (hErrorNode_out != nullptr)
+        *hErrorNode_out = resultInfo.errorNode;
+    if (updateResult_out != nullptr)
+        *updateResult_out = resultInfo.result;
+    return result;
+}
+#endif
 
 #ifdef cuMemcpy_ptds
 #undef cuMemcpy_ptds
