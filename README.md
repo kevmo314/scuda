@@ -20,19 +20,15 @@ You can see a list of some currently working examples in the [test folder](./tes
 
 ## Quick Start
 
-Build the images from the repo root. The client image includes the SCUDA
-`libcuda.so.1` shim, the SCUDA `libnvidia-ml.so.1` shim, and a real
-`nvidia-smi` binary extracted from Ubuntu's NVIDIA utils package.
-
-```bash
-docker build -f Dockerfile --target client -t scuda-client .
-docker build -f Dockerfile --target server -t scuda-server .
-```
+Use the published GHCR images. The examples below pin CUDA 13.1.0 on
+Ubuntu 24.04; other published tags use the same
+`cuda-<cuda-version>-ubuntu<ubuntu-version>` format.
 
 Run the server on the GPU machine:
 
 ```bash
-docker run --rm --gpus all -p 14833:14833 scuda-server
+docker run --rm --gpus all -p 14833:14833 \
+  ghcr.io/kevmo314/scuda-server:cuda-13.1.0-ubuntu24.04
 ```
 
 Run the client pointing at that server:
@@ -40,22 +36,38 @@ Run the client pointing at that server:
 ```bash
 docker run --rm -it \
   -e SCUDA_SERVER=<server>:14833 \
-  scuda-client \
-  bash
+  ghcr.io/kevmo314/scuda-client:cuda-13.1.0-ubuntu24.04 \
+  nvidia-smi
+```
+
+Example output from a real run against a remote RTX 4090:
+
+```text
+Mon May 18 15:40:46 2026
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.288.01             Driver Version: 590.48.01    CUDA Version: 13.1     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA GeForce RTX 4090        On  | 00000000:01:00.0  On |                  Off |
+| 30%   52C    P8              22W / 450W |      8MiB / 24564MiB |      0%      Default |
+|                                         |                      |                  N/A |
++-----------------------------------------+----------------------+----------------------+
+
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
 ```
 
 Inside the client container, `LD_LIBRARY_PATH=/opt/scuda/lib` is already set,
 so CUDA driver users pick up the SCUDA `libcuda.so.1` shim and NVML users such
 as `nvidia-smi` pick up the SCUDA `libnvidia-ml.so.1` shim automatically.
-
-You can sanity-check both shims with:
-
-```bash
-docker run --rm \
-  -e SCUDA_SERVER=<server>:14833 \
-  scuda-client \
-  nvidia-smi
-```
 
 ## Multi-GPU Across Multiple Servers
 
@@ -67,10 +79,12 @@ Run a server on each GPU machine:
 
 ```bash
 # on gpu-host-a
-docker run --rm --gpus all -p 14833:14833 scuda-server
+docker run --rm --gpus all -p 14833:14833 \
+  ghcr.io/kevmo314/scuda-server:cuda-13.1.0-ubuntu24.04
 
 # on gpu-host-b
-docker run --rm --gpus all -p 14833:14833 scuda-server
+docker run --rm --gpus all -p 14833:14833 \
+  ghcr.io/kevmo314/scuda-server:cuda-13.1.0-ubuntu24.04
 ```
 
 Point the client at both servers:
@@ -78,7 +92,7 @@ Point the client at both servers:
 ```bash
 docker run --rm --network host \
   -e SCUDA_SERVER=gpu-host-a:14833,gpu-host-b:14833 \
-  scuda-client \
+  ghcr.io/kevmo314/scuda-client:cuda-13.1.0-ubuntu24.04 \
   nvidia-smi -L
 ```
 
@@ -94,7 +108,7 @@ CUDA driver applications use the same `SCUDA_SERVER` value:
 ```bash
 docker run --rm --network host \
   -e SCUDA_SERVER=gpu-host-a:14833,gpu-host-b:14833 \
-  scuda-client \
+  ghcr.io/kevmo314/scuda-client:cuda-13.1.0-ubuntu24.04 \
   ./your_cuda_program
 ```
 
@@ -104,58 +118,22 @@ Same-server operations route by handle ownership.
 For a specific CUDA version:
 
 ```bash
-docker build -f Dockerfile --target client \
-  --build-arg CUDA_VERSION=12.4.1 \
-  --build-arg UBUNTU_VERSION=22.04 \
-  -t scuda-client:cuda-12.4.1 .
-
-docker build -f Dockerfile --target server \
-  --build-arg CUDA_VERSION=12.4.1 \
-  --build-arg UBUNTU_VERSION=22.04 \
-  -t scuda-server:cuda-12.4.1 .
-```
-
-If you want `nvidia-smi` in the client image to match a particular GPU host,
-choose the NVIDIA utils package that matches the host driver. For example,
-if `<server>` reports driver `590.48.01`, this client build
-uses the matching Ubuntu package:
-
-```bash
-docker build -f Dockerfile --target client \
-  --build-arg CUDA_VERSION=13.1.0 \
-  --build-arg UBUNTU_VERSION=24.04 \
-  --build-arg NVIDIA_UTILS_PACKAGE=nvidia-utils-590 \
-  --build-arg NVIDIA_UTILS_VERSION=590.48.01-0ubuntu0.24.04.4 \
-  -t scuda-client:cuda-13.1-nvidia-590 .
+docker pull ghcr.io/kevmo314/scuda-client:cuda-12.4.1-ubuntu22.04
+docker pull ghcr.io/kevmo314/scuda-server:cuda-12.4.1-ubuntu22.04
 ```
 
 ## Slow Start for the Skeptics
 
-This path builds SCUDA, derives a small PyTorch client image, and runs the
-`microgpt_train` test against a remote GPU. It is intentionally explicit so it
-is easy to see which side is the CPU-only client and which side owns the GPU.
-
-Build matching SCUDA client and server images:
-
-```bash
-docker build -f Dockerfile --target client \
-  --build-arg CUDA_VERSION=13.1.0 \
-  --build-arg UBUNTU_VERSION=24.04 \
-  --build-arg NVIDIA_UTILS_PACKAGE=nvidia-utils-590 \
-  --build-arg NVIDIA_UTILS_VERSION=590.48.01-0ubuntu0.24.04.4 \
-  -t scuda-client:cuda-13.1-nvidia-590 .
-
-docker build -f Dockerfile --target server \
-  --build-arg CUDA_VERSION=13.1.0 \
-  --build-arg UBUNTU_VERSION=24.04 \
-  -t scuda-server:cuda-13.1 .
-```
+This path derives a small PyTorch client image from the published SCUDA client
+image and runs the `microgpt_train` test against a remote GPU. It is
+intentionally explicit so it is easy to see which side is the CPU-only client
+and which side owns the GPU.
 
 Create a PyTorch client Dockerfile in the repo root:
 
 ```dockerfile
 # Dockerfile.pytorch-scuda
-FROM scuda-client:cuda-13.1-nvidia-590
+FROM ghcr.io/kevmo314/scuda-client:cuda-13.1.0-ubuntu24.04
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -184,7 +162,8 @@ docker build -f Dockerfile.pytorch-scuda -t scuda-pytorch:cuda-13.1 .
 Run the server on the GPU machine:
 
 ```bash
-docker run --rm --gpus all -p 14833:14833 scuda-server:cuda-13.1
+docker run --rm --gpus all -p 14833:14833 \
+  ghcr.io/kevmo314/scuda-server:cuda-13.1.0-ubuntu24.04
 ```
 
 Run the PyTorch client from the CPU-only machine:
