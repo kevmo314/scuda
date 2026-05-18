@@ -39,7 +39,7 @@ Run the client pointing at that server:
 
 ```bash
 docker run --rm -it \
-  -e SCUDA_SERVER=inferable-node-008:14833 \
+  -e SCUDA_SERVER=<server>:14833 \
   scuda-client \
   bash
 ```
@@ -52,7 +52,7 @@ You can sanity-check both shims with:
 
 ```bash
 docker run --rm \
-  -e SCUDA_SERVER=inferable-node-008:14833 \
+  -e SCUDA_SERVER=<server>:14833 \
   scuda-client \
   nvidia-smi
 ```
@@ -73,7 +73,7 @@ docker build -f Dockerfile --target server \
 
 If you want `nvidia-smi` in the client image to match a particular GPU host,
 choose the NVIDIA utils package that matches the host driver. For example,
-`inferable-node-008` currently reports driver `590.48.01`, so this client build
+if `<server>` reports driver `590.48.01`, this client build
 uses the matching Ubuntu package:
 
 ```bash
@@ -147,7 +147,7 @@ Run the PyTorch client from the CPU-only machine:
 
 ```bash
 docker run --rm \
-  -e SCUDA_SERVER=inferable-node-008:14833 \
+  -e SCUDA_SERVER=<server>:14833 \
   scuda-pytorch:cuda-13.1
 ```
 
