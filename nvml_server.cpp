@@ -10,6 +10,19 @@
 #include "codegen/gen_api.h"
 #include "rpc.h"
 
+// CUDA <= 12.6 ships NVML API 12, which does not define the versioned
+// temperature struct. The host driver exports the symbol on newer drivers; this
+// local definition preserves the ABI when building against older CUDA images.
+#if !defined(NVML_API_VERSION) || NVML_API_VERSION < 13
+typedef struct {
+  unsigned int version;
+  nvmlTemperatureSensors_t sensorType;
+  int temperature;
+} scuda_nvmlTemperature_t;
+#else
+using scuda_nvmlTemperature_t = nvmlTemperature_t;
+#endif
+
 namespace {
 
 nvmlReturn_t function_not_found() { return NVML_ERROR_FUNCTION_NOT_FOUND; }
@@ -126,7 +139,8 @@ int handle_device_from_uint(conn_t *conn, const char *name) {
   nvmlDevice_t device = nullptr;
   using Fn = nvmlReturn_t (*)(unsigned int, nvmlDevice_t *);
   Fn fn = nvml_symbol<Fn>(name);
-  nvmlReturn_t result = fn == nullptr ? function_not_found() : fn(index, &device);
+  nvmlReturn_t result =
+      fn == nullptr ? function_not_found() : fn(index, &device);
 
   if (rpc_write_start_response(conn, request_id) < 0 ||
       rpc_write(conn, &device, sizeof(device)) < 0 ||
@@ -228,7 +242,8 @@ template <typename T> int handle_device_value(conn_t *conn, const char *name) {
   T value = {};
   using Fn = nvmlReturn_t (*)(nvmlDevice_t, T *);
   Fn fn = nvml_symbol<Fn>(name);
-  nvmlReturn_t result = fn == nullptr ? function_not_found() : fn(device, &value);
+  nvmlReturn_t result =
+      fn == nullptr ? function_not_found() : fn(device, &value);
 
   if (rpc_write_start_response(conn, request_id) < 0 ||
       rpc_write(conn, &value, sizeof(value)) < 0 ||
@@ -285,16 +300,15 @@ int handle_processes(conn_t *conn, const char *name) {
     infos.resize(requested_count);
   }
 
-  using Fn = nvmlReturn_t (*)(nvmlDevice_t, unsigned int *, nvmlProcessInfo_t *);
+  using Fn =
+      nvmlReturn_t (*)(nvmlDevice_t, unsigned int *, nvmlProcessInfo_t *);
   Fn fn = nvml_symbol<Fn>(name);
-  nvmlReturn_t result = fn == nullptr
-                            ? function_not_found()
-                            : fn(device, &returned_count,
-                                 infos.empty() ? nullptr : infos.data());
-  unsigned int copied_count = has_infos
-                                  ? std::min<unsigned int>(returned_count,
-                                                           requested_count)
-                                  : 0;
+  nvmlReturn_t result =
+      fn == nullptr
+          ? function_not_found()
+          : fn(device, &returned_count, infos.empty() ? nullptr : infos.data());
+  unsigned int copied_count =
+      has_infos ? std::min<unsigned int>(returned_count, requested_count) : 0;
 
   if (rpc_write_start_response(conn, request_id) < 0 ||
       rpc_write(conn, &returned_count, sizeof(returned_count)) < 0 ||
@@ -564,7 +578,8 @@ int handle_nvmlDeviceGetBoardPartNumber(conn_t *conn) {
 }
 
 int handle_nvmlDeviceGetDisplayMode(conn_t *conn) {
-  return handle_device_value<nvmlEnableState_t>(conn, "nvmlDeviceGetDisplayMode");
+  return handle_device_value<nvmlEnableState_t>(conn,
+                                                "nvmlDeviceGetDisplayMode");
 }
 
 int handle_nvmlDeviceGetDisplayActive(conn_t *conn) {
@@ -578,16 +593,18 @@ int handle_nvmlDeviceGetCurrPcieLinkGeneration(conn_t *conn) {
 }
 
 int handle_nvmlDeviceGetCurrPcieLinkWidth(conn_t *conn) {
-  return handle_device_value<unsigned int>(conn, "nvmlDeviceGetCurrPcieLinkWidth");
+  return handle_device_value<unsigned int>(conn,
+                                           "nvmlDeviceGetCurrPcieLinkWidth");
 }
 
 int handle_nvmlDeviceGetMaxPcieLinkGeneration(conn_t *conn) {
-  return handle_device_value<unsigned int>(conn,
-                                           "nvmlDeviceGetMaxPcieLinkGeneration");
+  return handle_device_value<unsigned int>(
+      conn, "nvmlDeviceGetMaxPcieLinkGeneration");
 }
 
 int handle_nvmlDeviceGetMaxPcieLinkWidth(conn_t *conn) {
-  return handle_device_value<unsigned int>(conn, "nvmlDeviceGetMaxPcieLinkWidth");
+  return handle_device_value<unsigned int>(conn,
+                                           "nvmlDeviceGetMaxPcieLinkWidth");
 }
 
 int handle_nvmlDeviceGetPcieThroughput(conn_t *conn) {
@@ -624,18 +641,25 @@ int handle_nvmlDeviceGetMPSComputeRunningProcesses_v2(conn_t *conn) {
   return handle_processes(conn, "nvmlDeviceGetMPSComputeRunningProcesses_v2");
 }
 
-int handle_nvmlEventSetCreate(conn_t *conn) { return handle_event_set_create(conn); }
+int handle_nvmlEventSetCreate(conn_t *conn) {
+  return handle_event_set_create(conn);
+}
 
-int handle_nvmlEventSetFree(conn_t *conn) { return handle_event_set_free(conn); }
+int handle_nvmlEventSetFree(conn_t *conn) {
+  return handle_event_set_free(conn);
+}
 
-int handle_nvmlEventSetWait_v2(conn_t *conn) { return handle_event_set_wait(conn); }
+int handle_nvmlEventSetWait_v2(conn_t *conn) {
+  return handle_event_set_wait(conn);
+}
 
 int handle_nvmlDeviceRegisterEvents(conn_t *conn) {
   return handle_device_register_events(conn);
 }
 
 int handle_nvmlDeviceGetMaxMigDeviceCount(conn_t *conn) {
-  return handle_device_value<unsigned int>(conn, "nvmlDeviceGetMaxMigDeviceCount");
+  return handle_device_value<unsigned int>(conn,
+                                           "nvmlDeviceGetMaxMigDeviceCount");
 }
 
 int handle_nvmlDeviceGetEccMode(conn_t *conn) {
@@ -644,8 +668,8 @@ int handle_nvmlDeviceGetEccMode(conn_t *conn) {
 }
 
 int handle_nvmlDeviceGetTemperatureV(conn_t *conn) {
-  return handle_device_struct<nvmlTemperature_t>(conn,
-                                                 "nvmlDeviceGetTemperatureV");
+  return handle_device_struct<scuda_nvmlTemperature_t>(
+      conn, "nvmlDeviceGetTemperatureV");
 }
 
 int handle_nvmlDeviceGetEnforcedPowerLimit(conn_t *conn) {

@@ -15,6 +15,18 @@
 #include "codegen/gen_api.h"
 #include "rpc.h"
 
+// CUDA <= 12.6 ships NVML API 12, which does not define the versioned
+// temperature struct. Keep the wrapper ABI-compatible with newer nvidia-smi.
+#if !defined(NVML_API_VERSION) || NVML_API_VERSION < 13
+typedef struct {
+  unsigned int version;
+  nvmlTemperatureSensors_t sensorType;
+  int temperature;
+} scuda_nvmlTemperature_t;
+#else
+using scuda_nvmlTemperature_t = nvmlTemperature_t;
+#endif
+
 namespace {
 
 constexpr const char *DEFAULT_PORT = "14833";
@@ -147,7 +159,8 @@ nvmlReturn_t call_string_no_device(int op, char *value, unsigned int length) {
   conn_t *c = connection();
   nvmlReturn_t result = rpc_error();
   if (c == nullptr || rpc_write_start_request(c, op) < 0 ||
-      rpc_write(c, &length, sizeof(length)) < 0 || rpc_wait_for_response(c) < 0 ||
+      rpc_write(c, &length, sizeof(length)) < 0 ||
+      rpc_wait_for_response(c) < 0 ||
       (length != 0 && rpc_read(c, value, length) < 0) ||
       rpc_read(c, &result, sizeof(result)) < 0 || rpc_read_end(c) < 0) {
     return rpc_error();
@@ -160,8 +173,7 @@ nvmlReturn_t call_int_out(int op, int *value) {
   nvmlReturn_t result = rpc_error();
   int temp = 0;
   if (c == nullptr || rpc_write_start_request(c, op) < 0 ||
-      rpc_wait_for_response(c) < 0 ||
-      rpc_read(c, &temp, sizeof(temp)) < 0 ||
+      rpc_wait_for_response(c) < 0 || rpc_read(c, &temp, sizeof(temp)) < 0 ||
       rpc_read(c, &result, sizeof(result)) < 0 || rpc_read_end(c) < 0) {
     return rpc_error();
   }
@@ -176,8 +188,7 @@ nvmlReturn_t call_uint_out(int op, unsigned int *value) {
   nvmlReturn_t result = rpc_error();
   unsigned int temp = 0;
   if (c == nullptr || rpc_write_start_request(c, op) < 0 ||
-      rpc_wait_for_response(c) < 0 ||
-      rpc_read(c, &temp, sizeof(temp)) < 0 ||
+      rpc_wait_for_response(c) < 0 || rpc_read(c, &temp, sizeof(temp)) < 0 ||
       rpc_read(c, &result, sizeof(result)) < 0 || rpc_read_end(c) < 0) {
     return rpc_error();
   }
@@ -230,7 +241,8 @@ nvmlReturn_t call_device_string(int op, nvmlDevice_t device, char *value,
   nvmlReturn_t result = rpc_error();
   if (c == nullptr || rpc_write_start_request(c, op) < 0 ||
       rpc_write(c, &device, sizeof(device)) < 0 ||
-      rpc_write(c, &length, sizeof(length)) < 0 || rpc_wait_for_response(c) < 0 ||
+      rpc_write(c, &length, sizeof(length)) < 0 ||
+      rpc_wait_for_response(c) < 0 ||
       (length != 0 && rpc_read(c, value, length) < 0) ||
       rpc_read(c, &result, sizeof(result)) < 0 || rpc_read_end(c) < 0) {
     return rpc_error();
@@ -262,8 +274,8 @@ nvmlReturn_t call_device_value(int op, nvmlDevice_t device, T *value) {
   nvmlReturn_t result = rpc_error();
   T temp = {};
   if (c == nullptr || rpc_write_start_request(c, op) < 0 ||
-      rpc_write(c, &device, sizeof(device)) < 0 || rpc_wait_for_response(c) < 0 ||
-      rpc_read(c, &temp, sizeof(temp)) < 0 ||
+      rpc_write(c, &device, sizeof(device)) < 0 ||
+      rpc_wait_for_response(c) < 0 || rpc_read(c, &temp, sizeof(temp)) < 0 ||
       rpc_read(c, &result, sizeof(result)) < 0 || rpc_read_end(c) < 0) {
     return rpc_error();
   }
@@ -292,8 +304,8 @@ nvmlReturn_t call_device_arg_value(int op, nvmlDevice_t device, Arg arg,
   return result;
 }
 
-nvmlReturn_t call_processes(int op, nvmlDevice_t device, unsigned int *infoCount,
-                            nvmlProcessInfo_t *infos) {
+nvmlReturn_t call_processes(int op, nvmlDevice_t device,
+                            unsigned int *infoCount, nvmlProcessInfo_t *infos) {
   conn_t *c = connection();
   nvmlReturn_t result = rpc_error();
   unsigned int requested_count = infoCount == nullptr ? 0 : *infoCount;
@@ -386,7 +398,8 @@ nvmlReturn_t call_device_two_values(int op, nvmlDevice_t device, A *first,
   A first_temp = {};
   B second_temp = {};
   if (c == nullptr || rpc_write_start_request(c, op) < 0 ||
-      rpc_write(c, &device, sizeof(device)) < 0 || rpc_wait_for_response(c) < 0 ||
+      rpc_write(c, &device, sizeof(device)) < 0 ||
+      rpc_wait_for_response(c) < 0 ||
       rpc_read(c, &first_temp, sizeof(first_temp)) < 0 ||
       rpc_read(c, &second_temp, sizeof(second_temp)) < 0 ||
       rpc_read(c, &result, sizeof(result)) < 0 || rpc_read_end(c) < 0) {
@@ -508,7 +521,7 @@ extern "C" const char *nvmlErrorString(nvmlReturn_t result) {
 }
 
 extern "C" nvmlReturn_t nvmlInternalGetExportTable(const void **ppExportTable,
-                                                    const void *exportTableId) {
+                                                   const void *exportTableId) {
   static void *empty_table[512] = {};
   if (ppExportTable == nullptr) {
     return NVML_ERROR_INVALID_ARGUMENT;
@@ -526,30 +539,30 @@ extern "C" nvmlReturn_t nvmlEventSetFree(nvmlEventSet_t set) {
 }
 
 extern "C" nvmlReturn_t nvmlEventSetWait_v2(nvmlEventSet_t set,
-                                             nvmlEventData_t *data,
-                                             unsigned int timeoutms) {
+                                            nvmlEventData_t *data,
+                                            unsigned int timeoutms) {
   return call_event_set_wait(set, data, timeoutms);
 }
 
 extern "C" nvmlReturn_t nvmlEventSetWait(nvmlEventSet_t set,
-                                          nvmlEventData_t *data,
-                                          unsigned int timeoutms) {
+                                         nvmlEventData_t *data,
+                                         unsigned int timeoutms) {
   return nvmlEventSetWait_v2(set, data, timeoutms);
 }
 
 extern "C" nvmlReturn_t nvmlDeviceRegisterEvents(nvmlDevice_t device,
-                                                  unsigned long long eventTypes,
-                                                  nvmlEventSet_t set) {
+                                                 unsigned long long eventTypes,
+                                                 nvmlEventSet_t set) {
   return call_device_register_events(device, eventTypes, set);
 }
 
 extern "C" nvmlReturn_t nvmlSystemGetDriverVersion(char *version,
-                                                    unsigned int length) {
+                                                   unsigned int length) {
   return call_string_no_device(RPC_nvmlSystemGetDriverVersion, version, length);
 }
 
 extern "C" nvmlReturn_t nvmlSystemGetNVMLVersion(char *version,
-                                                  unsigned int length) {
+                                                 unsigned int length) {
   return call_string_no_device(RPC_nvmlSystemGetNVMLVersion, version, length);
 }
 
@@ -571,69 +584,69 @@ extern "C" nvmlReturn_t nvmlDeviceGetCount(unsigned int *deviceCount) {
 }
 
 extern "C" nvmlReturn_t nvmlDeviceGetHandleByIndex_v2(unsigned int index,
-                                                       nvmlDevice_t *device) {
+                                                      nvmlDevice_t *device) {
   return call_device_from_index(RPC_nvmlDeviceGetHandleByIndex_v2, index,
                                 device);
 }
 
 extern "C" nvmlReturn_t nvmlDeviceGetHandleByIndex(unsigned int index,
-                                                    nvmlDevice_t *device) {
+                                                   nvmlDevice_t *device) {
   return nvmlDeviceGetHandleByIndex_v2(index, device);
 }
 
 extern "C" nvmlReturn_t nvmlDeviceGetHandleByUUID(const char *uuid,
-                                                   nvmlDevice_t *device) {
+                                                  nvmlDevice_t *device) {
   return call_device_from_string(RPC_nvmlDeviceGetHandleByUUID, uuid, device);
 }
 
 extern "C" nvmlReturn_t nvmlDeviceGetHandleByPciBusId_v2(const char *pciBusId,
-                                                          nvmlDevice_t *device) {
+                                                         nvmlDevice_t *device) {
   return call_device_from_string(RPC_nvmlDeviceGetHandleByPciBusId_v2, pciBusId,
                                  device);
 }
 
 extern "C" nvmlReturn_t nvmlDeviceGetHandleByPciBusId(const char *pciBusId,
-                                                       nvmlDevice_t *device) {
+                                                      nvmlDevice_t *device) {
   return nvmlDeviceGetHandleByPciBusId_v2(pciBusId, device);
 }
 
 extern "C" nvmlReturn_t nvmlDeviceGetName(nvmlDevice_t device, char *name,
-                                           unsigned int length) {
+                                          unsigned int length) {
   return call_device_string(RPC_nvmlDeviceGetName, device, name, length);
 }
 
 extern "C" nvmlReturn_t nvmlDeviceGetUUID(nvmlDevice_t device, char *uuid,
-                                           unsigned int length) {
+                                          unsigned int length) {
   return call_device_string(RPC_nvmlDeviceGetUUID, device, uuid, length);
 }
 
 extern "C" nvmlReturn_t nvmlDeviceGetIndex(nvmlDevice_t device,
-                                            unsigned int *index) {
+                                           unsigned int *index) {
   return call_device_value(RPC_nvmlDeviceGetIndex, device, index);
 }
 
 extern "C" nvmlReturn_t nvmlDeviceGetMinorNumber(nvmlDevice_t device,
-                                                  unsigned int *minorNumber) {
+                                                 unsigned int *minorNumber) {
   return call_device_value(RPC_nvmlDeviceGetMinorNumber, device, minorNumber);
 }
 
 extern "C" nvmlReturn_t nvmlDeviceGetPciInfo_v3(nvmlDevice_t device,
-                                                 nvmlPciInfo_t *pci) {
+                                                nvmlPciInfo_t *pci) {
   return call_device_struct(RPC_nvmlDeviceGetPciInfo_v3, device, pci);
 }
 
 extern "C" nvmlReturn_t nvmlDeviceGetPciInfo_v2(nvmlDevice_t device,
-                                                 nvmlPciInfo_t *pci) {
+                                                nvmlPciInfo_t *pci) {
   return nvmlDeviceGetPciInfo_v3(device, pci);
 }
 
 extern "C" nvmlReturn_t nvmlDeviceGetPciInfo(nvmlDevice_t device,
-                                              nvmlPciInfo_t *pci) {
+                                             nvmlPciInfo_t *pci) {
   return nvmlDeviceGetPciInfo_v3(device, pci);
 }
 
 extern "C" nvmlReturn_t nvmlDeviceGetMemoryInfo(nvmlDevice_t device,
-                                                 nvmlMemory_t *memory) {
+                                                nvmlMemory_t *memory) {
   return call_device_struct(RPC_nvmlDeviceGetMemoryInfo, device, memory);
 }
 
@@ -653,79 +666,80 @@ nvmlDeviceGetTemperature(nvmlDevice_t device,
 }
 
 extern "C" nvmlReturn_t nvmlDeviceGetPowerUsage(nvmlDevice_t device,
-                                                 unsigned int *power) {
+                                                unsigned int *power) {
   return call_device_value(RPC_nvmlDeviceGetPowerUsage, device, power);
 }
 
-extern "C" nvmlReturn_t
-nvmlDeviceGetPowerManagementLimit(nvmlDevice_t device, unsigned int *limit) {
-  return call_device_value(RPC_nvmlDeviceGetPowerManagementLimit, device, limit);
+extern "C" nvmlReturn_t nvmlDeviceGetPowerManagementLimit(nvmlDevice_t device,
+                                                          unsigned int *limit) {
+  return call_device_value(RPC_nvmlDeviceGetPowerManagementLimit, device,
+                           limit);
 }
 
 extern "C" nvmlReturn_t nvmlDeviceGetClockInfo(nvmlDevice_t device,
-                                                nvmlClockType_t type,
-                                                unsigned int *clock) {
+                                               nvmlClockType_t type,
+                                               unsigned int *clock) {
   return call_device_arg_value(RPC_nvmlDeviceGetClockInfo, device, type, clock);
 }
 
 extern "C" nvmlReturn_t nvmlDeviceGetMaxClockInfo(nvmlDevice_t device,
-                                                   nvmlClockType_t type,
-                                                   unsigned int *clock) {
+                                                  nvmlClockType_t type,
+                                                  unsigned int *clock) {
   return call_device_arg_value(RPC_nvmlDeviceGetMaxClockInfo, device, type,
                                clock);
 }
 
 extern "C" nvmlReturn_t nvmlDeviceGetPerformanceState(nvmlDevice_t device,
-                                                       nvmlPstates_t *pState) {
+                                                      nvmlPstates_t *pState) {
   return call_device_value(RPC_nvmlDeviceGetPerformanceState, device, pState);
 }
 
 extern "C" nvmlReturn_t nvmlDeviceGetComputeMode(nvmlDevice_t device,
-                                                  nvmlComputeMode_t *mode) {
+                                                 nvmlComputeMode_t *mode) {
   return call_device_value(RPC_nvmlDeviceGetComputeMode, device, mode);
 }
 
 extern "C" nvmlReturn_t nvmlDeviceGetPersistenceMode(nvmlDevice_t device,
-                                                      nvmlEnableState_t *mode) {
+                                                     nvmlEnableState_t *mode) {
   return call_device_value(RPC_nvmlDeviceGetPersistenceMode, device, mode);
 }
 
 extern "C" nvmlReturn_t nvmlDeviceGetFanSpeed(nvmlDevice_t device,
-                                               unsigned int *speed) {
+                                              unsigned int *speed) {
   return call_device_value(RPC_nvmlDeviceGetFanSpeed, device, speed);
 }
 
 extern "C" nvmlReturn_t nvmlDeviceGetBrand(nvmlDevice_t device,
-                                            nvmlBrandType_t *type) {
+                                           nvmlBrandType_t *type) {
   return call_device_value(RPC_nvmlDeviceGetBrand, device, type);
 }
 
 extern "C" nvmlReturn_t nvmlDeviceGetVbiosVersion(nvmlDevice_t device,
-                                                   char *version,
-                                                   unsigned int length) {
+                                                  char *version,
+                                                  unsigned int length) {
   return call_device_string(RPC_nvmlDeviceGetVbiosVersion, device, version,
                             length);
 }
 
 extern "C" nvmlReturn_t nvmlDeviceGetSerial(nvmlDevice_t device, char *serial,
-                                             unsigned int length) {
+                                            unsigned int length) {
   return call_device_string(RPC_nvmlDeviceGetSerial, device, serial, length);
 }
 
-extern "C" nvmlReturn_t
-nvmlDeviceGetBoardPartNumber(nvmlDevice_t device, char *partNumber,
-                             unsigned int length) {
+extern "C" nvmlReturn_t nvmlDeviceGetBoardPartNumber(nvmlDevice_t device,
+                                                     char *partNumber,
+                                                     unsigned int length) {
   return call_device_string(RPC_nvmlDeviceGetBoardPartNumber, device,
                             partNumber, length);
 }
 
 extern "C" nvmlReturn_t nvmlDeviceGetDisplayMode(nvmlDevice_t device,
-                                                  nvmlEnableState_t *display) {
+                                                 nvmlEnableState_t *display) {
   return call_device_value(RPC_nvmlDeviceGetDisplayMode, device, display);
 }
 
 extern "C" nvmlReturn_t nvmlDeviceGetDisplayActive(nvmlDevice_t device,
-                                                    nvmlEnableState_t *active) {
+                                                   nvmlEnableState_t *active) {
   return call_device_value(RPC_nvmlDeviceGetDisplayActive, device, active);
 }
 
@@ -735,8 +749,8 @@ nvmlDeviceGetCurrPcieLinkGeneration(nvmlDevice_t device, unsigned int *value) {
                            value);
 }
 
-extern "C" nvmlReturn_t
-nvmlDeviceGetCurrPcieLinkWidth(nvmlDevice_t device, unsigned int *value) {
+extern "C" nvmlReturn_t nvmlDeviceGetCurrPcieLinkWidth(nvmlDevice_t device,
+                                                       unsigned int *value) {
   return call_device_value(RPC_nvmlDeviceGetCurrPcieLinkWidth, device, value);
 }
 
@@ -746,8 +760,8 @@ nvmlDeviceGetMaxPcieLinkGeneration(nvmlDevice_t device, unsigned int *value) {
                            value);
 }
 
-extern "C" nvmlReturn_t
-nvmlDeviceGetMaxPcieLinkWidth(nvmlDevice_t device, unsigned int *value) {
+extern "C" nvmlReturn_t nvmlDeviceGetMaxPcieLinkWidth(nvmlDevice_t device,
+                                                      unsigned int *value) {
   return call_device_value(RPC_nvmlDeviceGetMaxPcieLinkWidth, device, value);
 }
 
@@ -758,89 +772,78 @@ nvmlDeviceGetPcieThroughput(nvmlDevice_t device, nvmlPcieUtilCounter_t counter,
                                value);
 }
 
-extern "C" nvmlReturn_t
-nvmlDeviceGetPcieReplayCounter(nvmlDevice_t device, unsigned int *value) {
+extern "C" nvmlReturn_t nvmlDeviceGetPcieReplayCounter(nvmlDevice_t device,
+                                                       unsigned int *value) {
   return call_device_value(RPC_nvmlDeviceGetPcieReplayCounter, device, value);
 }
 
-extern "C" nvmlReturn_t
-nvmlDeviceGetComputeRunningProcesses(nvmlDevice_t device,
-                                     unsigned int *infoCount,
-                                     nvmlProcessInfo_t *infos) {
+extern "C" nvmlReturn_t nvmlDeviceGetComputeRunningProcesses(
+    nvmlDevice_t device, unsigned int *infoCount, nvmlProcessInfo_t *infos) {
   return call_processes(RPC_nvmlDeviceGetComputeRunningProcesses, device,
                         infoCount, infos);
 }
 
-extern "C" nvmlReturn_t
-nvmlDeviceGetComputeRunningProcesses_v2(nvmlDevice_t device,
-                                        unsigned int *infoCount,
-                                        nvmlProcessInfo_t *infos) {
+extern "C" nvmlReturn_t nvmlDeviceGetComputeRunningProcesses_v2(
+    nvmlDevice_t device, unsigned int *infoCount, nvmlProcessInfo_t *infos) {
   return call_processes(RPC_nvmlDeviceGetComputeRunningProcesses_v2, device,
                         infoCount, infos);
 }
 
-extern "C" nvmlReturn_t
-nvmlDeviceGetGraphicsRunningProcesses(nvmlDevice_t device,
-                                      unsigned int *infoCount,
-                                      nvmlProcessInfo_t *infos) {
+extern "C" nvmlReturn_t nvmlDeviceGetGraphicsRunningProcesses(
+    nvmlDevice_t device, unsigned int *infoCount, nvmlProcessInfo_t *infos) {
   return call_processes(RPC_nvmlDeviceGetGraphicsRunningProcesses, device,
                         infoCount, infos);
 }
 
-extern "C" nvmlReturn_t
-nvmlDeviceGetGraphicsRunningProcesses_v2(nvmlDevice_t device,
-                                         unsigned int *infoCount,
-                                         nvmlProcessInfo_t *infos) {
+extern "C" nvmlReturn_t nvmlDeviceGetGraphicsRunningProcesses_v2(
+    nvmlDevice_t device, unsigned int *infoCount, nvmlProcessInfo_t *infos) {
   return call_processes(RPC_nvmlDeviceGetGraphicsRunningProcesses_v2, device,
                         infoCount, infos);
 }
 
-extern "C" nvmlReturn_t
-nvmlDeviceGetMPSComputeRunningProcesses(nvmlDevice_t device,
-                                        unsigned int *infoCount,
-                                        nvmlProcessInfo_t *infos) {
+extern "C" nvmlReturn_t nvmlDeviceGetMPSComputeRunningProcesses(
+    nvmlDevice_t device, unsigned int *infoCount, nvmlProcessInfo_t *infos) {
   return call_processes(RPC_nvmlDeviceGetMPSComputeRunningProcesses, device,
                         infoCount, infos);
 }
 
-extern "C" nvmlReturn_t
-nvmlDeviceGetMPSComputeRunningProcesses_v2(nvmlDevice_t device,
-                                           unsigned int *infoCount,
-                                           nvmlProcessInfo_t *infos) {
+extern "C" nvmlReturn_t nvmlDeviceGetMPSComputeRunningProcesses_v2(
+    nvmlDevice_t device, unsigned int *infoCount, nvmlProcessInfo_t *infos) {
   return call_processes(RPC_nvmlDeviceGetMPSComputeRunningProcesses_v2, device,
                         infoCount, infos);
 }
 
 extern "C" nvmlReturn_t nvmlDeviceGetMaxMigDeviceCount(nvmlDevice_t device,
-                                                        unsigned int *count) {
+                                                       unsigned int *count) {
   return call_device_value(RPC_nvmlDeviceGetMaxMigDeviceCount, device, count);
 }
 
 extern "C" nvmlReturn_t nvmlDeviceGetEccMode(nvmlDevice_t device,
-                                              nvmlEnableState_t *current,
-                                              nvmlEnableState_t *pending) {
+                                             nvmlEnableState_t *current,
+                                             nvmlEnableState_t *pending) {
   return call_device_two_values(RPC_nvmlDeviceGetEccMode, device, current,
                                 pending);
 }
 
 extern "C" nvmlReturn_t
-nvmlDeviceGetTemperatureV(nvmlDevice_t device, nvmlTemperature_t *temperature) {
+nvmlDeviceGetTemperatureV(nvmlDevice_t device,
+                          scuda_nvmlTemperature_t *temperature) {
   return call_device_struct(RPC_nvmlDeviceGetTemperatureV, device, temperature);
 }
 
-extern "C" nvmlReturn_t
-nvmlDeviceGetEnforcedPowerLimit(nvmlDevice_t device, unsigned int *limit) {
+extern "C" nvmlReturn_t nvmlDeviceGetEnforcedPowerLimit(nvmlDevice_t device,
+                                                        unsigned int *limit) {
   return call_device_value(RPC_nvmlDeviceGetEnforcedPowerLimit, device, limit);
 }
 
-extern "C" nvmlReturn_t
-nvmlDeviceGetMemoryInfo_v2(nvmlDevice_t device, nvmlMemory_v2_t *memory) {
+extern "C" nvmlReturn_t nvmlDeviceGetMemoryInfo_v2(nvmlDevice_t device,
+                                                   nvmlMemory_v2_t *memory) {
   return call_device_struct(RPC_nvmlDeviceGetMemoryInfo_v2, device, memory);
 }
 
 extern "C" nvmlReturn_t nvmlDeviceGetMigMode(nvmlDevice_t device,
-                                              unsigned int *currentMode,
-                                              unsigned int *pendingMode) {
+                                             unsigned int *currentMode,
+                                             unsigned int *pendingMode) {
   return call_device_two_values(RPC_nvmlDeviceGetMigMode, device, currentMode,
                                 pendingMode);
 }
@@ -853,6 +856,7 @@ nvmlDeviceGetVirtualizationMode(nvmlDevice_t device,
 }
 
 extern "C" nvmlReturn_t nvmlDeviceIsMigDeviceHandle(nvmlDevice_t device,
-                                                     unsigned int *isMigDevice) {
-  return call_device_value(RPC_nvmlDeviceIsMigDeviceHandle, device, isMigDevice);
+                                                    unsigned int *isMigDevice) {
+  return call_device_value(RPC_nvmlDeviceIsMigDeviceHandle, device,
+                           isMigDevice);
 }
