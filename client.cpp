@@ -241,6 +241,17 @@ static std::unordered_map<CUfunction, CUfunction> &scuda_host_function_map() {
   return mappings;
 }
 
+static std::unordered_map<CUfunction, scuda_kernel_param_layout> &
+scuda_kernel_param_layout_cache() {
+  static std::unordered_map<CUfunction, scuda_kernel_param_layout> cache;
+  return cache;
+}
+
+static std::mutex &scuda_kernel_param_layout_cache_mutex() {
+  static std::mutex mutex;
+  return mutex;
+}
+
 static std::vector<CUmodule> &scuda_loaded_modules() {
   static std::vector<CUmodule> modules;
   return modules;
@@ -250,6 +261,77 @@ struct scuda_remote_device {
   unsigned int conn_index = 0;
   int remote_ordinal = 0;
   CUdevice remote_device = 0;
+};
+
+struct scuda_primary_context_state {
+  bool valid = false;
+  unsigned int flags = 0;
+  int active = 0;
+};
+
+struct scuda_device_attribute_key {
+  int device = 0;
+  int attribute = 0;
+
+  bool operator==(const scuda_device_attribute_key &other) const {
+    return device == other.device && attribute == other.attribute;
+  }
+};
+
+struct scuda_kernel_function_key {
+  CUcontext context = nullptr;
+  CUkernel kernel = nullptr;
+
+  bool operator==(const scuda_kernel_function_key &other) const {
+    return context == other.context && kernel == other.kernel;
+  }
+};
+
+struct scuda_occupancy_key {
+  CUfunction function = nullptr;
+  int block_size = 0;
+  size_t dynamic_smem_size = 0;
+  unsigned int flags = 0;
+  bool with_flags = false;
+
+  bool operator==(const scuda_occupancy_key &other) const {
+    return function == other.function && block_size == other.block_size &&
+           dynamic_smem_size == other.dynamic_smem_size &&
+           flags == other.flags && with_flags == other.with_flags;
+  }
+};
+
+struct scuda_device_attribute_key_hash {
+  size_t operator()(const scuda_device_attribute_key &key) const {
+    return (static_cast<size_t>(static_cast<unsigned int>(key.device)) << 32) ^
+           static_cast<size_t>(static_cast<unsigned int>(key.attribute));
+  }
+};
+
+struct scuda_kernel_function_key_hash {
+  size_t operator()(const scuda_kernel_function_key &key) const {
+    size_t hash =
+        std::hash<uintptr_t>{}(reinterpret_cast<uintptr_t>(key.context));
+    hash ^= std::hash<uintptr_t>{}(reinterpret_cast<uintptr_t>(key.kernel)) +
+            0x9e3779b9 + (hash << 6) + (hash >> 2);
+    return hash;
+  }
+};
+
+struct scuda_occupancy_key_hash {
+  size_t operator()(const scuda_occupancy_key &key) const {
+    size_t hash =
+        std::hash<uintptr_t>{}(reinterpret_cast<uintptr_t>(key.function));
+    hash ^= std::hash<int>{}(key.block_size) + 0x9e3779b9 + (hash << 6) +
+            (hash >> 2);
+    hash ^= std::hash<size_t>{}(key.dynamic_smem_size) + 0x9e3779b9 +
+            (hash << 6) + (hash >> 2);
+    hash ^= std::hash<unsigned int>{}(key.flags) + 0x9e3779b9 + (hash << 6) +
+            (hash >> 2);
+    hash ^= std::hash<bool>{}(key.with_flags) + 0x9e3779b9 + (hash << 6) +
+            (hash >> 2);
+    return hash;
+  }
 };
 
 static std::mutex &scuda_routing_mutex() {
@@ -295,6 +377,52 @@ static std::unordered_map<CUevent, unsigned int> &scuda_event_owners() {
 static std::unordered_map<CUdeviceptr, unsigned int> &scuda_deviceptr_owners() {
   static std::unordered_map<CUdeviceptr, unsigned int> owners;
   return owners;
+}
+
+static std::unordered_map<int, scuda_primary_context_state> &
+scuda_primary_context_states() {
+  static std::unordered_map<int, scuda_primary_context_state> states;
+  return states;
+}
+
+static std::unordered_map<scuda_device_attribute_key, int,
+                          scuda_device_attribute_key_hash> &
+scuda_device_attribute_cache() {
+  static std::unordered_map<scuda_device_attribute_key, int,
+                            scuda_device_attribute_key_hash>
+      cache;
+  return cache;
+}
+
+static std::mutex &scuda_device_attribute_cache_mutex() {
+  static std::mutex mutex;
+  return mutex;
+}
+
+static std::unordered_map<scuda_kernel_function_key, CUfunction,
+                          scuda_kernel_function_key_hash> &
+scuda_kernel_function_cache() {
+  static std::unordered_map<scuda_kernel_function_key, CUfunction,
+                            scuda_kernel_function_key_hash>
+      cache;
+  return cache;
+}
+
+static std::mutex &scuda_kernel_function_cache_mutex() {
+  static std::mutex mutex;
+  return mutex;
+}
+
+static std::unordered_map<scuda_occupancy_key, int, scuda_occupancy_key_hash> &
+scuda_occupancy_cache() {
+  static std::unordered_map<scuda_occupancy_key, int, scuda_occupancy_key_hash>
+      cache;
+  return cache;
+}
+
+static std::mutex &scuda_occupancy_cache_mutex() {
+  static std::mutex mutex;
+  return mutex;
 }
 
 static std::mutex &scuda_host_function_mutex() {
@@ -837,6 +965,148 @@ static CUfunction scuda_translate_private_function(CUfunction function) {
 extern "C" CUfunction
 scuda_translate_private_function_for_rpc(CUfunction function) {
   return scuda_translate_private_function(function);
+}
+
+extern "C" CUresult scuda_cuCtxGetCurrent_virtual(CUcontext *pctx);
+
+extern "C" CUresult scuda_cuDeviceGetAttribute_cached(
+    int *pi, CUdevice_attribute attrib, CUdevice dev) {
+  if (pi == nullptr) {
+    return CUDA_ERROR_INVALID_VALUE;
+  }
+  scuda_device_attribute_key key{static_cast<int>(dev),
+                                 static_cast<int>(attrib)};
+  {
+    std::lock_guard<std::mutex> lock(scuda_device_attribute_cache_mutex());
+    auto it = scuda_device_attribute_cache().find(key);
+    if (it != scuda_device_attribute_cache().end()) {
+      *pi = it->second;
+      return CUDA_SUCCESS;
+    }
+  }
+
+  CUdevice remote_dev = dev;
+  conn_t *conn = scuda_rpc_conn_for_device(&remote_dev);
+  CUresult return_value;
+  int value = 0;
+  if (conn == nullptr ||
+      rpc_write_start_request(conn, RPC_cuDeviceGetAttribute) < 0 ||
+      rpc_write(conn, &attrib, sizeof(attrib)) < 0 ||
+      rpc_write(conn, &remote_dev, sizeof(remote_dev)) < 0 ||
+      rpc_wait_for_response(conn) < 0 ||
+      rpc_read(conn, &value, sizeof(value)) < 0 ||
+      rpc_read(conn, &return_value, sizeof(return_value)) < 0 ||
+      rpc_read_end(conn) < 0) {
+    return CUDA_ERROR_DEVICE_UNAVAILABLE;
+  }
+  if (return_value == CUDA_SUCCESS) {
+    std::lock_guard<std::mutex> lock(scuda_device_attribute_cache_mutex());
+    scuda_device_attribute_cache()[key] = value;
+    *pi = value;
+  }
+  return return_value;
+}
+
+extern "C" CUresult scuda_cuKernelGetFunction_cached(CUfunction *pFunc,
+                                                      CUkernel kernel) {
+  if (pFunc == nullptr) {
+    return CUDA_ERROR_INVALID_VALUE;
+  }
+  CUcontext current_context = nullptr;
+  CUresult context_status = scuda_cuCtxGetCurrent_virtual(&current_context);
+  if (context_status != CUDA_SUCCESS) {
+    return context_status;
+  }
+  scuda_kernel_function_key key{current_context, kernel};
+  {
+    std::lock_guard<std::mutex> lock(scuda_kernel_function_cache_mutex());
+    auto it = scuda_kernel_function_cache().find(key);
+    if (it != scuda_kernel_function_cache().end()) {
+      *pFunc = it->second;
+      return CUDA_SUCCESS;
+    }
+  }
+
+  conn_t *conn = rpc_client_get_connection(0);
+  CUfunction function = nullptr;
+  CUresult return_value;
+  if (conn == nullptr ||
+      rpc_write_start_request(conn, RPC_cuKernelGetFunction) < 0 ||
+      rpc_write(conn, &kernel, sizeof(kernel)) < 0 ||
+      rpc_wait_for_response(conn) < 0 ||
+      rpc_read(conn, &function, sizeof(function)) < 0 ||
+      rpc_read(conn, &return_value, sizeof(return_value)) < 0 ||
+      rpc_read_end(conn) < 0) {
+    return CUDA_ERROR_DEVICE_UNAVAILABLE;
+  }
+  if (return_value == CUDA_SUCCESS) {
+    std::lock_guard<std::mutex> lock(scuda_kernel_function_cache_mutex());
+    scuda_kernel_function_cache()[key] = function;
+    *pFunc = function;
+    scuda_note_function_owner(function, conn);
+  }
+  return return_value;
+}
+
+static CUresult scuda_cuOccupancy_cached(int *numBlocks, CUfunction func,
+                                         int blockSize,
+                                         size_t dynamicSMemSize,
+                                         unsigned int flags,
+                                         bool with_flags) {
+  if (numBlocks == nullptr) {
+    return CUDA_ERROR_INVALID_VALUE;
+  }
+  CUfunction translated = scuda_translate_private_function(func);
+  scuda_occupancy_key key{translated, blockSize, dynamicSMemSize, flags,
+                          with_flags};
+  {
+    std::lock_guard<std::mutex> lock(scuda_occupancy_cache_mutex());
+    auto it = scuda_occupancy_cache().find(key);
+    if (it != scuda_occupancy_cache().end()) {
+      *numBlocks = it->second;
+      return CUDA_SUCCESS;
+    }
+  }
+
+  conn_t *conn = scuda_rpc_conn_for_function(translated);
+  CUresult return_value;
+  int remote_num_blocks = 0;
+  int opcode = with_flags
+                   ? RPC_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags
+                   : RPC_cuOccupancyMaxActiveBlocksPerMultiprocessor;
+  if (conn == nullptr || rpc_write_start_request(conn, opcode) < 0 ||
+      rpc_write(conn, &remote_num_blocks, sizeof(remote_num_blocks)) < 0 ||
+      rpc_write(conn, &translated, sizeof(translated)) < 0 ||
+      rpc_write(conn, &blockSize, sizeof(blockSize)) < 0 ||
+      rpc_write(conn, &dynamicSMemSize, sizeof(dynamicSMemSize)) < 0 ||
+      (with_flags && rpc_write(conn, &flags, sizeof(flags)) < 0) ||
+      rpc_wait_for_response(conn) < 0 ||
+      rpc_read(conn, &remote_num_blocks, sizeof(remote_num_blocks)) < 0 ||
+      rpc_read(conn, &return_value, sizeof(return_value)) < 0 ||
+      rpc_read_end(conn) < 0) {
+    return CUDA_ERROR_DEVICE_UNAVAILABLE;
+  }
+  if (return_value == CUDA_SUCCESS) {
+    std::lock_guard<std::mutex> lock(scuda_occupancy_cache_mutex());
+    scuda_occupancy_cache()[key] = remote_num_blocks;
+    *numBlocks = remote_num_blocks;
+  }
+  return return_value;
+}
+
+extern "C" CUresult
+scuda_cuOccupancyMaxActiveBlocksPerMultiprocessor_cached(
+    int *numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize) {
+  return scuda_cuOccupancy_cached(numBlocks, func, blockSize, dynamicSMemSize, 0,
+                                  false);
+}
+
+extern "C" CUresult
+scuda_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags_cached(
+    int *numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize,
+    unsigned int flags) {
+  return scuda_cuOccupancy_cached(numBlocks, func, blockSize, dynamicSMemSize,
+                                  flags, true);
 }
 
 static bool scuda_is_private_function(CUfunction function) {
@@ -1454,6 +1724,37 @@ extern "C" CUresult cuMemPoolSetAttribute(CUmemoryPool pool,
 
 static thread_local CUcontext scuda_current_context = nullptr;
 static thread_local std::vector<CUcontext> scuda_context_stack;
+static std::atomic<unsigned long long> scuda_context_cache_generation{0};
+static thread_local bool scuda_ctx_get_device_cache_valid = false;
+static thread_local unsigned long long scuda_ctx_get_device_cache_generation =
+    0;
+static thread_local CUcontext scuda_ctx_get_device_cache_context = nullptr;
+static thread_local CUdevice scuda_ctx_get_device_cache_device = -1;
+
+extern "C" void scuda_invalidate_current_context_cache() {
+  scuda_context_cache_generation.fetch_add(1, std::memory_order_acq_rel);
+  scuda_ctx_get_device_cache_valid = false;
+}
+
+static void scuda_cache_current_context_device(CUdevice device) {
+  scuda_ctx_get_device_cache_generation =
+      scuda_context_cache_generation.load(std::memory_order_acquire);
+  scuda_ctx_get_device_cache_context = scuda_current_context;
+  scuda_ctx_get_device_cache_device = device;
+  scuda_ctx_get_device_cache_valid = true;
+}
+
+static bool scuda_cached_current_context_device(CUdevice *device) {
+  unsigned long long generation =
+      scuda_context_cache_generation.load(std::memory_order_acquire);
+  if (device == nullptr || !scuda_ctx_get_device_cache_valid ||
+      scuda_ctx_get_device_cache_generation != generation ||
+      scuda_ctx_get_device_cache_context != scuda_current_context) {
+    return false;
+  }
+  *device = scuda_ctx_get_device_cache_device;
+  return true;
+}
 
 extern "C" conn_t *scuda_rpc_conn_for_current_context() {
   return scuda_rpc_conn_for_context(scuda_current_context);
@@ -1478,6 +1779,7 @@ extern "C" void scuda_note_ctx_create(CUcontext ctx, conn_t *conn) {
   scuda_note_context_owner(ctx, conn);
   scuda_context_stack.push_back(scuda_current_context);
   scuda_current_context = ctx;
+  scuda_invalidate_current_context_cache();
 }
 
 extern "C" CUresult scuda_cuCtxPushCurrent_virtual(CUcontext ctx) {
@@ -1485,6 +1787,7 @@ extern "C" CUresult scuda_cuCtxPushCurrent_virtual(CUcontext ctx) {
   CUresult result = scuda_set_remote_current_context(ctx);
   if (result == CUDA_SUCCESS) {
     scuda_current_context = ctx;
+    scuda_invalidate_current_context_cache();
   } else {
     scuda_context_stack.pop_back();
   }
@@ -1504,6 +1807,7 @@ extern "C" CUresult scuda_cuCtxPopCurrent_virtual(CUcontext *pctx) {
   CUresult result = scuda_set_remote_current_context(previous);
   if (result == CUDA_SUCCESS) {
     scuda_current_context = previous;
+    scuda_invalidate_current_context_cache();
   } else {
     scuda_context_stack.push_back(previous);
   }
@@ -1514,6 +1818,7 @@ extern "C" CUresult scuda_cuCtxSetCurrent_virtual(CUcontext ctx) {
   CUresult result = scuda_set_remote_current_context(ctx);
   if (result == CUDA_SUCCESS) {
     scuda_current_context = ctx;
+    scuda_invalidate_current_context_cache();
   }
   return result;
 }
@@ -1524,6 +1829,93 @@ extern "C" CUresult scuda_cuCtxGetCurrent_virtual(CUcontext *pctx) {
   }
   *pctx = scuda_current_context;
   return CUDA_SUCCESS;
+}
+
+extern "C" CUresult scuda_cuCtxGetDevice_cached(CUdevice *device) {
+  if (device == nullptr) {
+    return CUDA_ERROR_INVALID_VALUE;
+  }
+  if (scuda_cached_current_context_device(device)) {
+    return CUDA_SUCCESS;
+  }
+
+  conn_t *conn = scuda_rpc_conn_for_current_context();
+  CUdevice remote_device = 0;
+  CUresult return_value;
+  if (conn == nullptr ||
+      rpc_write_start_request(conn, RPC_cuCtxGetDevice) < 0 ||
+      rpc_wait_for_response(conn) < 0 ||
+      rpc_read(conn, &remote_device, sizeof(remote_device)) < 0 ||
+      rpc_read(conn, &return_value, sizeof(return_value)) < 0 ||
+      rpc_read_end(conn) < 0) {
+    return CUDA_ERROR_DEVICE_UNAVAILABLE;
+  }
+  if (return_value == CUDA_SUCCESS) {
+    *device = scuda_local_device_for_remote(conn, remote_device);
+    scuda_cache_current_context_device(*device);
+  }
+  return return_value;
+}
+
+extern "C" void scuda_note_primary_context_active(CUdevice dev) {
+  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  auto it = scuda_primary_context_states().find(static_cast<int>(dev));
+  if (it != scuda_primary_context_states().end() && it->second.valid) {
+    it->second.active = 1;
+  }
+}
+
+extern "C" void scuda_note_primary_context_flags(CUdevice dev,
+                                                 unsigned int flags) {
+  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  auto &state = scuda_primary_context_states()[static_cast<int>(dev)];
+  state.flags = flags;
+  if (!state.valid) {
+    state.active = 0;
+    state.valid = true;
+  }
+}
+
+extern "C" void scuda_invalidate_primary_context_state(CUdevice dev) {
+  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  scuda_primary_context_states().erase(static_cast<int>(dev));
+}
+
+extern "C" CUresult scuda_cuDevicePrimaryCtxGetState_cached(
+    CUdevice dev, unsigned int *flags, int *active) {
+  if (flags == nullptr || active == nullptr) {
+    return CUDA_ERROR_INVALID_VALUE;
+  }
+  int local_device = static_cast<int>(dev);
+  {
+    std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+    auto it = scuda_primary_context_states().find(local_device);
+    if (it != scuda_primary_context_states().end() && it->second.valid) {
+      *flags = it->second.flags;
+      *active = it->second.active;
+      return CUDA_SUCCESS;
+    }
+  }
+
+  CUdevice remote_device = dev;
+  conn_t *conn = scuda_rpc_conn_for_device(&remote_device);
+  CUresult return_value;
+  if (conn == nullptr ||
+      rpc_write_start_request(conn, RPC_cuDevicePrimaryCtxGetState) < 0 ||
+      rpc_write(conn, &remote_device, sizeof(remote_device)) < 0 ||
+      rpc_wait_for_response(conn) < 0 ||
+      rpc_read(conn, flags, sizeof(*flags)) < 0 ||
+      rpc_read(conn, active, sizeof(*active)) < 0 ||
+      rpc_read(conn, &return_value, sizeof(return_value)) < 0 ||
+      rpc_read_end(conn) < 0) {
+    return CUDA_ERROR_DEVICE_UNAVAILABLE;
+  }
+  if (return_value == CUDA_SUCCESS) {
+    std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+    scuda_primary_context_states()[local_device] =
+        scuda_primary_context_state{true, *flags, *active};
+  }
+  return return_value;
 }
 
 extern "C" CUresult cuMemPoolGetAttribute(CUmemoryPool pool,
@@ -2927,11 +3319,10 @@ cuLibraryLoadData(CUlibrary *library, const void *code,
 }
 
 static CUresult
-scuda_get_kernel_param_layout(CUfunction f, scuda_kernel_param_layout *layout) {
+scuda_fetch_kernel_param_layout(CUfunction f, scuda_kernel_param_layout *layout) {
   if (layout == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
-  f = scuda_translate_private_function(f);
   conn_t *conn = scuda_rpc_conn_for_function(f);
   CUresult return_value;
   if (conn == nullptr ||
@@ -2947,6 +3338,47 @@ scuda_get_kernel_param_layout(CUfunction f, scuda_kernel_param_layout *layout) {
   return return_value;
 }
 
+extern "C" void scuda_invalidate_kernel_param_layout_cache() {
+  {
+    std::lock_guard<std::mutex> lock(scuda_kernel_param_layout_cache_mutex());
+    scuda_kernel_param_layout_cache().clear();
+  }
+  {
+    std::lock_guard<std::mutex> lock(scuda_kernel_function_cache_mutex());
+    scuda_kernel_function_cache().clear();
+  }
+  {
+    std::lock_guard<std::mutex> lock(scuda_occupancy_cache_mutex());
+    scuda_occupancy_cache().clear();
+  }
+}
+
+extern "C" CUresult
+scuda_get_kernel_param_layout_cached(CUfunction f,
+                                     scuda_kernel_param_layout *layout) {
+  if (layout == nullptr) {
+    return CUDA_ERROR_INVALID_VALUE;
+  }
+  f = scuda_translate_private_function(f);
+  {
+    std::lock_guard<std::mutex> lock(scuda_kernel_param_layout_cache_mutex());
+    auto it = scuda_kernel_param_layout_cache().find(f);
+    if (it != scuda_kernel_param_layout_cache().end()) {
+      *layout = it->second;
+      return CUDA_SUCCESS;
+    }
+  }
+
+  scuda_kernel_param_layout fetched = {};
+  CUresult result = scuda_fetch_kernel_param_layout(f, &fetched);
+  if (result == CUDA_SUCCESS) {
+    std::lock_guard<std::mutex> lock(scuda_kernel_param_layout_cache_mutex());
+    scuda_kernel_param_layout_cache()[f] = fetched;
+    *layout = fetched;
+  }
+  return result;
+}
+
 extern "C" CUresult
 cuLaunchKernel(CUfunction f, unsigned int gridDimX, unsigned int gridDimY,
                unsigned int gridDimZ, unsigned int blockDimX,
@@ -2959,7 +3391,7 @@ cuLaunchKernel(CUfunction f, unsigned int gridDimX, unsigned int gridDimY,
   f = scuda_translate_private_function(f);
 
   scuda_kernel_param_layout layout;
-  CUresult status = scuda_get_kernel_param_layout(f, &layout);
+  CUresult status = scuda_get_kernel_param_layout_cached(f, &layout);
   if (status != CUDA_SUCCESS) {
     return status;
   }
@@ -3502,7 +3934,7 @@ scuda_pack_kernel_params(const CUDA_KERNEL_NODE_PARAMS *nodeParams,
     func = reinterpret_cast<CUfunction>(nodeParams->kern);
   }
 #endif
-  CUresult status = scuda_get_kernel_param_layout(func, layout);
+  CUresult status = scuda_get_kernel_param_layout_cached(func, layout);
   if (status != CUDA_SUCCESS) {
     return status;
   }
