@@ -58,7 +58,8 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: Dockerfile.server
+          file: Dockerfile
+          target: server
           push: ${{ github.event_name != 'pull_request' }}
           build-args: |
             CUDA_VERSION=${{ matrix.cuda }}

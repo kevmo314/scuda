@@ -40,6 +40,7 @@ set(CLIENT_SOURCES
 
 set(SERVER_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/server.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/manual_server.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rpc.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/codegen/gen_server.cpp
 )
@@ -50,6 +51,7 @@ set(CLIENT_HEADERS
 
 set(SERVER_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/codegen/gen_server.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/manual_server.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rpc.cpp
 )
 
