@@ -1,5 +1,6 @@
 #include "nvml_server.h"
 
+#include <cuda.h>
 #include <dlfcn.h>
 #include <nvml.h>
 
@@ -13,14 +14,15 @@
 // CUDA <= 12.6 ships NVML API 12, which does not define the versioned
 // temperature struct. The host driver exports the symbol on newer drivers; this
 // local definition preserves the ABI when building against older CUDA images.
-#if !defined(NVML_API_VERSION) || NVML_API_VERSION < 13
+#if (defined(CUDA_VERSION) && CUDA_VERSION >= 12080) ||                           \
+    (defined(NVML_API_VERSION) && NVML_API_VERSION >= 13)
+using scuda_nvmlTemperature_t = nvmlTemperature_t;
+#else
 typedef struct {
   unsigned int version;
   nvmlTemperatureSensors_t sensorType;
   int temperature;
 } scuda_nvmlTemperature_t;
-#else
-using scuda_nvmlTemperature_t = nvmlTemperature_t;
 #endif
 
 namespace {
