@@ -159,7 +159,7 @@ static inline CUresult cuGraphExecUpdate_v2(
 #endif
 #endif
 
-#if CUDA_VERSION < 12050
+#if CUDA_VERSION < 12000
 typedef int CUdriverProcAddressQueryResult;
 #define CU_GET_PROC_ADDRESS_SUCCESS 0
 #define CU_GET_PROC_ADDRESS_SYMBOL_NOT_FOUND 1
@@ -197,7 +197,7 @@ static inline CUresult cuOccupancyMaxActiveClusters(
 #endif
 #endif
 
-#if CUDA_VERSION < 12060
+#if CUDA_VERSION < 12000
 typedef struct CUgraphEdgeData_st {
   unsigned char pad;
 } CUgraphEdgeData;
