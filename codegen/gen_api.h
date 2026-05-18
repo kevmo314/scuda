@@ -401,3 +401,4 @@
 #define RPC_nvmlDeviceGetMigMode 400
 #define RPC_nvmlDeviceGetVirtualizationMode 401
 #define RPC_nvmlDeviceIsMigDeviceHandle 402
+#define RPC_nvmlDeviceGetNvLinkRemoteDeviceType 403

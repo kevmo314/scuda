@@ -135,6 +135,7 @@ NVML_RPC_FUNCTIONS = [
     "nvmlDeviceGetMigMode",
     "nvmlDeviceGetVirtualizationMode",
     "nvmlDeviceIsMigDeviceHandle",
+    "nvmlDeviceGetNvLinkRemoteDeviceType",
 ]
 
 SKIP_FUNCTIONS = {

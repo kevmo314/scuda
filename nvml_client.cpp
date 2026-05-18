@@ -1012,3 +1012,10 @@ extern "C" nvmlReturn_t nvmlDeviceIsMigDeviceHandle(nvmlDevice_t device,
   return call_device_value(RPC_nvmlDeviceIsMigDeviceHandle, device,
                            isMigDevice);
 }
+
+extern "C" nvmlReturn_t nvmlDeviceGetNvLinkRemoteDeviceType(
+    nvmlDevice_t device, unsigned int link,
+    nvmlIntNvLinkDeviceType_t *pNvLinkDeviceType) {
+  return call_device_arg_value(RPC_nvmlDeviceGetNvLinkRemoteDeviceType, device,
+                               link, pNvLinkDeviceType);
+}

@@ -55,10 +55,33 @@ extern "C" CUresult scuda_cuMemAllocManaged_safe(CUdeviceptr *dptr,
 extern "C" CUresult scuda_cuMemFree_v2_safe(CUdeviceptr dptr);
 extern "C" CUfunction scuda_translate_private_function_for_rpc(
     CUfunction function);
+struct scuda_kernel_param_layout;
 extern "C" CUresult scuda_cuCtxPushCurrent_virtual(CUcontext ctx);
 extern "C" CUresult scuda_cuCtxPopCurrent_virtual(CUcontext *pctx);
 extern "C" CUresult scuda_cuCtxSetCurrent_virtual(CUcontext ctx);
 extern "C" CUresult scuda_cuCtxGetCurrent_virtual(CUcontext *pctx);
+extern "C" CUresult scuda_cuCtxGetDevice_cached(CUdevice *device);
+extern "C" void scuda_invalidate_current_context_cache();
+extern "C" CUresult scuda_cuDevicePrimaryCtxGetState_cached(
+    CUdevice dev, unsigned int *flags, int *active);
+extern "C" void scuda_note_primary_context_active(CUdevice dev);
+extern "C" void scuda_note_primary_context_flags(CUdevice dev,
+                                                 unsigned int flags);
+extern "C" void scuda_invalidate_primary_context_state(CUdevice dev);
+extern "C" CUresult scuda_get_kernel_param_layout_cached(
+    CUfunction f, scuda_kernel_param_layout *layout);
+extern "C" void scuda_invalidate_kernel_param_layout_cache();
+extern "C" CUresult scuda_cuDeviceGetAttribute_cached(
+    int *pi, CUdevice_attribute attrib, CUdevice dev);
+extern "C" CUresult scuda_cuKernelGetFunction_cached(CUfunction *pFunc,
+                                                      CUkernel kernel);
+extern "C" CUresult
+scuda_cuOccupancyMaxActiveBlocksPerMultiprocessor_cached(
+    int *numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize);
+extern "C" CUresult
+scuda_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags_cached(
+    int *numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize,
+    unsigned int flags);
 static constexpr int SCUDA_RPC_cuLinkAddData_v2 = 1000018;
 
 struct scuda_client_link_state {
@@ -75,23 +98,7 @@ struct scuda_kernel_param_layout {
 
 static CUresult scuda_get_kernel_param_layout_for_codegen(
     CUfunction f, scuda_kernel_param_layout *layout) {
-    if (layout == nullptr)
-        return CUDA_ERROR_INVALID_VALUE;
-    constexpr int SCUDA_RPC_cuFuncGetParamLayout = 1000001;
-    f = scuda_translate_private_function_for_rpc(f);
-    conn_t *conn = scuda_rpc_conn_for_function(f);
-    CUresult return_value;
-    if (conn == nullptr ||
-        rpc_write_start_request(conn, SCUDA_RPC_cuFuncGetParamLayout) < 0 ||
-        rpc_write(conn, &f, sizeof(f)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, &layout->count, sizeof(layout->count)) < 0 ||
-        rpc_read(conn, layout->offsets, sizeof(layout->offsets)) < 0 ||
-        rpc_read(conn, layout->sizes, sizeof(layout->sizes)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(return_value)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    return return_value;
+    return scuda_get_kernel_param_layout_cached(f, layout);
 }
 
 static CUresult scuda_pack_kernel_params_for_codegen(
@@ -241,18 +248,7 @@ CUresult cuDeviceGetTexture1DLinearMaxWidth(size_t* maxWidthInElements, CUarray_
 
 CUresult cuDeviceGetAttribute(int* pi, CUdevice_attribute attrib, CUdevice dev)
 {
-    conn_t *conn = scuda_rpc_conn_for_device(&dev);
-    CUresult return_value;
-    if (conn == nullptr ||
-        rpc_write_start_request(conn, RPC_cuDeviceGetAttribute) < 0 ||
-        rpc_write(conn, &attrib, sizeof(CUdevice_attribute)) < 0 ||
-        rpc_write(conn, &dev, sizeof(CUdevice)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, pi, sizeof(int)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    return return_value;
+    return scuda_cuDeviceGetAttribute_cached(pi, attrib, dev);
 }
 
 CUresult cuDeviceSetMemPool(CUdevice dev, CUmemoryPool pool)
@@ -363,6 +359,7 @@ CUresult cuDeviceComputeCapability(int* major, int* minor, CUdevice dev)
 
 CUresult cuDevicePrimaryCtxRetain(CUcontext* pctx, CUdevice dev)
 {
+    CUdevice local_dev = dev;
     conn_t *conn = scuda_rpc_conn_for_device(&dev);
     CUresult return_value;
     if (conn == nullptr ||
@@ -373,13 +370,16 @@ CUresult cuDevicePrimaryCtxRetain(CUcontext* pctx, CUdevice dev)
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    if (return_value == CUDA_SUCCESS && pctx != nullptr)
+    if (return_value == CUDA_SUCCESS && pctx != nullptr) {
         scuda_note_context_owner(*pctx, conn);
+        scuda_note_primary_context_active(local_dev);
+    }
     return return_value;
 }
 
 CUresult cuDevicePrimaryCtxRelease_v2(CUdevice dev)
 {
+    CUdevice local_dev = dev;
     conn_t *conn = scuda_rpc_conn_for_device(&dev);
     CUresult return_value;
     if (conn == nullptr ||
@@ -389,11 +389,16 @@ CUresult cuDevicePrimaryCtxRelease_v2(CUdevice dev)
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    if (return_value == CUDA_SUCCESS)
+        scuda_invalidate_current_context_cache();
+    if (return_value == CUDA_SUCCESS)
+        scuda_invalidate_primary_context_state(local_dev);
     return return_value;
 }
 
 CUresult cuDevicePrimaryCtxSetFlags_v2(CUdevice dev, unsigned int flags)
 {
+    CUdevice local_dev = dev;
     conn_t *conn = scuda_rpc_conn_for_device(&dev);
     CUresult return_value;
     if (conn == nullptr ||
@@ -404,27 +409,21 @@ CUresult cuDevicePrimaryCtxSetFlags_v2(CUdevice dev, unsigned int flags)
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    if (return_value == CUDA_SUCCESS)
+        scuda_invalidate_current_context_cache();
+    if (return_value == CUDA_SUCCESS)
+        scuda_note_primary_context_flags(local_dev, flags);
     return return_value;
 }
 
 CUresult cuDevicePrimaryCtxGetState(CUdevice dev, unsigned int* flags, int* active)
 {
-    conn_t *conn = scuda_rpc_conn_for_device(&dev);
-    CUresult return_value;
-    if (conn == nullptr ||
-        rpc_write_start_request(conn, RPC_cuDevicePrimaryCtxGetState) < 0 ||
-        rpc_write(conn, &dev, sizeof(CUdevice)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, flags, sizeof(unsigned int)) < 0 ||
-        rpc_read(conn, active, sizeof(int)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    return return_value;
+    return scuda_cuDevicePrimaryCtxGetState_cached(dev, flags, active);
 }
 
 CUresult cuDevicePrimaryCtxReset_v2(CUdevice dev)
 {
+    CUdevice local_dev = dev;
     conn_t *conn = scuda_rpc_conn_for_device(&dev);
     CUresult return_value;
     if (conn == nullptr ||
@@ -434,6 +433,10 @@ CUresult cuDevicePrimaryCtxReset_v2(CUdevice dev)
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    if (return_value == CUDA_SUCCESS)
+        scuda_invalidate_current_context_cache();
+    if (return_value == CUDA_SUCCESS)
+        scuda_invalidate_primary_context_state(local_dev);
     return return_value;
 }
 
@@ -448,6 +451,8 @@ CUresult cuCtxDestroy_v2(CUcontext ctx)
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    if (return_value == CUDA_SUCCESS)
+        scuda_invalidate_current_context_cache();
     return return_value;
 }
 
@@ -473,18 +478,7 @@ CUresult cuCtxGetCurrent(CUcontext* pctx)
 
 CUresult cuCtxGetDevice(CUdevice* device)
 {
-    conn_t *conn = scuda_rpc_conn_for_current_context();
-    CUresult return_value;
-    if (conn == nullptr ||
-        rpc_write_start_request(conn, RPC_cuCtxGetDevice) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, device, sizeof(CUdevice)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    if (return_value == CUDA_SUCCESS && device != nullptr)
-        *device = scuda_local_device_for_remote(conn, *device);
-    return return_value;
+    return scuda_cuCtxGetDevice_cached(device);
 }
 
 CUresult cuCtxGetFlags(unsigned int* flags)
@@ -715,6 +709,8 @@ CUresult cuModuleUnload(CUmodule hmod)
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    if (return_value == CUDA_SUCCESS)
+        scuda_invalidate_kernel_param_layout_cache();
     return return_value;
 }
 
@@ -1042,6 +1038,8 @@ CUresult cuLibraryUnload(CUlibrary library)
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    if (return_value == CUDA_SUCCESS)
+        scuda_invalidate_kernel_param_layout_cache();
     return return_value;
 }
 
@@ -1080,16 +1078,7 @@ CUresult cuLibraryGetModule(CUmodule* pMod, CUlibrary library)
 
 CUresult cuKernelGetFunction(CUfunction* pFunc, CUkernel kernel)
 {
-    conn_t *conn = rpc_client_get_connection(0);
-    CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuKernelGetFunction) < 0 ||
-        rpc_write(conn, &kernel, sizeof(CUkernel)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, pFunc, sizeof(CUfunction)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    return return_value;
+    return scuda_cuKernelGetFunction_cached(pFunc, kernel);
 }
 
 CUresult cuLibraryGetGlobal(CUdeviceptr* dptr, size_t* bytes, CUlibrary library, const char* name)
@@ -3044,28 +3033,13 @@ CUresult cuFuncGetModule(CUmodule* hmod, CUfunction hfunc)
 
 CUresult cuLaunchCooperativeKernel(CUfunction f, unsigned int gridDimX, unsigned int gridDimY, unsigned int gridDimZ, unsigned int blockDimX, unsigned int blockDimY, unsigned int blockDimZ, unsigned int sharedMemBytes, CUstream hStream, void** kernelParams)
 {
-    struct scuda_kernel_param_layout {
-        uint32_t count = 0;
-        size_t offsets[64] = {};
-        size_t sizes[64] = {};
-    };
-    constexpr int SCUDA_RPC_cuFuncGetParamLayout = 1000001;
     extern CUresult scuda_sync_mapped_host_to_device_for_launch(
         unsigned char *packed, const size_t *offsets, const size_t *sizes,
         uint32_t count);
 
     conn_t *conn = rpc_client_get_connection(0);
     scuda_kernel_param_layout layout;
-    CUresult return_value;
-    if (rpc_write_start_request(conn, SCUDA_RPC_cuFuncGetParamLayout) < 0 ||
-        rpc_write(conn, &f, sizeof(f)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, &layout.count, sizeof(layout.count)) < 0 ||
-        rpc_read(conn, layout.offsets, sizeof(layout.offsets)) < 0 ||
-        rpc_read(conn, layout.sizes, sizeof(layout.sizes)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(return_value)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    CUresult return_value = scuda_get_kernel_param_layout_cached(f, &layout);
     if (return_value != CUDA_SUCCESS)
         return return_value;
     if (layout.count > 64)
@@ -4280,37 +4254,14 @@ CUresult cuGraphReleaseUserObject(CUgraph graph, CUuserObject object, unsigned i
 
 CUresult cuOccupancyMaxActiveBlocksPerMultiprocessor(int* numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize)
 {
-    conn_t *conn = rpc_client_get_connection(0);
-    CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuOccupancyMaxActiveBlocksPerMultiprocessor) < 0 ||
-        rpc_write(conn, numBlocks, sizeof(int)) < 0 ||
-        rpc_write(conn, &func, sizeof(CUfunction)) < 0 ||
-        rpc_write(conn, &blockSize, sizeof(int)) < 0 ||
-        rpc_write(conn, &dynamicSMemSize, sizeof(size_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, numBlocks, sizeof(int)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    return return_value;
+    return scuda_cuOccupancyMaxActiveBlocksPerMultiprocessor_cached(
+        numBlocks, func, blockSize, dynamicSMemSize);
 }
 
 CUresult cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(int* numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize, unsigned int flags)
 {
-    conn_t *conn = rpc_client_get_connection(0);
-    CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags) < 0 ||
-        rpc_write(conn, numBlocks, sizeof(int)) < 0 ||
-        rpc_write(conn, &func, sizeof(CUfunction)) < 0 ||
-        rpc_write(conn, &blockSize, sizeof(int)) < 0 ||
-        rpc_write(conn, &dynamicSMemSize, sizeof(size_t)) < 0 ||
-        rpc_write(conn, &flags, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, numBlocks, sizeof(int)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    return return_value;
+    return scuda_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags_cached(
+        numBlocks, func, blockSize, dynamicSMemSize, flags);
 }
 
 CUresult cuOccupancyAvailableDynamicSMemPerBlock(size_t* dynamicSmemSize, CUfunction func, int numBlocks, int blockSize)

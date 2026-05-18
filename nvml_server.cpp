@@ -697,3 +697,8 @@ int handle_nvmlDeviceGetVirtualizationMode(conn_t *conn) {
 int handle_nvmlDeviceIsMigDeviceHandle(conn_t *conn) {
   return handle_device_value<unsigned int>(conn, "nvmlDeviceIsMigDeviceHandle");
 }
+
+int handle_nvmlDeviceGetNvLinkRemoteDeviceType(conn_t *conn) {
+  return handle_device_arg_value<unsigned int, nvmlIntNvLinkDeviceType_t>(
+      conn, "nvmlDeviceGetNvLinkRemoteDeviceType");
+}
