@@ -29,7 +29,7 @@ SERVER_LOCAL_BIN="${SERVER_LOCAL_BIN:-$repo_root/build/scuda_driver_server}"
 SERVER_REMOTE_BIN="${SERVER_REMOTE_BIN:-/tmp/scuda-driver-server-scuda-$$}"
 SERVER_REMOTE_CLEANUP="${SERVER_REMOTE_CLEANUP:-1}"
 
-SCUDA_LIB="${SCUDA_LIB:-$repo_root/build/libcuda.so.1}"
+SCUDA_LIB="${SCUDA_LIB:-$repo_root/build/libscuda.so}"
 CUDA_HOME="${CUDA_HOME:-/usr/local/cuda}"
 CUDA_LIB_DIR="${CUDA_LIB_DIR:-/usr/local/cuda/lib64}"
 SAMPLE_TIMEOUT="${SAMPLE_TIMEOUT:-20}"
@@ -103,7 +103,7 @@ Environment:
                        Default: compliance.
   SERVER_SSH_TARGET    GPU host SSH target. Default: kevin@inferable-node-008.
   SERVER_PORT_BASE     First per-sample server port. Default: 14900.
-  SCUDA_LIB            Client shim. Default: $repo_root/build/libcuda.so.1.
+  SCUDA_LIB            Client shim. Default: $repo_root/build/libscuda.so.
   RESULTS_DIR          Output directory. Default: test/cuda-samples/results/<timestamp>.
 EOF
 }

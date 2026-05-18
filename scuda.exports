@@ -1,6 +1,7 @@
 {
   global:
     cu*;
+    nvml*;
     dlsym;
   local:
     *;

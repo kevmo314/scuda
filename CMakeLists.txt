@@ -36,6 +36,7 @@ set(CLIENT_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/rpc.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/client.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/codegen/gen_client.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/nvml_client.cpp
 )
 
 set(SERVER_SOURCES
@@ -44,11 +45,6 @@ set(SERVER_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/nvml_server.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rpc.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/codegen/gen_server.cpp
-)
-
-set(NVML_CLIENT_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/rpc.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/nvml_client.cpp
 )
 
 set(CLIENT_HEADERS
@@ -62,35 +58,40 @@ set(SERVER_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/rpc.cpp
 )
 
-set(CLIENT_OUTPUT scuda_driver)
-set(NVML_CLIENT_OUTPUT scuda_nvml)
+set(CLIENT_OUTPUT scuda)
 set(SERVER_OUTPUT scuda_driver_server)
 
 add_library(${CLIENT_OUTPUT} SHARED ${CLIENT_SOURCES} ${CLIENT_HEADERS})
 target_include_directories(${CLIENT_OUTPUT} PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
 target_link_libraries(${CLIENT_OUTPUT} PRIVATE stdc++)
 target_link_options(${CLIENT_OUTPUT} PRIVATE
-    "LINKER:--version-script=${CMAKE_CURRENT_SOURCE_DIR}/client.exports"
+    "LINKER:--version-script=${CMAKE_CURRENT_SOURCE_DIR}/scuda.exports"
 )
 set_target_properties(${CLIENT_OUTPUT} PROPERTIES
     POSITION_INDEPENDENT_CODE ON
-    OUTPUT_NAME cuda
+    OUTPUT_NAME scuda
     VERSION 1
     SOVERSION 1
 )
 
-add_library(${NVML_CLIENT_OUTPUT} SHARED ${NVML_CLIENT_SOURCES})
-target_include_directories(${NVML_CLIENT_OUTPUT} PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
-target_link_libraries(${NVML_CLIENT_OUTPUT} PRIVATE stdc++)
-target_link_options(${NVML_CLIENT_OUTPUT} PRIVATE
-    "LINKER:--version-script=${CMAKE_CURRENT_SOURCE_DIR}/nvml.exports"
+add_custom_command(TARGET ${CLIENT_OUTPUT} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E rm -f
+            $<TARGET_FILE_DIR:${CLIENT_OUTPUT}>/libcuda.so.1
+            $<TARGET_FILE_DIR:${CLIENT_OUTPUT}>/libcuda.so
+            $<TARGET_FILE_DIR:${CLIENT_OUTPUT}>/libnvidia-ml.so.1
+            $<TARGET_FILE_DIR:${CLIENT_OUTPUT}>/libnvidia-ml.so
+    COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_NAME:${CLIENT_OUTPUT}>
+            $<TARGET_FILE_DIR:${CLIENT_OUTPUT}>/libcuda.so.1
+    COMMAND ${CMAKE_COMMAND} -E create_symlink libcuda.so.1
+            $<TARGET_FILE_DIR:${CLIENT_OUTPUT}>/libcuda.so
+    COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_NAME:${CLIENT_OUTPUT}>
+            $<TARGET_FILE_DIR:${CLIENT_OUTPUT}>/libnvidia-ml.so.1
+    COMMAND ${CMAKE_COMMAND} -E create_symlink libnvidia-ml.so.1
+            $<TARGET_FILE_DIR:${CLIENT_OUTPUT}>/libnvidia-ml.so
 )
-set_target_properties(${NVML_CLIENT_OUTPUT} PROPERTIES
-    POSITION_INDEPENDENT_CODE ON
-    OUTPUT_NAME nvidia-ml
-    VERSION 1
-    SOVERSION 1
-)
+
+add_custom_target(scuda_driver DEPENDS ${CLIENT_OUTPUT})
+add_custom_target(scuda_nvml DEPENDS ${CLIENT_OUTPUT})
 
 add_executable(${SERVER_OUTPUT} ${SERVER_SOURCES} ${SERVER_HEADERS})
 target_include_directories(${SERVER_OUTPUT} PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
@@ -109,10 +110,5 @@ target_compile_options(${CLIENT_OUTPUT} PRIVATE
     $<$<COMPILE_LANGUAGE:CXX>: -Wno-deprecated-declarations>
 )
 
-target_compile_options(${NVML_CLIENT_OUTPUT} PRIVATE
-    $<$<COMPILE_LANGUAGE:CXX>: -Wno-deprecated-declarations>
-)
-
 message(STATUS "Building client output: ${CLIENT_OUTPUT}")
-message(STATUS "Building NVML client output: ${NVML_CLIENT_OUTPUT}")
 message(STATUS "Building server output: ${SERVER_OUTPUT}")

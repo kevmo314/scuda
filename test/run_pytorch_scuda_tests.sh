@@ -12,7 +12,7 @@ SERVER_LOCAL_BIN="${SERVER_LOCAL_BIN:-$repo_root/build/scuda_driver_server}"
 SERVER_REMOTE_BIN="${SERVER_REMOTE_BIN:-/tmp/scuda-driver-server-pytorch-${USER:-scuda}-$$}"
 SERVER_REMOTE_CLEANUP="${SERVER_REMOTE_CLEANUP:-1}"
 
-SCUDA_LIB="${SCUDA_LIB:-$repo_root/build/libcuda.so.1}"
+SCUDA_LIB="${SCUDA_LIB:-$repo_root/build/libscuda.so}"
 PYTHON_BIN="${PYTHON_BIN:-$repo_root/.venv-pytorch312/bin/python}"
 CUDA_LIB_DIR="${CUDA_LIB_DIR:-/usr/local/cuda/lib64}"
 TEST_TIMEOUT="${TEST_TIMEOUT:-90}"

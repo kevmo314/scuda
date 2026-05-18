@@ -1,6 +1,0 @@
-{
-    global:
-        nvml*;
-    local:
-        *;
-};

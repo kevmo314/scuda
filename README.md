@@ -66,8 +66,9 @@ Mon May 18 15:40:46 2026
 ```
 
 Inside the client container, `LD_LIBRARY_PATH=/opt/scuda/lib` is already set,
-so CUDA driver users pick up the SCUDA `libcuda.so.1` shim and NVML users such
-as `nvidia-smi` pick up the SCUDA `libnvidia-ml.so.1` shim automatically.
+so CUDA driver users and NVML users such as `nvidia-smi` pick up the unified
+SCUDA shim automatically. The real client library is `libscuda.so.1`;
+`libcuda.so.1` and `libnvidia-ml.so.1` are compatibility symlinks to it.
 
 ## Multi-GPU Across Multiple Servers
 
@@ -181,85 +182,51 @@ microgpt first_loss=... last_loss=...
 microgpt_train: PASS
 ```
 
-## Local development
+## Local Development
 
-Building the binaries requires running codegen first. Scuda codegen reads the cuda dependency header files in order to generate rpc calls.
-
-To ensure codegen works properly, the proper cuda packages need to be installed on your OS. Take a look at our [Dockerfile](./Dockerfile) to see an example.
-
-Take a look [here to install CUDA Toolkit](https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&Distribution=WSL-Ubuntu&target_version=2.0&target_type=deb_network) (choose your system)
-
-Codegen requires [cuBLAS](https://developer.nvidia.com/hpc-sdk-downloads), [cuDNN](https://developer.nvidia.com/cudnn-downloads?target_os=Linux&target_arch=x86_64&Distribution=Ubuntu&target_version=24.04&target_type=deb_network), [NVML](https://developer.nvidia.com/management-library-nvml), etc:
-
-```py
-cudnn_graph_header = find_header_file("cudnn_graph.h")
-cudnn_ops_header   = find_header_file("cudnn_ops.h")
-cuda_header        = find_header_file("cuda.h")
-cublas_header      = find_header_file("cublas_api.h")
-cudart_header      = find_header_file("cuda_runtime_api.h")
-annotations_header = find_header_file("annotations.h")
-```
-
-### Run codegen
+The Dockerfile is the reference build environment. For a local build, install a
+CUDA Toolkit and configure CMake:
 
 ```bash
-cd codegen && python3 ./codegen.py
+cmake -S . -B build
+cmake --build build --parallel --target scuda scuda_driver_server
 ```
 
-Ensure there are no errors in the output of the codegen.
-
-### Run cmake
-
-```sh
-cmake .
-cmake --build .
-```
-
-Cmake will generate a server and a client file depending on your cuda version.
-
-Example:
-`libscuda_12_0.so`, `server_12_0.so`
-
-It's required to run scuda server before initiating client commands.
-
-```sh
-./local.sh server
-```
-
-The above command will grep for the generated libscuda + server files. You can also run the binaries directly.
-
-
-```sh
-./server_12_0.so
-```
-
-If successful, the server will start:
+Generated sources are checked in. Only rerun codegen when intentionally
+refreshing the generated CUDA Driver API wrappers for a header version:
 
 ```bash
-Server listening on port 14833...
+cd codegen
+python3 ./codegen.py
 ```
 
-## Running the client
+The client build emits one unified shim, `build/libscuda.so`, plus loader
+compatibility symlinks:
 
-Scuda requires you to preload the libscuda binary before executing any cuda commands.
-
-Once the server above is running:
-
-```sh
-# update to your desired IP/port
-export SCUDA_SERVER=0.0.0.0
-
-LD_PRELOAD=./libscuda_12_0.so python3 -c "import torch; print(torch.cuda.is_available())"
-
-# or
-
-LD_PRELOAD=./libscuda_12_0.so nvidia-smi
+```text
+build/libscuda.so
+build/libcuda.so.1 -> libscuda.so.1
+build/libnvidia-ml.so.1 -> libscuda.so.1
 ```
 
-You can also use the local shell script to run your commands.
+Run the server on the GPU machine:
 
+```bash
+SCUDA_PORT=14833 ./build/scuda_driver_server
 ```
-./local.sh run
+
+Run a local client against it:
+
+```bash
+export SCUDA_SERVER=<server>:14833
+
+LD_LIBRARY_PATH="$PWD/build:${LD_LIBRARY_PATH:-}" \
+  LD_PRELOAD="$PWD/build/libscuda.so" \
+  python3 -c "import torch; print(torch.cuda.is_available())"
+
+LD_LIBRARY_PATH="$PWD/build:${LD_LIBRARY_PATH:-}" \
+  LD_PRELOAD="$PWD/build/libscuda.so" \
+  nvidia-smi
 ```
 
 ## Motivations

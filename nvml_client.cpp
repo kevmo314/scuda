@@ -1,21 +1,15 @@
-#include <arpa/inet.h>
 #include <cuda.h>
-#include <netdb.h>
-#include <netinet/tcp.h>
 #include <nvml.h>
-#include <pthread.h>
-#include <sys/socket.h>
-#include <unistd.h>
 
-#include <algorithm>
-#include <cerrno>
-#include <cstdio>
-#include <cstdlib>
 #include <cstring>
 #include <vector>
 
 #include "codegen/gen_api.h"
 #include "rpc.h"
+
+extern int rpc_open();
+extern int rpc_size();
+extern conn_t *rpc_client_get_connection(unsigned int index);
 
 // CUDA <= 12.6 ships NVML API 12, which does not define the versioned
 // temperature struct. Keep the wrapper ABI-compatible with newer nvidia-smi.
@@ -32,13 +26,6 @@ typedef struct {
 
 namespace {
 
-constexpr const char *DEFAULT_PORT = "14833";
-
-pthread_mutex_t conn_mutex = PTHREAD_MUTEX_INITIALIZER;
-conn_t conns[16] = {};
-int nconns = 0;
-bool connected = false;
-
 struct scuda_nvml_remote_device {
   unsigned int conn_index = 0;
   unsigned int remote_index = 0;
@@ -50,118 +37,23 @@ bool devices_ready = false;
 
 nvmlReturn_t rpc_error() { return NVML_ERROR_UNKNOWN; }
 
-void *rpc_client_dispatch_thread(void *p) {
-  conn_t *connection = static_cast<conn_t *>(p);
-  while (!connection->closed) {
-    int op = rpc_dispatch(connection, 1);
-    if (op < 0 || connection->closed) {
-      break;
-    }
-    if (rpc_read_end(connection) < 0) {
-      break;
-    }
-  }
-  return nullptr;
+int open_connection() {
+  return rpc_open();
 }
 
-int open_connection() {
-  if (pthread_mutex_lock(&conn_mutex) < 0) {
-    return -1;
-  }
-  if (connected) {
-    pthread_mutex_unlock(&conn_mutex);
+int connection_count() {
+  if (open_connection() < 0) {
     return 0;
   }
-
-  char *servers_env = getenv("SCUDA_SERVER");
-  if (servers_env == nullptr) {
-    fprintf(stderr, "SCUDA_SERVER environment variable not set\n");
-    pthread_mutex_unlock(&conn_mutex);
-    return -1;
-  }
-
-  char *servers = strdup(servers_env);
-  if (servers == nullptr) {
-    pthread_mutex_unlock(&conn_mutex);
-    return -1;
-  }
-
-  char *cursor = servers;
-  char *token = nullptr;
-  while ((token = strsep(&cursor, ",")) != nullptr) {
-    if (token[0] == '\0') {
-      continue;
-    }
-
-    char *host = token;
-    char *port = const_cast<char *>(DEFAULT_PORT);
-    char *colon = strchr(token, ':');
-    if (colon != nullptr) {
-      *colon = '\0';
-      port = colon + 1;
-    }
-
-    addrinfo hints = {};
-    hints.ai_family = AF_INET;
-    hints.ai_socktype = SOCK_STREAM;
-    addrinfo *res = nullptr;
-    if (getaddrinfo(host, port, &hints, &res) != 0) {
-      continue;
-    }
-
-    int sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
-    if (sockfd >= 0) {
-      int flag = 1;
-      setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, &flag, sizeof(flag));
-      if (connect(sockfd, res->ai_addr, res->ai_addrlen) == 0) {
-        if (nconns >= static_cast<int>(sizeof(conns) / sizeof(conns[0]))) {
-          close(sockfd);
-          freeaddrinfo(res);
-          break;
-        }
-        conn_t *c = &conns[nconns];
-        *c = {};
-        c->connfd = sockfd;
-        c->request_id = 0;
-        c->local_request_parity = c->request_id & 1;
-        if (pthread_mutex_init(&c->read_mutex, nullptr) < 0 ||
-            pthread_mutex_init(&c->write_mutex, nullptr) < 0 ||
-            pthread_mutex_init(&c->call_mutex, nullptr) < 0 ||
-            pthread_cond_init(&c->read_cond, nullptr) < 0 ||
-            pthread_create(&c->read_thread, nullptr, rpc_client_dispatch_thread,
-                           c) < 0) {
-          close(sockfd);
-          freeaddrinfo(res);
-          continue;
-        }
-        ++nconns;
-        freeaddrinfo(res);
-        continue;
-      }
-      close(sockfd);
-    }
-    freeaddrinfo(res);
-  }
-  free(servers);
-
-  if (nconns == 0) {
-    pthread_mutex_unlock(&conn_mutex);
-    return -1;
-  }
-
-  connected = true;
-  pthread_mutex_unlock(&conn_mutex);
-  return 0;
+  return rpc_size();
 }
 
 conn_t *connection(unsigned int index = 0) {
-  if (open_connection() < 0) {
+  int count = connection_count();
+  if (index >= static_cast<unsigned int>(count)) {
     return nullptr;
   }
-  if (index >= static_cast<unsigned int>(nconns)) {
-    return nullptr;
-  }
-  return &conns[index];
+  return rpc_client_get_connection(index);
 }
 
 nvmlReturn_t call_no_args_on(conn_t *c, int op) {
@@ -213,18 +105,20 @@ nvmlReturn_t ensure_devices() {
   }
 
   devices.clear();
-  for (int i = 0; i < nconns; ++i) {
-    unsigned int count = 0;
-    nvmlReturn_t result =
-        call_uint_out_on(&conns[i], RPC_nvmlDeviceGetCount_v2, &count);
+  int count = connection_count();
+  for (int i = 0; i < count; ++i) {
+    conn_t *c = connection(i);
+    unsigned int device_count = 0;
+    nvmlReturn_t result = call_uint_out_on(c, RPC_nvmlDeviceGetCount_v2,
+                                           &device_count);
     if (result != NVML_SUCCESS) {
       devices.clear();
       return result;
     }
-    for (unsigned int ordinal = 0; ordinal < count; ++ordinal) {
+    for (unsigned int ordinal = 0; ordinal < device_count; ++ordinal) {
       nvmlDevice_t remote = nullptr;
       result = call_device_from_index_on(
-          &conns[i], RPC_nvmlDeviceGetHandleByIndex_v2, ordinal, &remote);
+          c, RPC_nvmlDeviceGetHandleByIndex_v2, ordinal, &remote);
       if (result != NVML_SUCCESS) {
         devices.clear();
         return result;
@@ -548,8 +442,9 @@ extern "C" nvmlReturn_t nvmlInit_v2(void) {
     return rpc_error();
   }
   nvmlReturn_t first_error = NVML_SUCCESS;
-  for (int i = 0; i < nconns; ++i) {
-    nvmlReturn_t result = call_no_args_on(&conns[i], RPC_nvmlInit_v2);
+  int count = connection_count();
+  for (int i = 0; i < count; ++i) {
+    nvmlReturn_t result = call_no_args_on(connection(i), RPC_nvmlInit_v2);
     if (result != NVML_SUCCESS && first_error == NVML_SUCCESS) {
       first_error = result;
     }
@@ -566,8 +461,9 @@ extern "C" nvmlReturn_t nvmlInitWithFlags(unsigned int flags) {
     return rpc_error();
   }
   nvmlReturn_t first_error = NVML_SUCCESS;
-  for (int i = 0; i < nconns; ++i) {
-    conn_t *c = &conns[i];
+  int count = connection_count();
+  for (int i = 0; i < count; ++i) {
+    conn_t *c = connection(i);
     nvmlReturn_t result = rpc_error();
     if (rpc_write_start_request(c, RPC_nvmlInitWithFlags) < 0 ||
         rpc_write(c, &flags, sizeof(flags)) < 0 ||
