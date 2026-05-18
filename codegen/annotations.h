@@ -1,8 +1,17 @@
-#include <cublas_v2.h>
 #include <cuda.h>
 #include <cuda_runtime.h>
+
+#if __has_include(<cublas_v2.h>)
+#include <cublas_v2.h>
+#endif
+
+#if __has_include(<cudnn.h>)
 #include <cudnn.h>
+#endif
+
+#if __has_include(<nvml.h>)
 #include <nvml.h>
+#endif
 
 /**
  */
