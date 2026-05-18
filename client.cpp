@@ -1,5 +1,5 @@
-#include <arpa/inet.h>
 #include <algorithm>
+#include <arpa/inet.h>
 #include <atomic>
 #include <cstdint>
 #include <cstring>
@@ -16,17 +16,17 @@
 #include <netinet/tcp.h>
 #include <pthread.h>
 #include <signal.h>
+#include <sstream>
 #include <stdio.h>
 #include <string.h>
 #include <string>
-#include <sstream>
-#include <sys/socket.h>
 #include <sys/mman.h>
+#include <sys/socket.h>
 #include <sys/syscall.h>
 #include <sys/types.h>
 #include <sys/uio.h>
-#include <unordered_map>
 #include <unistd.h>
+#include <unordered_map>
 #include <vector>
 
 #define SCUDA_CUDA_COMPAT_TYPES_ONLY
@@ -36,8 +36,8 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "codegen/gen_client.h"
 #include "codegen/gen_api.h"
+#include "codegen/gen_client.h"
 #include "rpc.h"
 
 pthread_mutex_t conn_mutex;
@@ -180,6 +180,7 @@ static bool scuda_pointer_attribute_size(CUpointer_attribute attr,
 }
 
 extern int rpc_size();
+extern int rpc_open();
 extern conn_t *rpc_client_get_connection(unsigned int index);
 extern void rpc_close(conn_t *conn);
 
@@ -223,14 +224,14 @@ extern "C" CUresult scuda_missing_driver_api_called(const char *symbol) {
   return CUDA_ERROR_NOT_SUPPORTED;
 }
 
-static std::unordered_map<std::string, std::vector<uint64_t>>
-    &scuda_private_export_hashes() {
+static std::unordered_map<std::string, std::vector<uint64_t>> &
+scuda_private_export_hashes() {
   static std::unordered_map<std::string, std::vector<uint64_t>> hashes;
   return hashes;
 }
 
-static std::unordered_map<CUfunction, scuda_private_node_mapping>
-    &scuda_private_node_map() {
+static std::unordered_map<CUfunction, scuda_private_node_mapping> &
+scuda_private_node_map() {
   static std::unordered_map<CUfunction, scuda_private_node_mapping> mappings;
   return mappings;
 }
@@ -243,6 +244,57 @@ static std::unordered_map<CUfunction, CUfunction> &scuda_host_function_map() {
 static std::vector<CUmodule> &scuda_loaded_modules() {
   static std::vector<CUmodule> modules;
   return modules;
+}
+
+struct scuda_remote_device {
+  unsigned int conn_index = 0;
+  int remote_ordinal = 0;
+  CUdevice remote_device = 0;
+};
+
+static std::mutex &scuda_routing_mutex() {
+  static std::mutex mutex;
+  return mutex;
+}
+
+static std::vector<scuda_remote_device> &scuda_device_table() {
+  static std::vector<scuda_remote_device> devices;
+  return devices;
+}
+
+static bool &scuda_device_table_ready() {
+  static bool ready = false;
+  return ready;
+}
+
+static std::unordered_map<CUcontext, unsigned int> &scuda_context_owners() {
+  static std::unordered_map<CUcontext, unsigned int> owners;
+  return owners;
+}
+
+static std::unordered_map<CUmodule, unsigned int> &scuda_module_owners() {
+  static std::unordered_map<CUmodule, unsigned int> owners;
+  return owners;
+}
+
+static std::unordered_map<CUfunction, unsigned int> &scuda_function_owners() {
+  static std::unordered_map<CUfunction, unsigned int> owners;
+  return owners;
+}
+
+static std::unordered_map<CUstream, unsigned int> &scuda_stream_owners() {
+  static std::unordered_map<CUstream, unsigned int> owners;
+  return owners;
+}
+
+static std::unordered_map<CUevent, unsigned int> &scuda_event_owners() {
+  static std::unordered_map<CUevent, unsigned int> owners;
+  return owners;
+}
+
+static std::unordered_map<CUdeviceptr, unsigned int> &scuda_deviceptr_owners() {
+  static std::unordered_map<CUdeviceptr, unsigned int> owners;
+  return owners;
 }
 
 static std::mutex &scuda_host_function_mutex() {
@@ -278,6 +330,347 @@ static void scuda_remember_loaded_module(CUmodule module) {
 
 extern "C" void scuda_remember_loaded_module_for_rpc(CUmodule module) {
   scuda_remember_loaded_module(module);
+}
+
+static int scuda_conn_index(conn_t *conn) {
+  if (conn == nullptr) {
+    return -1;
+  }
+  for (int i = 0; i < nconns; ++i) {
+    if (&conns[i] == conn) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+static conn_t *scuda_conn_by_index(unsigned int index) {
+  if (rpc_open() < 0 || index >= static_cast<unsigned int>(nconns)) {
+    return nullptr;
+  }
+  return &conns[index];
+}
+
+static CUresult scuda_remote_cuInit(conn_t *conn, unsigned int flags) {
+  CUresult result = CUDA_ERROR_DEVICE_UNAVAILABLE;
+  if (conn == nullptr || rpc_write_start_request(conn, RPC_cuInit) < 0 ||
+      rpc_write(conn, &flags, sizeof(flags)) < 0 ||
+      rpc_wait_for_response(conn) < 0 ||
+      rpc_read(conn, &result, sizeof(result)) < 0 || rpc_read_end(conn) < 0) {
+    return CUDA_ERROR_DEVICE_UNAVAILABLE;
+  }
+  return result;
+}
+
+static CUresult scuda_remote_cuDeviceGetCount(conn_t *conn, int *count) {
+  CUresult result = CUDA_ERROR_DEVICE_UNAVAILABLE;
+  if (conn == nullptr || count == nullptr ||
+      rpc_write_start_request(conn, RPC_cuDeviceGetCount) < 0 ||
+      rpc_wait_for_response(conn) < 0 ||
+      rpc_read(conn, count, sizeof(*count)) < 0 ||
+      rpc_read(conn, &result, sizeof(result)) < 0 || rpc_read_end(conn) < 0) {
+    return CUDA_ERROR_DEVICE_UNAVAILABLE;
+  }
+  return result;
+}
+
+static CUresult scuda_remote_cuDeviceGet(conn_t *conn, CUdevice *device,
+                                         int ordinal) {
+  CUresult result = CUDA_ERROR_DEVICE_UNAVAILABLE;
+  if (conn == nullptr || device == nullptr ||
+      rpc_write_start_request(conn, RPC_cuDeviceGet) < 0 ||
+      rpc_write(conn, &ordinal, sizeof(ordinal)) < 0 ||
+      rpc_wait_for_response(conn) < 0 ||
+      rpc_read(conn, device, sizeof(*device)) < 0 ||
+      rpc_read(conn, &result, sizeof(result)) < 0 || rpc_read_end(conn) < 0) {
+    return CUDA_ERROR_DEVICE_UNAVAILABLE;
+  }
+  return result;
+}
+
+static CUresult scuda_ensure_device_table() {
+  if (rpc_open() < 0) {
+    return CUDA_ERROR_DEVICE_UNAVAILABLE;
+  }
+
+  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  if (scuda_device_table_ready()) {
+    return CUDA_SUCCESS;
+  }
+
+  auto &devices = scuda_device_table();
+  devices.clear();
+  for (int i = 0; i < nconns; ++i) {
+    int remote_count = 0;
+    CUresult result = scuda_remote_cuDeviceGetCount(&conns[i], &remote_count);
+    if (result != CUDA_SUCCESS) {
+      devices.clear();
+      return result;
+    }
+    for (int ordinal = 0; ordinal < remote_count; ++ordinal) {
+      CUdevice remote_device = 0;
+      result = scuda_remote_cuDeviceGet(&conns[i], &remote_device, ordinal);
+      if (result != CUDA_SUCCESS) {
+        devices.clear();
+        return result;
+      }
+      devices.push_back(scuda_remote_device{static_cast<unsigned int>(i),
+                                            ordinal, remote_device});
+    }
+  }
+  scuda_device_table_ready() = true;
+  return CUDA_SUCCESS;
+}
+
+extern "C" CUresult scuda_cuInit_multi(unsigned int flags) {
+  if (rpc_open() < 0) {
+    return CUDA_ERROR_DEVICE_UNAVAILABLE;
+  }
+
+  CUresult first_error = CUDA_SUCCESS;
+  for (int i = 0; i < nconns; ++i) {
+    CUresult result = scuda_remote_cuInit(&conns[i], flags);
+    if (result != CUDA_SUCCESS && first_error == CUDA_SUCCESS) {
+      first_error = result;
+    }
+  }
+  return first_error;
+}
+
+extern "C" CUresult scuda_cuDeviceGetCount_multi(int *count) {
+  if (count == nullptr) {
+    return CUDA_ERROR_INVALID_VALUE;
+  }
+  CUresult result = scuda_ensure_device_table();
+  if (result != CUDA_SUCCESS) {
+    return result;
+  }
+
+  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  *count = static_cast<int>(scuda_device_table().size());
+  return CUDA_SUCCESS;
+}
+
+extern "C" CUresult scuda_cuDeviceGet_multi(CUdevice *device, int ordinal) {
+  if (device == nullptr) {
+    return CUDA_ERROR_INVALID_VALUE;
+  }
+  CUresult result = scuda_ensure_device_table();
+  if (result != CUDA_SUCCESS) {
+    return result;
+  }
+
+  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  if (ordinal < 0 || ordinal >= static_cast<int>(scuda_device_table().size())) {
+    return CUDA_ERROR_INVALID_DEVICE;
+  }
+  *device = static_cast<CUdevice>(ordinal);
+  return CUDA_SUCCESS;
+}
+
+extern "C" conn_t *scuda_rpc_conn_for_device(CUdevice *device) {
+  if (device == nullptr || scuda_ensure_device_table() != CUDA_SUCCESS) {
+    return nullptr;
+  }
+
+  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  int local = static_cast<int>(*device);
+  auto &devices = scuda_device_table();
+  if (local < 0 || local >= static_cast<int>(devices.size())) {
+    return nullptr;
+  }
+  const scuda_remote_device &mapped = devices[local];
+  *device = mapped.remote_device;
+  return scuda_conn_by_index(mapped.conn_index);
+}
+
+extern "C" bool scuda_translate_device_for_conn(conn_t *conn,
+                                                CUdevice *device) {
+  if (conn == nullptr || device == nullptr ||
+      scuda_ensure_device_table() != CUDA_SUCCESS) {
+    return false;
+  }
+
+  int conn_index = scuda_conn_index(conn);
+  if (conn_index < 0) {
+    return false;
+  }
+
+  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  int local = static_cast<int>(*device);
+  auto &devices = scuda_device_table();
+  if (local < 0 || local >= static_cast<int>(devices.size())) {
+    return false;
+  }
+  const scuda_remote_device &mapped = devices[local];
+  if (mapped.conn_index != static_cast<unsigned int>(conn_index)) {
+    return false;
+  }
+  *device = mapped.remote_device;
+  return true;
+}
+
+extern "C" CUdevice scuda_local_device_for_remote(conn_t *conn,
+                                                  CUdevice remote_device) {
+  if (conn == nullptr || scuda_ensure_device_table() != CUDA_SUCCESS) {
+    return -1;
+  }
+  int conn_index = scuda_conn_index(conn);
+  if (conn_index < 0) {
+    return -1;
+  }
+
+  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  auto &devices = scuda_device_table();
+  for (size_t i = 0; i < devices.size(); ++i) {
+    if (devices[i].conn_index == static_cast<unsigned int>(conn_index) &&
+        devices[i].remote_device == remote_device) {
+      return static_cast<CUdevice>(i);
+    }
+  }
+  return -1;
+}
+
+extern "C" CUresult scuda_cuDeviceCanAccessPeer_multi(int *canAccessPeer,
+                                                      CUdevice dev,
+                                                      CUdevice peerDev) {
+  if (canAccessPeer == nullptr) {
+    return CUDA_ERROR_INVALID_VALUE;
+  }
+  conn_t *conn = scuda_rpc_conn_for_device(&dev);
+  if (conn == nullptr) {
+    return CUDA_ERROR_INVALID_DEVICE;
+  }
+  if (!scuda_translate_device_for_conn(conn, &peerDev)) {
+    *canAccessPeer = 0;
+    return CUDA_SUCCESS;
+  }
+
+  CUresult result = CUDA_ERROR_DEVICE_UNAVAILABLE;
+  if (rpc_write_start_request(conn, RPC_cuDeviceCanAccessPeer) < 0 ||
+      rpc_write(conn, canAccessPeer, sizeof(*canAccessPeer)) < 0 ||
+      rpc_write(conn, &dev, sizeof(dev)) < 0 ||
+      rpc_write(conn, &peerDev, sizeof(peerDev)) < 0 ||
+      rpc_wait_for_response(conn) < 0 ||
+      rpc_read(conn, canAccessPeer, sizeof(*canAccessPeer)) < 0 ||
+      rpc_read(conn, &result, sizeof(result)) < 0 || rpc_read_end(conn) < 0) {
+    return CUDA_ERROR_DEVICE_UNAVAILABLE;
+  }
+  return result;
+}
+
+extern "C" void scuda_note_context_owner(CUcontext ctx, conn_t *conn) {
+  int index = scuda_conn_index(conn);
+  if (ctx == nullptr || index < 0) {
+    return;
+  }
+  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  scuda_context_owners()[ctx] = static_cast<unsigned int>(index);
+}
+
+extern "C" void scuda_note_module_owner(CUmodule module, conn_t *conn) {
+  int index = scuda_conn_index(conn);
+  if (module == nullptr || index < 0) {
+    return;
+  }
+  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  scuda_module_owners()[module] = static_cast<unsigned int>(index);
+}
+
+extern "C" void scuda_note_function_owner(CUfunction function, conn_t *conn) {
+  int index = scuda_conn_index(conn);
+  if (function == nullptr || index < 0) {
+    return;
+  }
+  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  scuda_function_owners()[function] = static_cast<unsigned int>(index);
+}
+
+extern "C" void scuda_note_stream_owner(CUstream stream, conn_t *conn) {
+  int index = scuda_conn_index(conn);
+  if (stream == nullptr || index < 0) {
+    return;
+  }
+  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  scuda_stream_owners()[stream] = static_cast<unsigned int>(index);
+}
+
+extern "C" void scuda_note_event_owner(CUevent event, conn_t *conn) {
+  int index = scuda_conn_index(conn);
+  if (event == nullptr || index < 0) {
+    return;
+  }
+  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  scuda_event_owners()[event] = static_cast<unsigned int>(index);
+}
+
+extern "C" void scuda_note_deviceptr_owner(CUdeviceptr ptr, conn_t *conn) {
+  int index = scuda_conn_index(conn);
+  if (ptr == 0 || index < 0) {
+    return;
+  }
+  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  scuda_deviceptr_owners()[ptr] = static_cast<unsigned int>(index);
+}
+
+extern "C" void scuda_forget_deviceptr_owner(CUdeviceptr ptr) {
+  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  scuda_deviceptr_owners().erase(ptr);
+}
+
+static conn_t *scuda_conn_for_owner(unsigned int owner) {
+  return scuda_conn_by_index(owner);
+}
+
+extern "C" conn_t *scuda_rpc_conn_for_context(CUcontext ctx) {
+  if (ctx == nullptr) {
+    return scuda_conn_by_index(0);
+  }
+  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  auto it = scuda_context_owners().find(ctx);
+  if (it == scuda_context_owners().end()) {
+    return scuda_conn_by_index(0);
+  }
+  return scuda_conn_for_owner(it->second);
+}
+
+extern "C" conn_t *scuda_rpc_conn_for_module(CUmodule module) {
+  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  auto it = scuda_module_owners().find(module);
+  return it == scuda_module_owners().end() ? scuda_conn_by_index(0)
+                                           : scuda_conn_for_owner(it->second);
+}
+
+extern "C" conn_t *scuda_rpc_conn_for_function(CUfunction function) {
+  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  auto it = scuda_function_owners().find(function);
+  return it == scuda_function_owners().end() ? scuda_conn_by_index(0)
+                                             : scuda_conn_for_owner(it->second);
+}
+
+extern "C" conn_t *scuda_rpc_conn_for_stream(CUstream stream) {
+  if (stream == nullptr) {
+    return nullptr;
+  }
+  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  auto it = scuda_stream_owners().find(stream);
+  return it == scuda_stream_owners().end() ? scuda_conn_by_index(0)
+                                           : scuda_conn_for_owner(it->second);
+}
+
+extern "C" conn_t *scuda_rpc_conn_for_event(CUevent event) {
+  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  auto it = scuda_event_owners().find(event);
+  return it == scuda_event_owners().end() ? scuda_conn_by_index(0)
+                                          : scuda_conn_for_owner(it->second);
+}
+
+extern "C" conn_t *scuda_rpc_conn_for_deviceptr(CUdeviceptr ptr) {
+  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  auto it = scuda_deviceptr_owners().find(ptr);
+  return it == scuda_deviceptr_owners().end()
+             ? scuda_conn_by_index(0)
+             : scuda_conn_for_owner(it->second);
 }
 
 static bool scuda_read_file_span(const char *path,
@@ -423,9 +816,8 @@ static CUfunction scuda_resolve_host_function(CUfunction function) {
     }
   }
   if (scuda_trace_enabled()) {
-    std::cerr << "SCUDA host kernel " << kernel_name
-              << " was not found in " << modules.size() << " loaded modules"
-              << std::endl;
+    std::cerr << "SCUDA host kernel " << kernel_name << " was not found in "
+              << modules.size() << " loaded modules" << std::endl;
   }
 
   return function;
@@ -442,19 +834,21 @@ static CUfunction scuda_translate_private_function(CUfunction function) {
   return scuda_resolve_host_function(function);
 }
 
-extern "C" CUfunction scuda_translate_private_function_for_rpc(
-    CUfunction function) {
+extern "C" CUfunction
+scuda_translate_private_function_for_rpc(CUfunction function) {
   return scuda_translate_private_function(function);
 }
 
 static bool scuda_is_private_function(CUfunction function) {
   std::lock_guard<std::mutex> lock(scuda_private_node_mutex());
-  return scuda_private_node_map().find(function) != scuda_private_node_map().end();
+  return scuda_private_node_map().find(function) !=
+         scuda_private_node_map().end();
 }
 
-static CUresult scuda_get_remote_private_module_node(
-    CUcontext context, CUmodule module, CUfunction *server_node,
-    uint64_t *server_owner) {
+static CUresult scuda_get_remote_private_module_node(CUcontext context,
+                                                     CUmodule module,
+                                                     CUfunction *server_node,
+                                                     uint64_t *server_owner) {
   if (server_node == nullptr || server_owner == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
@@ -469,8 +863,7 @@ static CUresult scuda_get_remote_private_module_node(
       rpc_wait_for_response(conn) < 0 ||
       rpc_read(conn, server_node, sizeof(*server_node)) < 0 ||
       rpc_read(conn, server_owner, sizeof(*server_owner)) < 0 ||
-      rpc_read(conn, &result, sizeof(result)) < 0 ||
-      rpc_read_end(conn) < 0) {
+      rpc_read(conn, &result, sizeof(result)) < 0 || rpc_read_end(conn) < 0) {
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
   }
   return result;
@@ -489,9 +882,10 @@ static uint64_t scuda_private_export_slot_hash(const char *table_name,
   return it->second[slot];
 }
 
-extern "C" CUresult scuda_private_export_slot_called(
-    int slot, const char *table_name, uint64_t arg0, uint64_t arg1,
-    uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5) {
+extern "C" CUresult
+scuda_private_export_slot_called(int slot, const char *table_name,
+                                 uint64_t arg0, uint64_t arg1, uint64_t arg2,
+                                 uint64_t arg3, uint64_t arg4, uint64_t arg5) {
   static uint64_t scuda_private_2131_fake_object[64] = {};
 
   fprintf(stderr,
@@ -553,16 +947,14 @@ extern "C" CUresult scuda_private_export_slot_called(
       if (scuda_trace_enabled()) {
         std::cerr << "SCUDA private 6e16[7] remote node failed result="
                   << static_cast<int>(node_result)
-                  << " module=" << reinterpret_cast<void *>(arg1)
-                  << std::endl;
+                  << " module=" << reinterpret_cast<void *>(arg1) << std::endl;
       }
       return node_result == CUDA_SUCCESS ? CUDA_ERROR_NOT_FOUND : node_result;
     }
 
     auto &node_pool = scuda_private_6e16_node_pool();
     unsigned int node_index =
-        scuda_private_6e16_next_node().fetch_add(1,
-                                                 std::memory_order_relaxed) %
+        scuda_private_6e16_next_node().fetch_add(1, std::memory_order_relaxed) %
         (sizeof(node_pool) / sizeof(node_pool[0]));
     unsigned char *client_node = node_pool[node_index];
     memset(client_node, 0, sizeof(node_pool[node_index]));
@@ -586,9 +978,9 @@ extern "C" CUresult scuda_private_export_slot_called(
                 << std::endl;
     }
     if (arg2 != 0) {
-      using scuda_private_iterator_callback = void (*)(void *, void *, uint64_t);
-      auto callback =
-          reinterpret_cast<scuda_private_iterator_callback>(arg2);
+      using scuda_private_iterator_callback =
+          void (*)(void *, void *, uint64_t);
+      auto callback = reinterpret_cast<scuda_private_iterator_callback>(arg2);
       callback(reinterpret_cast<void *>(arg3), client_node,
                *reinterpret_cast<uint64_t *>(client_node + 8));
     }
@@ -767,8 +1159,7 @@ static const void *scuda_remote_private_export_table(const CUuuid *uuid) {
   std::vector<uint64_t> code_hashes(hashes, hashes + slot_count);
   if (scuda_trace_enabled()) {
     std::cerr << "SCUDA remote cuGetExportTable metadata uuid=" << uuid_hex
-              << " bytes=" << byte_size << " slots=" << slot_count
-              << std::endl;
+              << " bytes=" << byte_size << " slots=" << slot_count << std::endl;
   }
   return scuda_make_private_export_table(
       uuid_hex.c_str(), static_cast<size_t>(byte_size), code_hashes);
@@ -1064,10 +1455,16 @@ extern "C" CUresult cuMemPoolSetAttribute(CUmemoryPool pool,
 static thread_local CUcontext scuda_current_context = nullptr;
 static thread_local std::vector<CUcontext> scuda_context_stack;
 
+extern "C" conn_t *scuda_rpc_conn_for_current_context() {
+  return scuda_rpc_conn_for_context(scuda_current_context);
+}
+
 static CUresult scuda_set_remote_current_context(CUcontext ctx) {
-  conn_t *conn = rpc_client_get_connection(0);
+  conn_t *conn =
+      scuda_rpc_conn_for_context(ctx != nullptr ? ctx : scuda_current_context);
   CUresult return_value;
-  if (rpc_write_start_request(conn, RPC_cuCtxSetCurrent) < 0 ||
+  if (conn == nullptr ||
+      rpc_write_start_request(conn, RPC_cuCtxSetCurrent) < 0 ||
       rpc_write(conn, &ctx, sizeof(ctx)) < 0 ||
       rpc_wait_for_response(conn) < 0 ||
       rpc_read(conn, &return_value, sizeof(return_value)) < 0 ||
@@ -1077,7 +1474,8 @@ static CUresult scuda_set_remote_current_context(CUcontext ctx) {
   return return_value;
 }
 
-extern "C" void scuda_note_ctx_create(CUcontext ctx) {
+extern "C" void scuda_note_ctx_create(CUcontext ctx, conn_t *conn) {
+  scuda_note_context_owner(ctx, conn);
   scuda_context_stack.push_back(scuda_current_context);
   scuda_current_context = ctx;
 }
@@ -1218,8 +1616,7 @@ static size_t scuda_round_up(size_t value, size_t alignment) {
   return (value + alignment - 1) & ~(alignment - 1);
 }
 
-static void scuda_call_previous_sigsegv(int sig, siginfo_t *info,
-                                        void *uctx) {
+static void scuda_call_previous_sigsegv(int sig, siginfo_t *info, void *uctx) {
   if (scuda_previous_sigsegv_action.sa_flags & SA_SIGINFO) {
     if (scuda_previous_sigsegv_action.sa_sigaction != nullptr) {
       scuda_previous_sigsegv_action.sa_sigaction(sig, info, uctx);
@@ -1256,13 +1653,11 @@ static void scuda_sigsegv_handler(int sig, siginfo_t *info, void *uctx) {
     if (!allocation->all_host_dirty) {
       size_t word = page_index / 64;
       uint64_t bit = 1ULL << (page_index % 64);
-      uint64_t previous =
-          __atomic_fetch_or(&allocation->host_dirty_bits[word], bit,
-                            __ATOMIC_RELAXED);
+      uint64_t previous = __atomic_fetch_or(&allocation->host_dirty_bits[word],
+                                            bit, __ATOMIC_RELAXED);
       if ((previous & bit) == 0) {
-        uint32_t slot =
-            __atomic_fetch_add(&allocation->host_dirty_count, 1,
-                               __ATOMIC_RELAXED);
+        uint32_t slot = __atomic_fetch_add(&allocation->host_dirty_count, 1,
+                                           __ATOMIC_RELAXED);
         if (slot < allocation->page_count) {
           allocation->host_dirty_log[slot] = static_cast<uint32_t>(page_index);
         } else {
@@ -1340,8 +1735,9 @@ static bool scuda_protect_host_range(void *host, size_t size, int prot) {
                   prot) == 0;
 }
 
-static bool scuda_enable_dirty_tracking_locked(
-    void *host, scuda_host_allocation *allocation) {
+static bool
+scuda_enable_dirty_tracking_locked(void *host,
+                                   scuda_host_allocation *allocation) {
   if (host == nullptr || allocation == nullptr || allocation->device_ptr == 0) {
     return true;
   }
@@ -1383,15 +1779,13 @@ static void scuda_disable_dirty_tracking(void *host,
   allocation.tracking_enabled = false;
 }
 
-static std::vector<scuda_mapped_host_snapshot>
-scuda_mapped_host_snapshots() {
+static std::vector<scuda_mapped_host_snapshot> scuda_mapped_host_snapshots() {
   std::vector<scuda_mapped_host_snapshot> snapshots;
   std::lock_guard<std::mutex> lock(scuda_host_allocation_mutex());
   for (const auto &entry : scuda_host_allocations()) {
     if (entry.second.device_ptr != 0) {
       snapshots.push_back({entry.first, entry.second.size,
-                           entry.second.device_ptr,
-                           entry.second.device_dirty,
+                           entry.second.device_ptr, entry.second.device_dirty,
                            entry.second.managed});
     }
   }
@@ -1419,8 +1813,9 @@ static CUresult scuda_copy_host_range_to_device(void *host,
                          static_cast<unsigned char *>(host) + offset, bytes);
 }
 
-static CUresult scuda_sync_dirty_host_pages_to_device(
-    void *host, scuda_host_allocation &allocation) {
+static CUresult
+scuda_sync_dirty_host_pages_to_device(void *host,
+                                      scuda_host_allocation &allocation) {
   if (allocation.device_ptr == 0 || allocation.size == 0) {
     return CUDA_SUCCESS;
   }
@@ -1466,7 +1861,7 @@ static CUresult scuda_sync_dirty_host_pages_to_device(
     pages.erase(std::remove_if(pages.begin(), pages.end(),
                                [&](uint32_t page) {
                                  return !scuda_dirty_bit_is_set(allocation,
-                                                                 page);
+                                                                page);
                                }),
                 pages.end());
   }
@@ -1536,8 +1931,7 @@ extern "C" void scuda_mark_host_range_clean(void *host, size_t size) {
     }
   }
 
-  uintptr_t protect_start =
-      base + first_page * allocation.page_size;
+  uintptr_t protect_start = base + first_page * allocation.page_size;
   size_t protect_size = (last_page - first_page + 1) * allocation.page_size;
   scuda_protect_host_range(reinterpret_cast<void *>(protect_start),
                            protect_size, PROT_READ);
@@ -1607,9 +2001,10 @@ static void scuda_mark_mapped_device_dirty(void *host) {
   }
 }
 
-CUresult scuda_sync_mapped_host_to_device_for_launch(
-    unsigned char *packed, const size_t *offsets, const size_t *sizes,
-    uint32_t count) {
+CUresult scuda_sync_mapped_host_to_device_for_launch(unsigned char *packed,
+                                                     const size_t *offsets,
+                                                     const size_t *sizes,
+                                                     uint32_t count) {
   if (packed == nullptr || offsets == nullptr || sizes == nullptr) {
     return count == 0 ? CUDA_SUCCESS : CUDA_ERROR_INVALID_VALUE;
   }
@@ -1686,9 +2081,9 @@ extern "C" CUresult cuMemHostAlloc(void **pp, size_t bytesize,
     return CUDA_ERROR_INVALID_VALUE;
   }
 
-  constexpr unsigned int supported_flags =
-      CU_MEMHOSTALLOC_PORTABLE | CU_MEMHOSTALLOC_DEVICEMAP |
-      CU_MEMHOSTALLOC_WRITECOMBINED;
+  constexpr unsigned int supported_flags = CU_MEMHOSTALLOC_PORTABLE |
+                                           CU_MEMHOSTALLOC_DEVICEMAP |
+                                           CU_MEMHOSTALLOC_WRITECOMBINED;
   if ((Flags & ~supported_flags) != 0) {
     return CUDA_ERROR_INVALID_VALUE;
   }
@@ -1732,7 +2127,8 @@ extern "C" CUresult cuMemHostAlloc(void **pp, size_t bytesize,
     allocation.owned = true;
     allocation.owned_mmap = owned_mmap;
     allocation.device_ptr = device_ptr;
-    auto inserted = scuda_host_allocations().emplace(ptr, std::move(allocation));
+    auto inserted =
+        scuda_host_allocations().emplace(ptr, std::move(allocation));
     if (!scuda_enable_dirty_tracking_locked(ptr, &inserted.first->second)) {
       scuda_host_allocations().erase(inserted.first);
       if (owned_mmap) {
@@ -1956,7 +2352,8 @@ extern "C" CUresult scuda_cuMemAllocManaged_safe(CUdeviceptr *dptr,
     allocation.owned_mmap = true;
     allocation.managed = true;
     allocation.device_ptr = device_ptr;
-    auto inserted = scuda_host_allocations().emplace(ptr, std::move(allocation));
+    auto inserted =
+        scuda_host_allocations().emplace(ptr, std::move(allocation));
     if (!inserted.second) {
       munmap(ptr, storage_size);
       cuMemFree_v2(device_ptr);
@@ -1990,14 +2387,18 @@ extern "C" CUresult scuda_cuMemFree_v2_safe(CUdeviceptr dptr) {
     }
   }
   if (!found) {
-    conn_t *conn = rpc_client_get_connection(0);
+    conn_t *conn = scuda_rpc_conn_for_deviceptr(dptr);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMemFree_v2) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMemFree_v2) < 0 ||
         rpc_write(conn, &dptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0) {
       return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    }
+    if (return_value == CUDA_SUCCESS) {
+      scuda_forget_deviceptr_owner(dptr);
     }
     return return_value;
   }
@@ -2048,9 +2449,10 @@ extern "C" CUresult cuPointerGetAttribute(void *data,
   return return_value;
 }
 
-extern "C" CUresult scuda_cuPointerGetAttributes_safe(
-    unsigned int numAttributes, CUpointer_attribute *attributes, void **data,
-    CUdeviceptr ptr) {
+extern "C" CUresult
+scuda_cuPointerGetAttributes_safe(unsigned int numAttributes,
+                                  CUpointer_attribute *attributes, void **data,
+                                  CUdeviceptr ptr) {
   if (numAttributes != 0 && (attributes == nullptr || data == nullptr)) {
     return CUDA_ERROR_INVALID_VALUE;
   }
@@ -2143,8 +2545,9 @@ scuda_cuArrayCreate_v2_safe(CUarray *pHandle,
   return return_value;
 }
 
-extern "C" CUresult scuda_cuArray3DCreate_v2_safe(
-    CUarray *pHandle, const CUDA_ARRAY3D_DESCRIPTOR *pAllocateArray) {
+extern "C" CUresult
+scuda_cuArray3DCreate_v2_safe(CUarray *pHandle,
+                              const CUDA_ARRAY3D_DESCRIPTOR *pAllocateArray) {
   if (pHandle == nullptr || pAllocateArray == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
@@ -2162,9 +2565,9 @@ extern "C" CUresult scuda_cuArray3DCreate_v2_safe(
 }
 
 static CUresult scuda_rpc_noarg_driver_call(int op) {
-  conn_t *conn = rpc_client_get_connection(0);
+  conn_t *conn = scuda_rpc_conn_for_current_context();
   CUresult return_value;
-  if (rpc_write_start_request(conn, op) < 0 ||
+  if (conn == nullptr || rpc_write_start_request(conn, op) < 0 ||
       rpc_wait_for_response(conn) < 0 ||
       rpc_read(conn, &return_value, sizeof(return_value)) < 0 ||
       rpc_read_end(conn) < 0) {
@@ -2174,9 +2577,10 @@ static CUresult scuda_rpc_noarg_driver_call(int op) {
 }
 
 static CUresult scuda_rpc_stream_driver_call(int op, CUstream stream) {
-  conn_t *conn = rpc_client_get_connection(0);
+  conn_t *conn = stream == nullptr ? scuda_rpc_conn_for_current_context()
+                                   : scuda_rpc_conn_for_stream(stream);
   CUresult return_value;
-  if (rpc_write_start_request(conn, op) < 0 ||
+  if (conn == nullptr || rpc_write_start_request(conn, op) < 0 ||
       rpc_write(conn, &stream, sizeof(stream)) < 0 ||
       rpc_wait_for_response(conn) < 0 ||
       rpc_read(conn, &return_value, sizeof(return_value)) < 0 ||
@@ -2187,9 +2591,9 @@ static CUresult scuda_rpc_stream_driver_call(int op, CUstream stream) {
 }
 
 static CUresult scuda_rpc_event_driver_call(int op, CUevent event) {
-  conn_t *conn = rpc_client_get_connection(0);
+  conn_t *conn = scuda_rpc_conn_for_event(event);
   CUresult return_value;
-  if (rpc_write_start_request(conn, op) < 0 ||
+  if (conn == nullptr || rpc_write_start_request(conn, op) < 0 ||
       rpc_write(conn, &event, sizeof(event)) < 0 ||
       rpc_wait_for_response(conn) < 0 ||
       rpc_read(conn, &return_value, sizeof(return_value)) < 0 ||
@@ -2208,10 +2612,12 @@ extern "C" CUresult cuCtxSynchronize() {
 }
 
 extern "C" CUresult cuStreamSynchronize(CUstream hStream) {
-  conn_t *conn = rpc_client_get_connection(0);
+  conn_t *conn = hStream == nullptr ? scuda_rpc_conn_for_current_context()
+                                    : scuda_rpc_conn_for_stream(hStream);
   CUresult result = CUDA_ERROR_UNKNOWN;
   uint32_t copy_count = 0;
-  if (rpc_write_start_request(conn, RPC_cuStreamSynchronize) < 0 ||
+  if (conn == nullptr ||
+      rpc_write_start_request(conn, RPC_cuStreamSynchronize) < 0 ||
       rpc_write(conn, &hStream, sizeof(hStream)) < 0 ||
       rpc_wait_for_response(conn) < 0 ||
       rpc_read(conn, &copy_count, sizeof(copy_count)) < 0) {
@@ -2232,8 +2638,7 @@ extern "C" CUresult cuStreamSynchronize(CUstream hStream) {
       scuda_mark_host_range_clean(dst, bytes);
     }
   }
-  if (rpc_read(conn, &result, sizeof(result)) < 0 ||
-      rpc_read_end(conn) < 0) {
+  if (rpc_read(conn, &result, sizeof(result)) < 0 || rpc_read_end(conn) < 0) {
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
   }
   if (result != CUDA_SUCCESS) {
@@ -2263,9 +2668,10 @@ extern "C" CUresult cuCtxCreate_v2(CUcontext *pctx, unsigned int flags,
     return CUDA_ERROR_INVALID_VALUE;
   }
 
-  conn_t *conn = rpc_client_get_connection(0);
+  conn_t *conn = scuda_rpc_conn_for_device(&dev);
   CUresult return_value;
-  if (rpc_write_start_request(conn, SCUDA_RPC_cuCtxCreate_v2) < 0 ||
+  if (conn == nullptr ||
+      rpc_write_start_request(conn, SCUDA_RPC_cuCtxCreate_v2) < 0 ||
       rpc_write(conn, &flags, sizeof(flags)) < 0 ||
       rpc_write(conn, &dev, sizeof(dev)) < 0 ||
       rpc_wait_for_response(conn) < 0 ||
@@ -2275,7 +2681,7 @@ extern "C" CUresult cuCtxCreate_v2(CUcontext *pctx, unsigned int flags,
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
   }
   if (return_value == CUDA_SUCCESS) {
-    scuda_note_ctx_create(*pctx);
+    scuda_note_ctx_create(*pctx, conn);
   }
   return return_value;
 }
@@ -2324,13 +2730,14 @@ static CUresult scuda_occupancy_max_potential_block_size(
   return return_value;
 }
 
-extern "C" CUresult cuOccupancyMaxPotentialBlockSize(
-    int *minGridSize, int *blockSize, CUfunction func,
-    CUoccupancyB2DSize blockSizeToDynamicSMemSize, size_t dynamicSMemSize,
-    int blockSizeLimit) {
+extern "C" CUresult
+cuOccupancyMaxPotentialBlockSize(int *minGridSize, int *blockSize,
+                                 CUfunction func,
+                                 CUoccupancyB2DSize blockSizeToDynamicSMemSize,
+                                 size_t dynamicSMemSize, int blockSizeLimit) {
   return scuda_occupancy_max_potential_block_size(
-      minGridSize, blockSize, func, blockSizeToDynamicSMemSize,
-      dynamicSMemSize, blockSizeLimit, 0, false);
+      minGridSize, blockSize, func, blockSizeToDynamicSMemSize, dynamicSMemSize,
+      blockSizeLimit, 0, false);
 }
 
 extern "C" CUresult cuOccupancyMaxPotentialBlockSizeWithFlags(
@@ -2338,8 +2745,8 @@ extern "C" CUresult cuOccupancyMaxPotentialBlockSizeWithFlags(
     CUoccupancyB2DSize blockSizeToDynamicSMemSize, size_t dynamicSMemSize,
     int blockSizeLimit, unsigned int flags) {
   return scuda_occupancy_max_potential_block_size(
-      minGridSize, blockSize, func, blockSizeToDynamicSMemSize,
-      dynamicSMemSize, blockSizeLimit, flags, true);
+      minGridSize, blockSize, func, blockSizeToDynamicSMemSize, dynamicSMemSize,
+      blockSizeLimit, flags, true);
 }
 
 static bool scuda_pack_module_image(const void *image, uint32_t *kind,
@@ -2367,30 +2774,30 @@ static bool scuda_pack_module_image(const void *image, uint32_t *kind,
       const auto *ehdr = reinterpret_cast<const Elf64_Ehdr *>(image);
       size_t image_size = sizeof(Elf64_Ehdr);
       if (ehdr->e_phoff != 0 && ehdr->e_phentsize == sizeof(Elf64_Phdr)) {
-        image_size = std::max(
-            image_size,
-            static_cast<size_t>(ehdr->e_phoff) +
-                static_cast<size_t>(ehdr->e_phnum) * sizeof(Elf64_Phdr));
+        image_size =
+            std::max(image_size, static_cast<size_t>(ehdr->e_phoff) +
+                                     static_cast<size_t>(ehdr->e_phnum) *
+                                         sizeof(Elf64_Phdr));
         const auto *phdrs =
             reinterpret_cast<const Elf64_Phdr *>(elf + ehdr->e_phoff);
         for (int i = 0; i < ehdr->e_phnum; ++i) {
-          image_size = std::max(
-              image_size, static_cast<size_t>(phdrs[i].p_offset) +
-                              static_cast<size_t>(phdrs[i].p_filesz));
+          image_size =
+              std::max(image_size, static_cast<size_t>(phdrs[i].p_offset) +
+                                       static_cast<size_t>(phdrs[i].p_filesz));
         }
       }
       if (ehdr->e_shoff != 0 && ehdr->e_shentsize == sizeof(Elf64_Shdr)) {
-        image_size = std::max(
-            image_size,
-            static_cast<size_t>(ehdr->e_shoff) +
-                static_cast<size_t>(ehdr->e_shnum) * sizeof(Elf64_Shdr));
+        image_size =
+            std::max(image_size, static_cast<size_t>(ehdr->e_shoff) +
+                                     static_cast<size_t>(ehdr->e_shnum) *
+                                         sizeof(Elf64_Shdr));
         const auto *shdrs =
             reinterpret_cast<const Elf64_Shdr *>(elf + ehdr->e_shoff);
         for (int i = 0; i < ehdr->e_shnum; ++i) {
           if (shdrs[i].sh_type != SHT_NOBITS) {
-            image_size = std::max(
-                image_size, static_cast<size_t>(shdrs[i].sh_offset) +
-                                static_cast<size_t>(shdrs[i].sh_size));
+            image_size =
+                std::max(image_size, static_cast<size_t>(shdrs[i].sh_offset) +
+                                         static_cast<size_t>(shdrs[i].sh_size));
           }
         }
       }
@@ -2416,9 +2823,8 @@ static bool scuda_pack_module_image(const void *image, uint32_t *kind,
 
     return false;
   }
-  size_t image_size =
-      static_cast<size_t>(header->header_size) +
-      static_cast<size_t>(header->files_size);
+  size_t image_size = static_cast<size_t>(header->header_size) +
+                      static_cast<size_t>(header->files_size);
   const auto *raw = static_cast<const unsigned char *>(fatbin);
   bytes->assign(raw, raw + image_size);
   return true;
@@ -2435,10 +2841,11 @@ extern "C" CUresult cuModuleLoadData(CUmodule *module, const void *image) {
     return CUDA_ERROR_NOT_SUPPORTED;
   }
 
-  conn_t *conn = rpc_client_get_connection(0);
+  conn_t *conn = scuda_rpc_conn_for_current_context();
   CUresult return_value;
   size_t image_size = image_bytes.size();
-  if (rpc_write_start_request(conn, RPC_cuModuleLoadData) < 0 ||
+  if (conn == nullptr ||
+      rpc_write_start_request(conn, RPC_cuModuleLoadData) < 0 ||
       rpc_write(conn, &kind, sizeof(kind)) < 0 ||
       rpc_write(conn, &image_size, sizeof(image_size)) < 0 ||
       rpc_write(conn, image_bytes.data(), image_size) < 0 ||
@@ -2450,6 +2857,7 @@ extern "C" CUresult cuModuleLoadData(CUmodule *module, const void *image) {
   }
   if (return_value == CUDA_SUCCESS) {
     scuda_remember_loaded_module(*module);
+    scuda_note_module_owner(*module, conn);
   }
   return return_value;
 }
@@ -2464,11 +2872,11 @@ extern "C" CUresult cuModuleLoadDataEx(CUmodule *module, const void *image,
   return cuModuleLoadData(module, image);
 }
 
-extern "C" CUresult cuLibraryLoadData(
-    CUlibrary *library, const void *code, CUjit_option *jitOptions,
-    void **jitOptionsValues, unsigned int numJitOptions,
-    CUlibraryOption *libraryOptions, void **libraryOptionValues,
-    unsigned int numLibraryOptions) {
+extern "C" CUresult
+cuLibraryLoadData(CUlibrary *library, const void *code,
+                  CUjit_option *jitOptions, void **jitOptionsValues,
+                  unsigned int numJitOptions, CUlibraryOption *libraryOptions,
+                  void **libraryOptionValues, unsigned int numLibraryOptions) {
   if (library == nullptr || code == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
@@ -2477,8 +2885,7 @@ extern "C" CUresult cuLibraryLoadData(
       (libraryOptions[0] == CU_LIBRARY_HOST_UNIVERSAL_FUNCTION_AND_DATA_TABLE ||
        libraryOptions[0] == CU_LIBRARY_BINARY_IS_PRESERVED);
   if (numJitOptions != 0 ||
-      !(numLibraryOptions == 0 ||
-        can_ignore_library_options)) {
+      !(numLibraryOptions == 0 || can_ignore_library_options)) {
     if (scuda_trace_enabled()) {
       std::cerr << "SCUDA cuLibraryLoadData unsupported options: jit="
                 << numJitOptions << " library=" << numLibraryOptions
@@ -2495,18 +2902,18 @@ extern "C" CUresult cuLibraryLoadData(
     if (scuda_trace_enabled()) {
       const auto *wrapper =
           reinterpret_cast<const scuda_fatbin_wrapper *>(code);
-      std::cerr << "SCUDA cuLibraryLoadData could not pack image"
-                << " magic=0x" << std::hex << wrapper->magic
-                << " version=0x" << wrapper->version << std::dec
-                << std::endl;
+      std::cerr << "SCUDA cuLibraryLoadData could not pack image" << " magic=0x"
+                << std::hex << wrapper->magic << " version=0x"
+                << wrapper->version << std::dec << std::endl;
     }
     return CUDA_ERROR_NOT_SUPPORTED;
   }
 
-  conn_t *conn = rpc_client_get_connection(0);
+  conn_t *conn = scuda_rpc_conn_for_current_context();
   CUresult return_value;
   size_t image_size = image_bytes.size();
-  if (rpc_write_start_request(conn, RPC_cuLibraryLoadData) < 0 ||
+  if (conn == nullptr ||
+      rpc_write_start_request(conn, RPC_cuLibraryLoadData) < 0 ||
       rpc_write(conn, &kind, sizeof(kind)) < 0 ||
       rpc_write(conn, &image_size, sizeof(image_size)) < 0 ||
       rpc_write(conn, image_bytes.data(), image_size) < 0 ||
@@ -2519,17 +2926,17 @@ extern "C" CUresult cuLibraryLoadData(
   return return_value;
 }
 
-static CUresult scuda_get_kernel_param_layout(
-    CUfunction f, scuda_kernel_param_layout *layout) {
+static CUresult
+scuda_get_kernel_param_layout(CUfunction f, scuda_kernel_param_layout *layout) {
   if (layout == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
   f = scuda_translate_private_function(f);
-  conn_t *conn = rpc_client_get_connection(0);
+  conn_t *conn = scuda_rpc_conn_for_function(f);
   CUresult return_value;
-  if (rpc_write_start_request(conn, SCUDA_RPC_cuFuncGetParamLayout) < 0 ||
-      rpc_write(conn, &f, sizeof(f)) < 0 ||
-      rpc_wait_for_response(conn) < 0 ||
+  if (conn == nullptr ||
+      rpc_write_start_request(conn, SCUDA_RPC_cuFuncGetParamLayout) < 0 ||
+      rpc_write(conn, &f, sizeof(f)) < 0 || rpc_wait_for_response(conn) < 0 ||
       rpc_read(conn, &layout->count, sizeof(layout->count)) < 0 ||
       rpc_read(conn, layout->offsets, sizeof(layout->offsets)) < 0 ||
       rpc_read(conn, layout->sizes, sizeof(layout->sizes)) < 0 ||
@@ -2540,11 +2947,12 @@ static CUresult scuda_get_kernel_param_layout(
   return return_value;
 }
 
-extern "C" CUresult cuLaunchKernel(
-    CUfunction f, unsigned int gridDimX, unsigned int gridDimY,
-    unsigned int gridDimZ, unsigned int blockDimX, unsigned int blockDimY,
-    unsigned int blockDimZ, unsigned int sharedMemBytes, CUstream hStream,
-    void **kernelParams, void **extra) {
+extern "C" CUresult
+cuLaunchKernel(CUfunction f, unsigned int gridDimX, unsigned int gridDimY,
+               unsigned int gridDimZ, unsigned int blockDimX,
+               unsigned int blockDimY, unsigned int blockDimZ,
+               unsigned int sharedMemBytes, CUstream hStream,
+               void **kernelParams, void **extra) {
   if (extra != nullptr) {
     return CUDA_ERROR_NOT_SUPPORTED;
   }
@@ -2581,9 +2989,10 @@ extern "C" CUresult cuLaunchKernel(
     return status;
   }
 
-  conn_t *conn = rpc_client_get_connection(0);
+  conn_t *conn = scuda_rpc_conn_for_function(f);
   CUresult return_value;
-  if (rpc_write_start_request(conn, RPC_cuLaunchKernel) < 0 ||
+  if (conn == nullptr ||
+      rpc_write_start_request(conn, RPC_cuLaunchKernel) < 0 ||
       rpc_write(conn, &f, sizeof(f)) < 0 ||
       rpc_write(conn, &gridDimX, sizeof(gridDimX)) < 0 ||
       rpc_write(conn, &gridDimY, sizeof(gridDimY)) < 0 ||
@@ -2604,9 +3013,8 @@ extern "C" CUresult cuLaunchKernel(
   return return_value;
 }
 
-extern "C" CUresult cuLaunchKernelEx(const CUlaunchConfig *config,
-                                     CUfunction f, void **kernelParams,
-                                     void **extra) {
+extern "C" CUresult cuLaunchKernelEx(const CUlaunchConfig *config, CUfunction f,
+                                     void **kernelParams, void **extra) {
   if (config == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
@@ -2614,11 +3022,10 @@ extern "C" CUresult cuLaunchKernelEx(const CUlaunchConfig *config,
     std::cerr << "SCUDA cuLaunchKernelEx ignoring " << config->numAttrs
               << " launch attributes" << std::endl;
   }
-  return cuLaunchKernel(f, config->gridDimX, config->gridDimY,
-                        config->gridDimZ, config->blockDimX,
-                        config->blockDimY, config->blockDimZ,
-                        config->sharedMemBytes, config->hStream,
-                        kernelParams, extra);
+  return cuLaunchKernel(f, config->gridDimX, config->gridDimY, config->gridDimZ,
+                        config->blockDimX, config->blockDimY, config->blockDimZ,
+                        config->sharedMemBytes, config->hStream, kernelParams,
+                        extra);
 }
 
 extern "C" CUresult scuda_cuFuncGetAttribute_safe(int *pi,
@@ -2631,8 +3038,7 @@ extern "C" CUresult scuda_cuFuncGetAttribute_safe(int *pi,
   if (translated != hfunc) {
     if (scuda_trace_enabled()) {
       std::cerr << "SCUDA translated cuFuncGetAttribute attr=" << attrib
-                << " client=" << hfunc << " server=" << translated
-                << std::endl;
+                << " client=" << hfunc << " server=" << translated << std::endl;
     }
     return cuFuncGetAttribute(pi, attrib, translated);
   }
@@ -2656,8 +3062,8 @@ extern "C" CUresult scuda_cuOccupancyMaxActiveBlocksPerMultiprocessor_safe(
     return cuOccupancyMaxActiveBlocksPerMultiprocessor(
         numBlocks, translated, blockSize, dynamicSMemSize);
   }
-  return cuOccupancyMaxActiveBlocksPerMultiprocessor(
-      numBlocks, func, blockSize, dynamicSMemSize);
+  return cuOccupancyMaxActiveBlocksPerMultiprocessor(numBlocks, func, blockSize,
+                                                     dynamicSMemSize);
 }
 
 extern "C" CUresult
@@ -2674,8 +3080,8 @@ scuda_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags_safe(
                    "cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags"
                 << " client=" << func << " server=" << translated
                 << " blockSize=" << blockSize
-                << " dynamicSMemSize=" << dynamicSMemSize
-                << " flags=" << flags << std::endl;
+                << " dynamicSMemSize=" << dynamicSMemSize << " flags=" << flags
+                << std::endl;
     }
     return cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(
         numBlocks, translated, blockSize, dynamicSMemSize, flags);
@@ -2685,11 +3091,11 @@ scuda_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags_safe(
 }
 
 extern "C" CUresult cuMemcpyDtoHAsync_v2(void *dstHost, CUdeviceptr srcDevice,
-                                         size_t ByteCount,
-                                         CUstream hStream) {
-  conn_t *conn = rpc_client_get_connection(0);
+                                         size_t ByteCount, CUstream hStream) {
+  conn_t *conn = scuda_rpc_conn_for_deviceptr(srcDevice);
   CUresult return_value;
-  if (rpc_write_start_request(conn, RPC_cuMemcpyDtoHAsync_v2) < 0 ||
+  if (conn == nullptr ||
+      rpc_write_start_request(conn, RPC_cuMemcpyDtoHAsync_v2) < 0 ||
       rpc_write(conn, &dstHost, sizeof(dstHost)) < 0 ||
       rpc_write(conn, &srcDevice, sizeof(srcDevice)) < 0 ||
       rpc_write(conn, &ByteCount, sizeof(ByteCount)) < 0 ||
@@ -2725,8 +3131,8 @@ static bool scuda_is_local_address(const void *ptr) {
   if (page_size <= 0) {
     return false;
   }
-  uintptr_t page =
-      reinterpret_cast<uintptr_t>(ptr) & ~(static_cast<uintptr_t>(page_size) - 1);
+  uintptr_t page = reinterpret_cast<uintptr_t>(ptr) &
+                   ~(static_cast<uintptr_t>(page_size) - 1);
   unsigned char vec = 0;
   return mincore(reinterpret_cast<void *>(page), page_size, &vec) == 0;
 }
@@ -2746,9 +3152,8 @@ static size_t scuda_memcpy3d_host_span(const CUDA_MEMCPY3D &copy, bool source) {
   if (copy.WidthInBytes == 0 || copy.Height == 0 || copy.Depth == 0) {
     return 0;
   }
-  return (z + copy.Depth - 1) * pitch * height +
-         (y + copy.Height - 1) * pitch + x +
-         copy.WidthInBytes;
+  return (z + copy.Depth - 1) * pitch * height + (y + copy.Height - 1) * pitch +
+         x + copy.WidthInBytes;
 }
 
 static size_t scuda_memcpy2d_host_span(const CUDA_MEMCPY2D &copy, bool source) {
@@ -2782,14 +3187,12 @@ static CUresult scuda_cuMemcpy2D_common(const CUDA_MEMCPY2D *pCopy,
   }
 
   CUDA_MEMCPY2D copy = *pCopy;
-  size_t src_host_size =
-      copy.srcMemoryType == CU_MEMORYTYPE_HOST
-          ? scuda_memcpy2d_host_span(copy, true)
-          : 0;
-  size_t dst_host_size =
-      copy.dstMemoryType == CU_MEMORYTYPE_HOST
-          ? scuda_memcpy2d_host_span(copy, false)
-          : 0;
+  size_t src_host_size = copy.srcMemoryType == CU_MEMORYTYPE_HOST
+                             ? scuda_memcpy2d_host_span(copy, true)
+                             : 0;
+  size_t dst_host_size = copy.dstMemoryType == CU_MEMORYTYPE_HOST
+                             ? scuda_memcpy2d_host_span(copy, false)
+                             : 0;
   const void *src_host = copy.srcHost;
   void *dst_host = copy.dstHost;
   if ((src_host_size != 0 && src_host == nullptr) ||
@@ -2797,10 +3200,21 @@ static CUresult scuda_cuMemcpy2D_common(const CUDA_MEMCPY2D *pCopy,
     return CUDA_ERROR_INVALID_VALUE;
   }
 
-  conn_t *conn = rpc_client_get_connection(0);
+  conn_t *conn = nullptr;
+  if (copy.srcMemoryType == CU_MEMORYTYPE_DEVICE && copy.srcDevice != 0) {
+    conn = scuda_rpc_conn_for_deviceptr(copy.srcDevice);
+  } else if (copy.dstMemoryType == CU_MEMORYTYPE_DEVICE &&
+             copy.dstDevice != 0) {
+    conn = scuda_rpc_conn_for_deviceptr(copy.dstDevice);
+  } else if (stream != nullptr) {
+    conn = scuda_rpc_conn_for_stream(stream);
+  } else {
+    conn = scuda_rpc_conn_for_current_context();
+  }
   CUresult return_value;
   size_t returned_dst_size = 0;
-  if (rpc_write_start_request(conn, scuda_memcpy2d_rpc_op(async, unaligned)) <
+  if (conn == nullptr ||
+      rpc_write_start_request(conn, scuda_memcpy2d_rpc_op(async, unaligned)) <
           0 ||
       rpc_write(conn, &copy, sizeof(copy)) < 0 ||
       rpc_write(conn, &src_host_size, sizeof(src_host_size)) < 0 ||
@@ -2880,18 +3294,17 @@ static CUresult scuda_graph_mem_attribute_rpc(CUdevice device,
     return CUDA_ERROR_INVALID_VALUE;
   }
 
-  conn_t *conn = rpc_client_get_connection(0);
+  conn_t *conn = scuda_rpc_conn_for_device(&device);
   CUresult result = CUDA_ERROR_UNKNOWN;
   int op = set ? SCUDA_RPC_cuDeviceSetGraphMemAttribute
                : SCUDA_RPC_cuDeviceGetGraphMemAttribute;
-  if (rpc_write_start_request(conn, op) < 0 ||
+  if (conn == nullptr || rpc_write_start_request(conn, op) < 0 ||
       rpc_write(conn, &device, sizeof(device)) < 0 ||
       rpc_write(conn, &attr, sizeof(attr)) < 0 ||
       (set && rpc_write(conn, value, sizeof(*value)) < 0) ||
       rpc_wait_for_response(conn) < 0 ||
       (!set && rpc_read(conn, value, sizeof(*value)) < 0) ||
-      rpc_read(conn, &result, sizeof(result)) < 0 ||
-      rpc_read_end(conn) < 0) {
+      rpc_read(conn, &result, sizeof(result)) < 0 || rpc_read_end(conn) < 0) {
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
   }
   return result;
@@ -2929,14 +3342,12 @@ extern "C" CUresult cuMemcpy3D_v2(const CUDA_MEMCPY3D *pCopy) {
   }
 
   CUDA_MEMCPY3D copy = *pCopy;
-  size_t src_host_size =
-      copy.srcMemoryType == CU_MEMORYTYPE_HOST
-          ? scuda_memcpy3d_host_span(copy, true)
-          : 0;
-  size_t dst_host_size =
-      copy.dstMemoryType == CU_MEMORYTYPE_HOST
-          ? scuda_memcpy3d_host_span(copy, false)
-          : 0;
+  size_t src_host_size = copy.srcMemoryType == CU_MEMORYTYPE_HOST
+                             ? scuda_memcpy3d_host_span(copy, true)
+                             : 0;
+  size_t dst_host_size = copy.dstMemoryType == CU_MEMORYTYPE_HOST
+                             ? scuda_memcpy3d_host_span(copy, false)
+                             : 0;
   const void *src_host = copy.srcHost;
   void *dst_host = copy.dstHost;
   if ((src_host_size != 0 && src_host == nullptr) ||
@@ -2944,10 +3355,18 @@ extern "C" CUresult cuMemcpy3D_v2(const CUDA_MEMCPY3D *pCopy) {
     return CUDA_ERROR_INVALID_VALUE;
   }
 
-  conn_t *conn = rpc_client_get_connection(0);
+  conn_t *conn = nullptr;
+  if (copy.srcMemoryType == CU_MEMORYTYPE_DEVICE && copy.srcDevice != 0) {
+    conn = scuda_rpc_conn_for_deviceptr(copy.srcDevice);
+  } else if (copy.dstMemoryType == CU_MEMORYTYPE_DEVICE &&
+             copy.dstDevice != 0) {
+    conn = scuda_rpc_conn_for_deviceptr(copy.dstDevice);
+  } else {
+    conn = scuda_rpc_conn_for_current_context();
+  }
   CUresult return_value;
   size_t returned_dst_size = 0;
-  if (rpc_write_start_request(conn, RPC_cuMemcpy3D_v2) < 0 ||
+  if (conn == nullptr || rpc_write_start_request(conn, RPC_cuMemcpy3D_v2) < 0 ||
       rpc_write(conn, &copy, sizeof(copy)) < 0 ||
       rpc_write(conn, &src_host_size, sizeof(src_host_size)) < 0 ||
       (src_host_size != 0 && rpc_write(conn, src_host, src_host_size) < 0) ||
@@ -3001,9 +3420,13 @@ extern "C" CUresult cuMemcpyAsync(CUdeviceptr dst, CUdeviceptr src,
     return CUDA_SUCCESS;
   }
 
-  conn_t *conn = rpc_client_get_connection(0);
+  conn_t *conn = scuda_rpc_conn_for_deviceptr(dst);
+  conn_t *src_conn = scuda_rpc_conn_for_deviceptr(src);
+  if (conn != src_conn) {
+    return CUDA_ERROR_NOT_SUPPORTED;
+  }
   CUresult return_value;
-  if (rpc_write_start_request(conn, RPC_cuMemcpyAsync) < 0 ||
+  if (conn == nullptr || rpc_write_start_request(conn, RPC_cuMemcpyAsync) < 0 ||
       rpc_write(conn, &dst, sizeof(dst)) < 0 ||
       rpc_write(conn, &src, sizeof(src)) < 0 ||
       rpc_write(conn, &ByteCount, sizeof(ByteCount)) < 0 ||
@@ -3024,8 +3447,9 @@ extern "C" CUresult cuMemcpyAsync_ptsz(CUdeviceptr dst, CUdeviceptr src,
   return cuMemcpyAsync(dst, src, ByteCount, hStream);
 }
 
-static CUresult scuda_validate_graph_dependencies(
-    const CUgraphNode *dependencies, size_t numDependencies) {
+static CUresult
+scuda_validate_graph_dependencies(const CUgraphNode *dependencies,
+                                  size_t numDependencies) {
   if (numDependencies != 0 && dependencies == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
@@ -3042,7 +3466,8 @@ static CUresult scuda_queue_graph_dependencies(conn_t *conn,
   if (*numDependencies == 0) {
     return CUDA_SUCCESS;
   }
-  if (rpc_write(conn, dependencies, *numDependencies * sizeof(CUgraphNode)) < 0) {
+  if (rpc_write(conn, dependencies, *numDependencies * sizeof(CUgraphNode)) <
+      0) {
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
   }
   return CUDA_SUCCESS;
@@ -3061,9 +3486,10 @@ static size_t scuda_memcpy3d_host_span_bytes(const CUDA_MEMCPY3D &params,
   return pitch * rows;
 }
 
-static CUresult scuda_pack_kernel_params(const CUDA_KERNEL_NODE_PARAMS *nodeParams,
-                                         scuda_kernel_param_layout *layout,
-                                         std::vector<unsigned char> *packed) {
+static CUresult
+scuda_pack_kernel_params(const CUDA_KERNEL_NODE_PARAMS *nodeParams,
+                         scuda_kernel_param_layout *layout,
+                         std::vector<unsigned char> *packed) {
   if (nodeParams == nullptr || layout == nullptr || packed == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
@@ -3101,9 +3527,10 @@ static CUresult scuda_pack_kernel_params(const CUDA_KERNEL_NODE_PARAMS *nodePara
   return CUDA_SUCCESS;
 }
 
-extern "C" CUresult cuGraphAddKernelNode_v2(
-    CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies,
-    size_t numDependencies, const CUDA_KERNEL_NODE_PARAMS *nodeParams) {
+extern "C" CUresult
+cuGraphAddKernelNode_v2(CUgraphNode *phGraphNode, CUgraph hGraph,
+                        const CUgraphNode *dependencies, size_t numDependencies,
+                        const CUDA_KERNEL_NODE_PARAMS *nodeParams) {
   if (phGraphNode == nullptr || nodeParams == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
@@ -3145,9 +3572,10 @@ extern "C" CUresult cuGraphAddKernelNode_v2(
   return return_value;
 }
 
-extern "C" CUresult cuGraphAddMemcpyNode(
-    CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies,
-    size_t numDependencies, const CUDA_MEMCPY3D *copyParams, CUcontext ctx) {
+extern "C" CUresult
+cuGraphAddMemcpyNode(CUgraphNode *phGraphNode, CUgraph hGraph,
+                     const CUgraphNode *dependencies, size_t numDependencies,
+                     const CUDA_MEMCPY3D *copyParams, CUcontext ctx) {
   if (phGraphNode == nullptr || copyParams == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
@@ -3185,10 +3613,11 @@ extern "C" CUresult cuGraphAddMemcpyNode(
   return return_value;
 }
 
-extern "C" CUresult cuGraphAddMemsetNode(
-    CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies,
-    size_t numDependencies, const CUDA_MEMSET_NODE_PARAMS *memsetParams,
-    CUcontext ctx) {
+extern "C" CUresult
+cuGraphAddMemsetNode(CUgraphNode *phGraphNode, CUgraph hGraph,
+                     const CUgraphNode *dependencies, size_t numDependencies,
+                     const CUDA_MEMSET_NODE_PARAMS *memsetParams,
+                     CUcontext ctx) {
   if (phGraphNode == nullptr || memsetParams == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
@@ -3215,9 +3644,10 @@ extern "C" CUresult cuGraphAddMemsetNode(
   return return_value;
 }
 
-extern "C" CUresult cuGraphAddHostNode(
-    CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies,
-    size_t numDependencies, const CUDA_HOST_NODE_PARAMS *nodeParams) {
+extern "C" CUresult
+cuGraphAddHostNode(CUgraphNode *phGraphNode, CUgraph hGraph,
+                   const CUgraphNode *dependencies, size_t numDependencies,
+                   const CUDA_HOST_NODE_PARAMS *nodeParams) {
   if (phGraphNode == nullptr || nodeParams == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
@@ -3267,10 +3697,11 @@ extern "C" CUresult cuGraphConditionalHandleCreate(
   return return_value;
 }
 
-extern "C" CUresult cuGraphAddNode_v2(
-    CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies,
-    const CUgraphEdgeData *dependencyData, size_t numDependencies,
-    CUgraphNodeParams *nodeParams) {
+extern "C" CUresult cuGraphAddNode_v2(CUgraphNode *phGraphNode, CUgraph hGraph,
+                                      const CUgraphNode *dependencies,
+                                      const CUgraphEdgeData *dependencyData,
+                                      size_t numDependencies,
+                                      CUgraphNodeParams *nodeParams) {
   if (phGraphNode == nullptr || nodeParams == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
@@ -3331,9 +3762,8 @@ extern "C" CUresult cuGraphAddNode_v2(
       (packed_size != 0 && rpc_write(conn, packed.data(), packed_size) < 0) ||
       rpc_wait_for_response(conn) < 0 ||
       rpc_read(conn, phGraphNode, sizeof(*phGraphNode)) < 0 ||
-      (child_count != 0 &&
-       rpc_read(conn, child_graphs.data(),
-                child_count * sizeof(CUgraph)) < 0) ||
+      (child_count != 0 && rpc_read(conn, child_graphs.data(),
+                                    child_count * sizeof(CUgraph)) < 0) ||
       rpc_read(conn, &return_value, sizeof(return_value)) < 0 ||
       rpc_read_end(conn) < 0) {
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
@@ -3354,10 +3784,11 @@ extern "C" CUresult cuGraphAddNode_v2(
 #undef cuGraphAddNode
 #endif
 #if CUDA_VERSION >= 13000
-extern "C" CUresult cuGraphAddNode(
-    CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies,
-    const CUgraphEdgeData *dependencyData, size_t numDependencies,
-    CUgraphNodeParams *nodeParams) {
+extern "C" CUresult cuGraphAddNode(CUgraphNode *phGraphNode, CUgraph hGraph,
+                                   const CUgraphNode *dependencies,
+                                   const CUgraphEdgeData *dependencyData,
+                                   size_t numDependencies,
+                                   CUgraphNodeParams *nodeParams) {
   return cuGraphAddNode_v2(phGraphNode, hGraph, dependencies, dependencyData,
                            numDependencies, nodeParams);
 }
@@ -3398,8 +3829,7 @@ extern "C" CUresult cuGraphGetNodes(CUgraph hGraph, CUgraphNode *nodes,
 #ifdef cuGraphInstantiate
 #undef cuGraphInstantiate
 #endif
-extern "C" CUresult cuGraphInstantiate(CUgraphExec *phGraphExec,
-                                       CUgraph hGraph,
+extern "C" CUresult cuGraphInstantiate(CUgraphExec *phGraphExec, CUgraph hGraph,
                                        unsigned long long flags) {
   return cuGraphInstantiateWithFlags(phGraphExec, hGraph, flags);
 }
@@ -3476,8 +3906,8 @@ static bool scuda_is_writable_user_pointer(const void *ptr, size_t size) {
 static CUresult scuda_cuStreamGetCaptureInfo(
     CUstream stream, CUstreamCaptureStatus *captureStatus_out,
     cuuint64_t *id_out, CUgraph *graph_out,
-    const CUgraphNode **dependencies_out,
-    const CUgraphEdgeData **edgeData_out, size_t *numDependencies_out) {
+    const CUgraphNode **dependencies_out, const CUgraphEdgeData **edgeData_out,
+    size_t *numDependencies_out) {
   static thread_local std::vector<CUgraphNode> capture_dependencies;
   static thread_local std::vector<CUgraphEdgeData> capture_edge_data;
 
@@ -3526,9 +3956,8 @@ static CUresult scuda_cuStreamGetCaptureInfo(
       (numDependencies_out == nullptr || !num_dependencies_writable)) {
     numDependencies_out = reinterpret_cast<size_t *>(edgeData_out);
     edgeData_out = nullptr;
-    num_dependencies_writable =
-        scuda_is_writable_user_pointer(numDependencies_out,
-                                       sizeof(*numDependencies_out));
+    num_dependencies_writable = scuda_is_writable_user_pointer(
+        numDependencies_out, sizeof(*numDependencies_out));
   }
   if (numDependencies_out != nullptr && !num_dependencies_writable) {
     numDependencies_out = nullptr;
@@ -3564,11 +3993,11 @@ static CUresult scuda_cuStreamGetCaptureInfo(
 extern "C" CUresult cuStreamGetCaptureInfo_v3(
     CUstream stream, CUstreamCaptureStatus *captureStatus_out,
     cuuint64_t *id_out, CUgraph *graph_out,
-    const CUgraphNode **dependencies_out,
-    const CUgraphEdgeData **edgeData_out, size_t *numDependencies_out) {
+    const CUgraphNode **dependencies_out, const CUgraphEdgeData **edgeData_out,
+    size_t *numDependencies_out) {
   return scuda_cuStreamGetCaptureInfo(stream, captureStatus_out, id_out,
-                                      graph_out, dependencies_out,
-                                      edgeData_out, numDependencies_out);
+                                      graph_out, dependencies_out, edgeData_out,
+                                      numDependencies_out);
 }
 
 extern "C" CUresult cuStreamGetCaptureInfo_v2(
@@ -3587,25 +4016,27 @@ extern "C" CUresult cuStreamGetCaptureInfo_v2(
 extern "C" CUresult cuStreamGetCaptureInfo(
     CUstream stream, CUstreamCaptureStatus *captureStatus_out,
     cuuint64_t *id_out, CUgraph *graph_out,
-    const CUgraphNode **dependencies_out,
-    const CUgraphEdgeData **edgeData_out, size_t *numDependencies_out) {
+    const CUgraphNode **dependencies_out, const CUgraphEdgeData **edgeData_out,
+    size_t *numDependencies_out) {
   return scuda_cuStreamGetCaptureInfo(stream, captureStatus_out, id_out,
-                                      graph_out, dependencies_out,
-                                      edgeData_out, numDependencies_out);
+                                      graph_out, dependencies_out, edgeData_out,
+                                      numDependencies_out);
 }
 #else
-extern "C" CUresult cuStreamGetCaptureInfo(
-    CUstream stream, CUstreamCaptureStatus *captureStatus_out,
-    cuuint64_t *id_out) {
+extern "C" CUresult
+cuStreamGetCaptureInfo(CUstream stream,
+                       CUstreamCaptureStatus *captureStatus_out,
+                       cuuint64_t *id_out) {
   return scuda_cuStreamGetCaptureInfo(stream, captureStatus_out, id_out,
                                       nullptr, nullptr, nullptr, nullptr);
 }
 #endif
 
-extern "C" CUresult cuStreamBeginCaptureToGraph(
-    CUstream hStream, CUgraph hGraph, const CUgraphNode *dependencies,
-    const CUgraphEdgeData *dependencyData, size_t numDependencies,
-    CUstreamCaptureMode mode) {
+extern "C" CUresult
+cuStreamBeginCaptureToGraph(CUstream hStream, CUgraph hGraph,
+                            const CUgraphNode *dependencies,
+                            const CUgraphEdgeData *dependencyData,
+                            size_t numDependencies, CUstreamCaptureMode mode) {
   if (dependencyData != nullptr) {
     return CUDA_ERROR_NOT_SUPPORTED;
   }
@@ -3663,17 +4094,18 @@ extern "C" CUresult cuStreamUpdateCaptureDependencies_v2(
 #undef cuStreamUpdateCaptureDependencies
 #endif
 #if CUDA_VERSION >= 13000
-extern "C" CUresult cuStreamUpdateCaptureDependencies(
-    CUstream hStream, CUgraphNode *dependencies,
-    const CUgraphEdgeData *dependencyData, size_t numDependencies,
-    unsigned int flags) {
+extern "C" CUresult
+cuStreamUpdateCaptureDependencies(CUstream hStream, CUgraphNode *dependencies,
+                                  const CUgraphEdgeData *dependencyData,
+                                  size_t numDependencies, unsigned int flags) {
   return cuStreamUpdateCaptureDependencies_v2(
       hStream, dependencies, dependencyData, numDependencies, flags);
 }
 #else
-extern "C" CUresult cuStreamUpdateCaptureDependencies(
-    CUstream hStream, CUgraphNode *dependencies, size_t numDependencies,
-    unsigned int flags) {
+extern "C" CUresult cuStreamUpdateCaptureDependencies(CUstream hStream,
+                                                      CUgraphNode *dependencies,
+                                                      size_t numDependencies,
+                                                      unsigned int flags) {
   return cuStreamUpdateCaptureDependencies_v2(hStream, dependencies, nullptr,
                                               numDependencies, flags);
 }
@@ -3701,12 +4133,13 @@ static bool scuda_uuid_equals(const CUuuid *uuid, const unsigned char *bytes) {
 }
 
 extern "C" CUresult scuda_cudart_get_module_from_cubin(CUmodule *module,
-                                                        const void *fatbin) {
+                                                       const void *fatbin) {
   CUresult result = cuModuleLoadData(module, fatbin);
   if (scuda_trace_enabled()) {
     std::cerr << "SCUDA cudart get_module_from_cubin result="
-              << static_cast<int>(result) << " module="
-              << (module == nullptr ? nullptr : *module) << std::endl;
+              << static_cast<int>(result)
+              << " module=" << (module == nullptr ? nullptr : *module)
+              << std::endl;
   }
   return result;
 }
@@ -3716,23 +4149,26 @@ extern "C" CUresult scuda_cudart_get_primary_context(CUcontext *ctx,
   CUresult result = cuDevicePrimaryCtxRetain(ctx, dev);
   if (scuda_trace_enabled()) {
     std::cerr << "SCUDA cudart get_primary_context dev=" << dev
-              << " result=" << static_cast<int>(result) << " ctx="
-              << (ctx == nullptr ? nullptr : *ctx) << std::endl;
+              << " result=" << static_cast<int>(result)
+              << " ctx=" << (ctx == nullptr ? nullptr : *ctx) << std::endl;
   }
   return result;
 }
 
-extern "C" CUresult scuda_cudart_get_module_from_cubin_ext1(
-    CUmodule *module, const void *fatbin, void *arg3, void *arg4,
-    unsigned int arg5) {
+extern "C" CUresult scuda_cudart_get_module_from_cubin_ext1(CUmodule *module,
+                                                            const void *fatbin,
+                                                            void *arg3,
+                                                            void *arg4,
+                                                            unsigned int arg5) {
   if (arg3 != nullptr || arg4 != nullptr || arg5 != 0) {
     return CUDA_ERROR_NOT_SUPPORTED;
   }
   CUresult result = cuModuleLoadData(module, fatbin);
   if (scuda_trace_enabled()) {
     std::cerr << "SCUDA cudart get_module_from_cubin_ext1 result="
-              << static_cast<int>(result) << " module="
-              << (module == nullptr ? nullptr : *module) << std::endl;
+              << static_cast<int>(result)
+              << " module=" << (module == nullptr ? nullptr : *module)
+              << std::endl;
   }
   return result;
 }
@@ -3747,17 +4183,20 @@ extern "C" uintptr_t scuda_dark_return_zero_2(const void *, const void *) {
   return 0;
 }
 
-extern "C" CUresult scuda_cudart_get_module_from_cubin_ext2(
-    const void *fatbin, CUmodule *module, void *arg3, void *arg4,
-    unsigned int arg5) {
+extern "C" CUresult scuda_cudart_get_module_from_cubin_ext2(const void *fatbin,
+                                                            CUmodule *module,
+                                                            void *arg3,
+                                                            void *arg4,
+                                                            unsigned int arg5) {
   if (arg3 != nullptr || arg4 != nullptr || arg5 != 0) {
     return CUDA_ERROR_NOT_SUPPORTED;
   }
   CUresult result = cuModuleLoadData(module, fatbin);
   if (scuda_trace_enabled()) {
     std::cerr << "SCUDA cudart get_module_from_cubin_ext2 result="
-              << static_cast<int>(result) << " module="
-              << (module == nullptr ? nullptr : *module) << std::endl;
+              << static_cast<int>(result)
+              << " module=" << (module == nullptr ? nullptr : *module)
+              << std::endl;
   }
   return result;
 }
@@ -3784,8 +4223,8 @@ extern "C" void scuda_dark_get_unknown_buffer2(void **ptr, size_t *size) {
   }
 }
 
-using scuda_context_storage_dtor_t =
-    void (*)(CUcontext context, void *key, void *value);
+using scuda_context_storage_dtor_t = void (*)(CUcontext context, void *key,
+                                              void *value);
 
 struct scuda_context_storage_value {
   void *value;
@@ -3797,13 +4236,11 @@ static std::mutex &scuda_context_storage_mutex() {
   return *mutex;
 }
 
-static std::unordered_map<CUcontext,
-                          std::unordered_map<void *, scuda_context_storage_value>>
-    &scuda_context_storage() {
-  static auto *storage =
-      new std::unordered_map<CUcontext,
-                             std::unordered_map<void *,
-                                                scuda_context_storage_value>>();
+static std::unordered_map<
+    CUcontext, std::unordered_map<void *, scuda_context_storage_value>> &
+scuda_context_storage() {
+  static auto *storage = new std::unordered_map<
+      CUcontext, std::unordered_map<void *, scuda_context_storage_value>>();
   return *storage;
 }
 
@@ -3817,8 +4254,9 @@ static CUresult scuda_normalize_context(CUcontext *ctx) {
   return cuCtxGetCurrent(ctx);
 }
 
-extern "C" CUresult scuda_context_local_storage_put(
-    CUcontext ctx, void *key, void *value, scuda_context_storage_dtor_t dtor) {
+extern "C" CUresult
+scuda_context_local_storage_put(CUcontext ctx, void *key, void *value,
+                                scuda_context_storage_dtor_t dtor) {
   CUresult result = scuda_normalize_context(&ctx);
   if (result != CUDA_SUCCESS) {
     return result;
@@ -3860,8 +4298,8 @@ extern "C" CUresult scuda_context_local_storage_delete(CUcontext ctx,
   return CUDA_SUCCESS;
 }
 
-extern "C" CUresult scuda_context_local_storage_get(void **value,
-                                                    CUcontext ctx, void *key) {
+extern "C" CUresult scuda_context_local_storage_get(void **value, CUcontext ctx,
+                                                    void *key) {
   if (value == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
@@ -3905,16 +4343,14 @@ extern "C" CUresult scuda_heap_free(const void *, size_t *) {
 }
 
 extern "C" CUresult scuda_device_get_attribute_ext(CUdevice dev,
-                                                   unsigned int attribute,
-                                                   int,
+                                                   unsigned int attribute, int,
                                                    size_t (*result)[2]) {
   if (result == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
   int value = 0;
-  CUresult status =
-      cuDeviceGetAttribute(&value, static_cast<CUdevice_attribute>(attribute),
-                           dev);
+  CUresult status = cuDeviceGetAttribute(
+      &value, static_cast<CUdevice_attribute>(attribute), dev);
   if (status == CUDA_SUCCESS) {
     (*result)[0] = static_cast<size_t>(value);
     (*result)[1] = 0;
@@ -3951,30 +4387,28 @@ struct scuda_integrity_device_hash_info {
 static void scuda_integrity_single_pass(unsigned char state[66],
                                         unsigned char byte) {
   static constexpr unsigned char MIXING_TABLE[256] = {
-      0x29, 0x2E, 0x43, 0xC9, 0xA2, 0xD8, 0x7C, 0x01, 0x3D, 0x36, 0x54,
-      0xA1, 0xEC, 0xF0, 0x06, 0x13, 0x62, 0xA7, 0x05, 0xF3, 0xC0, 0xC7,
-      0x73, 0x8C, 0x98, 0x93, 0x2B, 0xD9, 0xBC, 0x4C, 0x82, 0xCA, 0x1E,
-      0x9B, 0x57, 0x3C, 0xFD, 0xD4, 0xE0, 0x16, 0x67, 0x42, 0x6F, 0x18,
-      0x8A, 0x17, 0xE5, 0x12, 0xBE, 0x4E, 0xC4, 0xD6, 0xDA, 0x9E, 0xDE,
-      0x49, 0xA0, 0xFB, 0xF5, 0x8E, 0xBB, 0x2F, 0xEE, 0x7A, 0xA9, 0x68,
-      0x79, 0x91, 0x15, 0xB2, 0x07, 0x3F, 0x94, 0xC2, 0x10, 0x89, 0x0B,
-      0x22, 0x5F, 0x21, 0x80, 0x7F, 0x5D, 0x9A, 0x5A, 0x90, 0x32, 0x27,
-      0x35, 0x3E, 0xCC, 0xE7, 0xBF, 0xF7, 0x97, 0x03, 0xFF, 0x19, 0x30,
-      0xB3, 0x48, 0xA5, 0xB5, 0xD1, 0xD7, 0x5E, 0x92, 0x2A, 0xAC, 0x56,
-      0xAA, 0xC6, 0x4F, 0xB8, 0x38, 0xD2, 0x96, 0xA4, 0x7D, 0xB6, 0x76,
-      0xFC, 0x6B, 0xE2, 0x9C, 0x74, 0x04, 0xF1, 0x45, 0x9D, 0x70, 0x59,
-      0x64, 0x71, 0x87, 0x20, 0x86, 0x5B, 0xCF, 0x65, 0xE6, 0x2D, 0xA8,
-      0x02, 0x1B, 0x60, 0x25, 0xAD, 0xAE, 0xB0, 0xB9, 0xF6, 0x1C, 0x46,
-      0x61, 0x69, 0x34, 0x40, 0x7E, 0x0F, 0x55, 0x47, 0xA3, 0x23, 0xDD,
-      0x51, 0xAF, 0x3A, 0xC3, 0x5C, 0xF9, 0xCE, 0xBA, 0xC5, 0xEA, 0x26,
-      0x2C, 0x53, 0x0D, 0x6E, 0x85, 0x28, 0x84, 0x09, 0xD3, 0xDF, 0xCD,
-      0xF4, 0x41, 0x81, 0x4D, 0x52, 0x6A, 0xDC, 0x37, 0xC8, 0x6C, 0xC1,
-      0xAB, 0xFA, 0x24, 0xE1, 0x7B, 0x08, 0x0C, 0xBD, 0xB1, 0x4A, 0x78,
-      0x88, 0x95, 0x8B, 0xE3, 0x63, 0xE8, 0x6D, 0xE9, 0xCB, 0xD5, 0xFE,
-      0x3B, 0x00, 0x1D, 0x39, 0xF2, 0xEF, 0xB7, 0x0E, 0x66, 0x58, 0xD0,
-      0xE4, 0xA6, 0x77, 0x72, 0xF8, 0xEB, 0x75, 0x4B, 0x0A, 0x31, 0x44,
-      0x50, 0xB4, 0x8F, 0xED, 0x1F, 0x1A, 0xDB, 0x99, 0x8D, 0x33, 0x9F,
-      0x11, 0x83, 0x14};
+      0x29, 0x2E, 0x43, 0xC9, 0xA2, 0xD8, 0x7C, 0x01, 0x3D, 0x36, 0x54, 0xA1,
+      0xEC, 0xF0, 0x06, 0x13, 0x62, 0xA7, 0x05, 0xF3, 0xC0, 0xC7, 0x73, 0x8C,
+      0x98, 0x93, 0x2B, 0xD9, 0xBC, 0x4C, 0x82, 0xCA, 0x1E, 0x9B, 0x57, 0x3C,
+      0xFD, 0xD4, 0xE0, 0x16, 0x67, 0x42, 0x6F, 0x18, 0x8A, 0x17, 0xE5, 0x12,
+      0xBE, 0x4E, 0xC4, 0xD6, 0xDA, 0x9E, 0xDE, 0x49, 0xA0, 0xFB, 0xF5, 0x8E,
+      0xBB, 0x2F, 0xEE, 0x7A, 0xA9, 0x68, 0x79, 0x91, 0x15, 0xB2, 0x07, 0x3F,
+      0x94, 0xC2, 0x10, 0x89, 0x0B, 0x22, 0x5F, 0x21, 0x80, 0x7F, 0x5D, 0x9A,
+      0x5A, 0x90, 0x32, 0x27, 0x35, 0x3E, 0xCC, 0xE7, 0xBF, 0xF7, 0x97, 0x03,
+      0xFF, 0x19, 0x30, 0xB3, 0x48, 0xA5, 0xB5, 0xD1, 0xD7, 0x5E, 0x92, 0x2A,
+      0xAC, 0x56, 0xAA, 0xC6, 0x4F, 0xB8, 0x38, 0xD2, 0x96, 0xA4, 0x7D, 0xB6,
+      0x76, 0xFC, 0x6B, 0xE2, 0x9C, 0x74, 0x04, 0xF1, 0x45, 0x9D, 0x70, 0x59,
+      0x64, 0x71, 0x87, 0x20, 0x86, 0x5B, 0xCF, 0x65, 0xE6, 0x2D, 0xA8, 0x02,
+      0x1B, 0x60, 0x25, 0xAD, 0xAE, 0xB0, 0xB9, 0xF6, 0x1C, 0x46, 0x61, 0x69,
+      0x34, 0x40, 0x7E, 0x0F, 0x55, 0x47, 0xA3, 0x23, 0xDD, 0x51, 0xAF, 0x3A,
+      0xC3, 0x5C, 0xF9, 0xCE, 0xBA, 0xC5, 0xEA, 0x26, 0x2C, 0x53, 0x0D, 0x6E,
+      0x85, 0x28, 0x84, 0x09, 0xD3, 0xDF, 0xCD, 0xF4, 0x41, 0x81, 0x4D, 0x52,
+      0x6A, 0xDC, 0x37, 0xC8, 0x6C, 0xC1, 0xAB, 0xFA, 0x24, 0xE1, 0x7B, 0x08,
+      0x0C, 0xBD, 0xB1, 0x4A, 0x78, 0x88, 0x95, 0x8B, 0xE3, 0x63, 0xE8, 0x6D,
+      0xE9, 0xCB, 0xD5, 0xFE, 0x3B, 0x00, 0x1D, 0x39, 0xF2, 0xEF, 0xB7, 0x0E,
+      0x66, 0x58, 0xD0, 0xE4, 0xA6, 0x77, 0x72, 0xF8, 0xEB, 0x75, 0x4B, 0x0A,
+      0x31, 0x44, 0x50, 0xB4, 0x8F, 0xED, 0x1F, 0x1A, 0xDB, 0x99, 0x8D, 0x33,
+      0x9F, 0x11, 0x83, 0x14};
 
   unsigned char index = state[0x40];
   state[index + 0x10] = byte;
@@ -4007,9 +4441,8 @@ static void scuda_integrity_single_pass(unsigned char state[66],
   }
 }
 
-static void scuda_integrity_hash_pass(unsigned char state[66],
-                                      const void *data, size_t size,
-                                      unsigned char xor_mask) {
+static void scuda_integrity_hash_pass(unsigned char state[66], const void *data,
+                                      size_t size, unsigned char xor_mask) {
   const auto *bytes = static_cast<const unsigned char *>(data);
   for (size_t i = 0; i < size; ++i) {
     scuda_integrity_single_pass(state, bytes[i] ^ xor_mask);
@@ -4173,18 +4606,17 @@ static const void *scuda_get_cudart_export_table() {
   return table;
 }
 
-template <size_t N> static const void *scuda_table_start(const void *(&table)[N]) {
+template <size_t N>
+static const void *scuda_table_start(const void *(&table)[N]) {
   return table;
 }
 
 static const void *scuda_get_tools_tls_table() {
-  static const void *table[4] = {reinterpret_cast<const void *>(sizeof(table)),
-                                reinterpret_cast<const void *>(
-                                    &scuda_dark_return_zero),
-                                reinterpret_cast<const void *>(
-                                    &scuda_dark_return_zero_1),
-                                reinterpret_cast<const void *>(
-                                    &scuda_dark_return_zero_1)};
+  static const void *table[4] = {
+      reinterpret_cast<const void *>(sizeof(table)),
+      reinterpret_cast<const void *>(&scuda_dark_return_zero),
+      reinterpret_cast<const void *>(&scuda_dark_return_zero_1),
+      reinterpret_cast<const void *>(&scuda_dark_return_zero_1)};
   return scuda_table_start(table);
 }
 
@@ -4212,9 +4644,9 @@ static const void *scuda_get_context_local_storage_table() {
 }
 
 static const void *scuda_get_ctx_create_bypass_table() {
-  static const void *table[2] = {reinterpret_cast<const void *>(sizeof(table)),
-                                reinterpret_cast<const void *>(
-                                    &scuda_ctx_create_bypass)};
+  static const void *table[2] = {
+      reinterpret_cast<const void *>(sizeof(table)),
+      reinterpret_cast<const void *>(&scuda_ctx_create_bypass)};
   return scuda_table_start(table);
 }
 
@@ -4396,7 +4828,7 @@ static void *scuda_make_missing_stub(const char *symbol) {
 }
 
 #define SCUDA_DEFINE_UNSUPPORTED_STUB(name)                                    \
-  extern "C" CUresult scuda_unsupported_##name() {                            \
+  extern "C" CUresult scuda_unsupported_##name() {                             \
     std::cerr << "SCUDA unsupported Driver API called: " #name << std::endl;   \
     return CUDA_ERROR_NOT_SUPPORTED;                                           \
   }
@@ -4470,7 +4902,8 @@ SCUDA_DEFINE_UNSUPPORTED_STUB(cuDeviceGetP2PAtomicCapabilities)
 
 static void *scuda_get_unsupported_stub(const char *symbol) {
   static const std::unordered_map<std::string, void *> stubs = {
-#define SCUDA_STUB_ENTRY(name) {#name, (void *)&scuda_unsupported_##name}
+#define SCUDA_STUB_ENTRY(name)                                                 \
+  { #name, (void *)&scuda_unsupported_##name }
       SCUDA_STUB_ENTRY(cuCtxCreate),
       SCUDA_STUB_ENTRY(cuModuleLoadData),
       SCUDA_STUB_ENTRY(cuModuleLoadFatBinary),
@@ -4852,8 +5285,8 @@ CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion,
     return CUDA_SUCCESS;
   }
   if (symbol != nullptr &&
-      strcmp(symbol,
-             "cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags") == 0) {
+      strcmp(symbol, "cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags") ==
+          0) {
     *pfn = reinterpret_cast<void *>(
         &scuda_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags_safe);
     if (symbolStatus != nullptr) {
@@ -4967,10 +5400,8 @@ CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion,
       {"cuGraphAddHostNode", (void *)cuGraphAddHostNode},
       {"cuGraphAddMemAllocNode", (void *)cuGraphAddMemAllocNode},
       {"cuGraphAddMemFreeNode", (void *)cuGraphAddMemFreeNode},
-      {"cuDeviceGetGraphMemAttribute",
-       (void *)cuDeviceGetGraphMemAttribute},
-      {"cuDeviceSetGraphMemAttribute",
-       (void *)cuDeviceSetGraphMemAttribute},
+      {"cuDeviceGetGraphMemAttribute", (void *)cuDeviceGetGraphMemAttribute},
+      {"cuDeviceSetGraphMemAttribute", (void *)cuDeviceSetGraphMemAttribute},
       {"cuGraphKernelNodeGetParams", (void *)cuGraphKernelNodeGetParams_v2},
       {"cuGraphKernelNodeGetParams_v2", (void *)cuGraphKernelNodeGetParams_v2},
       {"cuGraphExecKernelNodeSetParams",
@@ -4984,8 +5415,7 @@ CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion,
       {"cuStreamAddCallback", (void *)cuStreamAddCallback},
       {"cuStreamAddCallback_ptsz", (void *)cuStreamAddCallback},
       {"cuStreamBeginCaptureToGraph", (void *)cuStreamBeginCaptureToGraph},
-      {"cuStreamBeginCaptureToGraph_ptsz",
-       (void *)cuStreamBeginCaptureToGraph},
+      {"cuStreamBeginCaptureToGraph_ptsz", (void *)cuStreamBeginCaptureToGraph},
       {"cuStreamUpdateCaptureDependencies",
        (void *)cuStreamUpdateCaptureDependencies},
       {"cuStreamUpdateCaptureDependencies_v2",
@@ -5116,8 +5546,8 @@ void *dlsym(void *handle, const char *name) __THROW {
         &scuda_cuOccupancyMaxActiveBlocksPerMultiprocessor_safe);
   }
   if (name != nullptr &&
-      strcmp(name,
-             "cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags") == 0) {
+      strcmp(name, "cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags") ==
+          0) {
     return reinterpret_cast<void *>(
         &scuda_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags_safe);
   }
@@ -5231,10 +5661,8 @@ void *dlsym(void *handle, const char *name) __THROW {
       {"cuGraphAddHostNode", (void *)cuGraphAddHostNode},
       {"cuGraphAddMemAllocNode", (void *)cuGraphAddMemAllocNode},
       {"cuGraphAddMemFreeNode", (void *)cuGraphAddMemFreeNode},
-      {"cuDeviceGetGraphMemAttribute",
-       (void *)cuDeviceGetGraphMemAttribute},
-      {"cuDeviceSetGraphMemAttribute",
-       (void *)cuDeviceSetGraphMemAttribute},
+      {"cuDeviceGetGraphMemAttribute", (void *)cuDeviceGetGraphMemAttribute},
+      {"cuDeviceSetGraphMemAttribute", (void *)cuDeviceSetGraphMemAttribute},
       {"cuGraphKernelNodeGetParams", (void *)cuGraphKernelNodeGetParams_v2},
       {"cuGraphKernelNodeGetParams_v2", (void *)cuGraphKernelNodeGetParams_v2},
       {"cuGraphExecKernelNodeSetParams",
@@ -5248,8 +5676,7 @@ void *dlsym(void *handle, const char *name) __THROW {
       {"cuStreamAddCallback", (void *)cuStreamAddCallback},
       {"cuStreamAddCallback_ptsz", (void *)cuStreamAddCallback},
       {"cuStreamBeginCaptureToGraph", (void *)cuStreamBeginCaptureToGraph},
-      {"cuStreamBeginCaptureToGraph_ptsz",
-       (void *)cuStreamBeginCaptureToGraph},
+      {"cuStreamBeginCaptureToGraph_ptsz", (void *)cuStreamBeginCaptureToGraph},
       {"cuStreamUpdateCaptureDependencies",
        (void *)cuStreamUpdateCaptureDependencies},
       {"cuStreamUpdateCaptureDependencies_v2",
@@ -5267,7 +5694,8 @@ void *dlsym(void *handle, const char *name) __THROW {
     return unsupported_stub;
   }
 
-  if (scuda_stub_missing_enabled() && scuda_symbol_looks_like_driver_api(name)) {
+  if (scuda_stub_missing_enabled() &&
+      scuda_symbol_looks_like_driver_api(name)) {
     return scuda_make_missing_stub(name);
   }
 

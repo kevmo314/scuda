@@ -1,7 +1,7 @@
 #include <arpa/inet.h>
+#include <cuda.h>
 #include <netdb.h>
 #include <netinet/tcp.h>
-#include <cuda.h>
 #include <nvml.h>
 #include <pthread.h>
 #include <sys/socket.h>
@@ -12,13 +12,14 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <vector>
 
 #include "codegen/gen_api.h"
 #include "rpc.h"
 
 // CUDA <= 12.6 ships NVML API 12, which does not define the versioned
 // temperature struct. Keep the wrapper ABI-compatible with newer nvidia-smi.
-#if (defined(CUDA_VERSION) && CUDA_VERSION >= 12080) ||                           \
+#if (defined(CUDA_VERSION) && CUDA_VERSION >= 12080) ||                        \
     (defined(NVML_API_VERSION) && NVML_API_VERSION >= 13)
 using scuda_nvmlTemperature_t = nvmlTemperature_t;
 #else
@@ -34,8 +35,18 @@ namespace {
 constexpr const char *DEFAULT_PORT = "14833";
 
 pthread_mutex_t conn_mutex = PTHREAD_MUTEX_INITIALIZER;
-conn_t conn = {};
+conn_t conns[16] = {};
+int nconns = 0;
 bool connected = false;
+
+struct scuda_nvml_remote_device {
+  unsigned int conn_index = 0;
+  unsigned int remote_index = 0;
+  nvmlDevice_t remote_device = nullptr;
+};
+
+std::vector<scuda_nvml_remote_device> devices;
+bool devices_ready = false;
 
 nvmlReturn_t rpc_error() { return NVML_ERROR_UNKNOWN; }
 
@@ -75,7 +86,6 @@ int open_connection() {
     return -1;
   }
 
-  int sockfd = -1;
   char *cursor = servers;
   char *token = nullptr;
   while ((token = strsep(&cursor, ",")) != nullptr) {
@@ -99,37 +109,42 @@ int open_connection() {
       continue;
     }
 
-    sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+    int sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
     if (sockfd >= 0) {
       int flag = 1;
       setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, &flag, sizeof(flag));
       if (connect(sockfd, res->ai_addr, res->ai_addrlen) == 0) {
+        if (nconns >= static_cast<int>(sizeof(conns) / sizeof(conns[0]))) {
+          close(sockfd);
+          freeaddrinfo(res);
+          break;
+        }
+        conn_t *c = &conns[nconns];
+        *c = {};
+        c->connfd = sockfd;
+        c->request_id = 0;
+        c->local_request_parity = c->request_id & 1;
+        if (pthread_mutex_init(&c->read_mutex, nullptr) < 0 ||
+            pthread_mutex_init(&c->write_mutex, nullptr) < 0 ||
+            pthread_mutex_init(&c->call_mutex, nullptr) < 0 ||
+            pthread_cond_init(&c->read_cond, nullptr) < 0 ||
+            pthread_create(&c->read_thread, nullptr, rpc_client_dispatch_thread,
+                           c) < 0) {
+          close(sockfd);
+          freeaddrinfo(res);
+          continue;
+        }
+        ++nconns;
         freeaddrinfo(res);
-        break;
+        continue;
       }
       close(sockfd);
-      sockfd = -1;
     }
     freeaddrinfo(res);
   }
   free(servers);
 
-  if (sockfd < 0) {
-    pthread_mutex_unlock(&conn_mutex);
-    return -1;
-  }
-
-  conn = {};
-  conn.connfd = sockfd;
-  conn.request_id = 0;
-  conn.local_request_parity = conn.request_id & 1;
-  if (pthread_mutex_init(&conn.read_mutex, nullptr) < 0 ||
-      pthread_mutex_init(&conn.write_mutex, nullptr) < 0 ||
-      pthread_mutex_init(&conn.call_mutex, nullptr) < 0 ||
-      pthread_cond_init(&conn.read_cond, nullptr) < 0 ||
-      pthread_create(&conn.read_thread, nullptr, rpc_client_dispatch_thread,
-                     &conn) < 0) {
-    close(sockfd);
+  if (nconns == 0) {
     pthread_mutex_unlock(&conn_mutex);
     return -1;
   }
@@ -139,15 +154,17 @@ int open_connection() {
   return 0;
 }
 
-conn_t *connection() {
+conn_t *connection(unsigned int index = 0) {
   if (open_connection() < 0) {
     return nullptr;
   }
-  return &conn;
+  if (index >= static_cast<unsigned int>(nconns)) {
+    return nullptr;
+  }
+  return &conns[index];
 }
 
-nvmlReturn_t call_no_args(int op) {
-  conn_t *c = connection();
+nvmlReturn_t call_no_args_on(conn_t *c, int op) {
   nvmlReturn_t result = rpc_error();
   if (c == nullptr || rpc_write_start_request(c, op) < 0 ||
       rpc_wait_for_response(c) < 0 ||
@@ -156,6 +173,86 @@ nvmlReturn_t call_no_args(int op) {
   }
   return result;
 }
+
+nvmlReturn_t call_uint_out_on(conn_t *c, int op, unsigned int *value) {
+  nvmlReturn_t result = rpc_error();
+  unsigned int temp = 0;
+  if (c == nullptr || rpc_write_start_request(c, op) < 0 ||
+      rpc_wait_for_response(c) < 0 || rpc_read(c, &temp, sizeof(temp)) < 0 ||
+      rpc_read(c, &result, sizeof(result)) < 0 || rpc_read_end(c) < 0) {
+    return rpc_error();
+  }
+  if (value != nullptr) {
+    *value = temp;
+  }
+  return result;
+}
+
+nvmlReturn_t call_device_from_index_on(conn_t *c, int op, unsigned int index,
+                                       nvmlDevice_t *device) {
+  nvmlReturn_t result = rpc_error();
+  nvmlDevice_t temp = nullptr;
+  if (c == nullptr || rpc_write_start_request(c, op) < 0 ||
+      rpc_write(c, &index, sizeof(index)) < 0 || rpc_wait_for_response(c) < 0 ||
+      rpc_read(c, &temp, sizeof(temp)) < 0 ||
+      rpc_read(c, &result, sizeof(result)) < 0 || rpc_read_end(c) < 0) {
+    return rpc_error();
+  }
+  if (device != nullptr) {
+    *device = temp;
+  }
+  return result;
+}
+
+nvmlReturn_t ensure_devices() {
+  if (open_connection() < 0) {
+    return rpc_error();
+  }
+  if (devices_ready) {
+    return NVML_SUCCESS;
+  }
+
+  devices.clear();
+  for (int i = 0; i < nconns; ++i) {
+    unsigned int count = 0;
+    nvmlReturn_t result =
+        call_uint_out_on(&conns[i], RPC_nvmlDeviceGetCount_v2, &count);
+    if (result != NVML_SUCCESS) {
+      devices.clear();
+      return result;
+    }
+    for (unsigned int ordinal = 0; ordinal < count; ++ordinal) {
+      nvmlDevice_t remote = nullptr;
+      result = call_device_from_index_on(
+          &conns[i], RPC_nvmlDeviceGetHandleByIndex_v2, ordinal, &remote);
+      if (result != NVML_SUCCESS) {
+        devices.clear();
+        return result;
+      }
+      devices.push_back(scuda_nvml_remote_device{static_cast<unsigned int>(i),
+                                                 ordinal, remote});
+    }
+  }
+  devices_ready = true;
+  return NVML_SUCCESS;
+}
+
+conn_t *connection_for_device(nvmlDevice_t *device) {
+  if (device == nullptr || ensure_devices() != NVML_SUCCESS) {
+    return nullptr;
+  }
+  if (devices.empty()) {
+    return nullptr;
+  }
+  auto *mapped = reinterpret_cast<scuda_nvml_remote_device *>(*device);
+  if (mapped < devices.data() || mapped >= devices.data() + devices.size()) {
+    return connection();
+  }
+  *device = mapped->remote_device;
+  return connection(mapped->conn_index);
+}
+
+nvmlReturn_t call_no_args(int op) { return call_no_args_on(connection(), op); }
 
 nvmlReturn_t call_string_no_device(int op, char *value, unsigned int length) {
   conn_t *c = connection();
@@ -239,7 +336,7 @@ nvmlReturn_t call_device_from_string(int op, const char *value,
 
 nvmlReturn_t call_device_string(int op, nvmlDevice_t device, char *value,
                                 unsigned int length) {
-  conn_t *c = connection();
+  conn_t *c = connection_for_device(&device);
   nvmlReturn_t result = rpc_error();
   if (c == nullptr || rpc_write_start_request(c, op) < 0 ||
       rpc_write(c, &device, sizeof(device)) < 0 ||
@@ -254,7 +351,7 @@ nvmlReturn_t call_device_string(int op, nvmlDevice_t device, char *value,
 
 template <typename T>
 nvmlReturn_t call_device_struct(int op, nvmlDevice_t device, T *value) {
-  conn_t *c = connection();
+  conn_t *c = connection_for_device(&device);
   nvmlReturn_t result = rpc_error();
   T temp = value == nullptr ? T{} : *value;
   if (c == nullptr || rpc_write_start_request(c, op) < 0 ||
@@ -272,7 +369,7 @@ nvmlReturn_t call_device_struct(int op, nvmlDevice_t device, T *value) {
 
 template <typename T>
 nvmlReturn_t call_device_value(int op, nvmlDevice_t device, T *value) {
-  conn_t *c = connection();
+  conn_t *c = connection_for_device(&device);
   nvmlReturn_t result = rpc_error();
   T temp = {};
   if (c == nullptr || rpc_write_start_request(c, op) < 0 ||
@@ -290,7 +387,7 @@ nvmlReturn_t call_device_value(int op, nvmlDevice_t device, T *value) {
 template <typename Arg, typename Out>
 nvmlReturn_t call_device_arg_value(int op, nvmlDevice_t device, Arg arg,
                                    Out *value) {
-  conn_t *c = connection();
+  conn_t *c = connection_for_device(&device);
   nvmlReturn_t result = rpc_error();
   Out temp = {};
   if (c == nullptr || rpc_write_start_request(c, op) < 0 ||
@@ -308,7 +405,7 @@ nvmlReturn_t call_device_arg_value(int op, nvmlDevice_t device, Arg arg,
 
 nvmlReturn_t call_processes(int op, nvmlDevice_t device,
                             unsigned int *infoCount, nvmlProcessInfo_t *infos) {
-  conn_t *c = connection();
+  conn_t *c = connection_for_device(&device);
   nvmlReturn_t result = rpc_error();
   unsigned int requested_count = infoCount == nullptr ? 0 : *infoCount;
   int has_infos = infos == nullptr ? 0 : 1;
@@ -379,7 +476,7 @@ nvmlReturn_t call_event_set_wait(nvmlEventSet_t set, nvmlEventData_t *data,
 nvmlReturn_t call_device_register_events(nvmlDevice_t device,
                                          unsigned long long eventTypes,
                                          nvmlEventSet_t set) {
-  conn_t *c = connection();
+  conn_t *c = connection_for_device(&device);
   nvmlReturn_t result = rpc_error();
   if (c == nullptr ||
       rpc_write_start_request(c, RPC_nvmlDeviceRegisterEvents) < 0 ||
@@ -395,7 +492,7 @@ nvmlReturn_t call_device_register_events(nvmlDevice_t device,
 template <typename A, typename B>
 nvmlReturn_t call_device_two_values(int op, nvmlDevice_t device, A *first,
                                     B *second) {
-  conn_t *c = connection();
+  conn_t *c = connection_for_device(&device);
   nvmlReturn_t result = rpc_error();
   A first_temp = {};
   B second_temp = {};
@@ -447,20 +544,44 @@ nvmlReturn_t call_device_two_values(int op, nvmlDevice_t device, A *first,
 #endif
 
 extern "C" nvmlReturn_t nvmlInit_v2(void) {
-  return call_no_args(RPC_nvmlInit_v2);
+  if (open_connection() < 0) {
+    return rpc_error();
+  }
+  nvmlReturn_t first_error = NVML_SUCCESS;
+  for (int i = 0; i < nconns; ++i) {
+    nvmlReturn_t result = call_no_args_on(&conns[i], RPC_nvmlInit_v2);
+    if (result != NVML_SUCCESS && first_error == NVML_SUCCESS) {
+      first_error = result;
+    }
+  }
+  devices_ready = false;
+  devices.clear();
+  return first_error;
 }
 
 extern "C" nvmlReturn_t nvmlInit(void) { return nvmlInit_v2(); }
 
 extern "C" nvmlReturn_t nvmlInitWithFlags(unsigned int flags) {
-  conn_t *c = connection();
-  nvmlReturn_t result = rpc_error();
-  if (c == nullptr || rpc_write_start_request(c, RPC_nvmlInitWithFlags) < 0 ||
-      rpc_write(c, &flags, sizeof(flags)) < 0 || rpc_wait_for_response(c) < 0 ||
-      rpc_read(c, &result, sizeof(result)) < 0 || rpc_read_end(c) < 0) {
+  if (open_connection() < 0) {
     return rpc_error();
   }
-  return result;
+  nvmlReturn_t first_error = NVML_SUCCESS;
+  for (int i = 0; i < nconns; ++i) {
+    conn_t *c = &conns[i];
+    nvmlReturn_t result = rpc_error();
+    if (rpc_write_start_request(c, RPC_nvmlInitWithFlags) < 0 ||
+        rpc_write(c, &flags, sizeof(flags)) < 0 ||
+        rpc_wait_for_response(c) < 0 ||
+        rpc_read(c, &result, sizeof(result)) < 0 || rpc_read_end(c) < 0) {
+      result = rpc_error();
+    }
+    if (result != NVML_SUCCESS && first_error == NVML_SUCCESS) {
+      first_error = result;
+    }
+  }
+  devices_ready = false;
+  devices.clear();
+  return first_error;
 }
 
 extern "C" nvmlReturn_t nvmlShutdown(void) {
@@ -578,7 +699,14 @@ nvmlSystemGetCudaDriverVersion_v2(int *cudaDriverVersion) {
 }
 
 extern "C" nvmlReturn_t nvmlDeviceGetCount_v2(unsigned int *deviceCount) {
-  return call_uint_out(RPC_nvmlDeviceGetCount_v2, deviceCount);
+  nvmlReturn_t result = ensure_devices();
+  if (result != NVML_SUCCESS) {
+    return result;
+  }
+  if (deviceCount != nullptr) {
+    *deviceCount = static_cast<unsigned int>(devices.size());
+  }
+  return NVML_SUCCESS;
 }
 
 extern "C" nvmlReturn_t nvmlDeviceGetCount(unsigned int *deviceCount) {
@@ -587,8 +715,18 @@ extern "C" nvmlReturn_t nvmlDeviceGetCount(unsigned int *deviceCount) {
 
 extern "C" nvmlReturn_t nvmlDeviceGetHandleByIndex_v2(unsigned int index,
                                                       nvmlDevice_t *device) {
-  return call_device_from_index(RPC_nvmlDeviceGetHandleByIndex_v2, index,
-                                device);
+  nvmlReturn_t result = ensure_devices();
+  if (result != NVML_SUCCESS) {
+    return result;
+  }
+  if (device == nullptr) {
+    return NVML_ERROR_INVALID_ARGUMENT;
+  }
+  if (index >= devices.size()) {
+    return NVML_ERROR_INVALID_ARGUMENT;
+  }
+  *device = reinterpret_cast<nvmlDevice_t>(&devices[index]);
+  return NVML_SUCCESS;
 }
 
 extern "C" nvmlReturn_t nvmlDeviceGetHandleByIndex(unsigned int index,
@@ -624,7 +762,19 @@ extern "C" nvmlReturn_t nvmlDeviceGetUUID(nvmlDevice_t device, char *uuid,
 
 extern "C" nvmlReturn_t nvmlDeviceGetIndex(nvmlDevice_t device,
                                            unsigned int *index) {
-  return call_device_value(RPC_nvmlDeviceGetIndex, device, index);
+  nvmlReturn_t result = ensure_devices();
+  if (result != NVML_SUCCESS) {
+    return result;
+  }
+  if (devices.empty() || index == nullptr) {
+    return NVML_ERROR_INVALID_ARGUMENT;
+  }
+  auto *mapped = reinterpret_cast<scuda_nvml_remote_device *>(device);
+  if (mapped < devices.data() || mapped >= devices.data() + devices.size()) {
+    return NVML_ERROR_INVALID_ARGUMENT;
+  }
+  *index = static_cast<unsigned int>(mapped - devices.data());
+  return NVML_SUCCESS;
 }
 
 extern "C" nvmlReturn_t nvmlDeviceGetMinorNumber(nvmlDevice_t device,
