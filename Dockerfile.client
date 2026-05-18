@@ -1,0 +1,61 @@
+ARG CUDA_VERSION=13.1.0
+ARG UBUNTU_VERSION=24.04
+ARG CUDA_IMAGE_FLAVOR=devel
+ARG CUDA_RUNTIME_IMAGE_FLAVOR=runtime
+
+FROM nvidia/cuda:${CUDA_VERSION}-${CUDA_IMAGE_FLAVOR}-ubuntu${UBUNTU_VERSION} AS builder
+
+ARG DEBIAN_FRONTEND=noninteractive
+ARG CMAKE_BUILD_TYPE=Release
+
+ENV CUDA_HOME=/usr/local/cuda
+ENV PATH="${CUDA_HOME}/bin:${PATH}"
+ENV LIBRARY_PATH="${CUDA_HOME}/lib64/stubs:${LIBRARY_PATH}"
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    ca-certificates \
+    cmake \
+    ninja-build \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /opt/scuda
+COPY . /opt/scuda
+
+RUN cmake -S /opt/scuda -B /opt/scuda/build \
+      -G Ninja \
+      -DCMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE}" \
+      -DCMAKE_LIBRARY_PATH="${CUDA_HOME}/lib64/stubs" \
+    && cmake --build /opt/scuda/build --parallel --target scuda_driver \
+    && test -e /opt/scuda/build/libcuda.so.1 \
+    && ! nm -D --defined-only /opt/scuda/build/libcuda.so.1 \
+      | awk '{print $3}' \
+      | grep -E '^cuda'
+
+FROM nvidia/cuda:${CUDA_VERSION}-${CUDA_RUNTIME_IMAGE_FLAVOR}-ubuntu${UBUNTU_VERSION}
+
+ARG DEBIAN_FRONTEND=noninteractive
+ARG CUDA_VERSION
+ARG UBUNTU_VERSION
+
+LABEL org.opencontainers.image.title="scuda-client"
+LABEL org.opencontainers.image.description="SCUDA client runtime with driver-only libcuda shim"
+LABEL org.opencontainers.image.source="https://github.com/kevmo314/scuda"
+LABEL org.opencontainers.image.version="${CUDA_VERSION}-ubuntu${UBUNTU_VERSION}"
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    bash \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /opt/scuda/build/libcuda.so.1 /opt/scuda/lib/libcuda.so.1
+COPY deploy/scuda-client-entrypoint.sh /usr/local/bin/scuda-client
+
+RUN ln -sf /opt/scuda/lib/libcuda.so.1 /opt/scuda/lib/libcuda.so \
+    && chmod +x /usr/local/bin/scuda-client
+
+ENV SCUDA_LIB=/opt/scuda/lib/libcuda.so.1
+ENV LD_LIBRARY_PATH=/opt/scuda/lib
+
+ENTRYPOINT ["/usr/local/bin/scuda-client"]
+CMD ["bash"]
