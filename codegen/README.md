@@ -11,6 +11,20 @@ available are `NULL_TERMINATED` (to indicate that this is a null-terminated stri
 `SIZE:<value>` to specify the size (aka width) of the parameter. If `LENGTH:<param>` is specified, `<param>` must
 be placed in front of the parameter referencing it, otherwise the generated code will not compile.
 
+Client routing can also be annotated for handles that belong to a specific SCUDA
+server connection. `@routingkey <kind> <param>` selects the connection for the
+generated client wrapper before it writes the RPC. Supported kinds are
+`DEVICE`, `CONTEXT`, `MODULE`, `FUNCTION`, `STREAM`, `EVENT`, and `DEVICEPTR`.
+`@routingkey CURRENT_CONTEXT` routes through the client's current CUDA context
+owner. `DEVICE` and `CONTEXT` routing is inferred from the first non-pointer
+`CUdevice` or `CUcontext` parameter, so those annotations are only needed when
+the routing key is not the first matching parameter.
+
+Generated wrappers can record ownership for handles returned by an API with
+`@recordowner <kind> <param>`. Supported owner kinds are `CONTEXT`, `MODULE`,
+`FUNCTION`, `STREAM`, `EVENT`, and `DEVICEPTR`. Ownership is recorded only after
+the CUDA call returns `CUDA_SUCCESS`.
+
 With the annotations in place, `codegen.py` reads in the annotations and generates the RPC server and client.
 
 The motivation for this approach is grounded in codegen being very good at ensuring that the RPC server and client

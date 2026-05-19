@@ -19,15 +19,28 @@
 extern int rpc_size();
 extern conn_t *rpc_client_get_connection(unsigned int index);
 extern void rpc_close(conn_t *conn);
+
+struct scuda_route {
+    int kind;
+    conn_t *conn;
+};
+
 extern "C" CUresult scuda_cuInit_multi(unsigned int flags);
 extern "C" CUresult scuda_cuDeviceGetCount_multi(int *count);
 extern "C" CUresult scuda_cuDeviceGet_multi(CUdevice *device, int ordinal);
-extern "C" CUresult scuda_cuDeviceCanAccessPeer_multi(int *canAccessPeer,
-                                                       CUdevice dev,
-                                                       CUdevice peerDev);
+extern "C" scuda_route scuda_route_for_default();
+extern "C" scuda_route scuda_route_for_device(CUdevice *device);
+extern "C" scuda_route scuda_route_for_current_context();
+extern "C" scuda_route scuda_route_for_context(CUcontext ctx);
+extern "C" scuda_route scuda_route_for_module(CUmodule module);
+extern "C" scuda_route scuda_route_for_function(CUfunction function);
+extern "C" scuda_route scuda_route_for_stream(CUstream stream);
+extern "C" scuda_route scuda_route_for_event(CUevent event);
+extern "C" scuda_route scuda_route_for_deviceptr(CUdeviceptr ptr);
+extern "C" bool scuda_route_is_local(scuda_route route);
+extern "C" conn_t *scuda_route_remote_conn(scuda_route route);
+extern "C" void *scuda_real_cuda_symbol(const char *name);
 extern "C" conn_t *scuda_rpc_conn_for_device(CUdevice *device);
-extern "C" CUdevice scuda_local_device_for_remote(conn_t *conn,
-                                                  CUdevice remote_device);
 extern "C" conn_t *scuda_rpc_conn_for_current_context();
 extern "C" conn_t *scuda_rpc_conn_for_context(CUcontext ctx);
 extern "C" conn_t *scuda_rpc_conn_for_module(CUmodule module);
@@ -41,97 +54,34 @@ extern "C" void scuda_note_function_owner(CUfunction function, conn_t *conn);
 extern "C" void scuda_note_stream_owner(CUstream stream, conn_t *conn);
 extern "C" void scuda_note_event_owner(CUevent event, conn_t *conn);
 extern "C" void scuda_note_deviceptr_owner(CUdeviceptr ptr, conn_t *conn);
-extern "C" void scuda_prepare_host_range_write(void *host, size_t size);
-extern "C" void scuda_mark_host_range_clean(void *host, size_t size);
-extern "C" void scuda_remember_loaded_module_for_rpc(CUmodule module);
-extern "C" CUresult
-scuda_cuArrayCreate_v2_safe(CUarray *pHandle,
-                            const CUDA_ARRAY_DESCRIPTOR *pAllocateArray);
-extern "C" CUresult scuda_cuArray3DCreate_v2_safe(
-    CUarray *pHandle, const CUDA_ARRAY3D_DESCRIPTOR *pAllocateArray);
-extern "C" CUresult scuda_cuMemAllocManaged_safe(CUdeviceptr *dptr,
-                                                 size_t bytesize,
-                                                 unsigned int flags);
+
+extern "C" void scuda_note_context_owner_route(CUcontext ctx, scuda_route route);
+extern "C" void scuda_note_module_owner_route(CUmodule module, scuda_route route);
+extern "C" void scuda_note_function_owner_route(CUfunction function, scuda_route route);
+extern "C" void scuda_note_stream_owner_route(CUstream stream, scuda_route route);
+extern "C" void scuda_note_event_owner_route(CUevent event, scuda_route route);
+extern "C" void scuda_note_deviceptr_owner_route(CUdeviceptr ptr, scuda_route route);
+
+extern "C" CUresult scuda_cuArrayCreate_v2_safe(CUarray *pHandle, const CUDA_ARRAY_DESCRIPTOR *pAllocateArray);
+extern "C" CUresult scuda_cuArray3DCreate_v2_safe(CUarray *pHandle, const CUDA_ARRAY3D_DESCRIPTOR *pAllocateArray);
+extern "C" CUresult scuda_cuMemAllocManaged_safe(CUdeviceptr *dptr, size_t bytesize, unsigned int flags);
 extern "C" CUresult scuda_cuMemFree_v2_safe(CUdeviceptr dptr);
-extern "C" CUfunction scuda_translate_private_function_for_rpc(
-    CUfunction function);
-struct scuda_kernel_param_layout;
 extern "C" CUresult scuda_cuCtxPushCurrent_virtual(CUcontext ctx);
 extern "C" CUresult scuda_cuCtxPopCurrent_virtual(CUcontext *pctx);
 extern "C" CUresult scuda_cuCtxSetCurrent_virtual(CUcontext ctx);
 extern "C" CUresult scuda_cuCtxGetCurrent_virtual(CUcontext *pctx);
 extern "C" CUresult scuda_cuCtxGetDevice_cached(CUdevice *device);
 extern "C" void scuda_invalidate_current_context_cache();
-extern "C" CUresult scuda_cuDevicePrimaryCtxGetState_cached(
-    CUdevice dev, unsigned int *flags, int *active);
+extern "C" CUresult scuda_cuDevicePrimaryCtxGetState_cached(CUdevice dev, unsigned int *flags, int *active);
 extern "C" void scuda_note_primary_context_active(CUdevice dev);
-extern "C" void scuda_note_primary_context_flags(CUdevice dev,
-                                                 unsigned int flags);
+extern "C" void scuda_note_primary_context_flags(CUdevice dev, unsigned int flags);
 extern "C" void scuda_invalidate_primary_context_state(CUdevice dev);
-extern "C" CUresult scuda_get_kernel_param_layout_cached(
-    CUfunction f, scuda_kernel_param_layout *layout);
-extern "C" void scuda_invalidate_kernel_param_layout_cache();
-extern "C" CUresult scuda_cuDeviceGetAttribute_cached(
-    int *pi, CUdevice_attribute attrib, CUdevice dev);
-extern "C" CUresult scuda_cuKernelGetFunction_cached(CUfunction *pFunc,
-                                                      CUkernel kernel);
-extern "C" CUresult
-scuda_cuOccupancyMaxActiveBlocksPerMultiprocessor_cached(
-    int *numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize);
-extern "C" CUresult
-scuda_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags_cached(
-    int *numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize,
-    unsigned int flags);
-static constexpr int SCUDA_RPC_cuLinkAddData_v2 = 1000018;
-
-struct scuda_client_link_state {
-    CUlinkState remote_state = nullptr;
-    std::vector<unsigned char> image;
-    CUjitInputType image_type = CU_JIT_INPUT_PTX;
-};
-
-struct scuda_kernel_param_layout {
-    uint32_t count = 0;
-    size_t offsets[64] = {};
-    size_t sizes[64] = {};
-};
-
-static CUresult scuda_get_kernel_param_layout_for_codegen(
-    CUfunction f, scuda_kernel_param_layout *layout) {
-    return scuda_get_kernel_param_layout_cached(f, layout);
-}
-
-static CUresult scuda_pack_kernel_params_for_codegen(
-    const CUDA_KERNEL_NODE_PARAMS *nodeParams, scuda_kernel_param_layout *layout,
-    std::vector<unsigned char> *packed) {
-    if (nodeParams == nullptr || layout == nullptr || packed == nullptr)
-        return CUDA_ERROR_INVALID_VALUE;
-    if (nodeParams->extra != nullptr)
-        return CUDA_ERROR_NOT_SUPPORTED;
-    CUfunction func = nodeParams->func;
-#if CUDA_VERSION >= 12000
-    if (func == nullptr)
-        func = reinterpret_cast<CUfunction>(nodeParams->kern);
-#endif
-    CUresult status = scuda_get_kernel_param_layout_for_codegen(func, layout);
-    if (status != CUDA_SUCCESS)
-        return status;
-    if (layout->count > 64)
-        return CUDA_ERROR_NOT_SUPPORTED;
-    if (layout->count != 0 && nodeParams->kernelParams == nullptr)
-        return CUDA_ERROR_INVALID_VALUE;
-    size_t total_size = 0;
-    for (uint32_t i = 0; i < layout->count; ++i) {
-        if (nodeParams->kernelParams[i] == nullptr)
-            return CUDA_ERROR_INVALID_VALUE;
-        total_size = std::max(total_size, layout->offsets[i] + layout->sizes[i]);
-    }
-    packed->assign(total_size, 0);
-    for (uint32_t i = 0; i < layout->count; ++i)
-        memcpy(packed->data() + layout->offsets[i], nodeParams->kernelParams[i],
-               layout->sizes[i]);
-    return CUDA_SUCCESS;
-}
+extern "C" CUresult scuda_cuDeviceGetAttribute_cached(int *pi, CUdevice_attribute attrib, CUdevice dev);
+extern "C" CUresult scuda_cuKernelGetFunction_cached(CUfunction *pFunc, CUkernel kernel);
+extern "C" CUresult scuda_cuPointerGetAttributes_safe(unsigned int numAttributes, CUpointer_attribute *attributes, void **data, CUdeviceptr ptr);
+extern "C" CUresult scuda_cuOccupancyMaxActiveBlocksPerMultiprocessor_cached(int *numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize);
+extern "C" CUresult scuda_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags_cached(int *numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize, unsigned int flags);
+extern "C" CUresult scuda_cuDeviceCanAccessPeer_multi(int *canAccessPeer, CUdevice dev, CUdevice peerDev);
 
 CUresult cuInit(unsigned int Flags)
 {
@@ -140,9 +90,22 @@ CUresult cuInit(unsigned int Flags)
 
 CUresult cuDriverGetVersion(int* driverVersion)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(int*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuDriverGetVersion"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(driverVersion);
+    if (driverVersion != nullptr) {
+        const char *override_version = getenv("SCUDA_DRIVER_VERSION_OVERRIDE");
+        if (override_version != nullptr) *driverVersion = atoi(override_version);
+    }
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuDriverGetVersion) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuDriverGetVersion) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, driverVersion, sizeof(int)) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
@@ -167,7 +130,15 @@ CUresult cuDeviceGetCount(int* count)
 
 CUresult cuDeviceGetName(char* name, int len, CUdevice dev)
 {
-    conn_t *conn = scuda_rpc_conn_for_device(&dev);
+    scuda_route route = scuda_route_for_device(&dev);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(char*, int, CUdevice);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuDeviceGetName"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(name, len, dev);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuDeviceGetName) < 0 ||
@@ -183,7 +154,15 @@ CUresult cuDeviceGetName(char* name, int len, CUdevice dev)
 
 CUresult cuDeviceGetUuid_v2(CUuuid* uuid, CUdevice dev)
 {
-    conn_t *conn = scuda_rpc_conn_for_device(&dev);
+    scuda_route route = scuda_route_for_device(&dev);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUuuid*, CUdevice);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuDeviceGetUuid_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(uuid, dev);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuDeviceGetUuid_v2) < 0 ||
@@ -198,7 +177,15 @@ CUresult cuDeviceGetUuid_v2(CUuuid* uuid, CUdevice dev)
 
 CUresult cuDeviceGetLuid(char* luid, unsigned int* deviceNodeMask, CUdevice dev)
 {
-    conn_t *conn = scuda_rpc_conn_for_device(&dev);
+    scuda_route route = scuda_route_for_device(&dev);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(char*, unsigned int*, CUdevice);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuDeviceGetLuid"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(luid, deviceNodeMask, dev);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     std::size_t luid_len;
     if (conn == nullptr ||
@@ -216,7 +203,15 @@ CUresult cuDeviceGetLuid(char* luid, unsigned int* deviceNodeMask, CUdevice dev)
 
 CUresult cuDeviceTotalMem_v2(size_t* bytes, CUdevice dev)
 {
-    conn_t *conn = scuda_rpc_conn_for_device(&dev);
+    scuda_route route = scuda_route_for_device(&dev);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(size_t*, CUdevice);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuDeviceTotalMem_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(bytes, dev);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuDeviceTotalMem_v2) < 0 ||
@@ -231,7 +226,15 @@ CUresult cuDeviceTotalMem_v2(size_t* bytes, CUdevice dev)
 
 CUresult cuDeviceGetTexture1DLinearMaxWidth(size_t* maxWidthInElements, CUarray_format format, unsigned numChannels, CUdevice dev)
 {
-    conn_t *conn = scuda_rpc_conn_for_device(&dev);
+    scuda_route route = scuda_route_for_device(&dev);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(size_t*, CUarray_format, unsigned, CUdevice);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuDeviceGetTexture1DLinearMaxWidth"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(maxWidthInElements, format, numChannels, dev);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuDeviceGetTexture1DLinearMaxWidth) < 0 ||
@@ -253,7 +256,15 @@ CUresult cuDeviceGetAttribute(int* pi, CUdevice_attribute attrib, CUdevice dev)
 
 CUresult cuDeviceSetMemPool(CUdevice dev, CUmemoryPool pool)
 {
-    conn_t *conn = scuda_rpc_conn_for_device(&dev);
+    scuda_route route = scuda_route_for_device(&dev);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdevice, CUmemoryPool);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuDeviceSetMemPool"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dev, pool);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuDeviceSetMemPool) < 0 ||
@@ -268,7 +279,15 @@ CUresult cuDeviceSetMemPool(CUdevice dev, CUmemoryPool pool)
 
 CUresult cuDeviceGetMemPool(CUmemoryPool* pool, CUdevice dev)
 {
-    conn_t *conn = scuda_rpc_conn_for_device(&dev);
+    scuda_route route = scuda_route_for_device(&dev);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUmemoryPool*, CUdevice);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuDeviceGetMemPool"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pool, dev);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuDeviceGetMemPool) < 0 ||
@@ -283,7 +302,15 @@ CUresult cuDeviceGetMemPool(CUmemoryPool* pool, CUdevice dev)
 
 CUresult cuDeviceGetDefaultMemPool(CUmemoryPool* pool_out, CUdevice dev)
 {
-    conn_t *conn = scuda_rpc_conn_for_device(&dev);
+    scuda_route route = scuda_route_for_device(&dev);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUmemoryPool*, CUdevice);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuDeviceGetDefaultMemPool"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pool_out, dev);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuDeviceGetDefaultMemPool) < 0 ||
@@ -298,7 +325,15 @@ CUresult cuDeviceGetDefaultMemPool(CUmemoryPool* pool_out, CUdevice dev)
 
 CUresult cuDeviceGetExecAffinitySupport(int* pi, CUexecAffinityType type, CUdevice dev)
 {
-    conn_t *conn = scuda_rpc_conn_for_device(&dev);
+    scuda_route route = scuda_route_for_device(&dev);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(int*, CUexecAffinityType, CUdevice);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuDeviceGetExecAffinitySupport"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pi, type, dev);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuDeviceGetExecAffinitySupport) < 0 ||
@@ -314,9 +349,18 @@ CUresult cuDeviceGetExecAffinitySupport(int* pi, CUexecAffinityType type, CUdevi
 
 CUresult cuFlushGPUDirectRDMAWrites(CUflushGPUDirectRDMAWritesTarget target, CUflushGPUDirectRDMAWritesScope scope)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUflushGPUDirectRDMAWritesTarget, CUflushGPUDirectRDMAWritesScope);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuFlushGPUDirectRDMAWrites"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(target, scope);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuFlushGPUDirectRDMAWrites) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuFlushGPUDirectRDMAWrites) < 0 ||
         rpc_write(conn, &target, sizeof(CUflushGPUDirectRDMAWritesTarget)) < 0 ||
         rpc_write(conn, &scope, sizeof(CUflushGPUDirectRDMAWritesScope)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -328,7 +372,15 @@ CUresult cuFlushGPUDirectRDMAWrites(CUflushGPUDirectRDMAWritesTarget target, CUf
 
 CUresult cuDeviceGetProperties(CUdevprop* prop, CUdevice dev)
 {
-    conn_t *conn = scuda_rpc_conn_for_device(&dev);
+    scuda_route route = scuda_route_for_device(&dev);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdevprop*, CUdevice);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuDeviceGetProperties"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(prop, dev);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuDeviceGetProperties) < 0 ||
@@ -343,7 +395,15 @@ CUresult cuDeviceGetProperties(CUdevprop* prop, CUdevice dev)
 
 CUresult cuDeviceComputeCapability(int* major, int* minor, CUdevice dev)
 {
-    conn_t *conn = scuda_rpc_conn_for_device(&dev);
+    scuda_route route = scuda_route_for_device(&dev);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(int*, int*, CUdevice);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuDeviceComputeCapability"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(major, minor, dev);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuDeviceComputeCapability) < 0 ||
@@ -359,8 +419,19 @@ CUresult cuDeviceComputeCapability(int* major, int* minor, CUdevice dev)
 
 CUresult cuDevicePrimaryCtxRetain(CUcontext* pctx, CUdevice dev)
 {
-    CUdevice local_dev = dev;
-    conn_t *conn = scuda_rpc_conn_for_device(&dev);
+    scuda_route route = scuda_route_for_device(&dev);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUcontext*, CUdevice);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuDevicePrimaryCtxRetain"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pctx, dev);
+    if (return_value == CUDA_SUCCESS && pctx != nullptr) {
+        scuda_note_context_owner_route(*pctx, route);
+    }
+    if (return_value == CUDA_SUCCESS) scuda_note_primary_context_active(dev);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuDevicePrimaryCtxRetain) < 0 ||
@@ -371,16 +442,24 @@ CUresult cuDevicePrimaryCtxRetain(CUcontext* pctx, CUdevice dev)
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
     if (return_value == CUDA_SUCCESS && pctx != nullptr) {
-        scuda_note_context_owner(*pctx, conn);
-        scuda_note_primary_context_active(local_dev);
+        scuda_note_context_owner_route(*pctx, route);
     }
+    if (return_value == CUDA_SUCCESS) scuda_note_primary_context_active(dev);
     return return_value;
 }
 
 CUresult cuDevicePrimaryCtxRelease_v2(CUdevice dev)
 {
-    CUdevice local_dev = dev;
-    conn_t *conn = scuda_rpc_conn_for_device(&dev);
+    scuda_route route = scuda_route_for_device(&dev);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdevice);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuDevicePrimaryCtxRelease_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dev);
+    if (return_value == CUDA_SUCCESS) scuda_invalidate_primary_context_state(dev);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuDevicePrimaryCtxRelease_v2) < 0 ||
@@ -389,17 +468,22 @@ CUresult cuDevicePrimaryCtxRelease_v2(CUdevice dev)
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    if (return_value == CUDA_SUCCESS)
-        scuda_invalidate_current_context_cache();
-    if (return_value == CUDA_SUCCESS)
-        scuda_invalidate_primary_context_state(local_dev);
+    if (return_value == CUDA_SUCCESS) scuda_invalidate_primary_context_state(dev);
     return return_value;
 }
 
 CUresult cuDevicePrimaryCtxSetFlags_v2(CUdevice dev, unsigned int flags)
 {
-    CUdevice local_dev = dev;
-    conn_t *conn = scuda_rpc_conn_for_device(&dev);
+    scuda_route route = scuda_route_for_device(&dev);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdevice, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuDevicePrimaryCtxSetFlags_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dev, flags);
+    if (return_value == CUDA_SUCCESS) scuda_note_primary_context_flags(dev, flags);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuDevicePrimaryCtxSetFlags_v2) < 0 ||
@@ -409,10 +493,7 @@ CUresult cuDevicePrimaryCtxSetFlags_v2(CUdevice dev, unsigned int flags)
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    if (return_value == CUDA_SUCCESS)
-        scuda_invalidate_current_context_cache();
-    if (return_value == CUDA_SUCCESS)
-        scuda_note_primary_context_flags(local_dev, flags);
+    if (return_value == CUDA_SUCCESS) scuda_note_primary_context_flags(dev, flags);
     return return_value;
 }
 
@@ -423,8 +504,16 @@ CUresult cuDevicePrimaryCtxGetState(CUdevice dev, unsigned int* flags, int* acti
 
 CUresult cuDevicePrimaryCtxReset_v2(CUdevice dev)
 {
-    CUdevice local_dev = dev;
-    conn_t *conn = scuda_rpc_conn_for_device(&dev);
+    scuda_route route = scuda_route_for_device(&dev);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdevice);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuDevicePrimaryCtxReset_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dev);
+    if (return_value == CUDA_SUCCESS) scuda_invalidate_primary_context_state(dev);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuDevicePrimaryCtxReset_v2) < 0 ||
@@ -433,16 +522,22 @@ CUresult cuDevicePrimaryCtxReset_v2(CUdevice dev)
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    if (return_value == CUDA_SUCCESS)
-        scuda_invalidate_current_context_cache();
-    if (return_value == CUDA_SUCCESS)
-        scuda_invalidate_primary_context_state(local_dev);
+    if (return_value == CUDA_SUCCESS) scuda_invalidate_primary_context_state(dev);
     return return_value;
 }
 
 CUresult cuCtxDestroy_v2(CUcontext ctx)
 {
-    conn_t *conn = scuda_rpc_conn_for_context(ctx);
+    scuda_route route = scuda_route_for_context(ctx);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUcontext);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuCtxDestroy_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(ctx);
+    if (return_value == CUDA_SUCCESS) scuda_invalidate_current_context_cache();
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuCtxDestroy_v2) < 0 ||
@@ -451,8 +546,7 @@ CUresult cuCtxDestroy_v2(CUcontext ctx)
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    if (return_value == CUDA_SUCCESS)
-        scuda_invalidate_current_context_cache();
+    if (return_value == CUDA_SUCCESS) scuda_invalidate_current_context_cache();
     return return_value;
 }
 
@@ -483,9 +577,18 @@ CUresult cuCtxGetDevice(CUdevice* device)
 
 CUresult cuCtxGetFlags(unsigned int* flags)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(unsigned int*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuCtxGetFlags"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(flags);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuCtxGetFlags) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuCtxGetFlags) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, flags, sizeof(unsigned int)) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
@@ -496,7 +599,15 @@ CUresult cuCtxGetFlags(unsigned int* flags)
 
 CUresult cuCtxGetId(CUcontext ctx, unsigned long long* ctxId)
 {
-    conn_t *conn = scuda_rpc_conn_for_context(ctx);
+    scuda_route route = scuda_route_for_context(ctx);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUcontext, unsigned long long*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuCtxGetId"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(ctx, ctxId);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuCtxGetId) < 0 ||
@@ -511,9 +622,18 @@ CUresult cuCtxGetId(CUcontext ctx, unsigned long long* ctxId)
 
 CUresult cuCtxSetLimit(CUlimit limit, size_t value)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUlimit, size_t);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuCtxSetLimit"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(limit, value);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuCtxSetLimit) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuCtxSetLimit) < 0 ||
         rpc_write(conn, &limit, sizeof(CUlimit)) < 0 ||
         rpc_write(conn, &value, sizeof(size_t)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -525,9 +645,18 @@ CUresult cuCtxSetLimit(CUlimit limit, size_t value)
 
 CUresult cuCtxGetLimit(size_t* pvalue, CUlimit limit)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(size_t*, CUlimit);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuCtxGetLimit"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pvalue, limit);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuCtxGetLimit) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuCtxGetLimit) < 0 ||
         rpc_write(conn, &limit, sizeof(CUlimit)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, pvalue, sizeof(size_t)) < 0 ||
@@ -539,9 +668,18 @@ CUresult cuCtxGetLimit(size_t* pvalue, CUlimit limit)
 
 CUresult cuCtxGetCacheConfig(CUfunc_cache* pconfig)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUfunc_cache*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuCtxGetCacheConfig"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pconfig);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuCtxGetCacheConfig) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuCtxGetCacheConfig) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, pconfig, sizeof(CUfunc_cache)) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
@@ -552,9 +690,18 @@ CUresult cuCtxGetCacheConfig(CUfunc_cache* pconfig)
 
 CUresult cuCtxSetCacheConfig(CUfunc_cache config)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUfunc_cache);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuCtxSetCacheConfig"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(config);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuCtxSetCacheConfig) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuCtxSetCacheConfig) < 0 ||
         rpc_write(conn, &config, sizeof(CUfunc_cache)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
@@ -565,7 +712,15 @@ CUresult cuCtxSetCacheConfig(CUfunc_cache config)
 
 CUresult cuCtxGetApiVersion(CUcontext ctx, unsigned int* version)
 {
-    conn_t *conn = scuda_rpc_conn_for_context(ctx);
+    scuda_route route = scuda_route_for_context(ctx);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUcontext, unsigned int*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuCtxGetApiVersion"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(ctx, version);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuCtxGetApiVersion) < 0 ||
@@ -580,9 +735,18 @@ CUresult cuCtxGetApiVersion(CUcontext ctx, unsigned int* version)
 
 CUresult cuCtxGetStreamPriorityRange(int* leastPriority, int* greatestPriority)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(int*, int*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuCtxGetStreamPriorityRange"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(leastPriority, greatestPriority);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuCtxGetStreamPriorityRange) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuCtxGetStreamPriorityRange) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, leastPriority, sizeof(int)) < 0 ||
         rpc_read(conn, greatestPriority, sizeof(int)) < 0 ||
@@ -594,9 +758,18 @@ CUresult cuCtxGetStreamPriorityRange(int* leastPriority, int* greatestPriority)
 
 CUresult cuCtxResetPersistingL2Cache()
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)();
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuCtxResetPersistingL2Cache"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real();
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuCtxResetPersistingL2Cache) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuCtxResetPersistingL2Cache) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
@@ -606,9 +779,18 @@ CUresult cuCtxResetPersistingL2Cache()
 
 CUresult cuCtxGetExecAffinity(CUexecAffinityParam* pExecAffinity, CUexecAffinityType type)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUexecAffinityParam*, CUexecAffinityType);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuCtxGetExecAffinity"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pExecAffinity, type);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuCtxGetExecAffinity) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuCtxGetExecAffinity) < 0 ||
         rpc_write(conn, &type, sizeof(CUexecAffinityType)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, pExecAffinity, sizeof(CUexecAffinityParam)) < 0 ||
@@ -620,9 +802,18 @@ CUresult cuCtxGetExecAffinity(CUexecAffinityParam* pExecAffinity, CUexecAffinity
 
 CUresult cuCtxAttach(CUcontext* pctx, unsigned int flags)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUcontext*, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuCtxAttach"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pctx, flags);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuCtxAttach) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuCtxAttach) < 0 ||
         rpc_write(conn, &flags, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, pctx, sizeof(CUcontext)) < 0 ||
@@ -634,7 +825,15 @@ CUresult cuCtxAttach(CUcontext* pctx, unsigned int flags)
 
 CUresult cuCtxDetach(CUcontext ctx)
 {
-    conn_t *conn = scuda_rpc_conn_for_context(ctx);
+    scuda_route route = scuda_route_for_context(ctx);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUcontext);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuCtxDetach"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(ctx);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuCtxDetach) < 0 ||
@@ -648,9 +847,18 @@ CUresult cuCtxDetach(CUcontext ctx)
 
 CUresult cuCtxGetSharedMemConfig(CUsharedconfig* pConfig)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUsharedconfig*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuCtxGetSharedMemConfig"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pConfig);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuCtxGetSharedMemConfig) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuCtxGetSharedMemConfig) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, pConfig, sizeof(CUsharedconfig)) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
@@ -661,9 +869,18 @@ CUresult cuCtxGetSharedMemConfig(CUsharedconfig* pConfig)
 
 CUresult cuCtxSetSharedMemConfig(CUsharedconfig config)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUsharedconfig);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuCtxSetSharedMemConfig"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(config);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuCtxSetSharedMemConfig) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuCtxSetSharedMemConfig) < 0 ||
         rpc_write(conn, &config, sizeof(CUsharedconfig)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
@@ -674,33 +891,40 @@ CUresult cuCtxSetSharedMemConfig(CUsharedconfig config)
 
 CUresult cuModuleLoad(CUmodule* module, const char* fname)
 {
-    if (module == nullptr || fname == nullptr)
-        return CUDA_ERROR_INVALID_VALUE;
-
-    FILE *file = std::fopen(fname, "rb");
-    if (file == nullptr)
-        return CUDA_ERROR_FILE_NOT_FOUND;
-    if (std::fseek(file, 0, SEEK_END) != 0) {
-        std::fclose(file);
-        return CUDA_ERROR_FILE_NOT_FOUND;
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUmodule*, const char*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuModuleLoad"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(module, fname);
+        return return_value;
     }
-    long file_size = std::ftell(file);
-    if (file_size <= 0 || std::fseek(file, 0, SEEK_SET) != 0) {
-        std::fclose(file);
-        return CUDA_ERROR_INVALID_IMAGE;
-    }
-    std::vector<unsigned char> image(static_cast<size_t>(file_size));
-    if (std::fread(image.data(), 1, image.size(), file) != image.size()) {
-        std::fclose(file);
-        return CUDA_ERROR_INVALID_IMAGE;
-    }
-    std::fclose(file);
-    return cuModuleLoadData(module, image.data());
+    conn_t *conn = scuda_route_remote_conn(route);
+    CUresult return_value;
+    std::size_t fname_len = std::strlen(fname) + 1;
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuModuleLoad) < 0 ||
+        rpc_write(conn, &fname_len, sizeof(std::size_t)) < 0 ||
+        rpc_write(conn, fname, fname_len) < 0 ||
+        rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, module, sizeof(CUmodule)) < 0 ||
+        rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
+        rpc_read_end(conn) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
 }
 
 CUresult cuModuleUnload(CUmodule hmod)
 {
-    conn_t *conn = scuda_rpc_conn_for_module(hmod);
+    scuda_route route = scuda_route_for_module(hmod);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUmodule);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuModuleUnload"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hmod);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuModuleUnload) < 0 ||
@@ -709,16 +933,23 @@ CUresult cuModuleUnload(CUmodule hmod)
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    if (return_value == CUDA_SUCCESS)
-        scuda_invalidate_kernel_param_layout_cache();
     return return_value;
 }
 
 CUresult cuModuleGetLoadingMode(CUmoduleLoadingMode* mode)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUmoduleLoadingMode*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuModuleGetLoadingMode"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(mode);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuModuleGetLoadingMode) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuModuleGetLoadingMode) < 0 ||
         rpc_write(conn, mode, sizeof(CUmoduleLoadingMode)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, mode, sizeof(CUmoduleLoadingMode)) < 0 ||
@@ -730,7 +961,18 @@ CUresult cuModuleGetLoadingMode(CUmoduleLoadingMode* mode)
 
 CUresult cuModuleGetFunction(CUfunction* hfunc, CUmodule hmod, const char* name)
 {
-    conn_t *conn = scuda_rpc_conn_for_module(hmod);
+    scuda_route route = scuda_route_for_module(hmod);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUfunction*, CUmodule, const char*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuModuleGetFunction"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hfunc, hmod, name);
+    if (return_value == CUDA_SUCCESS && hfunc != nullptr) {
+        scuda_note_function_owner_route(*hfunc, route);
+    }
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     std::size_t name_len = std::strlen(name) + 1;
     if (conn == nullptr ||
@@ -743,8 +985,9 @@ CUresult cuModuleGetFunction(CUfunction* hfunc, CUmodule hmod, const char* name)
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    if (return_value == CUDA_SUCCESS && hfunc != nullptr)
-        scuda_note_function_owner(*hfunc, conn);
+    if (return_value == CUDA_SUCCESS && hfunc != nullptr) {
+        scuda_note_function_owner_route(*hfunc, route);
+    }
     return return_value;
 }
 
@@ -752,7 +995,7 @@ CUresult cuModuleGetGlobal_v2(CUdeviceptr* dptr, size_t* bytes, CUmodule hmod, c
 {
     conn_t *conn = scuda_rpc_conn_for_module(hmod);
     CUresult return_value;
-    size_t remote_bytes;
+    size_t remote_bytes = 0;
     std::size_t name_len = std::strlen(name) + 1;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuModuleGetGlobal_v2) < 0 ||
@@ -760,131 +1003,66 @@ CUresult cuModuleGetGlobal_v2(CUdeviceptr* dptr, size_t* bytes, CUmodule hmod, c
         rpc_write(conn, &name_len, sizeof(std::size_t)) < 0 ||
         rpc_write(conn, name, name_len) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, dptr, sizeof(CUdeviceptr)) < 0 ||
+        (dptr != nullptr && rpc_read(conn, dptr, sizeof(CUdeviceptr)) < 0) ||
         rpc_read(conn, &remote_bytes, sizeof(size_t)) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    if (bytes != nullptr)
-        *bytes = remote_bytes;
-    if (return_value == CUDA_SUCCESS && dptr != nullptr)
-        scuda_note_deviceptr_owner(*dptr, conn);
+    if (bytes != nullptr) *bytes = remote_bytes;
+    if (return_value == CUDA_SUCCESS && dptr != nullptr) scuda_note_deviceptr_owner(*dptr, conn);
     return return_value;
 }
 
 CUresult cuLinkCreate_v2(unsigned int numOptions, CUjit_option* options, void** optionValues, CUlinkState* stateOut)
 {
-    (void)numOptions;
-    (void)options;
-    (void)optionValues;
-    if (stateOut == nullptr) {
-        return CUDA_ERROR_INVALID_VALUE;
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(unsigned int, CUjit_option*, void**, CUlinkState*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuLinkCreate_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(numOptions, options, optionValues, stateOut);
+        return return_value;
     }
-    *stateOut = reinterpret_cast<CUlinkState>(new scuda_client_link_state());
-    return CUDA_SUCCESS;
-}
-
-static CUresult scuda_remote_cuLinkCreate(CUlinkState *stateOut)
-{
-    unsigned int numOptions = 0;
-    conn_t *conn = rpc_client_get_connection(0);
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuLinkCreate_v2) < 0 ||
-        rpc_write(conn, &numOptions, sizeof(numOptions)) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuLinkCreate_v2) < 0 ||
+        rpc_write(conn, &numOptions, sizeof(unsigned int)) < 0 ||
+        rpc_write(conn, options, sizeof(CUjit_option)) < 0 ||
+        rpc_write(conn, optionValues, sizeof(void*)) < 0 ||
+        rpc_write(conn, stateOut, sizeof(CUlinkState)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, stateOut, sizeof(*stateOut)) < 0 ||
-        rpc_read(conn, &return_value, sizeof(return_value)) < 0 ||
+        rpc_read(conn, options, sizeof(CUjit_option)) < 0 ||
+        rpc_read(conn, optionValues, sizeof(void*)) < 0 ||
+        rpc_read(conn, stateOut, sizeof(CUlinkState)) < 0 ||
+        rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
     return return_value;
-}
-
-static CUresult scuda_remote_cuLinkAddData(CUlinkState state,
-                                           CUjitInputType type,
-                                           const void *data, size_t size)
-{
-    if (data == nullptr || size == 0)
-        return CUDA_ERROR_INVALID_VALUE;
-    size_t name_len = 0;
-    unsigned int numOptions = 0;
-    conn_t *conn = rpc_client_get_connection(0);
-    CUresult return_value;
-    if (rpc_write_start_request(conn, SCUDA_RPC_cuLinkAddData_v2) < 0 ||
-        rpc_write(conn, &state, sizeof(state)) < 0 ||
-        rpc_write(conn, &type, sizeof(type)) < 0 ||
-        rpc_write(conn, &size, sizeof(size)) < 0 ||
-        rpc_write(conn, data, size) < 0 ||
-        rpc_write(conn, &name_len, sizeof(name_len)) < 0 ||
-        rpc_write(conn, &numOptions, sizeof(numOptions)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, &return_value, sizeof(return_value)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    return return_value;
-}
-
-static CUresult scuda_ensure_remote_link_state(scuda_client_link_state *link)
-{
-    if (link == nullptr)
-        return CUDA_ERROR_INVALID_VALUE;
-    if (link->remote_state != nullptr)
-        return CUDA_SUCCESS;
-    CUresult result = scuda_remote_cuLinkCreate(&link->remote_state);
-    if (result != CUDA_SUCCESS)
-        return result;
-    if (!link->image.empty()) {
-        result = scuda_remote_cuLinkAddData(
-            link->remote_state, link->image_type, link->image.data(),
-            link->image.size());
-        if (result != CUDA_SUCCESS)
-            return result;
-    }
-    return CUDA_SUCCESS;
-}
-
-CUresult cuLinkAddData_v2(CUlinkState state, CUjitInputType type, void* data, size_t size, const char* name, unsigned int numOptions, CUjit_option* options, void** optionValues)
-{
-    (void)name;
-    (void)numOptions;
-    (void)options;
-    (void)optionValues;
-    if (state == nullptr || data == nullptr || size == 0) {
-        return CUDA_ERROR_INVALID_VALUE;
-    }
-    if (type != CU_JIT_INPUT_PTX && type != CU_JIT_INPUT_CUBIN && type != CU_JIT_INPUT_FATBINARY) {
-        return CUDA_ERROR_NOT_SUPPORTED;
-    }
-    auto *link = reinterpret_cast<scuda_client_link_state *>(state);
-    if (link->remote_state != nullptr)
-        return scuda_remote_cuLinkAddData(link->remote_state, type, data, size);
-    const auto *begin = static_cast<const unsigned char *>(data);
-    link->image.assign(begin, begin + size);
-    link->image_type = type;
-    if (link->image.empty() || link->image.back() != 0) {
-        link->image.push_back(0);
-    }
-    return CUDA_SUCCESS;
 }
 
 CUresult cuLinkAddFile_v2(CUlinkState state, CUjitInputType type, const char* path, unsigned int numOptions, CUjit_option* options, void** optionValues)
 {
-    if (path == nullptr || (numOptions != 0 && (options == nullptr || optionValues == nullptr)))
-        return CUDA_ERROR_INVALID_VALUE;
-    auto *link = reinterpret_cast<scuda_client_link_state *>(state);
-    CUresult status = scuda_ensure_remote_link_state(link);
-    if (status != CUDA_SUCCESS)
-        return status;
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUlinkState, CUjitInputType, const char*, unsigned int, CUjit_option*, void**);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuLinkAddFile_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(state, type, path, numOptions, options, optionValues);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     std::size_t path_len = std::strlen(path) + 1;
-    if (rpc_write_start_request(conn, RPC_cuLinkAddFile_v2) < 0 ||
-        rpc_write(conn, &link->remote_state, sizeof(CUlinkState)) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuLinkAddFile_v2) < 0 ||
+        rpc_write(conn, &state, sizeof(CUlinkState)) < 0 ||
         rpc_write(conn, &type, sizeof(CUjitInputType)) < 0 ||
         rpc_write(conn, &path_len, sizeof(std::size_t)) < 0 ||
         rpc_write(conn, path, path_len) < 0 ||
         rpc_write(conn, &numOptions, sizeof(unsigned int)) < 0 ||
-        (numOptions != 0 && rpc_write(conn, options, numOptions * sizeof(CUjit_option)) < 0) ||
-        (numOptions != 0 && rpc_write(conn, optionValues, numOptions * sizeof(void*)) < 0) ||
+        rpc_write(conn, options, numOptions * sizeof(CUjit_option)) < 0 ||
+        rpc_write(conn, optionValues, numOptions * sizeof(void*)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
@@ -894,90 +1072,65 @@ CUresult cuLinkAddFile_v2(CUlinkState state, CUjitInputType type, const char* pa
 
 CUresult cuLinkComplete(CUlinkState state, void** cubinOut, size_t* sizeOut)
 {
-    if (state == nullptr || cubinOut == nullptr || sizeOut == nullptr) {
-        return CUDA_ERROR_INVALID_VALUE;
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUlinkState, void**, size_t*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuLinkComplete"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(state, cubinOut, sizeOut);
+        return return_value;
     }
-    auto *link = reinterpret_cast<scuda_client_link_state *>(state);
-    if (link->remote_state != nullptr) {
-        conn_t *conn = rpc_client_get_connection(0);
-        CUresult return_value;
-        size_t remote_size = 0;
-        if (rpc_write_start_request(conn, RPC_cuLinkComplete) < 0 ||
-            rpc_write(conn, &link->remote_state, sizeof(link->remote_state)) < 0 ||
-            rpc_wait_for_response(conn) < 0 ||
-            rpc_read(conn, &remote_size, sizeof(remote_size)) < 0)
-            return CUDA_ERROR_DEVICE_UNAVAILABLE;
-        void *copy = remote_size == 0 ? nullptr : malloc(remote_size);
-        if (remote_size != 0 && copy == nullptr)
-            return CUDA_ERROR_OUT_OF_MEMORY;
-        if ((remote_size != 0 && rpc_read(conn, copy, remote_size) < 0) ||
-            rpc_read(conn, &return_value, sizeof(return_value)) < 0 ||
-            rpc_read_end(conn) < 0) {
-            free(copy);
-            return CUDA_ERROR_DEVICE_UNAVAILABLE;
-        }
-        if (return_value != CUDA_SUCCESS) {
-            free(copy);
-            return return_value;
-        }
-        *cubinOut = copy;
-        *sizeOut = remote_size;
-        return CUDA_SUCCESS;
-    }
-    if (link->image.empty()) {
-        return CUDA_ERROR_INVALID_VALUE;
-    }
-    void *copy = malloc(link->image.size());
-    if (copy == nullptr) {
-        return CUDA_ERROR_OUT_OF_MEMORY;
-    }
-    memcpy(copy, link->image.data(), link->image.size());
-    *cubinOut = copy;
-    *sizeOut = link->image.size();
-    return CUDA_SUCCESS;
+    conn_t *conn = scuda_route_remote_conn(route);
+    CUresult return_value;
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuLinkComplete) < 0 ||
+        rpc_write(conn, &state, sizeof(CUlinkState)) < 0 ||
+        rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, cubinOut, sizeof(void*)) < 0 ||
+        rpc_read(conn, sizeOut, sizeof(size_t)) < 0 ||
+        rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
+        rpc_read_end(conn) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
 }
 
 CUresult cuLinkDestroy(CUlinkState state)
 {
-    auto *link = reinterpret_cast<scuda_client_link_state *>(state);
-    if (link != nullptr && link->remote_state != nullptr) {
-        conn_t *conn = rpc_client_get_connection(0);
-        CUresult return_value;
-        if (rpc_write_start_request(conn, RPC_cuLinkDestroy) < 0 ||
-            rpc_write(conn, &link->remote_state, sizeof(link->remote_state)) < 0 ||
-            rpc_wait_for_response(conn) < 0 ||
-            rpc_read(conn, &return_value, sizeof(return_value)) < 0 ||
-            rpc_read_end(conn) < 0)
-            return CUDA_ERROR_DEVICE_UNAVAILABLE;
-        delete link;
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUlinkState);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuLinkDestroy"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(state);
         return return_value;
     }
-    delete link;
-    return CUDA_SUCCESS;
-}
-
-#ifdef cuLinkCreate
-#undef cuLinkCreate
-#endif
-CUresult cuLinkCreate(unsigned int numOptions, CUjit_option* options, void** optionValues, CUlinkState* stateOut)
-{
-    return cuLinkCreate_v2(numOptions, options, optionValues, stateOut);
-}
-
-#ifdef cuLinkAddData
-#undef cuLinkAddData
-#endif
-CUresult cuLinkAddData(CUlinkState state, CUjitInputType type, void* data, size_t size, const char* name, unsigned int numOptions, CUjit_option* options, void** optionValues)
-{
-    return cuLinkAddData_v2(state, type, data, size, name, numOptions, options, optionValues);
+    conn_t *conn = scuda_route_remote_conn(route);
+    CUresult return_value;
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuLinkDestroy) < 0 ||
+        rpc_write(conn, &state, sizeof(CUlinkState)) < 0 ||
+        rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
+        rpc_read_end(conn) < 0)
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    return return_value;
 }
 
 CUresult cuModuleGetTexRef(CUtexref* pTexRef, CUmodule hmod, const char* name)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUtexref*, CUmodule, const char*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuModuleGetTexRef"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pTexRef, hmod, name);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     std::size_t name_len = std::strlen(name) + 1;
-    if (rpc_write_start_request(conn, RPC_cuModuleGetTexRef) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuModuleGetTexRef) < 0 ||
         rpc_write(conn, &hmod, sizeof(CUmodule)) < 0 ||
         rpc_write(conn, &name_len, sizeof(std::size_t)) < 0 ||
         rpc_write(conn, name, name_len) < 0 ||
@@ -991,10 +1144,19 @@ CUresult cuModuleGetTexRef(CUtexref* pTexRef, CUmodule hmod, const char* name)
 
 CUresult cuModuleGetSurfRef(CUsurfref* pSurfRef, CUmodule hmod, const char* name)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUsurfref*, CUmodule, const char*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuModuleGetSurfRef"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pSurfRef, hmod, name);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     std::size_t name_len = std::strlen(name) + 1;
-    if (rpc_write_start_request(conn, RPC_cuModuleGetSurfRef) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuModuleGetSurfRef) < 0 ||
         rpc_write(conn, &hmod, sizeof(CUmodule)) < 0 ||
         rpc_write(conn, &name_len, sizeof(std::size_t)) < 0 ||
         rpc_write(conn, name, name_len) < 0 ||
@@ -1008,10 +1170,19 @@ CUresult cuModuleGetSurfRef(CUsurfref* pSurfRef, CUmodule hmod, const char* name
 
 CUresult cuLibraryLoadFromFile(CUlibrary* library, const char* fileName, CUjit_option* jitOptions, void** jitOptionsValues, unsigned int numJitOptions, CUlibraryOption* libraryOptions, void** libraryOptionValues, unsigned int numLibraryOptions)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUlibrary*, const char*, CUjit_option*, void**, unsigned int, CUlibraryOption*, void**, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuLibraryLoadFromFile"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(library, fileName, jitOptions, jitOptionsValues, numJitOptions, libraryOptions, libraryOptionValues, numLibraryOptions);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     std::size_t fileName_len = std::strlen(fileName) + 1;
-    if (rpc_write_start_request(conn, RPC_cuLibraryLoadFromFile) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuLibraryLoadFromFile) < 0 ||
         rpc_write(conn, &fileName_len, sizeof(std::size_t)) < 0 ||
         rpc_write(conn, fileName, fileName_len) < 0 ||
         rpc_write(conn, &numJitOptions, sizeof(unsigned int)) < 0 ||
@@ -1030,25 +1201,41 @@ CUresult cuLibraryLoadFromFile(CUlibrary* library, const char* fileName, CUjit_o
 
 CUresult cuLibraryUnload(CUlibrary library)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUlibrary);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuLibraryUnload"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(library);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuLibraryUnload) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuLibraryUnload) < 0 ||
         rpc_write(conn, &library, sizeof(CUlibrary)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    if (return_value == CUDA_SUCCESS)
-        scuda_invalidate_kernel_param_layout_cache();
     return return_value;
 }
 
 CUresult cuLibraryGetKernel(CUkernel* pKernel, CUlibrary library, const char* name)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUkernel*, CUlibrary, const char*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuLibraryGetKernel"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pKernel, library, name);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     std::size_t name_len = std::strlen(name) + 1;
-    if (rpc_write_start_request(conn, RPC_cuLibraryGetKernel) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuLibraryGetKernel) < 0 ||
         rpc_write(conn, &library, sizeof(CUlibrary)) < 0 ||
         rpc_write(conn, &name_len, sizeof(std::size_t)) < 0 ||
         rpc_write(conn, name, name_len) < 0 ||
@@ -1062,17 +1249,24 @@ CUresult cuLibraryGetKernel(CUkernel* pKernel, CUlibrary library, const char* na
 
 CUresult cuLibraryGetModule(CUmodule* pMod, CUlibrary library)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUmodule*, CUlibrary);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuLibraryGetModule"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pMod, library);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuLibraryGetModule) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuLibraryGetModule) < 0 ||
         rpc_write(conn, &library, sizeof(CUlibrary)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, pMod, sizeof(CUmodule)) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    if (return_value == CUDA_SUCCESS)
-        scuda_remember_loaded_module_for_rpc(*pMod);
     return return_value;
 }
 
@@ -1085,20 +1279,21 @@ CUresult cuLibraryGetGlobal(CUdeviceptr* dptr, size_t* bytes, CUlibrary library,
 {
     conn_t *conn = rpc_client_get_connection(0);
     CUresult return_value;
-    size_t remote_bytes;
+    size_t remote_bytes = 0;
     std::size_t name_len = std::strlen(name) + 1;
-    if (rpc_write_start_request(conn, RPC_cuLibraryGetGlobal) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuLibraryGetGlobal) < 0 ||
         rpc_write(conn, &library, sizeof(CUlibrary)) < 0 ||
         rpc_write(conn, &name_len, sizeof(std::size_t)) < 0 ||
         rpc_write(conn, name, name_len) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, dptr, sizeof(CUdeviceptr)) < 0 ||
+        (dptr != nullptr && rpc_read(conn, dptr, sizeof(CUdeviceptr)) < 0) ||
         rpc_read(conn, &remote_bytes, sizeof(size_t)) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    if (bytes != nullptr)
-        *bytes = remote_bytes;
+    if (bytes != nullptr) *bytes = remote_bytes;
+    if (return_value == CUDA_SUCCESS && dptr != nullptr) scuda_note_deviceptr_owner(*dptr, conn);
     return return_value;
 }
 
@@ -1106,29 +1301,39 @@ CUresult cuLibraryGetManaged(CUdeviceptr* dptr, size_t* bytes, CUlibrary library
 {
     conn_t *conn = rpc_client_get_connection(0);
     CUresult return_value;
-    size_t remote_bytes;
+    size_t remote_bytes = 0;
     std::size_t name_len = std::strlen(name) + 1;
-    if (rpc_write_start_request(conn, RPC_cuLibraryGetManaged) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuLibraryGetManaged) < 0 ||
         rpc_write(conn, &library, sizeof(CUlibrary)) < 0 ||
         rpc_write(conn, &name_len, sizeof(std::size_t)) < 0 ||
         rpc_write(conn, name, name_len) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, dptr, sizeof(CUdeviceptr)) < 0 ||
+        (dptr != nullptr && rpc_read(conn, dptr, sizeof(CUdeviceptr)) < 0) ||
         rpc_read(conn, &remote_bytes, sizeof(size_t)) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    if (bytes != nullptr)
-        *bytes = remote_bytes;
+    if (bytes != nullptr) *bytes = remote_bytes;
+    if (return_value == CUDA_SUCCESS && dptr != nullptr) scuda_note_deviceptr_owner(*dptr, conn);
     return return_value;
 }
 
 CUresult cuLibraryGetUnifiedFunction(void** fptr, CUlibrary library, const char* symbol)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(void**, CUlibrary, const char*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuLibraryGetUnifiedFunction"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(fptr, library, symbol);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     std::size_t symbol_len = std::strlen(symbol) + 1;
-    if (rpc_write_start_request(conn, RPC_cuLibraryGetUnifiedFunction) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuLibraryGetUnifiedFunction) < 0 ||
         rpc_write(conn, &library, sizeof(CUlibrary)) < 0 ||
         rpc_write(conn, &symbol_len, sizeof(std::size_t)) < 0 ||
         rpc_write(conn, symbol, symbol_len) < 0 ||
@@ -1142,9 +1347,18 @@ CUresult cuLibraryGetUnifiedFunction(void** fptr, CUlibrary library, const char*
 
 CUresult cuKernelGetAttribute(int* pi, CUfunction_attribute attrib, CUkernel kernel, CUdevice dev)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_device(&dev);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(int*, CUfunction_attribute, CUkernel, CUdevice);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuKernelGetAttribute"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pi, attrib, kernel, dev);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuKernelGetAttribute) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuKernelGetAttribute) < 0 ||
         rpc_write(conn, pi, sizeof(int)) < 0 ||
         rpc_write(conn, &attrib, sizeof(CUfunction_attribute)) < 0 ||
         rpc_write(conn, &kernel, sizeof(CUkernel)) < 0 ||
@@ -1159,9 +1373,18 @@ CUresult cuKernelGetAttribute(int* pi, CUfunction_attribute attrib, CUkernel ker
 
 CUresult cuKernelSetAttribute(CUfunction_attribute attrib, int val, CUkernel kernel, CUdevice dev)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_device(&dev);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUfunction_attribute, int, CUkernel, CUdevice);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuKernelSetAttribute"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(attrib, val, kernel, dev);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuKernelSetAttribute) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuKernelSetAttribute) < 0 ||
         rpc_write(conn, &attrib, sizeof(CUfunction_attribute)) < 0 ||
         rpc_write(conn, &val, sizeof(int)) < 0 ||
         rpc_write(conn, &kernel, sizeof(CUkernel)) < 0 ||
@@ -1175,9 +1398,18 @@ CUresult cuKernelSetAttribute(CUfunction_attribute attrib, int val, CUkernel ker
 
 CUresult cuKernelSetCacheConfig(CUkernel kernel, CUfunc_cache config, CUdevice dev)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_device(&dev);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUkernel, CUfunc_cache, CUdevice);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuKernelSetCacheConfig"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(kernel, config, dev);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuKernelSetCacheConfig) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuKernelSetCacheConfig) < 0 ||
         rpc_write(conn, &kernel, sizeof(CUkernel)) < 0 ||
         rpc_write(conn, &config, sizeof(CUfunc_cache)) < 0 ||
         rpc_write(conn, &dev, sizeof(CUdevice)) < 0 ||
@@ -1190,7 +1422,15 @@ CUresult cuKernelSetCacheConfig(CUkernel kernel, CUfunc_cache config, CUdevice d
 
 CUresult cuMemGetInfo_v2(size_t* free, size_t* total)
 {
-    conn_t *conn = scuda_rpc_conn_for_current_context();
+    scuda_route route = scuda_route_for_current_context();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(size_t*, size_t*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemGetInfo_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(free, total);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuMemGetInfo_v2) < 0 ||
@@ -1207,7 +1447,18 @@ CUresult cuMemGetInfo_v2(size_t* free, size_t* total)
 
 CUresult cuMemAlloc_v2(CUdeviceptr* dptr, size_t bytesize)
 {
-    conn_t *conn = scuda_rpc_conn_for_current_context();
+    scuda_route route = scuda_route_for_current_context();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr*, size_t);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemAlloc_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dptr, bytesize);
+    if (return_value == CUDA_SUCCESS && dptr != nullptr) {
+        scuda_note_deviceptr_owner_route(*dptr, route);
+    }
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuMemAlloc_v2) < 0 ||
@@ -1218,14 +1469,26 @@ CUresult cuMemAlloc_v2(CUdeviceptr* dptr, size_t bytesize)
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    if (return_value == CUDA_SUCCESS && dptr != nullptr)
-        scuda_note_deviceptr_owner(*dptr, conn);
+    if (return_value == CUDA_SUCCESS && dptr != nullptr) {
+        scuda_note_deviceptr_owner_route(*dptr, route);
+    }
     return return_value;
 }
 
 CUresult cuMemAllocPitch_v2(CUdeviceptr* dptr, size_t* pPitch, size_t WidthInBytes, size_t Height, unsigned int ElementSizeBytes)
 {
-    conn_t *conn = scuda_rpc_conn_for_current_context();
+    scuda_route route = scuda_route_for_current_context();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr*, size_t*, size_t, size_t, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemAllocPitch_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dptr, pPitch, WidthInBytes, Height, ElementSizeBytes);
+    if (return_value == CUDA_SUCCESS && dptr != nullptr) {
+        scuda_note_deviceptr_owner_route(*dptr, route);
+    }
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuMemAllocPitch_v2) < 0 ||
@@ -1240,8 +1503,9 @@ CUresult cuMemAllocPitch_v2(CUdeviceptr* dptr, size_t* pPitch, size_t WidthInByt
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    if (return_value == CUDA_SUCCESS && dptr != nullptr)
-        scuda_note_deviceptr_owner(*dptr, conn);
+    if (return_value == CUDA_SUCCESS && dptr != nullptr) {
+        scuda_note_deviceptr_owner_route(*dptr, route);
+    }
     return return_value;
 }
 
@@ -1252,7 +1516,15 @@ CUresult cuMemFree_v2(CUdeviceptr dptr)
 
 CUresult cuMemGetAddressRange_v2(CUdeviceptr* pbase, size_t* psize, CUdeviceptr dptr)
 {
-    conn_t *conn = scuda_rpc_conn_for_deviceptr(dptr);
+    scuda_route route = scuda_route_for_deviceptr(dptr);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr*, size_t*, CUdeviceptr);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemGetAddressRange_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pbase, psize, dptr);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuMemGetAddressRange_v2) < 0 ||
@@ -1275,10 +1547,19 @@ CUresult cuMemAllocManaged(CUdeviceptr* dptr, size_t bytesize, unsigned int flag
 
 CUresult cuDeviceGetByPCIBusId(CUdevice* dev, const char* pciBusId)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdevice*, const char*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuDeviceGetByPCIBusId"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dev, pciBusId);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     std::size_t pciBusId_len = std::strlen(pciBusId) + 1;
-    if (rpc_write_start_request(conn, RPC_cuDeviceGetByPCIBusId) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuDeviceGetByPCIBusId) < 0 ||
         rpc_write(conn, dev, sizeof(CUdevice)) < 0 ||
         rpc_write(conn, &pciBusId_len, sizeof(std::size_t)) < 0 ||
         rpc_write(conn, pciBusId, pciBusId_len) < 0 ||
@@ -1292,7 +1573,15 @@ CUresult cuDeviceGetByPCIBusId(CUdevice* dev, const char* pciBusId)
 
 CUresult cuDeviceGetPCIBusId(char* pciBusId, int len, CUdevice dev)
 {
-    conn_t *conn = scuda_rpc_conn_for_device(&dev);
+    scuda_route route = scuda_route_for_device(&dev);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(char*, int, CUdevice);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuDeviceGetPCIBusId"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pciBusId, len, dev);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuDeviceGetPCIBusId) < 0 ||
@@ -1308,9 +1597,18 @@ CUresult cuDeviceGetPCIBusId(char* pciBusId, int len, CUdevice dev)
 
 CUresult cuIpcGetEventHandle(CUipcEventHandle* pHandle, CUevent event)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUipcEventHandle*, CUevent);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuIpcGetEventHandle"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pHandle, event);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuIpcGetEventHandle) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuIpcGetEventHandle) < 0 ||
         rpc_write(conn, pHandle, sizeof(CUipcEventHandle)) < 0 ||
         rpc_write(conn, &event, sizeof(CUevent)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -1323,9 +1621,18 @@ CUresult cuIpcGetEventHandle(CUipcEventHandle* pHandle, CUevent event)
 
 CUresult cuIpcOpenEventHandle(CUevent* phEvent, CUipcEventHandle handle)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUevent*, CUipcEventHandle);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuIpcOpenEventHandle"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(phEvent, handle);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuIpcOpenEventHandle) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuIpcOpenEventHandle) < 0 ||
         rpc_write(conn, phEvent, sizeof(CUevent)) < 0 ||
         rpc_write(conn, &handle, sizeof(CUipcEventHandle)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -1338,9 +1645,18 @@ CUresult cuIpcOpenEventHandle(CUevent* phEvent, CUipcEventHandle handle)
 
 CUresult cuIpcGetMemHandle(CUipcMemHandle* pHandle, CUdeviceptr dptr)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUipcMemHandle*, CUdeviceptr);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuIpcGetMemHandle"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pHandle, dptr);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuIpcGetMemHandle) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuIpcGetMemHandle) < 0 ||
         rpc_write(conn, pHandle, sizeof(CUipcMemHandle)) < 0 ||
         rpc_write(conn, &dptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -1353,9 +1669,18 @@ CUresult cuIpcGetMemHandle(CUipcMemHandle* pHandle, CUdeviceptr dptr)
 
 CUresult cuIpcOpenMemHandle_v2(CUdeviceptr* pdptr, CUipcMemHandle handle, unsigned int Flags)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr*, CUipcMemHandle, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuIpcOpenMemHandle_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pdptr, handle, Flags);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuIpcOpenMemHandle_v2) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuIpcOpenMemHandle_v2) < 0 ||
         rpc_write(conn, pdptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(conn, &handle, sizeof(CUipcMemHandle)) < 0 ||
         rpc_write(conn, &Flags, sizeof(unsigned int)) < 0 ||
@@ -1369,9 +1694,18 @@ CUresult cuIpcOpenMemHandle_v2(CUdeviceptr* pdptr, CUipcMemHandle handle, unsign
 
 CUresult cuIpcCloseMemHandle(CUdeviceptr dptr)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuIpcCloseMemHandle"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dptr);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuIpcCloseMemHandle) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuIpcCloseMemHandle) < 0 ||
         rpc_write(conn, &dptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
@@ -1382,10 +1716,15 @@ CUresult cuIpcCloseMemHandle(CUdeviceptr dptr)
 
 CUresult cuMemcpy(CUdeviceptr dst, CUdeviceptr src, size_t ByteCount)
 {
-    conn_t *conn = scuda_rpc_conn_for_deviceptr(dst);
-    conn_t *src_conn = scuda_rpc_conn_for_deviceptr(src);
-    if (conn != src_conn)
-        return CUDA_ERROR_NOT_SUPPORTED;
+    scuda_route route = scuda_route_for_deviceptr(dst);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr, CUdeviceptr, size_t);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemcpy"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dst, src, ByteCount);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuMemcpy) < 0 ||
@@ -1401,9 +1740,18 @@ CUresult cuMemcpy(CUdeviceptr dst, CUdeviceptr src, size_t ByteCount)
 
 CUresult cuMemcpyPeer(CUdeviceptr dstDevice, CUcontext dstContext, CUdeviceptr srcDevice, CUcontext srcContext, size_t ByteCount)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_context(dstContext);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr, CUcontext, CUdeviceptr, CUcontext, size_t);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemcpyPeer"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dstDevice, dstContext, srcDevice, srcContext, ByteCount);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMemcpyPeer) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMemcpyPeer) < 0 ||
         rpc_write(conn, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(conn, &dstContext, sizeof(CUcontext)) < 0 ||
         rpc_write(conn, &srcDevice, sizeof(CUdeviceptr)) < 0 ||
@@ -1418,7 +1766,15 @@ CUresult cuMemcpyPeer(CUdeviceptr dstDevice, CUcontext dstContext, CUdeviceptr s
 
 CUresult cuMemcpyHtoD_v2(CUdeviceptr dstDevice, const void* srcHost, size_t ByteCount)
 {
-    conn_t *conn = scuda_rpc_conn_for_deviceptr(dstDevice);
+    scuda_route route = scuda_route_for_deviceptr(dstDevice);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr, const void*, size_t);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemcpyHtoD_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dstDevice, srcHost, ByteCount);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuMemcpyHtoD_v2) < 0 ||
@@ -1434,30 +1790,39 @@ CUresult cuMemcpyHtoD_v2(CUdeviceptr dstDevice, const void* srcHost, size_t Byte
 
 CUresult cuMemcpyDtoH_v2(void* dstHost, CUdeviceptr srcDevice, size_t ByteCount)
 {
-    conn_t *conn = scuda_rpc_conn_for_deviceptr(srcDevice);
+    scuda_route route = scuda_route_for_deviceptr(srcDevice);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(void*, CUdeviceptr, size_t);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemcpyDtoH_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dstHost, srcDevice, ByteCount);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuMemcpyDtoH_v2) < 0 ||
         rpc_write(conn, &srcDevice, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(conn, &ByteCount, sizeof(size_t)) < 0 ||
-        rpc_wait_for_response(conn) < 0)
-        return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    scuda_prepare_host_range_write(dstHost, ByteCount);
-    if (rpc_read(conn, dstHost, ByteCount) < 0 ||
+        rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, dstHost, ByteCount) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    if (return_value == CUDA_SUCCESS)
-        scuda_mark_host_range_clean(dstHost, ByteCount);
     return return_value;
 }
 
 CUresult cuMemcpyDtoD_v2(CUdeviceptr dstDevice, CUdeviceptr srcDevice, size_t ByteCount)
 {
-    conn_t *conn = scuda_rpc_conn_for_deviceptr(dstDevice);
-    conn_t *src_conn = scuda_rpc_conn_for_deviceptr(srcDevice);
-    if (conn != src_conn)
-        return CUDA_ERROR_NOT_SUPPORTED;
+    scuda_route route = scuda_route_for_deviceptr(dstDevice);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr, CUdeviceptr, size_t);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemcpyDtoD_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dstDevice, srcDevice, ByteCount);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuMemcpyDtoD_v2) < 0 ||
@@ -1473,7 +1838,15 @@ CUresult cuMemcpyDtoD_v2(CUdeviceptr dstDevice, CUdeviceptr srcDevice, size_t By
 
 CUresult cuMemcpyDtoA_v2(CUarray dstArray, size_t dstOffset, CUdeviceptr srcDevice, size_t ByteCount)
 {
-    conn_t *conn = scuda_rpc_conn_for_deviceptr(srcDevice);
+    scuda_route route = scuda_route_for_deviceptr(srcDevice);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUarray, size_t, CUdeviceptr, size_t);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemcpyDtoA_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dstArray, dstOffset, srcDevice, ByteCount);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuMemcpyDtoA_v2) < 0 ||
@@ -1490,7 +1863,15 @@ CUresult cuMemcpyDtoA_v2(CUarray dstArray, size_t dstOffset, CUdeviceptr srcDevi
 
 CUresult cuMemcpyAtoD_v2(CUdeviceptr dstDevice, CUarray srcArray, size_t srcOffset, size_t ByteCount)
 {
-    conn_t *conn = scuda_rpc_conn_for_deviceptr(dstDevice);
+    scuda_route route = scuda_route_for_deviceptr(dstDevice);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr, CUarray, size_t, size_t);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemcpyAtoD_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dstDevice, srcArray, srcOffset, ByteCount);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuMemcpyAtoD_v2) < 0 ||
@@ -1507,9 +1888,18 @@ CUresult cuMemcpyAtoD_v2(CUdeviceptr dstDevice, CUarray srcArray, size_t srcOffs
 
 CUresult cuMemcpyAtoH_v2(void* dstHost, CUarray srcArray, size_t srcOffset, size_t ByteCount)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(void*, CUarray, size_t, size_t);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemcpyAtoH_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dstHost, srcArray, srcOffset, ByteCount);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMemcpyAtoH_v2) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMemcpyAtoH_v2) < 0 ||
         rpc_write(conn, &srcArray, sizeof(CUarray)) < 0 ||
         rpc_write(conn, &srcOffset, sizeof(size_t)) < 0 ||
         rpc_write(conn, &ByteCount, sizeof(size_t)) < 0 ||
@@ -1523,9 +1913,18 @@ CUresult cuMemcpyAtoH_v2(void* dstHost, CUarray srcArray, size_t srcOffset, size
 
 CUresult cuMemcpyAtoA_v2(CUarray dstArray, size_t dstOffset, CUarray srcArray, size_t srcOffset, size_t ByteCount)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUarray, size_t, CUarray, size_t, size_t);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemcpyAtoA_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dstArray, dstOffset, srcArray, srcOffset, ByteCount);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMemcpyAtoA_v2) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMemcpyAtoA_v2) < 0 ||
         rpc_write(conn, &dstArray, sizeof(CUarray)) < 0 ||
         rpc_write(conn, &dstOffset, sizeof(size_t)) < 0 ||
         rpc_write(conn, &srcArray, sizeof(CUarray)) < 0 ||
@@ -1540,9 +1939,18 @@ CUresult cuMemcpyAtoA_v2(CUarray dstArray, size_t dstOffset, CUarray srcArray, s
 
 CUresult cuMemcpyPeerAsync(CUdeviceptr dstDevice, CUcontext dstContext, CUdeviceptr srcDevice, CUcontext srcContext, size_t ByteCount, CUstream hStream)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_context(dstContext);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr, CUcontext, CUdeviceptr, CUcontext, size_t, CUstream);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemcpyPeerAsync"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dstDevice, dstContext, srcDevice, srcContext, ByteCount, hStream);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMemcpyPeerAsync) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMemcpyPeerAsync) < 0 ||
         rpc_write(conn, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(conn, &dstContext, sizeof(CUcontext)) < 0 ||
         rpc_write(conn, &srcDevice, sizeof(CUdeviceptr)) < 0 ||
@@ -1558,7 +1966,15 @@ CUresult cuMemcpyPeerAsync(CUdeviceptr dstDevice, CUcontext dstContext, CUdevice
 
 CUresult cuMemcpyHtoDAsync_v2(CUdeviceptr dstDevice, const void* srcHost, size_t ByteCount, CUstream hStream)
 {
-    conn_t *conn = scuda_rpc_conn_for_deviceptr(dstDevice);
+    scuda_route route = scuda_route_for_deviceptr(dstDevice);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr, const void*, size_t, CUstream);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemcpyHtoDAsync_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dstDevice, srcHost, ByteCount, hStream);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuMemcpyHtoDAsync_v2) < 0 ||
@@ -1575,10 +1991,15 @@ CUresult cuMemcpyHtoDAsync_v2(CUdeviceptr dstDevice, const void* srcHost, size_t
 
 CUresult cuMemcpyDtoDAsync_v2(CUdeviceptr dstDevice, CUdeviceptr srcDevice, size_t ByteCount, CUstream hStream)
 {
-    conn_t *conn = scuda_rpc_conn_for_deviceptr(dstDevice);
-    conn_t *src_conn = scuda_rpc_conn_for_deviceptr(srcDevice);
-    if (conn != src_conn)
-        return CUDA_ERROR_NOT_SUPPORTED;
+    scuda_route route = scuda_route_for_deviceptr(dstDevice);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr, CUdeviceptr, size_t, CUstream);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemcpyDtoDAsync_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dstDevice, srcDevice, ByteCount, hStream);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuMemcpyDtoDAsync_v2) < 0 ||
@@ -1595,7 +2016,15 @@ CUresult cuMemcpyDtoDAsync_v2(CUdeviceptr dstDevice, CUdeviceptr srcDevice, size
 
 CUresult cuMemsetD8_v2(CUdeviceptr dstDevice, unsigned char uc, size_t N)
 {
-    conn_t *conn = scuda_rpc_conn_for_deviceptr(dstDevice);
+    scuda_route route = scuda_route_for_deviceptr(dstDevice);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr, unsigned char, size_t);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemsetD8_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dstDevice, uc, N);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuMemsetD8_v2) < 0 ||
@@ -1611,7 +2040,15 @@ CUresult cuMemsetD8_v2(CUdeviceptr dstDevice, unsigned char uc, size_t N)
 
 CUresult cuMemsetD16_v2(CUdeviceptr dstDevice, unsigned short us, size_t N)
 {
-    conn_t *conn = scuda_rpc_conn_for_deviceptr(dstDevice);
+    scuda_route route = scuda_route_for_deviceptr(dstDevice);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr, unsigned short, size_t);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemsetD16_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dstDevice, us, N);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuMemsetD16_v2) < 0 ||
@@ -1627,7 +2064,15 @@ CUresult cuMemsetD16_v2(CUdeviceptr dstDevice, unsigned short us, size_t N)
 
 CUresult cuMemsetD32_v2(CUdeviceptr dstDevice, unsigned int ui, size_t N)
 {
-    conn_t *conn = scuda_rpc_conn_for_deviceptr(dstDevice);
+    scuda_route route = scuda_route_for_deviceptr(dstDevice);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr, unsigned int, size_t);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemsetD32_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dstDevice, ui, N);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuMemsetD32_v2) < 0 ||
@@ -1643,7 +2088,15 @@ CUresult cuMemsetD32_v2(CUdeviceptr dstDevice, unsigned int ui, size_t N)
 
 CUresult cuMemsetD2D8_v2(CUdeviceptr dstDevice, size_t dstPitch, unsigned char uc, size_t Width, size_t Height)
 {
-    conn_t *conn = scuda_rpc_conn_for_deviceptr(dstDevice);
+    scuda_route route = scuda_route_for_deviceptr(dstDevice);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr, size_t, unsigned char, size_t, size_t);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemsetD2D8_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dstDevice, dstPitch, uc, Width, Height);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuMemsetD2D8_v2) < 0 ||
@@ -1661,7 +2114,15 @@ CUresult cuMemsetD2D8_v2(CUdeviceptr dstDevice, size_t dstPitch, unsigned char u
 
 CUresult cuMemsetD2D16_v2(CUdeviceptr dstDevice, size_t dstPitch, unsigned short us, size_t Width, size_t Height)
 {
-    conn_t *conn = scuda_rpc_conn_for_deviceptr(dstDevice);
+    scuda_route route = scuda_route_for_deviceptr(dstDevice);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr, size_t, unsigned short, size_t, size_t);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemsetD2D16_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dstDevice, dstPitch, us, Width, Height);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuMemsetD2D16_v2) < 0 ||
@@ -1679,7 +2140,15 @@ CUresult cuMemsetD2D16_v2(CUdeviceptr dstDevice, size_t dstPitch, unsigned short
 
 CUresult cuMemsetD2D32_v2(CUdeviceptr dstDevice, size_t dstPitch, unsigned int ui, size_t Width, size_t Height)
 {
-    conn_t *conn = scuda_rpc_conn_for_deviceptr(dstDevice);
+    scuda_route route = scuda_route_for_deviceptr(dstDevice);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr, size_t, unsigned int, size_t, size_t);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemsetD2D32_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dstDevice, dstPitch, ui, Width, Height);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuMemsetD2D32_v2) < 0 ||
@@ -1695,59 +2164,20 @@ CUresult cuMemsetD2D32_v2(CUdeviceptr dstDevice, size_t dstPitch, unsigned int u
     return return_value;
 }
 
-#ifdef cuMemsetD8
-#undef cuMemsetD8
-#endif
-extern "C" CUresult cuMemsetD8(CUdeviceptr dstDevice, unsigned char uc, size_t N)
-{
-    return cuMemsetD8_v2(dstDevice, uc, N);
-}
-
-#ifdef cuMemsetD16
-#undef cuMemsetD16
-#endif
-extern "C" CUresult cuMemsetD16(CUdeviceptr dstDevice, unsigned short us, size_t N)
-{
-    return cuMemsetD16_v2(dstDevice, us, N);
-}
-
-#ifdef cuMemsetD32
-#undef cuMemsetD32
-#endif
-extern "C" CUresult cuMemsetD32(CUdeviceptr dstDevice, unsigned int ui, size_t N)
-{
-    return cuMemsetD32_v2(dstDevice, ui, N);
-}
-
-#ifdef cuMemsetD2D8
-#undef cuMemsetD2D8
-#endif
-extern "C" CUresult cuMemsetD2D8(CUdeviceptr dstDevice, size_t dstPitch, unsigned char uc, size_t Width, size_t Height)
-{
-    return cuMemsetD2D8_v2(dstDevice, dstPitch, uc, Width, Height);
-}
-
-#ifdef cuMemsetD2D16
-#undef cuMemsetD2D16
-#endif
-extern "C" CUresult cuMemsetD2D16(CUdeviceptr dstDevice, size_t dstPitch, unsigned short us, size_t Width, size_t Height)
-{
-    return cuMemsetD2D16_v2(dstDevice, dstPitch, us, Width, Height);
-}
-
-#ifdef cuMemsetD2D32
-#undef cuMemsetD2D32
-#endif
-extern "C" CUresult cuMemsetD2D32(CUdeviceptr dstDevice, size_t dstPitch, unsigned int ui, size_t Width, size_t Height)
-{
-    return cuMemsetD2D32_v2(dstDevice, dstPitch, ui, Width, Height);
-}
-
 CUresult cuMemsetD8Async(CUdeviceptr dstDevice, unsigned char uc, size_t N, CUstream hStream)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_deviceptr(dstDevice);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr, unsigned char, size_t, CUstream);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemsetD8Async"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dstDevice, uc, N, hStream);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMemsetD8Async) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMemsetD8Async) < 0 ||
         rpc_write(conn, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(conn, &uc, sizeof(unsigned char)) < 0 ||
         rpc_write(conn, &N, sizeof(size_t)) < 0 ||
@@ -1761,9 +2191,18 @@ CUresult cuMemsetD8Async(CUdeviceptr dstDevice, unsigned char uc, size_t N, CUst
 
 CUresult cuMemsetD16Async(CUdeviceptr dstDevice, unsigned short us, size_t N, CUstream hStream)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_deviceptr(dstDevice);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr, unsigned short, size_t, CUstream);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemsetD16Async"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dstDevice, us, N, hStream);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMemsetD16Async) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMemsetD16Async) < 0 ||
         rpc_write(conn, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(conn, &us, sizeof(unsigned short)) < 0 ||
         rpc_write(conn, &N, sizeof(size_t)) < 0 ||
@@ -1777,9 +2216,18 @@ CUresult cuMemsetD16Async(CUdeviceptr dstDevice, unsigned short us, size_t N, CU
 
 CUresult cuMemsetD32Async(CUdeviceptr dstDevice, unsigned int ui, size_t N, CUstream hStream)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_deviceptr(dstDevice);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr, unsigned int, size_t, CUstream);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemsetD32Async"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dstDevice, ui, N, hStream);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMemsetD32Async) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMemsetD32Async) < 0 ||
         rpc_write(conn, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(conn, &ui, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, &N, sizeof(size_t)) < 0 ||
@@ -1793,9 +2241,18 @@ CUresult cuMemsetD32Async(CUdeviceptr dstDevice, unsigned int ui, size_t N, CUst
 
 CUresult cuMemsetD2D8Async(CUdeviceptr dstDevice, size_t dstPitch, unsigned char uc, size_t Width, size_t Height, CUstream hStream)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_deviceptr(dstDevice);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr, size_t, unsigned char, size_t, size_t, CUstream);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemsetD2D8Async"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dstDevice, dstPitch, uc, Width, Height, hStream);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMemsetD2D8Async) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMemsetD2D8Async) < 0 ||
         rpc_write(conn, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(conn, &dstPitch, sizeof(size_t)) < 0 ||
         rpc_write(conn, &uc, sizeof(unsigned char)) < 0 ||
@@ -1811,9 +2268,18 @@ CUresult cuMemsetD2D8Async(CUdeviceptr dstDevice, size_t dstPitch, unsigned char
 
 CUresult cuMemsetD2D16Async(CUdeviceptr dstDevice, size_t dstPitch, unsigned short us, size_t Width, size_t Height, CUstream hStream)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_deviceptr(dstDevice);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr, size_t, unsigned short, size_t, size_t, CUstream);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemsetD2D16Async"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dstDevice, dstPitch, us, Width, Height, hStream);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMemsetD2D16Async) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMemsetD2D16Async) < 0 ||
         rpc_write(conn, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(conn, &dstPitch, sizeof(size_t)) < 0 ||
         rpc_write(conn, &us, sizeof(unsigned short)) < 0 ||
@@ -1829,9 +2295,18 @@ CUresult cuMemsetD2D16Async(CUdeviceptr dstDevice, size_t dstPitch, unsigned sho
 
 CUresult cuMemsetD2D32Async(CUdeviceptr dstDevice, size_t dstPitch, unsigned int ui, size_t Width, size_t Height, CUstream hStream)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_deviceptr(dstDevice);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr, size_t, unsigned int, size_t, size_t, CUstream);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemsetD2D32Async"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dstDevice, dstPitch, ui, Width, Height, hStream);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMemsetD2D32Async) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMemsetD2D32Async) < 0 ||
         rpc_write(conn, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(conn, &dstPitch, sizeof(size_t)) < 0 ||
         rpc_write(conn, &ui, sizeof(unsigned int)) < 0 ||
@@ -1852,9 +2327,18 @@ CUresult cuArrayCreate_v2(CUarray* pHandle, const CUDA_ARRAY_DESCRIPTOR* pAlloca
 
 CUresult cuArrayGetDescriptor_v2(CUDA_ARRAY_DESCRIPTOR* pArrayDescriptor, CUarray hArray)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUDA_ARRAY_DESCRIPTOR*, CUarray);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuArrayGetDescriptor_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pArrayDescriptor, hArray);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuArrayGetDescriptor_v2) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuArrayGetDescriptor_v2) < 0 ||
         rpc_write(conn, pArrayDescriptor, sizeof(CUDA_ARRAY_DESCRIPTOR)) < 0 ||
         rpc_write(conn, &hArray, sizeof(CUarray)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -1867,9 +2351,18 @@ CUresult cuArrayGetDescriptor_v2(CUDA_ARRAY_DESCRIPTOR* pArrayDescriptor, CUarra
 
 CUresult cuArrayGetSparseProperties(CUDA_ARRAY_SPARSE_PROPERTIES* sparseProperties, CUarray array)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUDA_ARRAY_SPARSE_PROPERTIES*, CUarray);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuArrayGetSparseProperties"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(sparseProperties, array);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuArrayGetSparseProperties) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuArrayGetSparseProperties) < 0 ||
         rpc_write(conn, sparseProperties, sizeof(CUDA_ARRAY_SPARSE_PROPERTIES)) < 0 ||
         rpc_write(conn, &array, sizeof(CUarray)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -1882,9 +2375,18 @@ CUresult cuArrayGetSparseProperties(CUDA_ARRAY_SPARSE_PROPERTIES* sparseProperti
 
 CUresult cuMipmappedArrayGetSparseProperties(CUDA_ARRAY_SPARSE_PROPERTIES* sparseProperties, CUmipmappedArray mipmap)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUDA_ARRAY_SPARSE_PROPERTIES*, CUmipmappedArray);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMipmappedArrayGetSparseProperties"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(sparseProperties, mipmap);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMipmappedArrayGetSparseProperties) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMipmappedArrayGetSparseProperties) < 0 ||
         rpc_write(conn, sparseProperties, sizeof(CUDA_ARRAY_SPARSE_PROPERTIES)) < 0 ||
         rpc_write(conn, &mipmap, sizeof(CUmipmappedArray)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -1897,9 +2399,18 @@ CUresult cuMipmappedArrayGetSparseProperties(CUDA_ARRAY_SPARSE_PROPERTIES* spars
 
 CUresult cuArrayGetMemoryRequirements(CUDA_ARRAY_MEMORY_REQUIREMENTS* memoryRequirements, CUarray array, CUdevice device)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_device(&device);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUDA_ARRAY_MEMORY_REQUIREMENTS*, CUarray, CUdevice);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuArrayGetMemoryRequirements"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(memoryRequirements, array, device);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuArrayGetMemoryRequirements) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuArrayGetMemoryRequirements) < 0 ||
         rpc_write(conn, memoryRequirements, sizeof(CUDA_ARRAY_MEMORY_REQUIREMENTS)) < 0 ||
         rpc_write(conn, &array, sizeof(CUarray)) < 0 ||
         rpc_write(conn, &device, sizeof(CUdevice)) < 0 ||
@@ -1913,9 +2424,18 @@ CUresult cuArrayGetMemoryRequirements(CUDA_ARRAY_MEMORY_REQUIREMENTS* memoryRequ
 
 CUresult cuMipmappedArrayGetMemoryRequirements(CUDA_ARRAY_MEMORY_REQUIREMENTS* memoryRequirements, CUmipmappedArray mipmap, CUdevice device)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_device(&device);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUDA_ARRAY_MEMORY_REQUIREMENTS*, CUmipmappedArray, CUdevice);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMipmappedArrayGetMemoryRequirements"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(memoryRequirements, mipmap, device);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMipmappedArrayGetMemoryRequirements) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMipmappedArrayGetMemoryRequirements) < 0 ||
         rpc_write(conn, memoryRequirements, sizeof(CUDA_ARRAY_MEMORY_REQUIREMENTS)) < 0 ||
         rpc_write(conn, &mipmap, sizeof(CUmipmappedArray)) < 0 ||
         rpc_write(conn, &device, sizeof(CUdevice)) < 0 ||
@@ -1929,9 +2449,18 @@ CUresult cuMipmappedArrayGetMemoryRequirements(CUDA_ARRAY_MEMORY_REQUIREMENTS* m
 
 CUresult cuArrayGetPlane(CUarray* pPlaneArray, CUarray hArray, unsigned int planeIdx)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUarray*, CUarray, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuArrayGetPlane"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pPlaneArray, hArray, planeIdx);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuArrayGetPlane) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuArrayGetPlane) < 0 ||
         rpc_write(conn, pPlaneArray, sizeof(CUarray)) < 0 ||
         rpc_write(conn, &hArray, sizeof(CUarray)) < 0 ||
         rpc_write(conn, &planeIdx, sizeof(unsigned int)) < 0 ||
@@ -1945,9 +2474,18 @@ CUresult cuArrayGetPlane(CUarray* pPlaneArray, CUarray hArray, unsigned int plan
 
 CUresult cuArrayDestroy(CUarray hArray)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUarray);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuArrayDestroy"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hArray);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuArrayDestroy) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuArrayDestroy) < 0 ||
         rpc_write(conn, &hArray, sizeof(CUarray)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
@@ -1963,9 +2501,18 @@ CUresult cuArray3DCreate_v2(CUarray* pHandle, const CUDA_ARRAY3D_DESCRIPTOR* pAl
 
 CUresult cuArray3DGetDescriptor_v2(CUDA_ARRAY3D_DESCRIPTOR* pArrayDescriptor, CUarray hArray)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUDA_ARRAY3D_DESCRIPTOR*, CUarray);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuArray3DGetDescriptor_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pArrayDescriptor, hArray);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuArray3DGetDescriptor_v2) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuArray3DGetDescriptor_v2) < 0 ||
         rpc_write(conn, pArrayDescriptor, sizeof(CUDA_ARRAY3D_DESCRIPTOR)) < 0 ||
         rpc_write(conn, &hArray, sizeof(CUarray)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -1978,9 +2525,18 @@ CUresult cuArray3DGetDescriptor_v2(CUDA_ARRAY3D_DESCRIPTOR* pArrayDescriptor, CU
 
 CUresult cuMipmappedArrayCreate(CUmipmappedArray* pHandle, const CUDA_ARRAY3D_DESCRIPTOR* pMipmappedArrayDesc, unsigned int numMipmapLevels)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUmipmappedArray*, const CUDA_ARRAY3D_DESCRIPTOR*, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMipmappedArrayCreate"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pHandle, pMipmappedArrayDesc, numMipmapLevels);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMipmappedArrayCreate) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMipmappedArrayCreate) < 0 ||
         rpc_write(conn, pHandle, sizeof(CUmipmappedArray)) < 0 ||
         rpc_write(conn, &pMipmappedArrayDesc, sizeof(const CUDA_ARRAY3D_DESCRIPTOR*)) < 0 ||
         rpc_write(conn, &numMipmapLevels, sizeof(unsigned int)) < 0 ||
@@ -1994,9 +2550,18 @@ CUresult cuMipmappedArrayCreate(CUmipmappedArray* pHandle, const CUDA_ARRAY3D_DE
 
 CUresult cuMipmappedArrayGetLevel(CUarray* pLevelArray, CUmipmappedArray hMipmappedArray, unsigned int level)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUarray*, CUmipmappedArray, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMipmappedArrayGetLevel"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pLevelArray, hMipmappedArray, level);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMipmappedArrayGetLevel) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMipmappedArrayGetLevel) < 0 ||
         rpc_write(conn, pLevelArray, sizeof(CUarray)) < 0 ||
         rpc_write(conn, &hMipmappedArray, sizeof(CUmipmappedArray)) < 0 ||
         rpc_write(conn, &level, sizeof(unsigned int)) < 0 ||
@@ -2010,9 +2575,18 @@ CUresult cuMipmappedArrayGetLevel(CUarray* pLevelArray, CUmipmappedArray hMipmap
 
 CUresult cuMipmappedArrayDestroy(CUmipmappedArray hMipmappedArray)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUmipmappedArray);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMipmappedArrayDestroy"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hMipmappedArray);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMipmappedArrayDestroy) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMipmappedArrayDestroy) < 0 ||
         rpc_write(conn, &hMipmappedArray, sizeof(CUmipmappedArray)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
@@ -2023,9 +2597,18 @@ CUresult cuMipmappedArrayDestroy(CUmipmappedArray hMipmappedArray)
 
 CUresult cuMemAddressReserve(CUdeviceptr* ptr, size_t size, size_t alignment, CUdeviceptr addr, unsigned long long flags)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr*, size_t, size_t, CUdeviceptr, unsigned long long);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemAddressReserve"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(ptr, size, alignment, addr, flags);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMemAddressReserve) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMemAddressReserve) < 0 ||
         rpc_write(conn, ptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(conn, &size, sizeof(size_t)) < 0 ||
         rpc_write(conn, &alignment, sizeof(size_t)) < 0 ||
@@ -2041,9 +2624,18 @@ CUresult cuMemAddressReserve(CUdeviceptr* ptr, size_t size, size_t alignment, CU
 
 CUresult cuMemAddressFree(CUdeviceptr ptr, size_t size)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr, size_t);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemAddressFree"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(ptr, size);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMemAddressFree) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMemAddressFree) < 0 ||
         rpc_write(conn, &ptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(conn, &size, sizeof(size_t)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -2055,13 +2647,20 @@ CUresult cuMemAddressFree(CUdeviceptr ptr, size_t size)
 
 CUresult cuMemCreate(CUmemGenericAllocationHandle* handle, size_t size, const CUmemAllocationProp* prop, unsigned long long flags)
 {
-    if (handle == nullptr || prop == nullptr)
-        return CUDA_ERROR_INVALID_VALUE;
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUmemGenericAllocationHandle*, size_t, const CUmemAllocationProp*, unsigned long long);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemCreate"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(handle, size, prop, flags);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMemCreate) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMemCreate) < 0 ||
         rpc_write(conn, &size, sizeof(size_t)) < 0 ||
-        rpc_write(conn, prop, sizeof(CUmemAllocationProp)) < 0 ||
+        rpc_write(conn, prop, sizeof(const CUmemAllocationProp)) < 0 ||
         rpc_write(conn, &flags, sizeof(unsigned long long)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, handle, sizeof(CUmemGenericAllocationHandle)) < 0 ||
@@ -2073,9 +2672,18 @@ CUresult cuMemCreate(CUmemGenericAllocationHandle* handle, size_t size, const CU
 
 CUresult cuMemRelease(CUmemGenericAllocationHandle handle)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUmemGenericAllocationHandle);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemRelease"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(handle);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMemRelease) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMemRelease) < 0 ||
         rpc_write(conn, &handle, sizeof(CUmemGenericAllocationHandle)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
@@ -2086,9 +2694,18 @@ CUresult cuMemRelease(CUmemGenericAllocationHandle handle)
 
 CUresult cuMemMap(CUdeviceptr ptr, size_t size, size_t offset, CUmemGenericAllocationHandle handle, unsigned long long flags)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr, size_t, size_t, CUmemGenericAllocationHandle, unsigned long long);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemMap"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(ptr, size, offset, handle, flags);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMemMap) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMemMap) < 0 ||
         rpc_write(conn, &ptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(conn, &size, sizeof(size_t)) < 0 ||
         rpc_write(conn, &offset, sizeof(size_t)) < 0 ||
@@ -2103,9 +2720,18 @@ CUresult cuMemMap(CUdeviceptr ptr, size_t size, size_t offset, CUmemGenericAlloc
 
 CUresult cuMemMapArrayAsync(CUarrayMapInfo* mapInfoList, unsigned int count, CUstream hStream)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUarrayMapInfo*, unsigned int, CUstream);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemMapArrayAsync"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(mapInfoList, count, hStream);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMemMapArrayAsync) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMemMapArrayAsync) < 0 ||
         rpc_write(conn, mapInfoList, sizeof(CUarrayMapInfo)) < 0 ||
         rpc_write(conn, &count, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, &hStream, sizeof(CUstream)) < 0 ||
@@ -2119,9 +2745,18 @@ CUresult cuMemMapArrayAsync(CUarrayMapInfo* mapInfoList, unsigned int count, CUs
 
 CUresult cuMemUnmap(CUdeviceptr ptr, size_t size)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr, size_t);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemUnmap"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(ptr, size);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMemUnmap) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMemUnmap) < 0 ||
         rpc_write(conn, &ptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(conn, &size, sizeof(size_t)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -2133,15 +2768,22 @@ CUresult cuMemUnmap(CUdeviceptr ptr, size_t size)
 
 CUresult cuMemSetAccess(CUdeviceptr ptr, size_t size, const CUmemAccessDesc* desc, size_t count)
 {
-    if (count != 0 && desc == nullptr)
-        return CUDA_ERROR_INVALID_VALUE;
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr, size_t, const CUmemAccessDesc*, size_t);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemSetAccess"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(ptr, size, desc, count);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMemSetAccess) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMemSetAccess) < 0 ||
         rpc_write(conn, &ptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(conn, &size, sizeof(size_t)) < 0 ||
         rpc_write(conn, &count, sizeof(size_t)) < 0 ||
-        (count != 0 && rpc_write(conn, desc, count * sizeof(CUmemAccessDesc)) < 0) ||
+        rpc_write(conn, desc, count * sizeof(const CUmemAccessDesc)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
@@ -2151,12 +2793,19 @@ CUresult cuMemSetAccess(CUdeviceptr ptr, size_t size, const CUmemAccessDesc* des
 
 CUresult cuMemGetAccess(unsigned long long* flags, const CUmemLocation* location, CUdeviceptr ptr)
 {
-    if (flags == nullptr || location == nullptr)
-        return CUDA_ERROR_INVALID_VALUE;
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(unsigned long long*, const CUmemLocation*, CUdeviceptr);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemGetAccess"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(flags, location, ptr);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMemGetAccess) < 0 ||
-        rpc_write(conn, location, sizeof(CUmemLocation)) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMemGetAccess) < 0 ||
+        rpc_write(conn, location, sizeof(const CUmemLocation)) < 0 ||
         rpc_write(conn, &ptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, flags, sizeof(unsigned long long)) < 0 ||
@@ -2168,12 +2817,19 @@ CUresult cuMemGetAccess(unsigned long long* flags, const CUmemLocation* location
 
 CUresult cuMemGetAllocationGranularity(size_t* granularity, const CUmemAllocationProp* prop, CUmemAllocationGranularity_flags option)
 {
-    if (granularity == nullptr || prop == nullptr)
-        return CUDA_ERROR_INVALID_VALUE;
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(size_t*, const CUmemAllocationProp*, CUmemAllocationGranularity_flags);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemGetAllocationGranularity"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(granularity, prop, option);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMemGetAllocationGranularity) < 0 ||
-        rpc_write(conn, prop, sizeof(CUmemAllocationProp)) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMemGetAllocationGranularity) < 0 ||
+        rpc_write(conn, prop, sizeof(const CUmemAllocationProp)) < 0 ||
         rpc_write(conn, &option, sizeof(CUmemAllocationGranularity_flags)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, granularity, sizeof(size_t)) < 0 ||
@@ -2185,9 +2841,18 @@ CUresult cuMemGetAllocationGranularity(size_t* granularity, const CUmemAllocatio
 
 CUresult cuMemGetAllocationPropertiesFromHandle(CUmemAllocationProp* prop, CUmemGenericAllocationHandle handle)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUmemAllocationProp*, CUmemGenericAllocationHandle);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemGetAllocationPropertiesFromHandle"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(prop, handle);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMemGetAllocationPropertiesFromHandle) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMemGetAllocationPropertiesFromHandle) < 0 ||
         rpc_write(conn, prop, sizeof(CUmemAllocationProp)) < 0 ||
         rpc_write(conn, &handle, sizeof(CUmemGenericAllocationHandle)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -2200,9 +2865,18 @@ CUresult cuMemGetAllocationPropertiesFromHandle(CUmemAllocationProp* prop, CUmem
 
 CUresult cuMemFreeAsync(CUdeviceptr dptr, CUstream hStream)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr, CUstream);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemFreeAsync"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dptr, hStream);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMemFreeAsync) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMemFreeAsync) < 0 ||
         rpc_write(conn, &dptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(conn, &hStream, sizeof(CUstream)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -2214,9 +2888,18 @@ CUresult cuMemFreeAsync(CUdeviceptr dptr, CUstream hStream)
 
 CUresult cuMemAllocAsync(CUdeviceptr* dptr, size_t bytesize, CUstream hStream)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr*, size_t, CUstream);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemAllocAsync"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dptr, bytesize, hStream);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMemAllocAsync) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMemAllocAsync) < 0 ||
         rpc_write(conn, dptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(conn, &bytesize, sizeof(size_t)) < 0 ||
         rpc_write(conn, &hStream, sizeof(CUstream)) < 0 ||
@@ -2230,9 +2913,18 @@ CUresult cuMemAllocAsync(CUdeviceptr* dptr, size_t bytesize, CUstream hStream)
 
 CUresult cuMemPoolTrimTo(CUmemoryPool pool, size_t minBytesToKeep)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUmemoryPool, size_t);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemPoolTrimTo"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pool, minBytesToKeep);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMemPoolTrimTo) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMemPoolTrimTo) < 0 ||
         rpc_write(conn, &pool, sizeof(CUmemoryPool)) < 0 ||
         rpc_write(conn, &minBytesToKeep, sizeof(size_t)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -2244,9 +2936,18 @@ CUresult cuMemPoolTrimTo(CUmemoryPool pool, size_t minBytesToKeep)
 
 CUresult cuMemPoolSetAccess(CUmemoryPool pool, const CUmemAccessDesc* map, size_t count)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUmemoryPool, const CUmemAccessDesc*, size_t);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemPoolSetAccess"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pool, map, count);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMemPoolSetAccess) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMemPoolSetAccess) < 0 ||
         rpc_write(conn, &pool, sizeof(CUmemoryPool)) < 0 ||
         rpc_write(conn, &map, sizeof(const CUmemAccessDesc*)) < 0 ||
         rpc_write(conn, &count, sizeof(size_t)) < 0 ||
@@ -2259,9 +2960,18 @@ CUresult cuMemPoolSetAccess(CUmemoryPool pool, const CUmemAccessDesc* map, size_
 
 CUresult cuMemPoolGetAccess(CUmemAccess_flags* flags, CUmemoryPool memPool, CUmemLocation* location)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUmemAccess_flags*, CUmemoryPool, CUmemLocation*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemPoolGetAccess"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(flags, memPool, location);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMemPoolGetAccess) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMemPoolGetAccess) < 0 ||
         rpc_write(conn, flags, sizeof(CUmemAccess_flags)) < 0 ||
         rpc_write(conn, &memPool, sizeof(CUmemoryPool)) < 0 ||
         rpc_write(conn, location, sizeof(CUmemLocation)) < 0 ||
@@ -2276,9 +2986,18 @@ CUresult cuMemPoolGetAccess(CUmemAccess_flags* flags, CUmemoryPool memPool, CUme
 
 CUresult cuMemPoolCreate(CUmemoryPool* pool, const CUmemPoolProps* poolProps)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUmemoryPool*, const CUmemPoolProps*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemPoolCreate"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pool, poolProps);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMemPoolCreate) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMemPoolCreate) < 0 ||
         rpc_write(conn, pool, sizeof(CUmemoryPool)) < 0 ||
         rpc_write(conn, &poolProps, sizeof(const CUmemPoolProps*)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -2291,9 +3010,18 @@ CUresult cuMemPoolCreate(CUmemoryPool* pool, const CUmemPoolProps* poolProps)
 
 CUresult cuMemPoolDestroy(CUmemoryPool pool)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUmemoryPool);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemPoolDestroy"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pool);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMemPoolDestroy) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMemPoolDestroy) < 0 ||
         rpc_write(conn, &pool, sizeof(CUmemoryPool)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
@@ -2304,9 +3032,18 @@ CUresult cuMemPoolDestroy(CUmemoryPool pool)
 
 CUresult cuMemAllocFromPoolAsync(CUdeviceptr* dptr, size_t bytesize, CUmemoryPool pool, CUstream hStream)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr*, size_t, CUmemoryPool, CUstream);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemAllocFromPoolAsync"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dptr, bytesize, pool, hStream);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMemAllocFromPoolAsync) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMemAllocFromPoolAsync) < 0 ||
         rpc_write(conn, dptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(conn, &bytesize, sizeof(size_t)) < 0 ||
         rpc_write(conn, &pool, sizeof(CUmemoryPool)) < 0 ||
@@ -2321,9 +3058,18 @@ CUresult cuMemAllocFromPoolAsync(CUdeviceptr* dptr, size_t bytesize, CUmemoryPoo
 
 CUresult cuMemPoolExportPointer(CUmemPoolPtrExportData* shareData_out, CUdeviceptr ptr)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUmemPoolPtrExportData*, CUdeviceptr);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemPoolExportPointer"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(shareData_out, ptr);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMemPoolExportPointer) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMemPoolExportPointer) < 0 ||
         rpc_write(conn, shareData_out, sizeof(CUmemPoolPtrExportData)) < 0 ||
         rpc_write(conn, &ptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -2336,9 +3082,18 @@ CUresult cuMemPoolExportPointer(CUmemPoolPtrExportData* shareData_out, CUdevicep
 
 CUresult cuMemPoolImportPointer(CUdeviceptr* ptr_out, CUmemoryPool pool, CUmemPoolPtrExportData* shareData)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr*, CUmemoryPool, CUmemPoolPtrExportData*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemPoolImportPointer"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(ptr_out, pool, shareData);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMemPoolImportPointer) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMemPoolImportPointer) < 0 ||
         rpc_write(conn, ptr_out, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(conn, &pool, sizeof(CUmemoryPool)) < 0 ||
         rpc_write(conn, shareData, sizeof(CUmemPoolPtrExportData)) < 0 ||
@@ -2353,9 +3108,18 @@ CUresult cuMemPoolImportPointer(CUdeviceptr* ptr_out, CUmemoryPool pool, CUmemPo
 
 CUresult cuMemRangeGetAttributes(void** data, size_t* dataSizes, CUmem_range_attribute* attributes, size_t numAttributes, CUdeviceptr devPtr, size_t count)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(void**, size_t*, CUmem_range_attribute*, size_t, CUdeviceptr, size_t);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemRangeGetAttributes"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(data, dataSizes, attributes, numAttributes, devPtr, count);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuMemRangeGetAttributes) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuMemRangeGetAttributes) < 0 ||
         rpc_write(conn, data, sizeof(void*)) < 0 ||
         rpc_write(conn, dataSizes, sizeof(size_t)) < 0 ||
         rpc_write(conn, attributes, sizeof(CUmem_range_attribute)) < 0 ||
@@ -2374,9 +3138,18 @@ CUresult cuMemRangeGetAttributes(void** data, size_t* dataSizes, CUmem_range_att
 
 CUresult cuPointerSetAttribute(const void* value, CUpointer_attribute attribute, CUdeviceptr ptr)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(const void*, CUpointer_attribute, CUdeviceptr);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuPointerSetAttribute"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(value, attribute, ptr);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuPointerSetAttribute) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuPointerSetAttribute) < 0 ||
         rpc_write(conn, &value, sizeof(const void*)) < 0 ||
         rpc_write(conn, &attribute, sizeof(CUpointer_attribute)) < 0 ||
         rpc_write(conn, &ptr, sizeof(CUdeviceptr)) < 0 ||
@@ -2387,20 +3160,25 @@ CUresult cuPointerSetAttribute(const void* value, CUpointer_attribute attribute,
     return return_value;
 }
 
-extern "C" CUresult scuda_cuPointerGetAttributes_safe(
-    unsigned int numAttributes, CUpointer_attribute *attributes, void **data,
-    CUdeviceptr ptr);
-
-CUresult cuPointerGetAttributes(unsigned int numAttributes,
-                                CUpointer_attribute *attributes, void **data,
-                                CUdeviceptr ptr) {
-    return scuda_cuPointerGetAttributes_safe(numAttributes, attributes, data,
-                                             ptr);
+CUresult cuPointerGetAttributes(unsigned int numAttributes, CUpointer_attribute* attributes, void** data, CUdeviceptr ptr)
+{
+    return scuda_cuPointerGetAttributes_safe(numAttributes, attributes, data, ptr);
 }
 
 CUresult cuStreamCreate(CUstream* phStream, unsigned int Flags)
 {
-    conn_t *conn = scuda_rpc_conn_for_current_context();
+    scuda_route route = scuda_route_for_current_context();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUstream*, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuStreamCreate"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(phStream, Flags);
+    if (return_value == CUDA_SUCCESS && phStream != nullptr) {
+        scuda_note_stream_owner_route(*phStream, route);
+    }
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuStreamCreate) < 0 ||
@@ -2411,14 +3189,26 @@ CUresult cuStreamCreate(CUstream* phStream, unsigned int Flags)
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    if (return_value == CUDA_SUCCESS && phStream != nullptr)
-        scuda_note_stream_owner(*phStream, conn);
+    if (return_value == CUDA_SUCCESS && phStream != nullptr) {
+        scuda_note_stream_owner_route(*phStream, route);
+    }
     return return_value;
 }
 
 CUresult cuStreamCreateWithPriority(CUstream* phStream, unsigned int flags, int priority)
 {
-    conn_t *conn = scuda_rpc_conn_for_current_context();
+    scuda_route route = scuda_route_for_current_context();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUstream*, unsigned int, int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuStreamCreateWithPriority"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(phStream, flags, priority);
+    if (return_value == CUDA_SUCCESS && phStream != nullptr) {
+        scuda_note_stream_owner_route(*phStream, route);
+    }
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuStreamCreateWithPriority) < 0 ||
@@ -2430,14 +3220,23 @@ CUresult cuStreamCreateWithPriority(CUstream* phStream, unsigned int flags, int 
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    if (return_value == CUDA_SUCCESS && phStream != nullptr)
-        scuda_note_stream_owner(*phStream, conn);
+    if (return_value == CUDA_SUCCESS && phStream != nullptr) {
+        scuda_note_stream_owner_route(*phStream, route);
+    }
     return return_value;
 }
 
 CUresult cuStreamGetPriority(CUstream hStream, int* priority)
 {
-    conn_t *conn = scuda_rpc_conn_for_stream(hStream);
+    scuda_route route = (hStream != nullptr ? scuda_route_for_stream(hStream) : scuda_route_for_default());
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUstream, int*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuStreamGetPriority"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hStream, priority);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuStreamGetPriority) < 0 ||
@@ -2453,7 +3252,15 @@ CUresult cuStreamGetPriority(CUstream hStream, int* priority)
 
 CUresult cuStreamGetFlags(CUstream hStream, unsigned int* flags)
 {
-    conn_t *conn = scuda_rpc_conn_for_stream(hStream);
+    scuda_route route = (hStream != nullptr ? scuda_route_for_stream(hStream) : scuda_route_for_default());
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUstream, unsigned int*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuStreamGetFlags"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hStream, flags);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuStreamGetFlags) < 0 ||
@@ -2469,7 +3276,15 @@ CUresult cuStreamGetFlags(CUstream hStream, unsigned int* flags)
 
 CUresult cuStreamGetId(CUstream hStream, unsigned long long* streamId)
 {
-    conn_t *conn = scuda_rpc_conn_for_stream(hStream);
+    scuda_route route = (hStream != nullptr ? scuda_route_for_stream(hStream) : scuda_route_for_default());
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUstream, unsigned long long*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuStreamGetId"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hStream, streamId);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuStreamGetId) < 0 ||
@@ -2485,7 +3300,15 @@ CUresult cuStreamGetId(CUstream hStream, unsigned long long* streamId)
 
 CUresult cuStreamGetCtx(CUstream hStream, CUcontext* pctx)
 {
-    conn_t *conn = scuda_rpc_conn_for_stream(hStream);
+    scuda_route route = (hStream != nullptr ? scuda_route_for_stream(hStream) : scuda_route_for_default());
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUstream, CUcontext*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuStreamGetCtx"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hStream, pctx);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuStreamGetCtx) < 0 ||
@@ -2496,14 +3319,20 @@ CUresult cuStreamGetCtx(CUstream hStream, CUcontext* pctx)
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    if (return_value == CUDA_SUCCESS && pctx != nullptr)
-        scuda_note_context_owner(*pctx, conn);
     return return_value;
 }
 
 CUresult cuStreamWaitEvent(CUstream hStream, CUevent hEvent, unsigned int Flags)
 {
-    conn_t *conn = hStream != nullptr ? scuda_rpc_conn_for_stream(hStream) : scuda_rpc_conn_for_event(hEvent);
+    scuda_route route = (hStream != nullptr ? scuda_route_for_stream(hStream) : scuda_route_for_default());
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUstream, CUevent, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuStreamWaitEvent"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hStream, hEvent, Flags);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuStreamWaitEvent) < 0 ||
@@ -2519,9 +3348,18 @@ CUresult cuStreamWaitEvent(CUstream hStream, CUevent hEvent, unsigned int Flags)
 
 CUresult cuStreamBeginCapture_v2(CUstream hStream, CUstreamCaptureMode mode)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = (hStream != nullptr ? scuda_route_for_stream(hStream) : scuda_route_for_default());
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUstream, CUstreamCaptureMode);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuStreamBeginCapture_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hStream, mode);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuStreamBeginCapture_v2) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuStreamBeginCapture_v2) < 0 ||
         rpc_write(conn, &hStream, sizeof(CUstream)) < 0 ||
         rpc_write(conn, &mode, sizeof(CUstreamCaptureMode)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -2533,9 +3371,18 @@ CUresult cuStreamBeginCapture_v2(CUstream hStream, CUstreamCaptureMode mode)
 
 CUresult cuThreadExchangeStreamCaptureMode(CUstreamCaptureMode* mode)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUstreamCaptureMode*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuThreadExchangeStreamCaptureMode"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(mode);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuThreadExchangeStreamCaptureMode) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuThreadExchangeStreamCaptureMode) < 0 ||
         rpc_write(conn, mode, sizeof(CUstreamCaptureMode)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, mode, sizeof(CUstreamCaptureMode)) < 0 ||
@@ -2547,15 +3394,22 @@ CUresult cuThreadExchangeStreamCaptureMode(CUstreamCaptureMode* mode)
 
 CUresult cuStreamEndCapture(CUstream hStream, CUgraph* phGraph)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = (hStream != nullptr ? scuda_route_for_stream(hStream) : scuda_route_for_default());
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUstream, CUgraph*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuStreamEndCapture"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hStream, phGraph);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    CUgraph graph_tmp = nullptr;
-    CUgraph *graph_out = phGraph == nullptr ? &graph_tmp : phGraph;
-    if (rpc_write_start_request(conn, RPC_cuStreamEndCapture) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuStreamEndCapture) < 0 ||
         rpc_write(conn, &hStream, sizeof(CUstream)) < 0 ||
-        rpc_write(conn, graph_out, sizeof(CUgraph)) < 0 ||
+        rpc_write(conn, phGraph, sizeof(CUgraph)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, graph_out, sizeof(CUgraph)) < 0 ||
+        rpc_read(conn, phGraph, sizeof(CUgraph)) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
@@ -2564,9 +3418,18 @@ CUresult cuStreamEndCapture(CUstream hStream, CUgraph* phGraph)
 
 CUresult cuStreamIsCapturing(CUstream hStream, CUstreamCaptureStatus* captureStatus)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = (hStream != nullptr ? scuda_route_for_stream(hStream) : scuda_route_for_default());
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUstream, CUstreamCaptureStatus*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuStreamIsCapturing"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hStream, captureStatus);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuStreamIsCapturing) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuStreamIsCapturing) < 0 ||
         rpc_write(conn, &hStream, sizeof(CUstream)) < 0 ||
         rpc_write(conn, captureStatus, sizeof(CUstreamCaptureStatus)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -2579,9 +3442,18 @@ CUresult cuStreamIsCapturing(CUstream hStream, CUstreamCaptureStatus* captureSta
 
 CUresult cuStreamAttachMemAsync(CUstream hStream, CUdeviceptr dptr, size_t length, unsigned int flags)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = (hStream != nullptr ? scuda_route_for_stream(hStream) : scuda_route_for_default());
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUstream, CUdeviceptr, size_t, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuStreamAttachMemAsync"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hStream, dptr, length, flags);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuStreamAttachMemAsync) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuStreamAttachMemAsync) < 0 ||
         rpc_write(conn, &hStream, sizeof(CUstream)) < 0 ||
         rpc_write(conn, &dptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(conn, &length, sizeof(size_t)) < 0 ||
@@ -2595,7 +3467,15 @@ CUresult cuStreamAttachMemAsync(CUstream hStream, CUdeviceptr dptr, size_t lengt
 
 CUresult cuStreamQuery(CUstream hStream)
 {
-    conn_t *conn = scuda_rpc_conn_for_stream(hStream);
+    scuda_route route = (hStream != nullptr ? scuda_route_for_stream(hStream) : scuda_route_for_default());
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUstream);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuStreamQuery"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hStream);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuStreamQuery) < 0 ||
@@ -2609,7 +3489,15 @@ CUresult cuStreamQuery(CUstream hStream)
 
 CUresult cuStreamDestroy_v2(CUstream hStream)
 {
-    conn_t *conn = scuda_rpc_conn_for_stream(hStream);
+    scuda_route route = (hStream != nullptr ? scuda_route_for_stream(hStream) : scuda_route_for_default());
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUstream);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuStreamDestroy_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hStream);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuStreamDestroy_v2) < 0 ||
@@ -2623,9 +3511,18 @@ CUresult cuStreamDestroy_v2(CUstream hStream)
 
 CUresult cuStreamCopyAttributes(CUstream dst, CUstream src)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = (dst != nullptr ? scuda_route_for_stream(dst) : scuda_route_for_default());
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUstream, CUstream);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuStreamCopyAttributes"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dst, src);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuStreamCopyAttributes) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuStreamCopyAttributes) < 0 ||
         rpc_write(conn, &dst, sizeof(CUstream)) < 0 ||
         rpc_write(conn, &src, sizeof(CUstream)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -2637,13 +3534,21 @@ CUresult cuStreamCopyAttributes(CUstream dst, CUstream src)
 
 CUresult cuStreamGetAttribute(CUstream hStream, CUstreamAttrID attr, CUstreamAttrValue* value_out)
 {
-    if (value_out == nullptr)
-        return CUDA_ERROR_INVALID_VALUE;
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = (hStream != nullptr ? scuda_route_for_stream(hStream) : scuda_route_for_default());
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUstream, CUstreamAttrID, CUstreamAttrValue*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuStreamGetAttribute"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hStream, attr, value_out);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuStreamGetAttribute) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuStreamGetAttribute) < 0 ||
         rpc_write(conn, &hStream, sizeof(CUstream)) < 0 ||
         rpc_write(conn, &attr, sizeof(CUstreamAttrID)) < 0 ||
+        rpc_write(conn, value_out, sizeof(CUstreamAttrValue)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, value_out, sizeof(CUstreamAttrValue)) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
@@ -2654,14 +3559,21 @@ CUresult cuStreamGetAttribute(CUstream hStream, CUstreamAttrID attr, CUstreamAtt
 
 CUresult cuStreamSetAttribute(CUstream hStream, CUstreamAttrID attr, const CUstreamAttrValue* value)
 {
-    if (value == nullptr)
-        return CUDA_ERROR_INVALID_VALUE;
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = (hStream != nullptr ? scuda_route_for_stream(hStream) : scuda_route_for_default());
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUstream, CUstreamAttrID, const CUstreamAttrValue*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuStreamSetAttribute"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hStream, attr, value);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuStreamSetAttribute) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuStreamSetAttribute) < 0 ||
         rpc_write(conn, &hStream, sizeof(CUstream)) < 0 ||
         rpc_write(conn, &attr, sizeof(CUstreamAttrID)) < 0 ||
-        rpc_write(conn, value, sizeof(CUstreamAttrValue)) < 0 ||
+        rpc_write(conn, &value, sizeof(const CUstreamAttrValue*)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
@@ -2671,7 +3583,18 @@ CUresult cuStreamSetAttribute(CUstream hStream, CUstreamAttrID attr, const CUstr
 
 CUresult cuEventCreate(CUevent* phEvent, unsigned int Flags)
 {
-    conn_t *conn = scuda_rpc_conn_for_current_context();
+    scuda_route route = scuda_route_for_current_context();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUevent*, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuEventCreate"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(phEvent, Flags);
+    if (return_value == CUDA_SUCCESS && phEvent != nullptr) {
+        scuda_note_event_owner_route(*phEvent, route);
+    }
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuEventCreate) < 0 ||
@@ -2682,14 +3605,23 @@ CUresult cuEventCreate(CUevent* phEvent, unsigned int Flags)
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    if (return_value == CUDA_SUCCESS && phEvent != nullptr)
-        scuda_note_event_owner(*phEvent, conn);
+    if (return_value == CUDA_SUCCESS && phEvent != nullptr) {
+        scuda_note_event_owner_route(*phEvent, route);
+    }
     return return_value;
 }
 
 CUresult cuEventRecord(CUevent hEvent, CUstream hStream)
 {
-    conn_t *conn = hStream != nullptr ? scuda_rpc_conn_for_stream(hStream) : scuda_rpc_conn_for_event(hEvent);
+    scuda_route route = (hStream != nullptr ? scuda_route_for_stream(hStream) : scuda_route_for_default());
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUevent, CUstream);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuEventRecord"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hEvent, hStream);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuEventRecord) < 0 ||
@@ -2704,7 +3636,15 @@ CUresult cuEventRecord(CUevent hEvent, CUstream hStream)
 
 CUresult cuEventRecordWithFlags(CUevent hEvent, CUstream hStream, unsigned int flags)
 {
-    conn_t *conn = hStream != nullptr ? scuda_rpc_conn_for_stream(hStream) : scuda_rpc_conn_for_event(hEvent);
+    scuda_route route = (hStream != nullptr ? scuda_route_for_stream(hStream) : scuda_route_for_default());
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUevent, CUstream, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuEventRecordWithFlags"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hEvent, hStream, flags);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuEventRecordWithFlags) < 0 ||
@@ -2720,7 +3660,15 @@ CUresult cuEventRecordWithFlags(CUevent hEvent, CUstream hStream, unsigned int f
 
 CUresult cuEventQuery(CUevent hEvent)
 {
-    conn_t *conn = scuda_rpc_conn_for_event(hEvent);
+    scuda_route route = scuda_route_for_event(hEvent);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUevent);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuEventQuery"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hEvent);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuEventQuery) < 0 ||
@@ -2734,7 +3682,15 @@ CUresult cuEventQuery(CUevent hEvent)
 
 CUresult cuEventDestroy_v2(CUevent hEvent)
 {
-    conn_t *conn = scuda_rpc_conn_for_event(hEvent);
+    scuda_route route = scuda_route_for_event(hEvent);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUevent);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuEventDestroy_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hEvent);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuEventDestroy_v2) < 0 ||
@@ -2748,7 +3704,15 @@ CUresult cuEventDestroy_v2(CUevent hEvent)
 
 CUresult cuEventElapsedTime_v2(float* pMilliseconds, CUevent hStart, CUevent hEnd)
 {
-    conn_t *conn = scuda_rpc_conn_for_event(hStart);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(float*, CUevent, CUevent);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuEventElapsedTime_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pMilliseconds, hStart, hEnd);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuEventElapsedTime_v2) < 0 ||
@@ -2765,9 +3729,18 @@ CUresult cuEventElapsedTime_v2(float* pMilliseconds, CUevent hStart, CUevent hEn
 
 CUresult cuImportExternalMemory(CUexternalMemory* extMem_out, const CUDA_EXTERNAL_MEMORY_HANDLE_DESC* memHandleDesc)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUexternalMemory*, const CUDA_EXTERNAL_MEMORY_HANDLE_DESC*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuImportExternalMemory"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(extMem_out, memHandleDesc);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuImportExternalMemory) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuImportExternalMemory) < 0 ||
         rpc_write(conn, extMem_out, sizeof(CUexternalMemory)) < 0 ||
         rpc_write(conn, &memHandleDesc, sizeof(const CUDA_EXTERNAL_MEMORY_HANDLE_DESC*)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -2780,9 +3753,18 @@ CUresult cuImportExternalMemory(CUexternalMemory* extMem_out, const CUDA_EXTERNA
 
 CUresult cuExternalMemoryGetMappedBuffer(CUdeviceptr* devPtr, CUexternalMemory extMem, const CUDA_EXTERNAL_MEMORY_BUFFER_DESC* bufferDesc)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr*, CUexternalMemory, const CUDA_EXTERNAL_MEMORY_BUFFER_DESC*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuExternalMemoryGetMappedBuffer"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(devPtr, extMem, bufferDesc);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuExternalMemoryGetMappedBuffer) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuExternalMemoryGetMappedBuffer) < 0 ||
         rpc_write(conn, devPtr, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(conn, &extMem, sizeof(CUexternalMemory)) < 0 ||
         rpc_write(conn, &bufferDesc, sizeof(const CUDA_EXTERNAL_MEMORY_BUFFER_DESC*)) < 0 ||
@@ -2796,9 +3778,18 @@ CUresult cuExternalMemoryGetMappedBuffer(CUdeviceptr* devPtr, CUexternalMemory e
 
 CUresult cuExternalMemoryGetMappedMipmappedArray(CUmipmappedArray* mipmap, CUexternalMemory extMem, const CUDA_EXTERNAL_MEMORY_MIPMAPPED_ARRAY_DESC* mipmapDesc)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUmipmappedArray*, CUexternalMemory, const CUDA_EXTERNAL_MEMORY_MIPMAPPED_ARRAY_DESC*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuExternalMemoryGetMappedMipmappedArray"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(mipmap, extMem, mipmapDesc);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuExternalMemoryGetMappedMipmappedArray) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuExternalMemoryGetMappedMipmappedArray) < 0 ||
         rpc_write(conn, mipmap, sizeof(CUmipmappedArray)) < 0 ||
         rpc_write(conn, &extMem, sizeof(CUexternalMemory)) < 0 ||
         rpc_write(conn, &mipmapDesc, sizeof(const CUDA_EXTERNAL_MEMORY_MIPMAPPED_ARRAY_DESC*)) < 0 ||
@@ -2812,9 +3803,18 @@ CUresult cuExternalMemoryGetMappedMipmappedArray(CUmipmappedArray* mipmap, CUext
 
 CUresult cuDestroyExternalMemory(CUexternalMemory extMem)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUexternalMemory);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuDestroyExternalMemory"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(extMem);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuDestroyExternalMemory) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuDestroyExternalMemory) < 0 ||
         rpc_write(conn, &extMem, sizeof(CUexternalMemory)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
@@ -2825,9 +3825,18 @@ CUresult cuDestroyExternalMemory(CUexternalMemory extMem)
 
 CUresult cuImportExternalSemaphore(CUexternalSemaphore* extSem_out, const CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC* semHandleDesc)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUexternalSemaphore*, const CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuImportExternalSemaphore"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(extSem_out, semHandleDesc);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuImportExternalSemaphore) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuImportExternalSemaphore) < 0 ||
         rpc_write(conn, extSem_out, sizeof(CUexternalSemaphore)) < 0 ||
         rpc_write(conn, &semHandleDesc, sizeof(const CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC*)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -2840,9 +3849,18 @@ CUresult cuImportExternalSemaphore(CUexternalSemaphore* extSem_out, const CUDA_E
 
 CUresult cuSignalExternalSemaphoresAsync(const CUexternalSemaphore* extSemArray, const CUDA_EXTERNAL_SEMAPHORE_SIGNAL_PARAMS* paramsArray, unsigned int numExtSems, CUstream stream)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(const CUexternalSemaphore*, const CUDA_EXTERNAL_SEMAPHORE_SIGNAL_PARAMS*, unsigned int, CUstream);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuSignalExternalSemaphoresAsync"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(extSemArray, paramsArray, numExtSems, stream);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuSignalExternalSemaphoresAsync) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuSignalExternalSemaphoresAsync) < 0 ||
         rpc_write(conn, &extSemArray, sizeof(const CUexternalSemaphore*)) < 0 ||
         rpc_write(conn, &paramsArray, sizeof(const CUDA_EXTERNAL_SEMAPHORE_SIGNAL_PARAMS*)) < 0 ||
         rpc_write(conn, &numExtSems, sizeof(unsigned int)) < 0 ||
@@ -2856,9 +3874,18 @@ CUresult cuSignalExternalSemaphoresAsync(const CUexternalSemaphore* extSemArray,
 
 CUresult cuWaitExternalSemaphoresAsync(const CUexternalSemaphore* extSemArray, const CUDA_EXTERNAL_SEMAPHORE_WAIT_PARAMS* paramsArray, unsigned int numExtSems, CUstream stream)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(const CUexternalSemaphore*, const CUDA_EXTERNAL_SEMAPHORE_WAIT_PARAMS*, unsigned int, CUstream);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuWaitExternalSemaphoresAsync"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(extSemArray, paramsArray, numExtSems, stream);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuWaitExternalSemaphoresAsync) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuWaitExternalSemaphoresAsync) < 0 ||
         rpc_write(conn, &extSemArray, sizeof(const CUexternalSemaphore*)) < 0 ||
         rpc_write(conn, &paramsArray, sizeof(const CUDA_EXTERNAL_SEMAPHORE_WAIT_PARAMS*)) < 0 ||
         rpc_write(conn, &numExtSems, sizeof(unsigned int)) < 0 ||
@@ -2872,9 +3899,18 @@ CUresult cuWaitExternalSemaphoresAsync(const CUexternalSemaphore* extSemArray, c
 
 CUresult cuDestroyExternalSemaphore(CUexternalSemaphore extSem)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUexternalSemaphore);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuDestroyExternalSemaphore"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(extSem);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuDestroyExternalSemaphore) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuDestroyExternalSemaphore) < 0 ||
         rpc_write(conn, &extSem, sizeof(CUexternalSemaphore)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
@@ -2885,9 +3921,18 @@ CUresult cuDestroyExternalSemaphore(CUexternalSemaphore extSem)
 
 CUresult cuStreamWaitValue32_v2(CUstream stream, CUdeviceptr addr, cuuint32_t value, unsigned int flags)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUstream, CUdeviceptr, cuuint32_t, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuStreamWaitValue32_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(stream, addr, value, flags);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuStreamWaitValue32_v2) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuStreamWaitValue32_v2) < 0 ||
         rpc_write(conn, &stream, sizeof(CUstream)) < 0 ||
         rpc_write(conn, &addr, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(conn, &value, sizeof(cuuint32_t)) < 0 ||
@@ -2901,9 +3946,18 @@ CUresult cuStreamWaitValue32_v2(CUstream stream, CUdeviceptr addr, cuuint32_t va
 
 CUresult cuStreamWaitValue64_v2(CUstream stream, CUdeviceptr addr, cuuint64_t value, unsigned int flags)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUstream, CUdeviceptr, cuuint64_t, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuStreamWaitValue64_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(stream, addr, value, flags);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuStreamWaitValue64_v2) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuStreamWaitValue64_v2) < 0 ||
         rpc_write(conn, &stream, sizeof(CUstream)) < 0 ||
         rpc_write(conn, &addr, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(conn, &value, sizeof(cuuint64_t)) < 0 ||
@@ -2917,9 +3971,18 @@ CUresult cuStreamWaitValue64_v2(CUstream stream, CUdeviceptr addr, cuuint64_t va
 
 CUresult cuStreamWriteValue32_v2(CUstream stream, CUdeviceptr addr, cuuint32_t value, unsigned int flags)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUstream, CUdeviceptr, cuuint32_t, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuStreamWriteValue32_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(stream, addr, value, flags);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuStreamWriteValue32_v2) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuStreamWriteValue32_v2) < 0 ||
         rpc_write(conn, &stream, sizeof(CUstream)) < 0 ||
         rpc_write(conn, &addr, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(conn, &value, sizeof(cuuint32_t)) < 0 ||
@@ -2933,9 +3996,18 @@ CUresult cuStreamWriteValue32_v2(CUstream stream, CUdeviceptr addr, cuuint32_t v
 
 CUresult cuStreamWriteValue64_v2(CUstream stream, CUdeviceptr addr, cuuint64_t value, unsigned int flags)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUstream, CUdeviceptr, cuuint64_t, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuStreamWriteValue64_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(stream, addr, value, flags);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuStreamWriteValue64_v2) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuStreamWriteValue64_v2) < 0 ||
         rpc_write(conn, &stream, sizeof(CUstream)) < 0 ||
         rpc_write(conn, &addr, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(conn, &value, sizeof(cuuint64_t)) < 0 ||
@@ -2949,9 +4021,18 @@ CUresult cuStreamWriteValue64_v2(CUstream stream, CUdeviceptr addr, cuuint64_t v
 
 CUresult cuStreamBatchMemOp_v2(CUstream stream, unsigned int count, CUstreamBatchMemOpParams* paramArray, unsigned int flags)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUstream, unsigned int, CUstreamBatchMemOpParams*, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuStreamBatchMemOp_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(stream, count, paramArray, flags);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuStreamBatchMemOp_v2) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuStreamBatchMemOp_v2) < 0 ||
         rpc_write(conn, &stream, sizeof(CUstream)) < 0 ||
         rpc_write(conn, &count, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, paramArray, sizeof(CUstreamBatchMemOpParams)) < 0 ||
@@ -2966,7 +4047,15 @@ CUresult cuStreamBatchMemOp_v2(CUstream stream, unsigned int count, CUstreamBatc
 
 CUresult cuFuncGetAttribute(int* pi, CUfunction_attribute attrib, CUfunction hfunc)
 {
-    conn_t *conn = scuda_rpc_conn_for_function(hfunc);
+    scuda_route route = scuda_route_for_function(hfunc);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(int*, CUfunction_attribute, CUfunction);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuFuncGetAttribute"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pi, attrib, hfunc);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuFuncGetAttribute) < 0 ||
@@ -2983,8 +4072,15 @@ CUresult cuFuncGetAttribute(int* pi, CUfunction_attribute attrib, CUfunction hfu
 
 CUresult cuFuncSetAttribute(CUfunction hfunc, CUfunction_attribute attrib, int value)
 {
-    hfunc = scuda_translate_private_function_for_rpc(hfunc);
-    conn_t *conn = scuda_rpc_conn_for_function(hfunc);
+    scuda_route route = scuda_route_for_function(hfunc);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUfunction, CUfunction_attribute, int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuFuncSetAttribute"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hfunc, attrib, value);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuFuncSetAttribute) < 0 ||
@@ -3000,7 +4096,15 @@ CUresult cuFuncSetAttribute(CUfunction hfunc, CUfunction_attribute attrib, int v
 
 CUresult cuFuncSetCacheConfig(CUfunction hfunc, CUfunc_cache config)
 {
-    conn_t *conn = scuda_rpc_conn_for_function(hfunc);
+    scuda_route route = scuda_route_for_function(hfunc);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUfunction, CUfunc_cache);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuFuncSetCacheConfig"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hfunc, config);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuFuncSetCacheConfig) < 0 ||
@@ -3015,7 +4119,18 @@ CUresult cuFuncSetCacheConfig(CUfunction hfunc, CUfunc_cache config)
 
 CUresult cuFuncGetModule(CUmodule* hmod, CUfunction hfunc)
 {
-    conn_t *conn = scuda_rpc_conn_for_function(hfunc);
+    scuda_route route = scuda_route_for_function(hfunc);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUmodule*, CUfunction);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuFuncGetModule"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hmod, hfunc);
+    if (return_value == CUDA_SUCCESS && hmod != nullptr) {
+        scuda_note_module_owner_route(*hmod, route);
+    }
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuFuncGetModule) < 0 ||
@@ -3026,41 +4141,26 @@ CUresult cuFuncGetModule(CUmodule* hmod, CUfunction hfunc)
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    if (return_value == CUDA_SUCCESS && hmod != nullptr)
-        scuda_note_module_owner(*hmod, conn);
+    if (return_value == CUDA_SUCCESS && hmod != nullptr) {
+        scuda_note_module_owner_route(*hmod, route);
+    }
     return return_value;
 }
 
 CUresult cuLaunchCooperativeKernel(CUfunction f, unsigned int gridDimX, unsigned int gridDimY, unsigned int gridDimZ, unsigned int blockDimX, unsigned int blockDimY, unsigned int blockDimZ, unsigned int sharedMemBytes, CUstream hStream, void** kernelParams)
 {
-    extern CUresult scuda_sync_mapped_host_to_device_for_launch(
-        unsigned char *packed, const size_t *offsets, const size_t *sizes,
-        uint32_t count);
-
-    conn_t *conn = rpc_client_get_connection(0);
-    scuda_kernel_param_layout layout;
-    CUresult return_value = scuda_get_kernel_param_layout_cached(f, &layout);
-    if (return_value != CUDA_SUCCESS)
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUfunction, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, CUstream, void**);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuLaunchCooperativeKernel"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(f, gridDimX, gridDimY, gridDimZ, blockDimX, blockDimY, blockDimZ, sharedMemBytes, hStream, kernelParams);
         return return_value;
-    if (layout.count > 64)
-        return CUDA_ERROR_NOT_SUPPORTED;
-
-    size_t total_size = 0;
-    for (uint32_t i = 0; i < layout.count; ++i) {
-        if (kernelParams == nullptr || kernelParams[i] == nullptr)
-            return CUDA_ERROR_INVALID_VALUE;
-        total_size = std::max(total_size, layout.offsets[i] + layout.sizes[i]);
     }
-    std::vector<unsigned char> packed(total_size);
-    for (uint32_t i = 0; i < layout.count; ++i)
-        memcpy(packed.data() + layout.offsets[i], kernelParams[i], layout.sizes[i]);
-
-    return_value = scuda_sync_mapped_host_to_device_for_launch(
-        packed.data(), layout.offsets, layout.sizes, layout.count);
-    if (return_value != CUDA_SUCCESS)
-        return return_value;
-
-    if (rpc_write_start_request(conn, RPC_cuLaunchCooperativeKernel) < 0 ||
+    conn_t *conn = scuda_route_remote_conn(route);
+    CUresult return_value;
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuLaunchCooperativeKernel) < 0 ||
         rpc_write(conn, &f, sizeof(CUfunction)) < 0 ||
         rpc_write(conn, &gridDimX, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, &gridDimY, sizeof(unsigned int)) < 0 ||
@@ -3070,10 +4170,9 @@ CUresult cuLaunchCooperativeKernel(CUfunction f, unsigned int gridDimX, unsigned
         rpc_write(conn, &blockDimZ, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, &sharedMemBytes, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, &hStream, sizeof(CUstream)) < 0 ||
-        rpc_write(conn, &layout.count, sizeof(layout.count)) < 0 ||
-        rpc_write(conn, &total_size, sizeof(total_size)) < 0 ||
-        rpc_write(conn, packed.data(), packed.size()) < 0 ||
+        rpc_write(conn, kernelParams, sizeof(void*)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, kernelParams, sizeof(void*)) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
@@ -3082,9 +4181,18 @@ CUresult cuLaunchCooperativeKernel(CUfunction f, unsigned int gridDimX, unsigned
 
 CUresult cuLaunchCooperativeKernelMultiDevice(CUDA_LAUNCH_PARAMS* launchParamsList, unsigned int numDevices, unsigned int flags)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUDA_LAUNCH_PARAMS*, unsigned int, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuLaunchCooperativeKernelMultiDevice"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(launchParamsList, numDevices, flags);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuLaunchCooperativeKernelMultiDevice) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuLaunchCooperativeKernelMultiDevice) < 0 ||
         rpc_write(conn, launchParamsList, sizeof(CUDA_LAUNCH_PARAMS)) < 0 ||
         rpc_write(conn, &numDevices, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, &flags, sizeof(unsigned int)) < 0 ||
@@ -3098,9 +4206,18 @@ CUresult cuLaunchCooperativeKernelMultiDevice(CUDA_LAUNCH_PARAMS* launchParamsLi
 
 CUresult cuFuncSetBlockShape(CUfunction hfunc, int x, int y, int z)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUfunction, int, int, int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuFuncSetBlockShape"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hfunc, x, y, z);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuFuncSetBlockShape) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuFuncSetBlockShape) < 0 ||
         rpc_write(conn, &hfunc, sizeof(CUfunction)) < 0 ||
         rpc_write(conn, &x, sizeof(int)) < 0 ||
         rpc_write(conn, &y, sizeof(int)) < 0 ||
@@ -3114,9 +4231,18 @@ CUresult cuFuncSetBlockShape(CUfunction hfunc, int x, int y, int z)
 
 CUresult cuFuncSetSharedSize(CUfunction hfunc, unsigned int bytes)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUfunction, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuFuncSetSharedSize"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hfunc, bytes);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuFuncSetSharedSize) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuFuncSetSharedSize) < 0 ||
         rpc_write(conn, &hfunc, sizeof(CUfunction)) < 0 ||
         rpc_write(conn, &bytes, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -3128,9 +4254,18 @@ CUresult cuFuncSetSharedSize(CUfunction hfunc, unsigned int bytes)
 
 CUresult cuParamSetSize(CUfunction hfunc, unsigned int numbytes)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUfunction, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuParamSetSize"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hfunc, numbytes);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuParamSetSize) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuParamSetSize) < 0 ||
         rpc_write(conn, &hfunc, sizeof(CUfunction)) < 0 ||
         rpc_write(conn, &numbytes, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -3142,9 +4277,18 @@ CUresult cuParamSetSize(CUfunction hfunc, unsigned int numbytes)
 
 CUresult cuParamSeti(CUfunction hfunc, int offset, unsigned int value)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUfunction, int, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuParamSeti"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hfunc, offset, value);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuParamSeti) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuParamSeti) < 0 ||
         rpc_write(conn, &hfunc, sizeof(CUfunction)) < 0 ||
         rpc_write(conn, &offset, sizeof(int)) < 0 ||
         rpc_write(conn, &value, sizeof(unsigned int)) < 0 ||
@@ -3157,9 +4301,18 @@ CUresult cuParamSeti(CUfunction hfunc, int offset, unsigned int value)
 
 CUresult cuParamSetf(CUfunction hfunc, int offset, float value)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUfunction, int, float);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuParamSetf"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hfunc, offset, value);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuParamSetf) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuParamSetf) < 0 ||
         rpc_write(conn, &hfunc, sizeof(CUfunction)) < 0 ||
         rpc_write(conn, &offset, sizeof(int)) < 0 ||
         rpc_write(conn, &value, sizeof(float)) < 0 ||
@@ -3172,9 +4325,18 @@ CUresult cuParamSetf(CUfunction hfunc, int offset, float value)
 
 CUresult cuLaunch(CUfunction f)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUfunction);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuLaunch"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(f);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuLaunch) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuLaunch) < 0 ||
         rpc_write(conn, &f, sizeof(CUfunction)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
@@ -3185,9 +4347,18 @@ CUresult cuLaunch(CUfunction f)
 
 CUresult cuLaunchGrid(CUfunction f, int grid_width, int grid_height)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUfunction, int, int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuLaunchGrid"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(f, grid_width, grid_height);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuLaunchGrid) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuLaunchGrid) < 0 ||
         rpc_write(conn, &f, sizeof(CUfunction)) < 0 ||
         rpc_write(conn, &grid_width, sizeof(int)) < 0 ||
         rpc_write(conn, &grid_height, sizeof(int)) < 0 ||
@@ -3200,9 +4371,18 @@ CUresult cuLaunchGrid(CUfunction f, int grid_width, int grid_height)
 
 CUresult cuLaunchGridAsync(CUfunction f, int grid_width, int grid_height, CUstream hStream)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUfunction, int, int, CUstream);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuLaunchGridAsync"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(f, grid_width, grid_height, hStream);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuLaunchGridAsync) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuLaunchGridAsync) < 0 ||
         rpc_write(conn, &f, sizeof(CUfunction)) < 0 ||
         rpc_write(conn, &grid_width, sizeof(int)) < 0 ||
         rpc_write(conn, &grid_height, sizeof(int)) < 0 ||
@@ -3216,9 +4396,18 @@ CUresult cuLaunchGridAsync(CUfunction f, int grid_width, int grid_height, CUstre
 
 CUresult cuParamSetTexRef(CUfunction hfunc, int texunit, CUtexref hTexRef)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUfunction, int, CUtexref);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuParamSetTexRef"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hfunc, texunit, hTexRef);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuParamSetTexRef) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuParamSetTexRef) < 0 ||
         rpc_write(conn, &hfunc, sizeof(CUfunction)) < 0 ||
         rpc_write(conn, &texunit, sizeof(int)) < 0 ||
         rpc_write(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
@@ -3231,9 +4420,18 @@ CUresult cuParamSetTexRef(CUfunction hfunc, int texunit, CUtexref hTexRef)
 
 CUresult cuFuncSetSharedMemConfig(CUfunction hfunc, CUsharedconfig config)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_function(hfunc);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUfunction, CUsharedconfig);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuFuncSetSharedMemConfig"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hfunc, config);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuFuncSetSharedMemConfig) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuFuncSetSharedMemConfig) < 0 ||
         rpc_write(conn, &hfunc, sizeof(CUfunction)) < 0 ||
         rpc_write(conn, &config, sizeof(CUsharedconfig)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -3245,9 +4443,18 @@ CUresult cuFuncSetSharedMemConfig(CUfunction hfunc, CUsharedconfig config)
 
 CUresult cuGraphCreate(CUgraph* phGraph, unsigned int flags)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraph*, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphCreate"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(phGraph, flags);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphCreate) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphCreate) < 0 ||
         rpc_write(conn, phGraph, sizeof(CUgraph)) < 0 ||
         rpc_write(conn, &flags, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -3260,9 +4467,18 @@ CUresult cuGraphCreate(CUgraph* phGraph, unsigned int flags)
 
 CUresult cuGraphKernelNodeGetParams_v2(CUgraphNode hNode, CUDA_KERNEL_NODE_PARAMS* nodeParams)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode, CUDA_KERNEL_NODE_PARAMS*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphKernelNodeGetParams_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hNode, nodeParams);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphKernelNodeGetParams_v2) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphKernelNodeGetParams_v2) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, nodeParams, sizeof(CUDA_KERNEL_NODE_PARAMS)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -3275,9 +4491,18 @@ CUresult cuGraphKernelNodeGetParams_v2(CUgraphNode hNode, CUDA_KERNEL_NODE_PARAM
 
 CUresult cuGraphKernelNodeSetParams_v2(CUgraphNode hNode, const CUDA_KERNEL_NODE_PARAMS* nodeParams)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode, const CUDA_KERNEL_NODE_PARAMS*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphKernelNodeSetParams_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hNode, nodeParams);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphKernelNodeSetParams_v2) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphKernelNodeSetParams_v2) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, &nodeParams, sizeof(const CUDA_KERNEL_NODE_PARAMS*)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -3289,9 +4514,18 @@ CUresult cuGraphKernelNodeSetParams_v2(CUgraphNode hNode, const CUDA_KERNEL_NODE
 
 CUresult cuGraphMemcpyNodeGetParams(CUgraphNode hNode, CUDA_MEMCPY3D* nodeParams)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode, CUDA_MEMCPY3D*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphMemcpyNodeGetParams"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hNode, nodeParams);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphMemcpyNodeGetParams) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphMemcpyNodeGetParams) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, nodeParams, sizeof(CUDA_MEMCPY3D)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -3304,9 +4538,18 @@ CUresult cuGraphMemcpyNodeGetParams(CUgraphNode hNode, CUDA_MEMCPY3D* nodeParams
 
 CUresult cuGraphMemcpyNodeSetParams(CUgraphNode hNode, const CUDA_MEMCPY3D* nodeParams)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode, const CUDA_MEMCPY3D*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphMemcpyNodeSetParams"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hNode, nodeParams);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphMemcpyNodeSetParams) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphMemcpyNodeSetParams) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, &nodeParams, sizeof(const CUDA_MEMCPY3D*)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -3318,9 +4561,18 @@ CUresult cuGraphMemcpyNodeSetParams(CUgraphNode hNode, const CUDA_MEMCPY3D* node
 
 CUresult cuGraphMemsetNodeGetParams(CUgraphNode hNode, CUDA_MEMSET_NODE_PARAMS* nodeParams)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode, CUDA_MEMSET_NODE_PARAMS*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphMemsetNodeGetParams"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hNode, nodeParams);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphMemsetNodeGetParams) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphMemsetNodeGetParams) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, nodeParams, sizeof(CUDA_MEMSET_NODE_PARAMS)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -3333,9 +4585,18 @@ CUresult cuGraphMemsetNodeGetParams(CUgraphNode hNode, CUDA_MEMSET_NODE_PARAMS* 
 
 CUresult cuGraphMemsetNodeSetParams(CUgraphNode hNode, const CUDA_MEMSET_NODE_PARAMS* nodeParams)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode, const CUDA_MEMSET_NODE_PARAMS*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphMemsetNodeSetParams"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hNode, nodeParams);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphMemsetNodeSetParams) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphMemsetNodeSetParams) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, &nodeParams, sizeof(const CUDA_MEMSET_NODE_PARAMS*)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -3347,9 +4608,18 @@ CUresult cuGraphMemsetNodeSetParams(CUgraphNode hNode, const CUDA_MEMSET_NODE_PA
 
 CUresult cuGraphHostNodeGetParams(CUgraphNode hNode, CUDA_HOST_NODE_PARAMS* nodeParams)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode, CUDA_HOST_NODE_PARAMS*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphHostNodeGetParams"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hNode, nodeParams);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphHostNodeGetParams) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphHostNodeGetParams) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, nodeParams, sizeof(CUDA_HOST_NODE_PARAMS)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -3362,9 +4632,18 @@ CUresult cuGraphHostNodeGetParams(CUgraphNode hNode, CUDA_HOST_NODE_PARAMS* node
 
 CUresult cuGraphHostNodeSetParams(CUgraphNode hNode, const CUDA_HOST_NODE_PARAMS* nodeParams)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode, const CUDA_HOST_NODE_PARAMS*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphHostNodeSetParams"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hNode, nodeParams);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphHostNodeSetParams) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphHostNodeSetParams) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, &nodeParams, sizeof(const CUDA_HOST_NODE_PARAMS*)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -3376,9 +4655,18 @@ CUresult cuGraphHostNodeSetParams(CUgraphNode hNode, const CUDA_HOST_NODE_PARAMS
 
 CUresult cuGraphAddChildGraphNode(CUgraphNode* phGraphNode, CUgraph hGraph, const CUgraphNode* dependencies, size_t numDependencies, CUgraph childGraph)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode*, CUgraph, const CUgraphNode*, size_t, CUgraph);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphAddChildGraphNode"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(phGraphNode, hGraph, dependencies, numDependencies, childGraph);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphAddChildGraphNode) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphAddChildGraphNode) < 0 ||
         rpc_write(conn, phGraphNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, &hGraph, sizeof(CUgraph)) < 0 ||
         rpc_write(conn, &dependencies, sizeof(const CUgraphNode*)) < 0 ||
@@ -3394,9 +4682,18 @@ CUresult cuGraphAddChildGraphNode(CUgraphNode* phGraphNode, CUgraph hGraph, cons
 
 CUresult cuGraphChildGraphNodeGetGraph(CUgraphNode hNode, CUgraph* phGraph)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode, CUgraph*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphChildGraphNodeGetGraph"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hNode, phGraph);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphChildGraphNodeGetGraph) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphChildGraphNodeGetGraph) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, phGraph, sizeof(CUgraph)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -3409,9 +4706,18 @@ CUresult cuGraphChildGraphNodeGetGraph(CUgraphNode hNode, CUgraph* phGraph)
 
 CUresult cuGraphAddEmptyNode(CUgraphNode* phGraphNode, CUgraph hGraph, const CUgraphNode* dependencies, size_t numDependencies)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode*, CUgraph, const CUgraphNode*, size_t);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphAddEmptyNode"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(phGraphNode, hGraph, dependencies, numDependencies);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphAddEmptyNode) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphAddEmptyNode) < 0 ||
         rpc_write(conn, phGraphNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, &hGraph, sizeof(CUgraph)) < 0 ||
         rpc_write(conn, &dependencies, sizeof(const CUgraphNode*)) < 0 ||
@@ -3426,9 +4732,18 @@ CUresult cuGraphAddEmptyNode(CUgraphNode* phGraphNode, CUgraph hGraph, const CUg
 
 CUresult cuGraphAddEventRecordNode(CUgraphNode* phGraphNode, CUgraph hGraph, const CUgraphNode* dependencies, size_t numDependencies, CUevent event)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode*, CUgraph, const CUgraphNode*, size_t, CUevent);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphAddEventRecordNode"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(phGraphNode, hGraph, dependencies, numDependencies, event);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphAddEventRecordNode) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphAddEventRecordNode) < 0 ||
         rpc_write(conn, phGraphNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, &hGraph, sizeof(CUgraph)) < 0 ||
         rpc_write(conn, &dependencies, sizeof(const CUgraphNode*)) < 0 ||
@@ -3444,9 +4759,18 @@ CUresult cuGraphAddEventRecordNode(CUgraphNode* phGraphNode, CUgraph hGraph, con
 
 CUresult cuGraphEventRecordNodeGetEvent(CUgraphNode hNode, CUevent* event_out)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode, CUevent*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphEventRecordNodeGetEvent"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hNode, event_out);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphEventRecordNodeGetEvent) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphEventRecordNodeGetEvent) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, event_out, sizeof(CUevent)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -3459,9 +4783,18 @@ CUresult cuGraphEventRecordNodeGetEvent(CUgraphNode hNode, CUevent* event_out)
 
 CUresult cuGraphEventRecordNodeSetEvent(CUgraphNode hNode, CUevent event)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode, CUevent);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphEventRecordNodeSetEvent"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hNode, event);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphEventRecordNodeSetEvent) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphEventRecordNodeSetEvent) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, &event, sizeof(CUevent)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -3473,9 +4806,18 @@ CUresult cuGraphEventRecordNodeSetEvent(CUgraphNode hNode, CUevent event)
 
 CUresult cuGraphAddEventWaitNode(CUgraphNode* phGraphNode, CUgraph hGraph, const CUgraphNode* dependencies, size_t numDependencies, CUevent event)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode*, CUgraph, const CUgraphNode*, size_t, CUevent);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphAddEventWaitNode"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(phGraphNode, hGraph, dependencies, numDependencies, event);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphAddEventWaitNode) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphAddEventWaitNode) < 0 ||
         rpc_write(conn, phGraphNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, &hGraph, sizeof(CUgraph)) < 0 ||
         rpc_write(conn, &dependencies, sizeof(const CUgraphNode*)) < 0 ||
@@ -3491,9 +4833,18 @@ CUresult cuGraphAddEventWaitNode(CUgraphNode* phGraphNode, CUgraph hGraph, const
 
 CUresult cuGraphEventWaitNodeGetEvent(CUgraphNode hNode, CUevent* event_out)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode, CUevent*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphEventWaitNodeGetEvent"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hNode, event_out);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphEventWaitNodeGetEvent) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphEventWaitNodeGetEvent) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, event_out, sizeof(CUevent)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -3506,9 +4857,18 @@ CUresult cuGraphEventWaitNodeGetEvent(CUgraphNode hNode, CUevent* event_out)
 
 CUresult cuGraphEventWaitNodeSetEvent(CUgraphNode hNode, CUevent event)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode, CUevent);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphEventWaitNodeSetEvent"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hNode, event);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphEventWaitNodeSetEvent) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphEventWaitNodeSetEvent) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, &event, sizeof(CUevent)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -3520,9 +4880,18 @@ CUresult cuGraphEventWaitNodeSetEvent(CUgraphNode hNode, CUevent event)
 
 CUresult cuGraphAddExternalSemaphoresSignalNode(CUgraphNode* phGraphNode, CUgraph hGraph, const CUgraphNode* dependencies, size_t numDependencies, const CUDA_EXT_SEM_SIGNAL_NODE_PARAMS* nodeParams)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode*, CUgraph, const CUgraphNode*, size_t, const CUDA_EXT_SEM_SIGNAL_NODE_PARAMS*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphAddExternalSemaphoresSignalNode"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(phGraphNode, hGraph, dependencies, numDependencies, nodeParams);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphAddExternalSemaphoresSignalNode) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphAddExternalSemaphoresSignalNode) < 0 ||
         rpc_write(conn, phGraphNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, &hGraph, sizeof(CUgraph)) < 0 ||
         rpc_write(conn, &dependencies, sizeof(const CUgraphNode*)) < 0 ||
@@ -3538,9 +4907,18 @@ CUresult cuGraphAddExternalSemaphoresSignalNode(CUgraphNode* phGraphNode, CUgrap
 
 CUresult cuGraphExternalSemaphoresSignalNodeGetParams(CUgraphNode hNode, CUDA_EXT_SEM_SIGNAL_NODE_PARAMS* params_out)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode, CUDA_EXT_SEM_SIGNAL_NODE_PARAMS*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphExternalSemaphoresSignalNodeGetParams"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hNode, params_out);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphExternalSemaphoresSignalNodeGetParams) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphExternalSemaphoresSignalNodeGetParams) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, params_out, sizeof(CUDA_EXT_SEM_SIGNAL_NODE_PARAMS)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -3553,9 +4931,18 @@ CUresult cuGraphExternalSemaphoresSignalNodeGetParams(CUgraphNode hNode, CUDA_EX
 
 CUresult cuGraphExternalSemaphoresSignalNodeSetParams(CUgraphNode hNode, const CUDA_EXT_SEM_SIGNAL_NODE_PARAMS* nodeParams)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode, const CUDA_EXT_SEM_SIGNAL_NODE_PARAMS*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphExternalSemaphoresSignalNodeSetParams"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hNode, nodeParams);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphExternalSemaphoresSignalNodeSetParams) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphExternalSemaphoresSignalNodeSetParams) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, &nodeParams, sizeof(const CUDA_EXT_SEM_SIGNAL_NODE_PARAMS*)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -3567,9 +4954,18 @@ CUresult cuGraphExternalSemaphoresSignalNodeSetParams(CUgraphNode hNode, const C
 
 CUresult cuGraphAddExternalSemaphoresWaitNode(CUgraphNode* phGraphNode, CUgraph hGraph, const CUgraphNode* dependencies, size_t numDependencies, const CUDA_EXT_SEM_WAIT_NODE_PARAMS* nodeParams)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode*, CUgraph, const CUgraphNode*, size_t, const CUDA_EXT_SEM_WAIT_NODE_PARAMS*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphAddExternalSemaphoresWaitNode"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(phGraphNode, hGraph, dependencies, numDependencies, nodeParams);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphAddExternalSemaphoresWaitNode) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphAddExternalSemaphoresWaitNode) < 0 ||
         rpc_write(conn, phGraphNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, &hGraph, sizeof(CUgraph)) < 0 ||
         rpc_write(conn, &dependencies, sizeof(const CUgraphNode*)) < 0 ||
@@ -3585,9 +4981,18 @@ CUresult cuGraphAddExternalSemaphoresWaitNode(CUgraphNode* phGraphNode, CUgraph 
 
 CUresult cuGraphExternalSemaphoresWaitNodeGetParams(CUgraphNode hNode, CUDA_EXT_SEM_WAIT_NODE_PARAMS* params_out)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode, CUDA_EXT_SEM_WAIT_NODE_PARAMS*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphExternalSemaphoresWaitNodeGetParams"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hNode, params_out);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphExternalSemaphoresWaitNodeGetParams) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphExternalSemaphoresWaitNodeGetParams) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, params_out, sizeof(CUDA_EXT_SEM_WAIT_NODE_PARAMS)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -3600,9 +5005,18 @@ CUresult cuGraphExternalSemaphoresWaitNodeGetParams(CUgraphNode hNode, CUDA_EXT_
 
 CUresult cuGraphExternalSemaphoresWaitNodeSetParams(CUgraphNode hNode, const CUDA_EXT_SEM_WAIT_NODE_PARAMS* nodeParams)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode, const CUDA_EXT_SEM_WAIT_NODE_PARAMS*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphExternalSemaphoresWaitNodeSetParams"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hNode, nodeParams);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphExternalSemaphoresWaitNodeSetParams) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphExternalSemaphoresWaitNodeSetParams) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, &nodeParams, sizeof(const CUDA_EXT_SEM_WAIT_NODE_PARAMS*)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -3614,9 +5028,18 @@ CUresult cuGraphExternalSemaphoresWaitNodeSetParams(CUgraphNode hNode, const CUD
 
 CUresult cuGraphAddBatchMemOpNode(CUgraphNode* phGraphNode, CUgraph hGraph, const CUgraphNode* dependencies, size_t numDependencies, const CUDA_BATCH_MEM_OP_NODE_PARAMS* nodeParams)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode*, CUgraph, const CUgraphNode*, size_t, const CUDA_BATCH_MEM_OP_NODE_PARAMS*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphAddBatchMemOpNode"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(phGraphNode, hGraph, dependencies, numDependencies, nodeParams);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphAddBatchMemOpNode) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphAddBatchMemOpNode) < 0 ||
         rpc_write(conn, phGraphNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, &hGraph, sizeof(CUgraph)) < 0 ||
         rpc_write(conn, &dependencies, sizeof(const CUgraphNode*)) < 0 ||
@@ -3632,9 +5055,18 @@ CUresult cuGraphAddBatchMemOpNode(CUgraphNode* phGraphNode, CUgraph hGraph, cons
 
 CUresult cuGraphBatchMemOpNodeGetParams(CUgraphNode hNode, CUDA_BATCH_MEM_OP_NODE_PARAMS* nodeParams_out)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode, CUDA_BATCH_MEM_OP_NODE_PARAMS*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphBatchMemOpNodeGetParams"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hNode, nodeParams_out);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphBatchMemOpNodeGetParams) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphBatchMemOpNodeGetParams) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, nodeParams_out, sizeof(CUDA_BATCH_MEM_OP_NODE_PARAMS)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -3647,9 +5079,18 @@ CUresult cuGraphBatchMemOpNodeGetParams(CUgraphNode hNode, CUDA_BATCH_MEM_OP_NOD
 
 CUresult cuGraphBatchMemOpNodeSetParams(CUgraphNode hNode, const CUDA_BATCH_MEM_OP_NODE_PARAMS* nodeParams)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode, const CUDA_BATCH_MEM_OP_NODE_PARAMS*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphBatchMemOpNodeSetParams"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hNode, nodeParams);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphBatchMemOpNodeSetParams) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphBatchMemOpNodeSetParams) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, &nodeParams, sizeof(const CUDA_BATCH_MEM_OP_NODE_PARAMS*)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -3661,9 +5102,18 @@ CUresult cuGraphBatchMemOpNodeSetParams(CUgraphNode hNode, const CUDA_BATCH_MEM_
 
 CUresult cuGraphExecBatchMemOpNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNode, const CUDA_BATCH_MEM_OP_NODE_PARAMS* nodeParams)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphExec, CUgraphNode, const CUDA_BATCH_MEM_OP_NODE_PARAMS*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphExecBatchMemOpNodeSetParams"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hGraphExec, hNode, nodeParams);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphExecBatchMemOpNodeSetParams) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphExecBatchMemOpNodeSetParams) < 0 ||
         rpc_write(conn, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, &nodeParams, sizeof(const CUDA_BATCH_MEM_OP_NODE_PARAMS*)) < 0 ||
@@ -3676,14 +5126,22 @@ CUresult cuGraphExecBatchMemOpNodeSetParams(CUgraphExec hGraphExec, CUgraphNode 
 
 CUresult cuGraphAddMemAllocNode(CUgraphNode* phGraphNode, CUgraph hGraph, const CUgraphNode* dependencies, size_t numDependencies, CUDA_MEM_ALLOC_NODE_PARAMS* nodeParams)
 {
-    if (phGraphNode == nullptr || nodeParams == nullptr || (numDependencies != 0 && dependencies == nullptr))
-        return CUDA_ERROR_INVALID_VALUE;
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode*, CUgraph, const CUgraphNode*, size_t, CUDA_MEM_ALLOC_NODE_PARAMS*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphAddMemAllocNode"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(phGraphNode, hGraph, dependencies, numDependencies, nodeParams);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphAddMemAllocNode) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphAddMemAllocNode) < 0 ||
+        rpc_write(conn, phGraphNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, &hGraph, sizeof(CUgraph)) < 0 ||
+        rpc_write(conn, &dependencies, sizeof(const CUgraphNode*)) < 0 ||
         rpc_write(conn, &numDependencies, sizeof(size_t)) < 0 ||
-        (numDependencies != 0 && rpc_write(conn, dependencies, numDependencies * sizeof(CUgraphNode)) < 0) ||
         rpc_write(conn, nodeParams, sizeof(CUDA_MEM_ALLOC_NODE_PARAMS)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, phGraphNode, sizeof(CUgraphNode)) < 0 ||
@@ -3696,9 +5154,18 @@ CUresult cuGraphAddMemAllocNode(CUgraphNode* phGraphNode, CUgraph hGraph, const 
 
 CUresult cuGraphMemAllocNodeGetParams(CUgraphNode hNode, CUDA_MEM_ALLOC_NODE_PARAMS* params_out)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode, CUDA_MEM_ALLOC_NODE_PARAMS*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphMemAllocNodeGetParams"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hNode, params_out);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphMemAllocNodeGetParams) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphMemAllocNodeGetParams) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, params_out, sizeof(CUDA_MEM_ALLOC_NODE_PARAMS)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -3711,14 +5178,22 @@ CUresult cuGraphMemAllocNodeGetParams(CUgraphNode hNode, CUDA_MEM_ALLOC_NODE_PAR
 
 CUresult cuGraphAddMemFreeNode(CUgraphNode* phGraphNode, CUgraph hGraph, const CUgraphNode* dependencies, size_t numDependencies, CUdeviceptr dptr)
 {
-    if (phGraphNode == nullptr || (numDependencies != 0 && dependencies == nullptr))
-        return CUDA_ERROR_INVALID_VALUE;
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode*, CUgraph, const CUgraphNode*, size_t, CUdeviceptr);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphAddMemFreeNode"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(phGraphNode, hGraph, dependencies, numDependencies, dptr);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphAddMemFreeNode) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphAddMemFreeNode) < 0 ||
+        rpc_write(conn, phGraphNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, &hGraph, sizeof(CUgraph)) < 0 ||
         rpc_write(conn, &numDependencies, sizeof(size_t)) < 0 ||
-        (numDependencies != 0 && rpc_write(conn, dependencies, numDependencies * sizeof(CUgraphNode)) < 0) ||
+        rpc_write(conn, dependencies, numDependencies * sizeof(const CUgraphNode)) < 0 ||
         rpc_write(conn, &dptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, phGraphNode, sizeof(CUgraphNode)) < 0 ||
@@ -3730,9 +5205,18 @@ CUresult cuGraphAddMemFreeNode(CUgraphNode* phGraphNode, CUgraph hGraph, const C
 
 CUresult cuGraphMemFreeNodeGetParams(CUgraphNode hNode, CUdeviceptr* dptr_out)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode, CUdeviceptr*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphMemFreeNodeGetParams"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hNode, dptr_out);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphMemFreeNodeGetParams) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphMemFreeNodeGetParams) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, dptr_out, sizeof(CUdeviceptr)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -3745,9 +5229,18 @@ CUresult cuGraphMemFreeNodeGetParams(CUgraphNode hNode, CUdeviceptr* dptr_out)
 
 CUresult cuDeviceGraphMemTrim(CUdevice device)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_device(&device);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdevice);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuDeviceGraphMemTrim"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(device);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuDeviceGraphMemTrim) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuDeviceGraphMemTrim) < 0 ||
         rpc_write(conn, &device, sizeof(CUdevice)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
@@ -3758,9 +5251,18 @@ CUresult cuDeviceGraphMemTrim(CUdevice device)
 
 CUresult cuGraphClone(CUgraph* phGraphClone, CUgraph originalGraph)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraph*, CUgraph);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphClone"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(phGraphClone, originalGraph);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphClone) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphClone) < 0 ||
         rpc_write(conn, phGraphClone, sizeof(CUgraph)) < 0 ||
         rpc_write(conn, &originalGraph, sizeof(CUgraph)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -3773,9 +5275,18 @@ CUresult cuGraphClone(CUgraph* phGraphClone, CUgraph originalGraph)
 
 CUresult cuGraphNodeFindInClone(CUgraphNode* phNode, CUgraphNode hOriginalNode, CUgraph hClonedGraph)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode*, CUgraphNode, CUgraph);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphNodeFindInClone"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(phNode, hOriginalNode, hClonedGraph);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphNodeFindInClone) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphNodeFindInClone) < 0 ||
         rpc_write(conn, phNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, &hOriginalNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, &hClonedGraph, sizeof(CUgraph)) < 0 ||
@@ -3789,9 +5300,18 @@ CUresult cuGraphNodeFindInClone(CUgraphNode* phNode, CUgraphNode hOriginalNode, 
 
 CUresult cuGraphNodeGetType(CUgraphNode hNode, CUgraphNodeType* type)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode, CUgraphNodeType*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphNodeGetType"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hNode, type);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphNodeGetType) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphNodeGetType) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, type, sizeof(CUgraphNodeType)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -3804,9 +5324,18 @@ CUresult cuGraphNodeGetType(CUgraphNode hNode, CUgraphNodeType* type)
 
 CUresult cuGraphGetRootNodes(CUgraph hGraph, CUgraphNode* rootNodes, size_t* numRootNodes)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraph, CUgraphNode*, size_t*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphGetRootNodes"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hGraph, rootNodes, numRootNodes);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphGetRootNodes) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphGetRootNodes) < 0 ||
         rpc_write(conn, &hGraph, sizeof(CUgraph)) < 0 ||
         rpc_write(conn, rootNodes, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, numRootNodes, sizeof(size_t)) < 0 ||
@@ -3821,9 +5350,18 @@ CUresult cuGraphGetRootNodes(CUgraph hGraph, CUgraphNode* rootNodes, size_t* num
 
 CUresult cuGraphDestroyNode(CUgraphNode hNode)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphDestroyNode"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hNode);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphDestroyNode) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphDestroyNode) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
@@ -3834,9 +5372,18 @@ CUresult cuGraphDestroyNode(CUgraphNode hNode)
 
 CUresult cuGraphInstantiateWithFlags(CUgraphExec* phGraphExec, CUgraph hGraph, unsigned long long flags)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphExec*, CUgraph, unsigned long long);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphInstantiateWithFlags"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(phGraphExec, hGraph, flags);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphInstantiateWithFlags) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphInstantiateWithFlags) < 0 ||
         rpc_write(conn, phGraphExec, sizeof(CUgraphExec)) < 0 ||
         rpc_write(conn, &hGraph, sizeof(CUgraph)) < 0 ||
         rpc_write(conn, &flags, sizeof(unsigned long long)) < 0 ||
@@ -3850,9 +5397,18 @@ CUresult cuGraphInstantiateWithFlags(CUgraphExec* phGraphExec, CUgraph hGraph, u
 
 CUresult cuGraphInstantiateWithParams(CUgraphExec* phGraphExec, CUgraph hGraph, CUDA_GRAPH_INSTANTIATE_PARAMS* instantiateParams)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphExec*, CUgraph, CUDA_GRAPH_INSTANTIATE_PARAMS*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphInstantiateWithParams"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(phGraphExec, hGraph, instantiateParams);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphInstantiateWithParams) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphInstantiateWithParams) < 0 ||
         rpc_write(conn, phGraphExec, sizeof(CUgraphExec)) < 0 ||
         rpc_write(conn, &hGraph, sizeof(CUgraph)) < 0 ||
         rpc_write(conn, instantiateParams, sizeof(CUDA_GRAPH_INSTANTIATE_PARAMS)) < 0 ||
@@ -3867,9 +5423,18 @@ CUresult cuGraphInstantiateWithParams(CUgraphExec* phGraphExec, CUgraph hGraph, 
 
 CUresult cuGraphExecGetFlags(CUgraphExec hGraphExec, cuuint64_t* flags)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphExec, cuuint64_t*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphExecGetFlags"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hGraphExec, flags);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphExecGetFlags) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphExecGetFlags) < 0 ||
         rpc_write(conn, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
         rpc_write(conn, flags, sizeof(cuuint64_t)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -3882,27 +5447,21 @@ CUresult cuGraphExecGetFlags(CUgraphExec hGraphExec, cuuint64_t* flags)
 
 CUresult cuGraphExecKernelNodeSetParams_v2(CUgraphExec hGraphExec, CUgraphNode hNode, const CUDA_KERNEL_NODE_PARAMS* nodeParams)
 {
-    if (nodeParams == nullptr)
-        return CUDA_ERROR_INVALID_VALUE;
-    scuda_kernel_param_layout layout;
-    std::vector<unsigned char> packed;
-    CUresult status =
-        scuda_pack_kernel_params_for_codegen(nodeParams, &layout, &packed);
-    if (status != CUDA_SUCCESS)
-        return status;
-    CUDA_KERNEL_NODE_PARAMS serial_params = *nodeParams;
-    serial_params.kernelParams = nullptr;
-    serial_params.extra = nullptr;
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphExec, CUgraphNode, const CUDA_KERNEL_NODE_PARAMS*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphExecKernelNodeSetParams_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hGraphExec, hNode, nodeParams);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    size_t packed_size = packed.size();
-    if (rpc_write_start_request(conn, RPC_cuGraphExecKernelNodeSetParams_v2) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphExecKernelNodeSetParams_v2) < 0 ||
         rpc_write(conn, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
-        rpc_write(conn, &serial_params, sizeof(serial_params)) < 0 ||
-        rpc_write(conn, &layout.count, sizeof(layout.count)) < 0 ||
-        rpc_write(conn, &packed_size, sizeof(packed_size)) < 0 ||
-        (packed_size != 0 && rpc_write(conn, packed.data(), packed_size) < 0) ||
+        rpc_write(conn, &nodeParams, sizeof(const CUDA_KERNEL_NODE_PARAMS*)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
@@ -3912,9 +5471,18 @@ CUresult cuGraphExecKernelNodeSetParams_v2(CUgraphExec hGraphExec, CUgraphNode h
 
 CUresult cuGraphExecMemcpyNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNode, const CUDA_MEMCPY3D* copyParams, CUcontext ctx)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_context(ctx);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphExec, CUgraphNode, const CUDA_MEMCPY3D*, CUcontext);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphExecMemcpyNodeSetParams"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hGraphExec, hNode, copyParams, ctx);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphExecMemcpyNodeSetParams) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphExecMemcpyNodeSetParams) < 0 ||
         rpc_write(conn, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, &copyParams, sizeof(const CUDA_MEMCPY3D*)) < 0 ||
@@ -3928,9 +5496,18 @@ CUresult cuGraphExecMemcpyNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNod
 
 CUresult cuGraphExecMemsetNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNode, const CUDA_MEMSET_NODE_PARAMS* memsetParams, CUcontext ctx)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_context(ctx);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphExec, CUgraphNode, const CUDA_MEMSET_NODE_PARAMS*, CUcontext);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphExecMemsetNodeSetParams"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hGraphExec, hNode, memsetParams, ctx);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphExecMemsetNodeSetParams) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphExecMemsetNodeSetParams) < 0 ||
         rpc_write(conn, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, &memsetParams, sizeof(const CUDA_MEMSET_NODE_PARAMS*)) < 0 ||
@@ -3944,9 +5521,18 @@ CUresult cuGraphExecMemsetNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNod
 
 CUresult cuGraphExecHostNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNode, const CUDA_HOST_NODE_PARAMS* nodeParams)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphExec, CUgraphNode, const CUDA_HOST_NODE_PARAMS*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphExecHostNodeSetParams"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hGraphExec, hNode, nodeParams);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphExecHostNodeSetParams) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphExecHostNodeSetParams) < 0 ||
         rpc_write(conn, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, &nodeParams, sizeof(const CUDA_HOST_NODE_PARAMS*)) < 0 ||
@@ -3959,9 +5545,18 @@ CUresult cuGraphExecHostNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNode,
 
 CUresult cuGraphExecChildGraphNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNode, CUgraph childGraph)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphExec, CUgraphNode, CUgraph);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphExecChildGraphNodeSetParams"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hGraphExec, hNode, childGraph);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphExecChildGraphNodeSetParams) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphExecChildGraphNodeSetParams) < 0 ||
         rpc_write(conn, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, &childGraph, sizeof(CUgraph)) < 0 ||
@@ -3974,9 +5569,18 @@ CUresult cuGraphExecChildGraphNodeSetParams(CUgraphExec hGraphExec, CUgraphNode 
 
 CUresult cuGraphExecEventRecordNodeSetEvent(CUgraphExec hGraphExec, CUgraphNode hNode, CUevent event)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphExec, CUgraphNode, CUevent);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphExecEventRecordNodeSetEvent"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hGraphExec, hNode, event);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphExecEventRecordNodeSetEvent) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphExecEventRecordNodeSetEvent) < 0 ||
         rpc_write(conn, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, &event, sizeof(CUevent)) < 0 ||
@@ -3989,9 +5593,18 @@ CUresult cuGraphExecEventRecordNodeSetEvent(CUgraphExec hGraphExec, CUgraphNode 
 
 CUresult cuGraphExecEventWaitNodeSetEvent(CUgraphExec hGraphExec, CUgraphNode hNode, CUevent event)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphExec, CUgraphNode, CUevent);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphExecEventWaitNodeSetEvent"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hGraphExec, hNode, event);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphExecEventWaitNodeSetEvent) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphExecEventWaitNodeSetEvent) < 0 ||
         rpc_write(conn, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, &event, sizeof(CUevent)) < 0 ||
@@ -4004,9 +5617,18 @@ CUresult cuGraphExecEventWaitNodeSetEvent(CUgraphExec hGraphExec, CUgraphNode hN
 
 CUresult cuGraphExecExternalSemaphoresSignalNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNode, const CUDA_EXT_SEM_SIGNAL_NODE_PARAMS* nodeParams)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphExec, CUgraphNode, const CUDA_EXT_SEM_SIGNAL_NODE_PARAMS*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphExecExternalSemaphoresSignalNodeSetParams"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hGraphExec, hNode, nodeParams);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphExecExternalSemaphoresSignalNodeSetParams) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphExecExternalSemaphoresSignalNodeSetParams) < 0 ||
         rpc_write(conn, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, &nodeParams, sizeof(const CUDA_EXT_SEM_SIGNAL_NODE_PARAMS*)) < 0 ||
@@ -4019,9 +5641,18 @@ CUresult cuGraphExecExternalSemaphoresSignalNodeSetParams(CUgraphExec hGraphExec
 
 CUresult cuGraphExecExternalSemaphoresWaitNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNode, const CUDA_EXT_SEM_WAIT_NODE_PARAMS* nodeParams)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphExec, CUgraphNode, const CUDA_EXT_SEM_WAIT_NODE_PARAMS*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphExecExternalSemaphoresWaitNodeSetParams"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hGraphExec, hNode, nodeParams);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphExecExternalSemaphoresWaitNodeSetParams) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphExecExternalSemaphoresWaitNodeSetParams) < 0 ||
         rpc_write(conn, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, &nodeParams, sizeof(const CUDA_EXT_SEM_WAIT_NODE_PARAMS*)) < 0 ||
@@ -4034,9 +5665,18 @@ CUresult cuGraphExecExternalSemaphoresWaitNodeSetParams(CUgraphExec hGraphExec, 
 
 CUresult cuGraphNodeSetEnabled(CUgraphExec hGraphExec, CUgraphNode hNode, unsigned int isEnabled)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphExec, CUgraphNode, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphNodeSetEnabled"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hGraphExec, hNode, isEnabled);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphNodeSetEnabled) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphNodeSetEnabled) < 0 ||
         rpc_write(conn, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, &isEnabled, sizeof(unsigned int)) < 0 ||
@@ -4049,9 +5689,18 @@ CUresult cuGraphNodeSetEnabled(CUgraphExec hGraphExec, CUgraphNode hNode, unsign
 
 CUresult cuGraphNodeGetEnabled(CUgraphExec hGraphExec, CUgraphNode hNode, unsigned int* isEnabled)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphExec, CUgraphNode, unsigned int*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphNodeGetEnabled"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hGraphExec, hNode, isEnabled);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphNodeGetEnabled) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphNodeGetEnabled) < 0 ||
         rpc_write(conn, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, isEnabled, sizeof(unsigned int)) < 0 ||
@@ -4065,9 +5714,18 @@ CUresult cuGraphNodeGetEnabled(CUgraphExec hGraphExec, CUgraphNode hNode, unsign
 
 CUresult cuGraphUpload(CUgraphExec hGraphExec, CUstream hStream)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphExec, CUstream);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphUpload"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hGraphExec, hStream);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphUpload) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphUpload) < 0 ||
         rpc_write(conn, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
         rpc_write(conn, &hStream, sizeof(CUstream)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -4079,9 +5737,18 @@ CUresult cuGraphUpload(CUgraphExec hGraphExec, CUstream hStream)
 
 CUresult cuGraphLaunch(CUgraphExec hGraphExec, CUstream hStream)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphExec, CUstream);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphLaunch"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hGraphExec, hStream);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphLaunch) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphLaunch) < 0 ||
         rpc_write(conn, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
         rpc_write(conn, &hStream, sizeof(CUstream)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -4093,9 +5760,18 @@ CUresult cuGraphLaunch(CUgraphExec hGraphExec, CUstream hStream)
 
 CUresult cuGraphExecDestroy(CUgraphExec hGraphExec)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphExec);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphExecDestroy"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hGraphExec);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphExecDestroy) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphExecDestroy) < 0 ||
         rpc_write(conn, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
@@ -4106,9 +5782,18 @@ CUresult cuGraphExecDestroy(CUgraphExec hGraphExec)
 
 CUresult cuGraphDestroy(CUgraph hGraph)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraph);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphDestroy"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hGraph);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphDestroy) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphDestroy) < 0 ||
         rpc_write(conn, &hGraph, sizeof(CUgraph)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
@@ -4119,9 +5804,18 @@ CUresult cuGraphDestroy(CUgraph hGraph)
 
 CUresult cuGraphExecUpdate_v2(CUgraphExec hGraphExec, CUgraph hGraph, CUgraphExecUpdateResultInfo* resultInfo)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphExec, CUgraph, CUgraphExecUpdateResultInfo*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphExecUpdate_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hGraphExec, hGraph, resultInfo);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphExecUpdate_v2) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphExecUpdate_v2) < 0 ||
         rpc_write(conn, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
         rpc_write(conn, &hGraph, sizeof(CUgraph)) < 0 ||
         rpc_write(conn, resultInfo, sizeof(CUgraphExecUpdateResultInfo)) < 0 ||
@@ -4135,9 +5829,18 @@ CUresult cuGraphExecUpdate_v2(CUgraphExec hGraphExec, CUgraph hGraph, CUgraphExe
 
 CUresult cuGraphKernelNodeCopyAttributes(CUgraphNode dst, CUgraphNode src)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode, CUgraphNode);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphKernelNodeCopyAttributes"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dst, src);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphKernelNodeCopyAttributes) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphKernelNodeCopyAttributes) < 0 ||
         rpc_write(conn, &dst, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, &src, sizeof(CUgraphNode)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -4149,9 +5852,18 @@ CUresult cuGraphKernelNodeCopyAttributes(CUgraphNode dst, CUgraphNode src)
 
 CUresult cuGraphKernelNodeGetAttribute(CUgraphNode hNode, CUkernelNodeAttrID attr, CUkernelNodeAttrValue* value_out)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode, CUkernelNodeAttrID, CUkernelNodeAttrValue*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphKernelNodeGetAttribute"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hNode, attr, value_out);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphKernelNodeGetAttribute) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphKernelNodeGetAttribute) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, &attr, sizeof(CUkernelNodeAttrID)) < 0 ||
         rpc_write(conn, value_out, sizeof(CUkernelNodeAttrValue)) < 0 ||
@@ -4165,9 +5877,18 @@ CUresult cuGraphKernelNodeGetAttribute(CUgraphNode hNode, CUkernelNodeAttrID att
 
 CUresult cuGraphKernelNodeSetAttribute(CUgraphNode hNode, CUkernelNodeAttrID attr, const CUkernelNodeAttrValue* value)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphNode, CUkernelNodeAttrID, const CUkernelNodeAttrValue*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphKernelNodeSetAttribute"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hNode, attr, value);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphKernelNodeSetAttribute) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphKernelNodeSetAttribute) < 0 ||
         rpc_write(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
         rpc_write(conn, &attr, sizeof(CUkernelNodeAttrID)) < 0 ||
         rpc_write(conn, &value, sizeof(const CUkernelNodeAttrValue*)) < 0 ||
@@ -4180,9 +5901,18 @@ CUresult cuGraphKernelNodeSetAttribute(CUgraphNode hNode, CUkernelNodeAttrID att
 
 CUresult cuGraphDebugDotPrint(CUgraph hGraph, const char* path, unsigned int flags)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraph, const char*, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphDebugDotPrint"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hGraph, path, flags);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphDebugDotPrint) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphDebugDotPrint) < 0 ||
         rpc_write(conn, &hGraph, sizeof(CUgraph)) < 0 ||
         rpc_write(conn, &path, sizeof(const char*)) < 0 ||
         rpc_write(conn, &flags, sizeof(unsigned int)) < 0 ||
@@ -4195,9 +5925,18 @@ CUresult cuGraphDebugDotPrint(CUgraph hGraph, const char* path, unsigned int fla
 
 CUresult cuUserObjectRetain(CUuserObject object, unsigned int count)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUuserObject, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuUserObjectRetain"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(object, count);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuUserObjectRetain) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuUserObjectRetain) < 0 ||
         rpc_write(conn, &object, sizeof(CUuserObject)) < 0 ||
         rpc_write(conn, &count, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -4209,9 +5948,18 @@ CUresult cuUserObjectRetain(CUuserObject object, unsigned int count)
 
 CUresult cuUserObjectRelease(CUuserObject object, unsigned int count)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUuserObject, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuUserObjectRelease"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(object, count);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuUserObjectRelease) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuUserObjectRelease) < 0 ||
         rpc_write(conn, &object, sizeof(CUuserObject)) < 0 ||
         rpc_write(conn, &count, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -4223,9 +5971,18 @@ CUresult cuUserObjectRelease(CUuserObject object, unsigned int count)
 
 CUresult cuGraphRetainUserObject(CUgraph graph, CUuserObject object, unsigned int count, unsigned int flags)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraph, CUuserObject, unsigned int, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphRetainUserObject"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(graph, object, count, flags);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphRetainUserObject) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphRetainUserObject) < 0 ||
         rpc_write(conn, &graph, sizeof(CUgraph)) < 0 ||
         rpc_write(conn, &object, sizeof(CUuserObject)) < 0 ||
         rpc_write(conn, &count, sizeof(unsigned int)) < 0 ||
@@ -4239,9 +5996,18 @@ CUresult cuGraphRetainUserObject(CUgraph graph, CUuserObject object, unsigned in
 
 CUresult cuGraphReleaseUserObject(CUgraph graph, CUuserObject object, unsigned int count)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraph, CUuserObject, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphReleaseUserObject"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(graph, object, count);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphReleaseUserObject) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphReleaseUserObject) < 0 ||
         rpc_write(conn, &graph, sizeof(CUgraph)) < 0 ||
         rpc_write(conn, &object, sizeof(CUuserObject)) < 0 ||
         rpc_write(conn, &count, sizeof(unsigned int)) < 0 ||
@@ -4254,21 +6020,28 @@ CUresult cuGraphReleaseUserObject(CUgraph graph, CUuserObject object, unsigned i
 
 CUresult cuOccupancyMaxActiveBlocksPerMultiprocessor(int* numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize)
 {
-    return scuda_cuOccupancyMaxActiveBlocksPerMultiprocessor_cached(
-        numBlocks, func, blockSize, dynamicSMemSize);
+    return scuda_cuOccupancyMaxActiveBlocksPerMultiprocessor_cached(numBlocks, func, blockSize, dynamicSMemSize);
 }
 
 CUresult cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags(int* numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize, unsigned int flags)
 {
-    return scuda_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags_cached(
-        numBlocks, func, blockSize, dynamicSMemSize, flags);
+    return scuda_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags_cached(numBlocks, func, blockSize, dynamicSMemSize, flags);
 }
 
 CUresult cuOccupancyAvailableDynamicSMemPerBlock(size_t* dynamicSmemSize, CUfunction func, int numBlocks, int blockSize)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(size_t*, CUfunction, int, int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuOccupancyAvailableDynamicSMemPerBlock"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(dynamicSmemSize, func, numBlocks, blockSize);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuOccupancyAvailableDynamicSMemPerBlock) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuOccupancyAvailableDynamicSMemPerBlock) < 0 ||
         rpc_write(conn, dynamicSmemSize, sizeof(size_t)) < 0 ||
         rpc_write(conn, &func, sizeof(CUfunction)) < 0 ||
         rpc_write(conn, &numBlocks, sizeof(int)) < 0 ||
@@ -4283,9 +6056,18 @@ CUresult cuOccupancyAvailableDynamicSMemPerBlock(size_t* dynamicSmemSize, CUfunc
 
 CUresult cuOccupancyMaxPotentialClusterSize(int* clusterSize, CUfunction func, const CUlaunchConfig* config)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(int*, CUfunction, const CUlaunchConfig*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuOccupancyMaxPotentialClusterSize"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(clusterSize, func, config);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuOccupancyMaxPotentialClusterSize) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuOccupancyMaxPotentialClusterSize) < 0 ||
         rpc_write(conn, clusterSize, sizeof(int)) < 0 ||
         rpc_write(conn, &func, sizeof(CUfunction)) < 0 ||
         rpc_write(conn, &config, sizeof(const CUlaunchConfig*)) < 0 ||
@@ -4299,9 +6081,18 @@ CUresult cuOccupancyMaxPotentialClusterSize(int* clusterSize, CUfunction func, c
 
 CUresult cuOccupancyMaxActiveClusters(int* numClusters, CUfunction func, const CUlaunchConfig* config)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(int*, CUfunction, const CUlaunchConfig*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuOccupancyMaxActiveClusters"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(numClusters, func, config);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuOccupancyMaxActiveClusters) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuOccupancyMaxActiveClusters) < 0 ||
         rpc_write(conn, numClusters, sizeof(int)) < 0 ||
         rpc_write(conn, &func, sizeof(CUfunction)) < 0 ||
         rpc_write(conn, &config, sizeof(const CUlaunchConfig*)) < 0 ||
@@ -4315,9 +6106,18 @@ CUresult cuOccupancyMaxActiveClusters(int* numClusters, CUfunction func, const C
 
 CUresult cuTexRefSetArray(CUtexref hTexRef, CUarray hArray, unsigned int Flags)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUtexref, CUarray, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuTexRefSetArray"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hTexRef, hArray, Flags);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuTexRefSetArray) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuTexRefSetArray) < 0 ||
         rpc_write(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_write(conn, &hArray, sizeof(CUarray)) < 0 ||
         rpc_write(conn, &Flags, sizeof(unsigned int)) < 0 ||
@@ -4330,9 +6130,18 @@ CUresult cuTexRefSetArray(CUtexref hTexRef, CUarray hArray, unsigned int Flags)
 
 CUresult cuTexRefSetMipmappedArray(CUtexref hTexRef, CUmipmappedArray hMipmappedArray, unsigned int Flags)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUtexref, CUmipmappedArray, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuTexRefSetMipmappedArray"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hTexRef, hMipmappedArray, Flags);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuTexRefSetMipmappedArray) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuTexRefSetMipmappedArray) < 0 ||
         rpc_write(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_write(conn, &hMipmappedArray, sizeof(CUmipmappedArray)) < 0 ||
         rpc_write(conn, &Flags, sizeof(unsigned int)) < 0 ||
@@ -4345,9 +6154,18 @@ CUresult cuTexRefSetMipmappedArray(CUtexref hTexRef, CUmipmappedArray hMipmapped
 
 CUresult cuTexRefSetAddress_v2(size_t* ByteOffset, CUtexref hTexRef, CUdeviceptr dptr, size_t bytes)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(size_t*, CUtexref, CUdeviceptr, size_t);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuTexRefSetAddress_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(ByteOffset, hTexRef, dptr, bytes);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuTexRefSetAddress_v2) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuTexRefSetAddress_v2) < 0 ||
         rpc_write(conn, ByteOffset, sizeof(size_t)) < 0 ||
         rpc_write(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_write(conn, &dptr, sizeof(CUdeviceptr)) < 0 ||
@@ -4362,9 +6180,18 @@ CUresult cuTexRefSetAddress_v2(size_t* ByteOffset, CUtexref hTexRef, CUdeviceptr
 
 CUresult cuTexRefSetAddress2D_v3(CUtexref hTexRef, const CUDA_ARRAY_DESCRIPTOR* desc, CUdeviceptr dptr, size_t Pitch)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUtexref, const CUDA_ARRAY_DESCRIPTOR*, CUdeviceptr, size_t);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuTexRefSetAddress2D_v3"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hTexRef, desc, dptr, Pitch);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuTexRefSetAddress2D_v3) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuTexRefSetAddress2D_v3) < 0 ||
         rpc_write(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_write(conn, &desc, sizeof(const CUDA_ARRAY_DESCRIPTOR*)) < 0 ||
         rpc_write(conn, &dptr, sizeof(CUdeviceptr)) < 0 ||
@@ -4378,9 +6205,18 @@ CUresult cuTexRefSetAddress2D_v3(CUtexref hTexRef, const CUDA_ARRAY_DESCRIPTOR* 
 
 CUresult cuTexRefSetFormat(CUtexref hTexRef, CUarray_format fmt, int NumPackedComponents)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUtexref, CUarray_format, int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuTexRefSetFormat"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hTexRef, fmt, NumPackedComponents);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuTexRefSetFormat) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuTexRefSetFormat) < 0 ||
         rpc_write(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_write(conn, &fmt, sizeof(CUarray_format)) < 0 ||
         rpc_write(conn, &NumPackedComponents, sizeof(int)) < 0 ||
@@ -4393,9 +6229,18 @@ CUresult cuTexRefSetFormat(CUtexref hTexRef, CUarray_format fmt, int NumPackedCo
 
 CUresult cuTexRefSetAddressMode(CUtexref hTexRef, int dim, CUaddress_mode am)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUtexref, int, CUaddress_mode);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuTexRefSetAddressMode"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hTexRef, dim, am);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuTexRefSetAddressMode) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuTexRefSetAddressMode) < 0 ||
         rpc_write(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_write(conn, &dim, sizeof(int)) < 0 ||
         rpc_write(conn, &am, sizeof(CUaddress_mode)) < 0 ||
@@ -4408,9 +6253,18 @@ CUresult cuTexRefSetAddressMode(CUtexref hTexRef, int dim, CUaddress_mode am)
 
 CUresult cuTexRefSetFilterMode(CUtexref hTexRef, CUfilter_mode fm)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUtexref, CUfilter_mode);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuTexRefSetFilterMode"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hTexRef, fm);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuTexRefSetFilterMode) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuTexRefSetFilterMode) < 0 ||
         rpc_write(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_write(conn, &fm, sizeof(CUfilter_mode)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -4422,9 +6276,18 @@ CUresult cuTexRefSetFilterMode(CUtexref hTexRef, CUfilter_mode fm)
 
 CUresult cuTexRefSetMipmapFilterMode(CUtexref hTexRef, CUfilter_mode fm)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUtexref, CUfilter_mode);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuTexRefSetMipmapFilterMode"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hTexRef, fm);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuTexRefSetMipmapFilterMode) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuTexRefSetMipmapFilterMode) < 0 ||
         rpc_write(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_write(conn, &fm, sizeof(CUfilter_mode)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -4436,9 +6299,18 @@ CUresult cuTexRefSetMipmapFilterMode(CUtexref hTexRef, CUfilter_mode fm)
 
 CUresult cuTexRefSetMipmapLevelBias(CUtexref hTexRef, float bias)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUtexref, float);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuTexRefSetMipmapLevelBias"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hTexRef, bias);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuTexRefSetMipmapLevelBias) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuTexRefSetMipmapLevelBias) < 0 ||
         rpc_write(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_write(conn, &bias, sizeof(float)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -4450,9 +6322,18 @@ CUresult cuTexRefSetMipmapLevelBias(CUtexref hTexRef, float bias)
 
 CUresult cuTexRefSetMipmapLevelClamp(CUtexref hTexRef, float minMipmapLevelClamp, float maxMipmapLevelClamp)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUtexref, float, float);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuTexRefSetMipmapLevelClamp"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hTexRef, minMipmapLevelClamp, maxMipmapLevelClamp);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuTexRefSetMipmapLevelClamp) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuTexRefSetMipmapLevelClamp) < 0 ||
         rpc_write(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_write(conn, &minMipmapLevelClamp, sizeof(float)) < 0 ||
         rpc_write(conn, &maxMipmapLevelClamp, sizeof(float)) < 0 ||
@@ -4465,9 +6346,18 @@ CUresult cuTexRefSetMipmapLevelClamp(CUtexref hTexRef, float minMipmapLevelClamp
 
 CUresult cuTexRefSetMaxAnisotropy(CUtexref hTexRef, unsigned int maxAniso)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUtexref, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuTexRefSetMaxAnisotropy"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hTexRef, maxAniso);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuTexRefSetMaxAnisotropy) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuTexRefSetMaxAnisotropy) < 0 ||
         rpc_write(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_write(conn, &maxAniso, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -4479,9 +6369,18 @@ CUresult cuTexRefSetMaxAnisotropy(CUtexref hTexRef, unsigned int maxAniso)
 
 CUresult cuTexRefSetBorderColor(CUtexref hTexRef, float* pBorderColor)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUtexref, float*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuTexRefSetBorderColor"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hTexRef, pBorderColor);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuTexRefSetBorderColor) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuTexRefSetBorderColor) < 0 ||
         rpc_write(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_write(conn, pBorderColor, sizeof(float)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -4494,9 +6393,18 @@ CUresult cuTexRefSetBorderColor(CUtexref hTexRef, float* pBorderColor)
 
 CUresult cuTexRefSetFlags(CUtexref hTexRef, unsigned int Flags)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUtexref, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuTexRefSetFlags"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hTexRef, Flags);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuTexRefSetFlags) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuTexRefSetFlags) < 0 ||
         rpc_write(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_write(conn, &Flags, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -4508,9 +6416,18 @@ CUresult cuTexRefSetFlags(CUtexref hTexRef, unsigned int Flags)
 
 CUresult cuTexRefGetAddress_v2(CUdeviceptr* pdptr, CUtexref hTexRef)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr*, CUtexref);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuTexRefGetAddress_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pdptr, hTexRef);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuTexRefGetAddress_v2) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuTexRefGetAddress_v2) < 0 ||
         rpc_write(conn, pdptr, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -4523,9 +6440,18 @@ CUresult cuTexRefGetAddress_v2(CUdeviceptr* pdptr, CUtexref hTexRef)
 
 CUresult cuTexRefGetArray(CUarray* phArray, CUtexref hTexRef)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUarray*, CUtexref);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuTexRefGetArray"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(phArray, hTexRef);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuTexRefGetArray) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuTexRefGetArray) < 0 ||
         rpc_write(conn, phArray, sizeof(CUarray)) < 0 ||
         rpc_write(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -4538,9 +6464,18 @@ CUresult cuTexRefGetArray(CUarray* phArray, CUtexref hTexRef)
 
 CUresult cuTexRefGetMipmappedArray(CUmipmappedArray* phMipmappedArray, CUtexref hTexRef)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUmipmappedArray*, CUtexref);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuTexRefGetMipmappedArray"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(phMipmappedArray, hTexRef);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuTexRefGetMipmappedArray) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuTexRefGetMipmappedArray) < 0 ||
         rpc_write(conn, phMipmappedArray, sizeof(CUmipmappedArray)) < 0 ||
         rpc_write(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -4553,9 +6488,18 @@ CUresult cuTexRefGetMipmappedArray(CUmipmappedArray* phMipmappedArray, CUtexref 
 
 CUresult cuTexRefGetAddressMode(CUaddress_mode* pam, CUtexref hTexRef, int dim)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUaddress_mode*, CUtexref, int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuTexRefGetAddressMode"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pam, hTexRef, dim);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuTexRefGetAddressMode) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuTexRefGetAddressMode) < 0 ||
         rpc_write(conn, pam, sizeof(CUaddress_mode)) < 0 ||
         rpc_write(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_write(conn, &dim, sizeof(int)) < 0 ||
@@ -4569,9 +6513,18 @@ CUresult cuTexRefGetAddressMode(CUaddress_mode* pam, CUtexref hTexRef, int dim)
 
 CUresult cuTexRefGetFilterMode(CUfilter_mode* pfm, CUtexref hTexRef)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUfilter_mode*, CUtexref);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuTexRefGetFilterMode"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pfm, hTexRef);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuTexRefGetFilterMode) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuTexRefGetFilterMode) < 0 ||
         rpc_write(conn, pfm, sizeof(CUfilter_mode)) < 0 ||
         rpc_write(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -4584,9 +6537,18 @@ CUresult cuTexRefGetFilterMode(CUfilter_mode* pfm, CUtexref hTexRef)
 
 CUresult cuTexRefGetFormat(CUarray_format* pFormat, int* pNumChannels, CUtexref hTexRef)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUarray_format*, int*, CUtexref);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuTexRefGetFormat"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pFormat, pNumChannels, hTexRef);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuTexRefGetFormat) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuTexRefGetFormat) < 0 ||
         rpc_write(conn, pFormat, sizeof(CUarray_format)) < 0 ||
         rpc_write(conn, pNumChannels, sizeof(int)) < 0 ||
         rpc_write(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
@@ -4601,9 +6563,18 @@ CUresult cuTexRefGetFormat(CUarray_format* pFormat, int* pNumChannels, CUtexref 
 
 CUresult cuTexRefGetMipmapFilterMode(CUfilter_mode* pfm, CUtexref hTexRef)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUfilter_mode*, CUtexref);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuTexRefGetMipmapFilterMode"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pfm, hTexRef);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuTexRefGetMipmapFilterMode) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuTexRefGetMipmapFilterMode) < 0 ||
         rpc_write(conn, pfm, sizeof(CUfilter_mode)) < 0 ||
         rpc_write(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -4616,9 +6587,18 @@ CUresult cuTexRefGetMipmapFilterMode(CUfilter_mode* pfm, CUtexref hTexRef)
 
 CUresult cuTexRefGetMipmapLevelBias(float* pbias, CUtexref hTexRef)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(float*, CUtexref);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuTexRefGetMipmapLevelBias"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pbias, hTexRef);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuTexRefGetMipmapLevelBias) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuTexRefGetMipmapLevelBias) < 0 ||
         rpc_write(conn, pbias, sizeof(float)) < 0 ||
         rpc_write(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -4631,9 +6611,18 @@ CUresult cuTexRefGetMipmapLevelBias(float* pbias, CUtexref hTexRef)
 
 CUresult cuTexRefGetMipmapLevelClamp(float* pminMipmapLevelClamp, float* pmaxMipmapLevelClamp, CUtexref hTexRef)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(float*, float*, CUtexref);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuTexRefGetMipmapLevelClamp"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pminMipmapLevelClamp, pmaxMipmapLevelClamp, hTexRef);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuTexRefGetMipmapLevelClamp) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuTexRefGetMipmapLevelClamp) < 0 ||
         rpc_write(conn, pminMipmapLevelClamp, sizeof(float)) < 0 ||
         rpc_write(conn, pmaxMipmapLevelClamp, sizeof(float)) < 0 ||
         rpc_write(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
@@ -4648,9 +6637,18 @@ CUresult cuTexRefGetMipmapLevelClamp(float* pminMipmapLevelClamp, float* pmaxMip
 
 CUresult cuTexRefGetMaxAnisotropy(int* pmaxAniso, CUtexref hTexRef)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(int*, CUtexref);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuTexRefGetMaxAnisotropy"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pmaxAniso, hTexRef);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuTexRefGetMaxAnisotropy) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuTexRefGetMaxAnisotropy) < 0 ||
         rpc_write(conn, pmaxAniso, sizeof(int)) < 0 ||
         rpc_write(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -4663,9 +6661,18 @@ CUresult cuTexRefGetMaxAnisotropy(int* pmaxAniso, CUtexref hTexRef)
 
 CUresult cuTexRefGetBorderColor(float* pBorderColor, CUtexref hTexRef)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(float*, CUtexref);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuTexRefGetBorderColor"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pBorderColor, hTexRef);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuTexRefGetBorderColor) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuTexRefGetBorderColor) < 0 ||
         rpc_write(conn, pBorderColor, sizeof(float)) < 0 ||
         rpc_write(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -4678,9 +6685,18 @@ CUresult cuTexRefGetBorderColor(float* pBorderColor, CUtexref hTexRef)
 
 CUresult cuTexRefGetFlags(unsigned int* pFlags, CUtexref hTexRef)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(unsigned int*, CUtexref);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuTexRefGetFlags"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pFlags, hTexRef);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuTexRefGetFlags) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuTexRefGetFlags) < 0 ||
         rpc_write(conn, pFlags, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -4693,9 +6709,18 @@ CUresult cuTexRefGetFlags(unsigned int* pFlags, CUtexref hTexRef)
 
 CUresult cuTexRefCreate(CUtexref* pTexRef)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUtexref*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuTexRefCreate"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pTexRef);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuTexRefCreate) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuTexRefCreate) < 0 ||
         rpc_write(conn, pTexRef, sizeof(CUtexref)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, pTexRef, sizeof(CUtexref)) < 0 ||
@@ -4707,9 +6732,18 @@ CUresult cuTexRefCreate(CUtexref* pTexRef)
 
 CUresult cuTexRefDestroy(CUtexref hTexRef)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUtexref);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuTexRefDestroy"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hTexRef);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuTexRefDestroy) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuTexRefDestroy) < 0 ||
         rpc_write(conn, &hTexRef, sizeof(CUtexref)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
@@ -4720,9 +6754,18 @@ CUresult cuTexRefDestroy(CUtexref hTexRef)
 
 CUresult cuSurfRefSetArray(CUsurfref hSurfRef, CUarray hArray, unsigned int Flags)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUsurfref, CUarray, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuSurfRefSetArray"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(hSurfRef, hArray, Flags);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuSurfRefSetArray) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuSurfRefSetArray) < 0 ||
         rpc_write(conn, &hSurfRef, sizeof(CUsurfref)) < 0 ||
         rpc_write(conn, &hArray, sizeof(CUarray)) < 0 ||
         rpc_write(conn, &Flags, sizeof(unsigned int)) < 0 ||
@@ -4735,9 +6778,18 @@ CUresult cuSurfRefSetArray(CUsurfref hSurfRef, CUarray hArray, unsigned int Flag
 
 CUresult cuSurfRefGetArray(CUarray* phArray, CUsurfref hSurfRef)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUarray*, CUsurfref);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuSurfRefGetArray"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(phArray, hSurfRef);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuSurfRefGetArray) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuSurfRefGetArray) < 0 ||
         rpc_write(conn, phArray, sizeof(CUarray)) < 0 ||
         rpc_write(conn, &hSurfRef, sizeof(CUsurfref)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -4750,24 +6802,22 @@ CUresult cuSurfRefGetArray(CUarray* phArray, CUsurfref hSurfRef)
 
 CUresult cuTexObjectCreate(CUtexObject* pTexObject, const CUDA_RESOURCE_DESC* pResDesc, const CUDA_TEXTURE_DESC* pTexDesc, const CUDA_RESOURCE_VIEW_DESC* pResViewDesc)
 {
-    if (pTexObject == nullptr || pResDesc == nullptr)
-        return CUDA_ERROR_INVALID_VALUE;
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUtexObject*, const CUDA_RESOURCE_DESC*, const CUDA_TEXTURE_DESC*, const CUDA_RESOURCE_VIEW_DESC*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuTexObjectCreate"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pTexObject, pResDesc, pTexDesc, pResViewDesc);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    uint32_t has_tex_desc = pTexDesc != nullptr ? 1 : 0;
-    uint32_t has_res_view_desc = pResViewDesc != nullptr ? 1 : 0;
-    CUDA_TEXTURE_DESC tex_desc = {};
-    CUDA_RESOURCE_VIEW_DESC res_view_desc = {};
-    if (pTexDesc != nullptr)
-        tex_desc = *pTexDesc;
-    if (pResViewDesc != nullptr)
-        res_view_desc = *pResViewDesc;
-    if (rpc_write_start_request(conn, RPC_cuTexObjectCreate) < 0 ||
-        rpc_write(conn, pResDesc, sizeof(CUDA_RESOURCE_DESC)) < 0 ||
-        rpc_write(conn, &has_tex_desc, sizeof(uint32_t)) < 0 ||
-        (has_tex_desc != 0 && rpc_write(conn, &tex_desc, sizeof(CUDA_TEXTURE_DESC)) < 0) ||
-        rpc_write(conn, &has_res_view_desc, sizeof(uint32_t)) < 0 ||
-        (has_res_view_desc != 0 && rpc_write(conn, &res_view_desc, sizeof(CUDA_RESOURCE_VIEW_DESC)) < 0) ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuTexObjectCreate) < 0 ||
+        rpc_write(conn, pTexObject, sizeof(CUtexObject)) < 0 ||
+        rpc_write(conn, &pResDesc, sizeof(const CUDA_RESOURCE_DESC*)) < 0 ||
+        rpc_write(conn, &pTexDesc, sizeof(const CUDA_TEXTURE_DESC*)) < 0 ||
+        rpc_write(conn, &pResViewDesc, sizeof(const CUDA_RESOURCE_VIEW_DESC*)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, pTexObject, sizeof(CUtexObject)) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
@@ -4778,9 +6828,18 @@ CUresult cuTexObjectCreate(CUtexObject* pTexObject, const CUDA_RESOURCE_DESC* pR
 
 CUresult cuTexObjectDestroy(CUtexObject texObject)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUtexObject);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuTexObjectDestroy"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(texObject);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuTexObjectDestroy) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuTexObjectDestroy) < 0 ||
         rpc_write(conn, &texObject, sizeof(CUtexObject)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
@@ -4791,9 +6850,18 @@ CUresult cuTexObjectDestroy(CUtexObject texObject)
 
 CUresult cuTexObjectGetResourceDesc(CUDA_RESOURCE_DESC* pResDesc, CUtexObject texObject)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUDA_RESOURCE_DESC*, CUtexObject);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuTexObjectGetResourceDesc"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pResDesc, texObject);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuTexObjectGetResourceDesc) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuTexObjectGetResourceDesc) < 0 ||
         rpc_write(conn, pResDesc, sizeof(CUDA_RESOURCE_DESC)) < 0 ||
         rpc_write(conn, &texObject, sizeof(CUtexObject)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -4806,9 +6874,18 @@ CUresult cuTexObjectGetResourceDesc(CUDA_RESOURCE_DESC* pResDesc, CUtexObject te
 
 CUresult cuTexObjectGetTextureDesc(CUDA_TEXTURE_DESC* pTexDesc, CUtexObject texObject)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUDA_TEXTURE_DESC*, CUtexObject);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuTexObjectGetTextureDesc"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pTexDesc, texObject);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuTexObjectGetTextureDesc) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuTexObjectGetTextureDesc) < 0 ||
         rpc_write(conn, pTexDesc, sizeof(CUDA_TEXTURE_DESC)) < 0 ||
         rpc_write(conn, &texObject, sizeof(CUtexObject)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -4821,9 +6898,18 @@ CUresult cuTexObjectGetTextureDesc(CUDA_TEXTURE_DESC* pTexDesc, CUtexObject texO
 
 CUresult cuTexObjectGetResourceViewDesc(CUDA_RESOURCE_VIEW_DESC* pResViewDesc, CUtexObject texObject)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUDA_RESOURCE_VIEW_DESC*, CUtexObject);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuTexObjectGetResourceViewDesc"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pResViewDesc, texObject);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuTexObjectGetResourceViewDesc) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuTexObjectGetResourceViewDesc) < 0 ||
         rpc_write(conn, pResViewDesc, sizeof(CUDA_RESOURCE_VIEW_DESC)) < 0 ||
         rpc_write(conn, &texObject, sizeof(CUtexObject)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -4836,12 +6922,20 @@ CUresult cuTexObjectGetResourceViewDesc(CUDA_RESOURCE_VIEW_DESC* pResViewDesc, C
 
 CUresult cuSurfObjectCreate(CUsurfObject* pSurfObject, const CUDA_RESOURCE_DESC* pResDesc)
 {
-    if (pSurfObject == nullptr || pResDesc == nullptr)
-        return CUDA_ERROR_INVALID_VALUE;
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUsurfObject*, const CUDA_RESOURCE_DESC*);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuSurfObjectCreate"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pSurfObject, pResDesc);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuSurfObjectCreate) < 0 ||
-        rpc_write(conn, pResDesc, sizeof(CUDA_RESOURCE_DESC)) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuSurfObjectCreate) < 0 ||
+        rpc_write(conn, pSurfObject, sizeof(CUsurfObject)) < 0 ||
+        rpc_write(conn, &pResDesc, sizeof(const CUDA_RESOURCE_DESC*)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, pSurfObject, sizeof(CUsurfObject)) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
@@ -4852,9 +6946,18 @@ CUresult cuSurfObjectCreate(CUsurfObject* pSurfObject, const CUDA_RESOURCE_DESC*
 
 CUresult cuSurfObjectDestroy(CUsurfObject surfObject)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUsurfObject);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuSurfObjectDestroy"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(surfObject);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuSurfObjectDestroy) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuSurfObjectDestroy) < 0 ||
         rpc_write(conn, &surfObject, sizeof(CUsurfObject)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
@@ -4865,9 +6968,18 @@ CUresult cuSurfObjectDestroy(CUsurfObject surfObject)
 
 CUresult cuSurfObjectGetResourceDesc(CUDA_RESOURCE_DESC* pResDesc, CUsurfObject surfObject)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUDA_RESOURCE_DESC*, CUsurfObject);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuSurfObjectGetResourceDesc"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pResDesc, surfObject);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuSurfObjectGetResourceDesc) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuSurfObjectGetResourceDesc) < 0 ||
         rpc_write(conn, pResDesc, sizeof(CUDA_RESOURCE_DESC)) < 0 ||
         rpc_write(conn, &surfObject, sizeof(CUsurfObject)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -4885,9 +6997,18 @@ CUresult cuDeviceCanAccessPeer(int* canAccessPeer, CUdevice dev, CUdevice peerDe
 
 CUresult cuCtxEnablePeerAccess(CUcontext peerContext, unsigned int Flags)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_context(peerContext);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUcontext, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuCtxEnablePeerAccess"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(peerContext, Flags);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuCtxEnablePeerAccess) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuCtxEnablePeerAccess) < 0 ||
         rpc_write(conn, &peerContext, sizeof(CUcontext)) < 0 ||
         rpc_write(conn, &Flags, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -4899,9 +7020,18 @@ CUresult cuCtxEnablePeerAccess(CUcontext peerContext, unsigned int Flags)
 
 CUresult cuCtxDisablePeerAccess(CUcontext peerContext)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_context(peerContext);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUcontext);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuCtxDisablePeerAccess"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(peerContext);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuCtxDisablePeerAccess) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuCtxDisablePeerAccess) < 0 ||
         rpc_write(conn, &peerContext, sizeof(CUcontext)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
@@ -4912,9 +7042,18 @@ CUresult cuCtxDisablePeerAccess(CUcontext peerContext)
 
 CUresult cuDeviceGetP2PAttribute(int* value, CUdevice_P2PAttribute attrib, CUdevice srcDevice, CUdevice dstDevice)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_device(&srcDevice);
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(int*, CUdevice_P2PAttribute, CUdevice, CUdevice);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuDeviceGetP2PAttribute"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(value, attrib, srcDevice, dstDevice);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuDeviceGetP2PAttribute) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuDeviceGetP2PAttribute) < 0 ||
         rpc_write(conn, value, sizeof(int)) < 0 ||
         rpc_write(conn, &attrib, sizeof(CUdevice_P2PAttribute)) < 0 ||
         rpc_write(conn, &srcDevice, sizeof(CUdevice)) < 0 ||
@@ -4929,9 +7068,18 @@ CUresult cuDeviceGetP2PAttribute(int* value, CUdevice_P2PAttribute attrib, CUdev
 
 CUresult cuGraphicsUnregisterResource(CUgraphicsResource resource)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphicsResource);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphicsUnregisterResource"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(resource);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphicsUnregisterResource) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphicsUnregisterResource) < 0 ||
         rpc_write(conn, &resource, sizeof(CUgraphicsResource)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
@@ -4942,9 +7090,18 @@ CUresult cuGraphicsUnregisterResource(CUgraphicsResource resource)
 
 CUresult cuGraphicsSubResourceGetMappedArray(CUarray* pArray, CUgraphicsResource resource, unsigned int arrayIndex, unsigned int mipLevel)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUarray*, CUgraphicsResource, unsigned int, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphicsSubResourceGetMappedArray"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pArray, resource, arrayIndex, mipLevel);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphicsSubResourceGetMappedArray) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphicsSubResourceGetMappedArray) < 0 ||
         rpc_write(conn, pArray, sizeof(CUarray)) < 0 ||
         rpc_write(conn, &resource, sizeof(CUgraphicsResource)) < 0 ||
         rpc_write(conn, &arrayIndex, sizeof(unsigned int)) < 0 ||
@@ -4959,9 +7116,18 @@ CUresult cuGraphicsSubResourceGetMappedArray(CUarray* pArray, CUgraphicsResource
 
 CUresult cuGraphicsResourceGetMappedMipmappedArray(CUmipmappedArray* pMipmappedArray, CUgraphicsResource resource)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUmipmappedArray*, CUgraphicsResource);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphicsResourceGetMappedMipmappedArray"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pMipmappedArray, resource);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphicsResourceGetMappedMipmappedArray) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphicsResourceGetMappedMipmappedArray) < 0 ||
         rpc_write(conn, pMipmappedArray, sizeof(CUmipmappedArray)) < 0 ||
         rpc_write(conn, &resource, sizeof(CUgraphicsResource)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -4974,9 +7140,18 @@ CUresult cuGraphicsResourceGetMappedMipmappedArray(CUmipmappedArray* pMipmappedA
 
 CUresult cuGraphicsResourceGetMappedPointer_v2(CUdeviceptr* pDevPtr, size_t* pSize, CUgraphicsResource resource)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUdeviceptr*, size_t*, CUgraphicsResource);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphicsResourceGetMappedPointer_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(pDevPtr, pSize, resource);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphicsResourceGetMappedPointer_v2) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphicsResourceGetMappedPointer_v2) < 0 ||
         rpc_write(conn, pDevPtr, sizeof(CUdeviceptr)) < 0 ||
         rpc_write(conn, pSize, sizeof(size_t)) < 0 ||
         rpc_write(conn, &resource, sizeof(CUgraphicsResource)) < 0 ||
@@ -4991,9 +7166,18 @@ CUresult cuGraphicsResourceGetMappedPointer_v2(CUdeviceptr* pDevPtr, size_t* pSi
 
 CUresult cuGraphicsResourceSetMapFlags_v2(CUgraphicsResource resource, unsigned int flags)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(CUgraphicsResource, unsigned int);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphicsResourceSetMapFlags_v2"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(resource, flags);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphicsResourceSetMapFlags_v2) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphicsResourceSetMapFlags_v2) < 0 ||
         rpc_write(conn, &resource, sizeof(CUgraphicsResource)) < 0 ||
         rpc_write(conn, &flags, sizeof(unsigned int)) < 0 ||
         rpc_wait_for_response(conn) < 0 ||
@@ -5005,9 +7189,18 @@ CUresult cuGraphicsResourceSetMapFlags_v2(CUgraphicsResource resource, unsigned 
 
 CUresult cuGraphicsMapResources(unsigned int count, CUgraphicsResource* resources, CUstream hStream)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(unsigned int, CUgraphicsResource*, CUstream);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphicsMapResources"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(count, resources, hStream);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphicsMapResources) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphicsMapResources) < 0 ||
         rpc_write(conn, &count, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, resources, sizeof(CUgraphicsResource)) < 0 ||
         rpc_write(conn, &hStream, sizeof(CUstream)) < 0 ||
@@ -5021,9 +7214,18 @@ CUresult cuGraphicsMapResources(unsigned int count, CUgraphicsResource* resource
 
 CUresult cuGraphicsUnmapResources(unsigned int count, CUgraphicsResource* resources, CUstream hStream)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_default();
+    if (scuda_route_is_local(route)) {
+        using real_fn_t = CUresult (*)(unsigned int, CUgraphicsResource*, CUstream);
+        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphicsUnmapResources"));
+        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
+        CUresult return_value = real(count, resources, hStream);
+        return return_value;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
-    if (rpc_write_start_request(conn, RPC_cuGraphicsUnmapResources) < 0 ||
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuGraphicsUnmapResources) < 0 ||
         rpc_write(conn, &count, sizeof(unsigned int)) < 0 ||
         rpc_write(conn, resources, sizeof(CUgraphicsResource)) < 0 ||
         rpc_write(conn, &hStream, sizeof(CUstream)) < 0 ||
@@ -5171,6 +7373,14 @@ extern "C" CUresult cuMemcpyDtoDAsync(CUdeviceptr dstDevice, CUdeviceptr srcDevi
     return cuMemcpyDtoDAsync_v2(dstDevice, srcDevice, ByteCount, hStream);
 }
 
+#ifdef cuMemsetD8
+#undef cuMemsetD8
+#endif
+extern "C" CUresult cuMemsetD8(CUdeviceptr dstDevice, unsigned char uc, size_t N)
+{
+    return cuMemsetD8_v2(dstDevice, uc, N);
+}
+
 #ifdef cuStreamBeginCapture
 #undef cuStreamBeginCapture
 #endif
@@ -5179,25 +7389,15 @@ extern "C" CUresult cuStreamBeginCapture(CUstream hStream, CUstreamCaptureMode m
     return cuStreamBeginCapture_v2(hStream, mode);
 }
 
+#if CUDA_VERSION >= 12000
 #ifdef cuGraphExecUpdate
 #undef cuGraphExecUpdate
 #endif
-#if CUDA_VERSION >= 12000
 extern "C" CUresult cuGraphExecUpdate(CUgraphExec hGraphExec, CUgraph hGraph, CUgraphExecUpdateResultInfo* resultInfo)
 {
     return cuGraphExecUpdate_v2(hGraphExec, hGraph, resultInfo);
 }
-#else
-extern "C" CUresult cuGraphExecUpdate(CUgraphExec hGraphExec, CUgraph hGraph, CUgraphNode* hErrorNode_out, CUgraphExecUpdateResult* updateResult_out)
-{
-    CUgraphExecUpdateResultInfo resultInfo = {};
-    CUresult result = cuGraphExecUpdate_v2(hGraphExec, hGraph, &resultInfo);
-    if (hErrorNode_out != nullptr)
-        *hErrorNode_out = resultInfo.errorNode;
-    if (updateResult_out != nullptr)
-        *updateResult_out = resultInfo.result;
-    return result;
-}
+
 #endif
 
 #ifdef cuMemcpy_ptds
@@ -5528,10 +7728,7 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cuModuleGetLoadingMode", (void *)cuModuleGetLoadingMode},
     {"cuModuleGetFunction", (void *)cuModuleGetFunction},
     {"cuModuleGetGlobal_v2", (void *)cuModuleGetGlobal_v2},
-    {"cuLinkCreate", (void *)cuLinkCreate_v2},
     {"cuLinkCreate_v2", (void *)cuLinkCreate_v2},
-    {"cuLinkAddData", (void *)cuLinkAddData_v2},
-    {"cuLinkAddData_v2", (void *)cuLinkAddData_v2},
     {"cuLinkAddFile_v2", (void *)cuLinkAddFile_v2},
     {"cuLinkComplete", (void *)cuLinkComplete},
     {"cuLinkDestroy", (void *)cuLinkDestroy},
@@ -5576,15 +7773,9 @@ std::unordered_map<std::string, void *> functionMap = {
     {"cuMemsetD8_v2", (void *)cuMemsetD8_v2},
     {"cuMemsetD16_v2", (void *)cuMemsetD16_v2},
     {"cuMemsetD32_v2", (void *)cuMemsetD32_v2},
-    {"cuMemsetD8", (void *)cuMemsetD8_v2},
-    {"cuMemsetD16", (void *)cuMemsetD16_v2},
-    {"cuMemsetD32", (void *)cuMemsetD32_v2},
     {"cuMemsetD2D8_v2", (void *)cuMemsetD2D8_v2},
     {"cuMemsetD2D16_v2", (void *)cuMemsetD2D16_v2},
     {"cuMemsetD2D32_v2", (void *)cuMemsetD2D32_v2},
-    {"cuMemsetD2D8", (void *)cuMemsetD2D8_v2},
-    {"cuMemsetD2D16", (void *)cuMemsetD2D16_v2},
-    {"cuMemsetD2D32", (void *)cuMemsetD2D32_v2},
     {"cuMemsetD8Async", (void *)cuMemsetD8Async},
     {"cuMemsetD16Async", (void *)cuMemsetD16Async},
     {"cuMemsetD32Async", (void *)cuMemsetD32Async},

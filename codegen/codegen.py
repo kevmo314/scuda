@@ -77,6 +77,10 @@ MANUAL_REMAPPINGS = [
     ("cuMemAllocFromPoolAsync_ptsz", "cuMemAllocFromPoolAsync"),
 ]
 
+MANUAL_REMAPPING_GUARDS = {
+    "cuGraphExecUpdate": "CUDA_VERSION >= 12000",
+}
+
 NVML_RPC_FUNCTIONS = [
     "nvmlInit_v2",
     "nvmlInitWithFlags",
@@ -826,27 +830,88 @@ Operation = Union[
 ]
 
 
+@dataclass
+class OwnerAnnotation:
+    kind: str
+    parameter: Parameter
+
+
+@dataclass
+class FunctionAnnotationMetadata:
+    operations: list[Operation]
+    disabled: bool = False
+    routing_kind: Optional[str] = None
+    routing_parameter: Optional[Parameter] = None
+    record_owners: list[OwnerAnnotation] = None
+
+    def __post_init__(self):
+        if self.record_owners is None:
+            self.record_owners = []
+
+
+def infer_routing_key(
+    params: list[Parameter],
+) -> tuple[Optional[str], Optional[Parameter]]:
+    for param in params:
+        if isinstance(param.type, (Pointer, Array)):
+            continue
+        type_name = param.type.format().replace("const ", "").strip()
+        if type_name == "CUdevice":
+            return "DEVICE", param
+        if type_name == "CUcontext":
+            return "CONTEXT", param
+    return None, None
+
+
 # parses a function annotation. if disabled is encountered, returns True for short circuiting.
 def parse_annotation(
     annotation: str, params: list[Parameter]
-) -> list[tuple[Operation, bool]]:
+) -> FunctionAnnotationMetadata:
     operations: list[Operation] = []
+    metadata = FunctionAnnotationMetadata(operations=operations)
 
     if not annotation:
-        return operations
+        metadata.routing_kind, metadata.routing_parameter = infer_routing_key(params)
+        return metadata
     for line in annotation.split("\n"):
         # we treat disabled functions a bit differently.
         # we should record that this function is disabled so that we can create the RPC method but not the actual handler.
         # this is so that we don't break API compatability by commenting/uncommenting functions from our annotations file.
         if "@disabled" in line or "@DISABLED" in line:
             # we can return instantly; the function is disabled and we don't care about operations at this time.
-            return operations, True
+            metadata.disabled = True
+            return metadata
         if line.startswith("/**"):
             continue
         if line.startswith("*/"):
             continue
         if line.startswith("*"):
             line = line[2:]
+        if line.startswith("@routingkey"):
+            parts = line.split()
+            if len(parts) < 2:
+                continue
+            metadata.routing_kind = parts[1].upper()
+            if len(parts) >= 3:
+                try:
+                    metadata.routing_parameter = next(
+                        p for p in params if p.name == parts[2]
+                    )
+                except StopIteration:
+                    raise NotImplementedError(
+                        f"Routing parameter {parts[2]} not found"
+                    )
+            continue
+        if line.startswith("@recordowner"):
+            parts = line.split()
+            if len(parts) < 3:
+                continue
+            try:
+                param = next(p for p in params if p.name == parts[2])
+            except StopIteration:
+                raise NotImplementedError(f"Owner parameter {parts[2]} not found")
+            metadata.record_owners.append(OwnerAnnotation(parts[1].upper(), param))
+            continue
         if line.startswith("@param"):
             parts = line.split()
 
@@ -1086,7 +1151,84 @@ def parse_annotation(
             )
         else:
             raise NotImplementedError("Unknown type")
-    return operations, False
+    if metadata.routing_kind is None:
+        metadata.routing_kind, metadata.routing_parameter = infer_routing_key(params)
+    return metadata
+
+
+def client_routing_route_expr(metadata: FunctionAnnotationMetadata) -> str:
+    kind = metadata.routing_kind
+    param = metadata.routing_parameter
+    if kind is None:
+        return "scuda_route_for_default()"
+    if kind == "CURRENT_CONTEXT":
+        return "scuda_route_for_current_context()"
+    if param is None:
+        raise NotImplementedError(f"Routing key {kind} requires a parameter")
+    name = param.name
+    if kind == "DEVICE":
+        return f"scuda_route_for_device(&{name})"
+    if kind == "CONTEXT":
+        return f"scuda_route_for_context({name})"
+    if kind == "MODULE":
+        return f"scuda_route_for_module({name})"
+    if kind == "FUNCTION":
+        return f"scuda_route_for_function({name})"
+    if kind == "STREAM":
+        return f"({name} != nullptr ? scuda_route_for_stream({name}) : scuda_route_for_default())"
+    if kind == "EVENT":
+        return f"scuda_route_for_event({name})"
+    if kind == "DEVICEPTR":
+        return f"scuda_route_for_deviceptr({name})"
+    raise NotImplementedError(f"Unknown routing key kind: {kind}")
+
+
+def client_record_owner_stmt(owner: OwnerAnnotation) -> str:
+    kind = owner.kind
+    name = owner.parameter.name
+    value = f"*{name}" if isinstance(owner.parameter.type, Pointer) else name
+    null_guard = f" && {name} != nullptr" if isinstance(owner.parameter.type, Pointer) else ""
+    if kind == "CONTEXT":
+        fn = "scuda_note_context_owner"
+    elif kind == "MODULE":
+        fn = "scuda_note_module_owner"
+    elif kind == "FUNCTION":
+        fn = "scuda_note_function_owner"
+    elif kind == "STREAM":
+        fn = "scuda_note_stream_owner"
+    elif kind == "EVENT":
+        fn = "scuda_note_event_owner"
+    elif kind == "DEVICEPTR":
+        fn = "scuda_note_deviceptr_owner"
+    else:
+        raise NotImplementedError(f"Unknown owner kind: {kind}")
+    return (
+        f"    if (return_value == CUDA_SUCCESS{null_guard}) {{\n"
+        f"        {fn}_route({value}, route);\n"
+        "    }\n"
+    )
+
+
+def write_client_post_call(f, function: Function, metadata: FunctionAnnotationMetadata):
+    if function.name.format() == "cuDriverGetVersion":
+        f.write("    if (driverVersion != nullptr) {\n")
+        f.write("        const char *override_version = getenv(\"SCUDA_DRIVER_VERSION_OVERRIDE\");\n")
+        f.write("        if (override_version != nullptr) *driverVersion = atoi(override_version);\n")
+        f.write("    }\n")
+
+    for owner in metadata.record_owners:
+        f.write(client_record_owner_stmt(owner))
+
+    if function.name.format() == "cuDevicePrimaryCtxRetain":
+        f.write("    if (return_value == CUDA_SUCCESS) scuda_note_primary_context_active(dev);\n")
+    if function.name.format() == "cuDevicePrimaryCtxRelease_v2":
+        f.write("    if (return_value == CUDA_SUCCESS) scuda_invalidate_primary_context_state(dev);\n")
+    if function.name.format() == "cuDevicePrimaryCtxSetFlags_v2":
+        f.write("    if (return_value == CUDA_SUCCESS) scuda_note_primary_context_flags(dev, flags);\n")
+    if function.name.format() == "cuDevicePrimaryCtxReset_v2":
+        f.write("    if (return_value == CUDA_SUCCESS) scuda_invalidate_primary_context_state(dev);\n")
+    if function.name.format() == "cuCtxDestroy_v2":
+        f.write("    if (return_value == CUDA_SUCCESS) scuda_invalidate_current_context_cache();\n")
 
 
 def error_const(return_type: str) -> str:
@@ -1143,6 +1285,12 @@ def format_call_args(function: Function) -> list[str]:
     return [param.name for param in function.parameters if param.name]
 
 
+def server_call_name(function_name: str) -> str:
+    if function_name == "cuEventElapsedTime_v2":
+        return "cuEventElapsedTime"
+    return function_name
+
+
 # List of possible directories to search for header files
 COMMON_INCLUDE_DIRS = [
     "./",
@@ -1189,7 +1337,9 @@ def main():
         and function.name.format() not in SKIP_FUNCTIONS
     ]
 
-    functions_with_annotations: list[tuple[Function, Function, list[Operation]]] = []
+    functions_with_annotations: list[
+        tuple[Function, Function, list[Operation], bool, FunctionAnnotationMetadata]
+    ] = []
 
     dupes = {}
 
@@ -1208,18 +1358,16 @@ def main():
             print(f"Annotation for {function.name} not found")
             continue
         try:
-            operations, is_func_disabled = parse_annotation(
-                annotation.doxygen, function.parameters
-            )
+            metadata = parse_annotation(annotation.doxygen, function.parameters)
         except Exception as e:
             print(f"Error parsing annotation for {function.name}: {e}")
             continue
         functions_with_annotations.append(
-            (function, annotation, operations, is_func_disabled)
+            (function, annotation, metadata.operations, metadata.disabled, metadata)
         )
 
     with open("gen_api.h", "w") as f:
-        for i, (function, _, _, _) in enumerate(functions_with_annotations):
+        for i, (function, _, _, _, _) in enumerate(functions_with_annotations):
             f.write(
                 "#define RPC_{name} {value}\n".format(
                     name=function.name.format(),
@@ -1238,16 +1386,83 @@ def main():
         f.write(
             "#include <cuda.h>\n"
             "\n"
+            "#define SCUDA_CUDA_COMPAT_TYPES_ONLY\n"
+            '#include "cuda_compat.h"\n'
+            "#undef SCUDA_CUDA_COMPAT_TYPES_ONLY\n"
+            "\n"
+            "#include <algorithm>\n"
+            "#include <cstdint>\n"
+            "#include <cstdio>\n"
             "#include <cstring>\n"
             "#include <string>\n"
-            "#include <unordered_map>\n\n"
+            "#include <unordered_map>\n"
+            "#include <vector>\n\n"
             '#include "gen_api.h"\n\n'
             '#include "rpc.h"\n\n'
             "extern int rpc_size();\n"
             "extern conn_t *rpc_client_get_connection(unsigned int index);\n"
             "extern void rpc_close(conn_t *conn);\n\n"
+            "struct scuda_route {\n"
+            "    int kind;\n"
+            "    conn_t *conn;\n"
+            "};\n\n"
+            'extern "C" CUresult scuda_cuInit_multi(unsigned int flags);\n'
+            'extern "C" CUresult scuda_cuDeviceGetCount_multi(int *count);\n'
+            'extern "C" CUresult scuda_cuDeviceGet_multi(CUdevice *device, int ordinal);\n'
+            'extern "C" scuda_route scuda_route_for_default();\n'
+            'extern "C" scuda_route scuda_route_for_device(CUdevice *device);\n'
+            'extern "C" scuda_route scuda_route_for_current_context();\n'
+            'extern "C" scuda_route scuda_route_for_context(CUcontext ctx);\n'
+            'extern "C" scuda_route scuda_route_for_module(CUmodule module);\n'
+            'extern "C" scuda_route scuda_route_for_function(CUfunction function);\n'
+            'extern "C" scuda_route scuda_route_for_stream(CUstream stream);\n'
+            'extern "C" scuda_route scuda_route_for_event(CUevent event);\n'
+            'extern "C" scuda_route scuda_route_for_deviceptr(CUdeviceptr ptr);\n'
+            'extern "C" bool scuda_route_is_local(scuda_route route);\n'
+            'extern "C" conn_t *scuda_route_remote_conn(scuda_route route);\n'
+            'extern "C" void *scuda_real_cuda_symbol(const char *name);\n'
+            'extern "C" conn_t *scuda_rpc_conn_for_device(CUdevice *device);\n'
+            'extern "C" conn_t *scuda_rpc_conn_for_current_context();\n'
+            'extern "C" conn_t *scuda_rpc_conn_for_context(CUcontext ctx);\n'
+            'extern "C" conn_t *scuda_rpc_conn_for_module(CUmodule module);\n'
+            'extern "C" conn_t *scuda_rpc_conn_for_function(CUfunction function);\n'
+            'extern "C" conn_t *scuda_rpc_conn_for_stream(CUstream stream);\n'
+            'extern "C" conn_t *scuda_rpc_conn_for_event(CUevent event);\n'
+            'extern "C" conn_t *scuda_rpc_conn_for_deviceptr(CUdeviceptr ptr);\n'
+            'extern "C" void scuda_note_context_owner(CUcontext ctx, conn_t *conn);\n'
+            'extern "C" void scuda_note_module_owner(CUmodule module, conn_t *conn);\n'
+            'extern "C" void scuda_note_function_owner(CUfunction function, conn_t *conn);\n'
+            'extern "C" void scuda_note_stream_owner(CUstream stream, conn_t *conn);\n'
+            'extern "C" void scuda_note_event_owner(CUevent event, conn_t *conn);\n'
+            'extern "C" void scuda_note_deviceptr_owner(CUdeviceptr ptr, conn_t *conn);\n\n'
+            'extern "C" void scuda_note_context_owner_route(CUcontext ctx, scuda_route route);\n'
+            'extern "C" void scuda_note_module_owner_route(CUmodule module, scuda_route route);\n'
+            'extern "C" void scuda_note_function_owner_route(CUfunction function, scuda_route route);\n'
+            'extern "C" void scuda_note_stream_owner_route(CUstream stream, scuda_route route);\n'
+            'extern "C" void scuda_note_event_owner_route(CUevent event, scuda_route route);\n'
+            'extern "C" void scuda_note_deviceptr_owner_route(CUdeviceptr ptr, scuda_route route);\n\n'
+            'extern "C" CUresult scuda_cuArrayCreate_v2_safe(CUarray *pHandle, const CUDA_ARRAY_DESCRIPTOR *pAllocateArray);\n'
+            'extern "C" CUresult scuda_cuArray3DCreate_v2_safe(CUarray *pHandle, const CUDA_ARRAY3D_DESCRIPTOR *pAllocateArray);\n'
+            'extern "C" CUresult scuda_cuMemAllocManaged_safe(CUdeviceptr *dptr, size_t bytesize, unsigned int flags);\n'
+            'extern "C" CUresult scuda_cuMemFree_v2_safe(CUdeviceptr dptr);\n'
+            'extern "C" CUresult scuda_cuCtxPushCurrent_virtual(CUcontext ctx);\n'
+            'extern "C" CUresult scuda_cuCtxPopCurrent_virtual(CUcontext *pctx);\n'
+            'extern "C" CUresult scuda_cuCtxSetCurrent_virtual(CUcontext ctx);\n'
+            'extern "C" CUresult scuda_cuCtxGetCurrent_virtual(CUcontext *pctx);\n'
+            'extern "C" CUresult scuda_cuCtxGetDevice_cached(CUdevice *device);\n'
+            'extern "C" void scuda_invalidate_current_context_cache();\n'
+            'extern "C" CUresult scuda_cuDevicePrimaryCtxGetState_cached(CUdevice dev, unsigned int *flags, int *active);\n'
+            'extern "C" void scuda_note_primary_context_active(CUdevice dev);\n'
+            'extern "C" void scuda_note_primary_context_flags(CUdevice dev, unsigned int flags);\n'
+            'extern "C" void scuda_invalidate_primary_context_state(CUdevice dev);\n'
+            'extern "C" CUresult scuda_cuDeviceGetAttribute_cached(int *pi, CUdevice_attribute attrib, CUdevice dev);\n'
+            'extern "C" CUresult scuda_cuKernelGetFunction_cached(CUfunction *pFunc, CUkernel kernel);\n'
+            'extern "C" CUresult scuda_cuPointerGetAttributes_safe(unsigned int numAttributes, CUpointer_attribute *attributes, void **data, CUdeviceptr ptr);\n'
+            'extern "C" CUresult scuda_cuOccupancyMaxActiveBlocksPerMultiprocessor_cached(int *numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize);\n'
+            'extern "C" CUresult scuda_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags_cached(int *numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize, unsigned int flags);\n'
+            'extern "C" CUresult scuda_cuDeviceCanAccessPeer_multi(int *canAccessPeer, CUdevice dev, CUdevice peerDev);\n\n'
         )
-        for function, annotation, operations, disabled in functions_with_annotations:
+        for function, annotation, operations, disabled, metadata in functions_with_annotations:
             # we don't generate client function definitions for disabled functions; only the RPC definitions.
             if disabled:
                 continue
@@ -1263,7 +1478,115 @@ def main():
             )
             f.write("{\n")
 
-            f.write("    conn_t *conn = rpc_client_get_connection(0);\n")
+            if function.name.format() == "cuInit":
+                f.write("    return scuda_cuInit_multi(Flags);\n")
+                f.write("}\n\n")
+                continue
+            if function.name.format() == "cuDeviceGet":
+                f.write("    return scuda_cuDeviceGet_multi(device, ordinal);\n")
+                f.write("}\n\n")
+                continue
+            if function.name.format() == "cuDeviceGetCount":
+                f.write("    return scuda_cuDeviceGetCount_multi(count);\n")
+                f.write("}\n\n")
+                continue
+            direct_wrappers = {
+                "cuDeviceGetAttribute": "scuda_cuDeviceGetAttribute_cached(pi, attrib, dev)",
+                "cuDevicePrimaryCtxGetState": "scuda_cuDevicePrimaryCtxGetState_cached(dev, flags, active)",
+                "cuCtxPushCurrent_v2": "scuda_cuCtxPushCurrent_virtual(ctx)",
+                "cuCtxPopCurrent_v2": "scuda_cuCtxPopCurrent_virtual(pctx)",
+                "cuCtxSetCurrent": "scuda_cuCtxSetCurrent_virtual(ctx)",
+                "cuCtxGetCurrent": "scuda_cuCtxGetCurrent_virtual(pctx)",
+                "cuCtxGetDevice": "scuda_cuCtxGetDevice_cached(device)",
+                "cuKernelGetFunction": "scuda_cuKernelGetFunction_cached(pFunc, kernel)",
+                "cuMemFree_v2": "scuda_cuMemFree_v2_safe(dptr)",
+                "cuMemAllocManaged": "scuda_cuMemAllocManaged_safe(dptr, bytesize, flags)",
+                "cuArrayCreate_v2": "scuda_cuArrayCreate_v2_safe(pHandle, pAllocateArray)",
+                "cuArray3DCreate_v2": "scuda_cuArray3DCreate_v2_safe(pHandle, pAllocateArray)",
+                "cuPointerGetAttributes": "scuda_cuPointerGetAttributes_safe(numAttributes, attributes, data, ptr)",
+                "cuOccupancyMaxActiveBlocksPerMultiprocessor": "scuda_cuOccupancyMaxActiveBlocksPerMultiprocessor_cached(numBlocks, func, blockSize, dynamicSMemSize)",
+                "cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags": "scuda_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags_cached(numBlocks, func, blockSize, dynamicSMemSize, flags)",
+                "cuDeviceCanAccessPeer": "scuda_cuDeviceCanAccessPeer_multi(canAccessPeer, dev, peerDev)",
+            }
+            if function.name.format() in direct_wrappers:
+                f.write("    return {call};\n".format(call=direct_wrappers[function.name.format()]))
+                f.write("}\n\n")
+                continue
+            if function.name.format() == "cuModuleGetGlobal_v2":
+                f.write("    conn_t *conn = scuda_rpc_conn_for_module(hmod);\n")
+                f.write("    CUresult return_value;\n")
+                f.write("    size_t remote_bytes = 0;\n")
+                f.write("    std::size_t name_len = std::strlen(name) + 1;\n")
+                f.write("    if (conn == nullptr ||\n")
+                f.write("        rpc_write_start_request(conn, RPC_cuModuleGetGlobal_v2) < 0 ||\n")
+                f.write("        rpc_write(conn, &hmod, sizeof(CUmodule)) < 0 ||\n")
+                f.write("        rpc_write(conn, &name_len, sizeof(std::size_t)) < 0 ||\n")
+                f.write("        rpc_write(conn, name, name_len) < 0 ||\n")
+                f.write("        rpc_wait_for_response(conn) < 0 ||\n")
+                f.write("        (dptr != nullptr && rpc_read(conn, dptr, sizeof(CUdeviceptr)) < 0) ||\n")
+                f.write("        rpc_read(conn, &remote_bytes, sizeof(size_t)) < 0 ||\n")
+                f.write("        rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||\n")
+                f.write("        rpc_read_end(conn) < 0)\n")
+                f.write("        return CUDA_ERROR_DEVICE_UNAVAILABLE;\n")
+                f.write("    if (bytes != nullptr) *bytes = remote_bytes;\n")
+                f.write("    if (return_value == CUDA_SUCCESS && dptr != nullptr) scuda_note_deviceptr_owner(*dptr, conn);\n")
+                f.write("    return return_value;\n")
+                f.write("}\n\n")
+                continue
+            if function.name.format() in {"cuLibraryGetGlobal", "cuLibraryGetManaged"}:
+                f.write("    conn_t *conn = rpc_client_get_connection(0);\n")
+                f.write("    CUresult return_value;\n")
+                f.write("    size_t remote_bytes = 0;\n")
+                f.write("    std::size_t name_len = std::strlen(name) + 1;\n")
+                f.write("    if (conn == nullptr ||\n")
+                f.write("        rpc_write_start_request(conn, RPC_{name}) < 0 ||\n".format(name=function.name.format()))
+                f.write("        rpc_write(conn, &library, sizeof(CUlibrary)) < 0 ||\n")
+                f.write("        rpc_write(conn, &name_len, sizeof(std::size_t)) < 0 ||\n")
+                f.write("        rpc_write(conn, name, name_len) < 0 ||\n")
+                f.write("        rpc_wait_for_response(conn) < 0 ||\n")
+                f.write("        (dptr != nullptr && rpc_read(conn, dptr, sizeof(CUdeviceptr)) < 0) ||\n")
+                f.write("        rpc_read(conn, &remote_bytes, sizeof(size_t)) < 0 ||\n")
+                f.write("        rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||\n")
+                f.write("        rpc_read_end(conn) < 0)\n")
+                f.write("        return CUDA_ERROR_DEVICE_UNAVAILABLE;\n")
+                f.write("    if (bytes != nullptr) *bytes = remote_bytes;\n")
+                f.write("    if (return_value == CUDA_SUCCESS && dptr != nullptr) scuda_note_deviceptr_owner(*dptr, conn);\n")
+                f.write("    return return_value;\n")
+                f.write("}\n\n")
+                continue
+
+            f.write(
+                "    scuda_route route = {route_expr};\n".format(
+                    route_expr=client_routing_route_expr(metadata)
+                )
+            )
+            f.write("    if (scuda_route_is_local(route)) {\n")
+            f.write(
+                "        using real_fn_t = {return_type} (*)({params});\n".format(
+                    return_type=function.return_type.format(),
+                    params=", ".join([param.type.format() for param in function.parameters]),
+                )
+            )
+            f.write(
+                "        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol(\"{name}\"));\n".format(
+                    name=function.name.format()
+                )
+            )
+            f.write(
+                "        if (real == nullptr) return {error_return};\n".format(
+                    error_return=error_const(function.return_type.format())
+                )
+            )
+            f.write(
+                "        {return_type} return_value = real({args});\n".format(
+                    return_type=function.return_type.format(),
+                    args=", ".join(format_call_args(function)),
+                )
+            )
+            write_client_post_call(f, function, metadata)
+            f.write("        return return_value;\n")
+            f.write("    }\n")
+            f.write("    conn_t *conn = scuda_route_remote_conn(route);\n")
 
             f.write(
                 "    {return_type} return_value;\n".format(
@@ -1288,7 +1611,8 @@ def main():
                         )
 
             f.write(
-                "    if (rpc_write_start_request(conn, RPC_{name}) < 0 ||\n".format(
+                "    if (conn == nullptr ||\n"
+                "        rpc_write_start_request(conn, RPC_{name}) < 0 ||\n".format(
                     name=function.name.format()
                 )
             )
@@ -1313,24 +1637,23 @@ def main():
                 )
             )
 
-            if function.name.format() == "cuDriverGetVersion":
-                f.write("    if (driverVersion != nullptr) {\n")
-                f.write("        const char *override_version = getenv(\"SCUDA_DRIVER_VERSION_OVERRIDE\");\n")
-                f.write("        if (override_version != nullptr) *driverVersion = atoi(override_version);\n")
-                f.write("    }\n")
+            write_client_post_call(f, function, metadata)
 
             f.write("    return return_value;\n")
             f.write("}\n\n")
 
         function_by_name = {
             function.name.format(): function
-            for function, _, _, disabled in functions_with_annotations
+            for function, _, _, disabled, _ in functions_with_annotations
             if not disabled
         }
         for alias, target in MANUAL_REMAPPINGS:
             if alias in function_by_name or target not in function_by_name:
                 continue
             target_function = function_by_name[target]
+            guard = MANUAL_REMAPPING_GUARDS.get(alias)
+            if guard is not None:
+                f.write("#if {guard}\n".format(guard=guard))
             f.write("#ifdef {name}\n#undef {name}\n#endif\n".format(name=alias))
             f.write(
                 'extern "C" {return_type} {name}({params})\n'.format(
@@ -1350,9 +1673,11 @@ def main():
             else:
                 f.write("    return {call};\n".format(call=call))
                 f.write("}\n\n")
+            if guard is not None:
+                f.write("#endif\n\n")
 
         f.write("std::unordered_map<std::string, void *> functionMap = {\n")
-        for function, _, _, disabled in functions_with_annotations:
+        for function, _, _, disabled, _ in functions_with_annotations:
             if disabled:
                 continue
 
@@ -1364,7 +1689,7 @@ def main():
         # write manual overrides
         function_names = set(
             f.name.format()
-            for f, _, _, disabled in functions_with_annotations
+            for f, _, _, disabled, _ in functions_with_annotations
             if not disabled
         )
         for x, y in MANUAL_REMAPPINGS:
@@ -1392,6 +1717,7 @@ def main():
         f.write(
             "#include <iostream>\n"
             "#include <cuda.h>\n"
+            '#include "cuda_compat.h"\n'
             "\n"
             "#include <cstring>\n"
             "#include <string>\n"
@@ -1404,7 +1730,7 @@ def main():
             '#include "rpc.h"\n\n'
             '#include "nvml_server.h"\n\n'
         )
-        for function, annotation, operations, disabled in functions_with_annotations:
+        for function, annotation, operations, disabled, _ in functions_with_annotations:
             if disabled:
                 continue
 
@@ -1461,14 +1787,14 @@ def main():
             if function.return_type.format() != "void":
                 f.write(
                     "    scuda_intercept_result = {name}({params});\n\n".format(
-                        name=function.name.format(),
+                        name=server_call_name(function.name.format()),
                         params=", ".join(params),
                     )
                 )
             else:
                 f.write(
                     "    {name}({params});\n\n".format(
-                        name=function.name.format(),
+                        name=server_call_name(function.name.format()),
                         params=", ".join(params),
                     )
                 )
@@ -1496,7 +1822,7 @@ def main():
             f.write("}\n\n")
 
         f.write("static RequestHandler opHandlers[] = {\n")
-        for function, _, _, disabled in functions_with_annotations:
+        for function, _, _, disabled, _ in functions_with_annotations:
             if disabled:
                 f.write("    nullptr,\n")
             else:

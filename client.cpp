@@ -19,6 +19,7 @@
 #include <sstream>
 #include <stdio.h>
 #include <string.h>
+#include <strings.h>
 #include <string>
 #include <sys/mman.h>
 #include <sys/socket.h>
@@ -257,7 +258,24 @@ static std::vector<CUmodule> &scuda_loaded_modules() {
   return modules;
 }
 
-struct scuda_remote_device {
+static constexpr int SCUDA_ROUTE_REMOTE = 0;
+static constexpr int SCUDA_ROUTE_LOCAL = 1;
+static constexpr int SCUDA_ROUTE_INVALID = 2;
+
+struct scuda_route {
+  int kind = SCUDA_ROUTE_INVALID;
+  conn_t *conn = nullptr;
+};
+
+struct scuda_owner {
+  bool local = false;
+  unsigned int conn_index = 0;
+};
+
+struct scuda_device_entry {
+  bool local = false;
+  int local_ordinal = -1;
+  CUdevice local_device = -1;
   unsigned int conn_index = 0;
   int remote_ordinal = 0;
   CUdevice remote_device = 0;
@@ -339,8 +357,8 @@ static std::mutex &scuda_routing_mutex() {
   return mutex;
 }
 
-static std::vector<scuda_remote_device> &scuda_device_table() {
-  static std::vector<scuda_remote_device> devices;
+static std::vector<scuda_device_entry> &scuda_device_table() {
+  static std::vector<scuda_device_entry> devices;
   return devices;
 }
 
@@ -349,33 +367,33 @@ static bool &scuda_device_table_ready() {
   return ready;
 }
 
-static std::unordered_map<CUcontext, unsigned int> &scuda_context_owners() {
-  static std::unordered_map<CUcontext, unsigned int> owners;
+static std::unordered_map<CUcontext, scuda_owner> &scuda_context_owners() {
+  static std::unordered_map<CUcontext, scuda_owner> owners;
   return owners;
 }
 
-static std::unordered_map<CUmodule, unsigned int> &scuda_module_owners() {
-  static std::unordered_map<CUmodule, unsigned int> owners;
+static std::unordered_map<CUmodule, scuda_owner> &scuda_module_owners() {
+  static std::unordered_map<CUmodule, scuda_owner> owners;
   return owners;
 }
 
-static std::unordered_map<CUfunction, unsigned int> &scuda_function_owners() {
-  static std::unordered_map<CUfunction, unsigned int> owners;
+static std::unordered_map<CUfunction, scuda_owner> &scuda_function_owners() {
+  static std::unordered_map<CUfunction, scuda_owner> owners;
   return owners;
 }
 
-static std::unordered_map<CUstream, unsigned int> &scuda_stream_owners() {
-  static std::unordered_map<CUstream, unsigned int> owners;
+static std::unordered_map<CUstream, scuda_owner> &scuda_stream_owners() {
+  static std::unordered_map<CUstream, scuda_owner> owners;
   return owners;
 }
 
-static std::unordered_map<CUevent, unsigned int> &scuda_event_owners() {
-  static std::unordered_map<CUevent, unsigned int> owners;
+static std::unordered_map<CUevent, scuda_owner> &scuda_event_owners() {
+  static std::unordered_map<CUevent, scuda_owner> owners;
   return owners;
 }
 
-static std::unordered_map<CUdeviceptr, unsigned int> &scuda_deviceptr_owners() {
-  static std::unordered_map<CUdeviceptr, unsigned int> owners;
+static std::unordered_map<CUdeviceptr, scuda_owner> &scuda_deviceptr_owners() {
+  static std::unordered_map<CUdeviceptr, scuda_owner> owners;
   return owners;
 }
 
@@ -479,6 +497,81 @@ static conn_t *scuda_conn_by_index(unsigned int index) {
   return &conns[index];
 }
 
+static bool scuda_env_enabled(const char *name) {
+  const char *value = getenv(name);
+  return value != nullptr && strcmp(value, "0") != 0 &&
+         strcasecmp(value, "false") != 0 && strcasecmp(value, "no") != 0;
+}
+
+static void *scuda_local_libcuda_handle() {
+  static std::once_flag once;
+  static void *handle = nullptr;
+  std::call_once(once, []() {
+    if (scuda_env_enabled("SCUDA_DISABLE_LOCAL")) {
+      return;
+    }
+    const char *override_path = getenv("SCUDA_REAL_LIBCUDA");
+    const char *paths[] = {
+        override_path,
+        "/usr/lib/x86_64-linux-gnu/libcuda.so.1",
+        "/usr/lib/aarch64-linux-gnu/libcuda.so.1",
+        "/usr/lib64/libcuda.so.1",
+        "/usr/lib/wsl/lib/libcuda.so.1",
+        nullptr,
+    };
+    for (const char *path : paths) {
+      if (path == nullptr || path[0] == '\0') {
+        continue;
+      }
+      handle = dlopen(path, RTLD_NOW | RTLD_LOCAL);
+      if (handle != nullptr) {
+        return;
+      }
+    }
+  });
+  return handle;
+}
+
+extern "C" void *scuda_real_cuda_symbol(const char *name) {
+  void *handle = scuda_local_libcuda_handle();
+  if (handle == nullptr || name == nullptr) {
+    return nullptr;
+  }
+  return scuda_real_dlsym(handle, name);
+}
+
+template <typename Fn> static Fn scuda_real_cuda_fn(const char *name) {
+  return reinterpret_cast<Fn>(scuda_real_cuda_symbol(name));
+}
+
+extern "C" bool scuda_route_is_local(scuda_route route) {
+  return route.kind == SCUDA_ROUTE_LOCAL;
+}
+
+extern "C" conn_t *scuda_route_remote_conn(scuda_route route) {
+  return route.kind == SCUDA_ROUTE_REMOTE ? route.conn : nullptr;
+}
+
+static scuda_route scuda_remote_route_for_conn(conn_t *conn) {
+  if (conn == nullptr) {
+    return scuda_route{SCUDA_ROUTE_INVALID, nullptr};
+  }
+  return scuda_route{SCUDA_ROUTE_REMOTE, conn};
+}
+
+static scuda_route scuda_local_route() {
+  return scuda_route{SCUDA_ROUTE_LOCAL, nullptr};
+}
+
+static scuda_route scuda_route_for_owner(const scuda_owner &owner) {
+  if (owner.local) {
+    return scuda_local_route();
+  }
+  return scuda_remote_route_for_conn(scuda_conn_by_index(owner.conn_index));
+}
+
+extern "C" scuda_route scuda_route_for_default();
+
 static CUresult scuda_remote_cuInit(conn_t *conn, unsigned int flags) {
   CUresult result = CUDA_ERROR_DEVICE_UNAVAILABLE;
   if (conn == nullptr || rpc_write_start_request(conn, RPC_cuInit) < 0 ||
@@ -517,10 +610,6 @@ static CUresult scuda_remote_cuDeviceGet(conn_t *conn, CUdevice *device,
 }
 
 static CUresult scuda_ensure_device_table() {
-  if (rpc_open() < 0) {
-    return CUDA_ERROR_DEVICE_UNAVAILABLE;
-  }
-
   std::lock_guard<std::mutex> lock(scuda_routing_mutex());
   if (scuda_device_table_ready()) {
     return CUDA_SUCCESS;
@@ -528,41 +617,84 @@ static CUresult scuda_ensure_device_table() {
 
   auto &devices = scuda_device_table();
   devices.clear();
-  for (int i = 0; i < nconns; ++i) {
-    int remote_count = 0;
-    CUresult result = scuda_remote_cuDeviceGetCount(&conns[i], &remote_count);
-    if (result != CUDA_SUCCESS) {
-      devices.clear();
-      return result;
+
+  using cuDeviceGetCount_fn = CUresult (*)(int *);
+  using cuDeviceGet_fn = CUresult (*)(CUdevice *, int);
+  auto local_count_fn =
+      scuda_real_cuda_fn<cuDeviceGetCount_fn>("cuDeviceGetCount");
+  auto local_get_fn = scuda_real_cuda_fn<cuDeviceGet_fn>("cuDeviceGet");
+  if (local_count_fn != nullptr && local_get_fn != nullptr) {
+    int local_count = 0;
+    if (local_count_fn(&local_count) == CUDA_SUCCESS && local_count > 0) {
+      for (int ordinal = 0; ordinal < local_count; ++ordinal) {
+        CUdevice local_device = 0;
+        if (local_get_fn(&local_device, ordinal) == CUDA_SUCCESS) {
+          scuda_device_entry entry;
+          entry.local = true;
+          entry.local_ordinal = ordinal;
+          entry.local_device = local_device;
+          devices.push_back(entry);
+        }
+      }
     }
-    for (int ordinal = 0; ordinal < remote_count; ++ordinal) {
-      CUdevice remote_device = 0;
-      result = scuda_remote_cuDeviceGet(&conns[i], &remote_device, ordinal);
+  }
+
+  if (rpc_open() == 0) {
+    for (int i = 0; i < nconns; ++i) {
+      int remote_count = 0;
+      CUresult result = scuda_remote_cuDeviceGetCount(&conns[i], &remote_count);
       if (result != CUDA_SUCCESS) {
         devices.clear();
         return result;
       }
-      devices.push_back(scuda_remote_device{static_cast<unsigned int>(i),
-                                            ordinal, remote_device});
+      for (int ordinal = 0; ordinal < remote_count; ++ordinal) {
+        CUdevice remote_device = 0;
+        result = scuda_remote_cuDeviceGet(&conns[i], &remote_device, ordinal);
+        if (result != CUDA_SUCCESS) {
+          devices.clear();
+          return result;
+        }
+        scuda_device_entry entry;
+        entry.local = false;
+        entry.conn_index = static_cast<unsigned int>(i);
+        entry.remote_ordinal = ordinal;
+        entry.remote_device = remote_device;
+        devices.push_back(entry);
+      }
     }
+  }
+
+  if (devices.empty()) {
+    return CUDA_ERROR_DEVICE_UNAVAILABLE;
   }
   scuda_device_table_ready() = true;
   return CUDA_SUCCESS;
 }
 
 extern "C" CUresult scuda_cuInit_multi(unsigned int flags) {
-  if (rpc_open() < 0) {
-    return CUDA_ERROR_DEVICE_UNAVAILABLE;
-  }
-
   CUresult first_error = CUDA_SUCCESS;
-  for (int i = 0; i < nconns; ++i) {
-    CUresult result = scuda_remote_cuInit(&conns[i], flags);
+  bool initialized_any = false;
+  using cuInit_fn = CUresult (*)(unsigned int);
+  auto local_init = scuda_real_cuda_fn<cuInit_fn>("cuInit");
+  if (local_init != nullptr) {
+    CUresult result = local_init(flags);
     if (result != CUDA_SUCCESS && first_error == CUDA_SUCCESS) {
       first_error = result;
+    } else if (result == CUDA_SUCCESS) {
+      initialized_any = true;
     }
   }
-  return first_error;
+  if (rpc_open() == 0) {
+    for (int i = 0; i < nconns; ++i) {
+      CUresult result = scuda_remote_cuInit(&conns[i], flags);
+      if (result != CUDA_SUCCESS && first_error == CUDA_SUCCESS) {
+        first_error = result;
+      } else if (result == CUDA_SUCCESS) {
+        initialized_any = true;
+      }
+    }
+  }
+  return initialized_any ? CUDA_SUCCESS : first_error;
 }
 
 extern "C" CUresult scuda_cuDeviceGetCount_multi(int *count) {
@@ -607,9 +739,33 @@ extern "C" conn_t *scuda_rpc_conn_for_device(CUdevice *device) {
   if (local < 0 || local >= static_cast<int>(devices.size())) {
     return nullptr;
   }
-  const scuda_remote_device &mapped = devices[local];
+  const scuda_device_entry &mapped = devices[local];
+  if (mapped.local) {
+    *device = mapped.local_device;
+    return nullptr;
+  }
   *device = mapped.remote_device;
   return scuda_conn_by_index(mapped.conn_index);
+}
+
+extern "C" scuda_route scuda_route_for_device(CUdevice *device) {
+  if (device == nullptr || scuda_ensure_device_table() != CUDA_SUCCESS) {
+    return scuda_route{SCUDA_ROUTE_INVALID, nullptr};
+  }
+
+  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  int local = static_cast<int>(*device);
+  auto &devices = scuda_device_table();
+  if (local < 0 || local >= static_cast<int>(devices.size())) {
+    return scuda_route{SCUDA_ROUTE_INVALID, nullptr};
+  }
+  const scuda_device_entry &mapped = devices[local];
+  if (mapped.local) {
+    *device = mapped.local_device;
+    return scuda_local_route();
+  }
+  *device = mapped.remote_device;
+  return scuda_remote_route_for_conn(scuda_conn_by_index(mapped.conn_index));
 }
 
 extern "C" bool scuda_translate_device_for_conn(conn_t *conn,
@@ -630,8 +786,9 @@ extern "C" bool scuda_translate_device_for_conn(conn_t *conn,
   if (local < 0 || local >= static_cast<int>(devices.size())) {
     return false;
   }
-  const scuda_remote_device &mapped = devices[local];
-  if (mapped.conn_index != static_cast<unsigned int>(conn_index)) {
+  const scuda_device_entry &mapped = devices[local];
+  if (mapped.local ||
+      mapped.conn_index != static_cast<unsigned int>(conn_index)) {
     return false;
   }
   *device = mapped.remote_device;
@@ -652,6 +809,7 @@ extern "C" CUdevice scuda_local_device_for_remote(conn_t *conn,
   auto &devices = scuda_device_table();
   for (size_t i = 0; i < devices.size(); ++i) {
     if (devices[i].conn_index == static_cast<unsigned int>(conn_index) &&
+        !devices[i].local &&
         devices[i].remote_device == remote_device) {
       return static_cast<CUdevice>(i);
     }
@@ -665,7 +823,20 @@ extern "C" CUresult scuda_cuDeviceCanAccessPeer_multi(int *canAccessPeer,
   if (canAccessPeer == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
-  conn_t *conn = scuda_rpc_conn_for_device(&dev);
+  scuda_route route = scuda_route_for_device(&dev);
+  if (scuda_route_is_local(route)) {
+    CUdevice peer = peerDev;
+    scuda_route peer_route = scuda_route_for_device(&peer);
+    if (!scuda_route_is_local(peer_route)) {
+      *canAccessPeer = 0;
+      return CUDA_SUCCESS;
+    }
+    using real_fn_t = CUresult (*)(int *, CUdevice, CUdevice);
+    auto real = scuda_real_cuda_fn<real_fn_t>("cuDeviceCanAccessPeer");
+    return real == nullptr ? CUDA_ERROR_DEVICE_UNAVAILABLE
+                           : real(canAccessPeer, dev, peer);
+  }
+  conn_t *conn = scuda_route_remote_conn(route);
   if (conn == nullptr) {
     return CUDA_ERROR_INVALID_DEVICE;
   }
@@ -693,7 +864,7 @@ extern "C" void scuda_note_context_owner(CUcontext ctx, conn_t *conn) {
     return;
   }
   std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  scuda_context_owners()[ctx] = static_cast<unsigned int>(index);
+  scuda_context_owners()[ctx] = scuda_owner{false, static_cast<unsigned int>(index)};
 }
 
 extern "C" void scuda_note_module_owner(CUmodule module, conn_t *conn) {
@@ -702,7 +873,7 @@ extern "C" void scuda_note_module_owner(CUmodule module, conn_t *conn) {
     return;
   }
   std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  scuda_module_owners()[module] = static_cast<unsigned int>(index);
+  scuda_module_owners()[module] = scuda_owner{false, static_cast<unsigned int>(index)};
 }
 
 extern "C" void scuda_note_function_owner(CUfunction function, conn_t *conn) {
@@ -711,7 +882,7 @@ extern "C" void scuda_note_function_owner(CUfunction function, conn_t *conn) {
     return;
   }
   std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  scuda_function_owners()[function] = static_cast<unsigned int>(index);
+  scuda_function_owners()[function] = scuda_owner{false, static_cast<unsigned int>(index)};
 }
 
 extern "C" void scuda_note_stream_owner(CUstream stream, conn_t *conn) {
@@ -720,7 +891,7 @@ extern "C" void scuda_note_stream_owner(CUstream stream, conn_t *conn) {
     return;
   }
   std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  scuda_stream_owners()[stream] = static_cast<unsigned int>(index);
+  scuda_stream_owners()[stream] = scuda_owner{false, static_cast<unsigned int>(index)};
 }
 
 extern "C" void scuda_note_event_owner(CUevent event, conn_t *conn) {
@@ -729,7 +900,7 @@ extern "C" void scuda_note_event_owner(CUevent event, conn_t *conn) {
     return;
   }
   std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  scuda_event_owners()[event] = static_cast<unsigned int>(index);
+  scuda_event_owners()[event] = scuda_owner{false, static_cast<unsigned int>(index)};
 }
 
 extern "C" void scuda_note_deviceptr_owner(CUdeviceptr ptr, conn_t *conn) {
@@ -738,7 +909,85 @@ extern "C" void scuda_note_deviceptr_owner(CUdeviceptr ptr, conn_t *conn) {
     return;
   }
   std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  scuda_deviceptr_owners()[ptr] = static_cast<unsigned int>(index);
+  scuda_deviceptr_owners()[ptr] = scuda_owner{false, static_cast<unsigned int>(index)};
+}
+
+extern "C" void scuda_note_context_owner_route(CUcontext ctx,
+                                                scuda_route route) {
+  if (ctx == nullptr || route.kind == SCUDA_ROUTE_INVALID) {
+    return;
+  }
+  if (route.kind == SCUDA_ROUTE_REMOTE) {
+    scuda_note_context_owner(ctx, route.conn);
+    return;
+  }
+  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  scuda_context_owners()[ctx] = scuda_owner{true, 0};
+}
+
+extern "C" void scuda_note_module_owner_route(CUmodule module,
+                                               scuda_route route) {
+  if (module == nullptr || route.kind == SCUDA_ROUTE_INVALID) {
+    return;
+  }
+  if (route.kind == SCUDA_ROUTE_REMOTE) {
+    scuda_note_module_owner(module, route.conn);
+    return;
+  }
+  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  scuda_module_owners()[module] = scuda_owner{true, 0};
+}
+
+extern "C" void scuda_note_function_owner_route(CUfunction function,
+                                                 scuda_route route) {
+  if (function == nullptr || route.kind == SCUDA_ROUTE_INVALID) {
+    return;
+  }
+  if (route.kind == SCUDA_ROUTE_REMOTE) {
+    scuda_note_function_owner(function, route.conn);
+    return;
+  }
+  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  scuda_function_owners()[function] = scuda_owner{true, 0};
+}
+
+extern "C" void scuda_note_stream_owner_route(CUstream stream,
+                                               scuda_route route) {
+  if (stream == nullptr || route.kind == SCUDA_ROUTE_INVALID) {
+    return;
+  }
+  if (route.kind == SCUDA_ROUTE_REMOTE) {
+    scuda_note_stream_owner(stream, route.conn);
+    return;
+  }
+  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  scuda_stream_owners()[stream] = scuda_owner{true, 0};
+}
+
+extern "C" void scuda_note_event_owner_route(CUevent event,
+                                              scuda_route route) {
+  if (event == nullptr || route.kind == SCUDA_ROUTE_INVALID) {
+    return;
+  }
+  if (route.kind == SCUDA_ROUTE_REMOTE) {
+    scuda_note_event_owner(event, route.conn);
+    return;
+  }
+  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  scuda_event_owners()[event] = scuda_owner{true, 0};
+}
+
+extern "C" void scuda_note_deviceptr_owner_route(CUdeviceptr ptr,
+                                                  scuda_route route) {
+  if (ptr == 0 || route.kind == SCUDA_ROUTE_INVALID) {
+    return;
+  }
+  if (route.kind == SCUDA_ROUTE_REMOTE) {
+    scuda_note_deviceptr_owner(ptr, route.conn);
+    return;
+  }
+  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  scuda_deviceptr_owners()[ptr] = scuda_owner{true, 0};
 }
 
 extern "C" void scuda_forget_deviceptr_owner(CUdeviceptr ptr) {
@@ -746,59 +995,100 @@ extern "C" void scuda_forget_deviceptr_owner(CUdeviceptr ptr) {
   scuda_deviceptr_owners().erase(ptr);
 }
 
-static conn_t *scuda_conn_for_owner(unsigned int owner) {
-  return scuda_conn_by_index(owner);
+extern "C" scuda_route scuda_route_for_context(CUcontext ctx) {
+  if (ctx == nullptr) {
+    return scuda_route_for_default();
+  }
+  {
+    std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+    auto it = scuda_context_owners().find(ctx);
+    if (it != scuda_context_owners().end()) {
+      return scuda_route_for_owner(it->second);
+    }
+  }
+  return scuda_route_for_default();
+}
+
+extern "C" scuda_route scuda_route_for_module(CUmodule module) {
+  {
+    std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+    auto it = scuda_module_owners().find(module);
+    if (it != scuda_module_owners().end()) {
+      return scuda_route_for_owner(it->second);
+    }
+  }
+  return scuda_route_for_default();
+}
+
+extern "C" scuda_route scuda_route_for_function(CUfunction function) {
+  {
+    std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+    auto it = scuda_function_owners().find(function);
+    if (it != scuda_function_owners().end()) {
+      return scuda_route_for_owner(it->second);
+    }
+  }
+  return scuda_route_for_default();
+}
+
+extern "C" scuda_route scuda_route_for_stream(CUstream stream) {
+  if (stream == nullptr) {
+    return scuda_route_for_default();
+  }
+  {
+    std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+    auto it = scuda_stream_owners().find(stream);
+    if (it != scuda_stream_owners().end()) {
+      return scuda_route_for_owner(it->second);
+    }
+  }
+  return scuda_route_for_default();
+}
+
+extern "C" scuda_route scuda_route_for_event(CUevent event) {
+  {
+    std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+    auto it = scuda_event_owners().find(event);
+    if (it != scuda_event_owners().end()) {
+      return scuda_route_for_owner(it->second);
+    }
+  }
+  return scuda_route_for_default();
+}
+
+extern "C" scuda_route scuda_route_for_deviceptr(CUdeviceptr ptr) {
+  {
+    std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+    auto it = scuda_deviceptr_owners().find(ptr);
+    if (it != scuda_deviceptr_owners().end()) {
+      return scuda_route_for_owner(it->second);
+    }
+  }
+  return scuda_route_for_default();
 }
 
 extern "C" conn_t *scuda_rpc_conn_for_context(CUcontext ctx) {
-  if (ctx == nullptr) {
-    return scuda_conn_by_index(0);
-  }
-  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  auto it = scuda_context_owners().find(ctx);
-  if (it == scuda_context_owners().end()) {
-    return scuda_conn_by_index(0);
-  }
-  return scuda_conn_for_owner(it->second);
+  return scuda_route_remote_conn(scuda_route_for_context(ctx));
 }
 
 extern "C" conn_t *scuda_rpc_conn_for_module(CUmodule module) {
-  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  auto it = scuda_module_owners().find(module);
-  return it == scuda_module_owners().end() ? scuda_conn_by_index(0)
-                                           : scuda_conn_for_owner(it->second);
+  return scuda_route_remote_conn(scuda_route_for_module(module));
 }
 
 extern "C" conn_t *scuda_rpc_conn_for_function(CUfunction function) {
-  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  auto it = scuda_function_owners().find(function);
-  return it == scuda_function_owners().end() ? scuda_conn_by_index(0)
-                                             : scuda_conn_for_owner(it->second);
+  return scuda_route_remote_conn(scuda_route_for_function(function));
 }
 
 extern "C" conn_t *scuda_rpc_conn_for_stream(CUstream stream) {
-  if (stream == nullptr) {
-    return nullptr;
-  }
-  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  auto it = scuda_stream_owners().find(stream);
-  return it == scuda_stream_owners().end() ? scuda_conn_by_index(0)
-                                           : scuda_conn_for_owner(it->second);
+  return scuda_route_remote_conn(scuda_route_for_stream(stream));
 }
 
 extern "C" conn_t *scuda_rpc_conn_for_event(CUevent event) {
-  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  auto it = scuda_event_owners().find(event);
-  return it == scuda_event_owners().end() ? scuda_conn_by_index(0)
-                                          : scuda_conn_for_owner(it->second);
+  return scuda_route_remote_conn(scuda_route_for_event(event));
 }
 
 extern "C" conn_t *scuda_rpc_conn_for_deviceptr(CUdeviceptr ptr) {
-  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  auto it = scuda_deviceptr_owners().find(ptr);
-  return it == scuda_deviceptr_owners().end()
-             ? scuda_conn_by_index(0)
-             : scuda_conn_for_owner(it->second);
+  return scuda_route_remote_conn(scuda_route_for_deviceptr(ptr));
 }
 
 static bool scuda_read_file_span(const char *path,
@@ -986,7 +1276,21 @@ extern "C" CUresult scuda_cuDeviceGetAttribute_cached(
   }
 
   CUdevice remote_dev = dev;
-  conn_t *conn = scuda_rpc_conn_for_device(&remote_dev);
+  scuda_route route = scuda_route_for_device(&remote_dev);
+  if (scuda_route_is_local(route)) {
+    using real_fn_t = CUresult (*)(int *, CUdevice_attribute, CUdevice);
+    auto real = scuda_real_cuda_fn<real_fn_t>("cuDeviceGetAttribute");
+    if (real == nullptr) {
+      return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    }
+    CUresult result = real(pi, attrib, remote_dev);
+    if (result == CUDA_SUCCESS) {
+      std::lock_guard<std::mutex> lock(scuda_device_attribute_cache_mutex());
+      scuda_device_attribute_cache()[key] = *pi;
+    }
+    return result;
+  }
+  conn_t *conn = scuda_route_remote_conn(route);
   CUresult return_value;
   int value = 0;
   if (conn == nullptr ||
@@ -1027,7 +1331,22 @@ extern "C" CUresult scuda_cuKernelGetFunction_cached(CUfunction *pFunc,
     }
   }
 
-  conn_t *conn = rpc_client_get_connection(0);
+  scuda_route route = scuda_route_for_default();
+  if (scuda_route_is_local(route)) {
+    using real_fn_t = CUresult (*)(CUfunction *, CUkernel);
+    auto real = scuda_real_cuda_fn<real_fn_t>("cuKernelGetFunction");
+    if (real == nullptr) {
+      return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    }
+    CUresult result = real(pFunc, kernel);
+    if (result == CUDA_SUCCESS) {
+      std::lock_guard<std::mutex> lock(scuda_kernel_function_cache_mutex());
+      scuda_kernel_function_cache()[key] = *pFunc;
+      scuda_note_function_owner_route(*pFunc, route);
+    }
+    return result;
+  }
+  conn_t *conn = scuda_route_remote_conn(route);
   CUfunction function = nullptr;
   CUresult return_value;
   if (conn == nullptr ||
@@ -1068,7 +1387,35 @@ static CUresult scuda_cuOccupancy_cached(int *numBlocks, CUfunction func,
     }
   }
 
-  conn_t *conn = scuda_rpc_conn_for_function(translated);
+  scuda_route route = scuda_route_for_function(translated);
+  if (scuda_route_is_local(route)) {
+    const char *symbol =
+        with_flags ? "cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags"
+                   : "cuOccupancyMaxActiveBlocksPerMultiprocessor";
+    using real_fn_t = CUresult (*)(int *, CUfunction, int, size_t,
+                                   unsigned int);
+    using real_no_flags_fn_t = CUresult (*)(int *, CUfunction, int, size_t);
+    CUresult result;
+    if (with_flags) {
+      auto real = scuda_real_cuda_fn<real_fn_t>(symbol);
+      if (real == nullptr) {
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+      }
+      result = real(numBlocks, translated, blockSize, dynamicSMemSize, flags);
+    } else {
+      auto real = scuda_real_cuda_fn<real_no_flags_fn_t>(symbol);
+      if (real == nullptr) {
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+      }
+      result = real(numBlocks, translated, blockSize, dynamicSMemSize);
+    }
+    if (result == CUDA_SUCCESS) {
+      std::lock_guard<std::mutex> lock(scuda_occupancy_cache_mutex());
+      scuda_occupancy_cache()[key] = *numBlocks;
+    }
+    return result;
+  }
+  conn_t *conn = scuda_route_remote_conn(route);
   CUresult return_value;
   int remote_num_blocks = 0;
   int opcode = with_flags
@@ -1756,13 +2103,43 @@ static bool scuda_cached_current_context_device(CUdevice *device) {
   return true;
 }
 
+extern "C" scuda_route scuda_route_for_current_context() {
+  return scuda_route_for_context(scuda_current_context);
+}
+
+extern "C" scuda_route scuda_route_for_default() {
+  if (scuda_current_context != nullptr) {
+    std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+    auto it = scuda_context_owners().find(scuda_current_context);
+    if (it != scuda_context_owners().end()) {
+      return scuda_route_for_owner(it->second);
+    }
+  }
+  conn_t *conn = scuda_conn_by_index(0);
+  if (conn != nullptr) {
+    return scuda_remote_route_for_conn(conn);
+  }
+  return scuda_local_libcuda_handle() != nullptr
+             ? scuda_local_route()
+             : scuda_route{SCUDA_ROUTE_INVALID, nullptr};
+}
+
 extern "C" conn_t *scuda_rpc_conn_for_current_context() {
-  return scuda_rpc_conn_for_context(scuda_current_context);
+  return scuda_route_remote_conn(scuda_route_for_current_context());
 }
 
 static CUresult scuda_set_remote_current_context(CUcontext ctx) {
-  conn_t *conn =
-      scuda_rpc_conn_for_context(ctx != nullptr ? ctx : scuda_current_context);
+  scuda_route route =
+      scuda_route_for_context(ctx != nullptr ? ctx : scuda_current_context);
+  if (scuda_route_is_local(route)) {
+    using real_fn_t = CUresult (*)(CUcontext);
+    auto real = scuda_real_cuda_fn<real_fn_t>("cuCtxSetCurrent");
+    if (real == nullptr) {
+      return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    }
+    return real(ctx);
+  }
+  conn_t *conn = scuda_route_remote_conn(route);
   CUresult return_value;
   if (conn == nullptr ||
       rpc_write_start_request(conn, RPC_cuCtxSetCurrent) < 0 ||
@@ -1777,6 +2154,13 @@ static CUresult scuda_set_remote_current_context(CUcontext ctx) {
 
 extern "C" void scuda_note_ctx_create(CUcontext ctx, conn_t *conn) {
   scuda_note_context_owner(ctx, conn);
+  scuda_context_stack.push_back(scuda_current_context);
+  scuda_current_context = ctx;
+  scuda_invalidate_current_context_cache();
+}
+
+extern "C" void scuda_note_ctx_create_route(CUcontext ctx, scuda_route route) {
+  scuda_note_context_owner_route(ctx, route);
   scuda_context_stack.push_back(scuda_current_context);
   scuda_current_context = ctx;
   scuda_invalidate_current_context_cache();
@@ -1839,7 +2223,20 @@ extern "C" CUresult scuda_cuCtxGetDevice_cached(CUdevice *device) {
     return CUDA_SUCCESS;
   }
 
-  conn_t *conn = scuda_rpc_conn_for_current_context();
+  scuda_route route = scuda_route_for_current_context();
+  if (scuda_route_is_local(route)) {
+    using real_fn_t = CUresult (*)(CUdevice *);
+    auto real = scuda_real_cuda_fn<real_fn_t>("cuCtxGetDevice");
+    if (real == nullptr) {
+      return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    }
+    CUresult result = real(device);
+    if (result == CUDA_SUCCESS) {
+      scuda_cache_current_context_device(*device);
+    }
+    return result;
+  }
+  conn_t *conn = scuda_route_remote_conn(route);
   CUdevice remote_device = 0;
   CUresult return_value;
   if (conn == nullptr ||
@@ -1898,7 +2295,22 @@ extern "C" CUresult scuda_cuDevicePrimaryCtxGetState_cached(
   }
 
   CUdevice remote_device = dev;
-  conn_t *conn = scuda_rpc_conn_for_device(&remote_device);
+  scuda_route route = scuda_route_for_device(&remote_device);
+  if (scuda_route_is_local(route)) {
+    using real_fn_t = CUresult (*)(CUdevice, unsigned int *, int *);
+    auto real = scuda_real_cuda_fn<real_fn_t>("cuDevicePrimaryCtxGetState");
+    if (real == nullptr) {
+      return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    }
+    CUresult result = real(remote_device, flags, active);
+    if (result == CUDA_SUCCESS) {
+      std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+      scuda_primary_context_states()[local_device] =
+          scuda_primary_context_state{true, *flags, *active};
+    }
+    return result;
+  }
+  conn_t *conn = scuda_route_remote_conn(route);
   CUresult return_value;
   if (conn == nullptr ||
       rpc_write_start_request(conn, RPC_cuDevicePrimaryCtxGetState) < 0 ||
@@ -2779,7 +3191,20 @@ extern "C" CUresult scuda_cuMemFree_v2_safe(CUdeviceptr dptr) {
     }
   }
   if (!found) {
-    conn_t *conn = scuda_rpc_conn_for_deviceptr(dptr);
+    scuda_route route = scuda_route_for_deviceptr(dptr);
+    if (scuda_route_is_local(route)) {
+      using real_fn_t = CUresult (*)(CUdeviceptr);
+      auto real = scuda_real_cuda_fn<real_fn_t>("cuMemFree_v2");
+      if (real == nullptr) {
+        return CUDA_ERROR_DEVICE_UNAVAILABLE;
+      }
+      CUresult result = real(dptr);
+      if (result == CUDA_SUCCESS) {
+        scuda_forget_deviceptr_owner(dptr);
+      }
+      return result;
+    }
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuMemFree_v2) < 0 ||
@@ -2823,7 +3248,14 @@ extern "C" CUresult cuPointerGetAttribute(void *data,
     return CUDA_ERROR_NOT_SUPPORTED;
   }
 
-  conn_t *conn = rpc_client_get_connection(0);
+  scuda_route route = scuda_route_for_deviceptr(ptr);
+  if (scuda_route_is_local(route)) {
+    using real_fn_t = CUresult (*)(void *, CUpointer_attribute, CUdeviceptr);
+    auto real = scuda_real_cuda_fn<real_fn_t>("cuPointerGetAttribute");
+    return real == nullptr ? CUDA_ERROR_DEVICE_UNAVAILABLE
+                           : real(data, attribute, ptr);
+  }
+  conn_t *conn = scuda_route_remote_conn(route);
   CUresult return_value;
   if (rpc_write_start_request(conn, SCUDA_RPC_cuPointerGetAttribute) < 0 ||
       rpc_write(conn, &attribute, sizeof(attribute)) < 0 ||
@@ -2857,7 +3289,15 @@ scuda_cuPointerGetAttributes_safe(unsigned int numAttributes,
     }
   }
 
-  conn_t *conn = rpc_client_get_connection(0);
+  scuda_route route = scuda_route_for_deviceptr(ptr);
+  if (scuda_route_is_local(route)) {
+    using real_fn_t = CUresult (*)(unsigned int, CUpointer_attribute *, void **,
+                                   CUdeviceptr);
+    auto real = scuda_real_cuda_fn<real_fn_t>("cuPointerGetAttributes");
+    return real == nullptr ? CUDA_ERROR_DEVICE_UNAVAILABLE
+                           : real(numAttributes, attributes, data, ptr);
+  }
+  conn_t *conn = scuda_route_remote_conn(route);
   if (rpc_write_start_request(conn, SCUDA_RPC_cuPointerGetAttributes) < 0 ||
       rpc_write(conn, &numAttributes, sizeof(numAttributes)) < 0 ||
       (numAttributes != 0 &&
@@ -2924,7 +3364,14 @@ scuda_cuArrayCreate_v2_safe(CUarray *pHandle,
   if (pHandle == nullptr || pAllocateArray == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
-  conn_t *conn = rpc_client_get_connection(0);
+  scuda_route route = scuda_route_for_default();
+  if (scuda_route_is_local(route)) {
+    using real_fn_t = CUresult (*)(CUarray *, const CUDA_ARRAY_DESCRIPTOR *);
+    auto real = scuda_real_cuda_fn<real_fn_t>("cuArrayCreate_v2");
+    return real == nullptr ? CUDA_ERROR_DEVICE_UNAVAILABLE
+                           : real(pHandle, pAllocateArray);
+  }
+  conn_t *conn = scuda_route_remote_conn(route);
   CUresult return_value;
   if (rpc_write_start_request(conn, RPC_cuArrayCreate_v2) < 0 ||
       rpc_write(conn, pAllocateArray, sizeof(*pAllocateArray)) < 0 ||
@@ -2943,7 +3390,14 @@ scuda_cuArray3DCreate_v2_safe(CUarray *pHandle,
   if (pHandle == nullptr || pAllocateArray == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
-  conn_t *conn = rpc_client_get_connection(0);
+  scuda_route route = scuda_route_for_default();
+  if (scuda_route_is_local(route)) {
+    using real_fn_t = CUresult (*)(CUarray *, const CUDA_ARRAY3D_DESCRIPTOR *);
+    auto real = scuda_real_cuda_fn<real_fn_t>("cuArray3DCreate_v2");
+    return real == nullptr ? CUDA_ERROR_DEVICE_UNAVAILABLE
+                           : real(pHandle, pAllocateArray);
+  }
+  conn_t *conn = scuda_route_remote_conn(route);
   CUresult return_value;
   if (rpc_write_start_request(conn, RPC_cuArray3DCreate_v2) < 0 ||
       rpc_write(conn, pAllocateArray, sizeof(*pAllocateArray)) < 0 ||
@@ -2957,7 +3411,17 @@ scuda_cuArray3DCreate_v2_safe(CUarray *pHandle,
 }
 
 static CUresult scuda_rpc_noarg_driver_call(int op) {
-  conn_t *conn = scuda_rpc_conn_for_current_context();
+  scuda_route route = scuda_route_for_current_context();
+  if (scuda_route_is_local(route)) {
+    const char *symbol = op == RPC_cuCtxSynchronize ? "cuCtxSynchronize" : nullptr;
+    if (symbol == nullptr) {
+      return CUDA_ERROR_NOT_SUPPORTED;
+    }
+    using real_fn_t = CUresult (*)();
+    auto real = scuda_real_cuda_fn<real_fn_t>(symbol);
+    return real == nullptr ? CUDA_ERROR_DEVICE_UNAVAILABLE : real();
+  }
+  conn_t *conn = scuda_route_remote_conn(route);
   CUresult return_value;
   if (conn == nullptr || rpc_write_start_request(conn, op) < 0 ||
       rpc_wait_for_response(conn) < 0 ||
@@ -2969,8 +3433,24 @@ static CUresult scuda_rpc_noarg_driver_call(int op) {
 }
 
 static CUresult scuda_rpc_stream_driver_call(int op, CUstream stream) {
-  conn_t *conn = stream == nullptr ? scuda_rpc_conn_for_current_context()
-                                   : scuda_rpc_conn_for_stream(stream);
+  scuda_route route =
+      stream == nullptr ? scuda_route_for_current_context()
+                        : scuda_route_for_stream(stream);
+  if (scuda_route_is_local(route)) {
+    const char *symbol = nullptr;
+    if (op == RPC_cuStreamQuery) {
+      symbol = "cuStreamQuery";
+    } else if (op == RPC_cuStreamDestroy_v2) {
+      symbol = "cuStreamDestroy_v2";
+    }
+    if (symbol == nullptr) {
+      return CUDA_ERROR_NOT_SUPPORTED;
+    }
+    using real_fn_t = CUresult (*)(CUstream);
+    auto real = scuda_real_cuda_fn<real_fn_t>(symbol);
+    return real == nullptr ? CUDA_ERROR_DEVICE_UNAVAILABLE : real(stream);
+  }
+  conn_t *conn = scuda_route_remote_conn(route);
   CUresult return_value;
   if (conn == nullptr || rpc_write_start_request(conn, op) < 0 ||
       rpc_write(conn, &stream, sizeof(stream)) < 0 ||
@@ -2983,7 +3463,24 @@ static CUresult scuda_rpc_stream_driver_call(int op, CUstream stream) {
 }
 
 static CUresult scuda_rpc_event_driver_call(int op, CUevent event) {
-  conn_t *conn = scuda_rpc_conn_for_event(event);
+  scuda_route route = scuda_route_for_event(event);
+  if (scuda_route_is_local(route)) {
+    const char *symbol = nullptr;
+    if (op == RPC_cuEventSynchronize) {
+      symbol = "cuEventSynchronize";
+    } else if (op == RPC_cuEventQuery) {
+      symbol = "cuEventQuery";
+    } else if (op == RPC_cuEventDestroy_v2) {
+      symbol = "cuEventDestroy_v2";
+    }
+    if (symbol == nullptr) {
+      return CUDA_ERROR_NOT_SUPPORTED;
+    }
+    using real_fn_t = CUresult (*)(CUevent);
+    auto real = scuda_real_cuda_fn<real_fn_t>(symbol);
+    return real == nullptr ? CUDA_ERROR_DEVICE_UNAVAILABLE : real(event);
+  }
+  conn_t *conn = scuda_route_remote_conn(route);
   CUresult return_value;
   if (conn == nullptr || rpc_write_start_request(conn, op) < 0 ||
       rpc_write(conn, &event, sizeof(event)) < 0 ||
@@ -3004,8 +3501,14 @@ extern "C" CUresult cuCtxSynchronize() {
 }
 
 extern "C" CUresult cuStreamSynchronize(CUstream hStream) {
-  conn_t *conn = hStream == nullptr ? scuda_rpc_conn_for_current_context()
-                                    : scuda_rpc_conn_for_stream(hStream);
+  scuda_route route = hStream == nullptr ? scuda_route_for_current_context()
+                                         : scuda_route_for_stream(hStream);
+  if (scuda_route_is_local(route)) {
+    using real_fn_t = CUresult (*)(CUstream);
+    auto real = scuda_real_cuda_fn<real_fn_t>("cuStreamSynchronize");
+    return real == nullptr ? CUDA_ERROR_DEVICE_UNAVAILABLE : real(hStream);
+  }
+  conn_t *conn = scuda_route_remote_conn(route);
   CUresult result = CUDA_ERROR_UNKNOWN;
   uint32_t copy_count = 0;
   if (conn == nullptr ||
@@ -3060,7 +3563,20 @@ extern "C" CUresult cuCtxCreate_v2(CUcontext *pctx, unsigned int flags,
     return CUDA_ERROR_INVALID_VALUE;
   }
 
-  conn_t *conn = scuda_rpc_conn_for_device(&dev);
+  scuda_route route = scuda_route_for_device(&dev);
+  if (scuda_route_is_local(route)) {
+    using real_fn_t = CUresult (*)(CUcontext *, unsigned int, CUdevice);
+    auto real = scuda_real_cuda_fn<real_fn_t>("cuCtxCreate_v2");
+    if (real == nullptr) {
+      return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    }
+    CUresult result = real(pctx, flags, dev);
+    if (result == CUDA_SUCCESS) {
+      scuda_note_ctx_create_route(*pctx, route);
+    }
+    return result;
+  }
+  conn_t *conn = scuda_route_remote_conn(route);
   CUresult return_value;
   if (conn == nullptr ||
       rpc_write_start_request(conn, SCUDA_RPC_cuCtxCreate_v2) < 0 ||
@@ -3233,7 +3749,21 @@ extern "C" CUresult cuModuleLoadData(CUmodule *module, const void *image) {
     return CUDA_ERROR_NOT_SUPPORTED;
   }
 
-  conn_t *conn = scuda_rpc_conn_for_current_context();
+  scuda_route route = scuda_route_for_current_context();
+  if (scuda_route_is_local(route)) {
+    using real_fn_t = CUresult (*)(CUmodule *, const void *);
+    auto real = scuda_real_cuda_fn<real_fn_t>("cuModuleLoadData");
+    if (real == nullptr) {
+      return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    }
+    CUresult result = real(module, image);
+    if (result == CUDA_SUCCESS) {
+      scuda_remember_loaded_module(*module);
+      scuda_note_module_owner_route(*module, route);
+    }
+    return result;
+  }
+  conn_t *conn = scuda_route_remote_conn(route);
   CUresult return_value;
   size_t image_size = image_bytes.size();
   if (conn == nullptr ||
@@ -3390,6 +3920,19 @@ cuLaunchKernel(CUfunction f, unsigned int gridDimX, unsigned int gridDimY,
   }
   f = scuda_translate_private_function(f);
 
+  scuda_route route = scuda_route_for_function(f);
+  if (scuda_route_is_local(route)) {
+    using real_fn_t = CUresult (*)(CUfunction, unsigned int, unsigned int,
+                                   unsigned int, unsigned int, unsigned int,
+                                   unsigned int, unsigned int, CUstream,
+                                   void **, void **);
+    auto real = scuda_real_cuda_fn<real_fn_t>("cuLaunchKernel");
+    return real == nullptr
+               ? CUDA_ERROR_DEVICE_UNAVAILABLE
+               : real(f, gridDimX, gridDimY, gridDimZ, blockDimX, blockDimY,
+                      blockDimZ, sharedMemBytes, hStream, kernelParams, extra);
+  }
+
   scuda_kernel_param_layout layout;
   CUresult status = scuda_get_kernel_param_layout_cached(f, &layout);
   if (status != CUDA_SUCCESS) {
@@ -3421,7 +3964,7 @@ cuLaunchKernel(CUfunction f, unsigned int gridDimX, unsigned int gridDimY,
     return status;
   }
 
-  conn_t *conn = scuda_rpc_conn_for_function(f);
+  conn_t *conn = scuda_route_remote_conn(route);
   CUresult return_value;
   if (conn == nullptr ||
       rpc_write_start_request(conn, RPC_cuLaunchKernel) < 0 ||
@@ -5601,8 +6144,9 @@ int rpc_open() {
 
   char *server_ips = getenv("SCUDA_SERVER");
   if (server_ips == NULL) {
-    printf("SCUDA_SERVER environment variable not set\n");
-    std::exit(1);
+    if (pthread_mutex_unlock(&conn_mutex) < 0)
+      return -1;
+    return -1;
   }
 
   char *server_ip = strdup(server_ips);
@@ -5636,7 +6180,7 @@ int rpc_open() {
     int sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
     if (sockfd == -1) {
       printf("socket creation failed...\n");
-      exit(1);
+      continue;
     }
 
     int opts = setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, (char *)&flag,
@@ -5644,7 +6188,8 @@ int rpc_open() {
     if (connect(sockfd, res->ai_addr, res->ai_addrlen) < 0) {
       std::cerr << "Connecting to " << host << " port " << port
                 << " failed: " << strerror(errno) << std::endl;
-      exit(1);
+      close(sockfd);
+      continue;
     }
 
     conns[nconns] = {};
