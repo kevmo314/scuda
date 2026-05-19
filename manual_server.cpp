@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <cuda.h>
-#include <functional>
+#include <errno.h>
 #include <future>
 #include <iostream>
 #include <memory>
@@ -12,7 +12,6 @@
 #include <string>
 #include <sys/socket.h>
 #include <sys/uio.h>
-#include <thread>
 #include <unistd.h>
 #include <unordered_map>
 
@@ -49,6 +48,108 @@ static constexpr uint32_t SCUDA_MODULE_IMAGE_FATBINC_V1 = 1;
 static constexpr uint32_t SCUDA_MODULE_IMAGE_FATBIN_RAW = 2;
 static constexpr uint32_t SCUDA_MODULE_IMAGE_FATBINC_V2 = 3;
 static constexpr uint32_t SCUDA_PRIVATE_EXPORT_MAX_SLOTS = 256;
+
+struct scuda_captured_stdout {
+  int saved_stdout = -1;
+  FILE *capture_file = nullptr;
+  bool active = false;
+  std::string output;
+};
+
+static pthread_mutex_t scuda_stdout_capture_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+static bool scuda_start_stdout_capture(scuda_captured_stdout *capture) {
+  if (capture == nullptr) {
+    return false;
+  }
+  capture->saved_stdout = -1;
+  capture->capture_file = nullptr;
+  capture->active = false;
+  capture->output.clear();
+
+  if (pthread_mutex_lock(&scuda_stdout_capture_mutex) != 0) {
+    return false;
+  }
+
+  fflush(stdout);
+  std::cout.flush();
+
+  capture->saved_stdout = dup(STDOUT_FILENO);
+  capture->capture_file = tmpfile();
+  if (capture->saved_stdout < 0 || capture->capture_file == nullptr) {
+    if (capture->saved_stdout >= 0) {
+      close(capture->saved_stdout);
+      capture->saved_stdout = -1;
+    }
+    if (capture->capture_file != nullptr) {
+      fclose(capture->capture_file);
+      capture->capture_file = nullptr;
+    }
+    pthread_mutex_unlock(&scuda_stdout_capture_mutex);
+    return false;
+  }
+
+  if (dup2(fileno(capture->capture_file), STDOUT_FILENO) < 0) {
+    fclose(capture->capture_file);
+    capture->capture_file = nullptr;
+    close(capture->saved_stdout);
+    capture->saved_stdout = -1;
+    pthread_mutex_unlock(&scuda_stdout_capture_mutex);
+    return false;
+  }
+
+  capture->active = true;
+  return true;
+}
+
+static void scuda_finish_stdout_capture(scuda_captured_stdout *capture) {
+  if (capture == nullptr || !capture->active) {
+    return;
+  }
+
+  fflush(stdout);
+  std::cout.flush();
+  dup2(capture->saved_stdout, STDOUT_FILENO);
+  close(capture->saved_stdout);
+  capture->saved_stdout = -1;
+  if (capture->capture_file != nullptr) {
+    int capture_fd = fileno(capture->capture_file);
+    if (capture_fd >= 0 && lseek(capture_fd, 0, SEEK_SET) >= 0) {
+      char buffer[4096];
+      for (;;) {
+        ssize_t bytes = read(capture_fd, buffer, sizeof(buffer));
+        if (bytes > 0) {
+          capture->output.append(buffer, static_cast<size_t>(bytes));
+          continue;
+        }
+        if (bytes == 0) {
+          break;
+        }
+        if (errno == EINTR) {
+          continue;
+        }
+        break;
+      }
+    }
+    fclose(capture->capture_file);
+    capture->capture_file = nullptr;
+  }
+  capture->active = false;
+  pthread_mutex_unlock(&scuda_stdout_capture_mutex);
+}
+
+static int scuda_write_captured_stdout(conn_t *conn,
+                                       const scuda_captured_stdout &capture) {
+  uint64_t output_size = capture.output.size();
+  if (rpc_write(conn, &output_size, sizeof(output_size)) < 0) {
+    return -1;
+  }
+  if (output_size != 0 &&
+      rpc_write(conn, capture.output.data(), capture.output.size()) < 0) {
+    return -1;
+  }
+  return 0;
+}
 
 struct scuda_kernel_param_layout {
   uint32_t count = 0;
@@ -2501,10 +2602,13 @@ int handle_manual_cuCtxSynchronize(conn_t *conn) {
   if (request_id < 0) {
     return -1;
   }
+  scuda_captured_stdout capture;
+  scuda_start_stdout_capture(&capture);
   CUresult result = cuCtxSynchronize();
+  scuda_finish_stdout_capture(&capture);
   if (rpc_write_start_response(conn, request_id) < 0 ||
-      rpc_write(conn, &result, sizeof(result)) < 0 ||
-      rpc_write_end(conn) < 0) {
+      scuda_write_captured_stdout(conn, capture) < 0 ||
+      rpc_write(conn, &result, sizeof(result)) < 0 || rpc_write_end(conn) < 0) {
     return -1;
   }
   return 0;
@@ -2519,7 +2623,10 @@ int handle_manual_cuStreamSynchronize(conn_t *conn) {
   if (request_id < 0) {
     return -1;
   }
+  scuda_captured_stdout capture;
+  scuda_start_stdout_capture(&capture);
   CUresult result = cuStreamSynchronize(stream);
+  scuda_finish_stdout_capture(&capture);
   std::shared_ptr<scuda_graph_resources> resources;
   uint32_t copy_count = 0;
   auto stream_it = scuda_stream_capture_resource_map().find(stream);
@@ -2528,8 +2635,8 @@ int handle_manual_cuStreamSynchronize(conn_t *conn) {
   }
   if (rpc_write_start_response(conn, request_id) < 0 ||
       scuda_write_graph_dtoh_copies(conn, resources, &copy_count) < 0 ||
-      rpc_write(conn, &result, sizeof(result)) < 0 ||
-      rpc_write_end(conn) < 0) {
+      scuda_write_captured_stdout(conn, capture) < 0 ||
+      rpc_write(conn, &result, sizeof(result)) < 0 || rpc_write_end(conn) < 0) {
     return -1;
   }
   return 0;
@@ -2568,10 +2675,13 @@ int handle_manual_cuEventSynchronize(conn_t *conn) {
   if (request_id < 0) {
     return -1;
   }
+  scuda_captured_stdout capture;
+  scuda_start_stdout_capture(&capture);
   CUresult result = cuEventSynchronize(event);
+  scuda_finish_stdout_capture(&capture);
   if (rpc_write_start_response(conn, request_id) < 0 ||
-      rpc_write(conn, &result, sizeof(result)) < 0 ||
-      rpc_write_end(conn) < 0) {
+      scuda_write_captured_stdout(conn, capture) < 0 ||
+      rpc_write(conn, &result, sizeof(result)) < 0 || rpc_write_end(conn) < 0) {
     return -1;
   }
   return 0;

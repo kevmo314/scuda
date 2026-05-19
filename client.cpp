@@ -19,8 +19,8 @@
 #include <sstream>
 #include <stdio.h>
 #include <string.h>
-#include <strings.h>
 #include <string>
+#include <strings.h>
 #include <sys/mman.h>
 #include <sys/socket.h>
 #include <sys/syscall.h>
@@ -3410,6 +3410,25 @@ scuda_cuArray3DCreate_v2_safe(CUarray *pHandle,
   return return_value;
 }
 
+static int scuda_forward_remote_stdout(conn_t *conn) {
+  uint64_t output_size = 0;
+  if (rpc_read(conn, &output_size, sizeof(output_size)) < 0) {
+    return -1;
+  }
+  if (output_size == 0) {
+    return 0;
+  }
+  std::string output;
+  output.resize(static_cast<size_t>(output_size));
+  if (rpc_read(conn, output.data(), output.size()) < 0) {
+    return -1;
+  }
+  fflush(stdout);
+  std::cout.flush();
+  return fwrite(output.data(), 1, output.size(), stdout) == output.size() ? 0
+                                                                          : -1;
+}
+
 static CUresult scuda_rpc_noarg_driver_call(int op) {
   scuda_route route = scuda_route_for_current_context();
   if (scuda_route_is_local(route)) {
@@ -3425,6 +3444,7 @@ static CUresult scuda_rpc_noarg_driver_call(int op) {
   CUresult return_value;
   if (conn == nullptr || rpc_write_start_request(conn, op) < 0 ||
       rpc_wait_for_response(conn) < 0 ||
+      (op == RPC_cuCtxSynchronize && scuda_forward_remote_stdout(conn) < 0) ||
       rpc_read(conn, &return_value, sizeof(return_value)) < 0 ||
       rpc_read_end(conn) < 0) {
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
@@ -3485,6 +3505,7 @@ static CUresult scuda_rpc_event_driver_call(int op, CUevent event) {
   if (conn == nullptr || rpc_write_start_request(conn, op) < 0 ||
       rpc_write(conn, &event, sizeof(event)) < 0 ||
       rpc_wait_for_response(conn) < 0 ||
+      (op == RPC_cuEventSynchronize && scuda_forward_remote_stdout(conn) < 0) ||
       rpc_read(conn, &return_value, sizeof(return_value)) < 0 ||
       rpc_read_end(conn) < 0) {
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
@@ -3533,7 +3554,8 @@ extern "C" CUresult cuStreamSynchronize(CUstream hStream) {
       scuda_mark_host_range_clean(dst, bytes);
     }
   }
-  if (rpc_read(conn, &result, sizeof(result)) < 0 || rpc_read_end(conn) < 0) {
+  if (scuda_forward_remote_stdout(conn) < 0 ||
+      rpc_read(conn, &result, sizeof(result)) < 0 || rpc_read_end(conn) < 0) {
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
   }
   if (result != CUDA_SUCCESS) {
