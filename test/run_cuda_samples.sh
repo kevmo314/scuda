@@ -230,16 +230,16 @@ resolve_sample_srcdir() {
   local sample="$1"
   local dir=""
 
-  if [[ -d "$CUDA_SAMPLES_DIR/cpp" ]]; then
-    dir="$(find "$CUDA_SAMPLES_DIR/cpp" -mindepth 2 -maxdepth 2 -type d -name "$sample" 2>/dev/null | head -n1 || true)"
+  if [[ -d "$CUDA_SAMPLES_DIR/Samples" ]]; then
+    dir="$(find "$CUDA_SAMPLES_DIR/Samples" -mindepth 2 -maxdepth 2 -type d -name "$sample" 2>/dev/null | head -n1 || true)"
     if [[ -n "$dir" ]]; then
       printf '%s\n' "$dir"
       return 0
     fi
   fi
 
-  if [[ -d "$CUDA_SAMPLES_DIR/Samples" ]]; then
-    dir="$(find "$CUDA_SAMPLES_DIR/Samples" -mindepth 2 -maxdepth 2 -type d -name "$sample" 2>/dev/null | head -n1 || true)"
+  if [[ -d "$CUDA_SAMPLES_DIR/cpp" ]]; then
+    dir="$(find "$CUDA_SAMPLES_DIR/cpp" -mindepth 2 -maxdepth 2 -type d -name "$sample" 2>/dev/null | head -n1 || true)"
     if [[ -n "$dir" ]]; then
       printf '%s\n' "$dir"
       return 0

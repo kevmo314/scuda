@@ -17,6 +17,9 @@ MANUAL_REMAPPINGS = [
     ("cuCtxPopCurrent", "cuCtxPopCurrent_v2"),
     ("cuCtxPushCurrent", "cuCtxPushCurrent_v2"),
     ("cuModuleGetGlobal", "cuModuleGetGlobal_v2"),
+    ("cuLinkCreate", "cuLinkCreate_v2"),
+    ("cuLinkAddData", "cuLinkAddData_v2"),
+    ("cuLinkAddFile", "cuLinkAddFile_v2"),
     ("cuMemAlloc", "cuMemAlloc_v2"),
     ("cuMemAllocPitch", "cuMemAllocPitch_v2"),
     ("cuMemFree", "cuMemFree_v2"),
@@ -27,6 +30,9 @@ MANUAL_REMAPPINGS = [
     ("cuMemcpyDtoD", "cuMemcpyDtoD_v2"),
     ("cuMemcpyDtoDAsync", "cuMemcpyDtoDAsync_v2"),
     ("cuMemsetD8", "cuMemsetD8_v2"),
+    ("cuMemsetD2D8", "cuMemsetD2D8_v2"),
+    ("cuMemsetD2D16", "cuMemsetD2D16_v2"),
+    ("cuMemsetD2D32", "cuMemsetD2D32_v2"),
     ("cuStreamBeginCapture", "cuStreamBeginCapture_v2"),
     ("cuGraphAddKernelNode", "cuGraphAddKernelNode_v2"),
     ("cuGraphExecUpdate", "cuGraphExecUpdate_v2"),
@@ -229,7 +235,7 @@ class NullableOperation:
 
     @property
     def server_reference(self) -> str:
-        return f"&{self.parameter.name}"
+        return f"{self.parameter.name}_null_check ? &{self.parameter.name} : nullptr"
 
     def server_rpc_write(self, f):
         if not self.recv:
@@ -241,7 +247,7 @@ class NullableOperation:
             )
         )
         f.write(
-            "        ({param_name}_null_check && rpc_write(conn, {param_name}, sizeof({base_type})) < 0) ||\n".format(
+            "        ({param_name}_null_check && rpc_write(conn, &{param_name}, sizeof({base_type})) < 0) ||\n".format(
                 param_name=self.parameter.name,
                 base_type=self.ptr.ptr_to.format(),
             )
@@ -331,9 +337,9 @@ class ArrayOperation:
 
         if not self.send:
             return
-        elif isinstance(self.length, int):
+        if isinstance(self.length, int):
             f.write(
-                "        rpc_write(conn, {param_name}, {size}) < 0 ||\n".format(
+                "        ({size} != 0 && rpc_write(conn, {param_name}, {size}) < 0) ||\n".format(
                     param_name=self.parameter.name,
                     size=self.length,
                 )
@@ -348,11 +354,37 @@ class ArrayOperation:
             )
         else:
             f.write(
-                "        rpc_write(conn, {param_name}, {size}) < 0 ||\n".format(
+                "        ({size} != 0 && {param_name} == nullptr) ||\n".format(
                     param_name=self.parameter.name,
                     size=self.transfer_size_expr(),
                 )
             )
+            f.write(
+                "        ({size} != 0 && rpc_write(conn, {param_name}, {size}) < 0) ||\n".format(
+                    param_name=self.parameter.name,
+                    size=self.transfer_size_expr(),
+                )
+            )
+
+    def client_prepare_rpc_read(self, f):
+        if not self.recv:
+            return
+        f.write(
+            "        (scuda_prepare_host_range_write({param_name}, {size}), false) ||\n".format(
+                param_name=self.parameter.name,
+                size=self.transfer_size_expr(),
+            )
+        )
+
+    def client_post_rpc_read_success(self, f):
+        if not self.recv:
+            return
+        f.write(
+            "    if (return_value == CUDA_SUCCESS) scuda_mark_host_range_clean({param_name}, {size});\n".format(
+                param_name=self.parameter.name,
+                size=self.transfer_size_expr(),
+            )
+        )
 
     def client_unified_copy(self, f, direction, error):
         f.write(
@@ -431,7 +463,10 @@ class ArrayOperation:
         else:
             c = self.ptr.ptr_to.const
             self.ptr.ptr_to.const = False
-            s = f"    {self.ptr.format()} {self.parameter.name};\n"
+            s = (
+                f"    {self.ptr.format()} {self.parameter.name};\n"
+                f"    size_t {self.parameter.name}_size;\n"
+            )
             self.ptr.ptr_to.const = c
         return s
 
@@ -475,21 +510,29 @@ class ArrayOperation:
             f.write("        false)\n")
             f.write("        goto ERROR_{index};\n".format(index=index))
             f.write(
-                "    {param_name} = ({server_type})malloc({size});\n".format(
+                "    {param_name}_size = {size};\n".format(
                     param_name=self.parameter.name,
-                    server_type=self.mutable_ptr_format(),
                     size=self.transfer_size_expr(),
                 )
             )
-            f.write("    if ({param_name} == nullptr)\n".format(
-                param_name=self.parameter.name
-            ))
+            f.write(
+                "    {param_name} = ({server_type})malloc({size});\n".format(
+                    param_name=self.parameter.name,
+                    server_type=self.mutable_ptr_format(),
+                    size=f"{self.parameter.name}_size",
+                )
+            )
+            f.write(
+                "    if ({param_name}_size != 0 && {param_name} == nullptr)\n".format(
+                    param_name=self.parameter.name
+                )
+            )
             f.write("        goto ERROR_{index};\n".format(index=index))
             f.write("    if(\n")
             f.write(
-                "        rpc_read(conn, {param_name}, {size}) < 0 ||\n".format(
+                "        ({size} != 0 && rpc_read(conn, {param_name}, {size}) < 0) ||\n".format(
                     param_name=self.parameter.name,
-                    size=self.transfer_size_expr(),
+                    size=f"{self.parameter.name}_size",
                 )
             )
             defer = self.parameter.name
@@ -521,22 +564,23 @@ class ArrayOperation:
     def server_reference(self) -> str:
         if self.iter:
             return f"{self.parameter.name}.data()"
-
-        return self.parameter.name
+        if isinstance(self.length, int):
+            return f"{self.parameter.name}"
+        return f"({self.transfer_size_expr()} == 0 ? nullptr : {self.parameter.name})"
 
     def server_rpc_write(self, f):
         if not self.recv:
             return
         if isinstance(self.length, int):
             f.write(
-                "        rpc_write(conn, {param_name}, {size}) < 0 ||\n".format(
+                "        ({size} != 0 && rpc_write(conn, {param_name}, {size}) < 0) ||\n".format(
                     param_name=self.parameter.name,
                     size=self.length,
                 )
             )
         else:
             f.write(
-                "        rpc_write(conn, {param_name}, {size}) < 0 ||\n".format(
+                "        ({size} != 0 && rpc_write(conn, {param_name}, {size}) < 0) ||\n".format(
                     param_name=self.parameter.name,
                     size=self.transfer_size_expr(),
                 )
@@ -547,14 +591,14 @@ class ArrayOperation:
             return
         if isinstance(self.length, int):
             f.write(
-                "        rpc_read(conn, {param_name}, {size}) < 0 ||\n".format(
+                "        ({size} != 0 && rpc_read(conn, {param_name}, {size}) < 0) ||\n".format(
                     param_name=self.parameter.name,
                     size=self.length,
                 )
             )
         else:
             f.write(
-                "        rpc_read(conn, {param_name}, {size}) < 0 ||\n".format(
+                "        ({size} != 0 && rpc_read(conn, {param_name}, {size}) < 0) ||\n".format(
                     param_name=self.parameter.name,
                     size=self.transfer_size_expr(),
                 )
@@ -668,13 +712,30 @@ class OpaqueTypeOperation:
     parameter: Parameter
     type_: Union[Type, Pointer]
 
+    def is_sent_cufunction(self) -> bool:
+        type_name = self.type_.format().replace("const ", "").strip()
+        return self.send and type_name == "CUfunction"
+
+    def client_declaration(self) -> str:
+        if self.is_sent_cufunction():
+            return (
+                f"    CUfunction {self.parameter.name}_rpc = "
+                f"scuda_translate_private_function_for_rpc({self.parameter.name});\n"
+            )
+        return ""
+
     def client_rpc_write(self, f):
         if not self.send:
             return
         else:
+            param_name = (
+                f"{self.parameter.name}_rpc"
+                if self.is_sent_cufunction()
+                else self.parameter.name
+            )
             f.write(
                 "        rpc_write(conn, &{param_name}, sizeof({param_type})) < 0 ||\n".format(
-                    param_name=self.parameter.name,
+                    param_name=param_name,
                     param_type=self.type_.format(),
                 )
             )
@@ -860,6 +921,16 @@ def infer_routing_key(
             return "DEVICE", param
         if type_name == "CUcontext":
             return "CONTEXT", param
+        if type_name == "CUmodule":
+            return "MODULE", param
+        if type_name == "CUfunction":
+            return "FUNCTION", param
+        if type_name == "CUstream":
+            return "STREAM", param
+        if type_name == "CUevent":
+            return "EVENT", param
+        if type_name == "CUdeviceptr":
+            return "DEVICEPTR", param
     return None, None
 
 
@@ -1429,6 +1500,7 @@ def main():
             'extern "C" conn_t *scuda_rpc_conn_for_stream(CUstream stream);\n'
             'extern "C" conn_t *scuda_rpc_conn_for_event(CUevent event);\n'
             'extern "C" conn_t *scuda_rpc_conn_for_deviceptr(CUdeviceptr ptr);\n'
+            'extern "C" CUfunction scuda_translate_private_function_for_rpc(CUfunction function);\n'
             'extern "C" void scuda_note_context_owner(CUcontext ctx, conn_t *conn);\n'
             'extern "C" void scuda_note_module_owner(CUmodule module, conn_t *conn);\n'
             'extern "C" void scuda_note_function_owner(CUfunction function, conn_t *conn);\n'
@@ -1441,8 +1513,17 @@ def main():
             'extern "C" void scuda_note_stream_owner_route(CUstream stream, scuda_route route);\n'
             'extern "C" void scuda_note_event_owner_route(CUevent event, scuda_route route);\n'
             'extern "C" void scuda_note_deviceptr_owner_route(CUdeviceptr ptr, scuda_route route);\n\n'
+            'extern "C" void scuda_prepare_host_range_write(void *host, size_t size);\n'
+            'extern "C" void scuda_mark_host_range_clean(void *host, size_t size);\n\n'
             'extern "C" CUresult scuda_cuArrayCreate_v2_safe(CUarray *pHandle, const CUDA_ARRAY_DESCRIPTOR *pAllocateArray);\n'
             'extern "C" CUresult scuda_cuArray3DCreate_v2_safe(CUarray *pHandle, const CUDA_ARRAY3D_DESCRIPTOR *pAllocateArray);\n'
+            'extern "C" CUresult scuda_cuLinkCreate_v2_safe(unsigned int numOptions, CUjit_option *options, void **optionValues, CUlinkState *stateOut);\n'
+            'extern "C" CUresult scuda_cuLinkAddData_v2_safe(CUlinkState state, CUjitInputType type, void *data, size_t size, const char *name, unsigned int numOptions, CUjit_option *options, void **optionValues);\n'
+            'extern "C" CUresult scuda_cuLinkAddFile_v2_safe(CUlinkState state, CUjitInputType type, const char *path, unsigned int numOptions, CUjit_option *options, void **optionValues);\n'
+            'extern "C" CUresult scuda_cuLinkComplete_safe(CUlinkState state, void **cubinOut, size_t *sizeOut);\n'
+            'extern "C" CUresult scuda_cuLinkDestroy_safe(CUlinkState state);\n'
+            'extern "C" CUresult scuda_cuLaunchCooperativeKernel_safe(CUfunction f, unsigned int gridDimX, unsigned int gridDimY, unsigned int gridDimZ, unsigned int blockDimX, unsigned int blockDimY, unsigned int blockDimZ, unsigned int sharedMemBytes, CUstream hStream, void **kernelParams);\n'
+            'extern "C" CUresult scuda_cuGraphExecKernelNodeSetParams_v2_safe(CUgraphExec hGraphExec, CUgraphNode hNode, const CUDA_KERNEL_NODE_PARAMS *nodeParams);\n'
             'extern "C" CUresult scuda_cuMemAllocManaged_safe(CUdeviceptr *dptr, size_t bytesize, unsigned int flags);\n'
             'extern "C" CUresult scuda_cuMemFree_v2_safe(CUdeviceptr dptr);\n'
             'extern "C" CUresult scuda_cuCtxPushCurrent_virtual(CUcontext ctx);\n'
@@ -1503,6 +1584,13 @@ def main():
                 "cuMemAllocManaged": "scuda_cuMemAllocManaged_safe(dptr, bytesize, flags)",
                 "cuArrayCreate_v2": "scuda_cuArrayCreate_v2_safe(pHandle, pAllocateArray)",
                 "cuArray3DCreate_v2": "scuda_cuArray3DCreate_v2_safe(pHandle, pAllocateArray)",
+                "cuLinkCreate_v2": "scuda_cuLinkCreate_v2_safe(numOptions, options, optionValues, stateOut)",
+                "cuLinkAddData_v2": "scuda_cuLinkAddData_v2_safe(state, type, data, size, name, numOptions, options, optionValues)",
+                "cuLinkAddFile_v2": "scuda_cuLinkAddFile_v2_safe(state, type, path, numOptions, options, optionValues)",
+                "cuLinkComplete": "scuda_cuLinkComplete_safe(state, cubinOut, sizeOut)",
+                "cuLinkDestroy": "scuda_cuLinkDestroy_safe(state)",
+                "cuLaunchCooperativeKernel": "scuda_cuLaunchCooperativeKernel_safe(f, gridDimX, gridDimY, gridDimZ, blockDimX, blockDimY, blockDimZ, sharedMemBytes, hStream, kernelParams)",
+                "cuGraphExecKernelNodeSetParams_v2": "scuda_cuGraphExecKernelNodeSetParams_v2_safe(hGraphExec, hNode, nodeParams)",
                 "cuPointerGetAttributes": "scuda_cuPointerGetAttributes_safe(numAttributes, attributes, data, ptr)",
                 "cuOccupancyMaxActiveBlocksPerMultiprocessor": "scuda_cuOccupancyMaxActiveBlocksPerMultiprocessor_cached(numBlocks, func, blockSize, dynamicSMemSize)",
                 "cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags": "scuda_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags_cached(numBlocks, func, blockSize, dynamicSMemSize, flags)",
@@ -1594,6 +1682,10 @@ def main():
                 )
             )
 
+            for operation in operations:
+                if isinstance(operation, OpaqueTypeOperation):
+                    f.write(operation.client_declaration())
+
             # compute the strlen's for null-terminated operations.
             for operation in operations:
                 if isinstance(operation, NullTerminatedOperation):
@@ -1609,6 +1701,13 @@ def main():
                                 param_name=operation.parameter.name
                             )
                         )
+                if isinstance(operation, NullableOperation) and operation.recv:
+                    f.write(
+                        "    {server_type} {param_name}_null_check;\n".format(
+                            server_type=operation.ptr.format(),
+                            param_name=operation.parameter.name,
+                        )
+                    )
 
             f.write(
                 "    if (conn == nullptr ||\n"
@@ -1621,6 +1720,10 @@ def main():
                 operation.client_rpc_write(f)
 
             f.write("        rpc_wait_for_response(conn) < 0 ||\n")
+
+            for operation in operations:
+                if isinstance(operation, ArrayOperation):
+                    operation.client_prepare_rpc_read(f)
 
             for operation in operations:
                 operation.client_rpc_read(f)
@@ -1638,6 +1741,9 @@ def main():
             )
 
             write_client_post_call(f, function, metadata)
+            for operation in operations:
+                if isinstance(operation, ArrayOperation):
+                    operation.client_post_rpc_read_success(f)
 
             f.write("    return return_value;\n")
             f.write("}\n\n")

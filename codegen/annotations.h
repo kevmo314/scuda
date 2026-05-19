@@ -2313,7 +2313,7 @@ CUresult cuLinkCreate_v2(unsigned int numOptions, CUjit_option *options,
 /**
  * @param state SEND_ONLY
  * @param type SEND_ONLY
- * @param data SEND_RECV
+ * @param data SEND_ONLY
  * @param size SEND_ONLY
  * @param name SEND_ONLY NULL_TERMINATED
  * @param numOptions SEND_ONLY
@@ -2669,12 +2669,12 @@ CUresult cuMemcpyAtoA_v2(CUarray dstArray, size_t dstOffset, CUarray srcArray,
                          size_t srcOffset, size_t ByteCount);
 /**
  * @disabled
- * @param pCopy SEND_ONLY
+ * @param pCopy SEND_ONLY DEREF
  */
 CUresult cuMemcpy2D_v2(const CUDA_MEMCPY2D *pCopy);
 /**
  * @disabled
- * @param pCopy SEND_ONLY
+ * @param pCopy SEND_ONLY DEREF
  */
 CUresult cuMemcpy2DUnaligned_v2(const CUDA_MEMCPY2D *pCopy);
 /**
@@ -2952,7 +2952,7 @@ CUresult cuArray3DGetDescriptor_v2(CUDA_ARRAY3D_DESCRIPTOR *pArrayDescriptor,
                                    CUarray hArray);
 /**
  * @param pHandle SEND_RECV
- * @param pMipmappedArrayDesc SEND_RECV
+ * @param pMipmappedArrayDesc SEND_ONLY DEREF
  * @param numMipmapLevels SEND_ONLY
  */
 CUresult
@@ -3308,7 +3308,7 @@ CUresult cuThreadExchangeStreamCaptureMode(CUstreamCaptureMode *mode);
 /**
  * @routingkey STREAM hStream
  * @param hStream SEND_ONLY
- * @param phGraph SEND_RECV
+ * @param phGraph SEND_RECV NULLABLE
  */
 CUresult cuStreamEndCapture(CUstream hStream, CUgraph *phGraph);
 /**
@@ -3385,7 +3385,7 @@ CUresult cuStreamGetAttribute(CUstream hStream, CUstreamAttrID attr,
  * @routingkey STREAM hStream
  * @param hStream SEND_ONLY
  * @param attr SEND_ONLY
- * @param value SEND_RECV
+ * @param value SEND_ONLY DEREF
  */
 CUresult cuStreamSetAttribute(CUstream hStream, CUstreamAttrID attr,
                               const CUstreamAttrValue *value);
@@ -3717,7 +3717,7 @@ CUresult cuGraphKernelNodeGetParams_v2(CUgraphNode hNode,
                                        CUDA_KERNEL_NODE_PARAMS *nodeParams);
 /**
  * @param hNode SEND_ONLY
- * @param nodeParams SEND_RECV
+ * @param nodeParams SEND_ONLY DEREF
  */
 CUresult
 cuGraphKernelNodeSetParams_v2(CUgraphNode hNode,
@@ -3743,7 +3743,7 @@ CUresult cuGraphMemcpyNodeGetParams(CUgraphNode hNode,
                                     CUDA_MEMCPY3D *nodeParams);
 /**
  * @param hNode SEND_ONLY
- * @param nodeParams SEND_RECV
+ * @param nodeParams SEND_ONLY DEREF
  */
 CUresult cuGraphMemcpyNodeSetParams(CUgraphNode hNode,
                                     const CUDA_MEMCPY3D *nodeParams);
@@ -3769,7 +3769,7 @@ CUresult cuGraphMemsetNodeGetParams(CUgraphNode hNode,
                                     CUDA_MEMSET_NODE_PARAMS *nodeParams);
 /**
  * @param hNode SEND_ONLY
- * @param nodeParams SEND_RECV
+ * @param nodeParams SEND_ONLY DEREF
  */
 CUresult cuGraphMemsetNodeSetParams(CUgraphNode hNode,
                                     const CUDA_MEMSET_NODE_PARAMS *nodeParams);
@@ -3940,8 +3940,8 @@ CUresult cuGraphExecBatchMemOpNodeSetParams(
 /**
  * @param phGraphNode SEND_RECV
  * @param hGraph SEND_ONLY
- * @param dependencies SEND_RECV
  * @param numDependencies SEND_ONLY
+ * @param dependencies SEND_ONLY LENGTH:numDependencies
  * @param nodeParams SEND_RECV
  */
 CUresult cuGraphAddMemAllocNode(CUgraphNode *phGraphNode, CUgraph hGraph,
@@ -4086,7 +4086,7 @@ CUresult cuGraphExecGetFlags(CUgraphExec hGraphExec, cuuint64_t *flags);
 /**
  * @param hGraphExec SEND_ONLY
  * @param hNode SEND_ONLY
- * @param nodeParams SEND_RECV
+ * @param nodeParams SEND_ONLY DEREF
  */
 CUresult
 cuGraphExecKernelNodeSetParams_v2(CUgraphExec hGraphExec, CUgraphNode hNode,
@@ -4094,7 +4094,7 @@ cuGraphExecKernelNodeSetParams_v2(CUgraphExec hGraphExec, CUgraphNode hNode,
 /**
  * @param hGraphExec SEND_ONLY
  * @param hNode SEND_ONLY
- * @param copyParams SEND_RECV
+ * @param copyParams SEND_ONLY DEREF
  * @param ctx SEND_ONLY
  */
 CUresult cuGraphExecMemcpyNodeSetParams(CUgraphExec hGraphExec,
@@ -4104,7 +4104,7 @@ CUresult cuGraphExecMemcpyNodeSetParams(CUgraphExec hGraphExec,
 /**
  * @param hGraphExec SEND_ONLY
  * @param hNode SEND_ONLY
- * @param memsetParams SEND_RECV
+ * @param memsetParams SEND_ONLY DEREF
  * @param ctx SEND_ONLY
  */
 CUresult
@@ -4114,7 +4114,7 @@ cuGraphExecMemsetNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNode,
 /**
  * @param hGraphExec SEND_ONLY
  * @param hNode SEND_ONLY
- * @param nodeParams SEND_RECV
+ * @param nodeParams SEND_ONLY DEREF
  */
 CUresult cuGraphExecHostNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNode,
                                       const CUDA_HOST_NODE_PARAMS *nodeParams);
@@ -4143,7 +4143,7 @@ CUresult cuGraphExecEventWaitNodeSetEvent(CUgraphExec hGraphExec,
 /**
  * @param hGraphExec SEND_ONLY
  * @param hNode SEND_ONLY
- * @param nodeParams SEND_RECV
+ * @param nodeParams SEND_ONLY DEREF
  */
 CUresult cuGraphExecExternalSemaphoresSignalNodeSetParams(
     CUgraphExec hGraphExec, CUgraphNode hNode,
@@ -4151,7 +4151,7 @@ CUresult cuGraphExecExternalSemaphoresSignalNodeSetParams(
 /**
  * @param hGraphExec SEND_ONLY
  * @param hNode SEND_ONLY
- * @param nodeParams SEND_RECV
+ * @param nodeParams SEND_ONLY DEREF
  */
 CUresult cuGraphExecExternalSemaphoresWaitNodeSetParams(
     CUgraphExec hGraphExec, CUgraphNode hNode,
@@ -4353,7 +4353,7 @@ CUresult cuTexRefSetAddress_v2(size_t *ByteOffset, CUtexref hTexRef,
                                CUdeviceptr dptr, size_t bytes);
 /**
  * @param hTexRef SEND_ONLY
- * @param desc SEND_RECV
+ * @param desc SEND_ONLY DEREF
  * @param dptr SEND_ONLY
  * @param Pitch SEND_ONLY
  */
@@ -4500,9 +4500,9 @@ CUresult cuSurfRefSetArray(CUsurfref hSurfRef, CUarray hArray,
 CUresult cuSurfRefGetArray(CUarray *phArray, CUsurfref hSurfRef);
 /**
  * @param pTexObject SEND_RECV
- * @param pResDesc SEND_RECV
- * @param pTexDesc SEND_RECV
- * @param pResViewDesc SEND_RECV
+ * @param pResDesc SEND_ONLY DEREF
+ * @param pTexDesc SEND_ONLY NULLABLE
+ * @param pResViewDesc SEND_ONLY NULLABLE
  */
 CUresult cuTexObjectCreate(CUtexObject *pTexObject,
                            const CUDA_RESOURCE_DESC *pResDesc,
@@ -4532,7 +4532,7 @@ CUresult cuTexObjectGetResourceViewDesc(CUDA_RESOURCE_VIEW_DESC *pResViewDesc,
                                         CUtexObject texObject);
 /**
  * @param pSurfObject SEND_RECV
- * @param pResDesc SEND_RECV
+ * @param pResDesc SEND_ONLY DEREF
  */
 CUresult cuSurfObjectCreate(CUsurfObject *pSurfObject,
                             const CUDA_RESOURCE_DESC *pResDesc);

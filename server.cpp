@@ -176,9 +176,23 @@ void client_handler(int connfd) {
       }
       continue;
     }
+    if (op == RPC_cuLinkAddFile_v2) {
+      if (handle_manual_cuLinkAddFile_v2(&conn) < 0) {
+        scuda_log_manual_handler_error("cuLinkAddFile_v2");
+        break;
+      }
+      continue;
+    }
     if (op == RPC_cuLinkComplete) {
       if (handle_manual_cuLinkComplete(&conn) < 0) {
         scuda_log_manual_handler_error("cuLinkComplete");
+        break;
+      }
+      continue;
+    }
+    if (op == RPC_cuLinkDestroy) {
+      if (handle_manual_cuLinkDestroy(&conn) < 0) {
+        scuda_log_manual_handler_error("cuLinkDestroy");
         break;
       }
       continue;
@@ -212,20 +226,6 @@ void client_handler(int connfd) {
       }
       continue;
     }
-    if (op == RPC_cuGraphAddMemAllocNode) {
-      if (handle_manual_cuGraphAddMemAllocNode(&conn) < 0) {
-        scuda_log_manual_handler_error("cuGraphAddMemAllocNode");
-        break;
-      }
-      continue;
-    }
-    if (op == RPC_cuGraphAddMemFreeNode) {
-      if (handle_manual_cuGraphAddMemFreeNode(&conn) < 0) {
-        scuda_log_manual_handler_error("cuGraphAddMemFreeNode");
-        break;
-      }
-      continue;
-    }
     if (op == SCUDA_RPC_cuDeviceGetGraphMemAttribute) {
       if (handle_manual_cuDeviceGetGraphMemAttribute(&conn) < 0) {
         scuda_log_manual_handler_error("cuDeviceGetGraphMemAttribute");
@@ -236,13 +236,6 @@ void client_handler(int connfd) {
     if (op == SCUDA_RPC_cuDeviceSetGraphMemAttribute) {
       if (handle_manual_cuDeviceSetGraphMemAttribute(&conn) < 0) {
         scuda_log_manual_handler_error("cuDeviceSetGraphMemAttribute");
-        break;
-      }
-      continue;
-    }
-    if (op == RPC_cuTexObjectCreate) {
-      if (handle_manual_cuTexObjectCreate(&conn) < 0) {
-        scuda_log_manual_handler_error("cuTexObjectCreate");
         break;
       }
       continue;
@@ -341,6 +334,13 @@ void client_handler(int connfd) {
       if (handle_manual_cuGraphAddHostNode(&conn) < 0) {
         std::cerr << "Error handling manual cuGraphAddHostNode request."
                   << std::endl;
+        break;
+      }
+      continue;
+    }
+    if (op == RPC_cuGraphExecKernelNodeSetParams_v2) {
+      if (handle_manual_cuGraphExecKernelNodeSetParams(&conn) < 0) {
+        scuda_log_manual_handler_error("cuGraphExecKernelNodeSetParams_v2");
         break;
       }
       continue;
