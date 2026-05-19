@@ -1,8 +1,6 @@
 #include <iostream>
 #include <cuda.h>
 
-#include "cuda_compat.h"
-
 #include <cstring>
 #include <string>
 #include <unordered_map>
@@ -18,16 +16,8 @@
 #include <cstdio>
 
 #include "rpc.h"
+
 #include "nvml_server.h"
-
-struct scuda_kernel_param_layout {
-    uint32_t count = 0;
-    size_t offsets[64] = {};
-    size_t sizes[64] = {};
-};
-
-CUresult scuda_get_kernel_param_layout(CUfunction f,
-                                       scuda_kernel_param_layout *layout);
 
 int handle_cuInit(conn_t *conn)
 {
@@ -1364,18 +1354,18 @@ int handle_cuLinkAddFile_v2(conn_t *conn)
         rpc_read(conn, &numOptions, sizeof(unsigned int)) < 0 ||
         false)
         goto ERROR_1;
-    options = numOptions == 0 ? nullptr : (CUjit_option*)malloc(numOptions * sizeof(CUjit_option));
-    if (numOptions != 0 && options == nullptr)
+    options = (CUjit_option*)malloc(numOptions * sizeof(CUjit_option));
+    if (options == nullptr)
         goto ERROR_1;
     if(
-        (numOptions != 0 && rpc_read(conn, options, numOptions * sizeof(CUjit_option)) < 0) ||
+        rpc_read(conn, options, numOptions * sizeof(CUjit_option)) < 0 ||
         false)
         goto ERROR_2;
-    optionValues = numOptions == 0 ? nullptr : (void**)malloc(numOptions * sizeof(void*));
-    if (numOptions != 0 && optionValues == nullptr)
+    optionValues = (void**)malloc(numOptions * sizeof(void*));
+    if (optionValues == nullptr)
         goto ERROR_2;
     if(
-        (numOptions != 0 && rpc_read(conn, optionValues, numOptions * sizeof(void*)) < 0) ||
+        rpc_read(conn, optionValues, numOptions * sizeof(void*)) < 0 ||
         false)
         goto ERROR_3;
 
@@ -1391,11 +1381,11 @@ int handle_cuLinkAddFile_v2(conn_t *conn)
 
     return 0;
 ERROR_3:
-    free((void *) optionValues);
+    free((void *) path);
 ERROR_2:
     free((void *) options);
 ERROR_1:
-    free((void *) path);
+    free((void *) optionValues);
 ERROR_0:
     return -1;
 }
@@ -3522,7 +3512,7 @@ int handle_cuMemCreate(conn_t *conn)
     CUresult scuda_intercept_result;
     if (
         rpc_read(conn, &size, sizeof(size_t)) < 0 ||
-        rpc_read(conn, &prop, sizeof(CUmemAllocationProp)) < 0 ||
+        rpc_read(conn, &prop, sizeof(const CUmemAllocationProp)) < 0 ||
         rpc_read(conn, &flags, sizeof(unsigned long long)) < 0 ||
         false)
         goto ERROR_0;
@@ -3663,7 +3653,7 @@ int handle_cuMemSetAccess(conn_t *conn)
     CUdeviceptr ptr;
     size_t size;
     size_t count;
-    std::vector<CUmemAccessDesc> desc;
+    CUmemAccessDesc* desc;
     int request_id;
     CUresult scuda_intercept_result;
     if (
@@ -3672,21 +3662,27 @@ int handle_cuMemSetAccess(conn_t *conn)
         rpc_read(conn, &count, sizeof(size_t)) < 0 ||
         false)
         goto ERROR_0;
-    desc.resize(count);
-    if (count != 0 && rpc_read(conn, desc.data(), count * sizeof(CUmemAccessDesc)) < 0)
+    desc = (CUmemAccessDesc*)malloc(count * sizeof(const CUmemAccessDesc));
+    if (desc == nullptr)
         goto ERROR_0;
+    if(
+        rpc_read(conn, desc, count * sizeof(const CUmemAccessDesc)) < 0 ||
+        false)
+        goto ERROR_1;
 
     request_id = rpc_read_end(conn);
     if (request_id < 0)
-        goto ERROR_0;
-    scuda_intercept_result = cuMemSetAccess(ptr, size, count == 0 ? nullptr : desc.data(), count);
+        goto ERROR_1;
+    scuda_intercept_result = cuMemSetAccess(ptr, size, desc, count);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(CUresult)) < 0 ||
         rpc_write_end(conn) < 0)
-        goto ERROR_0;
+        goto ERROR_1;
 
     return 0;
+ERROR_1:
+    free((void *) desc);
 ERROR_0:
     return -1;
 }
@@ -3699,7 +3695,7 @@ int handle_cuMemGetAccess(conn_t *conn)
     int request_id;
     CUresult scuda_intercept_result;
     if (
-        rpc_read(conn, &location, sizeof(CUmemLocation)) < 0 ||
+        rpc_read(conn, &location, sizeof(const CUmemLocation)) < 0 ||
         rpc_read(conn, &ptr, sizeof(CUdeviceptr)) < 0 ||
         false)
         goto ERROR_0;
@@ -3728,7 +3724,7 @@ int handle_cuMemGetAllocationGranularity(conn_t *conn)
     int request_id;
     CUresult scuda_intercept_result;
     if (
-        rpc_read(conn, &prop, sizeof(CUmemAllocationProp)) < 0 ||
+        rpc_read(conn, &prop, sizeof(const CUmemAllocationProp)) < 0 ||
         rpc_read(conn, &option, sizeof(CUmemAllocationGranularity_flags)) < 0 ||
         false)
         goto ERROR_0;
@@ -4585,12 +4581,13 @@ int handle_cuStreamGetAttribute(conn_t *conn)
 {
     CUstream hStream;
     CUstreamAttrID attr;
-    CUstreamAttrValue value_out = {};
+    CUstreamAttrValue value_out;
     int request_id;
     CUresult scuda_intercept_result;
     if (
         rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
         rpc_read(conn, &attr, sizeof(CUstreamAttrID)) < 0 ||
+        rpc_read(conn, &value_out, sizeof(CUstreamAttrValue)) < 0 ||
         false)
         goto ERROR_0;
 
@@ -4614,20 +4611,20 @@ int handle_cuStreamSetAttribute(conn_t *conn)
 {
     CUstream hStream;
     CUstreamAttrID attr;
-    CUstreamAttrValue value = {};
+    const CUstreamAttrValue* value;
     int request_id;
     CUresult scuda_intercept_result;
     if (
         rpc_read(conn, &hStream, sizeof(CUstream)) < 0 ||
         rpc_read(conn, &attr, sizeof(CUstreamAttrID)) < 0 ||
-        rpc_read(conn, &value, sizeof(CUstreamAttrValue)) < 0 ||
+        rpc_read(conn, &value, sizeof(const CUstreamAttrValue*)) < 0 ||
         false)
         goto ERROR_0;
 
     request_id = rpc_read_end(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cuStreamSetAttribute(hStream, attr, &value);
+    scuda_intercept_result = cuStreamSetAttribute(hStream, attr, value);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(CUresult)) < 0 ||
@@ -4790,7 +4787,7 @@ int handle_cuEventElapsedTime_v2(conn_t *conn)
     request_id = rpc_read_end(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cuEventElapsedTime(&pMilliseconds, hStart, hEnd);
+    scuda_intercept_result = cuEventElapsedTime_v2(&pMilliseconds, hStart, hEnd);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &pMilliseconds, sizeof(float)) < 0 ||
@@ -6868,52 +6865,20 @@ int handle_cuGraphExecKernelNodeSetParams_v2(conn_t *conn)
 {
     CUgraphExec hGraphExec;
     CUgraphNode hNode;
-    CUDA_KERNEL_NODE_PARAMS nodeParams = {};
-    uint32_t param_count = 0;
-    size_t packed_size = 0;
-    std::vector<unsigned char> packed;
-    scuda_kernel_param_layout layout;
-    std::vector<void *> params;
-    CUfunction func = nullptr;
+    const CUDA_KERNEL_NODE_PARAMS* nodeParams;
     int request_id;
     CUresult scuda_intercept_result;
     if (
         rpc_read(conn, &hGraphExec, sizeof(CUgraphExec)) < 0 ||
         rpc_read(conn, &hNode, sizeof(CUgraphNode)) < 0 ||
-        rpc_read(conn, &nodeParams, sizeof(CUDA_KERNEL_NODE_PARAMS)) < 0 ||
-        rpc_read(conn, &param_count, sizeof(param_count)) < 0 ||
-        rpc_read(conn, &packed_size, sizeof(packed_size)) < 0 ||
+        rpc_read(conn, &nodeParams, sizeof(const CUDA_KERNEL_NODE_PARAMS*)) < 0 ||
         false)
-        goto ERROR_0;
-    packed.resize(packed_size);
-    if (packed_size != 0 && rpc_read(conn, packed.data(), packed_size) < 0)
         goto ERROR_0;
 
     request_id = rpc_read_end(conn);
     if (request_id < 0)
         goto ERROR_0;
-    func = nodeParams.func;
-#if CUDA_VERSION >= 12000
-    if (func == nullptr)
-        func = reinterpret_cast<CUfunction>(nodeParams.kern);
-#endif
-    scuda_intercept_result = scuda_get_kernel_param_layout(func, &layout);
-    if (scuda_intercept_result == CUDA_SUCCESS && layout.count == param_count) {
-        params.resize(param_count);
-        for (uint32_t i = 0; i < param_count; ++i) {
-            if (layout.offsets[i] + layout.sizes[i] > packed.size()) {
-                scuda_intercept_result = CUDA_ERROR_INVALID_VALUE;
-                break;
-            }
-            params[i] = packed.data() + layout.offsets[i];
-        }
-        if (scuda_intercept_result == CUDA_SUCCESS) {
-            nodeParams.kernelParams = param_count == 0 ? nullptr : params.data();
-            nodeParams.extra = nullptr;
-            scuda_intercept_result =
-                cuGraphExecKernelNodeSetParams_v2(hGraphExec, hNode, &nodeParams);
-        }
-    }
+    scuda_intercept_result = cuGraphExecKernelNodeSetParams_v2(hGraphExec, hNode, nodeParams);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &scuda_intercept_result, sizeof(CUresult)) < 0 ||
@@ -8708,18 +8673,19 @@ ERROR_0:
 int handle_cuSurfObjectCreate(conn_t *conn)
 {
     CUsurfObject pSurfObject;
-    CUDA_RESOURCE_DESC pResDesc = {};
+    const CUDA_RESOURCE_DESC* pResDesc;
     int request_id;
     CUresult scuda_intercept_result;
     if (
-        rpc_read(conn, &pResDesc, sizeof(CUDA_RESOURCE_DESC)) < 0 ||
+        rpc_read(conn, &pSurfObject, sizeof(CUsurfObject)) < 0 ||
+        rpc_read(conn, &pResDesc, sizeof(const CUDA_RESOURCE_DESC*)) < 0 ||
         false)
         goto ERROR_0;
 
     request_id = rpc_read_end(conn);
     if (request_id < 0)
         goto ERROR_0;
-    scuda_intercept_result = cuSurfObjectCreate(&pSurfObject, &pResDesc);
+    scuda_intercept_result = cuSurfObjectCreate(&pSurfObject, pResDesc);
 
     if (rpc_write_start_response(conn, request_id) < 0 ||
         rpc_write(conn, &pSurfObject, sizeof(CUsurfObject)) < 0 ||
