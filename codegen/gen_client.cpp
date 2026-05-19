@@ -1347,7 +1347,7 @@ CUresult cuLibraryGetUnifiedFunction(void** fptr, CUlibrary library, const char*
 
 CUresult cuKernelGetAttribute(int* pi, CUfunction_attribute attrib, CUkernel kernel, CUdevice dev)
 {
-    scuda_route route = scuda_route_for_default();
+    scuda_route route = scuda_route_for_device(&dev);
     if (scuda_route_is_local(route)) {
         using real_fn_t = CUresult (*)(int*, CUfunction_attribute, CUkernel, CUdevice);
         auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuKernelGetAttribute"));
@@ -1373,7 +1373,7 @@ CUresult cuKernelGetAttribute(int* pi, CUfunction_attribute attrib, CUkernel ker
 
 CUresult cuKernelSetAttribute(CUfunction_attribute attrib, int val, CUkernel kernel, CUdevice dev)
 {
-    scuda_route route = scuda_route_for_default();
+    scuda_route route = scuda_route_for_device(&dev);
     if (scuda_route_is_local(route)) {
         using real_fn_t = CUresult (*)(CUfunction_attribute, int, CUkernel, CUdevice);
         auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuKernelSetAttribute"));
@@ -1398,7 +1398,7 @@ CUresult cuKernelSetAttribute(CUfunction_attribute attrib, int val, CUkernel ker
 
 CUresult cuKernelSetCacheConfig(CUkernel kernel, CUfunc_cache config, CUdevice dev)
 {
-    scuda_route route = scuda_route_for_default();
+    scuda_route route = scuda_route_for_device(&dev);
     if (scuda_route_is_local(route)) {
         using real_fn_t = CUresult (*)(CUkernel, CUfunc_cache, CUdevice);
         auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuKernelSetCacheConfig"));
@@ -1740,7 +1740,7 @@ CUresult cuMemcpy(CUdeviceptr dst, CUdeviceptr src, size_t ByteCount)
 
 CUresult cuMemcpyPeer(CUdeviceptr dstDevice, CUcontext dstContext, CUdeviceptr srcDevice, CUcontext srcContext, size_t ByteCount)
 {
-    scuda_route route = scuda_route_for_default();
+    scuda_route route = scuda_route_for_context(dstContext);
     if (scuda_route_is_local(route)) {
         using real_fn_t = CUresult (*)(CUdeviceptr, CUcontext, CUdeviceptr, CUcontext, size_t);
         auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemcpyPeer"));
@@ -1939,7 +1939,7 @@ CUresult cuMemcpyAtoA_v2(CUarray dstArray, size_t dstOffset, CUarray srcArray, s
 
 CUresult cuMemcpyPeerAsync(CUdeviceptr dstDevice, CUcontext dstContext, CUdeviceptr srcDevice, CUcontext srcContext, size_t ByteCount, CUstream hStream)
 {
-    scuda_route route = scuda_route_for_default();
+    scuda_route route = scuda_route_for_context(dstContext);
     if (scuda_route_is_local(route)) {
         using real_fn_t = CUresult (*)(CUdeviceptr, CUcontext, CUdeviceptr, CUcontext, size_t, CUstream);
         auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemcpyPeerAsync"));
@@ -2399,7 +2399,7 @@ CUresult cuMipmappedArrayGetSparseProperties(CUDA_ARRAY_SPARSE_PROPERTIES* spars
 
 CUresult cuArrayGetMemoryRequirements(CUDA_ARRAY_MEMORY_REQUIREMENTS* memoryRequirements, CUarray array, CUdevice device)
 {
-    scuda_route route = scuda_route_for_default();
+    scuda_route route = scuda_route_for_device(&device);
     if (scuda_route_is_local(route)) {
         using real_fn_t = CUresult (*)(CUDA_ARRAY_MEMORY_REQUIREMENTS*, CUarray, CUdevice);
         auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuArrayGetMemoryRequirements"));
@@ -2424,7 +2424,7 @@ CUresult cuArrayGetMemoryRequirements(CUDA_ARRAY_MEMORY_REQUIREMENTS* memoryRequ
 
 CUresult cuMipmappedArrayGetMemoryRequirements(CUDA_ARRAY_MEMORY_REQUIREMENTS* memoryRequirements, CUmipmappedArray mipmap, CUdevice device)
 {
-    scuda_route route = scuda_route_for_default();
+    scuda_route route = scuda_route_for_device(&device);
     if (scuda_route_is_local(route)) {
         using real_fn_t = CUresult (*)(CUDA_ARRAY_MEMORY_REQUIREMENTS*, CUmipmappedArray, CUdevice);
         auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMipmappedArrayGetMemoryRequirements"));
@@ -5229,7 +5229,7 @@ CUresult cuGraphMemFreeNodeGetParams(CUgraphNode hNode, CUdeviceptr* dptr_out)
 
 CUresult cuDeviceGraphMemTrim(CUdevice device)
 {
-    scuda_route route = scuda_route_for_default();
+    scuda_route route = scuda_route_for_device(&device);
     if (scuda_route_is_local(route)) {
         using real_fn_t = CUresult (*)(CUdevice);
         auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuDeviceGraphMemTrim"));
@@ -5471,7 +5471,7 @@ CUresult cuGraphExecKernelNodeSetParams_v2(CUgraphExec hGraphExec, CUgraphNode h
 
 CUresult cuGraphExecMemcpyNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNode, const CUDA_MEMCPY3D* copyParams, CUcontext ctx)
 {
-    scuda_route route = scuda_route_for_default();
+    scuda_route route = scuda_route_for_context(ctx);
     if (scuda_route_is_local(route)) {
         using real_fn_t = CUresult (*)(CUgraphExec, CUgraphNode, const CUDA_MEMCPY3D*, CUcontext);
         auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphExecMemcpyNodeSetParams"));
@@ -5496,7 +5496,7 @@ CUresult cuGraphExecMemcpyNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNod
 
 CUresult cuGraphExecMemsetNodeSetParams(CUgraphExec hGraphExec, CUgraphNode hNode, const CUDA_MEMSET_NODE_PARAMS* memsetParams, CUcontext ctx)
 {
-    scuda_route route = scuda_route_for_default();
+    scuda_route route = scuda_route_for_context(ctx);
     if (scuda_route_is_local(route)) {
         using real_fn_t = CUresult (*)(CUgraphExec, CUgraphNode, const CUDA_MEMSET_NODE_PARAMS*, CUcontext);
         auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuGraphExecMemsetNodeSetParams"));
@@ -6997,7 +6997,7 @@ CUresult cuDeviceCanAccessPeer(int* canAccessPeer, CUdevice dev, CUdevice peerDe
 
 CUresult cuCtxEnablePeerAccess(CUcontext peerContext, unsigned int Flags)
 {
-    scuda_route route = scuda_route_for_default();
+    scuda_route route = scuda_route_for_context(peerContext);
     if (scuda_route_is_local(route)) {
         using real_fn_t = CUresult (*)(CUcontext, unsigned int);
         auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuCtxEnablePeerAccess"));
@@ -7020,7 +7020,7 @@ CUresult cuCtxEnablePeerAccess(CUcontext peerContext, unsigned int Flags)
 
 CUresult cuCtxDisablePeerAccess(CUcontext peerContext)
 {
-    scuda_route route = scuda_route_for_default();
+    scuda_route route = scuda_route_for_context(peerContext);
     if (scuda_route_is_local(route)) {
         using real_fn_t = CUresult (*)(CUcontext);
         auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuCtxDisablePeerAccess"));
@@ -7042,7 +7042,7 @@ CUresult cuCtxDisablePeerAccess(CUcontext peerContext)
 
 CUresult cuDeviceGetP2PAttribute(int* value, CUdevice_P2PAttribute attrib, CUdevice srcDevice, CUdevice dstDevice)
 {
-    scuda_route route = scuda_route_for_default();
+    scuda_route route = scuda_route_for_device(&srcDevice);
     if (scuda_route_is_local(route)) {
         using real_fn_t = CUresult (*)(int*, CUdevice_P2PAttribute, CUdevice, CUdevice);
         auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuDeviceGetP2PAttribute"));
@@ -7389,6 +7389,7 @@ extern "C" CUresult cuStreamBeginCapture(CUstream hStream, CUstreamCaptureMode m
     return cuStreamBeginCapture_v2(hStream, mode);
 }
 
+#if CUDA_VERSION >= 12000
 #ifdef cuGraphExecUpdate
 #undef cuGraphExecUpdate
 #endif
@@ -7396,6 +7397,8 @@ extern "C" CUresult cuGraphExecUpdate(CUgraphExec hGraphExec, CUgraph hGraph, CU
 {
     return cuGraphExecUpdate_v2(hGraphExec, hGraph, resultInfo);
 }
+
+#endif
 
 #ifdef cuMemcpy_ptds
 #undef cuMemcpy_ptds

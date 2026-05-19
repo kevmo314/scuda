@@ -77,6 +77,10 @@ MANUAL_REMAPPINGS = [
     ("cuMemAllocFromPoolAsync_ptsz", "cuMemAllocFromPoolAsync"),
 ]
 
+MANUAL_REMAPPING_GUARDS = {
+    "cuGraphExecUpdate": "CUDA_VERSION >= 12000",
+}
+
 NVML_RPC_FUNCTIONS = [
     "nvmlInit_v2",
     "nvmlInitWithFlags",
@@ -845,6 +849,20 @@ class FunctionAnnotationMetadata:
             self.record_owners = []
 
 
+def infer_routing_key(
+    params: list[Parameter],
+) -> tuple[Optional[str], Optional[Parameter]]:
+    for param in params:
+        if isinstance(param.type, (Pointer, Array)):
+            continue
+        type_name = param.type.format().replace("const ", "").strip()
+        if type_name == "CUdevice":
+            return "DEVICE", param
+        if type_name == "CUcontext":
+            return "CONTEXT", param
+    return None, None
+
+
 # parses a function annotation. if disabled is encountered, returns True for short circuiting.
 def parse_annotation(
     annotation: str, params: list[Parameter]
@@ -853,6 +871,7 @@ def parse_annotation(
     metadata = FunctionAnnotationMetadata(operations=operations)
 
     if not annotation:
+        metadata.routing_kind, metadata.routing_parameter = infer_routing_key(params)
         return metadata
     for line in annotation.split("\n"):
         # we treat disabled functions a bit differently.
@@ -1132,6 +1151,8 @@ def parse_annotation(
             )
         else:
             raise NotImplementedError("Unknown type")
+    if metadata.routing_kind is None:
+        metadata.routing_kind, metadata.routing_parameter = infer_routing_key(params)
     return metadata
 
 
@@ -1262,6 +1283,12 @@ def format_function_params(function: Function) -> list[str]:
 
 def format_call_args(function: Function) -> list[str]:
     return [param.name for param in function.parameters if param.name]
+
+
+def server_call_name(function_name: str) -> str:
+    if function_name == "cuEventElapsedTime_v2":
+        return "cuEventElapsedTime"
+    return function_name
 
 
 # List of possible directories to search for header files
@@ -1624,6 +1651,9 @@ def main():
             if alias in function_by_name or target not in function_by_name:
                 continue
             target_function = function_by_name[target]
+            guard = MANUAL_REMAPPING_GUARDS.get(alias)
+            if guard is not None:
+                f.write("#if {guard}\n".format(guard=guard))
             f.write("#ifdef {name}\n#undef {name}\n#endif\n".format(name=alias))
             f.write(
                 'extern "C" {return_type} {name}({params})\n'.format(
@@ -1643,6 +1673,8 @@ def main():
             else:
                 f.write("    return {call};\n".format(call=call))
                 f.write("}\n\n")
+            if guard is not None:
+                f.write("#endif\n\n")
 
         f.write("std::unordered_map<std::string, void *> functionMap = {\n")
         for function, _, _, disabled, _ in functions_with_annotations:
@@ -1685,6 +1717,7 @@ def main():
         f.write(
             "#include <iostream>\n"
             "#include <cuda.h>\n"
+            '#include "cuda_compat.h"\n'
             "\n"
             "#include <cstring>\n"
             "#include <string>\n"
@@ -1754,14 +1787,14 @@ def main():
             if function.return_type.format() != "void":
                 f.write(
                     "    scuda_intercept_result = {name}({params});\n\n".format(
-                        name=function.name.format(),
+                        name=server_call_name(function.name.format()),
                         params=", ".join(params),
                     )
                 )
             else:
                 f.write(
                     "    {name}({params});\n\n".format(
-                        name=function.name.format(),
+                        name=server_call_name(function.name.format()),
                         params=", ".join(params),
                     )
                 )

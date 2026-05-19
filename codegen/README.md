@@ -16,7 +16,9 @@ server connection. `@routingkey <kind> <param>` selects the connection for the
 generated client wrapper before it writes the RPC. Supported kinds are
 `DEVICE`, `CONTEXT`, `MODULE`, `FUNCTION`, `STREAM`, `EVENT`, and `DEVICEPTR`.
 `@routingkey CURRENT_CONTEXT` routes through the client's current CUDA context
-owner.
+owner. `DEVICE` and `CONTEXT` routing is inferred from the first non-pointer
+`CUdevice` or `CUcontext` parameter, so those annotations are only needed when
+the routing key is not the first matching parameter.
 
 Generated wrappers can record ownership for handles returned by an API with
 `@recordowner <kind> <param>`. Supported owner kinds are `CONTEXT`, `MODULE`,
