@@ -1135,30 +1135,30 @@ def parse_annotation(
     return metadata
 
 
-def client_routing_conn_expr(metadata: FunctionAnnotationMetadata) -> str:
+def client_routing_route_expr(metadata: FunctionAnnotationMetadata) -> str:
     kind = metadata.routing_kind
     param = metadata.routing_parameter
     if kind is None:
-        return "rpc_client_get_connection(0)"
+        return "scuda_route_for_default()"
     if kind == "CURRENT_CONTEXT":
-        return "scuda_rpc_conn_for_current_context()"
+        return "scuda_route_for_current_context()"
     if param is None:
         raise NotImplementedError(f"Routing key {kind} requires a parameter")
     name = param.name
     if kind == "DEVICE":
-        return f"scuda_rpc_conn_for_device(&{name})"
+        return f"scuda_route_for_device(&{name})"
     if kind == "CONTEXT":
-        return f"scuda_rpc_conn_for_context({name})"
+        return f"scuda_route_for_context({name})"
     if kind == "MODULE":
-        return f"scuda_rpc_conn_for_module({name})"
+        return f"scuda_route_for_module({name})"
     if kind == "FUNCTION":
-        return f"scuda_rpc_conn_for_function({name})"
+        return f"scuda_route_for_function({name})"
     if kind == "STREAM":
-        return f"({name} != nullptr ? scuda_rpc_conn_for_stream({name}) : rpc_client_get_connection(0))"
+        return f"({name} != nullptr ? scuda_route_for_stream({name}) : scuda_route_for_default())"
     if kind == "EVENT":
-        return f"scuda_rpc_conn_for_event({name})"
+        return f"scuda_route_for_event({name})"
     if kind == "DEVICEPTR":
-        return f"scuda_rpc_conn_for_deviceptr({name})"
+        return f"scuda_route_for_deviceptr({name})"
     raise NotImplementedError(f"Unknown routing key kind: {kind}")
 
 
@@ -1183,9 +1183,31 @@ def client_record_owner_stmt(owner: OwnerAnnotation) -> str:
         raise NotImplementedError(f"Unknown owner kind: {kind}")
     return (
         f"    if (return_value == CUDA_SUCCESS{null_guard}) {{\n"
-        f"        {fn}({value}, conn);\n"
+        f"        {fn}_route({value}, route);\n"
         "    }\n"
     )
+
+
+def write_client_post_call(f, function: Function, metadata: FunctionAnnotationMetadata):
+    if function.name.format() == "cuDriverGetVersion":
+        f.write("    if (driverVersion != nullptr) {\n")
+        f.write("        const char *override_version = getenv(\"SCUDA_DRIVER_VERSION_OVERRIDE\");\n")
+        f.write("        if (override_version != nullptr) *driverVersion = atoi(override_version);\n")
+        f.write("    }\n")
+
+    for owner in metadata.record_owners:
+        f.write(client_record_owner_stmt(owner))
+
+    if function.name.format() == "cuDevicePrimaryCtxRetain":
+        f.write("    if (return_value == CUDA_SUCCESS) scuda_note_primary_context_active(dev);\n")
+    if function.name.format() == "cuDevicePrimaryCtxRelease_v2":
+        f.write("    if (return_value == CUDA_SUCCESS) scuda_invalidate_primary_context_state(dev);\n")
+    if function.name.format() == "cuDevicePrimaryCtxSetFlags_v2":
+        f.write("    if (return_value == CUDA_SUCCESS) scuda_note_primary_context_flags(dev, flags);\n")
+    if function.name.format() == "cuDevicePrimaryCtxReset_v2":
+        f.write("    if (return_value == CUDA_SUCCESS) scuda_invalidate_primary_context_state(dev);\n")
+    if function.name.format() == "cuCtxDestroy_v2":
+        f.write("    if (return_value == CUDA_SUCCESS) scuda_invalidate_current_context_cache();\n")
 
 
 def error_const(return_type: str) -> str:
@@ -1353,9 +1375,25 @@ def main():
             "extern int rpc_size();\n"
             "extern conn_t *rpc_client_get_connection(unsigned int index);\n"
             "extern void rpc_close(conn_t *conn);\n\n"
+            "struct scuda_route {\n"
+            "    int kind;\n"
+            "    conn_t *conn;\n"
+            "};\n\n"
             'extern "C" CUresult scuda_cuInit_multi(unsigned int flags);\n'
             'extern "C" CUresult scuda_cuDeviceGetCount_multi(int *count);\n'
             'extern "C" CUresult scuda_cuDeviceGet_multi(CUdevice *device, int ordinal);\n'
+            'extern "C" scuda_route scuda_route_for_default();\n'
+            'extern "C" scuda_route scuda_route_for_device(CUdevice *device);\n'
+            'extern "C" scuda_route scuda_route_for_current_context();\n'
+            'extern "C" scuda_route scuda_route_for_context(CUcontext ctx);\n'
+            'extern "C" scuda_route scuda_route_for_module(CUmodule module);\n'
+            'extern "C" scuda_route scuda_route_for_function(CUfunction function);\n'
+            'extern "C" scuda_route scuda_route_for_stream(CUstream stream);\n'
+            'extern "C" scuda_route scuda_route_for_event(CUevent event);\n'
+            'extern "C" scuda_route scuda_route_for_deviceptr(CUdeviceptr ptr);\n'
+            'extern "C" bool scuda_route_is_local(scuda_route route);\n'
+            'extern "C" conn_t *scuda_route_remote_conn(scuda_route route);\n'
+            'extern "C" void *scuda_real_cuda_symbol(const char *name);\n'
             'extern "C" conn_t *scuda_rpc_conn_for_device(CUdevice *device);\n'
             'extern "C" conn_t *scuda_rpc_conn_for_current_context();\n'
             'extern "C" conn_t *scuda_rpc_conn_for_context(CUcontext ctx);\n'
@@ -1370,6 +1408,12 @@ def main():
             'extern "C" void scuda_note_stream_owner(CUstream stream, conn_t *conn);\n'
             'extern "C" void scuda_note_event_owner(CUevent event, conn_t *conn);\n'
             'extern "C" void scuda_note_deviceptr_owner(CUdeviceptr ptr, conn_t *conn);\n\n'
+            'extern "C" void scuda_note_context_owner_route(CUcontext ctx, scuda_route route);\n'
+            'extern "C" void scuda_note_module_owner_route(CUmodule module, scuda_route route);\n'
+            'extern "C" void scuda_note_function_owner_route(CUfunction function, scuda_route route);\n'
+            'extern "C" void scuda_note_stream_owner_route(CUstream stream, scuda_route route);\n'
+            'extern "C" void scuda_note_event_owner_route(CUevent event, scuda_route route);\n'
+            'extern "C" void scuda_note_deviceptr_owner_route(CUdeviceptr ptr, scuda_route route);\n\n'
             'extern "C" CUresult scuda_cuArrayCreate_v2_safe(CUarray *pHandle, const CUDA_ARRAY_DESCRIPTOR *pAllocateArray);\n'
             'extern "C" CUresult scuda_cuArray3DCreate_v2_safe(CUarray *pHandle, const CUDA_ARRAY3D_DESCRIPTOR *pAllocateArray);\n'
             'extern "C" CUresult scuda_cuMemAllocManaged_safe(CUdeviceptr *dptr, size_t bytesize, unsigned int flags);\n'
@@ -1485,10 +1529,37 @@ def main():
                 continue
 
             f.write(
-                "    conn_t *conn = {conn_expr};\n".format(
-                    conn_expr=client_routing_conn_expr(metadata)
+                "    scuda_route route = {route_expr};\n".format(
+                    route_expr=client_routing_route_expr(metadata)
                 )
             )
+            f.write("    if (scuda_route_is_local(route)) {\n")
+            f.write(
+                "        using real_fn_t = {return_type} (*)({params});\n".format(
+                    return_type=function.return_type.format(),
+                    params=", ".join([param.type.format() for param in function.parameters]),
+                )
+            )
+            f.write(
+                "        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol(\"{name}\"));\n".format(
+                    name=function.name.format()
+                )
+            )
+            f.write(
+                "        if (real == nullptr) return {error_return};\n".format(
+                    error_return=error_const(function.return_type.format())
+                )
+            )
+            f.write(
+                "        {return_type} return_value = real({args});\n".format(
+                    return_type=function.return_type.format(),
+                    args=", ".join(format_call_args(function)),
+                )
+            )
+            write_client_post_call(f, function, metadata)
+            f.write("        return return_value;\n")
+            f.write("    }\n")
+            f.write("    conn_t *conn = scuda_route_remote_conn(route);\n")
 
             f.write(
                 "    {return_type} return_value;\n".format(
@@ -1539,25 +1610,7 @@ def main():
                 )
             )
 
-            if function.name.format() == "cuDriverGetVersion":
-                f.write("    if (driverVersion != nullptr) {\n")
-                f.write("        const char *override_version = getenv(\"SCUDA_DRIVER_VERSION_OVERRIDE\");\n")
-                f.write("        if (override_version != nullptr) *driverVersion = atoi(override_version);\n")
-                f.write("    }\n")
-
-            for owner in metadata.record_owners:
-                f.write(client_record_owner_stmt(owner))
-
-            if function.name.format() == "cuDevicePrimaryCtxRetain":
-                f.write("    if (return_value == CUDA_SUCCESS) scuda_note_primary_context_active(dev);\n")
-            if function.name.format() == "cuDevicePrimaryCtxRelease_v2":
-                f.write("    if (return_value == CUDA_SUCCESS) scuda_invalidate_primary_context_state(dev);\n")
-            if function.name.format() == "cuDevicePrimaryCtxSetFlags_v2":
-                f.write("    if (return_value == CUDA_SUCCESS) scuda_note_primary_context_flags(dev, flags);\n")
-            if function.name.format() == "cuDevicePrimaryCtxReset_v2":
-                f.write("    if (return_value == CUDA_SUCCESS) scuda_invalidate_primary_context_state(dev);\n")
-            if function.name.format() == "cuCtxDestroy_v2":
-                f.write("    if (return_value == CUDA_SUCCESS) scuda_invalidate_current_context_cache();\n")
+            write_client_post_call(f, function, metadata)
 
             f.write("    return return_value;\n")
             f.write("}\n\n")
