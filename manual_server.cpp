@@ -139,12 +139,16 @@ static void scuda_finish_stdout_capture(scuda_captured_stdout *capture) {
 }
 
 static int scuda_write_captured_stdout(conn_t *conn,
-                                       const scuda_captured_stdout &capture) {
-  uint64_t output_size = capture.output.size();
-  if (rpc_write(conn, &output_size, sizeof(output_size)) < 0) {
+                                       const scuda_captured_stdout &capture,
+                                       uint64_t *output_size) {
+  if (output_size == nullptr) {
     return -1;
   }
-  if (output_size != 0 &&
+  *output_size = capture.output.size();
+  if (rpc_write(conn, output_size, sizeof(*output_size)) < 0) {
+    return -1;
+  }
+  if (*output_size != 0 &&
       rpc_write(conn, capture.output.data(), capture.output.size()) < 0) {
     return -1;
   }
@@ -2868,8 +2872,9 @@ int handle_manual_cuCtxSynchronize(conn_t *conn) {
   scuda_start_stdout_capture(&capture);
   CUresult result = cuCtxSynchronize();
   scuda_finish_stdout_capture(&capture);
+  uint64_t stdout_size = 0;
   if (rpc_write_start_response(conn, request_id) < 0 ||
-      scuda_write_captured_stdout(conn, capture) < 0 ||
+      scuda_write_captured_stdout(conn, capture, &stdout_size) < 0 ||
       rpc_write(conn, &result, sizeof(result)) < 0 || rpc_write_end(conn) < 0) {
     return -1;
   }
@@ -2895,9 +2900,10 @@ int handle_manual_cuStreamSynchronize(conn_t *conn) {
   if (stream_it != scuda_stream_capture_resource_map().end()) {
     resources = stream_it->second;
   }
+  uint64_t stdout_size = 0;
   if (rpc_write_start_response(conn, request_id) < 0 ||
       scuda_write_graph_dtoh_copies(conn, resources, &copy_count) < 0 ||
-      scuda_write_captured_stdout(conn, capture) < 0 ||
+      scuda_write_captured_stdout(conn, capture, &stdout_size) < 0 ||
       rpc_write(conn, &result, sizeof(result)) < 0 || rpc_write_end(conn) < 0) {
     return -1;
   }
@@ -2941,8 +2947,9 @@ int handle_manual_cuEventSynchronize(conn_t *conn) {
   scuda_start_stdout_capture(&capture);
   CUresult result = cuEventSynchronize(event);
   scuda_finish_stdout_capture(&capture);
+  uint64_t stdout_size = 0;
   if (rpc_write_start_response(conn, request_id) < 0 ||
-      scuda_write_captured_stdout(conn, capture) < 0 ||
+      scuda_write_captured_stdout(conn, capture, &stdout_size) < 0 ||
       rpc_write(conn, &result, sizeof(result)) < 0 || rpc_write_end(conn) < 0) {
     return -1;
   }

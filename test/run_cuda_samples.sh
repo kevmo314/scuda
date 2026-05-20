@@ -288,7 +288,7 @@ sample_workdir() {
 sample_timeout() {
   local sample="$1"
   case "$sample" in
-    cuSolverRf|conjugateGradientPrecond)
+    cuSolverRf|conjugateGradientPrecond|simpleStreams)
       printf '%s\n' "${SLOW_SAMPLE_TIMEOUT:-240}"
       ;;
     *)
