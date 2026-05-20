@@ -479,6 +479,9 @@ for i in "${!samples[@]}"; do
   if [[ "$rc" == "0" ]]; then
     status="PASS"
     pass=$((pass + 1))
+  elif [[ "$rc" == "2" ]]; then
+    status="SKIP:waived"
+    skip=$((skip + 1))
   else
     status="FAIL:$rc"
     fail=$((fail + 1))

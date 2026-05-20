@@ -631,13 +631,7 @@ int handle_manual_cuModuleLoadData(conn_t *conn) {
 
   if (kind == SCUDA_MODULE_IMAGE_FATBINC_V1 ||
       kind == SCUDA_MODULE_IMAGE_FATBINC_V2) {
-    scuda_fatbin_wrapper wrapper = {
-        SCUDA_FATBINC_MAGIC,
-        kind == SCUDA_MODULE_IMAGE_FATBINC_V2 ? 2U : 1U,
-        image.data(),
-        nullptr,
-    };
-    result = cuModuleLoadData(&module, &wrapper);
+    result = cuModuleLoadFatBinary(&module, image.data());
   } else if (kind == SCUDA_MODULE_IMAGE_FATBIN_RAW) {
     result = cuModuleLoadData(&module, image.data());
   } else {

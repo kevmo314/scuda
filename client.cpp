@@ -354,13 +354,13 @@ struct scuda_occupancy_key_hash {
 };
 
 static std::mutex &scuda_routing_mutex() {
-  static std::mutex mutex;
-  return mutex;
+  static auto *mutex = new std::mutex();
+  return *mutex;
 }
 
 static std::vector<scuda_device_entry> &scuda_device_table() {
-  static std::vector<scuda_device_entry> devices;
-  return devices;
+  static auto *devices = new std::vector<scuda_device_entry>();
+  return *devices;
 }
 
 static bool &scuda_device_table_ready() {
@@ -369,84 +369,85 @@ static bool &scuda_device_table_ready() {
 }
 
 static std::unordered_map<CUcontext, scuda_owner> &scuda_context_owners() {
-  static std::unordered_map<CUcontext, scuda_owner> owners;
-  return owners;
+  static auto *owners = new std::unordered_map<CUcontext, scuda_owner>();
+  return *owners;
 }
 
 static std::unordered_map<CUmodule, scuda_owner> &scuda_module_owners() {
-  static std::unordered_map<CUmodule, scuda_owner> owners;
-  return owners;
+  static auto *owners = new std::unordered_map<CUmodule, scuda_owner>();
+  return *owners;
 }
 
 static std::unordered_map<CUfunction, scuda_owner> &scuda_function_owners() {
-  static std::unordered_map<CUfunction, scuda_owner> owners;
-  return owners;
+  static auto *owners = new std::unordered_map<CUfunction, scuda_owner>();
+  return *owners;
 }
 
 static std::unordered_map<CUstream, scuda_owner> &scuda_stream_owners() {
-  static std::unordered_map<CUstream, scuda_owner> owners;
-  return owners;
+  static auto *owners = new std::unordered_map<CUstream, scuda_owner>();
+  return *owners;
 }
 
 static std::unordered_map<CUevent, scuda_owner> &scuda_event_owners() {
-  static std::unordered_map<CUevent, scuda_owner> owners;
-  return owners;
+  static auto *owners = new std::unordered_map<CUevent, scuda_owner>();
+  return *owners;
 }
 
 static std::unordered_map<CUdeviceptr, scuda_owner> &scuda_deviceptr_owners() {
-  static std::unordered_map<CUdeviceptr, scuda_owner> owners;
-  return owners;
+  static auto *owners = new std::unordered_map<CUdeviceptr, scuda_owner>();
+  return *owners;
 }
 
 static std::unordered_map<int, scuda_primary_context_state> &
 scuda_primary_context_states() {
-  static std::unordered_map<int, scuda_primary_context_state> states;
-  return states;
+  static auto *states =
+      new std::unordered_map<int, scuda_primary_context_state>();
+  return *states;
 }
 
 static std::unordered_map<scuda_device_attribute_key, int,
                           scuda_device_attribute_key_hash> &
 scuda_device_attribute_cache() {
-  static std::unordered_map<scuda_device_attribute_key, int,
-                            scuda_device_attribute_key_hash>
-      cache;
-  return cache;
+  static auto *cache =
+      new std::unordered_map<scuda_device_attribute_key, int,
+                             scuda_device_attribute_key_hash>();
+  return *cache;
 }
 
 static std::mutex &scuda_device_attribute_cache_mutex() {
-  static std::mutex mutex;
-  return mutex;
+  static auto *mutex = new std::mutex();
+  return *mutex;
 }
 
 static std::unordered_map<scuda_kernel_function_key, CUfunction,
                           scuda_kernel_function_key_hash> &
 scuda_kernel_function_cache() {
-  static std::unordered_map<scuda_kernel_function_key, CUfunction,
-                            scuda_kernel_function_key_hash>
-      cache;
-  return cache;
+  static auto *cache =
+      new std::unordered_map<scuda_kernel_function_key, CUfunction,
+                             scuda_kernel_function_key_hash>();
+  return *cache;
 }
 
 static std::mutex &scuda_kernel_function_cache_mutex() {
-  static std::mutex mutex;
-  return mutex;
+  static auto *mutex = new std::mutex();
+  return *mutex;
 }
 
 static std::unordered_map<scuda_occupancy_key, int, scuda_occupancy_key_hash> &
 scuda_occupancy_cache() {
-  static std::unordered_map<scuda_occupancy_key, int, scuda_occupancy_key_hash>
-      cache;
-  return cache;
+  static auto *cache =
+      new std::unordered_map<scuda_occupancy_key, int, scuda_occupancy_key_hash>();
+  return *cache;
 }
 
 static std::mutex &scuda_occupancy_cache_mutex() {
-  static std::mutex mutex;
-  return mutex;
+  static auto *mutex = new std::mutex();
+  return *mutex;
 }
 
 static std::mutex &scuda_host_function_mutex() {
-  static std::mutex mutex;
-  return mutex;
+  static auto *mutex = new std::mutex();
+  return *mutex;
 }
 
 static unsigned char (&scuda_private_6e16_node_pool())[16][0x500] {
