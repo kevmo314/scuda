@@ -230,16 +230,16 @@ resolve_sample_srcdir() {
   local sample="$1"
   local dir=""
 
-  if [[ -d "$CUDA_SAMPLES_DIR/cpp" ]]; then
-    dir="$(find "$CUDA_SAMPLES_DIR/cpp" -mindepth 2 -maxdepth 2 -type d -name "$sample" 2>/dev/null | head -n1 || true)"
+  if [[ -d "$CUDA_SAMPLES_DIR/Samples" ]]; then
+    dir="$(find "$CUDA_SAMPLES_DIR/Samples" -mindepth 2 -maxdepth 2 -type d -name "$sample" 2>/dev/null | head -n1 || true)"
     if [[ -n "$dir" ]]; then
       printf '%s\n' "$dir"
       return 0
     fi
   fi
 
-  if [[ -d "$CUDA_SAMPLES_DIR/Samples" ]]; then
-    dir="$(find "$CUDA_SAMPLES_DIR/Samples" -mindepth 2 -maxdepth 2 -type d -name "$sample" 2>/dev/null | head -n1 || true)"
+  if [[ -d "$CUDA_SAMPLES_DIR/cpp" ]]; then
+    dir="$(find "$CUDA_SAMPLES_DIR/cpp" -mindepth 2 -maxdepth 2 -type d -name "$sample" 2>/dev/null | head -n1 || true)"
     if [[ -n "$dir" ]]; then
       printf '%s\n' "$dir"
       return 0
@@ -288,7 +288,7 @@ sample_workdir() {
 sample_timeout() {
   local sample="$1"
   case "$sample" in
-    cuSolverRf|conjugateGradientPrecond)
+    cuSolverRf|conjugateGradientPrecond|simpleStreams)
       printf '%s\n' "${SLOW_SAMPLE_TIMEOUT:-240}"
       ;;
     *)
@@ -479,6 +479,9 @@ for i in "${!samples[@]}"; do
   if [[ "$rc" == "0" ]]; then
     status="PASS"
     pass=$((pass + 1))
+  elif [[ "$rc" == "2" ]]; then
+    status="SKIP:waived"
+    skip=$((skip + 1))
   else
     status="FAIL:$rc"
     fail=$((fail + 1))

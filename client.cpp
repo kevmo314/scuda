@@ -88,6 +88,7 @@ static constexpr int SCUDA_RPC_cuStreamUpdateCaptureDependencies_v2 = 1000014;
 static constexpr int SCUDA_RPC_cuStreamGetCaptureInfo_v3 = 1000015;
 static constexpr int SCUDA_RPC_cuDeviceGetGraphMemAttribute = 1000016;
 static constexpr int SCUDA_RPC_cuDeviceSetGraphMemAttribute = 1000017;
+static constexpr int SCUDA_RPC_cuLinkAddData_v2 = 1000018;
 static constexpr uint32_t SCUDA_PRIVATE_EXPORT_MAX_SLOTS = 256;
 
 struct scuda_kernel_param_layout {
@@ -353,13 +354,13 @@ struct scuda_occupancy_key_hash {
 };
 
 static std::mutex &scuda_routing_mutex() {
-  static std::mutex mutex;
-  return mutex;
+  static auto *mutex = new std::mutex();
+  return *mutex;
 }
 
 static std::vector<scuda_device_entry> &scuda_device_table() {
-  static std::vector<scuda_device_entry> devices;
-  return devices;
+  static auto *devices = new std::vector<scuda_device_entry>();
+  return *devices;
 }
 
 static bool &scuda_device_table_ready() {
@@ -368,84 +369,85 @@ static bool &scuda_device_table_ready() {
 }
 
 static std::unordered_map<CUcontext, scuda_owner> &scuda_context_owners() {
-  static std::unordered_map<CUcontext, scuda_owner> owners;
-  return owners;
+  static auto *owners = new std::unordered_map<CUcontext, scuda_owner>();
+  return *owners;
 }
 
 static std::unordered_map<CUmodule, scuda_owner> &scuda_module_owners() {
-  static std::unordered_map<CUmodule, scuda_owner> owners;
-  return owners;
+  static auto *owners = new std::unordered_map<CUmodule, scuda_owner>();
+  return *owners;
 }
 
 static std::unordered_map<CUfunction, scuda_owner> &scuda_function_owners() {
-  static std::unordered_map<CUfunction, scuda_owner> owners;
-  return owners;
+  static auto *owners = new std::unordered_map<CUfunction, scuda_owner>();
+  return *owners;
 }
 
 static std::unordered_map<CUstream, scuda_owner> &scuda_stream_owners() {
-  static std::unordered_map<CUstream, scuda_owner> owners;
-  return owners;
+  static auto *owners = new std::unordered_map<CUstream, scuda_owner>();
+  return *owners;
 }
 
 static std::unordered_map<CUevent, scuda_owner> &scuda_event_owners() {
-  static std::unordered_map<CUevent, scuda_owner> owners;
-  return owners;
+  static auto *owners = new std::unordered_map<CUevent, scuda_owner>();
+  return *owners;
 }
 
 static std::unordered_map<CUdeviceptr, scuda_owner> &scuda_deviceptr_owners() {
-  static std::unordered_map<CUdeviceptr, scuda_owner> owners;
-  return owners;
+  static auto *owners = new std::unordered_map<CUdeviceptr, scuda_owner>();
+  return *owners;
 }
 
 static std::unordered_map<int, scuda_primary_context_state> &
 scuda_primary_context_states() {
-  static std::unordered_map<int, scuda_primary_context_state> states;
-  return states;
+  static auto *states =
+      new std::unordered_map<int, scuda_primary_context_state>();
+  return *states;
 }
 
 static std::unordered_map<scuda_device_attribute_key, int,
                           scuda_device_attribute_key_hash> &
 scuda_device_attribute_cache() {
-  static std::unordered_map<scuda_device_attribute_key, int,
-                            scuda_device_attribute_key_hash>
-      cache;
-  return cache;
+  static auto *cache =
+      new std::unordered_map<scuda_device_attribute_key, int,
+                             scuda_device_attribute_key_hash>();
+  return *cache;
 }
 
 static std::mutex &scuda_device_attribute_cache_mutex() {
-  static std::mutex mutex;
-  return mutex;
+  static auto *mutex = new std::mutex();
+  return *mutex;
 }
 
 static std::unordered_map<scuda_kernel_function_key, CUfunction,
                           scuda_kernel_function_key_hash> &
 scuda_kernel_function_cache() {
-  static std::unordered_map<scuda_kernel_function_key, CUfunction,
-                            scuda_kernel_function_key_hash>
-      cache;
-  return cache;
+  static auto *cache =
+      new std::unordered_map<scuda_kernel_function_key, CUfunction,
+                             scuda_kernel_function_key_hash>();
+  return *cache;
 }
 
 static std::mutex &scuda_kernel_function_cache_mutex() {
-  static std::mutex mutex;
-  return mutex;
+  static auto *mutex = new std::mutex();
+  return *mutex;
 }
 
 static std::unordered_map<scuda_occupancy_key, int, scuda_occupancy_key_hash> &
 scuda_occupancy_cache() {
-  static std::unordered_map<scuda_occupancy_key, int, scuda_occupancy_key_hash>
-      cache;
-  return cache;
+  static auto *cache =
+      new std::unordered_map<scuda_occupancy_key, int, scuda_occupancy_key_hash>();
+  return *cache;
 }
 
 static std::mutex &scuda_occupancy_cache_mutex() {
-  static std::mutex mutex;
-  return mutex;
+  static auto *mutex = new std::mutex();
+  return *mutex;
 }
 
 static std::mutex &scuda_host_function_mutex() {
-  static std::mutex mutex;
-  return mutex;
+  static auto *mutex = new std::mutex();
+  return *mutex;
 }
 
 static unsigned char (&scuda_private_6e16_node_pool())[16][0x500] {
@@ -3358,6 +3360,316 @@ extern "C" CUresult cuMemGetInfo(size_t *free, size_t *total) {
   return cuMemGetInfo_v2(free, total);
 }
 
+struct scuda_jit_client_binding {
+  CUjit_option option;
+  void *dst;
+  size_t size;
+};
+
+struct scuda_jit_client_state {
+  std::vector<scuda_jit_client_binding> bindings;
+  std::vector<unsigned char> cubin;
+};
+
+static std::mutex &scuda_jit_client_mutex() {
+  static std::mutex mutex;
+  return mutex;
+}
+
+static std::unordered_map<CUlinkState, scuda_jit_client_state>
+    &scuda_jit_client_states() {
+  static std::unordered_map<CUlinkState, scuda_jit_client_state> states;
+  return states;
+}
+
+static size_t scuda_jit_option_size(unsigned int numOptions,
+                                    const CUjit_option *options,
+                                    void *const *optionValues,
+                                    CUjit_option size_option) {
+  if (options == nullptr || optionValues == nullptr) {
+    return 0;
+  }
+  for (unsigned int i = 0; i < numOptions; ++i) {
+    if (options[i] == size_option) {
+      return static_cast<size_t>(reinterpret_cast<uintptr_t>(optionValues[i]));
+    }
+  }
+  return 0;
+}
+
+static std::vector<uintptr_t>
+scuda_pack_jit_option_values(unsigned int numOptions, void *const *optionValues) {
+  std::vector<uintptr_t> values(numOptions);
+  for (unsigned int i = 0; i < numOptions; ++i) {
+    values[i] = reinterpret_cast<uintptr_t>(
+        optionValues == nullptr ? nullptr : optionValues[i]);
+  }
+  return values;
+}
+
+static std::vector<scuda_jit_client_binding>
+scuda_capture_jit_client_bindings(unsigned int numOptions,
+                                  const CUjit_option *options,
+                                  void *const *optionValues) {
+  std::vector<scuda_jit_client_binding> bindings;
+  if (options == nullptr || optionValues == nullptr) {
+    return bindings;
+  }
+  size_t info_size = scuda_jit_option_size(
+      numOptions, options, optionValues, CU_JIT_INFO_LOG_BUFFER_SIZE_BYTES);
+  size_t error_size = scuda_jit_option_size(
+      numOptions, options, optionValues, CU_JIT_ERROR_LOG_BUFFER_SIZE_BYTES);
+  for (unsigned int i = 0; i < numOptions; ++i) {
+    if (options[i] == CU_JIT_WALL_TIME && optionValues[i] != nullptr) {
+      bindings.push_back({options[i], optionValues[i], sizeof(float)});
+    } else if (options[i] == CU_JIT_INFO_LOG_BUFFER &&
+               optionValues[i] != nullptr && info_size != 0) {
+      bindings.push_back({options[i], optionValues[i], info_size});
+    } else if (options[i] == CU_JIT_ERROR_LOG_BUFFER &&
+               optionValues[i] != nullptr && error_size != 0) {
+      bindings.push_back({options[i], optionValues[i], error_size});
+    }
+  }
+  return bindings;
+}
+
+static int scuda_write_jit_options(conn_t *conn, unsigned int numOptions,
+                                   CUjit_option *options,
+                                   void **optionValues) {
+  auto packed_values = scuda_pack_jit_option_values(numOptions, optionValues);
+  return rpc_write(conn, &numOptions, sizeof(numOptions)) < 0 ||
+                 (numOptions != 0 &&
+                  rpc_write(conn, options,
+                            numOptions * sizeof(CUjit_option)) < 0) ||
+                 (numOptions != 0 &&
+                  rpc_write(conn, packed_values.data(),
+                            numOptions * sizeof(uintptr_t)) < 0)
+             ? -1
+             : 0;
+}
+
+static int scuda_apply_jit_outputs(conn_t *conn, CUlinkState state) {
+  uint32_t output_count = 0;
+  if (rpc_read(conn, &output_count, sizeof(output_count)) < 0) {
+    return -1;
+  }
+  if (scuda_trace_enabled()) {
+    fprintf(stderr, "SCUDA cuLink JIT outputs state=%p count=%u\n",
+            reinterpret_cast<void *>(state), output_count);
+  }
+  if (output_count > 32) {
+    return -1;
+  }
+
+  std::lock_guard<std::mutex> lock(scuda_jit_client_mutex());
+  auto state_it = scuda_jit_client_states().find(state);
+  for (uint32_t i = 0; i < output_count; ++i) {
+    CUjit_option option;
+    size_t payload_size = 0;
+    if (rpc_read(conn, &option, sizeof(option)) < 0 ||
+        rpc_read(conn, &payload_size, sizeof(payload_size)) < 0) {
+      return -1;
+    }
+    if (scuda_trace_enabled()) {
+      fprintf(stderr,
+              "SCUDA cuLink JIT output state=%p index=%u option=%d size=%zu\n",
+              reinterpret_cast<void *>(state), i, static_cast<int>(option),
+              payload_size);
+    }
+    if (payload_size > (16ull << 20)) {
+      return -1;
+    }
+    std::vector<unsigned char> payload(payload_size);
+    if (payload_size != 0 &&
+        rpc_read(conn, payload.data(), payload_size) < 0) {
+      return -1;
+    }
+    if (state_it == scuda_jit_client_states().end()) {
+      continue;
+    }
+    for (const auto &binding : state_it->second.bindings) {
+      if (binding.option == option && binding.dst != nullptr) {
+        memcpy(binding.dst, payload.data(),
+               std::min(binding.size, payload.size()));
+        break;
+      }
+    }
+  }
+  return 0;
+}
+
+extern "C" CUresult scuda_cuLinkCreate_v2_safe(unsigned int numOptions,
+                                                CUjit_option *options,
+                                                void **optionValues,
+                                                CUlinkState *stateOut) {
+  if (stateOut == nullptr ||
+      (numOptions != 0 && (options == nullptr || optionValues == nullptr))) {
+    return CUDA_ERROR_INVALID_VALUE;
+  }
+  scuda_route route = scuda_route_for_default();
+  if (scuda_route_is_local(route)) {
+    using real_fn_t =
+        CUresult (*)(unsigned int, CUjit_option *, void **, CUlinkState *);
+    auto real = scuda_real_cuda_fn<real_fn_t>("cuLinkCreate_v2");
+    return real == nullptr ? CUDA_ERROR_DEVICE_UNAVAILABLE
+                           : real(numOptions, options, optionValues, stateOut);
+  }
+  conn_t *conn = scuda_route_remote_conn(route);
+  CUresult return_value;
+  if (conn == nullptr || rpc_write_start_request(conn, RPC_cuLinkCreate_v2) < 0 ||
+      scuda_write_jit_options(conn, numOptions, options, optionValues) < 0 ||
+      rpc_wait_for_response(conn) < 0 ||
+      rpc_read(conn, stateOut, sizeof(*stateOut)) < 0 ||
+      rpc_read(conn, &return_value, sizeof(return_value)) < 0 ||
+      rpc_read_end(conn) < 0) {
+    return CUDA_ERROR_DEVICE_UNAVAILABLE;
+  }
+  if (return_value == CUDA_SUCCESS) {
+    std::lock_guard<std::mutex> lock(scuda_jit_client_mutex());
+    scuda_jit_client_states()[*stateOut].bindings =
+        scuda_capture_jit_client_bindings(numOptions, options, optionValues);
+  }
+  return return_value;
+}
+
+extern "C" CUresult scuda_cuLinkAddData_v2_safe(
+    CUlinkState state, CUjitInputType type, void *data, size_t size,
+    const char *name, unsigned int numOptions, CUjit_option *options,
+    void **optionValues) {
+  scuda_route route = scuda_route_for_default();
+  if (scuda_route_is_local(route)) {
+    using real_fn_t = CUresult (*)(CUlinkState, CUjitInputType, void *, size_t,
+                                   const char *, unsigned int, CUjit_option *,
+                                   void **);
+    auto real = scuda_real_cuda_fn<real_fn_t>("cuLinkAddData_v2");
+    return real == nullptr
+               ? CUDA_ERROR_DEVICE_UNAVAILABLE
+               : real(state, type, data, size, name, numOptions, options,
+                      optionValues);
+  }
+  conn_t *conn = scuda_route_remote_conn(route);
+  CUresult return_value;
+  size_t name_len = name == nullptr ? 0 : strlen(name) + 1;
+  if (conn == nullptr ||
+      rpc_write_start_request(conn, SCUDA_RPC_cuLinkAddData_v2) < 0 ||
+      rpc_write(conn, &state, sizeof(state)) < 0 ||
+      rpc_write(conn, &type, sizeof(type)) < 0 ||
+      rpc_write(conn, &size, sizeof(size)) < 0 ||
+      (size != 0 && rpc_write(conn, data, size) < 0) ||
+      rpc_write(conn, &name_len, sizeof(name_len)) < 0 ||
+      (name_len != 0 && rpc_write(conn, name, name_len) < 0) ||
+      scuda_write_jit_options(conn, numOptions, options, optionValues) < 0 ||
+      rpc_wait_for_response(conn) < 0 ||
+      scuda_apply_jit_outputs(conn, state) < 0 ||
+      rpc_read(conn, &return_value, sizeof(return_value)) < 0 ||
+      rpc_read_end(conn) < 0) {
+    return CUDA_ERROR_DEVICE_UNAVAILABLE;
+  }
+  return return_value;
+}
+
+extern "C" CUresult scuda_cuLinkAddFile_v2_safe(
+    CUlinkState state, CUjitInputType type, const char *path,
+    unsigned int numOptions, CUjit_option *options, void **optionValues) {
+  scuda_route route = scuda_route_for_default();
+  if (scuda_route_is_local(route)) {
+    using real_fn_t = CUresult (*)(CUlinkState, CUjitInputType, const char *,
+                                   unsigned int, CUjit_option *, void **);
+    auto real = scuda_real_cuda_fn<real_fn_t>("cuLinkAddFile_v2");
+    return real == nullptr
+               ? CUDA_ERROR_DEVICE_UNAVAILABLE
+               : real(state, type, path, numOptions, options, optionValues);
+  }
+  conn_t *conn = scuda_route_remote_conn(route);
+  CUresult return_value;
+  size_t path_len = path == nullptr ? 0 : strlen(path) + 1;
+  if (conn == nullptr ||
+      rpc_write_start_request(conn, RPC_cuLinkAddFile_v2) < 0 ||
+      rpc_write(conn, &state, sizeof(state)) < 0 ||
+      rpc_write(conn, &type, sizeof(type)) < 0 ||
+      rpc_write(conn, &path_len, sizeof(path_len)) < 0 ||
+      (path_len != 0 && rpc_write(conn, path, path_len) < 0) ||
+      scuda_write_jit_options(conn, numOptions, options, optionValues) < 0 ||
+      rpc_wait_for_response(conn) < 0 ||
+      scuda_apply_jit_outputs(conn, state) < 0 ||
+      rpc_read(conn, &return_value, sizeof(return_value)) < 0 ||
+      rpc_read_end(conn) < 0) {
+    return CUDA_ERROR_DEVICE_UNAVAILABLE;
+  }
+  return return_value;
+}
+
+extern "C" CUresult scuda_cuLinkComplete_safe(CUlinkState state,
+                                               void **cubinOut,
+                                               size_t *sizeOut) {
+  if (cubinOut == nullptr || sizeOut == nullptr) {
+    return CUDA_ERROR_INVALID_VALUE;
+  }
+  scuda_route route = scuda_route_for_default();
+  if (scuda_route_is_local(route)) {
+    using real_fn_t = CUresult (*)(CUlinkState, void **, size_t *);
+    auto real = scuda_real_cuda_fn<real_fn_t>("cuLinkComplete");
+    return real == nullptr ? CUDA_ERROR_DEVICE_UNAVAILABLE
+                           : real(state, cubinOut, sizeOut);
+  }
+  conn_t *conn = scuda_route_remote_conn(route);
+  CUresult return_value;
+  size_t cubin_size = 0;
+  if (conn == nullptr || rpc_write_start_request(conn, RPC_cuLinkComplete) < 0 ||
+      rpc_write(conn, &state, sizeof(state)) < 0 ||
+      rpc_wait_for_response(conn) < 0 ||
+      rpc_read(conn, &cubin_size, sizeof(cubin_size)) < 0) {
+    return CUDA_ERROR_DEVICE_UNAVAILABLE;
+  }
+  if (scuda_trace_enabled()) {
+    fprintf(stderr, "SCUDA cuLinkComplete state=%p cubin_size=%zu\n",
+            reinterpret_cast<void *>(state), cubin_size);
+  }
+
+  {
+    std::lock_guard<std::mutex> lock(scuda_jit_client_mutex());
+    auto &jit_state = scuda_jit_client_states()[state];
+    if (cubin_size > (256ull << 20)) {
+      return CUDA_ERROR_INVALID_VALUE;
+    }
+    jit_state.cubin.resize(cubin_size);
+    if (cubin_size != 0 &&
+        rpc_read(conn, jit_state.cubin.data(), cubin_size) < 0) {
+      return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    }
+    *cubinOut = jit_state.cubin.empty() ? nullptr : jit_state.cubin.data();
+    *sizeOut = jit_state.cubin.size();
+  }
+
+  if (scuda_apply_jit_outputs(conn, state) < 0 ||
+      rpc_read(conn, &return_value, sizeof(return_value)) < 0 ||
+      rpc_read_end(conn) < 0) {
+    return CUDA_ERROR_DEVICE_UNAVAILABLE;
+  }
+  return return_value;
+}
+
+extern "C" CUresult scuda_cuLinkDestroy_safe(CUlinkState state) {
+  scuda_route route = scuda_route_for_default();
+  if (scuda_route_is_local(route)) {
+    using real_fn_t = CUresult (*)(CUlinkState);
+    auto real = scuda_real_cuda_fn<real_fn_t>("cuLinkDestroy");
+    return real == nullptr ? CUDA_ERROR_DEVICE_UNAVAILABLE : real(state);
+  }
+  conn_t *conn = scuda_route_remote_conn(route);
+  CUresult return_value;
+  if (conn == nullptr || rpc_write_start_request(conn, RPC_cuLinkDestroy) < 0 ||
+      rpc_write(conn, &state, sizeof(state)) < 0 ||
+      rpc_wait_for_response(conn) < 0 ||
+      rpc_read(conn, &return_value, sizeof(return_value)) < 0 ||
+      rpc_read_end(conn) < 0) {
+    return CUDA_ERROR_DEVICE_UNAVAILABLE;
+  }
+  std::lock_guard<std::mutex> lock(scuda_jit_client_mutex());
+  scuda_jit_client_states().erase(state);
+  return return_value;
+}
+
 extern "C" CUresult
 scuda_cuArrayCreate_v2_safe(CUarray *pHandle,
                             const CUDA_ARRAY_DESCRIPTOR *pAllocateArray) {
@@ -4025,6 +4337,78 @@ extern "C" CUresult cuLaunchKernelEx(const CUlaunchConfig *config, CUfunction f,
                         extra);
 }
 
+extern "C" CUresult scuda_cuLaunchCooperativeKernel_safe(
+    CUfunction f, unsigned int gridDimX, unsigned int gridDimY,
+    unsigned int gridDimZ, unsigned int blockDimX, unsigned int blockDimY,
+    unsigned int blockDimZ, unsigned int sharedMemBytes, CUstream hStream,
+    void **kernelParams) {
+  f = scuda_translate_private_function(f);
+
+  scuda_route route = scuda_route_for_function(f);
+  if (scuda_route_is_local(route)) {
+    using real_fn_t = CUresult (*)(CUfunction, unsigned int, unsigned int,
+                                   unsigned int, unsigned int, unsigned int,
+                                   unsigned int, unsigned int, CUstream,
+                                   void **);
+    auto real = scuda_real_cuda_fn<real_fn_t>("cuLaunchCooperativeKernel");
+    return real == nullptr ? CUDA_ERROR_DEVICE_UNAVAILABLE
+                           : real(f, gridDimX, gridDimY, gridDimZ, blockDimX,
+                                  blockDimY, blockDimZ, sharedMemBytes,
+                                  hStream, kernelParams);
+  }
+
+  scuda_kernel_param_layout layout;
+  CUresult status = scuda_get_kernel_param_layout_cached(f, &layout);
+  if (status != CUDA_SUCCESS) {
+    return status;
+  }
+  if (layout.count > 64) {
+    return CUDA_ERROR_NOT_SUPPORTED;
+  }
+
+  size_t total_size = 0;
+  for (uint32_t i = 0; i < layout.count; ++i) {
+    if (kernelParams == nullptr || kernelParams[i] == nullptr) {
+      return CUDA_ERROR_INVALID_VALUE;
+    }
+    total_size = std::max(total_size, layout.offsets[i] + layout.sizes[i]);
+  }
+
+  std::vector<unsigned char> packed(total_size);
+  for (uint32_t i = 0; i < layout.count; ++i) {
+    memcpy(packed.data() + layout.offsets[i], kernelParams[i], layout.sizes[i]);
+  }
+
+  status = scuda_sync_mapped_host_to_device_for_launch(
+      packed.data(), layout.offsets, layout.sizes, layout.count);
+  if (status != CUDA_SUCCESS) {
+    return status;
+  }
+
+  conn_t *conn = scuda_route_remote_conn(route);
+  CUresult return_value;
+  if (conn == nullptr ||
+      rpc_write_start_request(conn, RPC_cuLaunchCooperativeKernel) < 0 ||
+      rpc_write(conn, &f, sizeof(f)) < 0 ||
+      rpc_write(conn, &gridDimX, sizeof(gridDimX)) < 0 ||
+      rpc_write(conn, &gridDimY, sizeof(gridDimY)) < 0 ||
+      rpc_write(conn, &gridDimZ, sizeof(gridDimZ)) < 0 ||
+      rpc_write(conn, &blockDimX, sizeof(blockDimX)) < 0 ||
+      rpc_write(conn, &blockDimY, sizeof(blockDimY)) < 0 ||
+      rpc_write(conn, &blockDimZ, sizeof(blockDimZ)) < 0 ||
+      rpc_write(conn, &sharedMemBytes, sizeof(sharedMemBytes)) < 0 ||
+      rpc_write(conn, &hStream, sizeof(hStream)) < 0 ||
+      rpc_write(conn, &layout.count, sizeof(layout.count)) < 0 ||
+      rpc_write(conn, &total_size, sizeof(total_size)) < 0 ||
+      rpc_write(conn, packed.data(), packed.size()) < 0 ||
+      rpc_wait_for_response(conn) < 0 ||
+      rpc_read(conn, &return_value, sizeof(return_value)) < 0 ||
+      rpc_read_end(conn) < 0) {
+    return CUDA_ERROR_DEVICE_UNAVAILABLE;
+  }
+  return return_value;
+}
+
 extern "C" CUresult scuda_cuFuncGetAttribute_safe(int *pi,
                                                   CUfunction_attribute attrib,
                                                   CUfunction hfunc) {
@@ -4603,6 +4987,44 @@ cuGraphAddMemcpyNode(CUgraphNode *phGraphNode, CUgraph hGraph,
        rpc_write(conn, copyParams->srcHost, host_src_bytes) < 0) ||
       rpc_wait_for_response(conn) < 0 ||
       rpc_read(conn, phGraphNode, sizeof(*phGraphNode)) < 0 ||
+      rpc_read(conn, &return_value, sizeof(return_value)) < 0 ||
+      rpc_read_end(conn) < 0) {
+    return CUDA_ERROR_DEVICE_UNAVAILABLE;
+  }
+  return return_value;
+}
+
+extern "C" CUresult scuda_cuGraphExecKernelNodeSetParams_v2_safe(
+    CUgraphExec hGraphExec, CUgraphNode hNode,
+    const CUDA_KERNEL_NODE_PARAMS *nodeParams) {
+  if (nodeParams == nullptr) {
+    return CUDA_ERROR_INVALID_VALUE;
+  }
+
+  scuda_kernel_param_layout layout;
+  std::vector<unsigned char> packed;
+  CUresult status = scuda_pack_kernel_params(nodeParams, &layout, &packed);
+  if (status != CUDA_SUCCESS) {
+    return status;
+  }
+
+  CUDA_KERNEL_NODE_PARAMS serial_params = *nodeParams;
+  serial_params.func = scuda_translate_private_function(serial_params.func);
+  serial_params.kernelParams = nullptr;
+  serial_params.extra = nullptr;
+
+  conn_t *conn = rpc_client_get_connection(0);
+  CUresult return_value;
+  size_t packed_size = packed.size();
+  if (rpc_write_start_request(conn, RPC_cuGraphExecKernelNodeSetParams_v2) <
+          0 ||
+      rpc_write(conn, &hGraphExec, sizeof(hGraphExec)) < 0 ||
+      rpc_write(conn, &hNode, sizeof(hNode)) < 0 ||
+      rpc_write(conn, &serial_params, sizeof(serial_params)) < 0 ||
+      rpc_write(conn, &layout.count, sizeof(layout.count)) < 0 ||
+      rpc_write(conn, &packed_size, sizeof(packed_size)) < 0 ||
+      rpc_write(conn, packed.data(), packed.size()) < 0 ||
+      rpc_wait_for_response(conn) < 0 ||
       rpc_read(conn, &return_value, sizeof(return_value)) < 0 ||
       rpc_read_end(conn) < 0) {
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
