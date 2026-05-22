@@ -4463,20 +4463,24 @@ lupine_cuLinkAddFile_v2_safe(CUlinkState state, CUjitInputType type,
   uint8_t has_file_data = 0;
   if (path != nullptr) {
     int file_fd = open(path, O_RDONLY);
-    if (file_fd >= 0) {
-      struct stat st = {};
-      if (fstat(file_fd, &st) == 0 && st.st_size > 0) {
-        mapped_file_size = static_cast<size_t>(st.st_size);
-        file_mapping =
-            mmap(nullptr, mapped_file_size, PROT_READ, MAP_PRIVATE, file_fd, 0);
-        if (file_mapping != MAP_FAILED) {
-          file_payload = file_mapping;
-          file_size = mapped_file_size;
-          has_file_data = 1;
-        }
-      }
-      close(file_fd);
+    if (file_fd < 0) {
+      return CUDA_ERROR_FILE_NOT_FOUND;
     }
+    struct stat st = {};
+    if (fstat(file_fd, &st) < 0 || st.st_size <= 0) {
+      close(file_fd);
+      return CUDA_ERROR_FILE_NOT_FOUND;
+    }
+    mapped_file_size = static_cast<size_t>(st.st_size);
+    file_mapping =
+        mmap(nullptr, mapped_file_size, PROT_READ, MAP_PRIVATE, file_fd, 0);
+    close(file_fd);
+    if (file_mapping == MAP_FAILED) {
+      return CUDA_ERROR_FILE_NOT_FOUND;
+    }
+    file_payload = file_mapping;
+    file_size = mapped_file_size;
+    has_file_data = 1;
   }
   bool failed =
       conn == nullptr ||
