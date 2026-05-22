@@ -595,41 +595,31 @@ static void *lupine_alloc_host_resource(
   return ptr;
 }
 
-static void lupine_free_pending_dtoh_copy(lupine_pending_dtoh_copy &copy) {
-  if (copy.server_src == nullptr) {
-    return;
-  }
-  if (copy.pinned) {
-    cuMemFreeHost(copy.server_src);
-  } else {
-    free(copy.server_src);
-  }
-  copy.server_src = nullptr;
-}
-
-static bool lupine_pending_dtoh_copy_matches(
-    const lupine_pending_dtoh_copy &copy, CUstream stream, bool all_streams) {
-  return all_streams || copy.stream == stream;
-}
-
 static uint32_t lupine_count_pending_dtoh_copies(conn_t *conn, CUstream stream,
                                                  bool all_streams) {
   auto &pending = lupine_pending_dtoh_copies()[conn];
   uint32_t count = 0;
   for (const auto &copy : pending) {
-    if (lupine_pending_dtoh_copy_matches(copy, stream, all_streams)) {
+    if (all_streams || copy.stream == stream) {
       ++count;
     }
   }
   return count;
 }
 
-static int lupine_write_pending_dtoh_copy_payloads(conn_t *conn,
-                                                   CUstream stream,
-                                                   bool all_streams) {
+static int lupine_write_pending_dtoh_copies(conn_t *conn, CUstream stream,
+                                            bool all_streams,
+                                            bool write_count = true) {
   auto &pending = lupine_pending_dtoh_copies()[conn];
+  if (write_count) {
+    uint32_t count =
+        lupine_count_pending_dtoh_copies(conn, stream, all_streams);
+    if (rpc_write(conn, &count, sizeof(count)) < 0) {
+      return -1;
+    }
+  }
   for (auto &copy : pending) {
-    if (!lupine_pending_dtoh_copy_matches(copy, stream, all_streams)) {
+    if (!all_streams && copy.stream != stream) {
       continue;
     }
     if (rpc_write(conn, &copy.client_dst, sizeof(copy.client_dst)) < 0 ||
@@ -646,22 +636,20 @@ static void lupine_cleanup_pending_dtoh_copies(conn_t *conn, CUstream stream,
   auto &pending = lupine_pending_dtoh_copies()[conn];
   auto keep = std::remove_if(
       pending.begin(), pending.end(), [&](lupine_pending_dtoh_copy &copy) {
-        if (!lupine_pending_dtoh_copy_matches(copy, stream, all_streams)) {
+        if (!all_streams && copy.stream != stream) {
           return false;
         }
-        lupine_free_pending_dtoh_copy(copy);
+        if (copy.server_src != nullptr) {
+          if (copy.pinned) {
+            cuMemFreeHost(copy.server_src);
+          } else {
+            free(copy.server_src);
+          }
+          copy.server_src = nullptr;
+        }
         return true;
       });
   pending.erase(keep, pending.end());
-}
-
-static int lupine_write_pending_dtoh_copies(conn_t *conn, CUstream stream,
-                                            bool all_streams) {
-  uint32_t count = lupine_count_pending_dtoh_copies(conn, stream, all_streams);
-  if (rpc_write(conn, &count, sizeof(count)) < 0) {
-    return -1;
-  }
-  return lupine_write_pending_dtoh_copy_payloads(conn, stream, all_streams);
 }
 
 static void *lupine_alloc_capture_scratch(
@@ -3080,7 +3068,7 @@ int handle_manual_cuStreamSynchronize(conn_t *conn) {
                             (copy.bytes != 0 &&
                              rpc_write(conn, copy.server_src, copy.bytes) < 0);
                    })) ||
-      lupine_write_pending_dtoh_copy_payloads(conn, nullptr, true) < 0 ||
+      lupine_write_pending_dtoh_copies(conn, nullptr, true, false) < 0 ||
       lupine_write_captured_stdout(conn, capture, &stdout_size) < 0 ||
       rpc_write(conn, &result, sizeof(result)) < 0 || rpc_write_end(conn) < 0) {
     return -1;
