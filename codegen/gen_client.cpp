@@ -33,6 +33,7 @@ extern "C" scuda_route scuda_route_for_device(CUdevice *device);
 extern "C" scuda_route scuda_route_for_current_context();
 extern "C" scuda_route scuda_route_for_context(CUcontext ctx);
 extern "C" scuda_route scuda_route_for_module(CUmodule module);
+extern "C" scuda_route scuda_route_for_library(CUlibrary library);
 extern "C" scuda_route scuda_route_for_function(CUfunction function);
 extern "C" scuda_route scuda_route_for_stream(CUstream stream);
 extern "C" scuda_route scuda_route_for_event(CUevent event);
@@ -51,17 +52,29 @@ extern "C" conn_t *scuda_rpc_conn_for_deviceptr(CUdeviceptr ptr);
 extern "C" CUfunction scuda_translate_private_function_for_rpc(CUfunction function);
 extern "C" void scuda_note_context_owner(CUcontext ctx, conn_t *conn);
 extern "C" void scuda_note_module_owner(CUmodule module, conn_t *conn);
+extern "C" void scuda_note_library_owner(CUlibrary library, conn_t *conn);
 extern "C" void scuda_note_function_owner(CUfunction function, conn_t *conn);
 extern "C" void scuda_note_stream_owner(CUstream stream, conn_t *conn);
 extern "C" void scuda_note_event_owner(CUevent event, conn_t *conn);
 extern "C" void scuda_note_deviceptr_owner(CUdeviceptr ptr, conn_t *conn);
 
+extern "C" void scuda_note_deviceptr_allocation(CUdeviceptr ptr, size_t size, conn_t *conn);
+
 extern "C" void scuda_note_context_owner_route(CUcontext ctx, scuda_route route);
 extern "C" void scuda_note_module_owner_route(CUmodule module, scuda_route route);
+extern "C" void scuda_note_library_owner_route(CUlibrary library, scuda_route route);
 extern "C" void scuda_note_function_owner_route(CUfunction function, scuda_route route);
 extern "C" void scuda_note_stream_owner_route(CUstream stream, scuda_route route);
 extern "C" void scuda_note_event_owner_route(CUevent event, scuda_route route);
 extern "C" void scuda_note_deviceptr_owner_route(CUdeviceptr ptr, scuda_route route);
+
+extern "C" void scuda_note_deviceptr_allocation_route(CUdeviceptr ptr, size_t size, scuda_route route);
+
+extern "C" void scuda_forget_deviceptr_owner(CUdeviceptr ptr);
+
+extern "C" void scuda_record_library_kernel(CUkernel kernel, CUlibrary library, const char *name, scuda_route route);
+
+extern "C" void scuda_record_module_function(CUfunction function, CUmodule module, const char *name, scuda_route route);
 
 extern "C" void scuda_prepare_host_range_write(void *host, size_t size);
 extern "C" void scuda_mark_host_range_clean(void *host, size_t size);
@@ -93,6 +106,8 @@ extern "C" CUresult scuda_cuPointerGetAttributes_safe(unsigned int numAttributes
 extern "C" CUresult scuda_cuOccupancyMaxActiveBlocksPerMultiprocessor_cached(int *numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize);
 extern "C" CUresult scuda_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags_cached(int *numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize, unsigned int flags);
 extern "C" CUresult scuda_cuDeviceCanAccessPeer_multi(int *canAccessPeer, CUdevice dev, CUdevice peerDev);
+extern "C" CUresult scuda_cuCtxEnablePeerAccess_multi(CUcontext peerContext, unsigned int flags);
+extern "C" CUresult scuda_cuCtxDisablePeerAccess_multi(CUcontext peerContext);
 
 CUresult cuInit(unsigned int Flags)
 {
@@ -985,6 +1000,7 @@ CUresult cuModuleGetFunction(CUfunction* hfunc, CUmodule hmod, const char* name)
     if (return_value == CUDA_SUCCESS && hfunc != nullptr) {
         scuda_note_function_owner_route(*hfunc, route);
     }
+    if (return_value == CUDA_SUCCESS && hfunc != nullptr) scuda_record_module_function(*hfunc, hmod, name, route);
         return return_value;
     }
     conn_t *conn = scuda_route_remote_conn(route);
@@ -1003,6 +1019,7 @@ CUresult cuModuleGetFunction(CUfunction* hfunc, CUmodule hmod, const char* name)
     if (return_value == CUDA_SUCCESS && hfunc != nullptr) {
         scuda_note_function_owner_route(*hfunc, route);
     }
+    if (return_value == CUDA_SUCCESS && hfunc != nullptr) scuda_record_module_function(*hfunc, hmod, name, route);
     return return_value;
 }
 
@@ -1024,7 +1041,7 @@ CUresult cuModuleGetGlobal_v2(CUdeviceptr* dptr, size_t* bytes, CUmodule hmod, c
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
     if (bytes != nullptr) *bytes = remote_bytes;
-    if (return_value == CUDA_SUCCESS && dptr != nullptr) scuda_note_deviceptr_owner(*dptr, conn);
+    if (return_value == CUDA_SUCCESS && dptr != nullptr) scuda_note_deviceptr_allocation(*dptr, remote_bytes, conn);
     return return_value;
 }
 
@@ -1113,6 +1130,9 @@ CUresult cuLibraryLoadFromFile(CUlibrary* library, const char* fileName, CUjit_o
         auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuLibraryLoadFromFile"));
         if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
         CUresult return_value = real(library, fileName, jitOptions, jitOptionsValues, numJitOptions, libraryOptions, libraryOptionValues, numLibraryOptions);
+    if (return_value == CUDA_SUCCESS && library != nullptr) {
+        scuda_note_library_owner_route(*library, route);
+    }
         return return_value;
     }
     conn_t *conn = scuda_route_remote_conn(route);
@@ -1137,12 +1157,15 @@ CUresult cuLibraryLoadFromFile(CUlibrary* library, const char* fileName, CUjit_o
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    if (return_value == CUDA_SUCCESS && library != nullptr) {
+        scuda_note_library_owner_route(*library, route);
+    }
     return return_value;
 }
 
 CUresult cuLibraryUnload(CUlibrary library)
 {
-    scuda_route route = scuda_route_for_default();
+    scuda_route route = scuda_route_for_library(library);
     if (scuda_route_is_local(route)) {
         using real_fn_t = CUresult (*)(CUlibrary);
         auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuLibraryUnload"));
@@ -1164,12 +1187,13 @@ CUresult cuLibraryUnload(CUlibrary library)
 
 CUresult cuLibraryGetKernel(CUkernel* pKernel, CUlibrary library, const char* name)
 {
-    scuda_route route = scuda_route_for_default();
+    scuda_route route = scuda_route_for_library(library);
     if (scuda_route_is_local(route)) {
         using real_fn_t = CUresult (*)(CUkernel*, CUlibrary, const char*);
         auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuLibraryGetKernel"));
         if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
         CUresult return_value = real(pKernel, library, name);
+    if (return_value == CUDA_SUCCESS && pKernel != nullptr) scuda_record_library_kernel(*pKernel, library, name, route);
         return return_value;
     }
     conn_t *conn = scuda_route_remote_conn(route);
@@ -1185,17 +1209,21 @@ CUresult cuLibraryGetKernel(CUkernel* pKernel, CUlibrary library, const char* na
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    if (return_value == CUDA_SUCCESS && pKernel != nullptr) scuda_record_library_kernel(*pKernel, library, name, route);
     return return_value;
 }
 
 CUresult cuLibraryGetModule(CUmodule* pMod, CUlibrary library)
 {
-    scuda_route route = scuda_route_for_default();
+    scuda_route route = scuda_route_for_library(library);
     if (scuda_route_is_local(route)) {
         using real_fn_t = CUresult (*)(CUmodule*, CUlibrary);
         auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuLibraryGetModule"));
         if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
         CUresult return_value = real(pMod, library);
+    if (return_value == CUDA_SUCCESS && pMod != nullptr) {
+        scuda_note_module_owner_route(*pMod, route);
+    }
         return return_value;
     }
     conn_t *conn = scuda_route_remote_conn(route);
@@ -1208,6 +1236,9 @@ CUresult cuLibraryGetModule(CUmodule* pMod, CUlibrary library)
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    if (return_value == CUDA_SUCCESS && pMod != nullptr) {
+        scuda_note_module_owner_route(*pMod, route);
+    }
     return return_value;
 }
 
@@ -1218,7 +1249,8 @@ CUresult cuKernelGetFunction(CUfunction* pFunc, CUkernel kernel)
 
 CUresult cuLibraryGetGlobal(CUdeviceptr* dptr, size_t* bytes, CUlibrary library, const char* name)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_library(library);
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     size_t remote_bytes = 0;
     std::size_t name_len = std::strlen(name) + 1;
@@ -1234,13 +1266,14 @@ CUresult cuLibraryGetGlobal(CUdeviceptr* dptr, size_t* bytes, CUlibrary library,
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
     if (bytes != nullptr) *bytes = remote_bytes;
-    if (return_value == CUDA_SUCCESS && dptr != nullptr) scuda_note_deviceptr_owner(*dptr, conn);
+    if (return_value == CUDA_SUCCESS && dptr != nullptr) scuda_note_deviceptr_allocation(*dptr, remote_bytes, conn);
     return return_value;
 }
 
 CUresult cuLibraryGetManaged(CUdeviceptr* dptr, size_t* bytes, CUlibrary library, const char* name)
 {
-    conn_t *conn = rpc_client_get_connection(0);
+    scuda_route route = scuda_route_for_library(library);
+    conn_t *conn = scuda_route_remote_conn(route);
     CUresult return_value;
     size_t remote_bytes = 0;
     std::size_t name_len = std::strlen(name) + 1;
@@ -1256,13 +1289,13 @@ CUresult cuLibraryGetManaged(CUdeviceptr* dptr, size_t* bytes, CUlibrary library
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
     if (bytes != nullptr) *bytes = remote_bytes;
-    if (return_value == CUDA_SUCCESS && dptr != nullptr) scuda_note_deviceptr_owner(*dptr, conn);
+    if (return_value == CUDA_SUCCESS && dptr != nullptr) scuda_note_deviceptr_allocation(*dptr, remote_bytes, conn);
     return return_value;
 }
 
 CUresult cuLibraryGetUnifiedFunction(void** fptr, CUlibrary library, const char* symbol)
 {
-    scuda_route route = scuda_route_for_default();
+    scuda_route route = scuda_route_for_library(library);
     if (scuda_route_is_local(route)) {
         using real_fn_t = CUresult (*)(void**, CUlibrary, const char*);
         auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuLibraryGetUnifiedFunction"));
@@ -1397,6 +1430,7 @@ CUresult cuMemAlloc_v2(CUdeviceptr* dptr, size_t bytesize)
     if (return_value == CUDA_SUCCESS && dptr != nullptr) {
         scuda_note_deviceptr_owner_route(*dptr, route);
     }
+    if (return_value == CUDA_SUCCESS && dptr != nullptr) scuda_note_deviceptr_allocation_route(*dptr, bytesize, route);
         return return_value;
     }
     conn_t *conn = scuda_route_remote_conn(route);
@@ -1413,6 +1447,7 @@ CUresult cuMemAlloc_v2(CUdeviceptr* dptr, size_t bytesize)
     if (return_value == CUDA_SUCCESS && dptr != nullptr) {
         scuda_note_deviceptr_owner_route(*dptr, route);
     }
+    if (return_value == CUDA_SUCCESS && dptr != nullptr) scuda_note_deviceptr_allocation_route(*dptr, bytesize, route);
     return return_value;
 }
 
@@ -1426,6 +1461,12 @@ CUresult cuMemAllocPitch_v2(CUdeviceptr* dptr, size_t* pPitch, size_t WidthInByt
         CUresult return_value = real(dptr, pPitch, WidthInBytes, Height, ElementSizeBytes);
     if (return_value == CUDA_SUCCESS && dptr != nullptr) {
         scuda_note_deviceptr_owner_route(*dptr, route);
+    }
+    if (return_value == CUDA_SUCCESS && dptr != nullptr) {
+        size_t allocation_size = 0;
+        if (pPitch != nullptr) allocation_size = (*pPitch) * Height;
+        else allocation_size = WidthInBytes * Height;
+        scuda_note_deviceptr_allocation_route(*dptr, allocation_size, route);
     }
         return return_value;
     }
@@ -1446,6 +1487,12 @@ CUresult cuMemAllocPitch_v2(CUdeviceptr* dptr, size_t* pPitch, size_t WidthInByt
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
     if (return_value == CUDA_SUCCESS && dptr != nullptr) {
         scuda_note_deviceptr_owner_route(*dptr, route);
+    }
+    if (return_value == CUDA_SUCCESS && dptr != nullptr) {
+        size_t allocation_size = 0;
+        if (pPitch != nullptr) allocation_size = (*pPitch) * Height;
+        else allocation_size = WidthInBytes * Height;
+        scuda_note_deviceptr_allocation_route(*dptr, allocation_size, route);
     }
     return return_value;
 }
@@ -2821,6 +2868,7 @@ CUresult cuMemFreeAsync(CUdeviceptr dptr, CUstream hStream)
         auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemFreeAsync"));
         if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
         CUresult return_value = real(dptr, hStream);
+    if (return_value == CUDA_SUCCESS) scuda_forget_deviceptr_owner(dptr);
         return return_value;
     }
     conn_t *conn = scuda_route_remote_conn(route);
@@ -2833,6 +2881,7 @@ CUresult cuMemFreeAsync(CUdeviceptr dptr, CUstream hStream)
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    if (return_value == CUDA_SUCCESS) scuda_forget_deviceptr_owner(dptr);
     return return_value;
 }
 
@@ -2844,6 +2893,10 @@ CUresult cuMemAllocAsync(CUdeviceptr* dptr, size_t bytesize, CUstream hStream)
         auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemAllocAsync"));
         if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
         CUresult return_value = real(dptr, bytesize, hStream);
+    if (return_value == CUDA_SUCCESS && dptr != nullptr) {
+        scuda_note_deviceptr_owner_route(*dptr, route);
+    }
+    if (return_value == CUDA_SUCCESS && dptr != nullptr) scuda_note_deviceptr_allocation_route(*dptr, bytesize, route);
         return return_value;
     }
     conn_t *conn = scuda_route_remote_conn(route);
@@ -2858,6 +2911,10 @@ CUresult cuMemAllocAsync(CUdeviceptr* dptr, size_t bytesize, CUstream hStream)
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    if (return_value == CUDA_SUCCESS && dptr != nullptr) {
+        scuda_note_deviceptr_owner_route(*dptr, route);
+    }
+    if (return_value == CUDA_SUCCESS && dptr != nullptr) scuda_note_deviceptr_allocation_route(*dptr, bytesize, route);
     return return_value;
 }
 
@@ -2988,6 +3045,10 @@ CUresult cuMemAllocFromPoolAsync(CUdeviceptr* dptr, size_t bytesize, CUmemoryPoo
         auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuMemAllocFromPoolAsync"));
         if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
         CUresult return_value = real(dptr, bytesize, pool, hStream);
+    if (return_value == CUDA_SUCCESS && dptr != nullptr) {
+        scuda_note_deviceptr_owner_route(*dptr, route);
+    }
+    if (return_value == CUDA_SUCCESS && dptr != nullptr) scuda_note_deviceptr_allocation_route(*dptr, bytesize, route);
         return return_value;
     }
     conn_t *conn = scuda_route_remote_conn(route);
@@ -3003,6 +3064,10 @@ CUresult cuMemAllocFromPoolAsync(CUdeviceptr* dptr, size_t bytesize, CUmemoryPoo
         rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
         rpc_read_end(conn) < 0)
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    if (return_value == CUDA_SUCCESS && dptr != nullptr) {
+        scuda_note_deviceptr_owner_route(*dptr, route);
+    }
+    if (return_value == CUDA_SUCCESS && dptr != nullptr) scuda_note_deviceptr_allocation_route(*dptr, bytesize, route);
     return return_value;
 }
 
@@ -6925,47 +6990,12 @@ CUresult cuDeviceCanAccessPeer(int* canAccessPeer, CUdevice dev, CUdevice peerDe
 
 CUresult cuCtxEnablePeerAccess(CUcontext peerContext, unsigned int Flags)
 {
-    scuda_route route = scuda_route_for_context(peerContext);
-    if (scuda_route_is_local(route)) {
-        using real_fn_t = CUresult (*)(CUcontext, unsigned int);
-        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuCtxEnablePeerAccess"));
-        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
-        CUresult return_value = real(peerContext, Flags);
-        return return_value;
-    }
-    conn_t *conn = scuda_route_remote_conn(route);
-    CUresult return_value;
-    if (conn == nullptr ||
-        rpc_write_start_request(conn, RPC_cuCtxEnablePeerAccess) < 0 ||
-        rpc_write(conn, &peerContext, sizeof(CUcontext)) < 0 ||
-        rpc_write(conn, &Flags, sizeof(unsigned int)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    return return_value;
+    return scuda_cuCtxEnablePeerAccess_multi(peerContext, Flags);
 }
 
 CUresult cuCtxDisablePeerAccess(CUcontext peerContext)
 {
-    scuda_route route = scuda_route_for_context(peerContext);
-    if (scuda_route_is_local(route)) {
-        using real_fn_t = CUresult (*)(CUcontext);
-        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol("cuCtxDisablePeerAccess"));
-        if (real == nullptr) return CUDA_ERROR_DEVICE_UNAVAILABLE;
-        CUresult return_value = real(peerContext);
-        return return_value;
-    }
-    conn_t *conn = scuda_route_remote_conn(route);
-    CUresult return_value;
-    if (conn == nullptr ||
-        rpc_write_start_request(conn, RPC_cuCtxDisablePeerAccess) < 0 ||
-        rpc_write(conn, &peerContext, sizeof(CUcontext)) < 0 ||
-        rpc_wait_for_response(conn) < 0 ||
-        rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
-        rpc_read_end(conn) < 0)
-        return CUDA_ERROR_DEVICE_UNAVAILABLE;
-    return return_value;
+    return scuda_cuCtxDisablePeerAccess_multi(peerContext);
 }
 
 CUresult cuDeviceGetP2PAttribute(int* value, CUdevice_P2PAttribute attrib, CUdevice srcDevice, CUdevice dstDevice)

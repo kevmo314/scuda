@@ -2376,6 +2376,7 @@ CUresult cuLibraryLoadData(CUlibrary *library, const void *code,
                            void **libraryOptionValues,
                            unsigned int numLibraryOptions);
 /**
+ * @recordowner LIBRARY library
  * @param library RECV_ONLY
  * @param fileName SEND_ONLY NULL_TERMINATED
  * @param numJitOptions SEND_ONLY
@@ -2393,10 +2394,12 @@ CUresult cuLibraryLoadFromFile(CUlibrary *library, const char *fileName,
                                void **libraryOptionValues,
                                unsigned int numLibraryOptions);
 /**
+ * @routingkey LIBRARY library
  * @param library SEND_ONLY
  */
 CUresult cuLibraryUnload(CUlibrary library);
 /**
+ * @routingkey LIBRARY library
  * @param pKernel RECV_ONLY
  * @param library SEND_ONLY
  * @param name SEND_ONLY NULL_TERMINATED
@@ -2404,6 +2407,8 @@ CUresult cuLibraryUnload(CUlibrary library);
 CUresult cuLibraryGetKernel(CUkernel *pKernel, CUlibrary library,
                             const char *name);
 /**
+ * @routingkey LIBRARY library
+ * @recordowner MODULE pMod
  * @param pMod RECV_ONLY
  * @param library SEND_ONLY
  */
@@ -2414,6 +2419,7 @@ CUresult cuLibraryGetModule(CUmodule *pMod, CUlibrary library);
  */
 CUresult cuKernelGetFunction(CUfunction *pFunc, CUkernel kernel);
 /**
+ * @routingkey LIBRARY library
  * @param dptr RECV_ONLY
  * @param bytes RECV_ONLY
  * @param library SEND_ONLY
@@ -2422,6 +2428,7 @@ CUresult cuKernelGetFunction(CUfunction *pFunc, CUkernel kernel);
 CUresult cuLibraryGetGlobal(CUdeviceptr *dptr, size_t *bytes, CUlibrary library,
                             const char *name);
 /**
+ * @routingkey LIBRARY library
  * @param dptr RECV_ONLY
  * @param bytes RECV_ONLY
  * @param library SEND_ONLY
@@ -2430,6 +2437,7 @@ CUresult cuLibraryGetGlobal(CUdeviceptr *dptr, size_t *bytes, CUlibrary library,
 CUresult cuLibraryGetManaged(CUdeviceptr *dptr, size_t *bytes,
                              CUlibrary library, const char *name);
 /**
+ * @routingkey LIBRARY library
  * @param fptr RECV_ONLY
  * @param library SEND_ONLY
  * @param symbol SEND_ONLY NULL_TERMINATED
@@ -3085,11 +3093,14 @@ cuMemGetAllocationPropertiesFromHandle(CUmemAllocationProp *prop,
 CUresult cuMemRetainAllocationHandle(CUmemGenericAllocationHandle *handle,
                                      void *addr);
 /**
+ * @routingkey DEVICEPTR dptr
  * @param dptr SEND_ONLY
  * @param hStream SEND_ONLY
  */
 CUresult cuMemFreeAsync(CUdeviceptr dptr, CUstream hStream);
 /**
+ * @routingkey STREAM hStream
+ * @recordowner DEVICEPTR dptr
  * @param dptr SEND_RECV
  * @param bytesize SEND_ONLY
  * @param hStream SEND_ONLY
@@ -3138,6 +3149,8 @@ CUresult cuMemPoolCreate(CUmemoryPool *pool, const CUmemPoolProps *poolProps);
  */
 CUresult cuMemPoolDestroy(CUmemoryPool pool);
 /**
+ * @routingkey STREAM hStream
+ * @recordowner DEVICEPTR dptr
  * @param dptr SEND_RECV
  * @param bytesize SEND_ONLY
  * @param pool SEND_ONLY
