@@ -98,6 +98,15 @@ extern "C" void lupine_record_module_function(CUfunction function,
 
 extern "C" void lupine_prepare_host_range_write(void *host, size_t size);
 extern "C" void lupine_mark_host_range_clean(void *host, size_t size);
+extern "C" bool lupine_routes_share_server(lupine_route first,
+                                           lupine_route second);
+extern "C" bool lupine_deviceptrs_share_route(CUdeviceptr first,
+                                              CUdeviceptr second);
+extern "C" CUresult lupine_cuMemcpyDtoD_via_client(CUdeviceptr dstDevice,
+                                                   CUdeviceptr srcDevice,
+                                                   size_t ByteCount,
+                                                   CUstream hStream,
+                                                   bool async);
 
 extern "C" CUresult
 lupine_cuArrayCreate_v2_safe(CUarray *pHandle,
@@ -1901,6 +1910,9 @@ CUresult cuIpcCloseMemHandle(CUdeviceptr dptr) {
 
 CUresult cuMemcpy(CUdeviceptr dst, CUdeviceptr src, size_t ByteCount) {
   lupine_route route = lupine_route_for_deviceptr(dst);
+  if (!lupine_deviceptrs_share_route(dst, src)) {
+    return lupine_cuMemcpyDtoD_via_client(dst, src, ByteCount, nullptr, false);
+  }
   if (lupine_route_is_local(route)) {
     using real_fn_t = CUresult (*)(CUdeviceptr, CUdeviceptr, size_t);
     auto real =
@@ -1927,6 +1939,10 @@ CUresult cuMemcpyPeer(CUdeviceptr dstDevice, CUcontext dstContext,
                       CUdeviceptr srcDevice, CUcontext srcContext,
                       size_t ByteCount) {
   lupine_route route = lupine_route_for_deviceptr(dstDevice);
+  if (!lupine_deviceptrs_share_route(dstDevice, srcDevice)) {
+    return lupine_cuMemcpyDtoD_via_client(dstDevice, srcDevice, ByteCount,
+                                          nullptr, false);
+  }
   if (lupine_route_is_local(route)) {
     using real_fn_t =
         CUresult (*)(CUdeviceptr, CUcontext, CUdeviceptr, CUcontext, size_t);
@@ -2012,6 +2028,10 @@ CUresult cuMemcpyDtoH_v2(void *dstHost, CUdeviceptr srcDevice,
 CUresult cuMemcpyDtoD_v2(CUdeviceptr dstDevice, CUdeviceptr srcDevice,
                          size_t ByteCount) {
   lupine_route route = lupine_route_for_deviceptr(dstDevice);
+  if (!lupine_deviceptrs_share_route(dstDevice, srcDevice)) {
+    return lupine_cuMemcpyDtoD_via_client(dstDevice, srcDevice, ByteCount,
+                                          nullptr, false);
+  }
   if (lupine_route_is_local(route)) {
     using real_fn_t = CUresult (*)(CUdeviceptr, CUdeviceptr, size_t);
     auto real =
@@ -2152,6 +2172,10 @@ CUresult cuMemcpyPeerAsync(CUdeviceptr dstDevice, CUcontext dstContext,
                            CUdeviceptr srcDevice, CUcontext srcContext,
                            size_t ByteCount, CUstream hStream) {
   lupine_route route = lupine_route_for_deviceptr(dstDevice);
+  if (!lupine_deviceptrs_share_route(dstDevice, srcDevice)) {
+    return lupine_cuMemcpyDtoD_via_client(dstDevice, srcDevice, ByteCount,
+                                          hStream, true);
+  }
   if (lupine_route_is_local(route)) {
     using real_fn_t = CUresult (*)(CUdeviceptr, CUcontext, CUdeviceptr,
                                    CUcontext, size_t, CUstream);
@@ -2211,6 +2235,10 @@ CUresult cuMemcpyHtoDAsync_v2(CUdeviceptr dstDevice, const void *srcHost,
 CUresult cuMemcpyDtoDAsync_v2(CUdeviceptr dstDevice, CUdeviceptr srcDevice,
                               size_t ByteCount, CUstream hStream) {
   lupine_route route = lupine_route_for_deviceptr(dstDevice);
+  if (!lupine_deviceptrs_share_route(dstDevice, srcDevice)) {
+    return lupine_cuMemcpyDtoD_via_client(dstDevice, srcDevice, ByteCount,
+                                          hStream, true);
+  }
   if (lupine_route_is_local(route)) {
     using real_fn_t = CUresult (*)(CUdeviceptr, CUdeviceptr, size_t, CUstream);
     auto real = reinterpret_cast<real_fn_t>(
@@ -3721,6 +3749,10 @@ CUresult cuStreamWaitEvent(CUstream hStream, CUevent hEvent,
                            unsigned int Flags) {
   lupine_route route = (hStream != nullptr ? lupine_route_for_stream(hStream)
                                            : lupine_route_for_default());
+  lupine_route event_route = lupine_route_for_event(hEvent);
+  if (hEvent != nullptr && !lupine_routes_share_server(route, event_route)) {
+    return cuEventSynchronize(hEvent);
+  }
   if (lupine_route_is_local(route)) {
     using real_fn_t = CUresult (*)(CUstream, CUevent, unsigned int);
     auto real = reinterpret_cast<real_fn_t>(
