@@ -97,9 +97,55 @@ struct scuda_kernel_param_layout {
   size_t sizes[64] = {};
 };
 
+struct scuda_kernel_param_layout_key {
+  int route_id = -2;
+  CUfunction function = nullptr;
+
+  bool operator==(const scuda_kernel_param_layout_key &other) const {
+    return route_id == other.route_id && function == other.function;
+  }
+};
+
+struct scuda_kernel_param_layout_key_hash {
+  size_t operator()(const scuda_kernel_param_layout_key &key) const {
+    size_t hash = std::hash<int>{}(key.route_id);
+    hash ^= std::hash<uintptr_t>{}(reinterpret_cast<uintptr_t>(key.function)) +
+            0x9e3779b9 + (hash << 6) + (hash >> 2);
+    return hash;
+  }
+};
+
 struct scuda_private_node_mapping {
   CUfunction server_function = nullptr;
   uint64_t server_owner = 0;
+  CUmodule module = nullptr;
+  std::unordered_map<int, CUfunction> functions_by_route;
+};
+
+struct scuda_library_image_record {
+  uint32_t kind = 0;
+  const void *code = nullptr;
+  std::vector<unsigned char> image;
+  std::unordered_map<int, CUlibrary> libraries_by_route;
+};
+
+struct scuda_module_image_record {
+  uint32_t kind = 0;
+  const void *image_ptr = nullptr;
+  std::vector<unsigned char> image;
+  std::unordered_map<int, CUmodule> modules_by_route;
+};
+
+struct scuda_library_kernel_record {
+  CUlibrary library = nullptr;
+  std::string name;
+  std::unordered_map<int, CUkernel> kernels_by_route;
+};
+
+struct scuda_module_function_record {
+  CUmodule module = nullptr;
+  std::string name;
+  std::unordered_map<int, CUfunction> functions_by_route;
 };
 
 static bool scuda_mem_pool_attribute_size(CUmemPool_attribute attr,
@@ -243,9 +289,14 @@ static std::unordered_map<CUfunction, CUfunction> &scuda_host_function_map() {
   return mappings;
 }
 
-static std::unordered_map<CUfunction, scuda_kernel_param_layout> &
+static std::unordered_map<scuda_kernel_param_layout_key,
+                          scuda_kernel_param_layout,
+                          scuda_kernel_param_layout_key_hash> &
 scuda_kernel_param_layout_cache() {
-  static std::unordered_map<CUfunction, scuda_kernel_param_layout> cache;
+  static std::unordered_map<scuda_kernel_param_layout_key,
+                            scuda_kernel_param_layout,
+                            scuda_kernel_param_layout_key_hash>
+      cache;
   return cache;
 }
 
@@ -273,6 +324,12 @@ struct scuda_owner {
   unsigned int conn_index = 0;
 };
 
+struct scuda_deviceptr_allocation_record {
+  CUdeviceptr base = 0;
+  size_t size = 0;
+  scuda_owner owner;
+};
+
 struct scuda_device_entry {
   bool local = false;
   int local_ordinal = -1;
@@ -298,15 +355,18 @@ struct scuda_device_attribute_key {
 };
 
 struct scuda_kernel_function_key {
+  int route_id = -2;
   CUcontext context = nullptr;
   CUkernel kernel = nullptr;
 
   bool operator==(const scuda_kernel_function_key &other) const {
-    return context == other.context && kernel == other.kernel;
+    return route_id == other.route_id && context == other.context &&
+           kernel == other.kernel;
   }
 };
 
 struct scuda_occupancy_key {
+  int route_id = -2;
   CUfunction function = nullptr;
   int block_size = 0;
   size_t dynamic_smem_size = 0;
@@ -314,9 +374,10 @@ struct scuda_occupancy_key {
   bool with_flags = false;
 
   bool operator==(const scuda_occupancy_key &other) const {
-    return function == other.function && block_size == other.block_size &&
-           dynamic_smem_size == other.dynamic_smem_size &&
-           flags == other.flags && with_flags == other.with_flags;
+    return route_id == other.route_id && function == other.function &&
+           block_size == other.block_size &&
+           dynamic_smem_size == other.dynamic_smem_size && flags == other.flags &&
+           with_flags == other.with_flags;
   }
 };
 
@@ -329,8 +390,9 @@ struct scuda_device_attribute_key_hash {
 
 struct scuda_kernel_function_key_hash {
   size_t operator()(const scuda_kernel_function_key &key) const {
-    size_t hash =
-        std::hash<uintptr_t>{}(reinterpret_cast<uintptr_t>(key.context));
+    size_t hash = std::hash<int>{}(key.route_id);
+    hash ^= std::hash<uintptr_t>{}(reinterpret_cast<uintptr_t>(key.context)) +
+            0x9e3779b9 + (hash << 6) + (hash >> 2);
     hash ^= std::hash<uintptr_t>{}(reinterpret_cast<uintptr_t>(key.kernel)) +
             0x9e3779b9 + (hash << 6) + (hash >> 2);
     return hash;
@@ -339,8 +401,9 @@ struct scuda_kernel_function_key_hash {
 
 struct scuda_occupancy_key_hash {
   size_t operator()(const scuda_occupancy_key &key) const {
-    size_t hash =
-        std::hash<uintptr_t>{}(reinterpret_cast<uintptr_t>(key.function));
+    size_t hash = std::hash<int>{}(key.route_id);
+    hash ^= std::hash<uintptr_t>{}(reinterpret_cast<uintptr_t>(key.function)) +
+            0x9e3779b9 + (hash << 6) + (hash >> 2);
     hash ^= std::hash<int>{}(key.block_size) + 0x9e3779b9 + (hash << 6) +
             (hash >> 2);
     hash ^= std::hash<size_t>{}(key.dynamic_smem_size) + 0x9e3779b9 +
@@ -378,6 +441,39 @@ static std::unordered_map<CUmodule, scuda_owner> &scuda_module_owners() {
   return *owners;
 }
 
+static std::unordered_map<CUmodule, scuda_module_image_record> &
+scuda_module_images() {
+  static auto *images =
+      new std::unordered_map<CUmodule, scuda_module_image_record>();
+  return *images;
+}
+
+static std::unordered_map<CUlibrary, scuda_owner> &scuda_library_owners() {
+  static auto *owners = new std::unordered_map<CUlibrary, scuda_owner>();
+  return *owners;
+}
+
+static std::unordered_map<CUlibrary, scuda_library_image_record> &
+scuda_library_images() {
+  static auto *images =
+      new std::unordered_map<CUlibrary, scuda_library_image_record>();
+  return *images;
+}
+
+static std::unordered_map<CUkernel, scuda_library_kernel_record> &
+scuda_library_kernels() {
+  static auto *kernels =
+      new std::unordered_map<CUkernel, scuda_library_kernel_record>();
+  return *kernels;
+}
+
+static std::unordered_map<CUfunction, scuda_module_function_record> &
+scuda_module_functions() {
+  static auto *functions =
+      new std::unordered_map<CUfunction, scuda_module_function_record>();
+  return *functions;
+}
+
 static std::unordered_map<CUfunction, scuda_owner> &scuda_function_owners() {
   static auto *owners = new std::unordered_map<CUfunction, scuda_owner>();
   return *owners;
@@ -396,6 +492,13 @@ static std::unordered_map<CUevent, scuda_owner> &scuda_event_owners() {
 static std::unordered_map<CUdeviceptr, scuda_owner> &scuda_deviceptr_owners() {
   static auto *owners = new std::unordered_map<CUdeviceptr, scuda_owner>();
   return *owners;
+}
+
+static std::unordered_map<CUdeviceptr, scuda_deviceptr_allocation_record> &
+scuda_deviceptr_allocations() {
+  static auto *allocations =
+      new std::unordered_map<CUdeviceptr, scuda_deviceptr_allocation_record>();
+  return *allocations;
 }
 
 static std::unordered_map<int, scuda_primary_context_state> &
@@ -446,6 +549,11 @@ static std::mutex &scuda_occupancy_cache_mutex() {
 }
 
 static std::mutex &scuda_host_function_mutex() {
+  static auto *mutex = new std::mutex();
+  return *mutex;
+}
+
+static std::mutex &scuda_library_kernel_mutex() {
   static auto *mutex = new std::mutex();
   return *mutex;
 }
@@ -572,7 +680,54 @@ static scuda_route scuda_route_for_owner(const scuda_owner &owner) {
   return scuda_remote_route_for_conn(scuda_conn_by_index(owner.conn_index));
 }
 
+static int scuda_route_identity(scuda_route route) {
+  if (route.kind == SCUDA_ROUTE_LOCAL) {
+    return -1;
+  }
+  if (route.kind == SCUDA_ROUTE_REMOTE) {
+    return scuda_conn_index(route.conn);
+  }
+  return -2;
+}
+
+static scuda_route scuda_route_from_identity(int route_id) {
+  if (route_id == -1) {
+    return scuda_local_route();
+  }
+  if (route_id >= 0) {
+    return scuda_remote_route_for_conn(
+        scuda_conn_by_index(static_cast<unsigned int>(route_id)));
+  }
+  return scuda_route{SCUDA_ROUTE_INVALID, nullptr};
+}
+
+static int scuda_known_deviceptr_route_id(CUdeviceptr ptr) {
+  if (ptr == 0) {
+    return -2;
+  }
+  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  auto it = scuda_deviceptr_owners().find(ptr);
+  if (it != scuda_deviceptr_owners().end()) {
+    return it->second.local ? -1 : static_cast<int>(it->second.conn_index);
+  }
+  for (const auto &entry : scuda_deviceptr_allocations()) {
+    const auto &allocation = entry.second;
+    if (allocation.base == 0 || allocation.size == 0 ||
+        ptr < allocation.base) {
+      continue;
+    }
+    uint64_t offset = static_cast<uint64_t>(ptr - allocation.base);
+    if (offset < allocation.size) {
+      return allocation.owner.local
+                 ? -1
+                 : static_cast<int>(allocation.owner.conn_index);
+    }
+  }
+  return -2;
+}
+
 extern "C" scuda_route scuda_route_for_default();
+static bool scuda_is_local_address(const void *ptr);
 
 static CUresult scuda_remote_cuInit(conn_t *conn, unsigned int flags) {
   CUresult result = CUDA_ERROR_DEVICE_UNAVAILABLE;
@@ -819,6 +974,9 @@ extern "C" CUdevice scuda_local_device_for_remote(conn_t *conn,
   return -1;
 }
 
+extern "C" scuda_route scuda_route_for_current_context();
+extern "C" scuda_route scuda_route_for_context(CUcontext ctx);
+
 extern "C" CUresult scuda_cuDeviceCanAccessPeer_multi(int *canAccessPeer,
                                                       CUdevice dev,
                                                       CUdevice peerDev) {
@@ -860,6 +1018,55 @@ extern "C" CUresult scuda_cuDeviceCanAccessPeer_multi(int *canAccessPeer,
   return result;
 }
 
+extern "C" CUresult scuda_cuCtxEnablePeerAccess_multi(CUcontext peerContext,
+                                                       unsigned int flags) {
+  scuda_route current_route = scuda_route_for_current_context();
+  scuda_route peer_route = scuda_route_for_context(peerContext);
+  if (scuda_route_identity(current_route) != scuda_route_identity(peer_route)) {
+    return CUDA_ERROR_PEER_ACCESS_UNSUPPORTED;
+  }
+  if (scuda_route_is_local(current_route)) {
+    using real_fn_t = CUresult (*)(CUcontext, unsigned int);
+    auto real = scuda_real_cuda_fn<real_fn_t>("cuCtxEnablePeerAccess");
+    return real == nullptr ? CUDA_ERROR_DEVICE_UNAVAILABLE
+                           : real(peerContext, flags);
+  }
+  conn_t *conn = scuda_route_remote_conn(current_route);
+  CUresult result = CUDA_ERROR_DEVICE_UNAVAILABLE;
+  if (conn == nullptr ||
+      rpc_write_start_request(conn, RPC_cuCtxEnablePeerAccess) < 0 ||
+      rpc_write(conn, &peerContext, sizeof(peerContext)) < 0 ||
+      rpc_write(conn, &flags, sizeof(flags)) < 0 ||
+      rpc_wait_for_response(conn) < 0 ||
+      rpc_read(conn, &result, sizeof(result)) < 0 || rpc_read_end(conn) < 0) {
+    return CUDA_ERROR_DEVICE_UNAVAILABLE;
+  }
+  return result;
+}
+
+extern "C" CUresult scuda_cuCtxDisablePeerAccess_multi(CUcontext peerContext) {
+  scuda_route current_route = scuda_route_for_current_context();
+  scuda_route peer_route = scuda_route_for_context(peerContext);
+  if (scuda_route_identity(current_route) != scuda_route_identity(peer_route)) {
+    return CUDA_ERROR_PEER_ACCESS_NOT_ENABLED;
+  }
+  if (scuda_route_is_local(current_route)) {
+    using real_fn_t = CUresult (*)(CUcontext);
+    auto real = scuda_real_cuda_fn<real_fn_t>("cuCtxDisablePeerAccess");
+    return real == nullptr ? CUDA_ERROR_DEVICE_UNAVAILABLE : real(peerContext);
+  }
+  conn_t *conn = scuda_route_remote_conn(current_route);
+  CUresult result = CUDA_ERROR_DEVICE_UNAVAILABLE;
+  if (conn == nullptr ||
+      rpc_write_start_request(conn, RPC_cuCtxDisablePeerAccess) < 0 ||
+      rpc_write(conn, &peerContext, sizeof(peerContext)) < 0 ||
+      rpc_wait_for_response(conn) < 0 ||
+      rpc_read(conn, &result, sizeof(result)) < 0 || rpc_read_end(conn) < 0) {
+    return CUDA_ERROR_DEVICE_UNAVAILABLE;
+  }
+  return result;
+}
+
 extern "C" void scuda_note_context_owner(CUcontext ctx, conn_t *conn) {
   int index = scuda_conn_index(conn);
   if (ctx == nullptr || index < 0) {
@@ -876,6 +1083,16 @@ extern "C" void scuda_note_module_owner(CUmodule module, conn_t *conn) {
   }
   std::lock_guard<std::mutex> lock(scuda_routing_mutex());
   scuda_module_owners()[module] = scuda_owner{false, static_cast<unsigned int>(index)};
+}
+
+extern "C" void scuda_note_library_owner(CUlibrary library, conn_t *conn) {
+  int index = scuda_conn_index(conn);
+  if (library == nullptr || index < 0) {
+    return;
+  }
+  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  scuda_library_owners()[library] =
+      scuda_owner{false, static_cast<unsigned int>(index)};
 }
 
 extern "C" void scuda_note_function_owner(CUfunction function, conn_t *conn) {
@@ -914,6 +1131,29 @@ extern "C" void scuda_note_deviceptr_owner(CUdeviceptr ptr, conn_t *conn) {
   scuda_deviceptr_owners()[ptr] = scuda_owner{false, static_cast<unsigned int>(index)};
 }
 
+static void scuda_note_deviceptr_allocation_owner_locked(CUdeviceptr ptr,
+                                                         size_t size,
+                                                         scuda_owner owner) {
+  scuda_deviceptr_owners()[ptr] = owner;
+  if (size == 0) {
+    scuda_deviceptr_allocations().erase(ptr);
+    return;
+  }
+  scuda_deviceptr_allocations()[ptr] =
+      scuda_deviceptr_allocation_record{ptr, size, owner};
+}
+
+extern "C" void scuda_note_deviceptr_allocation(CUdeviceptr ptr, size_t size,
+                                                 conn_t *conn) {
+  int index = scuda_conn_index(conn);
+  if (ptr == 0 || index < 0) {
+    return;
+  }
+  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  scuda_note_deviceptr_allocation_owner_locked(
+      ptr, size, scuda_owner{false, static_cast<unsigned int>(index)});
+}
+
 extern "C" void scuda_note_context_owner_route(CUcontext ctx,
                                                 scuda_route route) {
   if (ctx == nullptr || route.kind == SCUDA_ROUTE_INVALID) {
@@ -938,6 +1178,19 @@ extern "C" void scuda_note_module_owner_route(CUmodule module,
   }
   std::lock_guard<std::mutex> lock(scuda_routing_mutex());
   scuda_module_owners()[module] = scuda_owner{true, 0};
+}
+
+extern "C" void scuda_note_library_owner_route(CUlibrary library,
+                                                scuda_route route) {
+  if (library == nullptr || route.kind == SCUDA_ROUTE_INVALID) {
+    return;
+  }
+  if (route.kind == SCUDA_ROUTE_REMOTE) {
+    scuda_note_library_owner(library, route.conn);
+    return;
+  }
+  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  scuda_library_owners()[library] = scuda_owner{true, 0};
 }
 
 extern "C" void scuda_note_function_owner_route(CUfunction function,
@@ -992,9 +1245,25 @@ extern "C" void scuda_note_deviceptr_owner_route(CUdeviceptr ptr,
   scuda_deviceptr_owners()[ptr] = scuda_owner{true, 0};
 }
 
+extern "C" void scuda_note_deviceptr_allocation_route(CUdeviceptr ptr,
+                                                       size_t size,
+                                                       scuda_route route) {
+  if (ptr == 0 || route.kind == SCUDA_ROUTE_INVALID) {
+    return;
+  }
+  if (route.kind == SCUDA_ROUTE_REMOTE) {
+    scuda_note_deviceptr_allocation(ptr, size, route.conn);
+    return;
+  }
+  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  scuda_note_deviceptr_allocation_owner_locked(ptr, size,
+                                               scuda_owner{true, 0});
+}
+
 extern "C" void scuda_forget_deviceptr_owner(CUdeviceptr ptr) {
   std::lock_guard<std::mutex> lock(scuda_routing_mutex());
   scuda_deviceptr_owners().erase(ptr);
+  scuda_deviceptr_allocations().erase(ptr);
 }
 
 extern "C" scuda_route scuda_route_for_context(CUcontext ctx) {
@@ -1016,6 +1285,17 @@ extern "C" scuda_route scuda_route_for_module(CUmodule module) {
     std::lock_guard<std::mutex> lock(scuda_routing_mutex());
     auto it = scuda_module_owners().find(module);
     if (it != scuda_module_owners().end()) {
+      return scuda_route_for_owner(it->second);
+    }
+  }
+  return scuda_route_for_default();
+}
+
+extern "C" scuda_route scuda_route_for_library(CUlibrary library) {
+  {
+    std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+    auto it = scuda_library_owners().find(library);
+    if (it != scuda_library_owners().end()) {
       return scuda_route_for_owner(it->second);
     }
   }
@@ -1065,6 +1345,17 @@ extern "C" scuda_route scuda_route_for_deviceptr(CUdeviceptr ptr) {
     if (it != scuda_deviceptr_owners().end()) {
       return scuda_route_for_owner(it->second);
     }
+    for (const auto &entry : scuda_deviceptr_allocations()) {
+      const auto &allocation = entry.second;
+      if (allocation.base == 0 || allocation.size == 0 ||
+          ptr < allocation.base) {
+        continue;
+      }
+      uint64_t offset = static_cast<uint64_t>(ptr - allocation.base);
+      if (offset < allocation.size) {
+        return scuda_route_for_owner(allocation.owner);
+      }
+    }
   }
   return scuda_route_for_default();
 }
@@ -1091,6 +1382,368 @@ extern "C" conn_t *scuda_rpc_conn_for_event(CUevent event) {
 
 extern "C" conn_t *scuda_rpc_conn_for_deviceptr(CUdeviceptr ptr) {
   return scuda_route_remote_conn(scuda_route_for_deviceptr(ptr));
+}
+
+extern "C" void scuda_record_library_image(CUlibrary library, scuda_route route,
+                                            uint32_t kind,
+                                            const unsigned char *image,
+                                            size_t image_size,
+                                            const void *code) {
+  int route_id = scuda_route_identity(route);
+  if (library == nullptr || image == nullptr || image_size == 0 ||
+      route_id == -2) {
+    return;
+  }
+  std::lock_guard<std::mutex> lock(scuda_library_kernel_mutex());
+  auto &record = scuda_library_images()[library];
+  record.kind = kind;
+  record.code = code;
+  record.image.assign(image, image + image_size);
+  record.libraries_by_route[route_id] = library;
+}
+
+extern "C" void scuda_record_module_image(CUmodule module, scuda_route route,
+                                           uint32_t kind,
+                                           const unsigned char *image,
+                                           size_t image_size,
+                                           const void *image_ptr) {
+  int route_id = scuda_route_identity(route);
+  if (module == nullptr || image == nullptr || image_size == 0 ||
+      route_id == -2) {
+    return;
+  }
+  std::lock_guard<std::mutex> lock(scuda_library_kernel_mutex());
+  auto &record = scuda_module_images()[module];
+  record.kind = kind;
+  record.image_ptr = image_ptr;
+  record.image.assign(image, image + image_size);
+  record.modules_by_route[route_id] = module;
+}
+
+extern "C" void scuda_record_library_kernel(CUkernel kernel, CUlibrary library,
+                                             const char *name,
+                                             scuda_route route) {
+  int route_id = scuda_route_identity(route);
+  if (kernel == nullptr || library == nullptr || name == nullptr ||
+      route_id == -2) {
+    return;
+  }
+  {
+    std::lock_guard<std::mutex> lock(scuda_library_kernel_mutex());
+    auto &record = scuda_library_kernels()[kernel];
+    record.library = library;
+    record.name = name;
+    record.kernels_by_route[route_id] = kernel;
+  }
+  scuda_note_function_owner_route(reinterpret_cast<CUfunction>(kernel), route);
+}
+
+extern "C" void scuda_record_module_function(CUfunction function,
+                                              CUmodule module,
+                                              const char *name,
+                                              scuda_route route) {
+  int route_id = scuda_route_identity(route);
+  if (function == nullptr || module == nullptr || name == nullptr ||
+      route_id == -2) {
+    return;
+  }
+  {
+    std::lock_guard<std::mutex> lock(scuda_library_kernel_mutex());
+    auto &record = scuda_module_functions()[function];
+    record.module = module;
+    record.name = name;
+    record.functions_by_route[route_id] = function;
+  }
+  scuda_note_function_owner_route(function, route);
+}
+
+static CUresult scuda_load_recorded_module_on_route(CUmodule source_module,
+                                                    scuda_route route,
+                                                    CUmodule *module) {
+  if (module == nullptr) {
+    return CUDA_ERROR_INVALID_VALUE;
+  }
+  *module = nullptr;
+  int route_id = scuda_route_identity(route);
+  if (source_module == nullptr || route_id == -2) {
+    return CUDA_ERROR_INVALID_VALUE;
+  }
+
+  scuda_module_image_record record;
+  {
+    std::lock_guard<std::mutex> lock(scuda_library_kernel_mutex());
+    auto it = scuda_module_images().find(source_module);
+    if (it == scuda_module_images().end()) {
+      return CUDA_ERROR_NOT_FOUND;
+    }
+    auto cached = it->second.modules_by_route.find(route_id);
+    if (cached != it->second.modules_by_route.end()) {
+      *module = cached->second;
+      return CUDA_SUCCESS;
+    }
+    record = it->second;
+  }
+
+  CUmodule loaded = nullptr;
+  CUresult result = CUDA_ERROR_DEVICE_UNAVAILABLE;
+  if (scuda_route_is_local(route)) {
+    using real_fn_t = CUresult (*)(CUmodule *, const void *);
+    auto real = scuda_real_cuda_fn<real_fn_t>("cuModuleLoadData");
+    if (real == nullptr || record.image_ptr == nullptr) {
+      return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    }
+    result = real(&loaded, record.image_ptr);
+  } else {
+    conn_t *conn = scuda_route_remote_conn(route);
+    size_t image_size = record.image.size();
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuModuleLoadData) < 0 ||
+        rpc_write(conn, &record.kind, sizeof(record.kind)) < 0 ||
+        rpc_write(conn, &image_size, sizeof(image_size)) < 0 ||
+        rpc_write(conn, record.image.data(), image_size) < 0 ||
+        rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, &loaded, sizeof(loaded)) < 0 ||
+        rpc_read(conn, &result, sizeof(result)) < 0 || rpc_read_end(conn) < 0) {
+      return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    }
+  }
+
+  if (result != CUDA_SUCCESS || loaded == nullptr) {
+    return result;
+  }
+
+  scuda_remember_loaded_module(loaded);
+  scuda_note_module_owner_route(loaded, route);
+  {
+    std::lock_guard<std::mutex> lock(scuda_library_kernel_mutex());
+    scuda_module_images()[source_module].modules_by_route[route_id] = loaded;
+    auto &loaded_record = scuda_module_images()[loaded];
+    loaded_record.kind = record.kind;
+    loaded_record.image_ptr = record.image_ptr;
+    loaded_record.image = std::move(record.image);
+    loaded_record.modules_by_route[route_id] = loaded;
+  }
+  *module = loaded;
+  return CUDA_SUCCESS;
+}
+
+static CUresult scuda_load_recorded_library_on_route(
+    CUlibrary source_library, scuda_route route, CUlibrary *library) {
+  if (library == nullptr) {
+    return CUDA_ERROR_INVALID_VALUE;
+  }
+  *library = nullptr;
+  int route_id = scuda_route_identity(route);
+  if (source_library == nullptr || route_id == -2) {
+    return CUDA_ERROR_INVALID_VALUE;
+  }
+
+  scuda_library_image_record record;
+  {
+    std::lock_guard<std::mutex> lock(scuda_library_kernel_mutex());
+    auto it = scuda_library_images().find(source_library);
+    if (it == scuda_library_images().end()) {
+      return CUDA_ERROR_NOT_FOUND;
+    }
+    auto cached = it->second.libraries_by_route.find(route_id);
+    if (cached != it->second.libraries_by_route.end()) {
+      *library = cached->second;
+      return CUDA_SUCCESS;
+    }
+    record = it->second;
+  }
+
+  CUlibrary loaded = nullptr;
+  CUresult result = CUDA_ERROR_DEVICE_UNAVAILABLE;
+  if (scuda_route_is_local(route)) {
+    using real_fn_t = CUresult (*)(CUlibrary *, const void *, CUjit_option *,
+                                   void **, unsigned int, CUlibraryOption *,
+                                   void **, unsigned int);
+    auto real = scuda_real_cuda_fn<real_fn_t>("cuLibraryLoadData");
+    if (real == nullptr || record.code == nullptr) {
+      return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    }
+    result = real(&loaded, record.code, nullptr, nullptr, 0, nullptr, nullptr, 0);
+  } else {
+    conn_t *conn = scuda_route_remote_conn(route);
+    size_t image_size = record.image.size();
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuLibraryLoadData) < 0 ||
+        rpc_write(conn, &record.kind, sizeof(record.kind)) < 0 ||
+        rpc_write(conn, &image_size, sizeof(image_size)) < 0 ||
+        rpc_write(conn, record.image.data(), image_size) < 0 ||
+        rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, &loaded, sizeof(loaded)) < 0 ||
+        rpc_read(conn, &result, sizeof(result)) < 0 || rpc_read_end(conn) < 0) {
+      return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    }
+  }
+
+  if (result != CUDA_SUCCESS || loaded == nullptr) {
+    return result;
+  }
+
+  scuda_note_library_owner_route(loaded, route);
+  {
+    std::lock_guard<std::mutex> lock(scuda_library_kernel_mutex());
+    scuda_library_images()[source_library].libraries_by_route[route_id] = loaded;
+    auto &loaded_record = scuda_library_images()[loaded];
+    loaded_record.kind = record.kind;
+    loaded_record.code = record.code;
+    loaded_record.image = std::move(record.image);
+    loaded_record.libraries_by_route[route_id] = loaded;
+  }
+  *library = loaded;
+  return CUDA_SUCCESS;
+}
+
+static CUresult scuda_resolve_library_kernel_for_route(CUfunction function,
+                                                       scuda_route route,
+                                                       CUfunction *resolved) {
+  if (resolved == nullptr) {
+    return CUDA_ERROR_INVALID_VALUE;
+  }
+  *resolved = function;
+  int route_id = scuda_route_identity(route);
+  if (function == nullptr || route_id == -2) {
+    return CUDA_SUCCESS;
+  }
+
+  scuda_library_kernel_record record;
+  {
+    std::lock_guard<std::mutex> lock(scuda_library_kernel_mutex());
+    auto it =
+        scuda_library_kernels().find(reinterpret_cast<CUkernel>(function));
+    if (it == scuda_library_kernels().end()) {
+      return CUDA_SUCCESS;
+    }
+    auto cached = it->second.kernels_by_route.find(route_id);
+    if (cached != it->second.kernels_by_route.end()) {
+      *resolved = reinterpret_cast<CUfunction>(cached->second);
+      return CUDA_SUCCESS;
+    }
+    record = it->second;
+  }
+
+  CUlibrary library = nullptr;
+  CUresult result =
+      scuda_load_recorded_library_on_route(record.library, route, &library);
+  if (result != CUDA_SUCCESS) {
+    return result;
+  }
+
+  CUkernel kernel = nullptr;
+  if (scuda_route_is_local(route)) {
+    using real_fn_t = CUresult (*)(CUkernel *, CUlibrary, const char *);
+    auto real = scuda_real_cuda_fn<real_fn_t>("cuLibraryGetKernel");
+    if (real == nullptr) {
+      return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    }
+    result = real(&kernel, library, record.name.c_str());
+  } else {
+    conn_t *conn = scuda_route_remote_conn(route);
+    std::size_t name_len = record.name.size() + 1;
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuLibraryGetKernel) < 0 ||
+        rpc_write(conn, &library, sizeof(library)) < 0 ||
+        rpc_write(conn, &name_len, sizeof(name_len)) < 0 ||
+        rpc_write(conn, record.name.c_str(), name_len) < 0 ||
+        rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, &kernel, sizeof(kernel)) < 0 ||
+        rpc_read(conn, &result, sizeof(result)) < 0 || rpc_read_end(conn) < 0) {
+      return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    }
+  }
+  if (result != CUDA_SUCCESS || kernel == nullptr) {
+    return result;
+  }
+
+  {
+    std::lock_guard<std::mutex> lock(scuda_library_kernel_mutex());
+    scuda_library_kernels()[reinterpret_cast<CUkernel>(function)]
+        .kernels_by_route[route_id] = kernel;
+    auto &new_record = scuda_library_kernels()[kernel];
+    new_record.library = library;
+    new_record.name = record.name;
+    new_record.kernels_by_route[route_id] = kernel;
+  }
+  scuda_note_function_owner_route(reinterpret_cast<CUfunction>(kernel), route);
+  *resolved = reinterpret_cast<CUfunction>(kernel);
+  return CUDA_SUCCESS;
+}
+
+static CUresult scuda_resolve_module_function_for_route(CUfunction function,
+                                                        scuda_route route,
+                                                        CUfunction *resolved) {
+  if (resolved == nullptr) {
+    return CUDA_ERROR_INVALID_VALUE;
+  }
+  *resolved = function;
+  int route_id = scuda_route_identity(route);
+  if (function == nullptr || route_id == -2) {
+    return CUDA_SUCCESS;
+  }
+
+  scuda_module_function_record record;
+  {
+    std::lock_guard<std::mutex> lock(scuda_library_kernel_mutex());
+    auto it = scuda_module_functions().find(function);
+    if (it == scuda_module_functions().end()) {
+      return CUDA_SUCCESS;
+    }
+    auto cached = it->second.functions_by_route.find(route_id);
+    if (cached != it->second.functions_by_route.end()) {
+      *resolved = cached->second;
+      return CUDA_SUCCESS;
+    }
+    record = it->second;
+  }
+
+  CUmodule module = nullptr;
+  CUresult result =
+      scuda_load_recorded_module_on_route(record.module, route, &module);
+  if (result != CUDA_SUCCESS) {
+    return result;
+  }
+
+  CUfunction route_function = nullptr;
+  if (scuda_route_is_local(route)) {
+    using real_fn_t = CUresult (*)(CUfunction *, CUmodule, const char *);
+    auto real = scuda_real_cuda_fn<real_fn_t>("cuModuleGetFunction");
+    if (real == nullptr) {
+      return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    }
+    result = real(&route_function, module, record.name.c_str());
+  } else {
+    conn_t *conn = scuda_route_remote_conn(route);
+    std::size_t name_len = record.name.size() + 1;
+    if (conn == nullptr ||
+        rpc_write_start_request(conn, RPC_cuModuleGetFunction) < 0 ||
+        rpc_write(conn, &module, sizeof(module)) < 0 ||
+        rpc_write(conn, &name_len, sizeof(name_len)) < 0 ||
+        rpc_write(conn, record.name.c_str(), name_len) < 0 ||
+        rpc_wait_for_response(conn) < 0 ||
+        rpc_read(conn, &route_function, sizeof(route_function)) < 0 ||
+        rpc_read(conn, &result, sizeof(result)) < 0 || rpc_read_end(conn) < 0) {
+      return CUDA_ERROR_DEVICE_UNAVAILABLE;
+    }
+  }
+  if (result != CUDA_SUCCESS || route_function == nullptr) {
+    return result;
+  }
+
+  {
+    std::lock_guard<std::mutex> lock(scuda_library_kernel_mutex());
+    scuda_module_functions()[function].functions_by_route[route_id] =
+        route_function;
+    auto &new_record = scuda_module_functions()[route_function];
+    new_record.module = module;
+    new_record.name = record.name;
+    new_record.functions_by_route[route_id] = route_function;
+  }
+  scuda_note_function_owner_route(route_function, route);
+  *resolved = route_function;
+  return CUDA_SUCCESS;
 }
 
 static bool scuda_read_file_span(const char *path,
@@ -1254,6 +1907,70 @@ static CUfunction scuda_translate_private_function(CUfunction function) {
   return scuda_resolve_host_function(function);
 }
 
+static CUresult scuda_get_remote_private_module_node(CUcontext context,
+                                                     CUmodule module,
+                                                     CUfunction *server_node,
+                                                     uint64_t *server_owner);
+
+static CUresult scuda_resolve_private_function_for_route(CUfunction function,
+                                                         scuda_route route,
+                                                         CUfunction *resolved) {
+  if (resolved == nullptr) {
+    return CUDA_ERROR_INVALID_VALUE;
+  }
+  *resolved = function;
+  int route_id = scuda_route_identity(route);
+  if (function == nullptr || route_id == -2) {
+    return CUDA_SUCCESS;
+  }
+
+  scuda_private_node_mapping mapping;
+  {
+    std::lock_guard<std::mutex> lock(scuda_private_node_mutex());
+    auto it = scuda_private_node_map().find(function);
+    if (it == scuda_private_node_map().end()) {
+      return CUDA_SUCCESS;
+    }
+    auto cached = it->second.functions_by_route.find(route_id);
+    if (cached != it->second.functions_by_route.end()) {
+      *resolved = cached->second;
+      return CUDA_SUCCESS;
+    }
+    mapping = it->second;
+  }
+
+  if (mapping.module == nullptr) {
+    return CUDA_ERROR_NOT_FOUND;
+  }
+  CUmodule module = nullptr;
+  CUresult result =
+      scuda_load_recorded_module_on_route(mapping.module, route, &module);
+  if (result != CUDA_SUCCESS || module == nullptr) {
+    return result;
+  }
+
+  CUfunction server_node = nullptr;
+  uint64_t server_owner = 0;
+  result = scuda_get_remote_private_module_node(nullptr, module, &server_node,
+                                                &server_owner);
+  if (result != CUDA_SUCCESS || server_node == nullptr) {
+    return result == CUDA_SUCCESS ? CUDA_ERROR_NOT_FOUND : result;
+  }
+
+  {
+    std::lock_guard<std::mutex> lock(scuda_private_node_mutex());
+    auto &record = scuda_private_node_map()[function];
+    record.module = mapping.module;
+    record.functions_by_route[route_id] = server_node;
+    if (record.server_function == nullptr) {
+      record.server_function = server_node;
+      record.server_owner = server_owner;
+    }
+  }
+  *resolved = server_node;
+  return CUDA_SUCCESS;
+}
+
 extern "C" CUfunction
 scuda_translate_private_function_for_rpc(CUfunction function) {
   return scuda_translate_private_function(function);
@@ -1323,7 +2040,20 @@ extern "C" CUresult scuda_cuKernelGetFunction_cached(CUfunction *pFunc,
   if (context_status != CUDA_SUCCESS) {
     return context_status;
   }
-  scuda_kernel_function_key key{current_context, kernel};
+  scuda_route route = scuda_route_for_default();
+  if (route.kind == SCUDA_ROUTE_INVALID) {
+    route = scuda_route_for_function(reinterpret_cast<CUfunction>(kernel));
+  }
+  CUfunction route_kernel_function = reinterpret_cast<CUfunction>(kernel);
+  CUresult resolve_status =
+      scuda_resolve_library_kernel_for_route(route_kernel_function, route,
+                                             &route_kernel_function);
+  if (resolve_status != CUDA_SUCCESS) {
+    return resolve_status;
+  }
+  CUkernel route_kernel = reinterpret_cast<CUkernel>(route_kernel_function);
+  scuda_kernel_function_key key{scuda_route_identity(route), current_context,
+                                route_kernel};
   {
     std::lock_guard<std::mutex> lock(scuda_kernel_function_cache_mutex());
     auto it = scuda_kernel_function_cache().find(key);
@@ -1333,14 +2063,13 @@ extern "C" CUresult scuda_cuKernelGetFunction_cached(CUfunction *pFunc,
     }
   }
 
-  scuda_route route = scuda_route_for_default();
   if (scuda_route_is_local(route)) {
     using real_fn_t = CUresult (*)(CUfunction *, CUkernel);
     auto real = scuda_real_cuda_fn<real_fn_t>("cuKernelGetFunction");
     if (real == nullptr) {
       return CUDA_ERROR_DEVICE_UNAVAILABLE;
     }
-    CUresult result = real(pFunc, kernel);
+    CUresult result = real(pFunc, route_kernel);
     if (result == CUDA_SUCCESS) {
       std::lock_guard<std::mutex> lock(scuda_kernel_function_cache_mutex());
       scuda_kernel_function_cache()[key] = *pFunc;
@@ -1353,7 +2082,7 @@ extern "C" CUresult scuda_cuKernelGetFunction_cached(CUfunction *pFunc,
   CUresult return_value;
   if (conn == nullptr ||
       rpc_write_start_request(conn, RPC_cuKernelGetFunction) < 0 ||
-      rpc_write(conn, &kernel, sizeof(kernel)) < 0 ||
+      rpc_write(conn, &route_kernel, sizeof(route_kernel)) < 0 ||
       rpc_wait_for_response(conn) < 0 ||
       rpc_read(conn, &function, sizeof(function)) < 0 ||
       rpc_read(conn, &return_value, sizeof(return_value)) < 0 ||
@@ -1378,8 +2107,9 @@ static CUresult scuda_cuOccupancy_cached(int *numBlocks, CUfunction func,
     return CUDA_ERROR_INVALID_VALUE;
   }
   CUfunction translated = scuda_translate_private_function(func);
-  scuda_occupancy_key key{translated, blockSize, dynamicSMemSize, flags,
-                          with_flags};
+  scuda_route route = scuda_route_for_function(translated);
+  scuda_occupancy_key key{scuda_route_identity(route), translated, blockSize,
+                          dynamicSMemSize, flags, with_flags};
   {
     std::lock_guard<std::mutex> lock(scuda_occupancy_cache_mutex());
     auto it = scuda_occupancy_cache().find(key);
@@ -1389,7 +2119,6 @@ static CUresult scuda_cuOccupancy_cached(int *numBlocks, CUfunction func,
     }
   }
 
-  scuda_route route = scuda_route_for_function(translated);
   if (scuda_route_is_local(route)) {
     const char *symbol =
         with_flags ? "cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags"
@@ -1473,7 +2202,19 @@ static CUresult scuda_get_remote_private_module_node(CUcontext context,
   }
   *server_node = nullptr;
   *server_owner = 0;
-  conn_t *conn = rpc_client_get_connection(0);
+  scuda_route route = context != nullptr ? scuda_route_for_context(context)
+                                         : scuda_route_for_module(module);
+  int route_id = scuda_route_identity(route);
+  if (module != nullptr && route_id != -2 &&
+      scuda_route_identity(scuda_route_for_module(module)) != route_id) {
+    CUmodule route_module = nullptr;
+    if (scuda_load_recorded_module_on_route(module, route, &route_module) ==
+            CUDA_SUCCESS &&
+        route_module != nullptr) {
+      module = route_module;
+    }
+  }
+  conn_t *conn = scuda_route_remote_conn(route);
   CUresult result = CUDA_ERROR_UNKNOWN;
   if (conn == nullptr ||
       rpc_write_start_request(conn, SCUDA_RPC_cuPrivateGetModuleNode) < 0 ||
@@ -1484,6 +2225,9 @@ static CUresult scuda_get_remote_private_module_node(CUcontext context,
       rpc_read(conn, server_owner, sizeof(*server_owner)) < 0 ||
       rpc_read(conn, &result, sizeof(result)) < 0 || rpc_read_end(conn) < 0) {
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
+  }
+  if (result == CUDA_SUCCESS && *server_node != nullptr) {
+    scuda_note_function_owner_route(*server_node, route);
   }
   return result;
 }
@@ -1507,18 +2251,20 @@ scuda_private_export_slot_called(int slot, const char *table_name,
                                  uint64_t arg3, uint64_t arg4, uint64_t arg5) {
   static uint64_t scuda_private_2131_fake_object[64] = {};
 
-  fprintf(stderr,
-          "SCUDA private export table called: %s[%d] hash=%#llx "
-          "args=%#llx,%#llx,%#llx,%#llx,%#llx,%#llx\n",
-          table_name, slot,
-          static_cast<unsigned long long>(
-              scuda_private_export_slot_hash(table_name, slot)),
-          static_cast<unsigned long long>(arg0),
-          static_cast<unsigned long long>(arg1),
-          static_cast<unsigned long long>(arg2),
-          static_cast<unsigned long long>(arg3),
-          static_cast<unsigned long long>(arg4),
-          static_cast<unsigned long long>(arg5));
+  if (scuda_trace_enabled()) {
+    fprintf(stderr,
+            "SCUDA private export table called: %s[%d] hash=%#llx "
+            "args=%#llx,%#llx,%#llx,%#llx,%#llx,%#llx\n",
+            table_name, slot,
+            static_cast<unsigned long long>(
+                scuda_private_export_slot_hash(table_name, slot)),
+            static_cast<unsigned long long>(arg0),
+            static_cast<unsigned long long>(arg1),
+            static_cast<unsigned long long>(arg2),
+            static_cast<unsigned long long>(arg3),
+            static_cast<unsigned long long>(arg4),
+            static_cast<unsigned long long>(arg5));
+  }
 
   if (table_name != nullptr &&
       strcmp(table_name, "21318c60971432488ca641ff7324c8f2") == 0 &&
@@ -1526,7 +2272,11 @@ scuda_private_export_slot_called(int slot, const char *table_name,
     if (arg1 == 0) {
       return CUDA_ERROR_UNKNOWN;
     }
-    *reinterpret_cast<uint64_t *>(arg1) = arg0 == 0 ? 0 : 1;
+    uint64_t output = arg0 == 0 ? 0 : 1;
+    *reinterpret_cast<uint64_t *>(arg1) = output;
+    if (scuda_trace_enabled()) {
+      std::cerr << "SCUDA private 2131[4] output=" << output << std::endl;
+    }
     return CUDA_SUCCESS;
   }
 
@@ -1586,8 +2336,21 @@ scuda_private_export_slot_called(int slot, const char *table_name,
     *reinterpret_cast<uint64_t *>(client_node + 0x480) = 0;
     {
       std::lock_guard<std::mutex> lock(scuda_private_node_mutex());
-      scuda_private_node_map()[reinterpret_cast<CUfunction>(client_node)] = {
-          server_node, server_owner};
+      int route_id = scuda_route_identity(scuda_route_for_function(server_node));
+      if (route_id == -2) {
+        scuda_route node_route =
+            arg0 != 0 ? scuda_route_for_context(reinterpret_cast<CUcontext>(arg0))
+                      : scuda_route_for_module(reinterpret_cast<CUmodule>(arg1));
+        route_id = scuda_route_identity(node_route);
+      }
+      auto &mapping =
+          scuda_private_node_map()[reinterpret_cast<CUfunction>(client_node)];
+      mapping.server_function = server_node;
+      mapping.server_owner = server_owner;
+      mapping.module = reinterpret_cast<CUmodule>(arg1);
+      if (route_id != -2) {
+        mapping.functions_by_route[route_id] = server_node;
+      }
     }
     if (scuda_trace_enabled()) {
       std::cerr << "SCUDA private 6e16[7] mapped client_node[" << node_index
@@ -2072,6 +2835,8 @@ extern "C" CUresult cuMemPoolSetAttribute(CUmemoryPool pool,
 }
 
 static thread_local CUcontext scuda_current_context = nullptr;
+static thread_local CUcontext scuda_default_context_hint = nullptr;
+static std::atomic<CUcontext> scuda_global_default_context_hint{nullptr};
 static thread_local std::vector<CUcontext> scuda_context_stack;
 static std::atomic<unsigned long long> scuda_context_cache_generation{0};
 static thread_local bool scuda_ctx_get_device_cache_valid = false;
@@ -2117,6 +2882,22 @@ extern "C" scuda_route scuda_route_for_default() {
       return scuda_route_for_owner(it->second);
     }
   }
+  if (scuda_default_context_hint != nullptr) {
+    std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+    auto it = scuda_context_owners().find(scuda_default_context_hint);
+    if (it != scuda_context_owners().end()) {
+      return scuda_route_for_owner(it->second);
+    }
+  }
+  CUcontext global_hint =
+      scuda_global_default_context_hint.load(std::memory_order_relaxed);
+  if (global_hint != nullptr) {
+    std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+    auto it = scuda_context_owners().find(global_hint);
+    if (it != scuda_context_owners().end()) {
+      return scuda_route_for_owner(it->second);
+    }
+  }
   conn_t *conn = scuda_conn_by_index(0);
   if (conn != nullptr) {
     return scuda_remote_route_for_conn(conn);
@@ -2158,6 +2939,10 @@ extern "C" void scuda_note_ctx_create(CUcontext ctx, conn_t *conn) {
   scuda_note_context_owner(ctx, conn);
   scuda_context_stack.push_back(scuda_current_context);
   scuda_current_context = ctx;
+  if (ctx != nullptr) {
+    scuda_default_context_hint = ctx;
+    scuda_global_default_context_hint.store(ctx, std::memory_order_relaxed);
+  }
   scuda_invalidate_current_context_cache();
 }
 
@@ -2165,6 +2950,10 @@ extern "C" void scuda_note_ctx_create_route(CUcontext ctx, scuda_route route) {
   scuda_note_context_owner_route(ctx, route);
   scuda_context_stack.push_back(scuda_current_context);
   scuda_current_context = ctx;
+  if (ctx != nullptr) {
+    scuda_default_context_hint = ctx;
+    scuda_global_default_context_hint.store(ctx, std::memory_order_relaxed);
+  }
   scuda_invalidate_current_context_cache();
 }
 
@@ -2173,6 +2962,10 @@ extern "C" CUresult scuda_cuCtxPushCurrent_virtual(CUcontext ctx) {
   CUresult result = scuda_set_remote_current_context(ctx);
   if (result == CUDA_SUCCESS) {
     scuda_current_context = ctx;
+    if (ctx != nullptr) {
+      scuda_default_context_hint = ctx;
+      scuda_global_default_context_hint.store(ctx, std::memory_order_relaxed);
+    }
     scuda_invalidate_current_context_cache();
   } else {
     scuda_context_stack.pop_back();
@@ -2193,6 +2986,11 @@ extern "C" CUresult scuda_cuCtxPopCurrent_virtual(CUcontext *pctx) {
   CUresult result = scuda_set_remote_current_context(previous);
   if (result == CUDA_SUCCESS) {
     scuda_current_context = previous;
+    if (previous != nullptr) {
+      scuda_default_context_hint = previous;
+      scuda_global_default_context_hint.store(previous,
+                                              std::memory_order_relaxed);
+    }
     scuda_invalidate_current_context_cache();
   } else {
     scuda_context_stack.push_back(previous);
@@ -2204,6 +3002,10 @@ extern "C" CUresult scuda_cuCtxSetCurrent_virtual(CUcontext ctx) {
   CUresult result = scuda_set_remote_current_context(ctx);
   if (result == CUDA_SUCCESS) {
     scuda_current_context = ctx;
+    if (ctx != nullptr) {
+      scuda_default_context_hint = ctx;
+      scuda_global_default_context_hint.store(ctx, std::memory_order_relaxed);
+    }
     scuda_invalidate_current_context_cache();
   }
   return result;
@@ -4094,6 +4896,8 @@ extern "C" CUresult cuModuleLoadData(CUmodule *module, const void *image) {
     if (result == CUDA_SUCCESS) {
       scuda_remember_loaded_module(*module);
       scuda_note_module_owner_route(*module, route);
+      scuda_record_module_image(*module, route, kind, image_bytes.data(),
+                                image_bytes.size(), image);
     }
     return result;
   }
@@ -4114,6 +4918,8 @@ extern "C" CUresult cuModuleLoadData(CUmodule *module, const void *image) {
   if (return_value == CUDA_SUCCESS) {
     scuda_remember_loaded_module(*module);
     scuda_note_module_owner(*module, conn);
+    scuda_record_module_image(*module, scuda_remote_route_for_conn(conn), kind,
+                              image_bytes.data(), image_bytes.size(), image);
   }
   return return_value;
 }
@@ -4179,6 +4985,11 @@ cuLibraryLoadData(CUlibrary *library, const void *code,
       rpc_read_end(conn) < 0) {
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
   }
+  if (return_value == CUDA_SUCCESS) {
+    scuda_note_library_owner(*library, conn);
+    scuda_record_library_image(*library, scuda_remote_route_for_conn(conn), kind,
+                               image_bytes.data(), image_bytes.size(), code);
+  }
   return return_value;
 }
 
@@ -4224,9 +5035,11 @@ scuda_get_kernel_param_layout_cached(CUfunction f,
     return CUDA_ERROR_INVALID_VALUE;
   }
   f = scuda_translate_private_function(f);
+  scuda_route route = scuda_route_for_function(f);
+  scuda_kernel_param_layout_key key{scuda_route_identity(route), f};
   {
     std::lock_guard<std::mutex> lock(scuda_kernel_param_layout_cache_mutex());
-    auto it = scuda_kernel_param_layout_cache().find(f);
+    auto it = scuda_kernel_param_layout_cache().find(key);
     if (it != scuda_kernel_param_layout_cache().end()) {
       *layout = it->second;
       return CUDA_SUCCESS;
@@ -4237,10 +5050,39 @@ scuda_get_kernel_param_layout_cached(CUfunction f,
   CUresult result = scuda_fetch_kernel_param_layout(f, &fetched);
   if (result == CUDA_SUCCESS) {
     std::lock_guard<std::mutex> lock(scuda_kernel_param_layout_cache_mutex());
-    scuda_kernel_param_layout_cache()[f] = fetched;
+    scuda_kernel_param_layout_cache()[key] = fetched;
     *layout = fetched;
   }
   return result;
+}
+
+static scuda_route
+scuda_route_from_known_kernel_deviceptr_args(
+    const std::vector<unsigned char> &packed,
+    const scuda_kernel_param_layout &layout, scuda_route fallback) {
+  int route_id = -2;
+  for (uint32_t i = 0; i < layout.count; ++i) {
+    if (layout.sizes[i] != sizeof(CUdeviceptr) ||
+        layout.offsets[i] + sizeof(CUdeviceptr) > packed.size()) {
+      continue;
+    }
+    CUdeviceptr ptr = 0;
+    memcpy(&ptr, packed.data() + layout.offsets[i], sizeof(ptr));
+    int ptr_route_id = scuda_known_deviceptr_route_id(ptr);
+    if (ptr_route_id == -2) {
+      continue;
+    }
+    if (route_id == -2) {
+      route_id = ptr_route_id;
+    } else if (route_id != ptr_route_id) {
+      return fallback;
+    }
+  }
+  if (route_id == -2 || route_id == scuda_route_identity(fallback)) {
+    return fallback;
+  }
+  scuda_route route = scuda_route_from_identity(route_id);
+  return route.kind == SCUDA_ROUTE_INVALID ? fallback : route;
 }
 
 extern "C" CUresult
@@ -4252,9 +5094,40 @@ cuLaunchKernel(CUfunction f, unsigned int gridDimX, unsigned int gridDimY,
   if (extra != nullptr) {
     return CUDA_ERROR_NOT_SUPPORTED;
   }
-  f = scuda_translate_private_function(f);
+  CUfunction requested_function = f;
+  scuda_route launch_route =
+      hStream != nullptr ? scuda_route_for_stream(hStream)
+                         : scuda_route_for_default();
+  CUfunction route_function = f;
+  CUresult resolve_status =
+      scuda_resolve_library_kernel_for_route(f, launch_route, &route_function);
+  if (resolve_status != CUDA_SUCCESS) {
+    return resolve_status;
+  }
+  resolve_status =
+      scuda_resolve_module_function_for_route(route_function, launch_route,
+                                             &route_function);
+  if (resolve_status != CUDA_SUCCESS) {
+    return resolve_status;
+  }
+  f = route_function;
+  resolve_status = scuda_resolve_private_function_for_route(f, launch_route,
+                                                            &route_function);
+  if (resolve_status != CUDA_SUCCESS) {
+    return resolve_status;
+  }
+  f = scuda_translate_private_function(route_function);
 
   scuda_route route = scuda_route_for_function(f);
+  if (scuda_trace_enabled()) {
+    std::cerr << "SCUDA cuLaunchKernel f=" << f
+              << " stream=" << hStream
+              << " launch_route=" << scuda_route_identity(launch_route)
+              << " function_route=" << scuda_route_identity(route)
+              << " grid=(" << gridDimX << "," << gridDimY << "," << gridDimZ
+              << ") block=(" << blockDimX << "," << blockDimY << ","
+              << blockDimZ << ")" << std::endl;
+  }
   if (scuda_route_is_local(route)) {
     using real_fn_t = CUresult (*)(CUfunction, unsigned int, unsigned int,
                                    unsigned int, unsigned int, unsigned int,
@@ -4292,6 +5165,54 @@ cuLaunchKernel(CUfunction f, unsigned int gridDimX, unsigned int gridDimY,
     memcpy(packed.data() + layout.offsets[i], kernelParams[i], layout.sizes[i]);
   }
 
+  scuda_route arg_route =
+      scuda_route_from_known_kernel_deviceptr_args(packed, layout, launch_route);
+  if (scuda_route_identity(arg_route) != scuda_route_identity(launch_route)) {
+    launch_route = arg_route;
+    route_function = requested_function;
+    resolve_status = scuda_resolve_library_kernel_for_route(
+        requested_function, launch_route, &route_function);
+    if (resolve_status != CUDA_SUCCESS) {
+      return resolve_status;
+    }
+    resolve_status = scuda_resolve_module_function_for_route(
+        route_function, launch_route, &route_function);
+    if (resolve_status != CUDA_SUCCESS) {
+      return resolve_status;
+    }
+    resolve_status = scuda_resolve_private_function_for_route(
+        route_function, launch_route, &route_function);
+    if (resolve_status != CUDA_SUCCESS) {
+      return resolve_status;
+    }
+    f = scuda_translate_private_function(route_function);
+    route = scuda_route_for_function(f);
+
+    status = scuda_get_kernel_param_layout_cached(f, &layout);
+    if (status != CUDA_SUCCESS) {
+      return status;
+    }
+    if (layout.count > 64) {
+      return CUDA_ERROR_NOT_SUPPORTED;
+    }
+    total_size = 0;
+    for (uint32_t i = 0; i < layout.count; ++i) {
+      if (kernelParams == nullptr || kernelParams[i] == nullptr) {
+        return CUDA_ERROR_INVALID_VALUE;
+      }
+      total_size = std::max(total_size, layout.offsets[i] + layout.sizes[i]);
+    }
+    packed.assign(total_size, 0);
+    for (uint32_t i = 0; i < layout.count; ++i) {
+      memcpy(packed.data() + layout.offsets[i], kernelParams[i],
+             layout.sizes[i]);
+    }
+    if (scuda_trace_enabled()) {
+      std::cerr << "SCUDA cuLaunchKernel rerouted by args f=" << f
+                << " route=" << scuda_route_identity(route) << std::endl;
+    }
+  }
+
   status = scuda_sync_mapped_host_to_device_for_launch(
       packed.data(), layout.offsets, layout.sizes, layout.count);
   if (status != CUDA_SUCCESS) {
@@ -4318,6 +5239,10 @@ cuLaunchKernel(CUfunction f, unsigned int gridDimX, unsigned int gridDimY,
       rpc_read(conn, &return_value, sizeof(return_value)) < 0 ||
       rpc_read_end(conn) < 0) {
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
+  }
+  if (scuda_trace_enabled() && return_value != CUDA_SUCCESS) {
+    std::cerr << "SCUDA cuLaunchKernel result="
+              << static_cast<int>(return_value) << std::endl;
   }
   return return_value;
 }
