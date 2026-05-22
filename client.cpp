@@ -7509,8 +7509,6 @@ int rpc_open() {
     return 0;
   }
 
-  std::cout << "Opening connection to server" << std::endl;
-
   char *server_ips = getenv("SCUDA_SERVER");
   if (server_ips == NULL) {
     if (pthread_mutex_unlock(&conn_mutex) < 0)
