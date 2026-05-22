@@ -12,7 +12,7 @@ jobs:
       id-token: write
     environment:
       name: pypi
-      url: https://pypi.org/p/scuda
+      url: https://pypi.org/p/lupine
     steps:
       - uses: actions/checkout@v4
 

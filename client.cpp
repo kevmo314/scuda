@@ -30,9 +30,9 @@
 #include <unordered_map>
 #include <vector>
 
-#define SCUDA_CUDA_COMPAT_TYPES_ONLY
+#define LUPINE_CUDA_COMPAT_TYPES_ONLY
 #include "cuda_compat.h"
-#undef SCUDA_CUDA_COMPAT_TYPES_ONLY
+#undef LUPINE_CUDA_COMPAT_TYPES_ONLY
 
 #include <cstdlib>
 #include <cstring>
@@ -44,7 +44,7 @@
 pthread_mutex_t conn_mutex;
 conn_t conns[16];
 int nconns = 0;
-static bool scuda_rpc_shutting_down = false;
+static bool lupine_rpc_shutting_down = false;
 
 const char *DEFAULT_PORT = "14833";
 
@@ -52,62 +52,62 @@ std::map<void *, void *> host_funcs;
 
 void add_host_node(void *fn, void *udata);
 
-struct scuda_fatbin_wrapper {
+struct lupine_fatbin_wrapper {
   uint32_t magic;
   uint32_t version;
   const void *data;
   const void *filename_or_fatbins;
 };
 
-struct scuda_fatbin_header {
+struct lupine_fatbin_header {
   uint32_t magic;
   uint16_t version;
   uint16_t header_size;
   uint64_t files_size;
 };
 
-static constexpr uint32_t SCUDA_FATBINC_MAGIC = 0x466243b1;
-static constexpr uint32_t SCUDA_FATBIN_MAGIC = 0xba55ed50;
-static constexpr uint32_t SCUDA_MODULE_IMAGE_FATBINC_V1 = 1;
-static constexpr uint32_t SCUDA_MODULE_IMAGE_FATBIN_RAW = 2;
-static constexpr uint32_t SCUDA_MODULE_IMAGE_FATBINC_V2 = 3;
-static constexpr int SCUDA_RPC_cuFuncGetParamLayout = 1000001;
-static constexpr int SCUDA_RPC_cuCtxCreate_v2 = 1000002;
-static constexpr int SCUDA_RPC_cuMemPoolSetAttribute = 1000003;
-static constexpr int SCUDA_RPC_cuMemPoolGetAttribute = 1000004;
-static constexpr int SCUDA_RPC_cuLaunchHostFunc = 1000005;
-static constexpr int SCUDA_RPC_cuPointerGetAttribute = 1000006;
-static constexpr int SCUDA_RPC_cuGetExportTableMetadata = 1000007;
-static constexpr int SCUDA_RPC_cuPrivateGetModuleNode = 1000008;
-static constexpr int SCUDA_RPC_cuPointerGetAttributes = 1000009;
-static constexpr int SCUDA_RPC_cuStreamAddCallback = 1000010;
-static constexpr int SCUDA_RPC_cuGraphConditionalHandleCreate = 1000011;
-static constexpr int SCUDA_RPC_cuGraphAddNode_v2 = 1000012;
-static constexpr int SCUDA_RPC_cuStreamBeginCaptureToGraph = 1000013;
-static constexpr int SCUDA_RPC_cuStreamUpdateCaptureDependencies_v2 = 1000014;
-static constexpr int SCUDA_RPC_cuStreamGetCaptureInfo_v3 = 1000015;
-static constexpr int SCUDA_RPC_cuDeviceGetGraphMemAttribute = 1000016;
-static constexpr int SCUDA_RPC_cuDeviceSetGraphMemAttribute = 1000017;
-static constexpr int SCUDA_RPC_cuLinkAddData_v2 = 1000018;
-static constexpr uint32_t SCUDA_PRIVATE_EXPORT_MAX_SLOTS = 256;
+static constexpr uint32_t LUPINE_FATBINC_MAGIC = 0x466243b1;
+static constexpr uint32_t LUPINE_FATBIN_MAGIC = 0xba55ed50;
+static constexpr uint32_t LUPINE_MODULE_IMAGE_FATBINC_V1 = 1;
+static constexpr uint32_t LUPINE_MODULE_IMAGE_FATBIN_RAW = 2;
+static constexpr uint32_t LUPINE_MODULE_IMAGE_FATBINC_V2 = 3;
+static constexpr int LUPINE_RPC_cuFuncGetParamLayout = 1000001;
+static constexpr int LUPINE_RPC_cuCtxCreate_v2 = 1000002;
+static constexpr int LUPINE_RPC_cuMemPoolSetAttribute = 1000003;
+static constexpr int LUPINE_RPC_cuMemPoolGetAttribute = 1000004;
+static constexpr int LUPINE_RPC_cuLaunchHostFunc = 1000005;
+static constexpr int LUPINE_RPC_cuPointerGetAttribute = 1000006;
+static constexpr int LUPINE_RPC_cuGetExportTableMetadata = 1000007;
+static constexpr int LUPINE_RPC_cuPrivateGetModuleNode = 1000008;
+static constexpr int LUPINE_RPC_cuPointerGetAttributes = 1000009;
+static constexpr int LUPINE_RPC_cuStreamAddCallback = 1000010;
+static constexpr int LUPINE_RPC_cuGraphConditionalHandleCreate = 1000011;
+static constexpr int LUPINE_RPC_cuGraphAddNode_v2 = 1000012;
+static constexpr int LUPINE_RPC_cuStreamBeginCaptureToGraph = 1000013;
+static constexpr int LUPINE_RPC_cuStreamUpdateCaptureDependencies_v2 = 1000014;
+static constexpr int LUPINE_RPC_cuStreamGetCaptureInfo_v3 = 1000015;
+static constexpr int LUPINE_RPC_cuDeviceGetGraphMemAttribute = 1000016;
+static constexpr int LUPINE_RPC_cuDeviceSetGraphMemAttribute = 1000017;
+static constexpr int LUPINE_RPC_cuLinkAddData_v2 = 1000018;
+static constexpr uint32_t LUPINE_PRIVATE_EXPORT_MAX_SLOTS = 256;
 
-struct scuda_kernel_param_layout {
+struct lupine_kernel_param_layout {
   uint32_t count = 0;
   size_t offsets[64] = {};
   size_t sizes[64] = {};
 };
 
-struct scuda_kernel_param_layout_key {
+struct lupine_kernel_param_layout_key {
   int route_id = -2;
   CUfunction function = nullptr;
 
-  bool operator==(const scuda_kernel_param_layout_key &other) const {
+  bool operator==(const lupine_kernel_param_layout_key &other) const {
     return route_id == other.route_id && function == other.function;
   }
 };
 
-struct scuda_kernel_param_layout_key_hash {
-  size_t operator()(const scuda_kernel_param_layout_key &key) const {
+struct lupine_kernel_param_layout_key_hash {
+  size_t operator()(const lupine_kernel_param_layout_key &key) const {
     size_t hash = std::hash<int>{}(key.route_id);
     hash ^= std::hash<uintptr_t>{}(reinterpret_cast<uintptr_t>(key.function)) +
             0x9e3779b9 + (hash << 6) + (hash >> 2);
@@ -115,41 +115,41 @@ struct scuda_kernel_param_layout_key_hash {
   }
 };
 
-struct scuda_private_node_mapping {
+struct lupine_private_node_mapping {
   CUfunction server_function = nullptr;
   uint64_t server_owner = 0;
   CUmodule module = nullptr;
   std::unordered_map<int, CUfunction> functions_by_route;
 };
 
-struct scuda_library_image_record {
+struct lupine_library_image_record {
   uint32_t kind = 0;
   const void *code = nullptr;
   std::vector<unsigned char> image;
   std::unordered_map<int, CUlibrary> libraries_by_route;
 };
 
-struct scuda_module_image_record {
+struct lupine_module_image_record {
   uint32_t kind = 0;
   const void *image_ptr = nullptr;
   std::vector<unsigned char> image;
   std::unordered_map<int, CUmodule> modules_by_route;
 };
 
-struct scuda_library_kernel_record {
+struct lupine_library_kernel_record {
   CUlibrary library = nullptr;
   std::string name;
   std::unordered_map<int, CUkernel> kernels_by_route;
 };
 
-struct scuda_module_function_record {
+struct lupine_module_function_record {
   CUmodule module = nullptr;
   std::string name;
   std::unordered_map<int, CUfunction> functions_by_route;
 };
 
-static bool scuda_mem_pool_attribute_size(CUmemPool_attribute attr,
-                                          size_t *size) {
+static bool lupine_mem_pool_attribute_size(CUmemPool_attribute attr,
+                                           size_t *size) {
   if (size == nullptr) {
     return false;
   }
@@ -171,8 +171,8 @@ static bool scuda_mem_pool_attribute_size(CUmemPool_attribute attr,
   }
 }
 
-static bool scuda_pointer_attribute_size(CUpointer_attribute attr,
-                                         size_t *size) {
+static bool lupine_pointer_attribute_size(CUpointer_attribute attr,
+                                          size_t *size) {
   if (size == nullptr) {
     return false;
   }
@@ -232,28 +232,28 @@ extern int rpc_open();
 extern conn_t *rpc_client_get_connection(unsigned int index);
 extern void rpc_close(conn_t *conn);
 
-static bool scuda_trace_enabled() {
+static bool lupine_trace_enabled() {
   static bool enabled = [] {
-    const char *value = getenv("SCUDA_TRACE");
+    const char *value = getenv("LUPINE_TRACE");
     return value != nullptr && strcmp(value, "0") != 0;
   }();
   return enabled;
 }
 
-static bool scuda_stub_missing_enabled() {
+static bool lupine_stub_missing_enabled() {
   static bool enabled = [] {
-    const char *value = getenv("SCUDA_STUB_MISSING");
+    const char *value = getenv("LUPINE_STUB_MISSING");
     return value == nullptr || strcmp(value, "0") != 0;
   }();
   return enabled;
 }
 
-static bool scuda_symbol_looks_like_driver_api(const char *symbol) {
+static bool lupine_symbol_looks_like_driver_api(const char *symbol) {
   return symbol != nullptr && symbol[0] == 'c' && symbol[1] == 'u' &&
          symbol[2] >= 'A' && symbol[2] <= 'Z';
 }
 
-static void *scuda_real_dlsym(void *handle, const char *name) {
+static void *lupine_real_dlsym(void *handle, const char *name) {
   static void *(*real_dlsym)(void *, const char *) = nullptr;
   if (real_dlsym == nullptr) {
     real_dlsym = reinterpret_cast<void *(*)(void *, const char *)>(
@@ -262,75 +262,75 @@ static void *scuda_real_dlsym(void *handle, const char *name) {
   return real_dlsym != nullptr ? real_dlsym(handle, name) : nullptr;
 }
 
-extern "C" CUresult scuda_unsupported_driver_api() {
-  std::cerr << "SCUDA unsupported generic Driver API called" << std::endl;
+extern "C" CUresult lupine_unsupported_driver_api() {
+  std::cerr << "LUPINE unsupported generic Driver API called" << std::endl;
   return CUDA_ERROR_NOT_SUPPORTED;
 }
 
-extern "C" CUresult scuda_missing_driver_api_called(const char *symbol) {
-  std::cerr << "SCUDA missing Driver API called: " << symbol << std::endl;
+extern "C" CUresult lupine_missing_driver_api_called(const char *symbol) {
+  std::cerr << "LUPINE missing Driver API called: " << symbol << std::endl;
   return CUDA_ERROR_NOT_SUPPORTED;
 }
 
 static std::unordered_map<std::string, std::vector<uint64_t>> &
-scuda_private_export_hashes() {
+lupine_private_export_hashes() {
   static std::unordered_map<std::string, std::vector<uint64_t>> hashes;
   return hashes;
 }
 
-static std::unordered_map<CUfunction, scuda_private_node_mapping> &
-scuda_private_node_map() {
-  static std::unordered_map<CUfunction, scuda_private_node_mapping> mappings;
+static std::unordered_map<CUfunction, lupine_private_node_mapping> &
+lupine_private_node_map() {
+  static std::unordered_map<CUfunction, lupine_private_node_mapping> mappings;
   return mappings;
 }
 
-static std::unordered_map<CUfunction, CUfunction> &scuda_host_function_map() {
+static std::unordered_map<CUfunction, CUfunction> &lupine_host_function_map() {
   static std::unordered_map<CUfunction, CUfunction> mappings;
   return mappings;
 }
 
-static std::unordered_map<scuda_kernel_param_layout_key,
-                          scuda_kernel_param_layout,
-                          scuda_kernel_param_layout_key_hash> &
-scuda_kernel_param_layout_cache() {
-  static std::unordered_map<scuda_kernel_param_layout_key,
-                            scuda_kernel_param_layout,
-                            scuda_kernel_param_layout_key_hash>
+static std::unordered_map<lupine_kernel_param_layout_key,
+                          lupine_kernel_param_layout,
+                          lupine_kernel_param_layout_key_hash> &
+lupine_kernel_param_layout_cache() {
+  static std::unordered_map<lupine_kernel_param_layout_key,
+                            lupine_kernel_param_layout,
+                            lupine_kernel_param_layout_key_hash>
       cache;
   return cache;
 }
 
-static std::mutex &scuda_kernel_param_layout_cache_mutex() {
+static std::mutex &lupine_kernel_param_layout_cache_mutex() {
   static std::mutex mutex;
   return mutex;
 }
 
-static std::vector<CUmodule> &scuda_loaded_modules() {
+static std::vector<CUmodule> &lupine_loaded_modules() {
   static std::vector<CUmodule> modules;
   return modules;
 }
 
-static constexpr int SCUDA_ROUTE_REMOTE = 0;
-static constexpr int SCUDA_ROUTE_LOCAL = 1;
-static constexpr int SCUDA_ROUTE_INVALID = 2;
+static constexpr int LUPINE_ROUTE_REMOTE = 0;
+static constexpr int LUPINE_ROUTE_LOCAL = 1;
+static constexpr int LUPINE_ROUTE_INVALID = 2;
 
-struct scuda_route {
-  int kind = SCUDA_ROUTE_INVALID;
+struct lupine_route {
+  int kind = LUPINE_ROUTE_INVALID;
   conn_t *conn = nullptr;
 };
 
-struct scuda_owner {
+struct lupine_owner {
   bool local = false;
   unsigned int conn_index = 0;
 };
 
-struct scuda_deviceptr_allocation_record {
+struct lupine_deviceptr_allocation_record {
   CUdeviceptr base = 0;
   size_t size = 0;
-  scuda_owner owner;
+  lupine_owner owner;
 };
 
-struct scuda_device_entry {
+struct lupine_device_entry {
   bool local = false;
   int local_ordinal = -1;
   CUdevice local_device = -1;
@@ -339,33 +339,33 @@ struct scuda_device_entry {
   CUdevice remote_device = 0;
 };
 
-struct scuda_primary_context_state {
+struct lupine_primary_context_state {
   bool valid = false;
   unsigned int flags = 0;
   int active = 0;
 };
 
-struct scuda_device_attribute_key {
+struct lupine_device_attribute_key {
   int device = 0;
   int attribute = 0;
 
-  bool operator==(const scuda_device_attribute_key &other) const {
+  bool operator==(const lupine_device_attribute_key &other) const {
     return device == other.device && attribute == other.attribute;
   }
 };
 
-struct scuda_kernel_function_key {
+struct lupine_kernel_function_key {
   int route_id = -2;
   CUcontext context = nullptr;
   CUkernel kernel = nullptr;
 
-  bool operator==(const scuda_kernel_function_key &other) const {
+  bool operator==(const lupine_kernel_function_key &other) const {
     return route_id == other.route_id && context == other.context &&
            kernel == other.kernel;
   }
 };
 
-struct scuda_occupancy_key {
+struct lupine_occupancy_key {
   int route_id = -2;
   CUfunction function = nullptr;
   int block_size = 0;
@@ -373,23 +373,23 @@ struct scuda_occupancy_key {
   unsigned int flags = 0;
   bool with_flags = false;
 
-  bool operator==(const scuda_occupancy_key &other) const {
+  bool operator==(const lupine_occupancy_key &other) const {
     return route_id == other.route_id && function == other.function &&
            block_size == other.block_size &&
-           dynamic_smem_size == other.dynamic_smem_size && flags == other.flags &&
-           with_flags == other.with_flags;
+           dynamic_smem_size == other.dynamic_smem_size &&
+           flags == other.flags && with_flags == other.with_flags;
   }
 };
 
-struct scuda_device_attribute_key_hash {
-  size_t operator()(const scuda_device_attribute_key &key) const {
+struct lupine_device_attribute_key_hash {
+  size_t operator()(const lupine_device_attribute_key &key) const {
     return (static_cast<size_t>(static_cast<unsigned int>(key.device)) << 32) ^
            static_cast<size_t>(static_cast<unsigned int>(key.attribute));
   }
 };
 
-struct scuda_kernel_function_key_hash {
-  size_t operator()(const scuda_kernel_function_key &key) const {
+struct lupine_kernel_function_key_hash {
+  size_t operator()(const lupine_kernel_function_key &key) const {
     size_t hash = std::hash<int>{}(key.route_id);
     hash ^= std::hash<uintptr_t>{}(reinterpret_cast<uintptr_t>(key.context)) +
             0x9e3779b9 + (hash << 6) + (hash >> 2);
@@ -399,8 +399,8 @@ struct scuda_kernel_function_key_hash {
   }
 };
 
-struct scuda_occupancy_key_hash {
-  size_t operator()(const scuda_occupancy_key &key) const {
+struct lupine_occupancy_key_hash {
+  size_t operator()(const lupine_occupancy_key &key) const {
     size_t hash = std::hash<int>{}(key.route_id);
     hash ^= std::hash<uintptr_t>{}(reinterpret_cast<uintptr_t>(key.function)) +
             0x9e3779b9 + (hash << 6) + (hash >> 2);
@@ -416,179 +416,181 @@ struct scuda_occupancy_key_hash {
   }
 };
 
-static std::mutex &scuda_routing_mutex() {
+static std::mutex &lupine_routing_mutex() {
   static auto *mutex = new std::mutex();
   return *mutex;
 }
 
-static std::vector<scuda_device_entry> &scuda_device_table() {
-  static auto *devices = new std::vector<scuda_device_entry>();
+static std::vector<lupine_device_entry> &lupine_device_table() {
+  static auto *devices = new std::vector<lupine_device_entry>();
   return *devices;
 }
 
-static bool &scuda_device_table_ready() {
+static bool &lupine_device_table_ready() {
   static bool ready = false;
   return ready;
 }
 
-static std::unordered_map<CUcontext, scuda_owner> &scuda_context_owners() {
-  static auto *owners = new std::unordered_map<CUcontext, scuda_owner>();
+static std::unordered_map<CUcontext, lupine_owner> &lupine_context_owners() {
+  static auto *owners = new std::unordered_map<CUcontext, lupine_owner>();
   return *owners;
 }
 
-static std::unordered_map<CUmodule, scuda_owner> &scuda_module_owners() {
-  static auto *owners = new std::unordered_map<CUmodule, scuda_owner>();
+static std::unordered_map<CUmodule, lupine_owner> &lupine_module_owners() {
+  static auto *owners = new std::unordered_map<CUmodule, lupine_owner>();
   return *owners;
 }
 
-static std::unordered_map<CUmodule, scuda_module_image_record> &
-scuda_module_images() {
+static std::unordered_map<CUmodule, lupine_module_image_record> &
+lupine_module_images() {
   static auto *images =
-      new std::unordered_map<CUmodule, scuda_module_image_record>();
+      new std::unordered_map<CUmodule, lupine_module_image_record>();
   return *images;
 }
 
-static std::unordered_map<CUlibrary, scuda_owner> &scuda_library_owners() {
-  static auto *owners = new std::unordered_map<CUlibrary, scuda_owner>();
+static std::unordered_map<CUlibrary, lupine_owner> &lupine_library_owners() {
+  static auto *owners = new std::unordered_map<CUlibrary, lupine_owner>();
   return *owners;
 }
 
-static std::unordered_map<CUlibrary, scuda_library_image_record> &
-scuda_library_images() {
+static std::unordered_map<CUlibrary, lupine_library_image_record> &
+lupine_library_images() {
   static auto *images =
-      new std::unordered_map<CUlibrary, scuda_library_image_record>();
+      new std::unordered_map<CUlibrary, lupine_library_image_record>();
   return *images;
 }
 
-static std::unordered_map<CUkernel, scuda_library_kernel_record> &
-scuda_library_kernels() {
+static std::unordered_map<CUkernel, lupine_library_kernel_record> &
+lupine_library_kernels() {
   static auto *kernels =
-      new std::unordered_map<CUkernel, scuda_library_kernel_record>();
+      new std::unordered_map<CUkernel, lupine_library_kernel_record>();
   return *kernels;
 }
 
-static std::unordered_map<CUfunction, scuda_module_function_record> &
-scuda_module_functions() {
+static std::unordered_map<CUfunction, lupine_module_function_record> &
+lupine_module_functions() {
   static auto *functions =
-      new std::unordered_map<CUfunction, scuda_module_function_record>();
+      new std::unordered_map<CUfunction, lupine_module_function_record>();
   return *functions;
 }
 
-static std::unordered_map<CUfunction, scuda_owner> &scuda_function_owners() {
-  static auto *owners = new std::unordered_map<CUfunction, scuda_owner>();
+static std::unordered_map<CUfunction, lupine_owner> &lupine_function_owners() {
+  static auto *owners = new std::unordered_map<CUfunction, lupine_owner>();
   return *owners;
 }
 
-static std::unordered_map<CUstream, scuda_owner> &scuda_stream_owners() {
-  static auto *owners = new std::unordered_map<CUstream, scuda_owner>();
+static std::unordered_map<CUstream, lupine_owner> &lupine_stream_owners() {
+  static auto *owners = new std::unordered_map<CUstream, lupine_owner>();
   return *owners;
 }
 
-static std::unordered_map<CUevent, scuda_owner> &scuda_event_owners() {
-  static auto *owners = new std::unordered_map<CUevent, scuda_owner>();
+static std::unordered_map<CUevent, lupine_owner> &lupine_event_owners() {
+  static auto *owners = new std::unordered_map<CUevent, lupine_owner>();
   return *owners;
 }
 
-static std::unordered_map<CUdeviceptr, scuda_owner> &scuda_deviceptr_owners() {
-  static auto *owners = new std::unordered_map<CUdeviceptr, scuda_owner>();
+static std::unordered_map<CUdeviceptr, lupine_owner> &
+lupine_deviceptr_owners() {
+  static auto *owners = new std::unordered_map<CUdeviceptr, lupine_owner>();
   return *owners;
 }
 
-static std::unordered_map<CUdeviceptr, scuda_deviceptr_allocation_record> &
-scuda_deviceptr_allocations() {
+static std::unordered_map<CUdeviceptr, lupine_deviceptr_allocation_record> &
+lupine_deviceptr_allocations() {
   static auto *allocations =
-      new std::unordered_map<CUdeviceptr, scuda_deviceptr_allocation_record>();
+      new std::unordered_map<CUdeviceptr, lupine_deviceptr_allocation_record>();
   return *allocations;
 }
 
-static std::unordered_map<int, scuda_primary_context_state> &
-scuda_primary_context_states() {
+static std::unordered_map<int, lupine_primary_context_state> &
+lupine_primary_context_states() {
   static auto *states =
-      new std::unordered_map<int, scuda_primary_context_state>();
+      new std::unordered_map<int, lupine_primary_context_state>();
   return *states;
 }
 
-static std::unordered_map<scuda_device_attribute_key, int,
-                          scuda_device_attribute_key_hash> &
-scuda_device_attribute_cache() {
+static std::unordered_map<lupine_device_attribute_key, int,
+                          lupine_device_attribute_key_hash> &
+lupine_device_attribute_cache() {
   static auto *cache =
-      new std::unordered_map<scuda_device_attribute_key, int,
-                             scuda_device_attribute_key_hash>();
+      new std::unordered_map<lupine_device_attribute_key, int,
+                             lupine_device_attribute_key_hash>();
   return *cache;
 }
 
-static std::mutex &scuda_device_attribute_cache_mutex() {
+static std::mutex &lupine_device_attribute_cache_mutex() {
   static auto *mutex = new std::mutex();
   return *mutex;
 }
 
-static std::unordered_map<scuda_kernel_function_key, CUfunction,
-                          scuda_kernel_function_key_hash> &
-scuda_kernel_function_cache() {
+static std::unordered_map<lupine_kernel_function_key, CUfunction,
+                          lupine_kernel_function_key_hash> &
+lupine_kernel_function_cache() {
   static auto *cache =
-      new std::unordered_map<scuda_kernel_function_key, CUfunction,
-                             scuda_kernel_function_key_hash>();
+      new std::unordered_map<lupine_kernel_function_key, CUfunction,
+                             lupine_kernel_function_key_hash>();
   return *cache;
 }
 
-static std::mutex &scuda_kernel_function_cache_mutex() {
+static std::mutex &lupine_kernel_function_cache_mutex() {
   static auto *mutex = new std::mutex();
   return *mutex;
 }
 
-static std::unordered_map<scuda_occupancy_key, int, scuda_occupancy_key_hash> &
-scuda_occupancy_cache() {
-  static auto *cache =
-      new std::unordered_map<scuda_occupancy_key, int, scuda_occupancy_key_hash>();
+static std::unordered_map<lupine_occupancy_key, int,
+                          lupine_occupancy_key_hash> &
+lupine_occupancy_cache() {
+  static auto *cache = new std::unordered_map<lupine_occupancy_key, int,
+                                              lupine_occupancy_key_hash>();
   return *cache;
 }
 
-static std::mutex &scuda_occupancy_cache_mutex() {
+static std::mutex &lupine_occupancy_cache_mutex() {
   static auto *mutex = new std::mutex();
   return *mutex;
 }
 
-static std::mutex &scuda_host_function_mutex() {
+static std::mutex &lupine_host_function_mutex() {
   static auto *mutex = new std::mutex();
   return *mutex;
 }
 
-static std::mutex &scuda_library_kernel_mutex() {
+static std::mutex &lupine_library_kernel_mutex() {
   static auto *mutex = new std::mutex();
   return *mutex;
 }
 
-static unsigned char (&scuda_private_6e16_node_pool())[16][0x500] {
+static unsigned char (&lupine_private_6e16_node_pool())[16][0x500] {
   static unsigned char nodes[16][0x500] = {};
   return nodes;
 }
 
-static std::atomic<unsigned int> &scuda_private_6e16_next_node() {
+static std::atomic<unsigned int> &lupine_private_6e16_next_node() {
   static std::atomic<unsigned int> next{0};
   return next;
 }
 
-static std::mutex &scuda_private_node_mutex() {
+static std::mutex &lupine_private_node_mutex() {
   static std::mutex mutex;
   return mutex;
 }
 
-static void scuda_remember_loaded_module(CUmodule module) {
+static void lupine_remember_loaded_module(CUmodule module) {
   if (module == nullptr) {
     return;
   }
-  std::lock_guard<std::mutex> lock(scuda_host_function_mutex());
-  auto &modules = scuda_loaded_modules();
+  std::lock_guard<std::mutex> lock(lupine_host_function_mutex());
+  auto &modules = lupine_loaded_modules();
   if (std::find(modules.begin(), modules.end(), module) == modules.end()) {
     modules.push_back(module);
   }
 }
 
-extern "C" void scuda_remember_loaded_module_for_rpc(CUmodule module) {
-  scuda_remember_loaded_module(module);
+extern "C" void lupine_remember_loaded_module_for_rpc(CUmodule module) {
+  lupine_remember_loaded_module(module);
 }
 
-static int scuda_conn_index(conn_t *conn) {
+static int lupine_conn_index(conn_t *conn) {
   if (conn == nullptr) {
     return -1;
   }
@@ -600,27 +602,27 @@ static int scuda_conn_index(conn_t *conn) {
   return -1;
 }
 
-static conn_t *scuda_conn_by_index(unsigned int index) {
+static conn_t *lupine_conn_by_index(unsigned int index) {
   if (rpc_open() < 0 || index >= static_cast<unsigned int>(nconns)) {
     return nullptr;
   }
   return &conns[index];
 }
 
-static bool scuda_env_enabled(const char *name) {
+static bool lupine_env_enabled(const char *name) {
   const char *value = getenv(name);
   return value != nullptr && strcmp(value, "0") != 0 &&
          strcasecmp(value, "false") != 0 && strcasecmp(value, "no") != 0;
 }
 
-static void *scuda_local_libcuda_handle() {
+static void *lupine_local_libcuda_handle() {
   static std::once_flag once;
   static void *handle = nullptr;
   std::call_once(once, []() {
-    if (scuda_env_enabled("SCUDA_DISABLE_LOCAL")) {
+    if (lupine_env_enabled("LUPINE_DISABLE_LOCAL")) {
       return;
     }
-    const char *override_path = getenv("SCUDA_REAL_LIBCUDA");
+    const char *override_path = getenv("LUPINE_REAL_LIBCUDA");
     const char *paths[] = {
         override_path,
         "/usr/lib/x86_64-linux-gnu/libcuda.so.1",
@@ -642,78 +644,77 @@ static void *scuda_local_libcuda_handle() {
   return handle;
 }
 
-extern "C" void *scuda_real_cuda_symbol(const char *name) {
-  void *handle = scuda_local_libcuda_handle();
+extern "C" void *lupine_real_cuda_symbol(const char *name) {
+  void *handle = lupine_local_libcuda_handle();
   if (handle == nullptr || name == nullptr) {
     return nullptr;
   }
-  return scuda_real_dlsym(handle, name);
+  return lupine_real_dlsym(handle, name);
 }
 
-template <typename Fn> static Fn scuda_real_cuda_fn(const char *name) {
-  return reinterpret_cast<Fn>(scuda_real_cuda_symbol(name));
+template <typename Fn> static Fn lupine_real_cuda_fn(const char *name) {
+  return reinterpret_cast<Fn>(lupine_real_cuda_symbol(name));
 }
 
-extern "C" bool scuda_route_is_local(scuda_route route) {
-  return route.kind == SCUDA_ROUTE_LOCAL;
+extern "C" bool lupine_route_is_local(lupine_route route) {
+  return route.kind == LUPINE_ROUTE_LOCAL;
 }
 
-extern "C" conn_t *scuda_route_remote_conn(scuda_route route) {
-  return route.kind == SCUDA_ROUTE_REMOTE ? route.conn : nullptr;
+extern "C" conn_t *lupine_route_remote_conn(lupine_route route) {
+  return route.kind == LUPINE_ROUTE_REMOTE ? route.conn : nullptr;
 }
 
-static scuda_route scuda_remote_route_for_conn(conn_t *conn) {
+static lupine_route lupine_remote_route_for_conn(conn_t *conn) {
   if (conn == nullptr) {
-    return scuda_route{SCUDA_ROUTE_INVALID, nullptr};
+    return lupine_route{LUPINE_ROUTE_INVALID, nullptr};
   }
-  return scuda_route{SCUDA_ROUTE_REMOTE, conn};
+  return lupine_route{LUPINE_ROUTE_REMOTE, conn};
 }
 
-static scuda_route scuda_local_route() {
-  return scuda_route{SCUDA_ROUTE_LOCAL, nullptr};
+static lupine_route lupine_local_route() {
+  return lupine_route{LUPINE_ROUTE_LOCAL, nullptr};
 }
 
-static scuda_route scuda_route_for_owner(const scuda_owner &owner) {
+static lupine_route lupine_route_for_owner(const lupine_owner &owner) {
   if (owner.local) {
-    return scuda_local_route();
+    return lupine_local_route();
   }
-  return scuda_remote_route_for_conn(scuda_conn_by_index(owner.conn_index));
+  return lupine_remote_route_for_conn(lupine_conn_by_index(owner.conn_index));
 }
 
-static int scuda_route_identity(scuda_route route) {
-  if (route.kind == SCUDA_ROUTE_LOCAL) {
+static int lupine_route_identity(lupine_route route) {
+  if (route.kind == LUPINE_ROUTE_LOCAL) {
     return -1;
   }
-  if (route.kind == SCUDA_ROUTE_REMOTE) {
-    return scuda_conn_index(route.conn);
+  if (route.kind == LUPINE_ROUTE_REMOTE) {
+    return lupine_conn_index(route.conn);
   }
   return -2;
 }
 
-static scuda_route scuda_route_from_identity(int route_id) {
+static lupine_route lupine_route_from_identity(int route_id) {
   if (route_id == -1) {
-    return scuda_local_route();
+    return lupine_local_route();
   }
   if (route_id >= 0) {
-    return scuda_remote_route_for_conn(
-        scuda_conn_by_index(static_cast<unsigned int>(route_id)));
+    return lupine_remote_route_for_conn(
+        lupine_conn_by_index(static_cast<unsigned int>(route_id)));
   }
-  return scuda_route{SCUDA_ROUTE_INVALID, nullptr};
+  return lupine_route{LUPINE_ROUTE_INVALID, nullptr};
 }
 
-static int scuda_known_deviceptr_route_id(CUdeviceptr ptr) {
+static int lupine_known_deviceptr_route_id(CUdeviceptr ptr) {
   if (ptr == 0) {
     return -2;
   }
-  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  auto it = scuda_deviceptr_owners().find(ptr);
-  if (it != scuda_deviceptr_owners().end()) {
+  std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+  auto it = lupine_deviceptr_owners().find(ptr);
+  if (it != lupine_deviceptr_owners().end()) {
     return it->second.local ? -1 : static_cast<int>(it->second.conn_index);
   }
-  for (const auto &entry : scuda_deviceptr_allocations()) {
+  for (const auto &entry : lupine_deviceptr_allocations()) {
     const auto &allocation = entry.second;
-    if (allocation.base == 0 || allocation.size == 0 ||
-        ptr < allocation.base) {
+    if (allocation.base == 0 || allocation.size == 0 || ptr < allocation.base) {
       continue;
     }
     uint64_t offset = static_cast<uint64_t>(ptr - allocation.base);
@@ -726,10 +727,10 @@ static int scuda_known_deviceptr_route_id(CUdeviceptr ptr) {
   return -2;
 }
 
-extern "C" scuda_route scuda_route_for_default();
-static bool scuda_is_local_address(const void *ptr);
+extern "C" lupine_route lupine_route_for_default();
+static bool lupine_is_local_address(const void *ptr);
 
-static CUresult scuda_remote_cuInit(conn_t *conn, unsigned int flags) {
+static CUresult lupine_remote_cuInit(conn_t *conn, unsigned int flags) {
   CUresult result = CUDA_ERROR_DEVICE_UNAVAILABLE;
   if (conn == nullptr || rpc_write_start_request(conn, RPC_cuInit) < 0 ||
       rpc_write(conn, &flags, sizeof(flags)) < 0 ||
@@ -740,7 +741,7 @@ static CUresult scuda_remote_cuInit(conn_t *conn, unsigned int flags) {
   return result;
 }
 
-static CUresult scuda_remote_cuDeviceGetCount(conn_t *conn, int *count) {
+static CUresult lupine_remote_cuDeviceGetCount(conn_t *conn, int *count) {
   CUresult result = CUDA_ERROR_DEVICE_UNAVAILABLE;
   if (conn == nullptr || count == nullptr ||
       rpc_write_start_request(conn, RPC_cuDeviceGetCount) < 0 ||
@@ -752,8 +753,8 @@ static CUresult scuda_remote_cuDeviceGetCount(conn_t *conn, int *count) {
   return result;
 }
 
-static CUresult scuda_remote_cuDeviceGet(conn_t *conn, CUdevice *device,
-                                         int ordinal) {
+static CUresult lupine_remote_cuDeviceGet(conn_t *conn, CUdevice *device,
+                                          int ordinal) {
   CUresult result = CUDA_ERROR_DEVICE_UNAVAILABLE;
   if (conn == nullptr || device == nullptr ||
       rpc_write_start_request(conn, RPC_cuDeviceGet) < 0 ||
@@ -766,27 +767,27 @@ static CUresult scuda_remote_cuDeviceGet(conn_t *conn, CUdevice *device,
   return result;
 }
 
-static CUresult scuda_ensure_device_table() {
-  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  if (scuda_device_table_ready()) {
+static CUresult lupine_ensure_device_table() {
+  std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+  if (lupine_device_table_ready()) {
     return CUDA_SUCCESS;
   }
 
-  auto &devices = scuda_device_table();
+  auto &devices = lupine_device_table();
   devices.clear();
 
   using cuDeviceGetCount_fn = CUresult (*)(int *);
   using cuDeviceGet_fn = CUresult (*)(CUdevice *, int);
   auto local_count_fn =
-      scuda_real_cuda_fn<cuDeviceGetCount_fn>("cuDeviceGetCount");
-  auto local_get_fn = scuda_real_cuda_fn<cuDeviceGet_fn>("cuDeviceGet");
+      lupine_real_cuda_fn<cuDeviceGetCount_fn>("cuDeviceGetCount");
+  auto local_get_fn = lupine_real_cuda_fn<cuDeviceGet_fn>("cuDeviceGet");
   if (local_count_fn != nullptr && local_get_fn != nullptr) {
     int local_count = 0;
     if (local_count_fn(&local_count) == CUDA_SUCCESS && local_count > 0) {
       for (int ordinal = 0; ordinal < local_count; ++ordinal) {
         CUdevice local_device = 0;
         if (local_get_fn(&local_device, ordinal) == CUDA_SUCCESS) {
-          scuda_device_entry entry;
+          lupine_device_entry entry;
           entry.local = true;
           entry.local_ordinal = ordinal;
           entry.local_device = local_device;
@@ -799,19 +800,20 @@ static CUresult scuda_ensure_device_table() {
   if (rpc_open() == 0) {
     for (int i = 0; i < nconns; ++i) {
       int remote_count = 0;
-      CUresult result = scuda_remote_cuDeviceGetCount(&conns[i], &remote_count);
+      CUresult result =
+          lupine_remote_cuDeviceGetCount(&conns[i], &remote_count);
       if (result != CUDA_SUCCESS) {
         devices.clear();
         return result;
       }
       for (int ordinal = 0; ordinal < remote_count; ++ordinal) {
         CUdevice remote_device = 0;
-        result = scuda_remote_cuDeviceGet(&conns[i], &remote_device, ordinal);
+        result = lupine_remote_cuDeviceGet(&conns[i], &remote_device, ordinal);
         if (result != CUDA_SUCCESS) {
           devices.clear();
           return result;
         }
-        scuda_device_entry entry;
+        lupine_device_entry entry;
         entry.local = false;
         entry.conn_index = static_cast<unsigned int>(i);
         entry.remote_ordinal = ordinal;
@@ -824,15 +826,15 @@ static CUresult scuda_ensure_device_table() {
   if (devices.empty()) {
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
   }
-  scuda_device_table_ready() = true;
+  lupine_device_table_ready() = true;
   return CUDA_SUCCESS;
 }
 
-extern "C" CUresult scuda_cuInit_multi(unsigned int flags) {
+extern "C" CUresult lupine_cuInit_multi(unsigned int flags) {
   CUresult first_error = CUDA_SUCCESS;
   bool initialized_any = false;
   using cuInit_fn = CUresult (*)(unsigned int);
-  auto local_init = scuda_real_cuda_fn<cuInit_fn>("cuInit");
+  auto local_init = lupine_real_cuda_fn<cuInit_fn>("cuInit");
   if (local_init != nullptr) {
     CUresult result = local_init(flags);
     if (result != CUDA_SUCCESS && first_error == CUDA_SUCCESS) {
@@ -843,7 +845,7 @@ extern "C" CUresult scuda_cuInit_multi(unsigned int flags) {
   }
   if (rpc_open() == 0) {
     for (int i = 0; i < nconns; ++i) {
-      CUresult result = scuda_remote_cuInit(&conns[i], flags);
+      CUresult result = lupine_remote_cuInit(&conns[i], flags);
       if (result != CUDA_SUCCESS && first_error == CUDA_SUCCESS) {
         first_error = result;
       } else if (result == CUDA_SUCCESS) {
@@ -854,96 +856,97 @@ extern "C" CUresult scuda_cuInit_multi(unsigned int flags) {
   return initialized_any ? CUDA_SUCCESS : first_error;
 }
 
-extern "C" CUresult scuda_cuDeviceGetCount_multi(int *count) {
+extern "C" CUresult lupine_cuDeviceGetCount_multi(int *count) {
   if (count == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
-  CUresult result = scuda_ensure_device_table();
+  CUresult result = lupine_ensure_device_table();
   if (result != CUDA_SUCCESS) {
     return result;
   }
 
-  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  *count = static_cast<int>(scuda_device_table().size());
+  std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+  *count = static_cast<int>(lupine_device_table().size());
   return CUDA_SUCCESS;
 }
 
-extern "C" CUresult scuda_cuDeviceGet_multi(CUdevice *device, int ordinal) {
+extern "C" CUresult lupine_cuDeviceGet_multi(CUdevice *device, int ordinal) {
   if (device == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
-  CUresult result = scuda_ensure_device_table();
+  CUresult result = lupine_ensure_device_table();
   if (result != CUDA_SUCCESS) {
     return result;
   }
 
-  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  if (ordinal < 0 || ordinal >= static_cast<int>(scuda_device_table().size())) {
+  std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+  if (ordinal < 0 ||
+      ordinal >= static_cast<int>(lupine_device_table().size())) {
     return CUDA_ERROR_INVALID_DEVICE;
   }
   *device = static_cast<CUdevice>(ordinal);
   return CUDA_SUCCESS;
 }
 
-extern "C" conn_t *scuda_rpc_conn_for_device(CUdevice *device) {
-  if (device == nullptr || scuda_ensure_device_table() != CUDA_SUCCESS) {
+extern "C" conn_t *lupine_rpc_conn_for_device(CUdevice *device) {
+  if (device == nullptr || lupine_ensure_device_table() != CUDA_SUCCESS) {
     return nullptr;
   }
 
-  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  std::lock_guard<std::mutex> lock(lupine_routing_mutex());
   int local = static_cast<int>(*device);
-  auto &devices = scuda_device_table();
+  auto &devices = lupine_device_table();
   if (local < 0 || local >= static_cast<int>(devices.size())) {
     return nullptr;
   }
-  const scuda_device_entry &mapped = devices[local];
+  const lupine_device_entry &mapped = devices[local];
   if (mapped.local) {
     *device = mapped.local_device;
     return nullptr;
   }
   *device = mapped.remote_device;
-  return scuda_conn_by_index(mapped.conn_index);
+  return lupine_conn_by_index(mapped.conn_index);
 }
 
-extern "C" scuda_route scuda_route_for_device(CUdevice *device) {
-  if (device == nullptr || scuda_ensure_device_table() != CUDA_SUCCESS) {
-    return scuda_route{SCUDA_ROUTE_INVALID, nullptr};
+extern "C" lupine_route lupine_route_for_device(CUdevice *device) {
+  if (device == nullptr || lupine_ensure_device_table() != CUDA_SUCCESS) {
+    return lupine_route{LUPINE_ROUTE_INVALID, nullptr};
   }
 
-  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  std::lock_guard<std::mutex> lock(lupine_routing_mutex());
   int local = static_cast<int>(*device);
-  auto &devices = scuda_device_table();
+  auto &devices = lupine_device_table();
   if (local < 0 || local >= static_cast<int>(devices.size())) {
-    return scuda_route{SCUDA_ROUTE_INVALID, nullptr};
+    return lupine_route{LUPINE_ROUTE_INVALID, nullptr};
   }
-  const scuda_device_entry &mapped = devices[local];
+  const lupine_device_entry &mapped = devices[local];
   if (mapped.local) {
     *device = mapped.local_device;
-    return scuda_local_route();
+    return lupine_local_route();
   }
   *device = mapped.remote_device;
-  return scuda_remote_route_for_conn(scuda_conn_by_index(mapped.conn_index));
+  return lupine_remote_route_for_conn(lupine_conn_by_index(mapped.conn_index));
 }
 
-extern "C" bool scuda_translate_device_for_conn(conn_t *conn,
-                                                CUdevice *device) {
+extern "C" bool lupine_translate_device_for_conn(conn_t *conn,
+                                                 CUdevice *device) {
   if (conn == nullptr || device == nullptr ||
-      scuda_ensure_device_table() != CUDA_SUCCESS) {
+      lupine_ensure_device_table() != CUDA_SUCCESS) {
     return false;
   }
 
-  int conn_index = scuda_conn_index(conn);
+  int conn_index = lupine_conn_index(conn);
   if (conn_index < 0) {
     return false;
   }
 
-  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
+  std::lock_guard<std::mutex> lock(lupine_routing_mutex());
   int local = static_cast<int>(*device);
-  auto &devices = scuda_device_table();
+  auto &devices = lupine_device_table();
   if (local < 0 || local >= static_cast<int>(devices.size())) {
     return false;
   }
-  const scuda_device_entry &mapped = devices[local];
+  const lupine_device_entry &mapped = devices[local];
   if (mapped.local ||
       mapped.conn_index != static_cast<unsigned int>(conn_index)) {
     return false;
@@ -952,55 +955,54 @@ extern "C" bool scuda_translate_device_for_conn(conn_t *conn,
   return true;
 }
 
-extern "C" CUdevice scuda_local_device_for_remote(conn_t *conn,
-                                                  CUdevice remote_device) {
-  if (conn == nullptr || scuda_ensure_device_table() != CUDA_SUCCESS) {
+extern "C" CUdevice lupine_local_device_for_remote(conn_t *conn,
+                                                   CUdevice remote_device) {
+  if (conn == nullptr || lupine_ensure_device_table() != CUDA_SUCCESS) {
     return -1;
   }
-  int conn_index = scuda_conn_index(conn);
+  int conn_index = lupine_conn_index(conn);
   if (conn_index < 0) {
     return -1;
   }
 
-  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  auto &devices = scuda_device_table();
+  std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+  auto &devices = lupine_device_table();
   for (size_t i = 0; i < devices.size(); ++i) {
     if (devices[i].conn_index == static_cast<unsigned int>(conn_index) &&
-        !devices[i].local &&
-        devices[i].remote_device == remote_device) {
+        !devices[i].local && devices[i].remote_device == remote_device) {
       return static_cast<CUdevice>(i);
     }
   }
   return -1;
 }
 
-extern "C" scuda_route scuda_route_for_current_context();
-extern "C" scuda_route scuda_route_for_context(CUcontext ctx);
+extern "C" lupine_route lupine_route_for_current_context();
+extern "C" lupine_route lupine_route_for_context(CUcontext ctx);
 
-extern "C" CUresult scuda_cuDeviceCanAccessPeer_multi(int *canAccessPeer,
-                                                      CUdevice dev,
-                                                      CUdevice peerDev) {
+extern "C" CUresult lupine_cuDeviceCanAccessPeer_multi(int *canAccessPeer,
+                                                       CUdevice dev,
+                                                       CUdevice peerDev) {
   if (canAccessPeer == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
-  scuda_route route = scuda_route_for_device(&dev);
-  if (scuda_route_is_local(route)) {
+  lupine_route route = lupine_route_for_device(&dev);
+  if (lupine_route_is_local(route)) {
     CUdevice peer = peerDev;
-    scuda_route peer_route = scuda_route_for_device(&peer);
-    if (!scuda_route_is_local(peer_route)) {
+    lupine_route peer_route = lupine_route_for_device(&peer);
+    if (!lupine_route_is_local(peer_route)) {
       *canAccessPeer = 0;
       return CUDA_SUCCESS;
     }
     using real_fn_t = CUresult (*)(int *, CUdevice, CUdevice);
-    auto real = scuda_real_cuda_fn<real_fn_t>("cuDeviceCanAccessPeer");
+    auto real = lupine_real_cuda_fn<real_fn_t>("cuDeviceCanAccessPeer");
     return real == nullptr ? CUDA_ERROR_DEVICE_UNAVAILABLE
                            : real(canAccessPeer, dev, peer);
   }
-  conn_t *conn = scuda_route_remote_conn(route);
+  conn_t *conn = lupine_route_remote_conn(route);
   if (conn == nullptr) {
     return CUDA_ERROR_INVALID_DEVICE;
   }
-  if (!scuda_translate_device_for_conn(conn, &peerDev)) {
+  if (!lupine_translate_device_for_conn(conn, &peerDev)) {
     *canAccessPeer = 0;
     return CUDA_SUCCESS;
   }
@@ -1018,20 +1020,21 @@ extern "C" CUresult scuda_cuDeviceCanAccessPeer_multi(int *canAccessPeer,
   return result;
 }
 
-extern "C" CUresult scuda_cuCtxEnablePeerAccess_multi(CUcontext peerContext,
+extern "C" CUresult lupine_cuCtxEnablePeerAccess_multi(CUcontext peerContext,
                                                        unsigned int flags) {
-  scuda_route current_route = scuda_route_for_current_context();
-  scuda_route peer_route = scuda_route_for_context(peerContext);
-  if (scuda_route_identity(current_route) != scuda_route_identity(peer_route)) {
+  lupine_route current_route = lupine_route_for_current_context();
+  lupine_route peer_route = lupine_route_for_context(peerContext);
+  if (lupine_route_identity(current_route) !=
+      lupine_route_identity(peer_route)) {
     return CUDA_ERROR_PEER_ACCESS_UNSUPPORTED;
   }
-  if (scuda_route_is_local(current_route)) {
+  if (lupine_route_is_local(current_route)) {
     using real_fn_t = CUresult (*)(CUcontext, unsigned int);
-    auto real = scuda_real_cuda_fn<real_fn_t>("cuCtxEnablePeerAccess");
+    auto real = lupine_real_cuda_fn<real_fn_t>("cuCtxEnablePeerAccess");
     return real == nullptr ? CUDA_ERROR_DEVICE_UNAVAILABLE
                            : real(peerContext, flags);
   }
-  conn_t *conn = scuda_route_remote_conn(current_route);
+  conn_t *conn = lupine_route_remote_conn(current_route);
   CUresult result = CUDA_ERROR_DEVICE_UNAVAILABLE;
   if (conn == nullptr ||
       rpc_write_start_request(conn, RPC_cuCtxEnablePeerAccess) < 0 ||
@@ -1044,18 +1047,19 @@ extern "C" CUresult scuda_cuCtxEnablePeerAccess_multi(CUcontext peerContext,
   return result;
 }
 
-extern "C" CUresult scuda_cuCtxDisablePeerAccess_multi(CUcontext peerContext) {
-  scuda_route current_route = scuda_route_for_current_context();
-  scuda_route peer_route = scuda_route_for_context(peerContext);
-  if (scuda_route_identity(current_route) != scuda_route_identity(peer_route)) {
+extern "C" CUresult lupine_cuCtxDisablePeerAccess_multi(CUcontext peerContext) {
+  lupine_route current_route = lupine_route_for_current_context();
+  lupine_route peer_route = lupine_route_for_context(peerContext);
+  if (lupine_route_identity(current_route) !=
+      lupine_route_identity(peer_route)) {
     return CUDA_ERROR_PEER_ACCESS_NOT_ENABLED;
   }
-  if (scuda_route_is_local(current_route)) {
+  if (lupine_route_is_local(current_route)) {
     using real_fn_t = CUresult (*)(CUcontext);
-    auto real = scuda_real_cuda_fn<real_fn_t>("cuCtxDisablePeerAccess");
+    auto real = lupine_real_cuda_fn<real_fn_t>("cuCtxDisablePeerAccess");
     return real == nullptr ? CUDA_ERROR_DEVICE_UNAVAILABLE : real(peerContext);
   }
-  conn_t *conn = scuda_route_remote_conn(current_route);
+  conn_t *conn = lupine_route_remote_conn(current_route);
   CUresult result = CUDA_ERROR_DEVICE_UNAVAILABLE;
   if (conn == nullptr ||
       rpc_write_start_request(conn, RPC_cuCtxDisablePeerAccess) < 0 ||
@@ -1067,285 +1071,291 @@ extern "C" CUresult scuda_cuCtxDisablePeerAccess_multi(CUcontext peerContext) {
   return result;
 }
 
-extern "C" void scuda_note_context_owner(CUcontext ctx, conn_t *conn) {
-  int index = scuda_conn_index(conn);
+extern "C" void lupine_note_context_owner(CUcontext ctx, conn_t *conn) {
+  int index = lupine_conn_index(conn);
   if (ctx == nullptr || index < 0) {
     return;
   }
-  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  scuda_context_owners()[ctx] = scuda_owner{false, static_cast<unsigned int>(index)};
+  std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+  lupine_context_owners()[ctx] =
+      lupine_owner{false, static_cast<unsigned int>(index)};
 }
 
-extern "C" void scuda_note_module_owner(CUmodule module, conn_t *conn) {
-  int index = scuda_conn_index(conn);
+extern "C" void lupine_note_module_owner(CUmodule module, conn_t *conn) {
+  int index = lupine_conn_index(conn);
   if (module == nullptr || index < 0) {
     return;
   }
-  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  scuda_module_owners()[module] = scuda_owner{false, static_cast<unsigned int>(index)};
+  std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+  lupine_module_owners()[module] =
+      lupine_owner{false, static_cast<unsigned int>(index)};
 }
 
-extern "C" void scuda_note_library_owner(CUlibrary library, conn_t *conn) {
-  int index = scuda_conn_index(conn);
+extern "C" void lupine_note_library_owner(CUlibrary library, conn_t *conn) {
+  int index = lupine_conn_index(conn);
   if (library == nullptr || index < 0) {
     return;
   }
-  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  scuda_library_owners()[library] =
-      scuda_owner{false, static_cast<unsigned int>(index)};
+  std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+  lupine_library_owners()[library] =
+      lupine_owner{false, static_cast<unsigned int>(index)};
 }
 
-extern "C" void scuda_note_function_owner(CUfunction function, conn_t *conn) {
-  int index = scuda_conn_index(conn);
+extern "C" void lupine_note_function_owner(CUfunction function, conn_t *conn) {
+  int index = lupine_conn_index(conn);
   if (function == nullptr || index < 0) {
     return;
   }
-  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  scuda_function_owners()[function] = scuda_owner{false, static_cast<unsigned int>(index)};
+  std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+  lupine_function_owners()[function] =
+      lupine_owner{false, static_cast<unsigned int>(index)};
 }
 
-extern "C" void scuda_note_stream_owner(CUstream stream, conn_t *conn) {
-  int index = scuda_conn_index(conn);
+extern "C" void lupine_note_stream_owner(CUstream stream, conn_t *conn) {
+  int index = lupine_conn_index(conn);
   if (stream == nullptr || index < 0) {
     return;
   }
-  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  scuda_stream_owners()[stream] = scuda_owner{false, static_cast<unsigned int>(index)};
+  std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+  lupine_stream_owners()[stream] =
+      lupine_owner{false, static_cast<unsigned int>(index)};
 }
 
-extern "C" void scuda_note_event_owner(CUevent event, conn_t *conn) {
-  int index = scuda_conn_index(conn);
+extern "C" void lupine_note_event_owner(CUevent event, conn_t *conn) {
+  int index = lupine_conn_index(conn);
   if (event == nullptr || index < 0) {
     return;
   }
-  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  scuda_event_owners()[event] = scuda_owner{false, static_cast<unsigned int>(index)};
+  std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+  lupine_event_owners()[event] =
+      lupine_owner{false, static_cast<unsigned int>(index)};
 }
 
-extern "C" void scuda_note_deviceptr_owner(CUdeviceptr ptr, conn_t *conn) {
-  int index = scuda_conn_index(conn);
+extern "C" void lupine_note_deviceptr_owner(CUdeviceptr ptr, conn_t *conn) {
+  int index = lupine_conn_index(conn);
   if (ptr == 0 || index < 0) {
     return;
   }
-  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  scuda_deviceptr_owners()[ptr] = scuda_owner{false, static_cast<unsigned int>(index)};
+  std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+  lupine_deviceptr_owners()[ptr] =
+      lupine_owner{false, static_cast<unsigned int>(index)};
 }
 
-static void scuda_note_deviceptr_allocation_owner_locked(CUdeviceptr ptr,
-                                                         size_t size,
-                                                         scuda_owner owner) {
-  scuda_deviceptr_owners()[ptr] = owner;
+static void lupine_note_deviceptr_allocation_owner_locked(CUdeviceptr ptr,
+                                                          size_t size,
+                                                          lupine_owner owner) {
+  lupine_deviceptr_owners()[ptr] = owner;
   if (size == 0) {
-    scuda_deviceptr_allocations().erase(ptr);
+    lupine_deviceptr_allocations().erase(ptr);
     return;
   }
-  scuda_deviceptr_allocations()[ptr] =
-      scuda_deviceptr_allocation_record{ptr, size, owner};
+  lupine_deviceptr_allocations()[ptr] =
+      lupine_deviceptr_allocation_record{ptr, size, owner};
 }
 
-extern "C" void scuda_note_deviceptr_allocation(CUdeviceptr ptr, size_t size,
+extern "C" void lupine_note_deviceptr_allocation(CUdeviceptr ptr, size_t size,
                                                  conn_t *conn) {
-  int index = scuda_conn_index(conn);
+  int index = lupine_conn_index(conn);
   if (ptr == 0 || index < 0) {
     return;
   }
-  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  scuda_note_deviceptr_allocation_owner_locked(
-      ptr, size, scuda_owner{false, static_cast<unsigned int>(index)});
+  std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+  lupine_note_deviceptr_allocation_owner_locked(
+      ptr, size, lupine_owner{false, static_cast<unsigned int>(index)});
 }
 
-extern "C" void scuda_note_context_owner_route(CUcontext ctx,
-                                                scuda_route route) {
-  if (ctx == nullptr || route.kind == SCUDA_ROUTE_INVALID) {
+extern "C" void lupine_note_context_owner_route(CUcontext ctx,
+                                                lupine_route route) {
+  if (ctx == nullptr || route.kind == LUPINE_ROUTE_INVALID) {
     return;
   }
-  if (route.kind == SCUDA_ROUTE_REMOTE) {
-    scuda_note_context_owner(ctx, route.conn);
+  if (route.kind == LUPINE_ROUTE_REMOTE) {
+    lupine_note_context_owner(ctx, route.conn);
     return;
   }
-  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  scuda_context_owners()[ctx] = scuda_owner{true, 0};
+  std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+  lupine_context_owners()[ctx] = lupine_owner{true, 0};
 }
 
-extern "C" void scuda_note_module_owner_route(CUmodule module,
-                                               scuda_route route) {
-  if (module == nullptr || route.kind == SCUDA_ROUTE_INVALID) {
+extern "C" void lupine_note_module_owner_route(CUmodule module,
+                                               lupine_route route) {
+  if (module == nullptr || route.kind == LUPINE_ROUTE_INVALID) {
     return;
   }
-  if (route.kind == SCUDA_ROUTE_REMOTE) {
-    scuda_note_module_owner(module, route.conn);
+  if (route.kind == LUPINE_ROUTE_REMOTE) {
+    lupine_note_module_owner(module, route.conn);
     return;
   }
-  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  scuda_module_owners()[module] = scuda_owner{true, 0};
+  std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+  lupine_module_owners()[module] = lupine_owner{true, 0};
 }
 
-extern "C" void scuda_note_library_owner_route(CUlibrary library,
-                                                scuda_route route) {
-  if (library == nullptr || route.kind == SCUDA_ROUTE_INVALID) {
+extern "C" void lupine_note_library_owner_route(CUlibrary library,
+                                                lupine_route route) {
+  if (library == nullptr || route.kind == LUPINE_ROUTE_INVALID) {
     return;
   }
-  if (route.kind == SCUDA_ROUTE_REMOTE) {
-    scuda_note_library_owner(library, route.conn);
+  if (route.kind == LUPINE_ROUTE_REMOTE) {
+    lupine_note_library_owner(library, route.conn);
     return;
   }
-  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  scuda_library_owners()[library] = scuda_owner{true, 0};
+  std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+  lupine_library_owners()[library] = lupine_owner{true, 0};
 }
 
-extern "C" void scuda_note_function_owner_route(CUfunction function,
-                                                 scuda_route route) {
-  if (function == nullptr || route.kind == SCUDA_ROUTE_INVALID) {
+extern "C" void lupine_note_function_owner_route(CUfunction function,
+                                                 lupine_route route) {
+  if (function == nullptr || route.kind == LUPINE_ROUTE_INVALID) {
     return;
   }
-  if (route.kind == SCUDA_ROUTE_REMOTE) {
-    scuda_note_function_owner(function, route.conn);
+  if (route.kind == LUPINE_ROUTE_REMOTE) {
+    lupine_note_function_owner(function, route.conn);
     return;
   }
-  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  scuda_function_owners()[function] = scuda_owner{true, 0};
+  std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+  lupine_function_owners()[function] = lupine_owner{true, 0};
 }
 
-extern "C" void scuda_note_stream_owner_route(CUstream stream,
-                                               scuda_route route) {
-  if (stream == nullptr || route.kind == SCUDA_ROUTE_INVALID) {
+extern "C" void lupine_note_stream_owner_route(CUstream stream,
+                                               lupine_route route) {
+  if (stream == nullptr || route.kind == LUPINE_ROUTE_INVALID) {
     return;
   }
-  if (route.kind == SCUDA_ROUTE_REMOTE) {
-    scuda_note_stream_owner(stream, route.conn);
+  if (route.kind == LUPINE_ROUTE_REMOTE) {
+    lupine_note_stream_owner(stream, route.conn);
     return;
   }
-  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  scuda_stream_owners()[stream] = scuda_owner{true, 0};
+  std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+  lupine_stream_owners()[stream] = lupine_owner{true, 0};
 }
 
-extern "C" void scuda_note_event_owner_route(CUevent event,
-                                              scuda_route route) {
-  if (event == nullptr || route.kind == SCUDA_ROUTE_INVALID) {
+extern "C" void lupine_note_event_owner_route(CUevent event,
+                                              lupine_route route) {
+  if (event == nullptr || route.kind == LUPINE_ROUTE_INVALID) {
     return;
   }
-  if (route.kind == SCUDA_ROUTE_REMOTE) {
-    scuda_note_event_owner(event, route.conn);
+  if (route.kind == LUPINE_ROUTE_REMOTE) {
+    lupine_note_event_owner(event, route.conn);
     return;
   }
-  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  scuda_event_owners()[event] = scuda_owner{true, 0};
+  std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+  lupine_event_owners()[event] = lupine_owner{true, 0};
 }
 
-extern "C" void scuda_note_deviceptr_owner_route(CUdeviceptr ptr,
-                                                  scuda_route route) {
-  if (ptr == 0 || route.kind == SCUDA_ROUTE_INVALID) {
+extern "C" void lupine_note_deviceptr_owner_route(CUdeviceptr ptr,
+                                                  lupine_route route) {
+  if (ptr == 0 || route.kind == LUPINE_ROUTE_INVALID) {
     return;
   }
-  if (route.kind == SCUDA_ROUTE_REMOTE) {
-    scuda_note_deviceptr_owner(ptr, route.conn);
+  if (route.kind == LUPINE_ROUTE_REMOTE) {
+    lupine_note_deviceptr_owner(ptr, route.conn);
     return;
   }
-  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  scuda_deviceptr_owners()[ptr] = scuda_owner{true, 0};
+  std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+  lupine_deviceptr_owners()[ptr] = lupine_owner{true, 0};
 }
 
-extern "C" void scuda_note_deviceptr_allocation_route(CUdeviceptr ptr,
+extern "C" void lupine_note_deviceptr_allocation_route(CUdeviceptr ptr,
                                                        size_t size,
-                                                       scuda_route route) {
-  if (ptr == 0 || route.kind == SCUDA_ROUTE_INVALID) {
+                                                       lupine_route route) {
+  if (ptr == 0 || route.kind == LUPINE_ROUTE_INVALID) {
     return;
   }
-  if (route.kind == SCUDA_ROUTE_REMOTE) {
-    scuda_note_deviceptr_allocation(ptr, size, route.conn);
+  if (route.kind == LUPINE_ROUTE_REMOTE) {
+    lupine_note_deviceptr_allocation(ptr, size, route.conn);
     return;
   }
-  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  scuda_note_deviceptr_allocation_owner_locked(ptr, size,
-                                               scuda_owner{true, 0});
+  std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+  lupine_note_deviceptr_allocation_owner_locked(ptr, size,
+                                                lupine_owner{true, 0});
 }
 
-extern "C" void scuda_forget_deviceptr_owner(CUdeviceptr ptr) {
-  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  scuda_deviceptr_owners().erase(ptr);
-  scuda_deviceptr_allocations().erase(ptr);
+extern "C" void lupine_forget_deviceptr_owner(CUdeviceptr ptr) {
+  std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+  lupine_deviceptr_owners().erase(ptr);
+  lupine_deviceptr_allocations().erase(ptr);
 }
 
-extern "C" scuda_route scuda_route_for_context(CUcontext ctx) {
+extern "C" lupine_route lupine_route_for_context(CUcontext ctx) {
   if (ctx == nullptr) {
-    return scuda_route_for_default();
+    return lupine_route_for_default();
   }
   {
-    std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-    auto it = scuda_context_owners().find(ctx);
-    if (it != scuda_context_owners().end()) {
-      return scuda_route_for_owner(it->second);
+    std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+    auto it = lupine_context_owners().find(ctx);
+    if (it != lupine_context_owners().end()) {
+      return lupine_route_for_owner(it->second);
     }
   }
-  return scuda_route_for_default();
+  return lupine_route_for_default();
 }
 
-extern "C" scuda_route scuda_route_for_module(CUmodule module) {
+extern "C" lupine_route lupine_route_for_module(CUmodule module) {
   {
-    std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-    auto it = scuda_module_owners().find(module);
-    if (it != scuda_module_owners().end()) {
-      return scuda_route_for_owner(it->second);
+    std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+    auto it = lupine_module_owners().find(module);
+    if (it != lupine_module_owners().end()) {
+      return lupine_route_for_owner(it->second);
     }
   }
-  return scuda_route_for_default();
+  return lupine_route_for_default();
 }
 
-extern "C" scuda_route scuda_route_for_library(CUlibrary library) {
+extern "C" lupine_route lupine_route_for_library(CUlibrary library) {
   {
-    std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-    auto it = scuda_library_owners().find(library);
-    if (it != scuda_library_owners().end()) {
-      return scuda_route_for_owner(it->second);
+    std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+    auto it = lupine_library_owners().find(library);
+    if (it != lupine_library_owners().end()) {
+      return lupine_route_for_owner(it->second);
     }
   }
-  return scuda_route_for_default();
+  return lupine_route_for_default();
 }
 
-extern "C" scuda_route scuda_route_for_function(CUfunction function) {
+extern "C" lupine_route lupine_route_for_function(CUfunction function) {
   {
-    std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-    auto it = scuda_function_owners().find(function);
-    if (it != scuda_function_owners().end()) {
-      return scuda_route_for_owner(it->second);
+    std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+    auto it = lupine_function_owners().find(function);
+    if (it != lupine_function_owners().end()) {
+      return lupine_route_for_owner(it->second);
     }
   }
-  return scuda_route_for_default();
+  return lupine_route_for_default();
 }
 
-extern "C" scuda_route scuda_route_for_stream(CUstream stream) {
+extern "C" lupine_route lupine_route_for_stream(CUstream stream) {
   if (stream == nullptr) {
-    return scuda_route_for_default();
+    return lupine_route_for_default();
   }
   {
-    std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-    auto it = scuda_stream_owners().find(stream);
-    if (it != scuda_stream_owners().end()) {
-      return scuda_route_for_owner(it->second);
+    std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+    auto it = lupine_stream_owners().find(stream);
+    if (it != lupine_stream_owners().end()) {
+      return lupine_route_for_owner(it->second);
     }
   }
-  return scuda_route_for_default();
+  return lupine_route_for_default();
 }
 
-extern "C" scuda_route scuda_route_for_event(CUevent event) {
+extern "C" lupine_route lupine_route_for_event(CUevent event) {
   {
-    std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-    auto it = scuda_event_owners().find(event);
-    if (it != scuda_event_owners().end()) {
-      return scuda_route_for_owner(it->second);
+    std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+    auto it = lupine_event_owners().find(event);
+    if (it != lupine_event_owners().end()) {
+      return lupine_route_for_owner(it->second);
     }
   }
-  return scuda_route_for_default();
+  return lupine_route_for_default();
 }
 
-extern "C" scuda_route scuda_route_for_deviceptr(CUdeviceptr ptr) {
+extern "C" lupine_route lupine_route_for_deviceptr(CUdeviceptr ptr) {
   {
-    std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-    auto it = scuda_deviceptr_owners().find(ptr);
-    if (it != scuda_deviceptr_owners().end()) {
-      return scuda_route_for_owner(it->second);
+    std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+    auto it = lupine_deviceptr_owners().find(ptr);
+    if (it != lupine_deviceptr_owners().end()) {
+      return lupine_route_for_owner(it->second);
     }
-    for (const auto &entry : scuda_deviceptr_allocations()) {
+    for (const auto &entry : lupine_deviceptr_allocations()) {
       const auto &allocation = entry.second;
       if (allocation.base == 0 || allocation.size == 0 ||
           ptr < allocation.base) {
@@ -1353,127 +1363,126 @@ extern "C" scuda_route scuda_route_for_deviceptr(CUdeviceptr ptr) {
       }
       uint64_t offset = static_cast<uint64_t>(ptr - allocation.base);
       if (offset < allocation.size) {
-        return scuda_route_for_owner(allocation.owner);
+        return lupine_route_for_owner(allocation.owner);
       }
     }
   }
-  return scuda_route_for_default();
+  return lupine_route_for_default();
 }
 
-extern "C" conn_t *scuda_rpc_conn_for_context(CUcontext ctx) {
-  return scuda_route_remote_conn(scuda_route_for_context(ctx));
+extern "C" conn_t *lupine_rpc_conn_for_context(CUcontext ctx) {
+  return lupine_route_remote_conn(lupine_route_for_context(ctx));
 }
 
-extern "C" conn_t *scuda_rpc_conn_for_module(CUmodule module) {
-  return scuda_route_remote_conn(scuda_route_for_module(module));
+extern "C" conn_t *lupine_rpc_conn_for_module(CUmodule module) {
+  return lupine_route_remote_conn(lupine_route_for_module(module));
 }
 
-extern "C" conn_t *scuda_rpc_conn_for_function(CUfunction function) {
-  return scuda_route_remote_conn(scuda_route_for_function(function));
+extern "C" conn_t *lupine_rpc_conn_for_function(CUfunction function) {
+  return lupine_route_remote_conn(lupine_route_for_function(function));
 }
 
-extern "C" conn_t *scuda_rpc_conn_for_stream(CUstream stream) {
-  return scuda_route_remote_conn(scuda_route_for_stream(stream));
+extern "C" conn_t *lupine_rpc_conn_for_stream(CUstream stream) {
+  return lupine_route_remote_conn(lupine_route_for_stream(stream));
 }
 
-extern "C" conn_t *scuda_rpc_conn_for_event(CUevent event) {
-  return scuda_route_remote_conn(scuda_route_for_event(event));
+extern "C" conn_t *lupine_rpc_conn_for_event(CUevent event) {
+  return lupine_route_remote_conn(lupine_route_for_event(event));
 }
 
-extern "C" conn_t *scuda_rpc_conn_for_deviceptr(CUdeviceptr ptr) {
-  return scuda_route_remote_conn(scuda_route_for_deviceptr(ptr));
+extern "C" conn_t *lupine_rpc_conn_for_deviceptr(CUdeviceptr ptr) {
+  return lupine_route_remote_conn(lupine_route_for_deviceptr(ptr));
 }
 
-extern "C" void scuda_record_library_image(CUlibrary library, scuda_route route,
-                                            uint32_t kind,
+extern "C" void lupine_record_library_image(CUlibrary library,
+                                            lupine_route route, uint32_t kind,
                                             const unsigned char *image,
                                             size_t image_size,
                                             const void *code) {
-  int route_id = scuda_route_identity(route);
+  int route_id = lupine_route_identity(route);
   if (library == nullptr || image == nullptr || image_size == 0 ||
       route_id == -2) {
     return;
   }
-  std::lock_guard<std::mutex> lock(scuda_library_kernel_mutex());
-  auto &record = scuda_library_images()[library];
+  std::lock_guard<std::mutex> lock(lupine_library_kernel_mutex());
+  auto &record = lupine_library_images()[library];
   record.kind = kind;
   record.code = code;
   record.image.assign(image, image + image_size);
   record.libraries_by_route[route_id] = library;
 }
 
-extern "C" void scuda_record_module_image(CUmodule module, scuda_route route,
+extern "C" void lupine_record_module_image(CUmodule module, lupine_route route,
                                            uint32_t kind,
                                            const unsigned char *image,
                                            size_t image_size,
                                            const void *image_ptr) {
-  int route_id = scuda_route_identity(route);
+  int route_id = lupine_route_identity(route);
   if (module == nullptr || image == nullptr || image_size == 0 ||
       route_id == -2) {
     return;
   }
-  std::lock_guard<std::mutex> lock(scuda_library_kernel_mutex());
-  auto &record = scuda_module_images()[module];
+  std::lock_guard<std::mutex> lock(lupine_library_kernel_mutex());
+  auto &record = lupine_module_images()[module];
   record.kind = kind;
   record.image_ptr = image_ptr;
   record.image.assign(image, image + image_size);
   record.modules_by_route[route_id] = module;
 }
 
-extern "C" void scuda_record_library_kernel(CUkernel kernel, CUlibrary library,
+extern "C" void lupine_record_library_kernel(CUkernel kernel, CUlibrary library,
                                              const char *name,
-                                             scuda_route route) {
-  int route_id = scuda_route_identity(route);
+                                             lupine_route route) {
+  int route_id = lupine_route_identity(route);
   if (kernel == nullptr || library == nullptr || name == nullptr ||
       route_id == -2) {
     return;
   }
   {
-    std::lock_guard<std::mutex> lock(scuda_library_kernel_mutex());
-    auto &record = scuda_library_kernels()[kernel];
+    std::lock_guard<std::mutex> lock(lupine_library_kernel_mutex());
+    auto &record = lupine_library_kernels()[kernel];
     record.library = library;
     record.name = name;
     record.kernels_by_route[route_id] = kernel;
   }
-  scuda_note_function_owner_route(reinterpret_cast<CUfunction>(kernel), route);
+  lupine_note_function_owner_route(reinterpret_cast<CUfunction>(kernel), route);
 }
 
-extern "C" void scuda_record_module_function(CUfunction function,
-                                              CUmodule module,
-                                              const char *name,
-                                              scuda_route route) {
-  int route_id = scuda_route_identity(route);
+extern "C" void lupine_record_module_function(CUfunction function,
+                                              CUmodule module, const char *name,
+                                              lupine_route route) {
+  int route_id = lupine_route_identity(route);
   if (function == nullptr || module == nullptr || name == nullptr ||
       route_id == -2) {
     return;
   }
   {
-    std::lock_guard<std::mutex> lock(scuda_library_kernel_mutex());
-    auto &record = scuda_module_functions()[function];
+    std::lock_guard<std::mutex> lock(lupine_library_kernel_mutex());
+    auto &record = lupine_module_functions()[function];
     record.module = module;
     record.name = name;
     record.functions_by_route[route_id] = function;
   }
-  scuda_note_function_owner_route(function, route);
+  lupine_note_function_owner_route(function, route);
 }
 
-static CUresult scuda_load_recorded_module_on_route(CUmodule source_module,
-                                                    scuda_route route,
-                                                    CUmodule *module) {
+static CUresult lupine_load_recorded_module_on_route(CUmodule source_module,
+                                                     lupine_route route,
+                                                     CUmodule *module) {
   if (module == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
   *module = nullptr;
-  int route_id = scuda_route_identity(route);
+  int route_id = lupine_route_identity(route);
   if (source_module == nullptr || route_id == -2) {
     return CUDA_ERROR_INVALID_VALUE;
   }
 
-  scuda_module_image_record record;
+  lupine_module_image_record record;
   {
-    std::lock_guard<std::mutex> lock(scuda_library_kernel_mutex());
-    auto it = scuda_module_images().find(source_module);
-    if (it == scuda_module_images().end()) {
+    std::lock_guard<std::mutex> lock(lupine_library_kernel_mutex());
+    auto it = lupine_module_images().find(source_module);
+    if (it == lupine_module_images().end()) {
       return CUDA_ERROR_NOT_FOUND;
     }
     auto cached = it->second.modules_by_route.find(route_id);
@@ -1486,15 +1495,15 @@ static CUresult scuda_load_recorded_module_on_route(CUmodule source_module,
 
   CUmodule loaded = nullptr;
   CUresult result = CUDA_ERROR_DEVICE_UNAVAILABLE;
-  if (scuda_route_is_local(route)) {
+  if (lupine_route_is_local(route)) {
     using real_fn_t = CUresult (*)(CUmodule *, const void *);
-    auto real = scuda_real_cuda_fn<real_fn_t>("cuModuleLoadData");
+    auto real = lupine_real_cuda_fn<real_fn_t>("cuModuleLoadData");
     if (real == nullptr || record.image_ptr == nullptr) {
       return CUDA_ERROR_DEVICE_UNAVAILABLE;
     }
     result = real(&loaded, record.image_ptr);
   } else {
-    conn_t *conn = scuda_route_remote_conn(route);
+    conn_t *conn = lupine_route_remote_conn(route);
     size_t image_size = record.image.size();
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuModuleLoadData) < 0 ||
@@ -1512,12 +1521,12 @@ static CUresult scuda_load_recorded_module_on_route(CUmodule source_module,
     return result;
   }
 
-  scuda_remember_loaded_module(loaded);
-  scuda_note_module_owner_route(loaded, route);
+  lupine_remember_loaded_module(loaded);
+  lupine_note_module_owner_route(loaded, route);
   {
-    std::lock_guard<std::mutex> lock(scuda_library_kernel_mutex());
-    scuda_module_images()[source_module].modules_by_route[route_id] = loaded;
-    auto &loaded_record = scuda_module_images()[loaded];
+    std::lock_guard<std::mutex> lock(lupine_library_kernel_mutex());
+    lupine_module_images()[source_module].modules_by_route[route_id] = loaded;
+    auto &loaded_record = lupine_module_images()[loaded];
     loaded_record.kind = record.kind;
     loaded_record.image_ptr = record.image_ptr;
     loaded_record.image = std::move(record.image);
@@ -1527,22 +1536,23 @@ static CUresult scuda_load_recorded_module_on_route(CUmodule source_module,
   return CUDA_SUCCESS;
 }
 
-static CUresult scuda_load_recorded_library_on_route(
-    CUlibrary source_library, scuda_route route, CUlibrary *library) {
+static CUresult lupine_load_recorded_library_on_route(CUlibrary source_library,
+                                                      lupine_route route,
+                                                      CUlibrary *library) {
   if (library == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
   *library = nullptr;
-  int route_id = scuda_route_identity(route);
+  int route_id = lupine_route_identity(route);
   if (source_library == nullptr || route_id == -2) {
     return CUDA_ERROR_INVALID_VALUE;
   }
 
-  scuda_library_image_record record;
+  lupine_library_image_record record;
   {
-    std::lock_guard<std::mutex> lock(scuda_library_kernel_mutex());
-    auto it = scuda_library_images().find(source_library);
-    if (it == scuda_library_images().end()) {
+    std::lock_guard<std::mutex> lock(lupine_library_kernel_mutex());
+    auto it = lupine_library_images().find(source_library);
+    if (it == lupine_library_images().end()) {
       return CUDA_ERROR_NOT_FOUND;
     }
     auto cached = it->second.libraries_by_route.find(route_id);
@@ -1555,17 +1565,18 @@ static CUresult scuda_load_recorded_library_on_route(
 
   CUlibrary loaded = nullptr;
   CUresult result = CUDA_ERROR_DEVICE_UNAVAILABLE;
-  if (scuda_route_is_local(route)) {
-    using real_fn_t = CUresult (*)(CUlibrary *, const void *, CUjit_option *,
-                                   void **, unsigned int, CUlibraryOption *,
-                                   void **, unsigned int);
-    auto real = scuda_real_cuda_fn<real_fn_t>("cuLibraryLoadData");
+  if (lupine_route_is_local(route)) {
+    using real_fn_t =
+        CUresult (*)(CUlibrary *, const void *, CUjit_option *, void **,
+                     unsigned int, CUlibraryOption *, void **, unsigned int);
+    auto real = lupine_real_cuda_fn<real_fn_t>("cuLibraryLoadData");
     if (real == nullptr || record.code == nullptr) {
       return CUDA_ERROR_DEVICE_UNAVAILABLE;
     }
-    result = real(&loaded, record.code, nullptr, nullptr, 0, nullptr, nullptr, 0);
+    result =
+        real(&loaded, record.code, nullptr, nullptr, 0, nullptr, nullptr, 0);
   } else {
-    conn_t *conn = scuda_route_remote_conn(route);
+    conn_t *conn = lupine_route_remote_conn(route);
     size_t image_size = record.image.size();
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuLibraryLoadData) < 0 ||
@@ -1583,11 +1594,12 @@ static CUresult scuda_load_recorded_library_on_route(
     return result;
   }
 
-  scuda_note_library_owner_route(loaded, route);
+  lupine_note_library_owner_route(loaded, route);
   {
-    std::lock_guard<std::mutex> lock(scuda_library_kernel_mutex());
-    scuda_library_images()[source_library].libraries_by_route[route_id] = loaded;
-    auto &loaded_record = scuda_library_images()[loaded];
+    std::lock_guard<std::mutex> lock(lupine_library_kernel_mutex());
+    lupine_library_images()[source_library].libraries_by_route[route_id] =
+        loaded;
+    auto &loaded_record = lupine_library_images()[loaded];
     loaded_record.kind = record.kind;
     loaded_record.code = record.code;
     loaded_record.image = std::move(record.image);
@@ -1597,24 +1609,24 @@ static CUresult scuda_load_recorded_library_on_route(
   return CUDA_SUCCESS;
 }
 
-static CUresult scuda_resolve_library_kernel_for_route(CUfunction function,
-                                                       scuda_route route,
-                                                       CUfunction *resolved) {
+static CUresult lupine_resolve_library_kernel_for_route(CUfunction function,
+                                                        lupine_route route,
+                                                        CUfunction *resolved) {
   if (resolved == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
   *resolved = function;
-  int route_id = scuda_route_identity(route);
+  int route_id = lupine_route_identity(route);
   if (function == nullptr || route_id == -2) {
     return CUDA_SUCCESS;
   }
 
-  scuda_library_kernel_record record;
+  lupine_library_kernel_record record;
   {
-    std::lock_guard<std::mutex> lock(scuda_library_kernel_mutex());
+    std::lock_guard<std::mutex> lock(lupine_library_kernel_mutex());
     auto it =
-        scuda_library_kernels().find(reinterpret_cast<CUkernel>(function));
-    if (it == scuda_library_kernels().end()) {
+        lupine_library_kernels().find(reinterpret_cast<CUkernel>(function));
+    if (it == lupine_library_kernels().end()) {
       return CUDA_SUCCESS;
     }
     auto cached = it->second.kernels_by_route.find(route_id);
@@ -1627,21 +1639,21 @@ static CUresult scuda_resolve_library_kernel_for_route(CUfunction function,
 
   CUlibrary library = nullptr;
   CUresult result =
-      scuda_load_recorded_library_on_route(record.library, route, &library);
+      lupine_load_recorded_library_on_route(record.library, route, &library);
   if (result != CUDA_SUCCESS) {
     return result;
   }
 
   CUkernel kernel = nullptr;
-  if (scuda_route_is_local(route)) {
+  if (lupine_route_is_local(route)) {
     using real_fn_t = CUresult (*)(CUkernel *, CUlibrary, const char *);
-    auto real = scuda_real_cuda_fn<real_fn_t>("cuLibraryGetKernel");
+    auto real = lupine_real_cuda_fn<real_fn_t>("cuLibraryGetKernel");
     if (real == nullptr) {
       return CUDA_ERROR_DEVICE_UNAVAILABLE;
     }
     result = real(&kernel, library, record.name.c_str());
   } else {
-    conn_t *conn = scuda_route_remote_conn(route);
+    conn_t *conn = lupine_route_remote_conn(route);
     std::size_t name_len = record.name.size() + 1;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuLibraryGetKernel) < 0 ||
@@ -1659,36 +1671,36 @@ static CUresult scuda_resolve_library_kernel_for_route(CUfunction function,
   }
 
   {
-    std::lock_guard<std::mutex> lock(scuda_library_kernel_mutex());
-    scuda_library_kernels()[reinterpret_cast<CUkernel>(function)]
+    std::lock_guard<std::mutex> lock(lupine_library_kernel_mutex());
+    lupine_library_kernels()[reinterpret_cast<CUkernel>(function)]
         .kernels_by_route[route_id] = kernel;
-    auto &new_record = scuda_library_kernels()[kernel];
+    auto &new_record = lupine_library_kernels()[kernel];
     new_record.library = library;
     new_record.name = record.name;
     new_record.kernels_by_route[route_id] = kernel;
   }
-  scuda_note_function_owner_route(reinterpret_cast<CUfunction>(kernel), route);
+  lupine_note_function_owner_route(reinterpret_cast<CUfunction>(kernel), route);
   *resolved = reinterpret_cast<CUfunction>(kernel);
   return CUDA_SUCCESS;
 }
 
-static CUresult scuda_resolve_module_function_for_route(CUfunction function,
-                                                        scuda_route route,
-                                                        CUfunction *resolved) {
+static CUresult lupine_resolve_module_function_for_route(CUfunction function,
+                                                         lupine_route route,
+                                                         CUfunction *resolved) {
   if (resolved == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
   *resolved = function;
-  int route_id = scuda_route_identity(route);
+  int route_id = lupine_route_identity(route);
   if (function == nullptr || route_id == -2) {
     return CUDA_SUCCESS;
   }
 
-  scuda_module_function_record record;
+  lupine_module_function_record record;
   {
-    std::lock_guard<std::mutex> lock(scuda_library_kernel_mutex());
-    auto it = scuda_module_functions().find(function);
-    if (it == scuda_module_functions().end()) {
+    std::lock_guard<std::mutex> lock(lupine_library_kernel_mutex());
+    auto it = lupine_module_functions().find(function);
+    if (it == lupine_module_functions().end()) {
       return CUDA_SUCCESS;
     }
     auto cached = it->second.functions_by_route.find(route_id);
@@ -1701,21 +1713,21 @@ static CUresult scuda_resolve_module_function_for_route(CUfunction function,
 
   CUmodule module = nullptr;
   CUresult result =
-      scuda_load_recorded_module_on_route(record.module, route, &module);
+      lupine_load_recorded_module_on_route(record.module, route, &module);
   if (result != CUDA_SUCCESS) {
     return result;
   }
 
   CUfunction route_function = nullptr;
-  if (scuda_route_is_local(route)) {
+  if (lupine_route_is_local(route)) {
     using real_fn_t = CUresult (*)(CUfunction *, CUmodule, const char *);
-    auto real = scuda_real_cuda_fn<real_fn_t>("cuModuleGetFunction");
+    auto real = lupine_real_cuda_fn<real_fn_t>("cuModuleGetFunction");
     if (real == nullptr) {
       return CUDA_ERROR_DEVICE_UNAVAILABLE;
     }
     result = real(&route_function, module, record.name.c_str());
   } else {
-    conn_t *conn = scuda_route_remote_conn(route);
+    conn_t *conn = lupine_route_remote_conn(route);
     std::size_t name_len = record.name.size() + 1;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuModuleGetFunction) < 0 ||
@@ -1733,21 +1745,21 @@ static CUresult scuda_resolve_module_function_for_route(CUfunction function,
   }
 
   {
-    std::lock_guard<std::mutex> lock(scuda_library_kernel_mutex());
-    scuda_module_functions()[function].functions_by_route[route_id] =
+    std::lock_guard<std::mutex> lock(lupine_library_kernel_mutex());
+    lupine_module_functions()[function].functions_by_route[route_id] =
         route_function;
-    auto &new_record = scuda_module_functions()[route_function];
+    auto &new_record = lupine_module_functions()[route_function];
     new_record.module = module;
     new_record.name = record.name;
     new_record.functions_by_route[route_id] = route_function;
   }
-  scuda_note_function_owner_route(route_function, route);
+  lupine_note_function_owner_route(route_function, route);
   *resolved = route_function;
   return CUDA_SUCCESS;
 }
 
-static bool scuda_read_file_span(const char *path,
-                                 std::vector<unsigned char> *bytes) {
+static bool lupine_read_file_span(const char *path,
+                                  std::vector<unsigned char> *bytes) {
   if (path == nullptr || bytes == nullptr) {
     return false;
   }
@@ -1764,10 +1776,11 @@ static bool scuda_read_file_span(const char *path,
   return file.read(reinterpret_cast<char *>(bytes->data()), size).good();
 }
 
-static bool scuda_lookup_elf_function_symbol(const char *path, uintptr_t offset,
-                                             std::string *symbol) {
+static bool lupine_lookup_elf_function_symbol(const char *path,
+                                              uintptr_t offset,
+                                              std::string *symbol) {
   std::vector<unsigned char> bytes;
-  if (symbol == nullptr || !scuda_read_file_span(path, &bytes) ||
+  if (symbol == nullptr || !lupine_read_file_span(path, &bytes) ||
       bytes.size() < sizeof(Elf64_Ehdr)) {
     return false;
   }
@@ -1833,15 +1846,15 @@ static bool scuda_lookup_elf_function_symbol(const char *path, uintptr_t offset,
   return true;
 }
 
-static CUfunction scuda_resolve_host_function(CUfunction function) {
+static CUfunction lupine_resolve_host_function(CUfunction function) {
   if (function == nullptr) {
     return function;
   }
 
   {
-    std::lock_guard<std::mutex> lock(scuda_host_function_mutex());
-    auto mapped = scuda_host_function_map().find(function);
-    if (mapped != scuda_host_function_map().end()) {
+    std::lock_guard<std::mutex> lock(lupine_host_function_mutex());
+    auto mapped = lupine_host_function_map().find(function);
+    if (mapped != lupine_host_function_map().end()) {
       return mapped->second;
     }
   }
@@ -1856,14 +1869,14 @@ static CUfunction scuda_resolve_host_function(CUfunction function) {
       info.dli_fbase != nullptr) {
     uintptr_t offset = reinterpret_cast<uintptr_t>(function) -
                        reinterpret_cast<uintptr_t>(info.dli_fbase);
-    if (scuda_lookup_elf_function_symbol(info.dli_fname, offset,
-                                         &symbol_name)) {
+    if (lupine_lookup_elf_function_symbol(info.dli_fname, offset,
+                                          &symbol_name)) {
       kernel_name = symbol_name.c_str();
     }
   }
   if (kernel_name == nullptr) {
-    if (scuda_trace_enabled()) {
-      std::cerr << "SCUDA could not resolve host kernel symbol for "
+    if (lupine_trace_enabled()) {
+      std::cerr << "LUPINE could not resolve host kernel symbol for "
                 << reinterpret_cast<void *>(function) << std::endl;
     }
     return function;
@@ -1871,64 +1884,63 @@ static CUfunction scuda_resolve_host_function(CUfunction function) {
 
   std::vector<CUmodule> modules;
   {
-    std::lock_guard<std::mutex> lock(scuda_host_function_mutex());
-    modules = scuda_loaded_modules();
+    std::lock_guard<std::mutex> lock(lupine_host_function_mutex());
+    modules = lupine_loaded_modules();
   }
   for (CUmodule module : modules) {
     CUfunction remote = nullptr;
     CUresult result = cuModuleGetFunction(&remote, module, kernel_name);
     if (result == CUDA_SUCCESS && remote != nullptr) {
-      std::lock_guard<std::mutex> lock(scuda_host_function_mutex());
-      scuda_host_function_map()[function] = remote;
-      if (scuda_trace_enabled()) {
-        std::cerr << "SCUDA mapped host kernel " << kernel_name
+      std::lock_guard<std::mutex> lock(lupine_host_function_mutex());
+      lupine_host_function_map()[function] = remote;
+      if (lupine_trace_enabled()) {
+        std::cerr << "LUPINE mapped host kernel " << kernel_name
                   << " host=" << reinterpret_cast<void *>(function)
                   << " remote=" << remote << std::endl;
       }
       return remote;
     }
   }
-  if (scuda_trace_enabled()) {
-    std::cerr << "SCUDA host kernel " << kernel_name << " was not found in "
+  if (lupine_trace_enabled()) {
+    std::cerr << "LUPINE host kernel " << kernel_name << " was not found in "
               << modules.size() << " loaded modules" << std::endl;
   }
 
   return function;
 }
 
-static CUfunction scuda_translate_private_function(CUfunction function) {
+static CUfunction lupine_translate_private_function(CUfunction function) {
   {
-    std::lock_guard<std::mutex> lock(scuda_private_node_mutex());
-    auto it = scuda_private_node_map().find(function);
-    if (it != scuda_private_node_map().end()) {
+    std::lock_guard<std::mutex> lock(lupine_private_node_mutex());
+    auto it = lupine_private_node_map().find(function);
+    if (it != lupine_private_node_map().end()) {
       return it->second.server_function;
     }
   }
-  return scuda_resolve_host_function(function);
+  return lupine_resolve_host_function(function);
 }
 
-static CUresult scuda_get_remote_private_module_node(CUcontext context,
-                                                     CUmodule module,
-                                                     CUfunction *server_node,
-                                                     uint64_t *server_owner);
+static CUresult lupine_get_remote_private_module_node(CUcontext context,
+                                                      CUmodule module,
+                                                      CUfunction *server_node,
+                                                      uint64_t *server_owner);
 
-static CUresult scuda_resolve_private_function_for_route(CUfunction function,
-                                                         scuda_route route,
-                                                         CUfunction *resolved) {
+static CUresult lupine_resolve_private_function_for_route(
+    CUfunction function, lupine_route route, CUfunction *resolved) {
   if (resolved == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
   *resolved = function;
-  int route_id = scuda_route_identity(route);
+  int route_id = lupine_route_identity(route);
   if (function == nullptr || route_id == -2) {
     return CUDA_SUCCESS;
   }
 
-  scuda_private_node_mapping mapping;
+  lupine_private_node_mapping mapping;
   {
-    std::lock_guard<std::mutex> lock(scuda_private_node_mutex());
-    auto it = scuda_private_node_map().find(function);
-    if (it == scuda_private_node_map().end()) {
+    std::lock_guard<std::mutex> lock(lupine_private_node_mutex());
+    auto it = lupine_private_node_map().find(function);
+    if (it == lupine_private_node_map().end()) {
       return CUDA_SUCCESS;
     }
     auto cached = it->second.functions_by_route.find(route_id);
@@ -1944,22 +1956,22 @@ static CUresult scuda_resolve_private_function_for_route(CUfunction function,
   }
   CUmodule module = nullptr;
   CUresult result =
-      scuda_load_recorded_module_on_route(mapping.module, route, &module);
+      lupine_load_recorded_module_on_route(mapping.module, route, &module);
   if (result != CUDA_SUCCESS || module == nullptr) {
     return result;
   }
 
   CUfunction server_node = nullptr;
   uint64_t server_owner = 0;
-  result = scuda_get_remote_private_module_node(nullptr, module, &server_node,
-                                                &server_owner);
+  result = lupine_get_remote_private_module_node(nullptr, module, &server_node,
+                                                 &server_owner);
   if (result != CUDA_SUCCESS || server_node == nullptr) {
     return result == CUDA_SUCCESS ? CUDA_ERROR_NOT_FOUND : result;
   }
 
   {
-    std::lock_guard<std::mutex> lock(scuda_private_node_mutex());
-    auto &record = scuda_private_node_map()[function];
+    std::lock_guard<std::mutex> lock(lupine_private_node_mutex());
+    auto &record = lupine_private_node_map()[function];
     record.module = mapping.module;
     record.functions_by_route[route_id] = server_node;
     if (record.server_function == nullptr) {
@@ -1972,44 +1984,45 @@ static CUresult scuda_resolve_private_function_for_route(CUfunction function,
 }
 
 extern "C" CUfunction
-scuda_translate_private_function_for_rpc(CUfunction function) {
-  return scuda_translate_private_function(function);
+lupine_translate_private_function_for_rpc(CUfunction function) {
+  return lupine_translate_private_function(function);
 }
 
-extern "C" CUresult scuda_cuCtxGetCurrent_virtual(CUcontext *pctx);
+extern "C" CUresult lupine_cuCtxGetCurrent_virtual(CUcontext *pctx);
 
-extern "C" CUresult scuda_cuDeviceGetAttribute_cached(
-    int *pi, CUdevice_attribute attrib, CUdevice dev) {
+extern "C" CUresult
+lupine_cuDeviceGetAttribute_cached(int *pi, CUdevice_attribute attrib,
+                                   CUdevice dev) {
   if (pi == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
-  scuda_device_attribute_key key{static_cast<int>(dev),
-                                 static_cast<int>(attrib)};
+  lupine_device_attribute_key key{static_cast<int>(dev),
+                                  static_cast<int>(attrib)};
   {
-    std::lock_guard<std::mutex> lock(scuda_device_attribute_cache_mutex());
-    auto it = scuda_device_attribute_cache().find(key);
-    if (it != scuda_device_attribute_cache().end()) {
+    std::lock_guard<std::mutex> lock(lupine_device_attribute_cache_mutex());
+    auto it = lupine_device_attribute_cache().find(key);
+    if (it != lupine_device_attribute_cache().end()) {
       *pi = it->second;
       return CUDA_SUCCESS;
     }
   }
 
   CUdevice remote_dev = dev;
-  scuda_route route = scuda_route_for_device(&remote_dev);
-  if (scuda_route_is_local(route)) {
+  lupine_route route = lupine_route_for_device(&remote_dev);
+  if (lupine_route_is_local(route)) {
     using real_fn_t = CUresult (*)(int *, CUdevice_attribute, CUdevice);
-    auto real = scuda_real_cuda_fn<real_fn_t>("cuDeviceGetAttribute");
+    auto real = lupine_real_cuda_fn<real_fn_t>("cuDeviceGetAttribute");
     if (real == nullptr) {
       return CUDA_ERROR_DEVICE_UNAVAILABLE;
     }
     CUresult result = real(pi, attrib, remote_dev);
     if (result == CUDA_SUCCESS) {
-      std::lock_guard<std::mutex> lock(scuda_device_attribute_cache_mutex());
-      scuda_device_attribute_cache()[key] = *pi;
+      std::lock_guard<std::mutex> lock(lupine_device_attribute_cache_mutex());
+      lupine_device_attribute_cache()[key] = *pi;
     }
     return result;
   }
-  conn_t *conn = scuda_route_remote_conn(route);
+  conn_t *conn = lupine_route_remote_conn(route);
   CUresult return_value;
   int value = 0;
   if (conn == nullptr ||
@@ -2023,61 +2036,60 @@ extern "C" CUresult scuda_cuDeviceGetAttribute_cached(
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
   }
   if (return_value == CUDA_SUCCESS) {
-    std::lock_guard<std::mutex> lock(scuda_device_attribute_cache_mutex());
-    scuda_device_attribute_cache()[key] = value;
+    std::lock_guard<std::mutex> lock(lupine_device_attribute_cache_mutex());
+    lupine_device_attribute_cache()[key] = value;
     *pi = value;
   }
   return return_value;
 }
 
-extern "C" CUresult scuda_cuKernelGetFunction_cached(CUfunction *pFunc,
+extern "C" CUresult lupine_cuKernelGetFunction_cached(CUfunction *pFunc,
                                                       CUkernel kernel) {
   if (pFunc == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
   CUcontext current_context = nullptr;
-  CUresult context_status = scuda_cuCtxGetCurrent_virtual(&current_context);
+  CUresult context_status = lupine_cuCtxGetCurrent_virtual(&current_context);
   if (context_status != CUDA_SUCCESS) {
     return context_status;
   }
-  scuda_route route = scuda_route_for_default();
-  if (route.kind == SCUDA_ROUTE_INVALID) {
-    route = scuda_route_for_function(reinterpret_cast<CUfunction>(kernel));
+  lupine_route route = lupine_route_for_default();
+  if (route.kind == LUPINE_ROUTE_INVALID) {
+    route = lupine_route_for_function(reinterpret_cast<CUfunction>(kernel));
   }
   CUfunction route_kernel_function = reinterpret_cast<CUfunction>(kernel);
-  CUresult resolve_status =
-      scuda_resolve_library_kernel_for_route(route_kernel_function, route,
-                                             &route_kernel_function);
+  CUresult resolve_status = lupine_resolve_library_kernel_for_route(
+      route_kernel_function, route, &route_kernel_function);
   if (resolve_status != CUDA_SUCCESS) {
     return resolve_status;
   }
   CUkernel route_kernel = reinterpret_cast<CUkernel>(route_kernel_function);
-  scuda_kernel_function_key key{scuda_route_identity(route), current_context,
-                                route_kernel};
+  lupine_kernel_function_key key{lupine_route_identity(route), current_context,
+                                 route_kernel};
   {
-    std::lock_guard<std::mutex> lock(scuda_kernel_function_cache_mutex());
-    auto it = scuda_kernel_function_cache().find(key);
-    if (it != scuda_kernel_function_cache().end()) {
+    std::lock_guard<std::mutex> lock(lupine_kernel_function_cache_mutex());
+    auto it = lupine_kernel_function_cache().find(key);
+    if (it != lupine_kernel_function_cache().end()) {
       *pFunc = it->second;
       return CUDA_SUCCESS;
     }
   }
 
-  if (scuda_route_is_local(route)) {
+  if (lupine_route_is_local(route)) {
     using real_fn_t = CUresult (*)(CUfunction *, CUkernel);
-    auto real = scuda_real_cuda_fn<real_fn_t>("cuKernelGetFunction");
+    auto real = lupine_real_cuda_fn<real_fn_t>("cuKernelGetFunction");
     if (real == nullptr) {
       return CUDA_ERROR_DEVICE_UNAVAILABLE;
     }
     CUresult result = real(pFunc, route_kernel);
     if (result == CUDA_SUCCESS) {
-      std::lock_guard<std::mutex> lock(scuda_kernel_function_cache_mutex());
-      scuda_kernel_function_cache()[key] = *pFunc;
-      scuda_note_function_owner_route(*pFunc, route);
+      std::lock_guard<std::mutex> lock(lupine_kernel_function_cache_mutex());
+      lupine_kernel_function_cache()[key] = *pFunc;
+      lupine_note_function_owner_route(*pFunc, route);
     }
     return result;
   }
-  conn_t *conn = scuda_route_remote_conn(route);
+  conn_t *conn = lupine_route_remote_conn(route);
   CUfunction function = nullptr;
   CUresult return_value;
   if (conn == nullptr ||
@@ -2090,63 +2102,65 @@ extern "C" CUresult scuda_cuKernelGetFunction_cached(CUfunction *pFunc,
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
   }
   if (return_value == CUDA_SUCCESS) {
-    std::lock_guard<std::mutex> lock(scuda_kernel_function_cache_mutex());
-    scuda_kernel_function_cache()[key] = function;
+    std::lock_guard<std::mutex> lock(lupine_kernel_function_cache_mutex());
+    lupine_kernel_function_cache()[key] = function;
     *pFunc = function;
-    scuda_note_function_owner(function, conn);
+    lupine_note_function_owner(function, conn);
   }
   return return_value;
 }
 
-static CUresult scuda_cuOccupancy_cached(int *numBlocks, CUfunction func,
-                                         int blockSize,
-                                         size_t dynamicSMemSize,
-                                         unsigned int flags,
-                                         bool with_flags) {
+static CUresult lupine_cuOccupancy_cached(int *numBlocks, CUfunction func,
+                                          int blockSize, size_t dynamicSMemSize,
+                                          unsigned int flags, bool with_flags) {
   if (numBlocks == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
-  CUfunction translated = scuda_translate_private_function(func);
-  scuda_route route = scuda_route_for_function(translated);
-  scuda_occupancy_key key{scuda_route_identity(route), translated, blockSize,
-                          dynamicSMemSize, flags, with_flags};
+  CUfunction translated = lupine_translate_private_function(func);
+  lupine_route route = lupine_route_for_function(translated);
+  lupine_occupancy_key key{lupine_route_identity(route),
+                           translated,
+                           blockSize,
+                           dynamicSMemSize,
+                           flags,
+                           with_flags};
   {
-    std::lock_guard<std::mutex> lock(scuda_occupancy_cache_mutex());
-    auto it = scuda_occupancy_cache().find(key);
-    if (it != scuda_occupancy_cache().end()) {
+    std::lock_guard<std::mutex> lock(lupine_occupancy_cache_mutex());
+    auto it = lupine_occupancy_cache().find(key);
+    if (it != lupine_occupancy_cache().end()) {
       *numBlocks = it->second;
       return CUDA_SUCCESS;
     }
   }
 
-  if (scuda_route_is_local(route)) {
+  if (lupine_route_is_local(route)) {
     const char *symbol =
         with_flags ? "cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags"
                    : "cuOccupancyMaxActiveBlocksPerMultiprocessor";
-    using real_fn_t = CUresult (*)(int *, CUfunction, int, size_t,
-                                   unsigned int);
+    using real_fn_t =
+        CUresult (*)(int *, CUfunction, int, size_t, unsigned int);
     using real_no_flags_fn_t = CUresult (*)(int *, CUfunction, int, size_t);
     CUresult result;
     if (with_flags) {
-      auto real = scuda_real_cuda_fn<real_fn_t>(symbol);
+      auto real = lupine_real_cuda_fn<real_fn_t>(symbol);
       if (real == nullptr) {
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
       }
       result = real(numBlocks, translated, blockSize, dynamicSMemSize, flags);
     } else {
-      auto real = scuda_real_cuda_fn<real_no_flags_fn_t>(symbol);
+      auto real = lupine_real_cuda_fn<real_no_flags_fn_t>(symbol);
       if (real == nullptr) {
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
       }
       result = real(numBlocks, translated, blockSize, dynamicSMemSize);
     }
     if (result == CUDA_SUCCESS) {
-      std::lock_guard<std::mutex> lock(scuda_occupancy_cache_mutex());
-      scuda_occupancy_cache()[key] = *numBlocks;
+      std::lock_guard<std::mutex> lock(lupine_occupancy_cache_mutex());
+      lupine_occupancy_cache()[key] = *numBlocks;
     }
     return result;
   }
-  conn_t *conn = scuda_route_remote_conn(route);
+  conn_t *conn = lupine_route_remote_conn(route);
   CUresult return_value;
   int remote_num_blocks = 0;
   int opcode = with_flags
@@ -2165,59 +2179,58 @@ static CUresult scuda_cuOccupancy_cached(int *numBlocks, CUfunction func,
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
   }
   if (return_value == CUDA_SUCCESS) {
-    std::lock_guard<std::mutex> lock(scuda_occupancy_cache_mutex());
-    scuda_occupancy_cache()[key] = remote_num_blocks;
+    std::lock_guard<std::mutex> lock(lupine_occupancy_cache_mutex());
+    lupine_occupancy_cache()[key] = remote_num_blocks;
     *numBlocks = remote_num_blocks;
   }
   return return_value;
 }
 
-extern "C" CUresult
-scuda_cuOccupancyMaxActiveBlocksPerMultiprocessor_cached(
+extern "C" CUresult lupine_cuOccupancyMaxActiveBlocksPerMultiprocessor_cached(
     int *numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize) {
-  return scuda_cuOccupancy_cached(numBlocks, func, blockSize, dynamicSMemSize, 0,
-                                  false);
+  return lupine_cuOccupancy_cached(numBlocks, func, blockSize, dynamicSMemSize,
+                                   0, false);
 }
 
 extern "C" CUresult
-scuda_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags_cached(
+lupine_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags_cached(
     int *numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize,
     unsigned int flags) {
-  return scuda_cuOccupancy_cached(numBlocks, func, blockSize, dynamicSMemSize,
-                                  flags, true);
+  return lupine_cuOccupancy_cached(numBlocks, func, blockSize, dynamicSMemSize,
+                                   flags, true);
 }
 
-static bool scuda_is_private_function(CUfunction function) {
-  std::lock_guard<std::mutex> lock(scuda_private_node_mutex());
-  return scuda_private_node_map().find(function) !=
-         scuda_private_node_map().end();
+static bool lupine_is_private_function(CUfunction function) {
+  std::lock_guard<std::mutex> lock(lupine_private_node_mutex());
+  return lupine_private_node_map().find(function) !=
+         lupine_private_node_map().end();
 }
 
-static CUresult scuda_get_remote_private_module_node(CUcontext context,
-                                                     CUmodule module,
-                                                     CUfunction *server_node,
-                                                     uint64_t *server_owner) {
+static CUresult lupine_get_remote_private_module_node(CUcontext context,
+                                                      CUmodule module,
+                                                      CUfunction *server_node,
+                                                      uint64_t *server_owner) {
   if (server_node == nullptr || server_owner == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
   *server_node = nullptr;
   *server_owner = 0;
-  scuda_route route = context != nullptr ? scuda_route_for_context(context)
-                                         : scuda_route_for_module(module);
-  int route_id = scuda_route_identity(route);
+  lupine_route route = context != nullptr ? lupine_route_for_context(context)
+                                          : lupine_route_for_module(module);
+  int route_id = lupine_route_identity(route);
   if (module != nullptr && route_id != -2 &&
-      scuda_route_identity(scuda_route_for_module(module)) != route_id) {
+      lupine_route_identity(lupine_route_for_module(module)) != route_id) {
     CUmodule route_module = nullptr;
-    if (scuda_load_recorded_module_on_route(module, route, &route_module) ==
+    if (lupine_load_recorded_module_on_route(module, route, &route_module) ==
             CUDA_SUCCESS &&
         route_module != nullptr) {
       module = route_module;
     }
   }
-  conn_t *conn = scuda_route_remote_conn(route);
+  conn_t *conn = lupine_route_remote_conn(route);
   CUresult result = CUDA_ERROR_UNKNOWN;
   if (conn == nullptr ||
-      rpc_write_start_request(conn, SCUDA_RPC_cuPrivateGetModuleNode) < 0 ||
+      rpc_write_start_request(conn, LUPINE_RPC_cuPrivateGetModuleNode) < 0 ||
       rpc_write(conn, &context, sizeof(context)) < 0 ||
       rpc_write(conn, &module, sizeof(module)) < 0 ||
       rpc_wait_for_response(conn) < 0 ||
@@ -2227,17 +2240,17 @@ static CUresult scuda_get_remote_private_module_node(CUcontext context,
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
   }
   if (result == CUDA_SUCCESS && *server_node != nullptr) {
-    scuda_note_function_owner_route(*server_node, route);
+    lupine_note_function_owner_route(*server_node, route);
   }
   return result;
 }
 
-static uint64_t scuda_private_export_slot_hash(const char *table_name,
-                                               int slot) {
+static uint64_t lupine_private_export_slot_hash(const char *table_name,
+                                                int slot) {
   if (table_name == nullptr || slot < 0) {
     return 0;
   }
-  auto &hashes = scuda_private_export_hashes();
+  auto &hashes = lupine_private_export_hashes();
   auto it = hashes.find(table_name);
   if (it == hashes.end() || static_cast<size_t>(slot) >= it->second.size()) {
     return 0;
@@ -2246,18 +2259,18 @@ static uint64_t scuda_private_export_slot_hash(const char *table_name,
 }
 
 extern "C" CUresult
-scuda_private_export_slot_called(int slot, const char *table_name,
-                                 uint64_t arg0, uint64_t arg1, uint64_t arg2,
-                                 uint64_t arg3, uint64_t arg4, uint64_t arg5) {
-  static uint64_t scuda_private_2131_fake_object[64] = {};
+lupine_private_export_slot_called(int slot, const char *table_name,
+                                  uint64_t arg0, uint64_t arg1, uint64_t arg2,
+                                  uint64_t arg3, uint64_t arg4, uint64_t arg5) {
+  static uint64_t lupine_private_2131_fake_object[64] = {};
 
-  if (scuda_trace_enabled()) {
+  if (lupine_trace_enabled()) {
     fprintf(stderr,
-            "SCUDA private export table called: %s[%d] hash=%#llx "
+            "LUPINE private export table called: %s[%d] hash=%#llx "
             "args=%#llx,%#llx,%#llx,%#llx,%#llx,%#llx\n",
             table_name, slot,
             static_cast<unsigned long long>(
-                scuda_private_export_slot_hash(table_name, slot)),
+                lupine_private_export_slot_hash(table_name, slot)),
             static_cast<unsigned long long>(arg0),
             static_cast<unsigned long long>(arg1),
             static_cast<unsigned long long>(arg2),
@@ -2274,8 +2287,8 @@ scuda_private_export_slot_called(int slot, const char *table_name,
     }
     uint64_t output = arg0 == 0 ? 0 : 1;
     *reinterpret_cast<uint64_t *>(arg1) = output;
-    if (scuda_trace_enabled()) {
-      std::cerr << "SCUDA private 2131[4] output=" << output << std::endl;
+    if (lupine_trace_enabled()) {
+      std::cerr << "LUPINE private 2131[4] output=" << output << std::endl;
     }
     return CUDA_SUCCESS;
   }
@@ -2290,7 +2303,7 @@ scuda_private_export_slot_called(int slot, const char *table_name,
       return static_cast<CUresult>(400);
     }
     *reinterpret_cast<uint64_t *>(arg2) =
-        reinterpret_cast<uint64_t>(&scuda_private_2131_fake_object[0]);
+        reinterpret_cast<uint64_t>(&lupine_private_2131_fake_object[0]);
     return CUDA_SUCCESS;
   }
 
@@ -2309,22 +2322,22 @@ scuda_private_export_slot_called(int slot, const char *table_name,
       slot == 7) {
     CUfunction server_node = nullptr;
     uint64_t server_owner = 0;
-    CUresult node_result = scuda_get_remote_private_module_node(
+    CUresult node_result = lupine_get_remote_private_module_node(
         reinterpret_cast<CUcontext>(arg0), reinterpret_cast<CUmodule>(arg1),
         &server_node, &server_owner);
     if (node_result != CUDA_SUCCESS || server_node == nullptr) {
-      if (scuda_trace_enabled()) {
-        std::cerr << "SCUDA private 6e16[7] remote node failed result="
+      if (lupine_trace_enabled()) {
+        std::cerr << "LUPINE private 6e16[7] remote node failed result="
                   << static_cast<int>(node_result)
                   << " module=" << reinterpret_cast<void *>(arg1) << std::endl;
       }
       return node_result == CUDA_SUCCESS ? CUDA_ERROR_NOT_FOUND : node_result;
     }
 
-    auto &node_pool = scuda_private_6e16_node_pool();
-    unsigned int node_index =
-        scuda_private_6e16_next_node().fetch_add(1, std::memory_order_relaxed) %
-        (sizeof(node_pool) / sizeof(node_pool[0]));
+    auto &node_pool = lupine_private_6e16_node_pool();
+    unsigned int node_index = lupine_private_6e16_next_node().fetch_add(
+                                  1, std::memory_order_relaxed) %
+                              (sizeof(node_pool) / sizeof(node_pool[0]));
     unsigned char *client_node = node_pool[node_index];
     memset(client_node, 0, sizeof(node_pool[node_index]));
     *reinterpret_cast<uint64_t *>(client_node + 0x0) = 0x100000001ULL;
@@ -2335,16 +2348,18 @@ scuda_private_export_slot_called(int slot, const char *table_name,
     *reinterpret_cast<uint32_t *>(client_node + 0x370) = 2;
     *reinterpret_cast<uint64_t *>(client_node + 0x480) = 0;
     {
-      std::lock_guard<std::mutex> lock(scuda_private_node_mutex());
-      int route_id = scuda_route_identity(scuda_route_for_function(server_node));
+      std::lock_guard<std::mutex> lock(lupine_private_node_mutex());
+      int route_id =
+          lupine_route_identity(lupine_route_for_function(server_node));
       if (route_id == -2) {
-        scuda_route node_route =
-            arg0 != 0 ? scuda_route_for_context(reinterpret_cast<CUcontext>(arg0))
-                      : scuda_route_for_module(reinterpret_cast<CUmodule>(arg1));
-        route_id = scuda_route_identity(node_route);
+        lupine_route node_route =
+            arg0 != 0
+                ? lupine_route_for_context(reinterpret_cast<CUcontext>(arg0))
+                : lupine_route_for_module(reinterpret_cast<CUmodule>(arg1));
+        route_id = lupine_route_identity(node_route);
       }
       auto &mapping =
-          scuda_private_node_map()[reinterpret_cast<CUfunction>(client_node)];
+          lupine_private_node_map()[reinterpret_cast<CUfunction>(client_node)];
       mapping.server_function = server_node;
       mapping.server_owner = server_owner;
       mapping.module = reinterpret_cast<CUmodule>(arg1);
@@ -2352,17 +2367,17 @@ scuda_private_export_slot_called(int slot, const char *table_name,
         mapping.functions_by_route[route_id] = server_node;
       }
     }
-    if (scuda_trace_enabled()) {
-      std::cerr << "SCUDA private 6e16[7] mapped client_node[" << node_index
+    if (lupine_trace_enabled()) {
+      std::cerr << "LUPINE private 6e16[7] mapped client_node[" << node_index
                 << "]=" << static_cast<void *>(client_node)
                 << " server_node=" << server_node
                 << " server_owner=" << reinterpret_cast<void *>(server_owner)
                 << std::endl;
     }
     if (arg2 != 0) {
-      using scuda_private_iterator_callback =
+      using lupine_private_iterator_callback =
           void (*)(void *, void *, uint64_t);
-      auto callback = reinterpret_cast<scuda_private_iterator_callback>(arg2);
+      auto callback = reinterpret_cast<lupine_private_iterator_callback>(arg2);
       callback(reinterpret_cast<void *>(arg3), client_node,
                *reinterpret_cast<uint64_t *>(client_node + 8));
     }
@@ -2372,44 +2387,44 @@ scuda_private_export_slot_called(int slot, const char *table_name,
   return CUDA_ERROR_NOT_SUPPORTED;
 }
 
-static bool scuda_stub_private_exports_enabled() {
+static bool lupine_stub_private_exports_enabled() {
   static bool enabled = [] {
-    const char *value = getenv("SCUDA_STUB_PRIVATE_EXPORTS");
+    const char *value = getenv("LUPINE_STUB_PRIVATE_EXPORTS");
     return value != nullptr && strcmp(value, "0") != 0;
   }();
   return enabled;
 }
 
-static bool scuda_remote_private_exports_enabled() {
+static bool lupine_remote_private_exports_enabled() {
   static bool enabled = [] {
-    const char *value = getenv("SCUDA_REMOTE_PRIVATE_EXPORTS");
+    const char *value = getenv("LUPINE_REMOTE_PRIVATE_EXPORTS");
     return value == nullptr || strcmp(value, "0") != 0;
   }();
   return enabled;
 }
 
-static std::atomic<bool> &scuda_private_export_tables_active_flag() {
+static std::atomic<bool> &lupine_private_export_tables_active_flag() {
   static std::atomic<bool> active{false};
   return active;
 }
 
-static bool scuda_private_export_remap_active() {
-  return scuda_stub_private_exports_enabled() ||
-         scuda_private_export_tables_active_flag().load(
+static bool lupine_private_export_remap_active() {
+  return lupine_stub_private_exports_enabled() ||
+         lupine_private_export_tables_active_flag().load(
              std::memory_order_relaxed);
 }
 
-static void *scuda_make_private_export_stub(int slot, const char *table_name) {
+static void *lupine_make_private_export_stub(int slot, const char *table_name) {
 #if defined(__x86_64__)
   constexpr size_t stub_size = 52;
   unsigned char *code = static_cast<unsigned char *>(
       mmap(nullptr, stub_size, PROT_READ | PROT_WRITE | PROT_EXEC,
            MAP_PRIVATE | MAP_ANONYMOUS, -1, 0));
   if (code == MAP_FAILED) {
-    return reinterpret_cast<void *>(&scuda_unsupported_driver_api);
+    return reinterpret_cast<void *>(&lupine_unsupported_driver_api);
   }
 
-  void *handler = reinterpret_cast<void *>(&scuda_private_export_slot_called);
+  void *handler = reinterpret_cast<void *>(&lupine_private_export_slot_called);
   size_t offset = 0;
   const unsigned char prologue[] = {
       0x48, 0x83, 0xec, 0x08, // sub rsp, 8
@@ -2443,13 +2458,13 @@ static void *scuda_make_private_export_stub(int slot, const char *table_name) {
 #else
   (void)slot;
   (void)table_name;
-  return reinterpret_cast<void *>(&scuda_unsupported_driver_api);
+  return reinterpret_cast<void *>(&lupine_unsupported_driver_api);
 #endif
 }
 
-static const void *
-scuda_make_private_export_table(const char *table_name, size_t byte_size,
-                                const std::vector<uint64_t> &code_hashes = {}) {
+static const void *lupine_make_private_export_table(
+    const char *table_name, size_t byte_size,
+    const std::vector<uint64_t> &code_hashes = {}) {
   static std::mutex mutex;
   static std::unordered_map<std::string, std::vector<void *>> tables;
   std::lock_guard<std::mutex> lock(mutex);
@@ -2466,18 +2481,18 @@ scuda_make_private_export_table(const char *table_name, size_t byte_size,
   char *stable_table_name = strdup(table_name);
   for (size_t i = 1; i < entries; ++i) {
     table[i] =
-        scuda_make_private_export_stub(static_cast<int>(i), stable_table_name);
+        lupine_make_private_export_stub(static_cast<int>(i), stable_table_name);
   }
   if (!code_hashes.empty()) {
-    scuda_private_export_hashes()[table_name] = code_hashes;
+    lupine_private_export_hashes()[table_name] = code_hashes;
   }
   auto inserted = tables.emplace(table_name, std::move(table));
-  scuda_private_export_tables_active_flag().store(true,
-                                                  std::memory_order_relaxed);
+  lupine_private_export_tables_active_flag().store(true,
+                                                   std::memory_order_relaxed);
   return inserted.first->second.data();
 }
 
-static std::string scuda_uuid_hex(const CUuuid *uuid) {
+static std::string lupine_uuid_hex(const CUuuid *uuid) {
   static constexpr char kHex[] = "0123456789abcdef";
   std::string out;
   if (uuid == nullptr) {
@@ -2491,8 +2506,8 @@ static std::string scuda_uuid_hex(const CUuuid *uuid) {
   return out;
 }
 
-static const void *scuda_remote_private_export_table(const CUuuid *uuid) {
-  if (uuid == nullptr || !scuda_remote_private_exports_enabled()) {
+static const void *lupine_remote_private_export_table(const CUuuid *uuid) {
+  if (uuid == nullptr || !lupine_remote_private_exports_enabled()) {
     return nullptr;
   }
 
@@ -2505,9 +2520,9 @@ static const void *scuda_remote_private_export_table(const CUuuid *uuid) {
   uint64_t byte_size = 0;
   uint32_t slot_count = 0;
   uint32_t trusted = 0;
-  uint64_t hashes[SCUDA_PRIVATE_EXPORT_MAX_SLOTS] = {};
+  uint64_t hashes[LUPINE_PRIVATE_EXPORT_MAX_SLOTS] = {};
 
-  if (rpc_write_start_request(conn, SCUDA_RPC_cuGetExportTableMetadata) < 0 ||
+  if (rpc_write_start_request(conn, LUPINE_RPC_cuGetExportTableMetadata) < 0 ||
       rpc_write(conn, uuid->bytes, sizeof(uuid->bytes)) < 0 ||
       rpc_wait_for_response(conn) < 0 ||
       rpc_read(conn, &result, sizeof(result)) < 0 ||
@@ -2517,7 +2532,7 @@ static const void *scuda_remote_private_export_table(const CUuuid *uuid) {
     return nullptr;
   }
 
-  if (slot_count > SCUDA_PRIVATE_EXPORT_MAX_SLOTS) {
+  if (slot_count > LUPINE_PRIVATE_EXPORT_MAX_SLOTS) {
     rpc_read_end(conn);
     return nullptr;
   }
@@ -2533,27 +2548,27 @@ static const void *scuda_remote_private_export_table(const CUuuid *uuid) {
   if (result != CUDA_SUCCESS || trusted == 0 || byte_size == 0 ||
       byte_size % sizeof(void *) != 0 || slot_count == 0 ||
       slot_count != byte_size / sizeof(void *) ||
-      slot_count > SCUDA_PRIVATE_EXPORT_MAX_SLOTS) {
+      slot_count > LUPINE_PRIVATE_EXPORT_MAX_SLOTS) {
     return nullptr;
   }
 
-  std::string uuid_hex = scuda_uuid_hex(uuid);
+  std::string uuid_hex = lupine_uuid_hex(uuid);
   std::vector<uint64_t> code_hashes(hashes, hashes + slot_count);
-  if (scuda_trace_enabled()) {
-    std::cerr << "SCUDA remote cuGetExportTable metadata uuid=" << uuid_hex
+  if (lupine_trace_enabled()) {
+    std::cerr << "LUPINE remote cuGetExportTable metadata uuid=" << uuid_hex
               << " bytes=" << byte_size << " slots=" << slot_count << std::endl;
   }
-  return scuda_make_private_export_table(
+  return lupine_make_private_export_table(
       uuid_hex.c_str(), static_cast<size_t>(byte_size), code_hashes);
 }
 
-static const void *scuda_private_export_table_from_env(const CUuuid *uuid) {
+static const void *lupine_private_export_table_from_env(const CUuuid *uuid) {
   if (uuid == nullptr) {
     return nullptr;
   }
   static std::unordered_map<std::string, size_t> configured_tables = [] {
     std::unordered_map<std::string, size_t> tables;
-    const char *raw = getenv("SCUDA_PRIVATE_EXPORT_TABLES");
+    const char *raw = getenv("LUPINE_PRIVATE_EXPORT_TABLES");
     if (raw == nullptr || raw[0] == '\0') {
       return tables;
     }
@@ -2581,15 +2596,15 @@ static const void *scuda_private_export_table_from_env(const CUuuid *uuid) {
     return tables;
   }();
 
-  std::string uuid_hex = scuda_uuid_hex(uuid);
+  std::string uuid_hex = lupine_uuid_hex(uuid);
   auto it = configured_tables.find(uuid_hex);
   if (it == configured_tables.end()) {
     return nullptr;
   }
-  return scuda_make_private_export_table(uuid_hex.c_str(), it->second);
+  return lupine_make_private_export_table(uuid_hex.c_str(), it->second);
 }
 
-static const char *scuda_error_name(CUresult error) {
+static const char *lupine_error_name(CUresult error) {
   switch (error) {
   case CUDA_SUCCESS:
     return "CUDA_SUCCESS";
@@ -2752,7 +2767,7 @@ extern "C" CUresult cuGetErrorName(CUresult error, const char **pStr) {
   if (pStr == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
-  const char *name = scuda_error_name(error);
+  const char *name = lupine_error_name(error);
   if (name == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
@@ -2815,13 +2830,13 @@ extern "C" CUresult cuMemPoolSetAttribute(CUmemoryPool pool,
     return CUDA_ERROR_INVALID_VALUE;
   }
   size_t value_size = 0;
-  if (!scuda_mem_pool_attribute_size(attr, &value_size)) {
+  if (!lupine_mem_pool_attribute_size(attr, &value_size)) {
     return CUDA_ERROR_NOT_SUPPORTED;
   }
 
   conn_t *conn = rpc_client_get_connection(0);
   CUresult return_value;
-  if (rpc_write_start_request(conn, SCUDA_RPC_cuMemPoolSetAttribute) < 0 ||
+  if (rpc_write_start_request(conn, LUPINE_RPC_cuMemPoolSetAttribute) < 0 ||
       rpc_write(conn, &pool, sizeof(pool)) < 0 ||
       rpc_write(conn, &attr, sizeof(attr)) < 0 ||
       rpc_write(conn, &value_size, sizeof(value_size)) < 0 ||
@@ -2834,95 +2849,95 @@ extern "C" CUresult cuMemPoolSetAttribute(CUmemoryPool pool,
   return return_value;
 }
 
-static thread_local CUcontext scuda_current_context = nullptr;
-static thread_local CUcontext scuda_default_context_hint = nullptr;
-static std::atomic<CUcontext> scuda_global_default_context_hint{nullptr};
-static thread_local std::vector<CUcontext> scuda_context_stack;
-static std::atomic<unsigned long long> scuda_context_cache_generation{0};
-static thread_local bool scuda_ctx_get_device_cache_valid = false;
-static thread_local unsigned long long scuda_ctx_get_device_cache_generation =
+static thread_local CUcontext lupine_current_context = nullptr;
+static thread_local CUcontext lupine_default_context_hint = nullptr;
+static std::atomic<CUcontext> lupine_global_default_context_hint{nullptr};
+static thread_local std::vector<CUcontext> lupine_context_stack;
+static std::atomic<unsigned long long> lupine_context_cache_generation{0};
+static thread_local bool lupine_ctx_get_device_cache_valid = false;
+static thread_local unsigned long long lupine_ctx_get_device_cache_generation =
     0;
-static thread_local CUcontext scuda_ctx_get_device_cache_context = nullptr;
-static thread_local CUdevice scuda_ctx_get_device_cache_device = -1;
+static thread_local CUcontext lupine_ctx_get_device_cache_context = nullptr;
+static thread_local CUdevice lupine_ctx_get_device_cache_device = -1;
 
-extern "C" void scuda_invalidate_current_context_cache() {
-  scuda_context_cache_generation.fetch_add(1, std::memory_order_acq_rel);
-  scuda_ctx_get_device_cache_valid = false;
+extern "C" void lupine_invalidate_current_context_cache() {
+  lupine_context_cache_generation.fetch_add(1, std::memory_order_acq_rel);
+  lupine_ctx_get_device_cache_valid = false;
 }
 
-static void scuda_cache_current_context_device(CUdevice device) {
-  scuda_ctx_get_device_cache_generation =
-      scuda_context_cache_generation.load(std::memory_order_acquire);
-  scuda_ctx_get_device_cache_context = scuda_current_context;
-  scuda_ctx_get_device_cache_device = device;
-  scuda_ctx_get_device_cache_valid = true;
+static void lupine_cache_current_context_device(CUdevice device) {
+  lupine_ctx_get_device_cache_generation =
+      lupine_context_cache_generation.load(std::memory_order_acquire);
+  lupine_ctx_get_device_cache_context = lupine_current_context;
+  lupine_ctx_get_device_cache_device = device;
+  lupine_ctx_get_device_cache_valid = true;
 }
 
-static bool scuda_cached_current_context_device(CUdevice *device) {
+static bool lupine_cached_current_context_device(CUdevice *device) {
   unsigned long long generation =
-      scuda_context_cache_generation.load(std::memory_order_acquire);
-  if (device == nullptr || !scuda_ctx_get_device_cache_valid ||
-      scuda_ctx_get_device_cache_generation != generation ||
-      scuda_ctx_get_device_cache_context != scuda_current_context) {
+      lupine_context_cache_generation.load(std::memory_order_acquire);
+  if (device == nullptr || !lupine_ctx_get_device_cache_valid ||
+      lupine_ctx_get_device_cache_generation != generation ||
+      lupine_ctx_get_device_cache_context != lupine_current_context) {
     return false;
   }
-  *device = scuda_ctx_get_device_cache_device;
+  *device = lupine_ctx_get_device_cache_device;
   return true;
 }
 
-extern "C" scuda_route scuda_route_for_current_context() {
-  return scuda_route_for_context(scuda_current_context);
+extern "C" lupine_route lupine_route_for_current_context() {
+  return lupine_route_for_context(lupine_current_context);
 }
 
-extern "C" scuda_route scuda_route_for_default() {
-  if (scuda_current_context != nullptr) {
-    std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-    auto it = scuda_context_owners().find(scuda_current_context);
-    if (it != scuda_context_owners().end()) {
-      return scuda_route_for_owner(it->second);
+extern "C" lupine_route lupine_route_for_default() {
+  if (lupine_current_context != nullptr) {
+    std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+    auto it = lupine_context_owners().find(lupine_current_context);
+    if (it != lupine_context_owners().end()) {
+      return lupine_route_for_owner(it->second);
     }
   }
-  if (scuda_default_context_hint != nullptr) {
-    std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-    auto it = scuda_context_owners().find(scuda_default_context_hint);
-    if (it != scuda_context_owners().end()) {
-      return scuda_route_for_owner(it->second);
+  if (lupine_default_context_hint != nullptr) {
+    std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+    auto it = lupine_context_owners().find(lupine_default_context_hint);
+    if (it != lupine_context_owners().end()) {
+      return lupine_route_for_owner(it->second);
     }
   }
   CUcontext global_hint =
-      scuda_global_default_context_hint.load(std::memory_order_relaxed);
+      lupine_global_default_context_hint.load(std::memory_order_relaxed);
   if (global_hint != nullptr) {
-    std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-    auto it = scuda_context_owners().find(global_hint);
-    if (it != scuda_context_owners().end()) {
-      return scuda_route_for_owner(it->second);
+    std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+    auto it = lupine_context_owners().find(global_hint);
+    if (it != lupine_context_owners().end()) {
+      return lupine_route_for_owner(it->second);
     }
   }
-  conn_t *conn = scuda_conn_by_index(0);
+  conn_t *conn = lupine_conn_by_index(0);
   if (conn != nullptr) {
-    return scuda_remote_route_for_conn(conn);
+    return lupine_remote_route_for_conn(conn);
   }
-  return scuda_local_libcuda_handle() != nullptr
-             ? scuda_local_route()
-             : scuda_route{SCUDA_ROUTE_INVALID, nullptr};
+  return lupine_local_libcuda_handle() != nullptr
+             ? lupine_local_route()
+             : lupine_route{LUPINE_ROUTE_INVALID, nullptr};
 }
 
-extern "C" conn_t *scuda_rpc_conn_for_current_context() {
-  return scuda_route_remote_conn(scuda_route_for_current_context());
+extern "C" conn_t *lupine_rpc_conn_for_current_context() {
+  return lupine_route_remote_conn(lupine_route_for_current_context());
 }
 
-static CUresult scuda_set_remote_current_context(CUcontext ctx) {
-  scuda_route route =
-      scuda_route_for_context(ctx != nullptr ? ctx : scuda_current_context);
-  if (scuda_route_is_local(route)) {
+static CUresult lupine_set_remote_current_context(CUcontext ctx) {
+  lupine_route route =
+      lupine_route_for_context(ctx != nullptr ? ctx : lupine_current_context);
+  if (lupine_route_is_local(route)) {
     using real_fn_t = CUresult (*)(CUcontext);
-    auto real = scuda_real_cuda_fn<real_fn_t>("cuCtxSetCurrent");
+    auto real = lupine_real_cuda_fn<real_fn_t>("cuCtxSetCurrent");
     if (real == nullptr) {
       return CUDA_ERROR_DEVICE_UNAVAILABLE;
     }
     return real(ctx);
   }
-  conn_t *conn = scuda_route_remote_conn(route);
+  conn_t *conn = lupine_route_remote_conn(route);
   CUresult return_value;
   if (conn == nullptr ||
       rpc_write_start_request(conn, RPC_cuCtxSetCurrent) < 0 ||
@@ -2935,112 +2950,113 @@ static CUresult scuda_set_remote_current_context(CUcontext ctx) {
   return return_value;
 }
 
-extern "C" void scuda_note_ctx_create(CUcontext ctx, conn_t *conn) {
-  scuda_note_context_owner(ctx, conn);
-  scuda_context_stack.push_back(scuda_current_context);
-  scuda_current_context = ctx;
+extern "C" void lupine_note_ctx_create(CUcontext ctx, conn_t *conn) {
+  lupine_note_context_owner(ctx, conn);
+  lupine_context_stack.push_back(lupine_current_context);
+  lupine_current_context = ctx;
   if (ctx != nullptr) {
-    scuda_default_context_hint = ctx;
-    scuda_global_default_context_hint.store(ctx, std::memory_order_relaxed);
+    lupine_default_context_hint = ctx;
+    lupine_global_default_context_hint.store(ctx, std::memory_order_relaxed);
   }
-  scuda_invalidate_current_context_cache();
+  lupine_invalidate_current_context_cache();
 }
 
-extern "C" void scuda_note_ctx_create_route(CUcontext ctx, scuda_route route) {
-  scuda_note_context_owner_route(ctx, route);
-  scuda_context_stack.push_back(scuda_current_context);
-  scuda_current_context = ctx;
+extern "C" void lupine_note_ctx_create_route(CUcontext ctx,
+                                             lupine_route route) {
+  lupine_note_context_owner_route(ctx, route);
+  lupine_context_stack.push_back(lupine_current_context);
+  lupine_current_context = ctx;
   if (ctx != nullptr) {
-    scuda_default_context_hint = ctx;
-    scuda_global_default_context_hint.store(ctx, std::memory_order_relaxed);
+    lupine_default_context_hint = ctx;
+    lupine_global_default_context_hint.store(ctx, std::memory_order_relaxed);
   }
-  scuda_invalidate_current_context_cache();
+  lupine_invalidate_current_context_cache();
 }
 
-extern "C" CUresult scuda_cuCtxPushCurrent_virtual(CUcontext ctx) {
-  scuda_context_stack.push_back(scuda_current_context);
-  CUresult result = scuda_set_remote_current_context(ctx);
+extern "C" CUresult lupine_cuCtxPushCurrent_virtual(CUcontext ctx) {
+  lupine_context_stack.push_back(lupine_current_context);
+  CUresult result = lupine_set_remote_current_context(ctx);
   if (result == CUDA_SUCCESS) {
-    scuda_current_context = ctx;
+    lupine_current_context = ctx;
     if (ctx != nullptr) {
-      scuda_default_context_hint = ctx;
-      scuda_global_default_context_hint.store(ctx, std::memory_order_relaxed);
+      lupine_default_context_hint = ctx;
+      lupine_global_default_context_hint.store(ctx, std::memory_order_relaxed);
     }
-    scuda_invalidate_current_context_cache();
+    lupine_invalidate_current_context_cache();
   } else {
-    scuda_context_stack.pop_back();
+    lupine_context_stack.pop_back();
   }
   return result;
 }
 
-extern "C" CUresult scuda_cuCtxPopCurrent_virtual(CUcontext *pctx) {
-  CUcontext popped = scuda_current_context;
+extern "C" CUresult lupine_cuCtxPopCurrent_virtual(CUcontext *pctx) {
+  CUcontext popped = lupine_current_context;
   if (pctx != nullptr) {
     *pctx = popped;
   }
   CUcontext previous = nullptr;
-  if (!scuda_context_stack.empty()) {
-    previous = scuda_context_stack.back();
-    scuda_context_stack.pop_back();
+  if (!lupine_context_stack.empty()) {
+    previous = lupine_context_stack.back();
+    lupine_context_stack.pop_back();
   }
-  CUresult result = scuda_set_remote_current_context(previous);
+  CUresult result = lupine_set_remote_current_context(previous);
   if (result == CUDA_SUCCESS) {
-    scuda_current_context = previous;
+    lupine_current_context = previous;
     if (previous != nullptr) {
-      scuda_default_context_hint = previous;
-      scuda_global_default_context_hint.store(previous,
-                                              std::memory_order_relaxed);
+      lupine_default_context_hint = previous;
+      lupine_global_default_context_hint.store(previous,
+                                               std::memory_order_relaxed);
     }
-    scuda_invalidate_current_context_cache();
+    lupine_invalidate_current_context_cache();
   } else {
-    scuda_context_stack.push_back(previous);
+    lupine_context_stack.push_back(previous);
   }
   return result;
 }
 
-extern "C" CUresult scuda_cuCtxSetCurrent_virtual(CUcontext ctx) {
-  CUresult result = scuda_set_remote_current_context(ctx);
+extern "C" CUresult lupine_cuCtxSetCurrent_virtual(CUcontext ctx) {
+  CUresult result = lupine_set_remote_current_context(ctx);
   if (result == CUDA_SUCCESS) {
-    scuda_current_context = ctx;
+    lupine_current_context = ctx;
     if (ctx != nullptr) {
-      scuda_default_context_hint = ctx;
-      scuda_global_default_context_hint.store(ctx, std::memory_order_relaxed);
+      lupine_default_context_hint = ctx;
+      lupine_global_default_context_hint.store(ctx, std::memory_order_relaxed);
     }
-    scuda_invalidate_current_context_cache();
+    lupine_invalidate_current_context_cache();
   }
   return result;
 }
 
-extern "C" CUresult scuda_cuCtxGetCurrent_virtual(CUcontext *pctx) {
+extern "C" CUresult lupine_cuCtxGetCurrent_virtual(CUcontext *pctx) {
   if (pctx == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
-  *pctx = scuda_current_context;
+  *pctx = lupine_current_context;
   return CUDA_SUCCESS;
 }
 
-extern "C" CUresult scuda_cuCtxGetDevice_cached(CUdevice *device) {
+extern "C" CUresult lupine_cuCtxGetDevice_cached(CUdevice *device) {
   if (device == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
-  if (scuda_cached_current_context_device(device)) {
+  if (lupine_cached_current_context_device(device)) {
     return CUDA_SUCCESS;
   }
 
-  scuda_route route = scuda_route_for_current_context();
-  if (scuda_route_is_local(route)) {
+  lupine_route route = lupine_route_for_current_context();
+  if (lupine_route_is_local(route)) {
     using real_fn_t = CUresult (*)(CUdevice *);
-    auto real = scuda_real_cuda_fn<real_fn_t>("cuCtxGetDevice");
+    auto real = lupine_real_cuda_fn<real_fn_t>("cuCtxGetDevice");
     if (real == nullptr) {
       return CUDA_ERROR_DEVICE_UNAVAILABLE;
     }
     CUresult result = real(device);
     if (result == CUDA_SUCCESS) {
-      scuda_cache_current_context_device(*device);
+      lupine_cache_current_context_device(*device);
     }
     return result;
   }
-  conn_t *conn = scuda_route_remote_conn(route);
+  conn_t *conn = lupine_route_remote_conn(route);
   CUdevice remote_device = 0;
   CUresult return_value;
   if (conn == nullptr ||
@@ -3052,24 +3068,24 @@ extern "C" CUresult scuda_cuCtxGetDevice_cached(CUdevice *device) {
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
   }
   if (return_value == CUDA_SUCCESS) {
-    *device = scuda_local_device_for_remote(conn, remote_device);
-    scuda_cache_current_context_device(*device);
+    *device = lupine_local_device_for_remote(conn, remote_device);
+    lupine_cache_current_context_device(*device);
   }
   return return_value;
 }
 
-extern "C" void scuda_note_primary_context_active(CUdevice dev) {
-  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  auto it = scuda_primary_context_states().find(static_cast<int>(dev));
-  if (it != scuda_primary_context_states().end() && it->second.valid) {
+extern "C" void lupine_note_primary_context_active(CUdevice dev) {
+  std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+  auto it = lupine_primary_context_states().find(static_cast<int>(dev));
+  if (it != lupine_primary_context_states().end() && it->second.valid) {
     it->second.active = 1;
   }
 }
 
-extern "C" void scuda_note_primary_context_flags(CUdevice dev,
-                                                 unsigned int flags) {
-  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  auto &state = scuda_primary_context_states()[static_cast<int>(dev)];
+extern "C" void lupine_note_primary_context_flags(CUdevice dev,
+                                                  unsigned int flags) {
+  std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+  auto &state = lupine_primary_context_states()[static_cast<int>(dev)];
   state.flags = flags;
   if (!state.valid) {
     state.active = 0;
@@ -3077,21 +3093,22 @@ extern "C" void scuda_note_primary_context_flags(CUdevice dev,
   }
 }
 
-extern "C" void scuda_invalidate_primary_context_state(CUdevice dev) {
-  std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-  scuda_primary_context_states().erase(static_cast<int>(dev));
+extern "C" void lupine_invalidate_primary_context_state(CUdevice dev) {
+  std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+  lupine_primary_context_states().erase(static_cast<int>(dev));
 }
 
-extern "C" CUresult scuda_cuDevicePrimaryCtxGetState_cached(
-    CUdevice dev, unsigned int *flags, int *active) {
+extern "C" CUresult
+lupine_cuDevicePrimaryCtxGetState_cached(CUdevice dev, unsigned int *flags,
+                                         int *active) {
   if (flags == nullptr || active == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
   int local_device = static_cast<int>(dev);
   {
-    std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-    auto it = scuda_primary_context_states().find(local_device);
-    if (it != scuda_primary_context_states().end() && it->second.valid) {
+    std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+    auto it = lupine_primary_context_states().find(local_device);
+    if (it != lupine_primary_context_states().end() && it->second.valid) {
       *flags = it->second.flags;
       *active = it->second.active;
       return CUDA_SUCCESS;
@@ -3099,22 +3116,22 @@ extern "C" CUresult scuda_cuDevicePrimaryCtxGetState_cached(
   }
 
   CUdevice remote_device = dev;
-  scuda_route route = scuda_route_for_device(&remote_device);
-  if (scuda_route_is_local(route)) {
+  lupine_route route = lupine_route_for_device(&remote_device);
+  if (lupine_route_is_local(route)) {
     using real_fn_t = CUresult (*)(CUdevice, unsigned int *, int *);
-    auto real = scuda_real_cuda_fn<real_fn_t>("cuDevicePrimaryCtxGetState");
+    auto real = lupine_real_cuda_fn<real_fn_t>("cuDevicePrimaryCtxGetState");
     if (real == nullptr) {
       return CUDA_ERROR_DEVICE_UNAVAILABLE;
     }
     CUresult result = real(remote_device, flags, active);
     if (result == CUDA_SUCCESS) {
-      std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-      scuda_primary_context_states()[local_device] =
-          scuda_primary_context_state{true, *flags, *active};
+      std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+      lupine_primary_context_states()[local_device] =
+          lupine_primary_context_state{true, *flags, *active};
     }
     return result;
   }
-  conn_t *conn = scuda_route_remote_conn(route);
+  conn_t *conn = lupine_route_remote_conn(route);
   CUresult return_value;
   if (conn == nullptr ||
       rpc_write_start_request(conn, RPC_cuDevicePrimaryCtxGetState) < 0 ||
@@ -3127,9 +3144,9 @@ extern "C" CUresult scuda_cuDevicePrimaryCtxGetState_cached(
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
   }
   if (return_value == CUDA_SUCCESS) {
-    std::lock_guard<std::mutex> lock(scuda_routing_mutex());
-    scuda_primary_context_states()[local_device] =
-        scuda_primary_context_state{true, *flags, *active};
+    std::lock_guard<std::mutex> lock(lupine_routing_mutex());
+    lupine_primary_context_states()[local_device] =
+        lupine_primary_context_state{true, *flags, *active};
   }
   return return_value;
 }
@@ -3141,13 +3158,13 @@ extern "C" CUresult cuMemPoolGetAttribute(CUmemoryPool pool,
     return CUDA_ERROR_INVALID_VALUE;
   }
   size_t value_size = 0;
-  if (!scuda_mem_pool_attribute_size(attr, &value_size)) {
+  if (!lupine_mem_pool_attribute_size(attr, &value_size)) {
     return CUDA_ERROR_NOT_SUPPORTED;
   }
 
   conn_t *conn = rpc_client_get_connection(0);
   CUresult return_value;
-  if (rpc_write_start_request(conn, SCUDA_RPC_cuMemPoolGetAttribute) < 0 ||
+  if (rpc_write_start_request(conn, LUPINE_RPC_cuMemPoolGetAttribute) < 0 ||
       rpc_write(conn, &pool, sizeof(pool)) < 0 ||
       rpc_write(conn, &attr, sizeof(attr)) < 0 ||
       rpc_write(conn, &value_size, sizeof(value_size)) < 0 ||
@@ -3160,7 +3177,7 @@ extern "C" CUresult cuMemPoolGetAttribute(CUmemoryPool pool,
   return return_value;
 }
 
-struct scuda_host_allocation {
+struct lupine_host_allocation {
   size_t size = 0;
   size_t storage_size = 0;
   size_t page_size = 0;
@@ -3179,7 +3196,7 @@ struct scuda_host_allocation {
   uint32_t host_dirty_count = 0;
 };
 
-struct scuda_mapped_host_snapshot {
+struct lupine_mapped_host_snapshot {
   void *host = nullptr;
   size_t size = 0;
   CUdeviceptr device_ptr = 0;
@@ -3187,71 +3204,71 @@ struct scuda_mapped_host_snapshot {
   bool managed = false;
 };
 
-using scuda_host_allocation_map =
-    std::map<void *, scuda_host_allocation, std::less<void *>>;
+using lupine_host_allocation_map =
+    std::map<void *, lupine_host_allocation, std::less<void *>>;
 
-static std::mutex &scuda_host_allocation_mutex() {
+static std::mutex &lupine_host_allocation_mutex() {
   static std::mutex mutex;
   return mutex;
 }
 
-static scuda_host_allocation_map &scuda_host_allocations() {
-  static scuda_host_allocation_map allocations;
+static lupine_host_allocation_map &lupine_host_allocations() {
+  static lupine_host_allocation_map allocations;
   return allocations;
 }
 
-static scuda_host_allocation_map::iterator
-scuda_find_host_allocation_locked(void *p);
+static lupine_host_allocation_map::iterator
+lupine_find_host_allocation_locked(void *p);
 
-struct scuda_fault_entry {
+struct lupine_fault_entry {
   uintptr_t base = 0;
   uintptr_t end = 0;
-  scuda_host_allocation *allocation = nullptr;
+  lupine_host_allocation *allocation = nullptr;
 };
 
-static constexpr size_t SCUDA_MAX_FAULT_ENTRIES = 1024;
-static scuda_fault_entry scuda_fault_entries[SCUDA_MAX_FAULT_ENTRIES];
-static volatile sig_atomic_t scuda_fault_entry_count = 0;
-static struct sigaction scuda_previous_sigsegv_action;
-static bool scuda_sigsegv_handler_installed = false;
+static constexpr size_t LUPINE_MAX_FAULT_ENTRIES = 1024;
+static lupine_fault_entry lupine_fault_entries[LUPINE_MAX_FAULT_ENTRIES];
+static volatile sig_atomic_t lupine_fault_entry_count = 0;
+static struct sigaction lupine_previous_sigsegv_action;
+static bool lupine_sigsegv_handler_installed = false;
 
-static size_t scuda_page_size() {
+static size_t lupine_page_size() {
   long page_size = sysconf(_SC_PAGESIZE);
   return page_size > 0 ? static_cast<size_t>(page_size) : 4096;
 }
 
-static size_t scuda_round_up(size_t value, size_t alignment) {
+static size_t lupine_round_up(size_t value, size_t alignment) {
   return (value + alignment - 1) & ~(alignment - 1);
 }
 
-static void scuda_call_previous_sigsegv(int sig, siginfo_t *info, void *uctx) {
-  if (scuda_previous_sigsegv_action.sa_flags & SA_SIGINFO) {
-    if (scuda_previous_sigsegv_action.sa_sigaction != nullptr) {
-      scuda_previous_sigsegv_action.sa_sigaction(sig, info, uctx);
+static void lupine_call_previous_sigsegv(int sig, siginfo_t *info, void *uctx) {
+  if (lupine_previous_sigsegv_action.sa_flags & SA_SIGINFO) {
+    if (lupine_previous_sigsegv_action.sa_sigaction != nullptr) {
+      lupine_previous_sigsegv_action.sa_sigaction(sig, info, uctx);
       return;
     }
-  } else if (scuda_previous_sigsegv_action.sa_handler == SIG_IGN) {
+  } else if (lupine_previous_sigsegv_action.sa_handler == SIG_IGN) {
     return;
-  } else if (scuda_previous_sigsegv_action.sa_handler != SIG_DFL &&
-             scuda_previous_sigsegv_action.sa_handler != nullptr) {
-    scuda_previous_sigsegv_action.sa_handler(sig);
+  } else if (lupine_previous_sigsegv_action.sa_handler != SIG_DFL &&
+             lupine_previous_sigsegv_action.sa_handler != nullptr) {
+    lupine_previous_sigsegv_action.sa_handler(sig);
     return;
   }
 
-  sigaction(sig, &scuda_previous_sigsegv_action, nullptr);
+  sigaction(sig, &lupine_previous_sigsegv_action, nullptr);
   raise(sig);
 }
 
-static void scuda_sigsegv_handler(int sig, siginfo_t *info, void *uctx) {
+static void lupine_sigsegv_handler(int sig, siginfo_t *info, void *uctx) {
   uintptr_t addr = reinterpret_cast<uintptr_t>(info->si_addr);
-  sig_atomic_t count = scuda_fault_entry_count;
+  sig_atomic_t count = lupine_fault_entry_count;
   for (sig_atomic_t i = 0; i < count; ++i) {
-    const scuda_fault_entry &entry = scuda_fault_entries[i];
+    const lupine_fault_entry &entry = lupine_fault_entries[i];
     if (addr < entry.base || addr >= entry.end || entry.allocation == nullptr) {
       continue;
     }
 
-    scuda_host_allocation *allocation = entry.allocation;
+    lupine_host_allocation *allocation = entry.allocation;
     size_t page_size = allocation->page_size;
     size_t page_index = (addr - entry.base) / page_size;
     if (page_index >= allocation->page_count) {
@@ -3279,73 +3296,73 @@ static void scuda_sigsegv_handler(int sig, siginfo_t *info, void *uctx) {
     return;
   }
 
-  scuda_call_previous_sigsegv(sig, info, uctx);
+  lupine_call_previous_sigsegv(sig, info, uctx);
 }
 
-static void scuda_install_sigsegv_handler() {
-  if (scuda_sigsegv_handler_installed) {
+static void lupine_install_sigsegv_handler() {
+  if (lupine_sigsegv_handler_installed) {
     return;
   }
   struct sigaction action = {};
-  action.sa_sigaction = scuda_sigsegv_handler;
+  action.sa_sigaction = lupine_sigsegv_handler;
   sigemptyset(&action.sa_mask);
   action.sa_flags = SA_SIGINFO | SA_NODEFER;
-  if (sigaction(SIGSEGV, &action, &scuda_previous_sigsegv_action) == 0) {
-    scuda_sigsegv_handler_installed = true;
+  if (sigaction(SIGSEGV, &action, &lupine_previous_sigsegv_action) == 0) {
+    lupine_sigsegv_handler_installed = true;
   }
 }
 
-static bool scuda_add_fault_entry(void *base, size_t size,
-                                  scuda_host_allocation *allocation) {
-  if (scuda_fault_entry_count >=
-      static_cast<sig_atomic_t>(SCUDA_MAX_FAULT_ENTRIES)) {
+static bool lupine_add_fault_entry(void *base, size_t size,
+                                   lupine_host_allocation *allocation) {
+  if (lupine_fault_entry_count >=
+      static_cast<sig_atomic_t>(LUPINE_MAX_FAULT_ENTRIES)) {
     return false;
   }
-  sig_atomic_t index = scuda_fault_entry_count;
-  scuda_fault_entries[index] = {
+  sig_atomic_t index = lupine_fault_entry_count;
+  lupine_fault_entries[index] = {
       reinterpret_cast<uintptr_t>(base),
       reinterpret_cast<uintptr_t>(base) + size,
       allocation,
   };
-  scuda_fault_entry_count = index + 1;
+  lupine_fault_entry_count = index + 1;
   return true;
 }
 
-static void scuda_remove_fault_entry(void *base) {
+static void lupine_remove_fault_entry(void *base) {
   uintptr_t target = reinterpret_cast<uintptr_t>(base);
-  sig_atomic_t count = scuda_fault_entry_count;
+  sig_atomic_t count = lupine_fault_entry_count;
   for (sig_atomic_t i = 0; i < count; ++i) {
-    if (scuda_fault_entries[i].base != target) {
+    if (lupine_fault_entries[i].base != target) {
       continue;
     }
     for (sig_atomic_t j = i + 1; j < count; ++j) {
-      scuda_fault_entries[j - 1] = scuda_fault_entries[j];
+      lupine_fault_entries[j - 1] = lupine_fault_entries[j];
     }
-    scuda_fault_entry_count = count - 1;
+    lupine_fault_entry_count = count - 1;
     return;
   }
 }
 
-static bool scuda_host_flags_request_mapping(unsigned int flags) {
+static bool lupine_host_flags_request_mapping(unsigned int flags) {
   return (flags & (CU_MEMHOSTALLOC_DEVICEMAP | CU_MEMHOSTREGISTER_DEVICEMAP)) !=
          0;
 }
 
-static bool scuda_protect_host_range(void *host, size_t size, int prot) {
+static bool lupine_protect_host_range(void *host, size_t size, int prot) {
   if (host == nullptr || size == 0) {
     return true;
   }
   uintptr_t start = reinterpret_cast<uintptr_t>(host);
-  size_t page_size = scuda_page_size();
+  size_t page_size = lupine_page_size();
   uintptr_t page_start = start & ~(static_cast<uintptr_t>(page_size) - 1);
-  uintptr_t end = scuda_round_up(start + size, page_size);
+  uintptr_t end = lupine_round_up(start + size, page_size);
   return mprotect(reinterpret_cast<void *>(page_start), end - page_start,
                   prot) == 0;
 }
 
 static bool
-scuda_enable_dirty_tracking_locked(void *host,
-                                   scuda_host_allocation *allocation) {
+lupine_enable_dirty_tracking_locked(void *host,
+                                    lupine_host_allocation *allocation) {
   if (host == nullptr || allocation == nullptr || allocation->device_ptr == 0) {
     return true;
   }
@@ -3363,34 +3380,34 @@ scuda_enable_dirty_tracking_locked(void *host,
   allocation->host_dirty_count = 0;
   allocation->dirty_overflow = false;
 
-  scuda_install_sigsegv_handler();
-  if (!scuda_add_fault_entry(host, allocation->storage_size, allocation)) {
+  lupine_install_sigsegv_handler();
+  if (!lupine_add_fault_entry(host, allocation->storage_size, allocation)) {
     allocation->tracking_enabled = false;
     return false;
   }
-  if (!scuda_protect_host_range(host, allocation->storage_size, PROT_READ)) {
-    scuda_remove_fault_entry(host);
+  if (!lupine_protect_host_range(host, allocation->storage_size, PROT_READ)) {
+    lupine_remove_fault_entry(host);
     allocation->tracking_enabled = false;
     return false;
   }
   return true;
 }
 
-static void scuda_disable_dirty_tracking(void *host,
-                                         scuda_host_allocation &allocation) {
+static void lupine_disable_dirty_tracking(void *host,
+                                          lupine_host_allocation &allocation) {
   if (!allocation.tracking_enabled) {
     return;
   }
-  scuda_protect_host_range(host, allocation.storage_size,
-                           PROT_READ | PROT_WRITE);
-  scuda_remove_fault_entry(host);
+  lupine_protect_host_range(host, allocation.storage_size,
+                            PROT_READ | PROT_WRITE);
+  lupine_remove_fault_entry(host);
   allocation.tracking_enabled = false;
 }
 
-static std::vector<scuda_mapped_host_snapshot> scuda_mapped_host_snapshots() {
-  std::vector<scuda_mapped_host_snapshot> snapshots;
-  std::lock_guard<std::mutex> lock(scuda_host_allocation_mutex());
-  for (const auto &entry : scuda_host_allocations()) {
+static std::vector<lupine_mapped_host_snapshot> lupine_mapped_host_snapshots() {
+  std::vector<lupine_mapped_host_snapshot> snapshots;
+  std::lock_guard<std::mutex> lock(lupine_host_allocation_mutex());
+  for (const auto &entry : lupine_host_allocations()) {
     if (entry.second.device_ptr != 0) {
       snapshots.push_back({entry.first, entry.second.size,
                            entry.second.device_ptr, entry.second.device_dirty,
@@ -3400,46 +3417,46 @@ static std::vector<scuda_mapped_host_snapshot> scuda_mapped_host_snapshots() {
   return snapshots;
 }
 
-static bool scuda_dirty_bit_is_set(const scuda_host_allocation &allocation,
-                                   size_t page_index) {
+static bool lupine_dirty_bit_is_set(const lupine_host_allocation &allocation,
+                                    size_t page_index) {
   size_t word = page_index / 64;
   uint64_t bit = 1ULL << (page_index % 64);
   return (allocation.host_dirty_bits[word] & bit) != 0;
 }
 
-static void scuda_clear_dirty_bit(scuda_host_allocation &allocation,
-                                  size_t page_index) {
+static void lupine_clear_dirty_bit(lupine_host_allocation &allocation,
+                                   size_t page_index) {
   size_t word = page_index / 64;
   uint64_t bit = 1ULL << (page_index % 64);
   allocation.host_dirty_bits[word] &= ~bit;
 }
 
-static CUresult scuda_copy_host_range_to_device(void *host,
-                                                CUdeviceptr device_ptr,
-                                                size_t offset, size_t bytes) {
+static CUresult lupine_copy_host_range_to_device(void *host,
+                                                 CUdeviceptr device_ptr,
+                                                 size_t offset, size_t bytes) {
   return cuMemcpyHtoD_v2(device_ptr + offset,
                          static_cast<unsigned char *>(host) + offset, bytes);
 }
 
 static CUresult
-scuda_sync_dirty_host_pages_to_device(void *host,
-                                      scuda_host_allocation &allocation) {
+lupine_sync_dirty_host_pages_to_device(void *host,
+                                       lupine_host_allocation &allocation) {
   if (allocation.device_ptr == 0 || allocation.size == 0) {
     return CUDA_SUCCESS;
   }
 
   if (!allocation.tracking_enabled) {
-    return scuda_copy_host_range_to_device(host, allocation.device_ptr, 0,
-                                           allocation.size);
+    return lupine_copy_host_range_to_device(host, allocation.device_ptr, 0,
+                                            allocation.size);
   }
 
   if (allocation.all_host_dirty) {
-    CUresult result = scuda_copy_host_range_to_device(
+    CUresult result = lupine_copy_host_range_to_device(
         host, allocation.device_ptr, 0, allocation.size);
     if (result != CUDA_SUCCESS) {
       return result;
     }
-    scuda_protect_host_range(host, allocation.storage_size, PROT_READ);
+    lupine_protect_host_range(host, allocation.storage_size, PROT_READ);
     std::fill(allocation.host_dirty_bits.begin(),
               allocation.host_dirty_bits.end(), 0);
     allocation.host_dirty_count = 0;
@@ -3457,7 +3474,7 @@ scuda_sync_dirty_host_pages_to_device(void *host,
 
   if (allocation.dirty_overflow) {
     for (size_t page = 0; page < allocation.page_count; ++page) {
-      if (scuda_dirty_bit_is_set(allocation, page)) {
+      if (lupine_dirty_bit_is_set(allocation, page)) {
         pages.push_back(static_cast<uint32_t>(page));
       }
     }
@@ -3468,8 +3485,8 @@ scuda_sync_dirty_host_pages_to_device(void *host,
     pages.erase(std::unique(pages.begin(), pages.end()), pages.end());
     pages.erase(std::remove_if(pages.begin(), pages.end(),
                                [&](uint32_t page) {
-                                 return !scuda_dirty_bit_is_set(allocation,
-                                                                page);
+                                 return !lupine_dirty_bit_is_set(allocation,
+                                                                 page);
                                }),
                 pages.end());
   }
@@ -3487,15 +3504,15 @@ scuda_sync_dirty_host_pages_to_device(void *host,
     size_t offset = first * allocation.page_size;
     size_t bytes = std::min((last - first + 1) * allocation.page_size,
                             allocation.size - offset);
-    CUresult result = scuda_copy_host_range_to_device(
+    CUresult result = lupine_copy_host_range_to_device(
         host, allocation.device_ptr, offset, bytes);
     if (result != CUDA_SUCCESS) {
       return result;
     }
-    scuda_protect_host_range(static_cast<unsigned char *>(host) + offset, bytes,
-                             PROT_READ);
+    lupine_protect_host_range(static_cast<unsigned char *>(host) + offset,
+                              bytes, PROT_READ);
     for (size_t page = first; page <= last; ++page) {
-      scuda_clear_dirty_bit(allocation, page);
+      lupine_clear_dirty_bit(allocation, page);
     }
   }
 
@@ -3504,14 +3521,14 @@ scuda_sync_dirty_host_pages_to_device(void *host,
   return CUDA_SUCCESS;
 }
 
-extern "C" void scuda_mark_host_range_clean(void *host, size_t size) {
+extern "C" void lupine_mark_host_range_clean(void *host, size_t size) {
   if (host == nullptr || size == 0) {
     return;
   }
 
-  std::lock_guard<std::mutex> lock(scuda_host_allocation_mutex());
-  auto it = scuda_find_host_allocation_locked(host);
-  if (it == scuda_host_allocations().end() || !it->second.tracking_enabled) {
+  std::lock_guard<std::mutex> lock(lupine_host_allocation_mutex());
+  auto it = lupine_find_host_allocation_locked(host);
+  if (it == lupine_host_allocations().end() || !it->second.tracking_enabled) {
     return;
   }
 
@@ -3535,24 +3552,24 @@ extern "C" void scuda_mark_host_range_clean(void *host, size_t size) {
     allocation.dirty_overflow = false;
   } else if (!allocation.all_host_dirty) {
     for (size_t page = first_page; page <= last_page; ++page) {
-      scuda_clear_dirty_bit(allocation, page);
+      lupine_clear_dirty_bit(allocation, page);
     }
   }
 
   uintptr_t protect_start = base + first_page * allocation.page_size;
   size_t protect_size = (last_page - first_page + 1) * allocation.page_size;
-  scuda_protect_host_range(reinterpret_cast<void *>(protect_start),
-                           protect_size, PROT_READ);
+  lupine_protect_host_range(reinterpret_cast<void *>(protect_start),
+                            protect_size, PROT_READ);
 }
 
-extern "C" void scuda_prepare_host_range_write(void *host, size_t size) {
+extern "C" void lupine_prepare_host_range_write(void *host, size_t size) {
   if (host == nullptr || size == 0) {
     return;
   }
 
-  std::lock_guard<std::mutex> lock(scuda_host_allocation_mutex());
-  auto it = scuda_find_host_allocation_locked(host);
-  if (it == scuda_host_allocations().end() || !it->second.tracking_enabled) {
+  std::lock_guard<std::mutex> lock(lupine_host_allocation_mutex());
+  auto it = lupine_find_host_allocation_locked(host);
+  if (it == lupine_host_allocations().end() || !it->second.tracking_enabled) {
     return;
   }
 
@@ -3567,15 +3584,15 @@ extern "C" void scuda_prepare_host_range_write(void *host, size_t size) {
   size_t last_page = (end - 1 - base) / it->second.page_size;
   uintptr_t protect_start = base + first_page * it->second.page_size;
   size_t protect_size = (last_page - first_page + 1) * it->second.page_size;
-  scuda_protect_host_range(reinterpret_cast<void *>(protect_start),
-                           protect_size, PROT_READ | PROT_WRITE);
+  lupine_protect_host_range(reinterpret_cast<void *>(protect_start),
+                            protect_size, PROT_READ | PROT_WRITE);
 }
 
-CUresult scuda_sync_mapped_host_to_device() {
-  std::lock_guard<std::mutex> lock(scuda_host_allocation_mutex());
-  for (auto &entry : scuda_host_allocations()) {
+CUresult lupine_sync_mapped_host_to_device() {
+  std::lock_guard<std::mutex> lock(lupine_host_allocation_mutex());
+  for (auto &entry : lupine_host_allocations()) {
     CUresult result =
-        scuda_sync_dirty_host_pages_to_device(entry.first, entry.second);
+        lupine_sync_dirty_host_pages_to_device(entry.first, entry.second);
     if (result != CUDA_SUCCESS) {
       return result;
     }
@@ -3583,14 +3600,14 @@ CUresult scuda_sync_mapped_host_to_device() {
   return CUDA_SUCCESS;
 }
 
-static bool scuda_device_ptr_in_mapping(CUdeviceptr ptr,
-                                        const scuda_mapped_host_snapshot &m) {
+static bool lupine_device_ptr_in_mapping(CUdeviceptr ptr,
+                                         const lupine_mapped_host_snapshot &m) {
   return ptr >= m.device_ptr && ptr < m.device_ptr + m.size;
 }
 
-static bool scuda_host_ptr_in_mapping(CUdeviceptr ptr,
-                                      const scuda_mapped_host_snapshot &m,
-                                      CUdeviceptr *translated) {
+static bool lupine_host_ptr_in_mapping(CUdeviceptr ptr,
+                                       const lupine_mapped_host_snapshot &m,
+                                       CUdeviceptr *translated) {
   uintptr_t host = reinterpret_cast<uintptr_t>(m.host);
   if (ptr < host || ptr >= host + m.size) {
     return false;
@@ -3601,28 +3618,28 @@ static bool scuda_host_ptr_in_mapping(CUdeviceptr ptr,
   return true;
 }
 
-static void scuda_mark_mapped_device_dirty(void *host) {
-  std::lock_guard<std::mutex> lock(scuda_host_allocation_mutex());
-  auto it = scuda_host_allocations().find(host);
-  if (it != scuda_host_allocations().end()) {
+static void lupine_mark_mapped_device_dirty(void *host) {
+  std::lock_guard<std::mutex> lock(lupine_host_allocation_mutex());
+  auto it = lupine_host_allocations().find(host);
+  if (it != lupine_host_allocations().end()) {
     it->second.device_dirty = true;
   }
 }
 
-CUresult scuda_sync_mapped_host_to_device_for_launch(unsigned char *packed,
-                                                     const size_t *offsets,
-                                                     const size_t *sizes,
-                                                     uint32_t count) {
+CUresult lupine_sync_mapped_host_to_device_for_launch(unsigned char *packed,
+                                                      const size_t *offsets,
+                                                      const size_t *sizes,
+                                                      uint32_t count) {
   if (packed == nullptr || offsets == nullptr || sizes == nullptr) {
     return count == 0 ? CUDA_SUCCESS : CUDA_ERROR_INVALID_VALUE;
   }
-  CUresult result = scuda_sync_mapped_host_to_device();
+  CUresult result = lupine_sync_mapped_host_to_device();
   if (result != CUDA_SUCCESS) {
     return result;
   }
 
-  std::vector<scuda_mapped_host_snapshot> snapshots =
-      scuda_mapped_host_snapshots();
+  std::vector<lupine_mapped_host_snapshot> snapshots =
+      lupine_mapped_host_snapshots();
   for (const auto &mapping : snapshots) {
     for (uint32_t i = 0; i < count; ++i) {
       if (sizes[i] != sizeof(CUdeviceptr)) {
@@ -3632,13 +3649,13 @@ CUresult scuda_sync_mapped_host_to_device_for_launch(unsigned char *packed,
       memcpy(&arg, packed + offsets[i], sizeof(arg));
       CUdeviceptr translated = 0;
       if (mapping.managed &&
-          scuda_host_ptr_in_mapping(arg, mapping, &translated)) {
+          lupine_host_ptr_in_mapping(arg, mapping, &translated)) {
         memcpy(packed + offsets[i], &translated, sizeof(translated));
-        scuda_mark_mapped_device_dirty(mapping.host);
+        lupine_mark_mapped_device_dirty(mapping.host);
         break;
       }
-      if (scuda_device_ptr_in_mapping(arg, mapping)) {
-        scuda_mark_mapped_device_dirty(mapping.host);
+      if (lupine_device_ptr_in_mapping(arg, mapping)) {
+        lupine_mark_mapped_device_dirty(mapping.host);
         break;
       }
     }
@@ -3646,8 +3663,8 @@ CUresult scuda_sync_mapped_host_to_device_for_launch(unsigned char *packed,
   return CUDA_SUCCESS;
 }
 
-static CUresult scuda_sync_mapped_device_to_host() {
-  for (const auto &mapping : scuda_mapped_host_snapshots()) {
+static CUresult lupine_sync_mapped_device_to_host() {
+  for (const auto &mapping : lupine_mapped_host_snapshots()) {
     if (!mapping.device_dirty || mapping.size == 0) {
       continue;
     }
@@ -3656,18 +3673,18 @@ static CUresult scuda_sync_mapped_device_to_host() {
     if (result != CUDA_SUCCESS) {
       return result;
     }
-    std::lock_guard<std::mutex> lock(scuda_host_allocation_mutex());
-    auto it = scuda_host_allocations().find(mapping.host);
-    if (it != scuda_host_allocations().end()) {
+    std::lock_guard<std::mutex> lock(lupine_host_allocation_mutex());
+    auto it = lupine_host_allocations().find(mapping.host);
+    if (it != lupine_host_allocations().end()) {
       it->second.device_dirty = false;
     }
   }
   return CUDA_SUCCESS;
 }
 
-static scuda_host_allocation_map::iterator
-scuda_find_host_allocation_locked(void *p) {
-  auto &allocations = scuda_host_allocations();
+static lupine_host_allocation_map::iterator
+lupine_find_host_allocation_locked(void *p) {
+  auto &allocations = lupine_host_allocations();
   auto exact = allocations.find(p);
   if (exact != allocations.end()) {
     return exact;
@@ -3697,7 +3714,7 @@ extern "C" CUresult cuMemHostAlloc(void **pp, size_t bytesize,
   }
 
   CUdeviceptr device_ptr = 0;
-  if (scuda_host_flags_request_mapping(Flags)) {
+  if (lupine_host_flags_request_mapping(Flags)) {
     CUresult result = cuMemAlloc_v2(&device_ptr, bytesize);
     if (result != CUDA_SUCCESS) {
       return result;
@@ -3705,8 +3722,8 @@ extern "C" CUresult cuMemHostAlloc(void **pp, size_t bytesize,
   }
 
   void *ptr = nullptr;
-  size_t page_size = scuda_page_size();
-  size_t storage_size = scuda_round_up(bytesize, page_size);
+  size_t page_size = lupine_page_size();
+  size_t storage_size = lupine_round_up(bytesize, page_size);
   bool owned_mmap = device_ptr != 0;
   if (owned_mmap) {
     ptr = mmap(nullptr, storage_size, PROT_READ | PROT_WRITE,
@@ -3725,8 +3742,8 @@ extern "C" CUresult cuMemHostAlloc(void **pp, size_t bytesize,
   }
 
   {
-    std::lock_guard<std::mutex> lock(scuda_host_allocation_mutex());
-    scuda_host_allocation allocation;
+    std::lock_guard<std::mutex> lock(lupine_host_allocation_mutex());
+    lupine_host_allocation allocation;
     allocation.size = bytesize;
     allocation.storage_size = storage_size;
     allocation.page_size = page_size;
@@ -3736,9 +3753,9 @@ extern "C" CUresult cuMemHostAlloc(void **pp, size_t bytesize,
     allocation.owned_mmap = owned_mmap;
     allocation.device_ptr = device_ptr;
     auto inserted =
-        scuda_host_allocations().emplace(ptr, std::move(allocation));
-    if (!scuda_enable_dirty_tracking_locked(ptr, &inserted.first->second)) {
-      scuda_host_allocations().erase(inserted.first);
+        lupine_host_allocations().emplace(ptr, std::move(allocation));
+    if (!lupine_enable_dirty_tracking_locked(ptr, &inserted.first->second)) {
+      lupine_host_allocations().erase(inserted.first);
       if (owned_mmap) {
         munmap(ptr, storage_size);
       } else {
@@ -3751,8 +3768,8 @@ extern "C" CUresult cuMemHostAlloc(void **pp, size_t bytesize,
     }
   }
   *pp = ptr;
-  if (scuda_trace_enabled()) {
-    std::cerr << "SCUDA local cuMemHostAlloc ptr=" << ptr
+  if (lupine_trace_enabled()) {
+    std::cerr << "LUPINE local cuMemHostAlloc ptr=" << ptr
               << " bytes=" << bytesize << " flags=" << Flags << std::endl;
   }
   return CUDA_SUCCESS;
@@ -3779,8 +3796,8 @@ extern "C" CUresult cuMemFreeHost(void *p) {
   size_t storage_size = 0;
   CUdeviceptr device_ptr = 0;
   {
-    std::lock_guard<std::mutex> lock(scuda_host_allocation_mutex());
-    auto &allocations = scuda_host_allocations();
+    std::lock_guard<std::mutex> lock(lupine_host_allocation_mutex());
+    auto &allocations = lupine_host_allocations();
     auto it = allocations.find(p);
     if (it == allocations.end()) {
       return CUDA_ERROR_INVALID_VALUE;
@@ -3789,7 +3806,7 @@ extern "C" CUresult cuMemFreeHost(void *p) {
     owned_mmap = it->second.owned_mmap;
     storage_size = it->second.storage_size;
     device_ptr = it->second.device_ptr;
-    scuda_disable_dirty_tracking(p, it->second);
+    lupine_disable_dirty_tracking(p, it->second);
     allocations.erase(it);
   }
   if (owned) {
@@ -3811,9 +3828,9 @@ extern "C" CUresult cuMemHostGetDevicePointer_v2(CUdeviceptr *pdptr, void *p,
     return CUDA_ERROR_INVALID_VALUE;
   }
 
-  std::lock_guard<std::mutex> lock(scuda_host_allocation_mutex());
-  auto it = scuda_find_host_allocation_locked(p);
-  if (it == scuda_host_allocations().end()) {
+  std::lock_guard<std::mutex> lock(lupine_host_allocation_mutex());
+  auto it = lupine_find_host_allocation_locked(p);
+  if (it == lupine_host_allocations().end()) {
     return CUDA_ERROR_INVALID_VALUE;
   }
   if ((it->second.flags & CU_MEMHOSTALLOC_DEVICEMAP) == 0) {
@@ -3839,9 +3856,9 @@ extern "C" CUresult cuMemHostGetFlags(unsigned int *pFlags, void *p) {
     return CUDA_ERROR_INVALID_VALUE;
   }
 
-  std::lock_guard<std::mutex> lock(scuda_host_allocation_mutex());
-  auto it = scuda_find_host_allocation_locked(p);
-  if (it == scuda_host_allocations().end()) {
+  std::lock_guard<std::mutex> lock(lupine_host_allocation_mutex());
+  auto it = lupine_find_host_allocation_locked(p);
+  if (it == lupine_host_allocations().end()) {
     return CUDA_ERROR_INVALID_VALUE;
   }
   *pFlags = it->second.flags;
@@ -3861,33 +3878,33 @@ extern "C" CUresult cuMemHostRegister_v2(void *p, size_t bytesize,
   }
 
   CUdeviceptr device_ptr = 0;
-  if (scuda_host_flags_request_mapping(Flags)) {
+  if (lupine_host_flags_request_mapping(Flags)) {
     CUresult result = cuMemAlloc_v2(&device_ptr, bytesize);
     if (result != CUDA_SUCCESS) {
       return result;
     }
   }
 
-  std::lock_guard<std::mutex> lock(scuda_host_allocation_mutex());
-  if (scuda_host_allocations().find(p) != scuda_host_allocations().end()) {
+  std::lock_guard<std::mutex> lock(lupine_host_allocation_mutex());
+  if (lupine_host_allocations().find(p) != lupine_host_allocations().end()) {
     if (device_ptr != 0) {
       cuMemFree_v2(device_ptr);
     }
     return CUDA_ERROR_HOST_MEMORY_ALREADY_REGISTERED;
   }
-  size_t page_size = scuda_page_size();
-  scuda_host_allocation allocation;
+  size_t page_size = lupine_page_size();
+  lupine_host_allocation allocation;
   allocation.size = bytesize;
   allocation.storage_size = bytesize;
   allocation.page_size = page_size;
-  allocation.page_count = scuda_round_up(bytesize, page_size) / page_size;
+  allocation.page_count = lupine_round_up(bytesize, page_size) / page_size;
   allocation.flags = Flags;
   allocation.owned = false;
   allocation.owned_mmap = false;
   allocation.device_ptr = device_ptr;
-  auto inserted = scuda_host_allocations().emplace(p, std::move(allocation));
-  if (!scuda_enable_dirty_tracking_locked(p, &inserted.first->second)) {
-    scuda_host_allocations().erase(inserted.first);
+  auto inserted = lupine_host_allocations().emplace(p, std::move(allocation));
+  if (!lupine_enable_dirty_tracking_locked(p, &inserted.first->second)) {
+    lupine_host_allocations().erase(inserted.first);
     if (device_ptr != 0) {
       cuMemFree_v2(device_ptr);
     }
@@ -3910,14 +3927,14 @@ extern "C" CUresult cuMemHostUnregister(void *p) {
   }
   CUdeviceptr device_ptr = 0;
   {
-    std::lock_guard<std::mutex> lock(scuda_host_allocation_mutex());
-    auto &allocations = scuda_host_allocations();
+    std::lock_guard<std::mutex> lock(lupine_host_allocation_mutex());
+    auto &allocations = lupine_host_allocations();
     auto it = allocations.find(p);
     if (it == allocations.end() || it->second.owned) {
       return CUDA_ERROR_HOST_MEMORY_NOT_REGISTERED;
     }
     device_ptr = it->second.device_ptr;
-    scuda_disable_dirty_tracking(p, it->second);
+    lupine_disable_dirty_tracking(p, it->second);
     allocations.erase(it);
   }
   if (device_ptr != 0) {
@@ -3926,9 +3943,9 @@ extern "C" CUresult cuMemHostUnregister(void *p) {
   return CUDA_SUCCESS;
 }
 
-extern "C" CUresult scuda_cuMemAllocManaged_safe(CUdeviceptr *dptr,
-                                                 size_t bytesize,
-                                                 unsigned int flags) {
+extern "C" CUresult lupine_cuMemAllocManaged_safe(CUdeviceptr *dptr,
+                                                  size_t bytesize,
+                                                  unsigned int flags) {
   if (dptr == nullptr || bytesize == 0) {
     return CUDA_ERROR_INVALID_VALUE;
   }
@@ -3939,8 +3956,8 @@ extern "C" CUresult scuda_cuMemAllocManaged_safe(CUdeviceptr *dptr,
     return result;
   }
 
-  size_t page_size = scuda_page_size();
-  size_t storage_size = scuda_round_up(bytesize, page_size);
+  size_t page_size = lupine_page_size();
+  size_t storage_size = lupine_round_up(bytesize, page_size);
   void *ptr = mmap(nullptr, storage_size, PROT_READ | PROT_WRITE,
                    MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
   if (ptr == MAP_FAILED) {
@@ -3949,8 +3966,8 @@ extern "C" CUresult scuda_cuMemAllocManaged_safe(CUdeviceptr *dptr,
   }
 
   {
-    std::lock_guard<std::mutex> lock(scuda_host_allocation_mutex());
-    scuda_host_allocation allocation;
+    std::lock_guard<std::mutex> lock(lupine_host_allocation_mutex());
+    lupine_host_allocation allocation;
     allocation.size = bytesize;
     allocation.storage_size = storage_size;
     allocation.page_size = page_size;
@@ -3961,14 +3978,14 @@ extern "C" CUresult scuda_cuMemAllocManaged_safe(CUdeviceptr *dptr,
     allocation.managed = true;
     allocation.device_ptr = device_ptr;
     auto inserted =
-        scuda_host_allocations().emplace(ptr, std::move(allocation));
+        lupine_host_allocations().emplace(ptr, std::move(allocation));
     if (!inserted.second) {
       munmap(ptr, storage_size);
       cuMemFree_v2(device_ptr);
       return CUDA_ERROR_INVALID_VALUE;
     }
-    if (!scuda_enable_dirty_tracking_locked(ptr, &inserted.first->second)) {
-      scuda_host_allocations().erase(inserted.first);
+    if (!lupine_enable_dirty_tracking_locked(ptr, &inserted.first->second)) {
+      lupine_host_allocations().erase(inserted.first);
       munmap(ptr, storage_size);
       cuMemFree_v2(device_ptr);
       return CUDA_ERROR_OUT_OF_MEMORY;
@@ -3979,36 +3996,36 @@ extern "C" CUresult scuda_cuMemAllocManaged_safe(CUdeviceptr *dptr,
   return CUDA_SUCCESS;
 }
 
-extern "C" CUresult scuda_cuMemFree_v2_safe(CUdeviceptr dptr) {
+extern "C" CUresult lupine_cuMemFree_v2_safe(CUdeviceptr dptr) {
   void *host = reinterpret_cast<void *>(dptr);
-  scuda_host_allocation allocation;
+  lupine_host_allocation allocation;
   bool found = false;
   {
-    std::lock_guard<std::mutex> lock(scuda_host_allocation_mutex());
-    auto it = scuda_find_host_allocation_locked(host);
-    if (it != scuda_host_allocations().end() &&
+    std::lock_guard<std::mutex> lock(lupine_host_allocation_mutex());
+    auto it = lupine_find_host_allocation_locked(host);
+    if (it != lupine_host_allocations().end() &&
         reinterpret_cast<void *>(dptr) == it->first && it->second.managed) {
       allocation = std::move(it->second);
-      scuda_disable_dirty_tracking(it->first, allocation);
-      scuda_host_allocations().erase(it);
+      lupine_disable_dirty_tracking(it->first, allocation);
+      lupine_host_allocations().erase(it);
       found = true;
     }
   }
   if (!found) {
-    scuda_route route = scuda_route_for_deviceptr(dptr);
-    if (scuda_route_is_local(route)) {
+    lupine_route route = lupine_route_for_deviceptr(dptr);
+    if (lupine_route_is_local(route)) {
       using real_fn_t = CUresult (*)(CUdeviceptr);
-      auto real = scuda_real_cuda_fn<real_fn_t>("cuMemFree_v2");
+      auto real = lupine_real_cuda_fn<real_fn_t>("cuMemFree_v2");
       if (real == nullptr) {
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
       }
       CUresult result = real(dptr);
       if (result == CUDA_SUCCESS) {
-        scuda_forget_deviceptr_owner(dptr);
+        lupine_forget_deviceptr_owner(dptr);
       }
       return result;
     }
-    conn_t *conn = scuda_route_remote_conn(route);
+    conn_t *conn = lupine_route_remote_conn(route);
     CUresult return_value;
     if (conn == nullptr ||
         rpc_write_start_request(conn, RPC_cuMemFree_v2) < 0 ||
@@ -4019,7 +4036,7 @@ extern "C" CUresult scuda_cuMemFree_v2_safe(CUdeviceptr dptr) {
       return CUDA_ERROR_DEVICE_UNAVAILABLE;
     }
     if (return_value == CUDA_SUCCESS) {
-      scuda_forget_deviceptr_owner(dptr);
+      lupine_forget_deviceptr_owner(dptr);
     }
     return return_value;
   }
@@ -4043,7 +4060,7 @@ extern "C" CUresult cuPointerGetAttribute(void *data,
     return CUDA_ERROR_INVALID_VALUE;
   }
   size_t value_size = 0;
-  if (!scuda_pointer_attribute_size(attribute, &value_size)) {
+  if (!lupine_pointer_attribute_size(attribute, &value_size)) {
     return CUDA_ERROR_NOT_SUPPORTED;
   }
 
@@ -4052,16 +4069,16 @@ extern "C" CUresult cuPointerGetAttribute(void *data,
     return CUDA_ERROR_NOT_SUPPORTED;
   }
 
-  scuda_route route = scuda_route_for_deviceptr(ptr);
-  if (scuda_route_is_local(route)) {
+  lupine_route route = lupine_route_for_deviceptr(ptr);
+  if (lupine_route_is_local(route)) {
     using real_fn_t = CUresult (*)(void *, CUpointer_attribute, CUdeviceptr);
-    auto real = scuda_real_cuda_fn<real_fn_t>("cuPointerGetAttribute");
+    auto real = lupine_real_cuda_fn<real_fn_t>("cuPointerGetAttribute");
     return real == nullptr ? CUDA_ERROR_DEVICE_UNAVAILABLE
                            : real(data, attribute, ptr);
   }
-  conn_t *conn = scuda_route_remote_conn(route);
+  conn_t *conn = lupine_route_remote_conn(route);
   CUresult return_value;
-  if (rpc_write_start_request(conn, SCUDA_RPC_cuPointerGetAttribute) < 0 ||
+  if (rpc_write_start_request(conn, LUPINE_RPC_cuPointerGetAttribute) < 0 ||
       rpc_write(conn, &attribute, sizeof(attribute)) < 0 ||
       rpc_write(conn, &ptr, sizeof(ptr)) < 0 ||
       rpc_write(conn, &value_size, sizeof(value_size)) < 0 ||
@@ -4078,31 +4095,31 @@ extern "C" CUresult cuPointerGetAttribute(void *data,
 }
 
 extern "C" CUresult
-scuda_cuPointerGetAttributes_safe(unsigned int numAttributes,
-                                  CUpointer_attribute *attributes, void **data,
-                                  CUdeviceptr ptr) {
+lupine_cuPointerGetAttributes_safe(unsigned int numAttributes,
+                                   CUpointer_attribute *attributes, void **data,
+                                   CUdeviceptr ptr) {
   if (numAttributes != 0 && (attributes == nullptr || data == nullptr)) {
     return CUDA_ERROR_INVALID_VALUE;
   }
 
   std::vector<size_t> value_sizes(numAttributes, 0);
   for (unsigned int i = 0; i < numAttributes; ++i) {
-    if (!scuda_pointer_attribute_size(attributes[i], &value_sizes[i]) ||
+    if (!lupine_pointer_attribute_size(attributes[i], &value_sizes[i]) ||
         value_sizes[i] > 64) {
       return CUDA_ERROR_NOT_SUPPORTED;
     }
   }
 
-  scuda_route route = scuda_route_for_deviceptr(ptr);
-  if (scuda_route_is_local(route)) {
-    using real_fn_t = CUresult (*)(unsigned int, CUpointer_attribute *, void **,
-                                   CUdeviceptr);
-    auto real = scuda_real_cuda_fn<real_fn_t>("cuPointerGetAttributes");
+  lupine_route route = lupine_route_for_deviceptr(ptr);
+  if (lupine_route_is_local(route)) {
+    using real_fn_t =
+        CUresult (*)(unsigned int, CUpointer_attribute *, void **, CUdeviceptr);
+    auto real = lupine_real_cuda_fn<real_fn_t>("cuPointerGetAttributes");
     return real == nullptr ? CUDA_ERROR_DEVICE_UNAVAILABLE
                            : real(numAttributes, attributes, data, ptr);
   }
-  conn_t *conn = scuda_route_remote_conn(route);
-  if (rpc_write_start_request(conn, SCUDA_RPC_cuPointerGetAttributes) < 0 ||
+  conn_t *conn = lupine_route_remote_conn(route);
+  if (rpc_write_start_request(conn, LUPINE_RPC_cuPointerGetAttributes) < 0 ||
       rpc_write(conn, &numAttributes, sizeof(numAttributes)) < 0 ||
       (numAttributes != 0 &&
        rpc_write(conn, attributes,
@@ -4162,32 +4179,32 @@ extern "C" CUresult cuMemGetInfo(size_t *free, size_t *total) {
   return cuMemGetInfo_v2(free, total);
 }
 
-struct scuda_jit_client_binding {
+struct lupine_jit_client_binding {
   CUjit_option option;
   void *dst;
   size_t size;
 };
 
-struct scuda_jit_client_state {
-  std::vector<scuda_jit_client_binding> bindings;
+struct lupine_jit_client_state {
+  std::vector<lupine_jit_client_binding> bindings;
   std::vector<unsigned char> cubin;
 };
 
-static std::mutex &scuda_jit_client_mutex() {
+static std::mutex &lupine_jit_client_mutex() {
   static std::mutex mutex;
   return mutex;
 }
 
-static std::unordered_map<CUlinkState, scuda_jit_client_state>
-    &scuda_jit_client_states() {
-  static std::unordered_map<CUlinkState, scuda_jit_client_state> states;
+static std::unordered_map<CUlinkState, lupine_jit_client_state> &
+lupine_jit_client_states() {
+  static std::unordered_map<CUlinkState, lupine_jit_client_state> states;
   return states;
 }
 
-static size_t scuda_jit_option_size(unsigned int numOptions,
-                                    const CUjit_option *options,
-                                    void *const *optionValues,
-                                    CUjit_option size_option) {
+static size_t lupine_jit_option_size(unsigned int numOptions,
+                                     const CUjit_option *options,
+                                     void *const *optionValues,
+                                     CUjit_option size_option) {
   if (options == nullptr || optionValues == nullptr) {
     return 0;
   }
@@ -4200,7 +4217,8 @@ static size_t scuda_jit_option_size(unsigned int numOptions,
 }
 
 static std::vector<uintptr_t>
-scuda_pack_jit_option_values(unsigned int numOptions, void *const *optionValues) {
+lupine_pack_jit_option_values(unsigned int numOptions,
+                              void *const *optionValues) {
   std::vector<uintptr_t> values(numOptions);
   for (unsigned int i = 0; i < numOptions; ++i) {
     values[i] = reinterpret_cast<uintptr_t>(
@@ -4209,17 +4227,17 @@ scuda_pack_jit_option_values(unsigned int numOptions, void *const *optionValues)
   return values;
 }
 
-static std::vector<scuda_jit_client_binding>
-scuda_capture_jit_client_bindings(unsigned int numOptions,
-                                  const CUjit_option *options,
-                                  void *const *optionValues) {
-  std::vector<scuda_jit_client_binding> bindings;
+static std::vector<lupine_jit_client_binding>
+lupine_capture_jit_client_bindings(unsigned int numOptions,
+                                   const CUjit_option *options,
+                                   void *const *optionValues) {
+  std::vector<lupine_jit_client_binding> bindings;
   if (options == nullptr || optionValues == nullptr) {
     return bindings;
   }
-  size_t info_size = scuda_jit_option_size(
-      numOptions, options, optionValues, CU_JIT_INFO_LOG_BUFFER_SIZE_BYTES);
-  size_t error_size = scuda_jit_option_size(
+  size_t info_size = lupine_jit_option_size(numOptions, options, optionValues,
+                                            CU_JIT_INFO_LOG_BUFFER_SIZE_BYTES);
+  size_t error_size = lupine_jit_option_size(
       numOptions, options, optionValues, CU_JIT_ERROR_LOG_BUFFER_SIZE_BYTES);
   for (unsigned int i = 0; i < numOptions; ++i) {
     if (options[i] == CU_JIT_WALL_TIME && optionValues[i] != nullptr) {
@@ -4235,14 +4253,14 @@ scuda_capture_jit_client_bindings(unsigned int numOptions,
   return bindings;
 }
 
-static int scuda_write_jit_options(conn_t *conn, unsigned int numOptions,
-                                   CUjit_option *options,
-                                   void **optionValues) {
-  auto packed_values = scuda_pack_jit_option_values(numOptions, optionValues);
+static int lupine_write_jit_options(conn_t *conn, unsigned int numOptions,
+                                    CUjit_option *options,
+                                    void **optionValues) {
+  auto packed_values = lupine_pack_jit_option_values(numOptions, optionValues);
   return rpc_write(conn, &numOptions, sizeof(numOptions)) < 0 ||
                  (numOptions != 0 &&
-                  rpc_write(conn, options,
-                            numOptions * sizeof(CUjit_option)) < 0) ||
+                  rpc_write(conn, options, numOptions * sizeof(CUjit_option)) <
+                      0) ||
                  (numOptions != 0 &&
                   rpc_write(conn, packed_values.data(),
                             numOptions * sizeof(uintptr_t)) < 0)
@@ -4250,21 +4268,21 @@ static int scuda_write_jit_options(conn_t *conn, unsigned int numOptions,
              : 0;
 }
 
-static int scuda_apply_jit_outputs(conn_t *conn, CUlinkState state) {
+static int lupine_apply_jit_outputs(conn_t *conn, CUlinkState state) {
   uint32_t output_count = 0;
   if (rpc_read(conn, &output_count, sizeof(output_count)) < 0) {
     return -1;
   }
-  if (scuda_trace_enabled()) {
-    fprintf(stderr, "SCUDA cuLink JIT outputs state=%p count=%u\n",
+  if (lupine_trace_enabled()) {
+    fprintf(stderr, "LUPINE cuLink JIT outputs state=%p count=%u\n",
             reinterpret_cast<void *>(state), output_count);
   }
   if (output_count > 32) {
     return -1;
   }
 
-  std::lock_guard<std::mutex> lock(scuda_jit_client_mutex());
-  auto state_it = scuda_jit_client_states().find(state);
+  std::lock_guard<std::mutex> lock(lupine_jit_client_mutex());
+  auto state_it = lupine_jit_client_states().find(state);
   for (uint32_t i = 0; i < output_count; ++i) {
     CUjit_option option;
     size_t payload_size = 0;
@@ -4272,9 +4290,9 @@ static int scuda_apply_jit_outputs(conn_t *conn, CUlinkState state) {
         rpc_read(conn, &payload_size, sizeof(payload_size)) < 0) {
       return -1;
     }
-    if (scuda_trace_enabled()) {
+    if (lupine_trace_enabled()) {
       fprintf(stderr,
-              "SCUDA cuLink JIT output state=%p index=%u option=%d size=%zu\n",
+              "LUPINE cuLink JIT output state=%p index=%u option=%d size=%zu\n",
               reinterpret_cast<void *>(state), i, static_cast<int>(option),
               payload_size);
     }
@@ -4282,11 +4300,10 @@ static int scuda_apply_jit_outputs(conn_t *conn, CUlinkState state) {
       return -1;
     }
     std::vector<unsigned char> payload(payload_size);
-    if (payload_size != 0 &&
-        rpc_read(conn, payload.data(), payload_size) < 0) {
+    if (payload_size != 0 && rpc_read(conn, payload.data(), payload_size) < 0) {
       return -1;
     }
-    if (state_it == scuda_jit_client_states().end()) {
+    if (state_it == lupine_jit_client_states().end()) {
       continue;
     }
     for (const auto &binding : state_it->second.bindings) {
@@ -4300,7 +4317,7 @@ static int scuda_apply_jit_outputs(conn_t *conn, CUlinkState state) {
   return 0;
 }
 
-extern "C" CUresult scuda_cuLinkCreate_v2_safe(unsigned int numOptions,
+extern "C" CUresult lupine_cuLinkCreate_v2_safe(unsigned int numOptions,
                                                 CUjit_option *options,
                                                 void **optionValues,
                                                 CUlinkState *stateOut) {
@@ -4308,18 +4325,19 @@ extern "C" CUresult scuda_cuLinkCreate_v2_safe(unsigned int numOptions,
       (numOptions != 0 && (options == nullptr || optionValues == nullptr))) {
     return CUDA_ERROR_INVALID_VALUE;
   }
-  scuda_route route = scuda_route_for_default();
-  if (scuda_route_is_local(route)) {
+  lupine_route route = lupine_route_for_default();
+  if (lupine_route_is_local(route)) {
     using real_fn_t =
         CUresult (*)(unsigned int, CUjit_option *, void **, CUlinkState *);
-    auto real = scuda_real_cuda_fn<real_fn_t>("cuLinkCreate_v2");
+    auto real = lupine_real_cuda_fn<real_fn_t>("cuLinkCreate_v2");
     return real == nullptr ? CUDA_ERROR_DEVICE_UNAVAILABLE
                            : real(numOptions, options, optionValues, stateOut);
   }
-  conn_t *conn = scuda_route_remote_conn(route);
+  conn_t *conn = lupine_route_remote_conn(route);
   CUresult return_value;
-  if (conn == nullptr || rpc_write_start_request(conn, RPC_cuLinkCreate_v2) < 0 ||
-      scuda_write_jit_options(conn, numOptions, options, optionValues) < 0 ||
+  if (conn == nullptr ||
+      rpc_write_start_request(conn, RPC_cuLinkCreate_v2) < 0 ||
+      lupine_write_jit_options(conn, numOptions, options, optionValues) < 0 ||
       rpc_wait_for_response(conn) < 0 ||
       rpc_read(conn, stateOut, sizeof(*stateOut)) < 0 ||
       rpc_read(conn, &return_value, sizeof(return_value)) < 0 ||
@@ -4327,42 +4345,42 @@ extern "C" CUresult scuda_cuLinkCreate_v2_safe(unsigned int numOptions,
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
   }
   if (return_value == CUDA_SUCCESS) {
-    std::lock_guard<std::mutex> lock(scuda_jit_client_mutex());
-    scuda_jit_client_states()[*stateOut].bindings =
-        scuda_capture_jit_client_bindings(numOptions, options, optionValues);
+    std::lock_guard<std::mutex> lock(lupine_jit_client_mutex());
+    lupine_jit_client_states()[*stateOut].bindings =
+        lupine_capture_jit_client_bindings(numOptions, options, optionValues);
   }
   return return_value;
 }
 
-extern "C" CUresult scuda_cuLinkAddData_v2_safe(
-    CUlinkState state, CUjitInputType type, void *data, size_t size,
-    const char *name, unsigned int numOptions, CUjit_option *options,
-    void **optionValues) {
-  scuda_route route = scuda_route_for_default();
-  if (scuda_route_is_local(route)) {
-    using real_fn_t = CUresult (*)(CUlinkState, CUjitInputType, void *, size_t,
-                                   const char *, unsigned int, CUjit_option *,
-                                   void **);
-    auto real = scuda_real_cuda_fn<real_fn_t>("cuLinkAddData_v2");
-    return real == nullptr
-               ? CUDA_ERROR_DEVICE_UNAVAILABLE
-               : real(state, type, data, size, name, numOptions, options,
-                      optionValues);
+extern "C" CUresult
+lupine_cuLinkAddData_v2_safe(CUlinkState state, CUjitInputType type, void *data,
+                             size_t size, const char *name,
+                             unsigned int numOptions, CUjit_option *options,
+                             void **optionValues) {
+  lupine_route route = lupine_route_for_default();
+  if (lupine_route_is_local(route)) {
+    using real_fn_t =
+        CUresult (*)(CUlinkState, CUjitInputType, void *, size_t, const char *,
+                     unsigned int, CUjit_option *, void **);
+    auto real = lupine_real_cuda_fn<real_fn_t>("cuLinkAddData_v2");
+    return real == nullptr ? CUDA_ERROR_DEVICE_UNAVAILABLE
+                           : real(state, type, data, size, name, numOptions,
+                                  options, optionValues);
   }
-  conn_t *conn = scuda_route_remote_conn(route);
+  conn_t *conn = lupine_route_remote_conn(route);
   CUresult return_value;
   size_t name_len = name == nullptr ? 0 : strlen(name) + 1;
   if (conn == nullptr ||
-      rpc_write_start_request(conn, SCUDA_RPC_cuLinkAddData_v2) < 0 ||
+      rpc_write_start_request(conn, LUPINE_RPC_cuLinkAddData_v2) < 0 ||
       rpc_write(conn, &state, sizeof(state)) < 0 ||
       rpc_write(conn, &type, sizeof(type)) < 0 ||
       rpc_write(conn, &size, sizeof(size)) < 0 ||
       (size != 0 && rpc_write(conn, data, size) < 0) ||
       rpc_write(conn, &name_len, sizeof(name_len)) < 0 ||
       (name_len != 0 && rpc_write(conn, name, name_len) < 0) ||
-      scuda_write_jit_options(conn, numOptions, options, optionValues) < 0 ||
+      lupine_write_jit_options(conn, numOptions, options, optionValues) < 0 ||
       rpc_wait_for_response(conn) < 0 ||
-      scuda_apply_jit_outputs(conn, state) < 0 ||
+      lupine_apply_jit_outputs(conn, state) < 0 ||
       rpc_read(conn, &return_value, sizeof(return_value)) < 0 ||
       rpc_read_end(conn) < 0) {
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
@@ -4370,19 +4388,20 @@ extern "C" CUresult scuda_cuLinkAddData_v2_safe(
   return return_value;
 }
 
-extern "C" CUresult scuda_cuLinkAddFile_v2_safe(
-    CUlinkState state, CUjitInputType type, const char *path,
-    unsigned int numOptions, CUjit_option *options, void **optionValues) {
-  scuda_route route = scuda_route_for_default();
-  if (scuda_route_is_local(route)) {
+extern "C" CUresult
+lupine_cuLinkAddFile_v2_safe(CUlinkState state, CUjitInputType type,
+                             const char *path, unsigned int numOptions,
+                             CUjit_option *options, void **optionValues) {
+  lupine_route route = lupine_route_for_default();
+  if (lupine_route_is_local(route)) {
     using real_fn_t = CUresult (*)(CUlinkState, CUjitInputType, const char *,
                                    unsigned int, CUjit_option *, void **);
-    auto real = scuda_real_cuda_fn<real_fn_t>("cuLinkAddFile_v2");
+    auto real = lupine_real_cuda_fn<real_fn_t>("cuLinkAddFile_v2");
     return real == nullptr
                ? CUDA_ERROR_DEVICE_UNAVAILABLE
                : real(state, type, path, numOptions, options, optionValues);
   }
-  conn_t *conn = scuda_route_remote_conn(route);
+  conn_t *conn = lupine_route_remote_conn(route);
   CUresult return_value;
   size_t path_len = path == nullptr ? 0 : strlen(path) + 1;
   if (conn == nullptr ||
@@ -4391,9 +4410,9 @@ extern "C" CUresult scuda_cuLinkAddFile_v2_safe(
       rpc_write(conn, &type, sizeof(type)) < 0 ||
       rpc_write(conn, &path_len, sizeof(path_len)) < 0 ||
       (path_len != 0 && rpc_write(conn, path, path_len) < 0) ||
-      scuda_write_jit_options(conn, numOptions, options, optionValues) < 0 ||
+      lupine_write_jit_options(conn, numOptions, options, optionValues) < 0 ||
       rpc_wait_for_response(conn) < 0 ||
-      scuda_apply_jit_outputs(conn, state) < 0 ||
+      lupine_apply_jit_outputs(conn, state) < 0 ||
       rpc_read(conn, &return_value, sizeof(return_value)) < 0 ||
       rpc_read_end(conn) < 0) {
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
@@ -4401,36 +4420,37 @@ extern "C" CUresult scuda_cuLinkAddFile_v2_safe(
   return return_value;
 }
 
-extern "C" CUresult scuda_cuLinkComplete_safe(CUlinkState state,
+extern "C" CUresult lupine_cuLinkComplete_safe(CUlinkState state,
                                                void **cubinOut,
                                                size_t *sizeOut) {
   if (cubinOut == nullptr || sizeOut == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
-  scuda_route route = scuda_route_for_default();
-  if (scuda_route_is_local(route)) {
+  lupine_route route = lupine_route_for_default();
+  if (lupine_route_is_local(route)) {
     using real_fn_t = CUresult (*)(CUlinkState, void **, size_t *);
-    auto real = scuda_real_cuda_fn<real_fn_t>("cuLinkComplete");
+    auto real = lupine_real_cuda_fn<real_fn_t>("cuLinkComplete");
     return real == nullptr ? CUDA_ERROR_DEVICE_UNAVAILABLE
                            : real(state, cubinOut, sizeOut);
   }
-  conn_t *conn = scuda_route_remote_conn(route);
+  conn_t *conn = lupine_route_remote_conn(route);
   CUresult return_value;
   size_t cubin_size = 0;
-  if (conn == nullptr || rpc_write_start_request(conn, RPC_cuLinkComplete) < 0 ||
+  if (conn == nullptr ||
+      rpc_write_start_request(conn, RPC_cuLinkComplete) < 0 ||
       rpc_write(conn, &state, sizeof(state)) < 0 ||
       rpc_wait_for_response(conn) < 0 ||
       rpc_read(conn, &cubin_size, sizeof(cubin_size)) < 0) {
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
   }
-  if (scuda_trace_enabled()) {
-    fprintf(stderr, "SCUDA cuLinkComplete state=%p cubin_size=%zu\n",
+  if (lupine_trace_enabled()) {
+    fprintf(stderr, "LUPINE cuLinkComplete state=%p cubin_size=%zu\n",
             reinterpret_cast<void *>(state), cubin_size);
   }
 
   {
-    std::lock_guard<std::mutex> lock(scuda_jit_client_mutex());
-    auto &jit_state = scuda_jit_client_states()[state];
+    std::lock_guard<std::mutex> lock(lupine_jit_client_mutex());
+    auto &jit_state = lupine_jit_client_states()[state];
     if (cubin_size > (256ull << 20)) {
       return CUDA_ERROR_INVALID_VALUE;
     }
@@ -4443,7 +4463,7 @@ extern "C" CUresult scuda_cuLinkComplete_safe(CUlinkState state,
     *sizeOut = jit_state.cubin.size();
   }
 
-  if (scuda_apply_jit_outputs(conn, state) < 0 ||
+  if (lupine_apply_jit_outputs(conn, state) < 0 ||
       rpc_read(conn, &return_value, sizeof(return_value)) < 0 ||
       rpc_read_end(conn) < 0) {
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
@@ -4451,14 +4471,14 @@ extern "C" CUresult scuda_cuLinkComplete_safe(CUlinkState state,
   return return_value;
 }
 
-extern "C" CUresult scuda_cuLinkDestroy_safe(CUlinkState state) {
-  scuda_route route = scuda_route_for_default();
-  if (scuda_route_is_local(route)) {
+extern "C" CUresult lupine_cuLinkDestroy_safe(CUlinkState state) {
+  lupine_route route = lupine_route_for_default();
+  if (lupine_route_is_local(route)) {
     using real_fn_t = CUresult (*)(CUlinkState);
-    auto real = scuda_real_cuda_fn<real_fn_t>("cuLinkDestroy");
+    auto real = lupine_real_cuda_fn<real_fn_t>("cuLinkDestroy");
     return real == nullptr ? CUDA_ERROR_DEVICE_UNAVAILABLE : real(state);
   }
-  conn_t *conn = scuda_route_remote_conn(route);
+  conn_t *conn = lupine_route_remote_conn(route);
   CUresult return_value;
   if (conn == nullptr || rpc_write_start_request(conn, RPC_cuLinkDestroy) < 0 ||
       rpc_write(conn, &state, sizeof(state)) < 0 ||
@@ -4467,25 +4487,25 @@ extern "C" CUresult scuda_cuLinkDestroy_safe(CUlinkState state) {
       rpc_read_end(conn) < 0) {
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
   }
-  std::lock_guard<std::mutex> lock(scuda_jit_client_mutex());
-  scuda_jit_client_states().erase(state);
+  std::lock_guard<std::mutex> lock(lupine_jit_client_mutex());
+  lupine_jit_client_states().erase(state);
   return return_value;
 }
 
 extern "C" CUresult
-scuda_cuArrayCreate_v2_safe(CUarray *pHandle,
-                            const CUDA_ARRAY_DESCRIPTOR *pAllocateArray) {
+lupine_cuArrayCreate_v2_safe(CUarray *pHandle,
+                             const CUDA_ARRAY_DESCRIPTOR *pAllocateArray) {
   if (pHandle == nullptr || pAllocateArray == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
-  scuda_route route = scuda_route_for_default();
-  if (scuda_route_is_local(route)) {
+  lupine_route route = lupine_route_for_default();
+  if (lupine_route_is_local(route)) {
     using real_fn_t = CUresult (*)(CUarray *, const CUDA_ARRAY_DESCRIPTOR *);
-    auto real = scuda_real_cuda_fn<real_fn_t>("cuArrayCreate_v2");
+    auto real = lupine_real_cuda_fn<real_fn_t>("cuArrayCreate_v2");
     return real == nullptr ? CUDA_ERROR_DEVICE_UNAVAILABLE
                            : real(pHandle, pAllocateArray);
   }
-  conn_t *conn = scuda_route_remote_conn(route);
+  conn_t *conn = lupine_route_remote_conn(route);
   CUresult return_value;
   if (rpc_write_start_request(conn, RPC_cuArrayCreate_v2) < 0 ||
       rpc_write(conn, pAllocateArray, sizeof(*pAllocateArray)) < 0 ||
@@ -4499,19 +4519,19 @@ scuda_cuArrayCreate_v2_safe(CUarray *pHandle,
 }
 
 extern "C" CUresult
-scuda_cuArray3DCreate_v2_safe(CUarray *pHandle,
-                              const CUDA_ARRAY3D_DESCRIPTOR *pAllocateArray) {
+lupine_cuArray3DCreate_v2_safe(CUarray *pHandle,
+                               const CUDA_ARRAY3D_DESCRIPTOR *pAllocateArray) {
   if (pHandle == nullptr || pAllocateArray == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
-  scuda_route route = scuda_route_for_default();
-  if (scuda_route_is_local(route)) {
+  lupine_route route = lupine_route_for_default();
+  if (lupine_route_is_local(route)) {
     using real_fn_t = CUresult (*)(CUarray *, const CUDA_ARRAY3D_DESCRIPTOR *);
-    auto real = scuda_real_cuda_fn<real_fn_t>("cuArray3DCreate_v2");
+    auto real = lupine_real_cuda_fn<real_fn_t>("cuArray3DCreate_v2");
     return real == nullptr ? CUDA_ERROR_DEVICE_UNAVAILABLE
                            : real(pHandle, pAllocateArray);
   }
-  conn_t *conn = scuda_route_remote_conn(route);
+  conn_t *conn = lupine_route_remote_conn(route);
   CUresult return_value;
   if (rpc_write_start_request(conn, RPC_cuArray3DCreate_v2) < 0 ||
       rpc_write(conn, pAllocateArray, sizeof(*pAllocateArray)) < 0 ||
@@ -4524,7 +4544,7 @@ scuda_cuArray3DCreate_v2_safe(CUarray *pHandle,
   return return_value;
 }
 
-static int scuda_forward_remote_stdout(conn_t *conn) {
+static int lupine_forward_remote_stdout(conn_t *conn) {
   uint64_t output_size = 0;
   if (rpc_read(conn, &output_size, sizeof(output_size)) < 0) {
     return -1;
@@ -4543,22 +4563,23 @@ static int scuda_forward_remote_stdout(conn_t *conn) {
                                                                           : -1;
 }
 
-static CUresult scuda_rpc_noarg_driver_call(int op) {
-  scuda_route route = scuda_route_for_current_context();
-  if (scuda_route_is_local(route)) {
-    const char *symbol = op == RPC_cuCtxSynchronize ? "cuCtxSynchronize" : nullptr;
+static CUresult lupine_rpc_noarg_driver_call(int op) {
+  lupine_route route = lupine_route_for_current_context();
+  if (lupine_route_is_local(route)) {
+    const char *symbol =
+        op == RPC_cuCtxSynchronize ? "cuCtxSynchronize" : nullptr;
     if (symbol == nullptr) {
       return CUDA_ERROR_NOT_SUPPORTED;
     }
     using real_fn_t = CUresult (*)();
-    auto real = scuda_real_cuda_fn<real_fn_t>(symbol);
+    auto real = lupine_real_cuda_fn<real_fn_t>(symbol);
     return real == nullptr ? CUDA_ERROR_DEVICE_UNAVAILABLE : real();
   }
-  conn_t *conn = scuda_route_remote_conn(route);
+  conn_t *conn = lupine_route_remote_conn(route);
   CUresult return_value;
   if (conn == nullptr || rpc_write_start_request(conn, op) < 0 ||
       rpc_wait_for_response(conn) < 0 ||
-      (op == RPC_cuCtxSynchronize && scuda_forward_remote_stdout(conn) < 0) ||
+      (op == RPC_cuCtxSynchronize && lupine_forward_remote_stdout(conn) < 0) ||
       rpc_read(conn, &return_value, sizeof(return_value)) < 0 ||
       rpc_read_end(conn) < 0) {
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
@@ -4566,11 +4587,10 @@ static CUresult scuda_rpc_noarg_driver_call(int op) {
   return return_value;
 }
 
-static CUresult scuda_rpc_stream_driver_call(int op, CUstream stream) {
-  scuda_route route =
-      stream == nullptr ? scuda_route_for_current_context()
-                        : scuda_route_for_stream(stream);
-  if (scuda_route_is_local(route)) {
+static CUresult lupine_rpc_stream_driver_call(int op, CUstream stream) {
+  lupine_route route = stream == nullptr ? lupine_route_for_current_context()
+                                         : lupine_route_for_stream(stream);
+  if (lupine_route_is_local(route)) {
     const char *symbol = nullptr;
     if (op == RPC_cuStreamQuery) {
       symbol = "cuStreamQuery";
@@ -4581,10 +4601,10 @@ static CUresult scuda_rpc_stream_driver_call(int op, CUstream stream) {
       return CUDA_ERROR_NOT_SUPPORTED;
     }
     using real_fn_t = CUresult (*)(CUstream);
-    auto real = scuda_real_cuda_fn<real_fn_t>(symbol);
+    auto real = lupine_real_cuda_fn<real_fn_t>(symbol);
     return real == nullptr ? CUDA_ERROR_DEVICE_UNAVAILABLE : real(stream);
   }
-  conn_t *conn = scuda_route_remote_conn(route);
+  conn_t *conn = lupine_route_remote_conn(route);
   CUresult return_value;
   if (conn == nullptr || rpc_write_start_request(conn, op) < 0 ||
       rpc_write(conn, &stream, sizeof(stream)) < 0 ||
@@ -4596,9 +4616,9 @@ static CUresult scuda_rpc_stream_driver_call(int op, CUstream stream) {
   return return_value;
 }
 
-static CUresult scuda_rpc_event_driver_call(int op, CUevent event) {
-  scuda_route route = scuda_route_for_event(event);
-  if (scuda_route_is_local(route)) {
+static CUresult lupine_rpc_event_driver_call(int op, CUevent event) {
+  lupine_route route = lupine_route_for_event(event);
+  if (lupine_route_is_local(route)) {
     const char *symbol = nullptr;
     if (op == RPC_cuEventSynchronize) {
       symbol = "cuEventSynchronize";
@@ -4611,15 +4631,16 @@ static CUresult scuda_rpc_event_driver_call(int op, CUevent event) {
       return CUDA_ERROR_NOT_SUPPORTED;
     }
     using real_fn_t = CUresult (*)(CUevent);
-    auto real = scuda_real_cuda_fn<real_fn_t>(symbol);
+    auto real = lupine_real_cuda_fn<real_fn_t>(symbol);
     return real == nullptr ? CUDA_ERROR_DEVICE_UNAVAILABLE : real(event);
   }
-  conn_t *conn = scuda_route_remote_conn(route);
+  conn_t *conn = lupine_route_remote_conn(route);
   CUresult return_value;
   if (conn == nullptr || rpc_write_start_request(conn, op) < 0 ||
       rpc_write(conn, &event, sizeof(event)) < 0 ||
       rpc_wait_for_response(conn) < 0 ||
-      (op == RPC_cuEventSynchronize && scuda_forward_remote_stdout(conn) < 0) ||
+      (op == RPC_cuEventSynchronize &&
+       lupine_forward_remote_stdout(conn) < 0) ||
       rpc_read(conn, &return_value, sizeof(return_value)) < 0 ||
       rpc_read_end(conn) < 0) {
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
@@ -4628,22 +4649,22 @@ static CUresult scuda_rpc_event_driver_call(int op, CUevent event) {
 }
 
 extern "C" CUresult cuCtxSynchronize() {
-  CUresult result = scuda_rpc_noarg_driver_call(RPC_cuCtxSynchronize);
+  CUresult result = lupine_rpc_noarg_driver_call(RPC_cuCtxSynchronize);
   if (result != CUDA_SUCCESS) {
     return result;
   }
-  return scuda_sync_mapped_device_to_host();
+  return lupine_sync_mapped_device_to_host();
 }
 
 extern "C" CUresult cuStreamSynchronize(CUstream hStream) {
-  scuda_route route = hStream == nullptr ? scuda_route_for_current_context()
-                                         : scuda_route_for_stream(hStream);
-  if (scuda_route_is_local(route)) {
+  lupine_route route = hStream == nullptr ? lupine_route_for_current_context()
+                                          : lupine_route_for_stream(hStream);
+  if (lupine_route_is_local(route)) {
     using real_fn_t = CUresult (*)(CUstream);
-    auto real = scuda_real_cuda_fn<real_fn_t>("cuStreamSynchronize");
+    auto real = lupine_real_cuda_fn<real_fn_t>("cuStreamSynchronize");
     return real == nullptr ? CUDA_ERROR_DEVICE_UNAVAILABLE : real(hStream);
   }
-  conn_t *conn = scuda_route_remote_conn(route);
+  conn_t *conn = lupine_route_remote_conn(route);
   CUresult result = CUDA_ERROR_UNKNOWN;
   uint32_t copy_count = 0;
   if (conn == nullptr ||
@@ -4661,21 +4682,21 @@ extern "C" CUresult cuStreamSynchronize(CUstream hStream) {
       return CUDA_ERROR_DEVICE_UNAVAILABLE;
     }
     if (bytes != 0) {
-      scuda_prepare_host_range_write(dst, bytes);
+      lupine_prepare_host_range_write(dst, bytes);
       if (rpc_read(conn, dst, bytes) < 0) {
         return CUDA_ERROR_DEVICE_UNAVAILABLE;
       }
-      scuda_mark_host_range_clean(dst, bytes);
+      lupine_mark_host_range_clean(dst, bytes);
     }
   }
-  if (scuda_forward_remote_stdout(conn) < 0 ||
+  if (lupine_forward_remote_stdout(conn) < 0 ||
       rpc_read(conn, &result, sizeof(result)) < 0 || rpc_read_end(conn) < 0) {
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
   }
   if (result != CUDA_SUCCESS) {
     return result;
   }
-  return scuda_sync_mapped_device_to_host();
+  return lupine_sync_mapped_device_to_host();
 }
 
 #ifdef cuStreamSynchronize_ptsz
@@ -4686,11 +4707,12 @@ extern "C" CUresult cuStreamSynchronize_ptsz(CUstream hStream) {
 }
 
 extern "C" CUresult cuEventSynchronize(CUevent hEvent) {
-  CUresult result = scuda_rpc_event_driver_call(RPC_cuEventSynchronize, hEvent);
+  CUresult result =
+      lupine_rpc_event_driver_call(RPC_cuEventSynchronize, hEvent);
   if (result != CUDA_SUCCESS) {
     return result;
   }
-  return scuda_sync_mapped_device_to_host();
+  return lupine_sync_mapped_device_to_host();
 }
 
 extern "C" CUresult cuCtxCreate_v2(CUcontext *pctx, unsigned int flags,
@@ -4699,23 +4721,23 @@ extern "C" CUresult cuCtxCreate_v2(CUcontext *pctx, unsigned int flags,
     return CUDA_ERROR_INVALID_VALUE;
   }
 
-  scuda_route route = scuda_route_for_device(&dev);
-  if (scuda_route_is_local(route)) {
+  lupine_route route = lupine_route_for_device(&dev);
+  if (lupine_route_is_local(route)) {
     using real_fn_t = CUresult (*)(CUcontext *, unsigned int, CUdevice);
-    auto real = scuda_real_cuda_fn<real_fn_t>("cuCtxCreate_v2");
+    auto real = lupine_real_cuda_fn<real_fn_t>("cuCtxCreate_v2");
     if (real == nullptr) {
       return CUDA_ERROR_DEVICE_UNAVAILABLE;
     }
     CUresult result = real(pctx, flags, dev);
     if (result == CUDA_SUCCESS) {
-      scuda_note_ctx_create_route(*pctx, route);
+      lupine_note_ctx_create_route(*pctx, route);
     }
     return result;
   }
-  conn_t *conn = scuda_route_remote_conn(route);
+  conn_t *conn = lupine_route_remote_conn(route);
   CUresult return_value;
   if (conn == nullptr ||
-      rpc_write_start_request(conn, SCUDA_RPC_cuCtxCreate_v2) < 0 ||
+      rpc_write_start_request(conn, LUPINE_RPC_cuCtxCreate_v2) < 0 ||
       rpc_write(conn, &flags, sizeof(flags)) < 0 ||
       rpc_write(conn, &dev, sizeof(dev)) < 0 ||
       rpc_wait_for_response(conn) < 0 ||
@@ -4725,7 +4747,7 @@ extern "C" CUresult cuCtxCreate_v2(CUcontext *pctx, unsigned int flags,
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
   }
   if (return_value == CUDA_SUCCESS) {
-    scuda_note_ctx_create(*pctx, conn);
+    lupine_note_ctx_create(*pctx, conn);
   }
   return return_value;
 }
@@ -4744,7 +4766,7 @@ extern "C" CUresult cuCtxCreate_v4(CUcontext *pctx,
 }
 #endif
 
-static CUresult scuda_occupancy_max_potential_block_size(
+static CUresult lupine_occupancy_max_potential_block_size(
     int *minGridSize, int *blockSize, CUfunction func,
     CUoccupancyB2DSize blockSizeToDynamicSMemSize, size_t dynamicSMemSize,
     int blockSizeLimit, unsigned int flags, bool with_flags) {
@@ -4779,7 +4801,7 @@ cuOccupancyMaxPotentialBlockSize(int *minGridSize, int *blockSize,
                                  CUfunction func,
                                  CUoccupancyB2DSize blockSizeToDynamicSMemSize,
                                  size_t dynamicSMemSize, int blockSizeLimit) {
-  return scuda_occupancy_max_potential_block_size(
+  return lupine_occupancy_max_potential_block_size(
       minGridSize, blockSize, func, blockSizeToDynamicSMemSize, dynamicSMemSize,
       blockSizeLimit, 0, false);
 }
@@ -4788,31 +4810,31 @@ extern "C" CUresult cuOccupancyMaxPotentialBlockSizeWithFlags(
     int *minGridSize, int *blockSize, CUfunction func,
     CUoccupancyB2DSize blockSizeToDynamicSMemSize, size_t dynamicSMemSize,
     int blockSizeLimit, unsigned int flags) {
-  return scuda_occupancy_max_potential_block_size(
+  return lupine_occupancy_max_potential_block_size(
       minGridSize, blockSize, func, blockSizeToDynamicSMemSize, dynamicSMemSize,
       blockSizeLimit, flags, true);
 }
 
-static bool scuda_pack_module_image(const void *image, uint32_t *kind,
-                                    std::vector<unsigned char> *bytes) {
+static bool lupine_pack_module_image(const void *image, uint32_t *kind,
+                                     std::vector<unsigned char> *bytes) {
   if (image == nullptr || kind == nullptr || bytes == nullptr) {
     return false;
   }
 
-  const auto *wrapper = reinterpret_cast<const scuda_fatbin_wrapper *>(image);
+  const auto *wrapper = reinterpret_cast<const lupine_fatbin_wrapper *>(image);
   const void *fatbin = image;
-  if (wrapper->magic == SCUDA_FATBINC_MAGIC &&
+  if (wrapper->magic == LUPINE_FATBINC_MAGIC &&
       (wrapper->version == 1 || wrapper->version == 2) &&
       wrapper->data != nullptr) {
     fatbin = wrapper->data;
-    *kind = wrapper->version == 2 ? SCUDA_MODULE_IMAGE_FATBINC_V2
-                                  : SCUDA_MODULE_IMAGE_FATBINC_V1;
+    *kind = wrapper->version == 2 ? LUPINE_MODULE_IMAGE_FATBINC_V2
+                                  : LUPINE_MODULE_IMAGE_FATBINC_V1;
   } else {
-    *kind = SCUDA_MODULE_IMAGE_FATBIN_RAW;
+    *kind = LUPINE_MODULE_IMAGE_FATBIN_RAW;
   }
 
-  const auto *header = reinterpret_cast<const scuda_fatbin_header *>(fatbin);
-  if (header->magic != SCUDA_FATBIN_MAGIC || header->header_size == 0) {
+  const auto *header = reinterpret_cast<const lupine_fatbin_header *>(fatbin);
+  if (header->magic != LUPINE_FATBIN_MAGIC || header->header_size == 0) {
     const auto *elf = static_cast<const unsigned char *>(image);
     if (std::memcmp(elf, ELFMAG, SELFMAG) == 0 && elf[EI_CLASS] == ELFCLASS64) {
       const auto *ehdr = reinterpret_cast<const Elf64_Ehdr *>(image);
@@ -4845,7 +4867,7 @@ static bool scuda_pack_module_image(const void *image, uint32_t *kind,
           }
         }
       }
-      *kind = SCUDA_MODULE_IMAGE_FATBIN_RAW;
+      *kind = LUPINE_MODULE_IMAGE_FATBIN_RAW;
       bytes->assign(elf, elf + image_size);
       return true;
     }
@@ -4858,7 +4880,7 @@ static bool scuda_pack_module_image(const void *image, uint32_t *kind,
     }
     if (std::strncmp(ptx_start, ".version", 8) == 0 ||
         std::strncmp(ptx_start, "//", 2) == 0) {
-      *kind = SCUDA_MODULE_IMAGE_FATBIN_RAW;
+      *kind = LUPINE_MODULE_IMAGE_FATBIN_RAW;
       bytes->assign(reinterpret_cast<const unsigned char *>(ptx),
                     reinterpret_cast<const unsigned char *>(ptx) +
                         std::strlen(ptx) + 1);
@@ -4881,27 +4903,27 @@ extern "C" CUresult cuModuleLoadData(CUmodule *module, const void *image) {
 
   uint32_t kind = 0;
   std::vector<unsigned char> image_bytes;
-  if (!scuda_pack_module_image(image, &kind, &image_bytes)) {
+  if (!lupine_pack_module_image(image, &kind, &image_bytes)) {
     return CUDA_ERROR_NOT_SUPPORTED;
   }
 
-  scuda_route route = scuda_route_for_current_context();
-  if (scuda_route_is_local(route)) {
+  lupine_route route = lupine_route_for_current_context();
+  if (lupine_route_is_local(route)) {
     using real_fn_t = CUresult (*)(CUmodule *, const void *);
-    auto real = scuda_real_cuda_fn<real_fn_t>("cuModuleLoadData");
+    auto real = lupine_real_cuda_fn<real_fn_t>("cuModuleLoadData");
     if (real == nullptr) {
       return CUDA_ERROR_DEVICE_UNAVAILABLE;
     }
     CUresult result = real(module, image);
     if (result == CUDA_SUCCESS) {
-      scuda_remember_loaded_module(*module);
-      scuda_note_module_owner_route(*module, route);
-      scuda_record_module_image(*module, route, kind, image_bytes.data(),
-                                image_bytes.size(), image);
+      lupine_remember_loaded_module(*module);
+      lupine_note_module_owner_route(*module, route);
+      lupine_record_module_image(*module, route, kind, image_bytes.data(),
+                                 image_bytes.size(), image);
     }
     return result;
   }
-  conn_t *conn = scuda_route_remote_conn(route);
+  conn_t *conn = lupine_route_remote_conn(route);
   CUresult return_value;
   size_t image_size = image_bytes.size();
   if (conn == nullptr ||
@@ -4916,10 +4938,11 @@ extern "C" CUresult cuModuleLoadData(CUmodule *module, const void *image) {
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
   }
   if (return_value == CUDA_SUCCESS) {
-    scuda_remember_loaded_module(*module);
-    scuda_note_module_owner(*module, conn);
-    scuda_record_module_image(*module, scuda_remote_route_for_conn(conn), kind,
-                              image_bytes.data(), image_bytes.size(), image);
+    lupine_remember_loaded_module(*module);
+    lupine_note_module_owner(*module, conn);
+    lupine_record_module_image(*module, lupine_remote_route_for_conn(conn),
+                               kind, image_bytes.data(), image_bytes.size(),
+                               image);
   }
   return return_value;
 }
@@ -4948,8 +4971,8 @@ cuLibraryLoadData(CUlibrary *library, const void *code,
        libraryOptions[0] == CU_LIBRARY_BINARY_IS_PRESERVED);
   if (numJitOptions != 0 ||
       !(numLibraryOptions == 0 || can_ignore_library_options)) {
-    if (scuda_trace_enabled()) {
-      std::cerr << "SCUDA cuLibraryLoadData unsupported options: jit="
+    if (lupine_trace_enabled()) {
+      std::cerr << "LUPINE cuLibraryLoadData unsupported options: jit="
                 << numJitOptions << " library=" << numLibraryOptions
                 << " first_library_option="
                 << (libraryOptions == nullptr ? -1 : (int)libraryOptions[0])
@@ -4960,18 +4983,18 @@ cuLibraryLoadData(CUlibrary *library, const void *code,
 
   uint32_t kind = 0;
   std::vector<unsigned char> image_bytes;
-  if (!scuda_pack_module_image(code, &kind, &image_bytes)) {
-    if (scuda_trace_enabled()) {
+  if (!lupine_pack_module_image(code, &kind, &image_bytes)) {
+    if (lupine_trace_enabled()) {
       const auto *wrapper =
-          reinterpret_cast<const scuda_fatbin_wrapper *>(code);
-      std::cerr << "SCUDA cuLibraryLoadData could not pack image" << " magic=0x"
-                << std::hex << wrapper->magic << " version=0x"
+          reinterpret_cast<const lupine_fatbin_wrapper *>(code);
+      std::cerr << "LUPINE cuLibraryLoadData could not pack image"
+                << " magic=0x" << std::hex << wrapper->magic << " version=0x"
                 << wrapper->version << std::dec << std::endl;
     }
     return CUDA_ERROR_NOT_SUPPORTED;
   }
 
-  conn_t *conn = scuda_rpc_conn_for_current_context();
+  conn_t *conn = lupine_rpc_conn_for_current_context();
   CUresult return_value;
   size_t image_size = image_bytes.size();
   if (conn == nullptr ||
@@ -4986,22 +5009,24 @@ cuLibraryLoadData(CUlibrary *library, const void *code,
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
   }
   if (return_value == CUDA_SUCCESS) {
-    scuda_note_library_owner(*library, conn);
-    scuda_record_library_image(*library, scuda_remote_route_for_conn(conn), kind,
-                               image_bytes.data(), image_bytes.size(), code);
+    lupine_note_library_owner(*library, conn);
+    lupine_record_library_image(*library, lupine_remote_route_for_conn(conn),
+                                kind, image_bytes.data(), image_bytes.size(),
+                                code);
   }
   return return_value;
 }
 
 static CUresult
-scuda_fetch_kernel_param_layout(CUfunction f, scuda_kernel_param_layout *layout) {
+lupine_fetch_kernel_param_layout(CUfunction f,
+                                 lupine_kernel_param_layout *layout) {
   if (layout == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
-  conn_t *conn = scuda_rpc_conn_for_function(f);
+  conn_t *conn = lupine_rpc_conn_for_function(f);
   CUresult return_value;
   if (conn == nullptr ||
-      rpc_write_start_request(conn, SCUDA_RPC_cuFuncGetParamLayout) < 0 ||
+      rpc_write_start_request(conn, LUPINE_RPC_cuFuncGetParamLayout) < 0 ||
       rpc_write(conn, &f, sizeof(f)) < 0 || rpc_wait_for_response(conn) < 0 ||
       rpc_read(conn, &layout->count, sizeof(layout->count)) < 0 ||
       rpc_read(conn, layout->offsets, sizeof(layout->offsets)) < 0 ||
@@ -5013,53 +5038,52 @@ scuda_fetch_kernel_param_layout(CUfunction f, scuda_kernel_param_layout *layout)
   return return_value;
 }
 
-extern "C" void scuda_invalidate_kernel_param_layout_cache() {
+extern "C" void lupine_invalidate_kernel_param_layout_cache() {
   {
-    std::lock_guard<std::mutex> lock(scuda_kernel_param_layout_cache_mutex());
-    scuda_kernel_param_layout_cache().clear();
+    std::lock_guard<std::mutex> lock(lupine_kernel_param_layout_cache_mutex());
+    lupine_kernel_param_layout_cache().clear();
   }
   {
-    std::lock_guard<std::mutex> lock(scuda_kernel_function_cache_mutex());
-    scuda_kernel_function_cache().clear();
+    std::lock_guard<std::mutex> lock(lupine_kernel_function_cache_mutex());
+    lupine_kernel_function_cache().clear();
   }
   {
-    std::lock_guard<std::mutex> lock(scuda_occupancy_cache_mutex());
-    scuda_occupancy_cache().clear();
+    std::lock_guard<std::mutex> lock(lupine_occupancy_cache_mutex());
+    lupine_occupancy_cache().clear();
   }
 }
 
 extern "C" CUresult
-scuda_get_kernel_param_layout_cached(CUfunction f,
-                                     scuda_kernel_param_layout *layout) {
+lupine_get_kernel_param_layout_cached(CUfunction f,
+                                      lupine_kernel_param_layout *layout) {
   if (layout == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
-  f = scuda_translate_private_function(f);
-  scuda_route route = scuda_route_for_function(f);
-  scuda_kernel_param_layout_key key{scuda_route_identity(route), f};
+  f = lupine_translate_private_function(f);
+  lupine_route route = lupine_route_for_function(f);
+  lupine_kernel_param_layout_key key{lupine_route_identity(route), f};
   {
-    std::lock_guard<std::mutex> lock(scuda_kernel_param_layout_cache_mutex());
-    auto it = scuda_kernel_param_layout_cache().find(key);
-    if (it != scuda_kernel_param_layout_cache().end()) {
+    std::lock_guard<std::mutex> lock(lupine_kernel_param_layout_cache_mutex());
+    auto it = lupine_kernel_param_layout_cache().find(key);
+    if (it != lupine_kernel_param_layout_cache().end()) {
       *layout = it->second;
       return CUDA_SUCCESS;
     }
   }
 
-  scuda_kernel_param_layout fetched = {};
-  CUresult result = scuda_fetch_kernel_param_layout(f, &fetched);
+  lupine_kernel_param_layout fetched = {};
+  CUresult result = lupine_fetch_kernel_param_layout(f, &fetched);
   if (result == CUDA_SUCCESS) {
-    std::lock_guard<std::mutex> lock(scuda_kernel_param_layout_cache_mutex());
-    scuda_kernel_param_layout_cache()[key] = fetched;
+    std::lock_guard<std::mutex> lock(lupine_kernel_param_layout_cache_mutex());
+    lupine_kernel_param_layout_cache()[key] = fetched;
     *layout = fetched;
   }
   return result;
 }
 
-static scuda_route
-scuda_route_from_known_kernel_deviceptr_args(
+static lupine_route lupine_route_from_known_kernel_deviceptr_args(
     const std::vector<unsigned char> &packed,
-    const scuda_kernel_param_layout &layout, scuda_route fallback) {
+    const lupine_kernel_param_layout &layout, lupine_route fallback) {
   int route_id = -2;
   for (uint32_t i = 0; i < layout.count; ++i) {
     if (layout.sizes[i] != sizeof(CUdeviceptr) ||
@@ -5068,7 +5092,7 @@ scuda_route_from_known_kernel_deviceptr_args(
     }
     CUdeviceptr ptr = 0;
     memcpy(&ptr, packed.data() + layout.offsets[i], sizeof(ptr));
-    int ptr_route_id = scuda_known_deviceptr_route_id(ptr);
+    int ptr_route_id = lupine_known_deviceptr_route_id(ptr);
     if (ptr_route_id == -2) {
       continue;
     }
@@ -5078,11 +5102,11 @@ scuda_route_from_known_kernel_deviceptr_args(
       return fallback;
     }
   }
-  if (route_id == -2 || route_id == scuda_route_identity(fallback)) {
+  if (route_id == -2 || route_id == lupine_route_identity(fallback)) {
     return fallback;
   }
-  scuda_route route = scuda_route_from_identity(route_id);
-  return route.kind == SCUDA_ROUTE_INVALID ? fallback : route;
+  lupine_route route = lupine_route_from_identity(route_id);
+  return route.kind == LUPINE_ROUTE_INVALID ? fallback : route;
 }
 
 extern "C" CUresult
@@ -5095,53 +5119,50 @@ cuLaunchKernel(CUfunction f, unsigned int gridDimX, unsigned int gridDimY,
     return CUDA_ERROR_NOT_SUPPORTED;
   }
   CUfunction requested_function = f;
-  scuda_route launch_route =
-      hStream != nullptr ? scuda_route_for_stream(hStream)
-                         : scuda_route_for_default();
+  lupine_route launch_route = hStream != nullptr
+                                  ? lupine_route_for_stream(hStream)
+                                  : lupine_route_for_default();
   CUfunction route_function = f;
   CUresult resolve_status =
-      scuda_resolve_library_kernel_for_route(f, launch_route, &route_function);
+      lupine_resolve_library_kernel_for_route(f, launch_route, &route_function);
   if (resolve_status != CUDA_SUCCESS) {
     return resolve_status;
   }
-  resolve_status =
-      scuda_resolve_module_function_for_route(route_function, launch_route,
-                                             &route_function);
+  resolve_status = lupine_resolve_module_function_for_route(
+      route_function, launch_route, &route_function);
   if (resolve_status != CUDA_SUCCESS) {
     return resolve_status;
   }
   f = route_function;
-  resolve_status = scuda_resolve_private_function_for_route(f, launch_route,
-                                                            &route_function);
+  resolve_status = lupine_resolve_private_function_for_route(f, launch_route,
+                                                             &route_function);
   if (resolve_status != CUDA_SUCCESS) {
     return resolve_status;
   }
-  f = scuda_translate_private_function(route_function);
+  f = lupine_translate_private_function(route_function);
 
-  scuda_route route = scuda_route_for_function(f);
-  if (scuda_trace_enabled()) {
-    std::cerr << "SCUDA cuLaunchKernel f=" << f
-              << " stream=" << hStream
-              << " launch_route=" << scuda_route_identity(launch_route)
-              << " function_route=" << scuda_route_identity(route)
-              << " grid=(" << gridDimX << "," << gridDimY << "," << gridDimZ
-              << ") block=(" << blockDimX << "," << blockDimY << ","
-              << blockDimZ << ")" << std::endl;
+  lupine_route route = lupine_route_for_function(f);
+  if (lupine_trace_enabled()) {
+    std::cerr << "LUPINE cuLaunchKernel f=" << f << " stream=" << hStream
+              << " launch_route=" << lupine_route_identity(launch_route)
+              << " function_route=" << lupine_route_identity(route) << " grid=("
+              << gridDimX << "," << gridDimY << "," << gridDimZ << ") block=("
+              << blockDimX << "," << blockDimY << "," << blockDimZ << ")"
+              << std::endl;
   }
-  if (scuda_route_is_local(route)) {
-    using real_fn_t = CUresult (*)(CUfunction, unsigned int, unsigned int,
-                                   unsigned int, unsigned int, unsigned int,
-                                   unsigned int, unsigned int, CUstream,
-                                   void **, void **);
-    auto real = scuda_real_cuda_fn<real_fn_t>("cuLaunchKernel");
+  if (lupine_route_is_local(route)) {
+    using real_fn_t = CUresult (*)(
+        CUfunction, unsigned int, unsigned int, unsigned int, unsigned int,
+        unsigned int, unsigned int, unsigned int, CUstream, void **, void **);
+    auto real = lupine_real_cuda_fn<real_fn_t>("cuLaunchKernel");
     return real == nullptr
                ? CUDA_ERROR_DEVICE_UNAVAILABLE
                : real(f, gridDimX, gridDimY, gridDimZ, blockDimX, blockDimY,
                       blockDimZ, sharedMemBytes, hStream, kernelParams, extra);
   }
 
-  scuda_kernel_param_layout layout;
-  CUresult status = scuda_get_kernel_param_layout_cached(f, &layout);
+  lupine_kernel_param_layout layout;
+  CUresult status = lupine_get_kernel_param_layout_cached(f, &layout);
   if (status != CUDA_SUCCESS) {
     return status;
   }
@@ -5165,30 +5186,30 @@ cuLaunchKernel(CUfunction f, unsigned int gridDimX, unsigned int gridDimY,
     memcpy(packed.data() + layout.offsets[i], kernelParams[i], layout.sizes[i]);
   }
 
-  scuda_route arg_route =
-      scuda_route_from_known_kernel_deviceptr_args(packed, layout, launch_route);
-  if (scuda_route_identity(arg_route) != scuda_route_identity(launch_route)) {
+  lupine_route arg_route = lupine_route_from_known_kernel_deviceptr_args(
+      packed, layout, launch_route);
+  if (lupine_route_identity(arg_route) != lupine_route_identity(launch_route)) {
     launch_route = arg_route;
     route_function = requested_function;
-    resolve_status = scuda_resolve_library_kernel_for_route(
+    resolve_status = lupine_resolve_library_kernel_for_route(
         requested_function, launch_route, &route_function);
     if (resolve_status != CUDA_SUCCESS) {
       return resolve_status;
     }
-    resolve_status = scuda_resolve_module_function_for_route(
+    resolve_status = lupine_resolve_module_function_for_route(
         route_function, launch_route, &route_function);
     if (resolve_status != CUDA_SUCCESS) {
       return resolve_status;
     }
-    resolve_status = scuda_resolve_private_function_for_route(
+    resolve_status = lupine_resolve_private_function_for_route(
         route_function, launch_route, &route_function);
     if (resolve_status != CUDA_SUCCESS) {
       return resolve_status;
     }
-    f = scuda_translate_private_function(route_function);
-    route = scuda_route_for_function(f);
+    f = lupine_translate_private_function(route_function);
+    route = lupine_route_for_function(f);
 
-    status = scuda_get_kernel_param_layout_cached(f, &layout);
+    status = lupine_get_kernel_param_layout_cached(f, &layout);
     if (status != CUDA_SUCCESS) {
       return status;
     }
@@ -5207,19 +5228,19 @@ cuLaunchKernel(CUfunction f, unsigned int gridDimX, unsigned int gridDimY,
       memcpy(packed.data() + layout.offsets[i], kernelParams[i],
              layout.sizes[i]);
     }
-    if (scuda_trace_enabled()) {
-      std::cerr << "SCUDA cuLaunchKernel rerouted by args f=" << f
-                << " route=" << scuda_route_identity(route) << std::endl;
+    if (lupine_trace_enabled()) {
+      std::cerr << "LUPINE cuLaunchKernel rerouted by args f=" << f
+                << " route=" << lupine_route_identity(route) << std::endl;
     }
   }
 
-  status = scuda_sync_mapped_host_to_device_for_launch(
+  status = lupine_sync_mapped_host_to_device_for_launch(
       packed.data(), layout.offsets, layout.sizes, layout.count);
   if (status != CUDA_SUCCESS) {
     return status;
   }
 
-  conn_t *conn = scuda_route_remote_conn(route);
+  conn_t *conn = lupine_route_remote_conn(route);
   CUresult return_value;
   if (conn == nullptr ||
       rpc_write_start_request(conn, RPC_cuLaunchKernel) < 0 ||
@@ -5240,8 +5261,8 @@ cuLaunchKernel(CUfunction f, unsigned int gridDimX, unsigned int gridDimY,
       rpc_read_end(conn) < 0) {
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
   }
-  if (scuda_trace_enabled() && return_value != CUDA_SUCCESS) {
-    std::cerr << "SCUDA cuLaunchKernel result="
+  if (lupine_trace_enabled() && return_value != CUDA_SUCCESS) {
+    std::cerr << "LUPINE cuLaunchKernel result="
               << static_cast<int>(return_value) << std::endl;
   }
   return return_value;
@@ -5252,8 +5273,8 @@ extern "C" CUresult cuLaunchKernelEx(const CUlaunchConfig *config, CUfunction f,
   if (config == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
-  if (config->numAttrs != 0 && scuda_trace_enabled()) {
-    std::cerr << "SCUDA cuLaunchKernelEx ignoring " << config->numAttrs
+  if (config->numAttrs != 0 && lupine_trace_enabled()) {
+    std::cerr << "LUPINE cuLaunchKernelEx ignoring " << config->numAttrs
               << " launch attributes" << std::endl;
   }
   return cuLaunchKernel(f, config->gridDimX, config->gridDimY, config->gridDimZ,
@@ -5262,28 +5283,27 @@ extern "C" CUresult cuLaunchKernelEx(const CUlaunchConfig *config, CUfunction f,
                         extra);
 }
 
-extern "C" CUresult scuda_cuLaunchCooperativeKernel_safe(
+extern "C" CUresult lupine_cuLaunchCooperativeKernel_safe(
     CUfunction f, unsigned int gridDimX, unsigned int gridDimY,
     unsigned int gridDimZ, unsigned int blockDimX, unsigned int blockDimY,
     unsigned int blockDimZ, unsigned int sharedMemBytes, CUstream hStream,
     void **kernelParams) {
-  f = scuda_translate_private_function(f);
+  f = lupine_translate_private_function(f);
 
-  scuda_route route = scuda_route_for_function(f);
-  if (scuda_route_is_local(route)) {
-    using real_fn_t = CUresult (*)(CUfunction, unsigned int, unsigned int,
-                                   unsigned int, unsigned int, unsigned int,
-                                   unsigned int, unsigned int, CUstream,
-                                   void **);
-    auto real = scuda_real_cuda_fn<real_fn_t>("cuLaunchCooperativeKernel");
-    return real == nullptr ? CUDA_ERROR_DEVICE_UNAVAILABLE
-                           : real(f, gridDimX, gridDimY, gridDimZ, blockDimX,
-                                  blockDimY, blockDimZ, sharedMemBytes,
-                                  hStream, kernelParams);
+  lupine_route route = lupine_route_for_function(f);
+  if (lupine_route_is_local(route)) {
+    using real_fn_t = CUresult (*)(
+        CUfunction, unsigned int, unsigned int, unsigned int, unsigned int,
+        unsigned int, unsigned int, unsigned int, CUstream, void **);
+    auto real = lupine_real_cuda_fn<real_fn_t>("cuLaunchCooperativeKernel");
+    return real == nullptr
+               ? CUDA_ERROR_DEVICE_UNAVAILABLE
+               : real(f, gridDimX, gridDimY, gridDimZ, blockDimX, blockDimY,
+                      blockDimZ, sharedMemBytes, hStream, kernelParams);
   }
 
-  scuda_kernel_param_layout layout;
-  CUresult status = scuda_get_kernel_param_layout_cached(f, &layout);
+  lupine_kernel_param_layout layout;
+  CUresult status = lupine_get_kernel_param_layout_cached(f, &layout);
   if (status != CUDA_SUCCESS) {
     return status;
   }
@@ -5304,13 +5324,13 @@ extern "C" CUresult scuda_cuLaunchCooperativeKernel_safe(
     memcpy(packed.data() + layout.offsets[i], kernelParams[i], layout.sizes[i]);
   }
 
-  status = scuda_sync_mapped_host_to_device_for_launch(
+  status = lupine_sync_mapped_host_to_device_for_launch(
       packed.data(), layout.offsets, layout.sizes, layout.count);
   if (status != CUDA_SUCCESS) {
     return status;
   }
 
-  conn_t *conn = scuda_route_remote_conn(route);
+  conn_t *conn = lupine_route_remote_conn(route);
   CUresult return_value;
   if (conn == nullptr ||
       rpc_write_start_request(conn, RPC_cuLaunchCooperativeKernel) < 0 ||
@@ -5334,16 +5354,16 @@ extern "C" CUresult scuda_cuLaunchCooperativeKernel_safe(
   return return_value;
 }
 
-extern "C" CUresult scuda_cuFuncGetAttribute_safe(int *pi,
-                                                  CUfunction_attribute attrib,
-                                                  CUfunction hfunc) {
+extern "C" CUresult lupine_cuFuncGetAttribute_safe(int *pi,
+                                                   CUfunction_attribute attrib,
+                                                   CUfunction hfunc) {
   if (pi == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
-  CUfunction translated = scuda_translate_private_function(hfunc);
+  CUfunction translated = lupine_translate_private_function(hfunc);
   if (translated != hfunc) {
-    if (scuda_trace_enabled()) {
-      std::cerr << "SCUDA translated cuFuncGetAttribute attr=" << attrib
+    if (lupine_trace_enabled()) {
+      std::cerr << "LUPINE translated cuFuncGetAttribute attr=" << attrib
                 << " client=" << hfunc << " server=" << translated << std::endl;
     }
     return cuFuncGetAttribute(pi, attrib, translated);
@@ -5351,15 +5371,15 @@ extern "C" CUresult scuda_cuFuncGetAttribute_safe(int *pi,
   return cuFuncGetAttribute(pi, attrib, hfunc);
 }
 
-extern "C" CUresult scuda_cuOccupancyMaxActiveBlocksPerMultiprocessor_safe(
+extern "C" CUresult lupine_cuOccupancyMaxActiveBlocksPerMultiprocessor_safe(
     int *numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize) {
   if (numBlocks == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
-  CUfunction translated = scuda_translate_private_function(func);
+  CUfunction translated = lupine_translate_private_function(func);
   if (translated != func) {
-    if (scuda_trace_enabled()) {
-      std::cerr << "SCUDA translated "
+    if (lupine_trace_enabled()) {
+      std::cerr << "LUPINE translated "
                    "cuOccupancyMaxActiveBlocksPerMultiprocessor"
                 << " client=" << func << " server=" << translated
                 << " blockSize=" << blockSize
@@ -5373,16 +5393,16 @@ extern "C" CUresult scuda_cuOccupancyMaxActiveBlocksPerMultiprocessor_safe(
 }
 
 extern "C" CUresult
-scuda_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags_safe(
+lupine_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags_safe(
     int *numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize,
     unsigned int flags) {
   if (numBlocks == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
-  CUfunction translated = scuda_translate_private_function(func);
+  CUfunction translated = lupine_translate_private_function(func);
   if (translated != func) {
-    if (scuda_trace_enabled()) {
-      std::cerr << "SCUDA translated "
+    if (lupine_trace_enabled()) {
+      std::cerr << "LUPINE translated "
                    "cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags"
                 << " client=" << func << " server=" << translated
                 << " blockSize=" << blockSize
@@ -5398,7 +5418,7 @@ scuda_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags_safe(
 
 extern "C" CUresult cuMemcpyDtoHAsync_v2(void *dstHost, CUdeviceptr srcDevice,
                                          size_t ByteCount, CUstream hStream) {
-  conn_t *conn = scuda_rpc_conn_for_deviceptr(srcDevice);
+  conn_t *conn = lupine_rpc_conn_for_deviceptr(srcDevice);
   CUresult return_value;
   if (conn == nullptr ||
       rpc_write_start_request(conn, RPC_cuMemcpyDtoHAsync_v2) < 0 ||
@@ -5409,14 +5429,14 @@ extern "C" CUresult cuMemcpyDtoHAsync_v2(void *dstHost, CUdeviceptr srcDevice,
       rpc_wait_for_response(conn) < 0) {
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
   }
-  scuda_prepare_host_range_write(dstHost, ByteCount);
+  lupine_prepare_host_range_write(dstHost, ByteCount);
   if (rpc_read(conn, dstHost, ByteCount) < 0 ||
       rpc_read(conn, &return_value, sizeof(return_value)) < 0 ||
       rpc_read_end(conn) < 0) {
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
   }
   if (return_value == CUDA_SUCCESS) {
-    scuda_mark_host_range_clean(dstHost, ByteCount);
+    lupine_mark_host_range_clean(dstHost, ByteCount);
   }
   return return_value;
 }
@@ -5429,7 +5449,7 @@ extern "C" CUresult cuMemcpyDtoHAsync(void *dstHost, CUdeviceptr srcDevice,
   return cuMemcpyDtoHAsync_v2(dstHost, srcDevice, ByteCount, hStream);
 }
 
-static bool scuda_is_local_address(const void *ptr) {
+static bool lupine_is_local_address(const void *ptr) {
   if (ptr == nullptr) {
     return false;
   }
@@ -5443,7 +5463,8 @@ static bool scuda_is_local_address(const void *ptr) {
   return mincore(reinterpret_cast<void *>(page), page_size, &vec) == 0;
 }
 
-static size_t scuda_memcpy3d_host_span(const CUDA_MEMCPY3D &copy, bool source) {
+static size_t lupine_memcpy3d_host_span(const CUDA_MEMCPY3D &copy,
+                                        bool source) {
   size_t x = source ? copy.srcXInBytes : copy.dstXInBytes;
   size_t y = source ? copy.srcY : copy.dstY;
   size_t z = source ? copy.srcZ : copy.dstZ;
@@ -5462,7 +5483,8 @@ static size_t scuda_memcpy3d_host_span(const CUDA_MEMCPY3D &copy, bool source) {
          x + copy.WidthInBytes;
 }
 
-static size_t scuda_memcpy2d_host_span(const CUDA_MEMCPY2D &copy, bool source) {
+static size_t lupine_memcpy2d_host_span(const CUDA_MEMCPY2D &copy,
+                                        bool source) {
   size_t x = source ? copy.srcXInBytes : copy.dstXInBytes;
   size_t y = source ? copy.srcY : copy.dstY;
   size_t pitch = source ? copy.srcPitch : copy.dstPitch;
@@ -5475,7 +5497,7 @@ static size_t scuda_memcpy2d_host_span(const CUDA_MEMCPY2D &copy, bool source) {
   return (y + copy.Height - 1) * pitch + x + copy.WidthInBytes;
 }
 
-static int scuda_memcpy2d_rpc_op(bool async, bool unaligned) {
+static int lupine_memcpy2d_rpc_op(bool async, bool unaligned) {
   if (async) {
     return RPC_cuMemcpy2DAsync_v2;
   }
@@ -5485,19 +5507,19 @@ static int scuda_memcpy2d_rpc_op(bool async, bool unaligned) {
   return RPC_cuMemcpy2D_v2;
 }
 
-static CUresult scuda_cuMemcpy2D_common(const CUDA_MEMCPY2D *pCopy,
-                                        CUstream stream, bool async,
-                                        bool unaligned) {
+static CUresult lupine_cuMemcpy2D_common(const CUDA_MEMCPY2D *pCopy,
+                                         CUstream stream, bool async,
+                                         bool unaligned) {
   if (pCopy == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
 
   CUDA_MEMCPY2D copy = *pCopy;
   size_t src_host_size = copy.srcMemoryType == CU_MEMORYTYPE_HOST
-                             ? scuda_memcpy2d_host_span(copy, true)
+                             ? lupine_memcpy2d_host_span(copy, true)
                              : 0;
   size_t dst_host_size = copy.dstMemoryType == CU_MEMORYTYPE_HOST
-                             ? scuda_memcpy2d_host_span(copy, false)
+                             ? lupine_memcpy2d_host_span(copy, false)
                              : 0;
   const void *src_host = copy.srcHost;
   void *dst_host = copy.dstHost;
@@ -5508,19 +5530,19 @@ static CUresult scuda_cuMemcpy2D_common(const CUDA_MEMCPY2D *pCopy,
 
   conn_t *conn = nullptr;
   if (copy.srcMemoryType == CU_MEMORYTYPE_DEVICE && copy.srcDevice != 0) {
-    conn = scuda_rpc_conn_for_deviceptr(copy.srcDevice);
+    conn = lupine_rpc_conn_for_deviceptr(copy.srcDevice);
   } else if (copy.dstMemoryType == CU_MEMORYTYPE_DEVICE &&
              copy.dstDevice != 0) {
-    conn = scuda_rpc_conn_for_deviceptr(copy.dstDevice);
+    conn = lupine_rpc_conn_for_deviceptr(copy.dstDevice);
   } else if (stream != nullptr) {
-    conn = scuda_rpc_conn_for_stream(stream);
+    conn = lupine_rpc_conn_for_stream(stream);
   } else {
-    conn = scuda_rpc_conn_for_current_context();
+    conn = lupine_rpc_conn_for_current_context();
   }
   CUresult return_value;
   size_t returned_dst_size = 0;
   if (conn == nullptr ||
-      rpc_write_start_request(conn, scuda_memcpy2d_rpc_op(async, unaligned)) <
+      rpc_write_start_request(conn, lupine_memcpy2d_rpc_op(async, unaligned)) <
           0 ||
       rpc_write(conn, &copy, sizeof(copy)) < 0 ||
       rpc_write(conn, &src_host_size, sizeof(src_host_size)) < 0 ||
@@ -5535,7 +5557,7 @@ static CUresult scuda_cuMemcpy2D_common(const CUDA_MEMCPY2D *pCopy,
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
   }
   if (returned_dst_size != 0) {
-    scuda_prepare_host_range_write(dst_host, returned_dst_size);
+    lupine_prepare_host_range_write(dst_host, returned_dst_size);
     if (rpc_read(conn, dst_host, returned_dst_size) < 0) {
       return CUDA_ERROR_DEVICE_UNAVAILABLE;
     }
@@ -5545,13 +5567,13 @@ static CUresult scuda_cuMemcpy2D_common(const CUDA_MEMCPY2D *pCopy,
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
   }
   if (return_value == CUDA_SUCCESS && returned_dst_size != 0) {
-    scuda_mark_host_range_clean(dst_host, returned_dst_size);
+    lupine_mark_host_range_clean(dst_host, returned_dst_size);
   }
   return return_value;
 }
 
 extern "C" CUresult cuMemcpy2D_v2(const CUDA_MEMCPY2D *pCopy) {
-  return scuda_cuMemcpy2D_common(pCopy, nullptr, false, false);
+  return lupine_cuMemcpy2D_common(pCopy, nullptr, false, false);
 }
 
 #ifdef cuMemcpy2D
@@ -5562,7 +5584,7 @@ extern "C" CUresult cuMemcpy2D(const CUDA_MEMCPY2D *pCopy) {
 }
 
 extern "C" CUresult cuMemcpy2DUnaligned_v2(const CUDA_MEMCPY2D *pCopy) {
-  return scuda_cuMemcpy2D_common(pCopy, nullptr, false, true);
+  return lupine_cuMemcpy2D_common(pCopy, nullptr, false, true);
 }
 
 #ifdef cuMemcpy2DUnaligned
@@ -5574,7 +5596,7 @@ extern "C" CUresult cuMemcpy2DUnaligned(const CUDA_MEMCPY2D *pCopy) {
 
 extern "C" CUresult cuMemcpy2DAsync_v2(const CUDA_MEMCPY2D *pCopy,
                                        CUstream hStream) {
-  return scuda_cuMemcpy2D_common(pCopy, hStream, true, false);
+  return lupine_cuMemcpy2D_common(pCopy, hStream, true, false);
 }
 
 #ifdef cuMemcpy2DAsync
@@ -5593,17 +5615,17 @@ extern "C" CUresult cuMemcpy2DAsync_ptsz(const CUDA_MEMCPY2D *pCopy,
   return cuMemcpy2DAsync_v2(pCopy, hStream);
 }
 
-static CUresult scuda_graph_mem_attribute_rpc(CUdevice device,
-                                              CUgraphMem_attribute attr,
-                                              cuuint64_t *value, bool set) {
+static CUresult lupine_graph_mem_attribute_rpc(CUdevice device,
+                                               CUgraphMem_attribute attr,
+                                               cuuint64_t *value, bool set) {
   if (value == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
 
-  conn_t *conn = scuda_rpc_conn_for_device(&device);
+  conn_t *conn = lupine_rpc_conn_for_device(&device);
   CUresult result = CUDA_ERROR_UNKNOWN;
-  int op = set ? SCUDA_RPC_cuDeviceSetGraphMemAttribute
-               : SCUDA_RPC_cuDeviceGetGraphMemAttribute;
+  int op = set ? LUPINE_RPC_cuDeviceSetGraphMemAttribute
+               : LUPINE_RPC_cuDeviceGetGraphMemAttribute;
   if (conn == nullptr || rpc_write_start_request(conn, op) < 0 ||
       rpc_write(conn, &device, sizeof(device)) < 0 ||
       rpc_write(conn, &attr, sizeof(attr)) < 0 ||
@@ -5624,7 +5646,7 @@ extern "C" CUresult cuDeviceGetGraphMemAttribute(CUdevice device,
   }
   cuuint64_t remote_value = 0;
   CUresult result =
-      scuda_graph_mem_attribute_rpc(device, attr, &remote_value, false);
+      lupine_graph_mem_attribute_rpc(device, attr, &remote_value, false);
   if (result == CUDA_SUCCESS) {
     memcpy(value, &remote_value, sizeof(remote_value));
   }
@@ -5639,7 +5661,7 @@ extern "C" CUresult cuDeviceSetGraphMemAttribute(CUdevice device,
   }
   cuuint64_t remote_value = 0;
   memcpy(&remote_value, value, sizeof(remote_value));
-  return scuda_graph_mem_attribute_rpc(device, attr, &remote_value, true);
+  return lupine_graph_mem_attribute_rpc(device, attr, &remote_value, true);
 }
 
 extern "C" CUresult cuMemcpy3D_v2(const CUDA_MEMCPY3D *pCopy) {
@@ -5649,10 +5671,10 @@ extern "C" CUresult cuMemcpy3D_v2(const CUDA_MEMCPY3D *pCopy) {
 
   CUDA_MEMCPY3D copy = *pCopy;
   size_t src_host_size = copy.srcMemoryType == CU_MEMORYTYPE_HOST
-                             ? scuda_memcpy3d_host_span(copy, true)
+                             ? lupine_memcpy3d_host_span(copy, true)
                              : 0;
   size_t dst_host_size = copy.dstMemoryType == CU_MEMORYTYPE_HOST
-                             ? scuda_memcpy3d_host_span(copy, false)
+                             ? lupine_memcpy3d_host_span(copy, false)
                              : 0;
   const void *src_host = copy.srcHost;
   void *dst_host = copy.dstHost;
@@ -5663,12 +5685,12 @@ extern "C" CUresult cuMemcpy3D_v2(const CUDA_MEMCPY3D *pCopy) {
 
   conn_t *conn = nullptr;
   if (copy.srcMemoryType == CU_MEMORYTYPE_DEVICE && copy.srcDevice != 0) {
-    conn = scuda_rpc_conn_for_deviceptr(copy.srcDevice);
+    conn = lupine_rpc_conn_for_deviceptr(copy.srcDevice);
   } else if (copy.dstMemoryType == CU_MEMORYTYPE_DEVICE &&
              copy.dstDevice != 0) {
-    conn = scuda_rpc_conn_for_deviceptr(copy.dstDevice);
+    conn = lupine_rpc_conn_for_deviceptr(copy.dstDevice);
   } else {
-    conn = scuda_rpc_conn_for_current_context();
+    conn = lupine_rpc_conn_for_current_context();
   }
   CUresult return_value;
   size_t returned_dst_size = 0;
@@ -5685,7 +5707,7 @@ extern "C" CUresult cuMemcpy3D_v2(const CUDA_MEMCPY3D *pCopy) {
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
   }
   if (returned_dst_size != 0) {
-    scuda_prepare_host_range_write(dst_host, returned_dst_size);
+    lupine_prepare_host_range_write(dst_host, returned_dst_size);
     if (rpc_read(conn, dst_host, returned_dst_size) < 0) {
       return CUDA_ERROR_DEVICE_UNAVAILABLE;
     }
@@ -5695,7 +5717,7 @@ extern "C" CUresult cuMemcpy3D_v2(const CUDA_MEMCPY3D *pCopy) {
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
   }
   if (return_value == CUDA_SUCCESS && returned_dst_size != 0) {
-    scuda_mark_host_range_clean(dst_host, returned_dst_size);
+    lupine_mark_host_range_clean(dst_host, returned_dst_size);
   }
   return return_value;
 }
@@ -5709,8 +5731,8 @@ extern "C" CUresult cuMemcpy3D(const CUDA_MEMCPY3D *pCopy) {
 
 extern "C" CUresult cuMemcpyAsync(CUdeviceptr dst, CUdeviceptr src,
                                   size_t ByteCount, CUstream hStream) {
-  bool dst_is_host = scuda_is_local_address(reinterpret_cast<void *>(dst));
-  bool src_is_host = scuda_is_local_address(reinterpret_cast<void *>(src));
+  bool dst_is_host = lupine_is_local_address(reinterpret_cast<void *>(dst));
+  bool src_is_host = lupine_is_local_address(reinterpret_cast<void *>(src));
 
   if (dst_is_host && !src_is_host) {
     return cuMemcpyDtoHAsync_v2(reinterpret_cast<void *>(dst), src, ByteCount,
@@ -5726,8 +5748,8 @@ extern "C" CUresult cuMemcpyAsync(CUdeviceptr dst, CUdeviceptr src,
     return CUDA_SUCCESS;
   }
 
-  conn_t *conn = scuda_rpc_conn_for_deviceptr(dst);
-  conn_t *src_conn = scuda_rpc_conn_for_deviceptr(src);
+  conn_t *conn = lupine_rpc_conn_for_deviceptr(dst);
+  conn_t *src_conn = lupine_rpc_conn_for_deviceptr(src);
   if (conn != src_conn) {
     return CUDA_ERROR_NOT_SUPPORTED;
   }
@@ -5754,17 +5776,17 @@ extern "C" CUresult cuMemcpyAsync_ptsz(CUdeviceptr dst, CUdeviceptr src,
 }
 
 static CUresult
-scuda_validate_graph_dependencies(const CUgraphNode *dependencies,
-                                  size_t numDependencies) {
+lupine_validate_graph_dependencies(const CUgraphNode *dependencies,
+                                   size_t numDependencies) {
   if (numDependencies != 0 && dependencies == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
   return CUDA_SUCCESS;
 }
 
-static CUresult scuda_queue_graph_dependencies(conn_t *conn,
-                                               const CUgraphNode *dependencies,
-                                               const size_t *numDependencies) {
+static CUresult lupine_queue_graph_dependencies(conn_t *conn,
+                                                const CUgraphNode *dependencies,
+                                                const size_t *numDependencies) {
   if (numDependencies == nullptr ||
       rpc_write(conn, numDependencies, sizeof(*numDependencies)) < 0) {
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
@@ -5779,8 +5801,8 @@ static CUresult scuda_queue_graph_dependencies(conn_t *conn,
   return CUDA_SUCCESS;
 }
 
-static size_t scuda_memcpy3d_host_span_bytes(const CUDA_MEMCPY3D &params,
-                                             bool source) {
+static size_t lupine_memcpy3d_host_span_bytes(const CUDA_MEMCPY3D &params,
+                                              bool source) {
   size_t width = params.WidthInBytes;
   size_t height = params.Height == 0 ? 1 : params.Height;
   size_t depth = params.Depth == 0 ? 1 : params.Depth;
@@ -5793,9 +5815,9 @@ static size_t scuda_memcpy3d_host_span_bytes(const CUDA_MEMCPY3D &params,
 }
 
 static CUresult
-scuda_pack_kernel_params(const CUDA_KERNEL_NODE_PARAMS *nodeParams,
-                         scuda_kernel_param_layout *layout,
-                         std::vector<unsigned char> *packed) {
+lupine_pack_kernel_params(const CUDA_KERNEL_NODE_PARAMS *nodeParams,
+                          lupine_kernel_param_layout *layout,
+                          std::vector<unsigned char> *packed) {
   if (nodeParams == nullptr || layout == nullptr || packed == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
@@ -5808,7 +5830,7 @@ scuda_pack_kernel_params(const CUDA_KERNEL_NODE_PARAMS *nodeParams,
     func = reinterpret_cast<CUfunction>(nodeParams->kern);
   }
 #endif
-  CUresult status = scuda_get_kernel_param_layout_cached(func, layout);
+  CUresult status = lupine_get_kernel_param_layout_cached(func, layout);
   if (status != CUDA_SUCCESS) {
     return status;
   }
@@ -5841,20 +5863,20 @@ cuGraphAddKernelNode_v2(CUgraphNode *phGraphNode, CUgraph hGraph,
     return CUDA_ERROR_INVALID_VALUE;
   }
   CUresult status =
-      scuda_validate_graph_dependencies(dependencies, numDependencies);
+      lupine_validate_graph_dependencies(dependencies, numDependencies);
   if (status != CUDA_SUCCESS) {
     return status;
   }
 
-  scuda_kernel_param_layout layout;
+  lupine_kernel_param_layout layout;
   std::vector<unsigned char> packed;
-  status = scuda_pack_kernel_params(nodeParams, &layout, &packed);
+  status = lupine_pack_kernel_params(nodeParams, &layout, &packed);
   if (status != CUDA_SUCCESS) {
     return status;
   }
 
   CUDA_KERNEL_NODE_PARAMS serial_params = *nodeParams;
-  serial_params.func = scuda_translate_private_function(serial_params.func);
+  serial_params.func = lupine_translate_private_function(serial_params.func);
   serial_params.kernelParams = nullptr;
   serial_params.extra = nullptr;
 
@@ -5863,7 +5885,7 @@ cuGraphAddKernelNode_v2(CUgraphNode *phGraphNode, CUgraph hGraph,
   size_t packed_size = packed.size();
   if (rpc_write_start_request(conn, RPC_cuGraphAddKernelNode_v2) < 0 ||
       rpc_write(conn, &hGraph, sizeof(hGraph)) < 0 ||
-      scuda_queue_graph_dependencies(conn, dependencies, &numDependencies) !=
+      lupine_queue_graph_dependencies(conn, dependencies, &numDependencies) !=
           CUDA_SUCCESS ||
       rpc_write(conn, &serial_params, sizeof(serial_params)) < 0 ||
       rpc_write(conn, &layout.count, sizeof(layout.count)) < 0 ||
@@ -5886,14 +5908,14 @@ cuGraphAddMemcpyNode(CUgraphNode *phGraphNode, CUgraph hGraph,
     return CUDA_ERROR_INVALID_VALUE;
   }
   CUresult status =
-      scuda_validate_graph_dependencies(dependencies, numDependencies);
+      lupine_validate_graph_dependencies(dependencies, numDependencies);
   if (status != CUDA_SUCCESS) {
     return status;
   }
 
   size_t host_src_bytes = 0;
   if (copyParams->srcMemoryType == CU_MEMORYTYPE_HOST) {
-    host_src_bytes = scuda_memcpy3d_host_span_bytes(*copyParams, true);
+    host_src_bytes = lupine_memcpy3d_host_span_bytes(*copyParams, true);
     if (host_src_bytes != 0 && copyParams->srcHost == nullptr) {
       return CUDA_ERROR_INVALID_VALUE;
     }
@@ -5903,7 +5925,7 @@ cuGraphAddMemcpyNode(CUgraphNode *phGraphNode, CUgraph hGraph,
   CUresult return_value;
   if (rpc_write_start_request(conn, RPC_cuGraphAddMemcpyNode) < 0 ||
       rpc_write(conn, &hGraph, sizeof(hGraph)) < 0 ||
-      scuda_queue_graph_dependencies(conn, dependencies, &numDependencies) !=
+      lupine_queue_graph_dependencies(conn, dependencies, &numDependencies) !=
           CUDA_SUCCESS ||
       rpc_write(conn, copyParams, sizeof(*copyParams)) < 0 ||
       rpc_write(conn, &ctx, sizeof(ctx)) < 0 ||
@@ -5919,22 +5941,22 @@ cuGraphAddMemcpyNode(CUgraphNode *phGraphNode, CUgraph hGraph,
   return return_value;
 }
 
-extern "C" CUresult scuda_cuGraphExecKernelNodeSetParams_v2_safe(
+extern "C" CUresult lupine_cuGraphExecKernelNodeSetParams_v2_safe(
     CUgraphExec hGraphExec, CUgraphNode hNode,
     const CUDA_KERNEL_NODE_PARAMS *nodeParams) {
   if (nodeParams == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
 
-  scuda_kernel_param_layout layout;
+  lupine_kernel_param_layout layout;
   std::vector<unsigned char> packed;
-  CUresult status = scuda_pack_kernel_params(nodeParams, &layout, &packed);
+  CUresult status = lupine_pack_kernel_params(nodeParams, &layout, &packed);
   if (status != CUDA_SUCCESS) {
     return status;
   }
 
   CUDA_KERNEL_NODE_PARAMS serial_params = *nodeParams;
-  serial_params.func = scuda_translate_private_function(serial_params.func);
+  serial_params.func = lupine_translate_private_function(serial_params.func);
   serial_params.kernelParams = nullptr;
   serial_params.extra = nullptr;
 
@@ -5966,7 +5988,7 @@ cuGraphAddMemsetNode(CUgraphNode *phGraphNode, CUgraph hGraph,
     return CUDA_ERROR_INVALID_VALUE;
   }
   CUresult status =
-      scuda_validate_graph_dependencies(dependencies, numDependencies);
+      lupine_validate_graph_dependencies(dependencies, numDependencies);
   if (status != CUDA_SUCCESS) {
     return status;
   }
@@ -5975,7 +5997,7 @@ cuGraphAddMemsetNode(CUgraphNode *phGraphNode, CUgraph hGraph,
   CUresult return_value;
   if (rpc_write_start_request(conn, RPC_cuGraphAddMemsetNode) < 0 ||
       rpc_write(conn, &hGraph, sizeof(hGraph)) < 0 ||
-      scuda_queue_graph_dependencies(conn, dependencies, &numDependencies) !=
+      lupine_queue_graph_dependencies(conn, dependencies, &numDependencies) !=
           CUDA_SUCCESS ||
       rpc_write(conn, memsetParams, sizeof(*memsetParams)) < 0 ||
       rpc_write(conn, &ctx, sizeof(ctx)) < 0 ||
@@ -5996,7 +6018,7 @@ cuGraphAddHostNode(CUgraphNode *phGraphNode, CUgraph hGraph,
     return CUDA_ERROR_INVALID_VALUE;
   }
   CUresult status =
-      scuda_validate_graph_dependencies(dependencies, numDependencies);
+      lupine_validate_graph_dependencies(dependencies, numDependencies);
   if (status != CUDA_SUCCESS) {
     return status;
   }
@@ -6006,7 +6028,7 @@ cuGraphAddHostNode(CUgraphNode *phGraphNode, CUgraph hGraph,
   CUresult return_value;
   if (rpc_write_start_request(conn, RPC_cuGraphAddHostNode) < 0 ||
       rpc_write(conn, &hGraph, sizeof(hGraph)) < 0 ||
-      scuda_queue_graph_dependencies(conn, dependencies, &numDependencies) !=
+      lupine_queue_graph_dependencies(conn, dependencies, &numDependencies) !=
           CUDA_SUCCESS ||
       rpc_write(conn, nodeParams, sizeof(*nodeParams)) < 0 ||
       rpc_wait_for_response(conn) < 0 ||
@@ -6026,7 +6048,7 @@ extern "C" CUresult cuGraphConditionalHandleCreate(
   }
   conn_t *conn = rpc_client_get_connection(0);
   CUresult return_value;
-  if (rpc_write_start_request(conn, SCUDA_RPC_cuGraphConditionalHandleCreate) <
+  if (rpc_write_start_request(conn, LUPINE_RPC_cuGraphConditionalHandleCreate) <
           0 ||
       rpc_write(conn, &hGraph, sizeof(hGraph)) < 0 ||
       rpc_write(conn, &ctx, sizeof(ctx)) < 0 ||
@@ -6053,7 +6075,7 @@ extern "C" CUresult cuGraphAddNode_v2(CUgraphNode *phGraphNode, CUgraph hGraph,
     return CUDA_ERROR_NOT_SUPPORTED;
   }
   CUresult status =
-      scuda_validate_graph_dependencies(dependencies, numDependencies);
+      lupine_validate_graph_dependencies(dependencies, numDependencies);
   if (status != CUDA_SUCCESS) {
     return status;
   }
@@ -6063,8 +6085,8 @@ extern "C" CUresult cuGraphAddNode_v2(CUgraphNode *phGraphNode, CUgraph hGraph,
   std::vector<unsigned char> packed;
   CUgraphNodeParams serial_params = *nodeParams;
   if (nodeParams->type == CU_GRAPH_NODE_TYPE_KERNEL) {
-    scuda_kernel_param_layout layout;
-    status = scuda_pack_kernel_params(
+    lupine_kernel_param_layout layout;
+    status = lupine_pack_kernel_params(
         reinterpret_cast<const CUDA_KERNEL_NODE_PARAMS *>(&nodeParams->kernel),
         &layout, &packed);
     if (status != CUDA_SUCCESS) {
@@ -6074,8 +6096,8 @@ extern "C" CUresult cuGraphAddNode_v2(CUgraphNode *phGraphNode, CUgraph hGraph,
     packed_size = packed.size();
     CUfunction translated =
         serial_params.kernel.func != nullptr
-            ? scuda_translate_private_function(serial_params.kernel.func)
-            : scuda_translate_private_function(
+            ? lupine_translate_private_function(serial_params.kernel.func)
+            : lupine_translate_private_function(
                   reinterpret_cast<CUfunction>(serial_params.kernel.kern));
     if (serial_params.kernel.func != nullptr) {
       serial_params.kernel.func = translated;
@@ -6096,9 +6118,9 @@ extern "C" CUresult cuGraphAddNode_v2(CUgraphNode *phGraphNode, CUgraph hGraph,
                                  ? nodeParams->conditional.size
                                  : 0;
   std::vector<CUgraph> child_graphs(child_count);
-  if (rpc_write_start_request(conn, SCUDA_RPC_cuGraphAddNode_v2) < 0 ||
+  if (rpc_write_start_request(conn, LUPINE_RPC_cuGraphAddNode_v2) < 0 ||
       rpc_write(conn, &hGraph, sizeof(hGraph)) < 0 ||
-      scuda_queue_graph_dependencies(conn, dependencies, &numDependencies) !=
+      lupine_queue_graph_dependencies(conn, dependencies, &numDependencies) !=
           CUDA_SUCCESS ||
       rpc_write(conn, &serial_params, sizeof(serial_params)) < 0 ||
       rpc_write(conn, &param_count, sizeof(param_count)) < 0 ||
@@ -6187,7 +6209,7 @@ extern "C" CUresult cuLaunchHostFunc(CUstream hStream, CUhostFn fn,
 
   conn_t *conn = rpc_client_get_connection(0);
   CUresult return_value;
-  if (rpc_write_start_request(conn, SCUDA_RPC_cuLaunchHostFunc) < 0 ||
+  if (rpc_write_start_request(conn, LUPINE_RPC_cuLaunchHostFunc) < 0 ||
       rpc_write(conn, &hStream, sizeof(hStream)) < 0 ||
       rpc_write(conn, &fn, sizeof(fn)) < 0 ||
       rpc_write(conn, &userData, sizeof(userData)) < 0 ||
@@ -6207,7 +6229,7 @@ extern "C" CUresult cuStreamAddCallback(CUstream hStream,
   }
   conn_t *conn = rpc_client_get_connection(0);
   CUresult return_value;
-  if (rpc_write_start_request(conn, SCUDA_RPC_cuStreamAddCallback) < 0 ||
+  if (rpc_write_start_request(conn, LUPINE_RPC_cuStreamAddCallback) < 0 ||
       rpc_write(conn, &hStream, sizeof(hStream)) < 0 ||
       rpc_write(conn, &callback, sizeof(callback)) < 0 ||
       rpc_write(conn, &userData, sizeof(userData)) < 0 ||
@@ -6220,7 +6242,7 @@ extern "C" CUresult cuStreamAddCallback(CUstream hStream,
   return return_value;
 }
 
-static bool scuda_is_writable_user_pointer(const void *ptr, size_t size) {
+static bool lupine_is_writable_user_pointer(const void *ptr, size_t size) {
   if (ptr == nullptr || size == 0) {
     return false;
   }
@@ -6247,7 +6269,7 @@ static bool scuda_is_writable_user_pointer(const void *ptr, size_t size) {
   return false;
 }
 
-static CUresult scuda_cuStreamGetCaptureInfo(
+static CUresult lupine_cuStreamGetCaptureInfo(
     CUstream stream, CUstreamCaptureStatus *captureStatus_out,
     cuuint64_t *id_out, CUgraph *graph_out,
     const CUgraphNode **dependencies_out, const CUgraphEdgeData **edgeData_out,
@@ -6262,7 +6284,7 @@ static CUresult scuda_cuStreamGetCaptureInfo(
   bool has_edge_data = false;
   conn_t *conn = rpc_client_get_connection(0);
   CUresult return_value;
-  if (rpc_write_start_request(conn, SCUDA_RPC_cuStreamGetCaptureInfo_v3) < 0 ||
+  if (rpc_write_start_request(conn, LUPINE_RPC_cuStreamGetCaptureInfo_v3) < 0 ||
       rpc_write(conn, &stream, sizeof(stream)) < 0 ||
       rpc_wait_for_response(conn) < 0 ||
       rpc_read(conn, &status, sizeof(status)) < 0 ||
@@ -6294,20 +6316,20 @@ static CUresult scuda_cuStreamGetCaptureInfo(
 
   bool num_dependencies_writable =
       numDependencies_out != nullptr &&
-      scuda_is_writable_user_pointer(numDependencies_out,
-                                     sizeof(*numDependencies_out));
+      lupine_is_writable_user_pointer(numDependencies_out,
+                                      sizeof(*numDependencies_out));
   if (edgeData_out != nullptr &&
       (numDependencies_out == nullptr || !num_dependencies_writable)) {
     numDependencies_out = reinterpret_cast<size_t *>(edgeData_out);
     edgeData_out = nullptr;
-    num_dependencies_writable = scuda_is_writable_user_pointer(
+    num_dependencies_writable = lupine_is_writable_user_pointer(
         numDependencies_out, sizeof(*numDependencies_out));
   }
   if (numDependencies_out != nullptr && !num_dependencies_writable) {
     numDependencies_out = nullptr;
   }
   if (edgeData_out != nullptr &&
-      !scuda_is_writable_user_pointer(edgeData_out, sizeof(*edgeData_out))) {
+      !lupine_is_writable_user_pointer(edgeData_out, sizeof(*edgeData_out))) {
     edgeData_out = nullptr;
   }
 
@@ -6339,18 +6361,18 @@ extern "C" CUresult cuStreamGetCaptureInfo_v3(
     cuuint64_t *id_out, CUgraph *graph_out,
     const CUgraphNode **dependencies_out, const CUgraphEdgeData **edgeData_out,
     size_t *numDependencies_out) {
-  return scuda_cuStreamGetCaptureInfo(stream, captureStatus_out, id_out,
-                                      graph_out, dependencies_out, edgeData_out,
-                                      numDependencies_out);
+  return lupine_cuStreamGetCaptureInfo(stream, captureStatus_out, id_out,
+                                       graph_out, dependencies_out,
+                                       edgeData_out, numDependencies_out);
 }
 
 extern "C" CUresult cuStreamGetCaptureInfo_v2(
     CUstream stream, CUstreamCaptureStatus *captureStatus_out,
     cuuint64_t *id_out, CUgraph *graph_out,
     const CUgraphNode **dependencies_out, size_t *numDependencies_out) {
-  return scuda_cuStreamGetCaptureInfo(stream, captureStatus_out, id_out,
-                                      graph_out, dependencies_out, nullptr,
-                                      numDependencies_out);
+  return lupine_cuStreamGetCaptureInfo(stream, captureStatus_out, id_out,
+                                       graph_out, dependencies_out, nullptr,
+                                       numDependencies_out);
 }
 
 #ifdef cuStreamGetCaptureInfo
@@ -6362,17 +6384,17 @@ extern "C" CUresult cuStreamGetCaptureInfo(
     cuuint64_t *id_out, CUgraph *graph_out,
     const CUgraphNode **dependencies_out, const CUgraphEdgeData **edgeData_out,
     size_t *numDependencies_out) {
-  return scuda_cuStreamGetCaptureInfo(stream, captureStatus_out, id_out,
-                                      graph_out, dependencies_out, edgeData_out,
-                                      numDependencies_out);
+  return lupine_cuStreamGetCaptureInfo(stream, captureStatus_out, id_out,
+                                       graph_out, dependencies_out,
+                                       edgeData_out, numDependencies_out);
 }
 #else
 extern "C" CUresult
 cuStreamGetCaptureInfo(CUstream stream,
                        CUstreamCaptureStatus *captureStatus_out,
                        cuuint64_t *id_out) {
-  return scuda_cuStreamGetCaptureInfo(stream, captureStatus_out, id_out,
-                                      nullptr, nullptr, nullptr, nullptr);
+  return lupine_cuStreamGetCaptureInfo(stream, captureStatus_out, id_out,
+                                       nullptr, nullptr, nullptr, nullptr);
 }
 #endif
 
@@ -6385,17 +6407,17 @@ cuStreamBeginCaptureToGraph(CUstream hStream, CUgraph hGraph,
     return CUDA_ERROR_NOT_SUPPORTED;
   }
   CUresult status =
-      scuda_validate_graph_dependencies(dependencies, numDependencies);
+      lupine_validate_graph_dependencies(dependencies, numDependencies);
   if (status != CUDA_SUCCESS) {
     return status;
   }
   conn_t *conn = rpc_client_get_connection(0);
   CUresult return_value;
-  if (rpc_write_start_request(conn, SCUDA_RPC_cuStreamBeginCaptureToGraph) <
+  if (rpc_write_start_request(conn, LUPINE_RPC_cuStreamBeginCaptureToGraph) <
           0 ||
       rpc_write(conn, &hStream, sizeof(hStream)) < 0 ||
       rpc_write(conn, &hGraph, sizeof(hGraph)) < 0 ||
-      scuda_queue_graph_dependencies(conn, dependencies, &numDependencies) !=
+      lupine_queue_graph_dependencies(conn, dependencies, &numDependencies) !=
           CUDA_SUCCESS ||
       rpc_write(conn, &mode, sizeof(mode)) < 0 ||
       rpc_wait_for_response(conn) < 0 ||
@@ -6414,16 +6436,16 @@ extern "C" CUresult cuStreamUpdateCaptureDependencies_v2(
     return CUDA_ERROR_NOT_SUPPORTED;
   }
   CUresult status =
-      scuda_validate_graph_dependencies(dependencies, numDependencies);
+      lupine_validate_graph_dependencies(dependencies, numDependencies);
   if (status != CUDA_SUCCESS) {
     return status;
   }
   conn_t *conn = rpc_client_get_connection(0);
   CUresult return_value;
   if (rpc_write_start_request(
-          conn, SCUDA_RPC_cuStreamUpdateCaptureDependencies_v2) < 0 ||
+          conn, LUPINE_RPC_cuStreamUpdateCaptureDependencies_v2) < 0 ||
       rpc_write(conn, &hStream, sizeof(hStream)) < 0 ||
-      scuda_queue_graph_dependencies(conn, dependencies, &numDependencies) !=
+      lupine_queue_graph_dependencies(conn, dependencies, &numDependencies) !=
           CUDA_SUCCESS ||
       rpc_write(conn, &flags, sizeof(flags)) < 0 ||
       rpc_wait_for_response(conn) < 0 ||
@@ -6472,15 +6494,15 @@ extern "C" CUresult cuStreamUpdateCaptureDependencies_ptsz(
 }
 #endif
 
-static bool scuda_uuid_equals(const CUuuid *uuid, const unsigned char *bytes) {
+static bool lupine_uuid_equals(const CUuuid *uuid, const unsigned char *bytes) {
   return uuid != nullptr && memcmp(uuid->bytes, bytes, 16) == 0;
 }
 
-extern "C" CUresult scuda_cudart_get_module_from_cubin(CUmodule *module,
-                                                       const void *fatbin) {
+extern "C" CUresult lupine_cudart_get_module_from_cubin(CUmodule *module,
+                                                        const void *fatbin) {
   CUresult result = cuModuleLoadData(module, fatbin);
-  if (scuda_trace_enabled()) {
-    std::cerr << "SCUDA cudart get_module_from_cubin result="
+  if (lupine_trace_enabled()) {
+    std::cerr << "LUPINE cudart get_module_from_cubin result="
               << static_cast<int>(result)
               << " module=" << (module == nullptr ? nullptr : *module)
               << std::endl;
@@ -6488,28 +6510,27 @@ extern "C" CUresult scuda_cudart_get_module_from_cubin(CUmodule *module,
   return result;
 }
 
-extern "C" CUresult scuda_cudart_get_primary_context(CUcontext *ctx,
-                                                     CUdevice dev) {
+extern "C" CUresult lupine_cudart_get_primary_context(CUcontext *ctx,
+                                                      CUdevice dev) {
   CUresult result = cuDevicePrimaryCtxRetain(ctx, dev);
-  if (scuda_trace_enabled()) {
-    std::cerr << "SCUDA cudart get_primary_context dev=" << dev
+  if (lupine_trace_enabled()) {
+    std::cerr << "LUPINE cudart get_primary_context dev=" << dev
               << " result=" << static_cast<int>(result)
               << " ctx=" << (ctx == nullptr ? nullptr : *ctx) << std::endl;
   }
   return result;
 }
 
-extern "C" CUresult scuda_cudart_get_module_from_cubin_ext1(CUmodule *module,
-                                                            const void *fatbin,
-                                                            void *arg3,
-                                                            void *arg4,
-                                                            unsigned int arg5) {
+extern "C" CUresult
+lupine_cudart_get_module_from_cubin_ext1(CUmodule *module, const void *fatbin,
+                                         void *arg3, void *arg4,
+                                         unsigned int arg5) {
   if (arg3 != nullptr || arg4 != nullptr || arg5 != 0) {
     return CUDA_ERROR_NOT_SUPPORTED;
   }
   CUresult result = cuModuleLoadData(module, fatbin);
-  if (scuda_trace_enabled()) {
-    std::cerr << "SCUDA cudart get_module_from_cubin_ext1 result="
+  if (lupine_trace_enabled()) {
+    std::cerr << "LUPINE cudart get_module_from_cubin_ext1 result="
               << static_cast<int>(result)
               << " module=" << (module == nullptr ? nullptr : *module)
               << std::endl;
@@ -6517,27 +6538,26 @@ extern "C" CUresult scuda_cudart_get_module_from_cubin_ext1(CUmodule *module,
   return result;
 }
 
-extern "C" void scuda_cudart_noop_size_arg(size_t) {}
+extern "C" void lupine_cudart_noop_size_arg(size_t) {}
 
-extern "C" uintptr_t scuda_dark_return_zero() { return 0; }
+extern "C" uintptr_t lupine_dark_return_zero() { return 0; }
 
-extern "C" uintptr_t scuda_dark_return_zero_1(const void *) { return 0; }
+extern "C" uintptr_t lupine_dark_return_zero_1(const void *) { return 0; }
 
-extern "C" uintptr_t scuda_dark_return_zero_2(const void *, const void *) {
+extern "C" uintptr_t lupine_dark_return_zero_2(const void *, const void *) {
   return 0;
 }
 
-extern "C" CUresult scuda_cudart_get_module_from_cubin_ext2(const void *fatbin,
-                                                            CUmodule *module,
-                                                            void *arg3,
-                                                            void *arg4,
-                                                            unsigned int arg5) {
+extern "C" CUresult
+lupine_cudart_get_module_from_cubin_ext2(const void *fatbin, CUmodule *module,
+                                         void *arg3, void *arg4,
+                                         unsigned int arg5) {
   if (arg3 != nullptr || arg4 != nullptr || arg5 != 0) {
     return CUDA_ERROR_NOT_SUPPORTED;
   }
   CUresult result = cuModuleLoadData(module, fatbin);
-  if (scuda_trace_enabled()) {
-    std::cerr << "SCUDA cudart get_module_from_cubin_ext2 result="
+  if (lupine_trace_enabled()) {
+    std::cerr << "LUPINE cudart get_module_from_cubin_ext2 result="
               << static_cast<int>(result)
               << " module=" << (module == nullptr ? nullptr : *module)
               << std::endl;
@@ -6545,9 +6565,9 @@ extern "C" CUresult scuda_cudart_get_module_from_cubin_ext2(const void *fatbin,
   return result;
 }
 
-extern "C" CUresult scuda_cudart_load_compilers() { return CUDA_SUCCESS; }
+extern "C" CUresult lupine_cudart_load_compilers() { return CUDA_SUCCESS; }
 
-extern "C" void scuda_dark_get_unknown_buffer1(void **ptr, size_t *size) {
+extern "C" void lupine_dark_get_unknown_buffer1(void **ptr, size_t *size) {
   static unsigned char buffer[1024] = {};
   if (ptr != nullptr) {
     *ptr = buffer;
@@ -6557,7 +6577,7 @@ extern "C" void scuda_dark_get_unknown_buffer1(void **ptr, size_t *size) {
   }
 }
 
-extern "C" void scuda_dark_get_unknown_buffer2(void **ptr, size_t *size) {
+extern "C" void lupine_dark_get_unknown_buffer2(void **ptr, size_t *size) {
   static unsigned char buffer[14] = {};
   if (ptr != nullptr) {
     *ptr = buffer;
@@ -6567,28 +6587,28 @@ extern "C" void scuda_dark_get_unknown_buffer2(void **ptr, size_t *size) {
   }
 }
 
-using scuda_context_storage_dtor_t = void (*)(CUcontext context, void *key,
-                                              void *value);
+using lupine_context_storage_dtor_t = void (*)(CUcontext context, void *key,
+                                               void *value);
 
-struct scuda_context_storage_value {
+struct lupine_context_storage_value {
   void *value;
-  scuda_context_storage_dtor_t dtor;
+  lupine_context_storage_dtor_t dtor;
 };
 
-static std::mutex &scuda_context_storage_mutex() {
+static std::mutex &lupine_context_storage_mutex() {
   static auto *mutex = new std::mutex();
   return *mutex;
 }
 
 static std::unordered_map<
-    CUcontext, std::unordered_map<void *, scuda_context_storage_value>> &
-scuda_context_storage() {
+    CUcontext, std::unordered_map<void *, lupine_context_storage_value>> &
+lupine_context_storage() {
   static auto *storage = new std::unordered_map<
-      CUcontext, std::unordered_map<void *, scuda_context_storage_value>>();
+      CUcontext, std::unordered_map<void *, lupine_context_storage_value>>();
   return *storage;
 }
 
-static CUresult scuda_normalize_context(CUcontext *ctx) {
+static CUresult lupine_normalize_context(CUcontext *ctx) {
   if (ctx == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
@@ -6599,32 +6619,32 @@ static CUresult scuda_normalize_context(CUcontext *ctx) {
 }
 
 extern "C" CUresult
-scuda_context_local_storage_put(CUcontext ctx, void *key, void *value,
-                                scuda_context_storage_dtor_t dtor) {
-  CUresult result = scuda_normalize_context(&ctx);
+lupine_context_local_storage_put(CUcontext ctx, void *key, void *value,
+                                 lupine_context_storage_dtor_t dtor) {
+  CUresult result = lupine_normalize_context(&ctx);
   if (result != CUDA_SUCCESS) {
     return result;
   }
 
-  std::lock_guard<std::mutex> lock(scuda_context_storage_mutex());
-  scuda_context_storage()[ctx][key] = {value, dtor};
-  if (scuda_trace_enabled()) {
-    std::cerr << "SCUDA context storage put ctx=" << ctx << " key=" << key
+  std::lock_guard<std::mutex> lock(lupine_context_storage_mutex());
+  lupine_context_storage()[ctx][key] = {value, dtor};
+  if (lupine_trace_enabled()) {
+    std::cerr << "LUPINE context storage put ctx=" << ctx << " key=" << key
               << " value=" << value << std::endl;
   }
   return CUDA_SUCCESS;
 }
 
-extern "C" CUresult scuda_context_local_storage_delete(CUcontext ctx,
-                                                       void *key) {
-  CUresult result = scuda_normalize_context(&ctx);
+extern "C" CUresult lupine_context_local_storage_delete(CUcontext ctx,
+                                                        void *key) {
+  CUresult result = lupine_normalize_context(&ctx);
   if (result != CUDA_SUCCESS) {
     return result;
   }
 
-  std::lock_guard<std::mutex> lock(scuda_context_storage_mutex());
-  auto ctx_it = scuda_context_storage().find(ctx);
-  if (ctx_it == scuda_context_storage().end()) {
+  std::lock_guard<std::mutex> lock(lupine_context_storage_mutex());
+  auto ctx_it = lupine_context_storage().find(ctx);
+  if (ctx_it == lupine_context_storage().end()) {
     return CUDA_ERROR_INVALID_HANDLE;
   }
   auto value_it = ctx_it->second.find(key);
@@ -6635,60 +6655,60 @@ extern "C" CUresult scuda_context_local_storage_delete(CUcontext ctx,
   // invoke here; some CUDA libraries call explicit delete during their own
   // teardown and free the value themselves.
   ctx_it->second.erase(value_it);
-  if (scuda_trace_enabled()) {
-    std::cerr << "SCUDA context storage delete ctx=" << ctx << " key=" << key
+  if (lupine_trace_enabled()) {
+    std::cerr << "LUPINE context storage delete ctx=" << ctx << " key=" << key
               << std::endl;
   }
   return CUDA_SUCCESS;
 }
 
-extern "C" CUresult scuda_context_local_storage_get(void **value, CUcontext ctx,
-                                                    void *key) {
+extern "C" CUresult lupine_context_local_storage_get(void **value,
+                                                     CUcontext ctx, void *key) {
   if (value == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
-  CUresult result = scuda_normalize_context(&ctx);
+  CUresult result = lupine_normalize_context(&ctx);
   if (result != CUDA_SUCCESS) {
     return result;
   }
 
-  std::lock_guard<std::mutex> lock(scuda_context_storage_mutex());
-  auto ctx_it = scuda_context_storage().find(ctx);
-  if (ctx_it == scuda_context_storage().end()) {
+  std::lock_guard<std::mutex> lock(lupine_context_storage_mutex());
+  auto ctx_it = lupine_context_storage().find(ctx);
+  if (ctx_it == lupine_context_storage().end()) {
     return CUDA_ERROR_INVALID_HANDLE;
   }
   auto value_it = ctx_it->second.find(key);
   if (value_it == ctx_it->second.end()) {
-    if (scuda_trace_enabled()) {
-      std::cerr << "SCUDA context storage get missing key ctx=" << ctx
+    if (lupine_trace_enabled()) {
+      std::cerr << "LUPINE context storage get missing key ctx=" << ctx
                 << " key=" << key << std::endl;
     }
     return CUDA_ERROR_INVALID_HANDLE;
   }
   *value = value_it->second.value;
-  if (scuda_trace_enabled()) {
-    std::cerr << "SCUDA context storage get ctx=" << ctx << " key=" << key
+  if (lupine_trace_enabled()) {
+    std::cerr << "LUPINE context storage get ctx=" << ctx << " key=" << key
               << " value=" << *value << std::endl;
   }
   return CUDA_SUCCESS;
 }
 
-extern "C" CUresult scuda_ctx_create_bypass(CUcontext *, unsigned int,
-                                            CUdevice) {
+extern "C" CUresult lupine_ctx_create_bypass(CUcontext *, unsigned int,
+                                             CUdevice) {
   return CUDA_ERROR_NOT_SUPPORTED;
 }
 
-extern "C" CUresult scuda_heap_alloc(const void **, size_t, size_t) {
+extern "C" CUresult lupine_heap_alloc(const void **, size_t, size_t) {
   return CUDA_ERROR_NOT_SUPPORTED;
 }
 
-extern "C" CUresult scuda_heap_free(const void *, size_t *) {
+extern "C" CUresult lupine_heap_free(const void *, size_t *) {
   return CUDA_ERROR_NOT_SUPPORTED;
 }
 
-extern "C" CUresult scuda_device_get_attribute_ext(CUdevice dev,
-                                                   unsigned int attribute, int,
-                                                   size_t (*result)[2]) {
+extern "C" CUresult lupine_device_get_attribute_ext(CUdevice dev,
+                                                    unsigned int attribute, int,
+                                                    size_t (*result)[2]) {
   if (result == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
@@ -6702,15 +6722,15 @@ extern "C" CUresult scuda_device_get_attribute_ext(CUdevice dev,
   return status;
 }
 
-extern "C" CUresult scuda_device_get_something(unsigned char *result,
-                                               CUdevice) {
+extern "C" CUresult lupine_device_get_something(unsigned char *result,
+                                                CUdevice) {
   if (result != nullptr) {
     *result = 0;
   }
   return CUDA_SUCCESS;
 }
 
-struct scuda_integrity_pass3_input {
+struct lupine_integrity_pass3_input {
   uint32_t driver_version;
   uint32_t version;
   uint32_t current_process;
@@ -6721,15 +6741,15 @@ struct scuda_integrity_pass3_input {
   uint64_t unix_seconds;
 };
 
-struct scuda_integrity_device_hash_info {
+struct lupine_integrity_device_hash_info {
   CUuuid guid;
   int32_t pci_domain;
   int32_t pci_bus;
   int32_t pci_device;
 };
 
-static void scuda_integrity_single_pass(unsigned char state[66],
-                                        unsigned char byte) {
+static void lupine_integrity_single_pass(unsigned char state[66],
+                                         unsigned char byte) {
   static constexpr unsigned char MIXING_TABLE[256] = {
       0x29, 0x2E, 0x43, 0xC9, 0xA2, 0xD8, 0x7C, 0x01, 0x3D, 0x36, 0x54, 0xA1,
       0xEC, 0xF0, 0x06, 0x13, 0x62, 0xA7, 0x05, 0xF3, 0xC0, 0xC7, 0x73, 0x8C,
@@ -6785,33 +6805,35 @@ static void scuda_integrity_single_pass(unsigned char state[66],
   }
 }
 
-static void scuda_integrity_hash_pass(unsigned char state[66], const void *data,
-                                      size_t size, unsigned char xor_mask) {
+static void lupine_integrity_hash_pass(unsigned char state[66],
+                                       const void *data, size_t size,
+                                       unsigned char xor_mask) {
   const auto *bytes = static_cast<const unsigned char *>(data);
   for (size_t i = 0; i < size; ++i) {
-    scuda_integrity_single_pass(state, bytes[i] ^ xor_mask);
+    lupine_integrity_single_pass(state, bytes[i] ^ xor_mask);
   }
 }
 
-static void scuda_integrity_zero_result(unsigned char state[66]) {
+static void lupine_integrity_zero_result(unsigned char state[66]) {
   memset(state, 0, 16);
   memset(state + 48, 0, 18);
 }
 
-static void scuda_integrity_pass5(unsigned char state[66], uint64_t result[2]) {
+static void lupine_integrity_pass5(unsigned char state[66],
+                                   uint64_t result[2]) {
   unsigned char temp = static_cast<unsigned char>(16 - state[64]);
   for (unsigned char i = 0; i < temp; ++i) {
-    scuda_integrity_single_pass(state, temp);
+    lupine_integrity_single_pass(state, temp);
   }
   for (size_t i = 0x30; i < 0x40; ++i) {
-    scuda_integrity_single_pass(state, state[i]);
+    lupine_integrity_single_pass(state, state[i]);
   }
   memcpy(&result[0], state, sizeof(uint64_t));
   memcpy(&result[1], state + sizeof(uint64_t), sizeof(uint64_t));
 }
 
-static CUresult scuda_get_device_hash_info(
-    std::vector<scuda_integrity_device_hash_info> *devices) {
+static CUresult lupine_get_device_hash_info(
+    std::vector<lupine_integrity_device_hash_info> *devices) {
   if (devices == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
@@ -6830,7 +6852,7 @@ static CUresult scuda_get_device_hash_info(
       return status;
     }
 
-    scuda_integrity_device_hash_info info = {};
+    lupine_integrity_device_hash_info info = {};
     status = cuDeviceGetUuid_v2(&info.guid, device);
     if (status != CUDA_SUCCESS) {
       return status;
@@ -6855,12 +6877,12 @@ static CUresult scuda_get_device_hash_info(
   return CUDA_SUCCESS;
 }
 
-static const void *scuda_get_cudart_export_table();
-static const void *scuda_get_integrity_check_table();
+static const void *lupine_get_cudart_export_table();
+static const void *lupine_get_integrity_check_table();
 
-extern "C" CUresult scuda_integrity_check(unsigned int version,
-                                          uint64_t unix_seconds,
-                                          uint64_t (*result)[2]) {
+extern "C" CUresult lupine_integrity_check(unsigned int version,
+                                           uint64_t unix_seconds,
+                                           uint64_t (*result)[2]) {
   if (result == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
@@ -6881,8 +6903,8 @@ extern "C" CUresult scuda_integrity_check(unsigned int version,
     return status;
   }
 
-  std::vector<scuda_integrity_device_hash_info> devices;
-  status = scuda_get_device_hash_info(&devices);
+  std::vector<lupine_integrity_device_hash_info> devices;
+  status = lupine_get_device_hash_info(&devices);
   if (status != CUDA_SUCCESS) {
     return status;
   }
@@ -6892,34 +6914,34 @@ extern "C" CUresult scuda_integrity_check(unsigned int version,
       0xAA, 0x08, 0x41, 0x36, 0x0B, 0xF5, 0x5A, 0x9F};
 
   unsigned char state[66] = {};
-  scuda_integrity_hash_pass(state, pass1_result, sizeof(pass1_result), 0x36);
+  lupine_integrity_hash_pass(state, pass1_result, sizeof(pass1_result), 0x36);
 
-  scuda_integrity_pass3_input input = {
+  lupine_integrity_pass3_input input = {
       static_cast<uint32_t>(driver_version),
       version,
       static_cast<uint32_t>(getpid()),
       static_cast<uint32_t>(reinterpret_cast<uintptr_t>(pthread_self())),
-      scuda_get_cudart_export_table(),
-      scuda_get_integrity_check_table(),
-      reinterpret_cast<const void *>(&scuda_integrity_check),
+      lupine_get_cudart_export_table(),
+      lupine_get_integrity_check_table(),
+      reinterpret_cast<const void *>(&lupine_integrity_check),
       unix_seconds,
   };
-  scuda_integrity_hash_pass(state, &input, sizeof(input), 0);
+  lupine_integrity_hash_pass(state, &input, sizeof(input), 0);
   for (const auto &device : devices) {
-    scuda_integrity_hash_pass(state, &device, sizeof(device), 0);
+    lupine_integrity_hash_pass(state, &device, sizeof(device), 0);
   }
 
   uint64_t pass5_result[2] = {};
-  scuda_integrity_pass5(state, pass5_result);
-  scuda_integrity_zero_result(state);
-  scuda_integrity_hash_pass(state, pass1_result, sizeof(pass1_result), 0x5c);
-  scuda_integrity_hash_pass(state, pass5_result, sizeof(pass5_result), 0);
-  scuda_integrity_pass5(state, *result);
+  lupine_integrity_pass5(state, pass5_result);
+  lupine_integrity_zero_result(state);
+  lupine_integrity_hash_pass(state, pass1_result, sizeof(pass1_result), 0x5c);
+  lupine_integrity_hash_pass(state, pass5_result, sizeof(pass5_result), 0);
+  lupine_integrity_pass5(state, *result);
   return CUDA_SUCCESS;
 }
 
-extern "C" CUresult scuda_context_check(CUcontext, unsigned int *result1,
-                                        const void **result2) {
+extern "C" CUresult lupine_context_check(CUcontext, unsigned int *result1,
+                                         const void **result2) {
   if (result1 != nullptr) {
     *result1 = 0;
   }
@@ -6929,110 +6951,110 @@ extern "C" CUresult scuda_context_check(CUcontext, unsigned int *result1,
   return CUDA_SUCCESS;
 }
 
-extern "C" unsigned int scuda_context_check_fn3() { return 0; }
+extern "C" unsigned int lupine_context_check_fn3() { return 0; }
 
-static const void *scuda_get_cudart_export_table() {
+static const void *lupine_get_cudart_export_table() {
   static const void *table[13] = {
       reinterpret_cast<const void *>(sizeof(table)),
-      reinterpret_cast<const void *>(&scuda_cudart_get_module_from_cubin),
-      reinterpret_cast<const void *>(&scuda_cudart_get_primary_context),
+      reinterpret_cast<const void *>(&lupine_cudart_get_module_from_cubin),
+      reinterpret_cast<const void *>(&lupine_cudart_get_primary_context),
       nullptr,
       nullptr,
       nullptr,
-      reinterpret_cast<const void *>(&scuda_cudart_get_module_from_cubin_ext1),
-      reinterpret_cast<const void *>(&scuda_cudart_noop_size_arg),
-      reinterpret_cast<const void *>(&scuda_cudart_get_module_from_cubin_ext2),
+      reinterpret_cast<const void *>(&lupine_cudart_get_module_from_cubin_ext1),
+      reinterpret_cast<const void *>(&lupine_cudart_noop_size_arg),
+      reinterpret_cast<const void *>(&lupine_cudart_get_module_from_cubin_ext2),
       nullptr,
       nullptr,
       nullptr,
-      reinterpret_cast<const void *>(&scuda_cudart_load_compilers),
+      reinterpret_cast<const void *>(&lupine_cudart_load_compilers),
   };
   return table;
 }
 
 template <size_t N>
-static const void *scuda_table_start(const void *(&table)[N]) {
+static const void *lupine_table_start(const void *(&table)[N]) {
   return table;
 }
 
-static const void *scuda_get_tools_tls_table() {
+static const void *lupine_get_tools_tls_table() {
   static const void *table[4] = {
       reinterpret_cast<const void *>(sizeof(table)),
-      reinterpret_cast<const void *>(&scuda_dark_return_zero),
-      reinterpret_cast<const void *>(&scuda_dark_return_zero_1),
-      reinterpret_cast<const void *>(&scuda_dark_return_zero_1)};
-  return scuda_table_start(table);
+      reinterpret_cast<const void *>(&lupine_dark_return_zero),
+      reinterpret_cast<const void *>(&lupine_dark_return_zero_1),
+      reinterpret_cast<const void *>(&lupine_dark_return_zero_1)};
+  return lupine_table_start(table);
 }
 
-static const void *scuda_get_tools_runtime_callback_hooks_table() {
+static const void *lupine_get_tools_runtime_callback_hooks_table() {
   static const void *table[7] = {
       reinterpret_cast<const void *>(sizeof(table)),
-      reinterpret_cast<const void *>(&scuda_dark_return_zero_2),
-      reinterpret_cast<const void *>(&scuda_dark_get_unknown_buffer1),
-      reinterpret_cast<const void *>(&scuda_dark_return_zero_2),
-      reinterpret_cast<const void *>(&scuda_dark_return_zero_2),
-      reinterpret_cast<const void *>(&scuda_dark_return_zero_2),
-      reinterpret_cast<const void *>(&scuda_dark_get_unknown_buffer2),
+      reinterpret_cast<const void *>(&lupine_dark_return_zero_2),
+      reinterpret_cast<const void *>(&lupine_dark_get_unknown_buffer1),
+      reinterpret_cast<const void *>(&lupine_dark_return_zero_2),
+      reinterpret_cast<const void *>(&lupine_dark_return_zero_2),
+      reinterpret_cast<const void *>(&lupine_dark_return_zero_2),
+      reinterpret_cast<const void *>(&lupine_dark_get_unknown_buffer2),
   };
-  return scuda_table_start(table);
+  return lupine_table_start(table);
 }
 
-static const void *scuda_get_context_local_storage_table() {
+static const void *lupine_get_context_local_storage_table() {
   static const void *table[4] = {
-      reinterpret_cast<const void *>(&scuda_context_local_storage_put),
-      reinterpret_cast<const void *>(&scuda_context_local_storage_delete),
-      reinterpret_cast<const void *>(&scuda_context_local_storage_get),
+      reinterpret_cast<const void *>(&lupine_context_local_storage_put),
+      reinterpret_cast<const void *>(&lupine_context_local_storage_delete),
+      reinterpret_cast<const void *>(&lupine_context_local_storage_get),
       nullptr,
   };
-  return scuda_table_start(table);
+  return lupine_table_start(table);
 }
 
-static const void *scuda_get_ctx_create_bypass_table() {
+static const void *lupine_get_ctx_create_bypass_table() {
   static const void *table[2] = {
       reinterpret_cast<const void *>(sizeof(table)),
-      reinterpret_cast<const void *>(&scuda_ctx_create_bypass)};
-  return scuda_table_start(table);
+      reinterpret_cast<const void *>(&lupine_ctx_create_bypass)};
+  return lupine_table_start(table);
 }
 
-static const void *scuda_get_heap_access_table() {
+static const void *lupine_get_heap_access_table() {
   static const void *table[3] = {
       reinterpret_cast<const void *>(sizeof(table)),
-      reinterpret_cast<const void *>(&scuda_heap_alloc),
-      reinterpret_cast<const void *>(&scuda_heap_free),
+      reinterpret_cast<const void *>(&lupine_heap_alloc),
+      reinterpret_cast<const void *>(&lupine_heap_free),
   };
-  return scuda_table_start(table);
+  return lupine_table_start(table);
 }
 
-static const void *scuda_get_device_extended_rt_table() {
+static const void *lupine_get_device_extended_rt_table() {
   static const void *table[26] = {};
   static std::once_flag once;
   std::call_once(once, [] {
     const_cast<void **>(table)[0] = reinterpret_cast<void *>(sizeof(table));
     const_cast<void **>(table)[5] =
-        reinterpret_cast<void *>(&scuda_device_get_attribute_ext);
+        reinterpret_cast<void *>(&lupine_device_get_attribute_ext);
     const_cast<void **>(table)[13] =
-        reinterpret_cast<void *>(&scuda_device_get_something);
+        reinterpret_cast<void *>(&lupine_device_get_something);
   });
-  return scuda_table_start(table);
+  return lupine_table_start(table);
 }
 
-static const void *scuda_get_integrity_check_table() {
+static const void *lupine_get_integrity_check_table() {
   static const void *table[3] = {
       reinterpret_cast<const void *>(sizeof(table)),
-      reinterpret_cast<const void *>(&scuda_integrity_check),
+      reinterpret_cast<const void *>(&lupine_integrity_check),
       nullptr,
   };
-  return scuda_table_start(table);
+  return lupine_table_start(table);
 }
 
-static const void *scuda_get_context_checks_table() {
+static const void *lupine_get_context_checks_table() {
   static const void *table[4] = {
       reinterpret_cast<const void *>(sizeof(table)),
       nullptr,
-      reinterpret_cast<const void *>(&scuda_context_check),
-      reinterpret_cast<const void *>(&scuda_context_check_fn3),
+      reinterpret_cast<const void *>(&lupine_context_check),
+      reinterpret_cast<const void *>(&lupine_context_check_fn3),
   };
-  return scuda_table_start(table);
+  return lupine_table_start(table);
 }
 
 extern "C" CUresult cuGetExportTable(const void **ppExportTable,
@@ -7065,8 +7087,8 @@ extern "C" CUresult cuGetExportTable(const void **ppExportTable,
       0x26, 0x3e, 0x88, 0x60, 0x7c, 0xd2, 0x61, 0x43,
       0x92, 0xf6, 0xbb, 0xd5, 0x00, 0x6d, 0xfa, 0x7e};
 
-  if (scuda_trace_enabled() && pExportTableId != nullptr) {
-    std::cerr << "SCUDA cuGetExportTable requested UUID:";
+  if (lupine_trace_enabled() && pExportTableId != nullptr) {
+    std::cerr << "LUPINE cuGetExportTable requested UUID:";
     for (unsigned char byte : pExportTableId->bytes) {
       fprintf(stderr, " %02x", byte);
     }
@@ -7079,53 +7101,53 @@ extern "C" CUresult cuGetExportTable(const void **ppExportTable,
   if (ppExportTable == nullptr || pExportTableId == nullptr) {
     return CUDA_ERROR_INVALID_VALUE;
   }
-  if (scuda_uuid_equals(pExportTableId, CUDART_INTERFACE_UUID)) {
-    *ppExportTable = scuda_get_cudart_export_table();
+  if (lupine_uuid_equals(pExportTableId, CUDART_INTERFACE_UUID)) {
+    *ppExportTable = lupine_get_cudart_export_table();
     return CUDA_SUCCESS;
   }
-  if (scuda_uuid_equals(pExportTableId, TOOLS_TLS_UUID)) {
-    *ppExportTable = scuda_get_tools_tls_table();
+  if (lupine_uuid_equals(pExportTableId, TOOLS_TLS_UUID)) {
+    *ppExportTable = lupine_get_tools_tls_table();
     return CUDA_SUCCESS;
   }
-  if (scuda_uuid_equals(pExportTableId, TOOLS_RUNTIME_CALLBACK_HOOKS_UUID)) {
-    *ppExportTable = scuda_get_tools_runtime_callback_hooks_table();
+  if (lupine_uuid_equals(pExportTableId, TOOLS_RUNTIME_CALLBACK_HOOKS_UUID)) {
+    *ppExportTable = lupine_get_tools_runtime_callback_hooks_table();
     return CUDA_SUCCESS;
   }
-  if (scuda_uuid_equals(pExportTableId, CONTEXT_LOCAL_STORAGE_UUID)) {
-    *ppExportTable = scuda_get_context_local_storage_table();
+  if (lupine_uuid_equals(pExportTableId, CONTEXT_LOCAL_STORAGE_UUID)) {
+    *ppExportTable = lupine_get_context_local_storage_table();
     return CUDA_SUCCESS;
   }
-  if (scuda_uuid_equals(pExportTableId, CTX_CREATE_BYPASS_UUID)) {
-    *ppExportTable = scuda_get_ctx_create_bypass_table();
+  if (lupine_uuid_equals(pExportTableId, CTX_CREATE_BYPASS_UUID)) {
+    *ppExportTable = lupine_get_ctx_create_bypass_table();
     return CUDA_SUCCESS;
   }
-  if (scuda_uuid_equals(pExportTableId, HEAP_ACCESS_UUID)) {
-    *ppExportTable = scuda_get_heap_access_table();
+  if (lupine_uuid_equals(pExportTableId, HEAP_ACCESS_UUID)) {
+    *ppExportTable = lupine_get_heap_access_table();
     return CUDA_SUCCESS;
   }
-  if (scuda_uuid_equals(pExportTableId, DEVICE_EXTENDED_RT_UUID)) {
-    *ppExportTable = scuda_get_device_extended_rt_table();
+  if (lupine_uuid_equals(pExportTableId, DEVICE_EXTENDED_RT_UUID)) {
+    *ppExportTable = lupine_get_device_extended_rt_table();
     return CUDA_SUCCESS;
   }
-  if (scuda_uuid_equals(pExportTableId, INTEGRITY_CHECK_UUID)) {
-    *ppExportTable = scuda_get_integrity_check_table();
+  if (lupine_uuid_equals(pExportTableId, INTEGRITY_CHECK_UUID)) {
+    *ppExportTable = lupine_get_integrity_check_table();
     return CUDA_SUCCESS;
   }
-  if (scuda_uuid_equals(pExportTableId, CONTEXT_CHECKS_UUID)) {
-    *ppExportTable = scuda_get_context_checks_table();
+  if (lupine_uuid_equals(pExportTableId, CONTEXT_CHECKS_UUID)) {
+    *ppExportTable = lupine_get_context_checks_table();
     return CUDA_SUCCESS;
   }
   {
     const void *private_table =
-        scuda_remote_private_export_table(pExportTableId);
+        lupine_remote_private_export_table(pExportTableId);
     if (private_table != nullptr) {
       *ppExportTable = private_table;
       return CUDA_SUCCESS;
     }
   }
-  if (scuda_stub_private_exports_enabled()) {
+  if (lupine_stub_private_exports_enabled()) {
     const void *private_table =
-        scuda_private_export_table_from_env(pExportTableId);
+        lupine_private_export_table_from_env(pExportTableId);
     if (private_table != nullptr) {
       *ppExportTable = private_table;
       return CUDA_SUCCESS;
@@ -7134,7 +7156,7 @@ extern "C" CUresult cuGetExportTable(const void **ppExportTable,
   return CUDA_ERROR_INVALID_VALUE;
 }
 
-static void *scuda_make_missing_stub(const char *symbol) {
+static void *lupine_make_missing_stub(const char *symbol) {
   if (symbol == nullptr) {
     return nullptr;
   }
@@ -7151,11 +7173,11 @@ static void *scuda_make_missing_stub(const char *symbol) {
       mmap(nullptr, stub_size, PROT_READ | PROT_WRITE | PROT_EXEC,
            MAP_PRIVATE | MAP_ANONYMOUS, -1, 0));
   if (code == MAP_FAILED) {
-    return reinterpret_cast<void *>(&scuda_unsupported_driver_api);
+    return reinterpret_cast<void *>(&lupine_unsupported_driver_api);
   }
 
   char *stable_symbol = strdup(symbol);
-  void *handler = reinterpret_cast<void *>(&scuda_missing_driver_api_called);
+  void *handler = reinterpret_cast<void *>(&lupine_missing_driver_api_called);
   code[0] = 0x48;
   code[1] = 0xbf;
   memcpy(code + 2, &stable_symbol, sizeof(stable_symbol));
@@ -7167,155 +7189,157 @@ static void *scuda_make_missing_stub(const char *symbol) {
   stubs[symbol] = code;
   return code;
 #else
-  return reinterpret_cast<void *>(&scuda_unsupported_driver_api);
+  return reinterpret_cast<void *>(&lupine_unsupported_driver_api);
 #endif
 }
 
-#define SCUDA_DEFINE_UNSUPPORTED_STUB(name)                                    \
-  extern "C" CUresult scuda_unsupported_##name() {                             \
-    std::cerr << "SCUDA unsupported Driver API called: " #name << std::endl;   \
+#define LUPINE_DEFINE_UNSUPPORTED_STUB(name)                                   \
+  extern "C" CUresult lupine_unsupported_##name() {                            \
+    std::cerr << "LUPINE unsupported Driver API called: " #name << std::endl;  \
     return CUDA_ERROR_NOT_SUPPORTED;                                           \
   }
 
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuCtxCreate)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuModuleLoadData)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuModuleLoadFatBinary)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuLibraryLoadData)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuLibraryGetKernelCount)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuLibraryEnumerateKernels)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuKernelGetName)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuKernelGetParamInfo)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuLinkCreate)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuLinkAddData)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuLinkAddFile)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuMemGetInfo)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuMemGetAddressRange)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuMemHostGetDevicePointer)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuMemHostRegister)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuMemHostUnregister)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuPointerGetAttribute)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuMemcpyDtoH)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuMemcpyDtoHAsync)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuMemcpy2DUnaligned)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuMemcpy2DAsync)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuMemcpy3D)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuMemcpy3DAsync)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuMemcpy3DPeer)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuMemcpy3DPeerAsync)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuMemAdvise)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuMemPrefetchAsync)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuMemRangeGetAttribute)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuGetErrorString)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuGetErrorName)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuGraphInstantiate)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuUserObjectCreate)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuStreamBeginCaptureToGraph)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuStreamGetCaptureInfo)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuStreamUpdateCaptureDependencies)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuGraphExecKernelNodeSetParams)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuGraphAddNode)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuGraphNodeSetParams)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuGraphExecNodeSetParams)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuGraphConditionalHandleCreate)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuDeviceRegisterAsyncNotification)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuDeviceUnregisterAsyncNotification)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuLogsRegisterCallback)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuLogsUnregisterCallback)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuLogsCurrent)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuLogsDumpToFile)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuLogsDumpToMemory)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuDeviceGetDevResource)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuDevSmResourceSplitByCount)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuDevResourceGenerateDesc)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuCtxFromGreenCtx)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuGreenCtxCreate)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuGreenCtxDestroy)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuCtxGetDevResource)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuGreenCtxGetDevResource)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuGreenCtxGetId)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuGreenCtxStreamCreate)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuStreamGetDevResource)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuCtxRecordEvent)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuCtxWaitEvent)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuGreenCtxRecordEvent)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuGreenCtxWaitEvent)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuDevSmResourceSplit)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuKernelGetLibrary)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuDeviceGetHostAtomicCapabilities)
-SCUDA_DEFINE_UNSUPPORTED_STUB(cuDeviceGetP2PAtomicCapabilities)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuCtxCreate)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuModuleLoadData)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuModuleLoadFatBinary)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuLibraryLoadData)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuLibraryGetKernelCount)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuLibraryEnumerateKernels)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuKernelGetName)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuKernelGetParamInfo)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuLinkCreate)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuLinkAddData)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuLinkAddFile)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuMemGetInfo)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuMemGetAddressRange)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuMemHostGetDevicePointer)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuMemHostRegister)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuMemHostUnregister)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuPointerGetAttribute)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuMemcpyDtoH)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuMemcpyDtoHAsync)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuMemcpy2DUnaligned)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuMemcpy2DAsync)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuMemcpy3D)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuMemcpy3DAsync)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuMemcpy3DPeer)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuMemcpy3DPeerAsync)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuMemAdvise)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuMemPrefetchAsync)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuMemRangeGetAttribute)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuGetErrorString)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuGetErrorName)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuGraphInstantiate)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuUserObjectCreate)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuStreamBeginCaptureToGraph)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuStreamGetCaptureInfo)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuStreamUpdateCaptureDependencies)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuGraphExecKernelNodeSetParams)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuGraphAddNode)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuGraphNodeSetParams)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuGraphExecNodeSetParams)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuGraphConditionalHandleCreate)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuDeviceRegisterAsyncNotification)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuDeviceUnregisterAsyncNotification)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuLogsRegisterCallback)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuLogsUnregisterCallback)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuLogsCurrent)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuLogsDumpToFile)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuLogsDumpToMemory)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuDeviceGetDevResource)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuDevSmResourceSplitByCount)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuDevResourceGenerateDesc)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuCtxFromGreenCtx)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuGreenCtxCreate)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuGreenCtxDestroy)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuCtxGetDevResource)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuGreenCtxGetDevResource)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuGreenCtxGetId)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuGreenCtxStreamCreate)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuStreamGetDevResource)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuCtxRecordEvent)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuCtxWaitEvent)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuGreenCtxRecordEvent)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuGreenCtxWaitEvent)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuDevSmResourceSplit)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuKernelGetLibrary)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuDeviceGetHostAtomicCapabilities)
+LUPINE_DEFINE_UNSUPPORTED_STUB(cuDeviceGetP2PAtomicCapabilities)
 
-static void *scuda_get_unsupported_stub(const char *symbol) {
+static void *lupine_get_unsupported_stub(const char *symbol) {
+  // clang-format off
   static const std::unordered_map<std::string, void *> stubs = {
-#define SCUDA_STUB_ENTRY(name)                                                 \
-  { #name, (void *)&scuda_unsupported_##name }
-      SCUDA_STUB_ENTRY(cuCtxCreate),
-      SCUDA_STUB_ENTRY(cuModuleLoadData),
-      SCUDA_STUB_ENTRY(cuModuleLoadFatBinary),
-      SCUDA_STUB_ENTRY(cuLibraryLoadData),
-      SCUDA_STUB_ENTRY(cuLibraryGetKernelCount),
-      SCUDA_STUB_ENTRY(cuLibraryEnumerateKernels),
-      SCUDA_STUB_ENTRY(cuKernelGetName),
-      SCUDA_STUB_ENTRY(cuKernelGetParamInfo),
-      SCUDA_STUB_ENTRY(cuLinkCreate),
-      SCUDA_STUB_ENTRY(cuLinkAddData),
-      SCUDA_STUB_ENTRY(cuLinkAddFile),
-      SCUDA_STUB_ENTRY(cuMemGetInfo),
-      SCUDA_STUB_ENTRY(cuMemGetAddressRange),
-      SCUDA_STUB_ENTRY(cuMemHostGetDevicePointer),
-      SCUDA_STUB_ENTRY(cuMemHostRegister),
-      SCUDA_STUB_ENTRY(cuMemHostUnregister),
-      SCUDA_STUB_ENTRY(cuPointerGetAttribute),
-      SCUDA_STUB_ENTRY(cuMemcpyDtoH),
-      SCUDA_STUB_ENTRY(cuMemcpyDtoHAsync),
-      SCUDA_STUB_ENTRY(cuMemcpy2DUnaligned),
-      SCUDA_STUB_ENTRY(cuMemcpy2DAsync),
-      SCUDA_STUB_ENTRY(cuMemcpy3D),
-      SCUDA_STUB_ENTRY(cuMemcpy3DAsync),
-      SCUDA_STUB_ENTRY(cuMemcpy3DPeer),
-      SCUDA_STUB_ENTRY(cuMemcpy3DPeerAsync),
-      SCUDA_STUB_ENTRY(cuMemAdvise),
-      SCUDA_STUB_ENTRY(cuMemPrefetchAsync),
-      SCUDA_STUB_ENTRY(cuMemRangeGetAttribute),
-      SCUDA_STUB_ENTRY(cuGetErrorString),
-      SCUDA_STUB_ENTRY(cuGetErrorName),
-      SCUDA_STUB_ENTRY(cuGraphInstantiate),
-      SCUDA_STUB_ENTRY(cuUserObjectCreate),
-      SCUDA_STUB_ENTRY(cuStreamBeginCaptureToGraph),
-      SCUDA_STUB_ENTRY(cuStreamGetCaptureInfo),
-      SCUDA_STUB_ENTRY(cuStreamUpdateCaptureDependencies),
-      SCUDA_STUB_ENTRY(cuGraphExecKernelNodeSetParams),
-      SCUDA_STUB_ENTRY(cuGraphAddNode),
-      SCUDA_STUB_ENTRY(cuGraphNodeSetParams),
-      SCUDA_STUB_ENTRY(cuGraphExecNodeSetParams),
-      SCUDA_STUB_ENTRY(cuGraphConditionalHandleCreate),
-      SCUDA_STUB_ENTRY(cuDeviceRegisterAsyncNotification),
-      SCUDA_STUB_ENTRY(cuDeviceUnregisterAsyncNotification),
-      SCUDA_STUB_ENTRY(cuLogsRegisterCallback),
-      SCUDA_STUB_ENTRY(cuLogsUnregisterCallback),
-      SCUDA_STUB_ENTRY(cuLogsCurrent),
-      SCUDA_STUB_ENTRY(cuLogsDumpToFile),
-      SCUDA_STUB_ENTRY(cuLogsDumpToMemory),
-      SCUDA_STUB_ENTRY(cuDeviceGetDevResource),
-      SCUDA_STUB_ENTRY(cuDevSmResourceSplitByCount),
-      SCUDA_STUB_ENTRY(cuDevResourceGenerateDesc),
-      SCUDA_STUB_ENTRY(cuCtxFromGreenCtx),
-      SCUDA_STUB_ENTRY(cuGreenCtxCreate),
-      SCUDA_STUB_ENTRY(cuGreenCtxDestroy),
-      SCUDA_STUB_ENTRY(cuCtxGetDevResource),
-      SCUDA_STUB_ENTRY(cuGreenCtxGetDevResource),
-      SCUDA_STUB_ENTRY(cuGreenCtxGetId),
-      SCUDA_STUB_ENTRY(cuGreenCtxStreamCreate),
-      SCUDA_STUB_ENTRY(cuStreamGetDevResource),
-      SCUDA_STUB_ENTRY(cuCtxRecordEvent),
-      SCUDA_STUB_ENTRY(cuCtxWaitEvent),
-      SCUDA_STUB_ENTRY(cuGreenCtxRecordEvent),
-      SCUDA_STUB_ENTRY(cuGreenCtxWaitEvent),
-      SCUDA_STUB_ENTRY(cuDevSmResourceSplit),
-      SCUDA_STUB_ENTRY(cuKernelGetLibrary),
-      SCUDA_STUB_ENTRY(cuDeviceGetHostAtomicCapabilities),
-      SCUDA_STUB_ENTRY(cuDeviceGetP2PAtomicCapabilities),
-#undef SCUDA_STUB_ENTRY
+#define LUPINE_STUB_ENTRY(name)                                                \
+  { #name, (void *)&lupine_unsupported_##name }
+      LUPINE_STUB_ENTRY(cuCtxCreate),
+      LUPINE_STUB_ENTRY(cuModuleLoadData),
+      LUPINE_STUB_ENTRY(cuModuleLoadFatBinary),
+      LUPINE_STUB_ENTRY(cuLibraryLoadData),
+      LUPINE_STUB_ENTRY(cuLibraryGetKernelCount),
+      LUPINE_STUB_ENTRY(cuLibraryEnumerateKernels),
+      LUPINE_STUB_ENTRY(cuKernelGetName),
+      LUPINE_STUB_ENTRY(cuKernelGetParamInfo),
+      LUPINE_STUB_ENTRY(cuLinkCreate),
+      LUPINE_STUB_ENTRY(cuLinkAddData),
+      LUPINE_STUB_ENTRY(cuLinkAddFile),
+      LUPINE_STUB_ENTRY(cuMemGetInfo),
+      LUPINE_STUB_ENTRY(cuMemGetAddressRange),
+      LUPINE_STUB_ENTRY(cuMemHostGetDevicePointer),
+      LUPINE_STUB_ENTRY(cuMemHostRegister),
+      LUPINE_STUB_ENTRY(cuMemHostUnregister),
+      LUPINE_STUB_ENTRY(cuPointerGetAttribute),
+      LUPINE_STUB_ENTRY(cuMemcpyDtoH),
+      LUPINE_STUB_ENTRY(cuMemcpyDtoHAsync),
+      LUPINE_STUB_ENTRY(cuMemcpy2DUnaligned),
+      LUPINE_STUB_ENTRY(cuMemcpy2DAsync),
+      LUPINE_STUB_ENTRY(cuMemcpy3D),
+      LUPINE_STUB_ENTRY(cuMemcpy3DAsync),
+      LUPINE_STUB_ENTRY(cuMemcpy3DPeer),
+      LUPINE_STUB_ENTRY(cuMemcpy3DPeerAsync),
+      LUPINE_STUB_ENTRY(cuMemAdvise),
+      LUPINE_STUB_ENTRY(cuMemPrefetchAsync),
+      LUPINE_STUB_ENTRY(cuMemRangeGetAttribute),
+      LUPINE_STUB_ENTRY(cuGetErrorString),
+      LUPINE_STUB_ENTRY(cuGetErrorName),
+      LUPINE_STUB_ENTRY(cuGraphInstantiate),
+      LUPINE_STUB_ENTRY(cuUserObjectCreate),
+      LUPINE_STUB_ENTRY(cuStreamBeginCaptureToGraph),
+      LUPINE_STUB_ENTRY(cuStreamGetCaptureInfo),
+      LUPINE_STUB_ENTRY(cuStreamUpdateCaptureDependencies),
+      LUPINE_STUB_ENTRY(cuGraphExecKernelNodeSetParams),
+      LUPINE_STUB_ENTRY(cuGraphAddNode),
+      LUPINE_STUB_ENTRY(cuGraphNodeSetParams),
+      LUPINE_STUB_ENTRY(cuGraphExecNodeSetParams),
+      LUPINE_STUB_ENTRY(cuGraphConditionalHandleCreate),
+      LUPINE_STUB_ENTRY(cuDeviceRegisterAsyncNotification),
+      LUPINE_STUB_ENTRY(cuDeviceUnregisterAsyncNotification),
+      LUPINE_STUB_ENTRY(cuLogsRegisterCallback),
+      LUPINE_STUB_ENTRY(cuLogsUnregisterCallback),
+      LUPINE_STUB_ENTRY(cuLogsCurrent),
+      LUPINE_STUB_ENTRY(cuLogsDumpToFile),
+      LUPINE_STUB_ENTRY(cuLogsDumpToMemory),
+      LUPINE_STUB_ENTRY(cuDeviceGetDevResource),
+      LUPINE_STUB_ENTRY(cuDevSmResourceSplitByCount),
+      LUPINE_STUB_ENTRY(cuDevResourceGenerateDesc),
+      LUPINE_STUB_ENTRY(cuCtxFromGreenCtx),
+      LUPINE_STUB_ENTRY(cuGreenCtxCreate),
+      LUPINE_STUB_ENTRY(cuGreenCtxDestroy),
+      LUPINE_STUB_ENTRY(cuCtxGetDevResource),
+      LUPINE_STUB_ENTRY(cuGreenCtxGetDevResource),
+      LUPINE_STUB_ENTRY(cuGreenCtxGetId),
+      LUPINE_STUB_ENTRY(cuGreenCtxStreamCreate),
+      LUPINE_STUB_ENTRY(cuStreamGetDevResource),
+      LUPINE_STUB_ENTRY(cuCtxRecordEvent),
+      LUPINE_STUB_ENTRY(cuCtxWaitEvent),
+      LUPINE_STUB_ENTRY(cuGreenCtxRecordEvent),
+      LUPINE_STUB_ENTRY(cuGreenCtxWaitEvent),
+      LUPINE_STUB_ENTRY(cuDevSmResourceSplit),
+      LUPINE_STUB_ENTRY(cuKernelGetLibrary),
+      LUPINE_STUB_ENTRY(cuDeviceGetHostAtomicCapabilities),
+      LUPINE_STUB_ENTRY(cuDeviceGetP2PAtomicCapabilities),
+#undef LUPINE_STUB_ENTRY
   };
+  // clang-format on
   if (symbol == nullptr) {
     return nullptr;
   }
@@ -7339,15 +7363,15 @@ void rpc_close(conn_t *conn) {
   pthread_mutex_unlock(&conn->read_mutex);
 }
 
-static void scuda_rpc_shutdown() {
+static void lupine_rpc_shutdown() {
   if (pthread_mutex_lock(&conn_mutex) < 0) {
     return;
   }
-  if (scuda_rpc_shutting_down) {
+  if (lupine_rpc_shutting_down) {
     pthread_mutex_unlock(&conn_mutex);
     return;
   }
-  scuda_rpc_shutting_down = true;
+  lupine_rpc_shutting_down = true;
   int count = nconns;
   for (int i = 0; i < count; ++i) {
     rpc_close(&conns[i]);
@@ -7367,13 +7391,13 @@ static void scuda_rpc_shutdown() {
 
   if (pthread_mutex_lock(&conn_mutex) == 0) {
     nconns = 0;
-    scuda_rpc_shutting_down = false;
+    lupine_rpc_shutting_down = false;
     pthread_mutex_unlock(&conn_mutex);
   }
 }
 
-__attribute__((destructor)) static void scuda_rpc_destructor() {
-  scuda_rpc_shutdown();
+__attribute__((destructor)) static void lupine_rpc_destructor() {
+  lupine_rpc_shutdown();
 }
 
 typedef void (*func_t)(void *);
@@ -7431,9 +7455,9 @@ void *rpc_client_dispatch_thread(void *arg) {
         }
 
         // Copy received data to the destination (dst) on the host
-        scuda_prepare_host_range_write(dst, count);
+        lupine_prepare_host_range_write(dst, count);
         memcpy(dst, host_data, count);
-        scuda_mark_host_range_clean(dst, count);
+        lupine_mark_host_range_clean(dst, count);
         free(host_data);
       }
 
@@ -7509,7 +7533,7 @@ int rpc_open() {
     return 0;
   }
 
-  char *server_ips = getenv("SCUDA_SERVER");
+  char *server_ips = getenv("LUPINE_SERVER");
   if (server_ips == NULL) {
     if (pthread_mutex_unlock(&conn_mutex) < 0)
       return -1;
@@ -7601,19 +7625,19 @@ extern "C" CUresult cuGetProcAddress(const char *symbol, void **pfn,
 CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion,
                              cuuint64_t flags,
                              CUdriverProcAddressQueryResult *symbolStatus) {
-  if (scuda_trace_enabled()) {
+  if (lupine_trace_enabled()) {
     std::cout << "cuGetProcAddress getting symbol: " << symbol << std::endl;
   }
 
   if (symbol != nullptr && strcmp(symbol, "cuFuncGetAttribute") == 0) {
-    *pfn = reinterpret_cast<void *>(&scuda_cuFuncGetAttribute_safe);
+    *pfn = reinterpret_cast<void *>(&lupine_cuFuncGetAttribute_safe);
     if (symbolStatus != nullptr) {
       *symbolStatus = CU_GET_PROC_ADDRESS_SUCCESS;
     }
     return CUDA_SUCCESS;
   }
   if (symbol != nullptr && strcmp(symbol, "cuPointerGetAttributes") == 0) {
-    *pfn = reinterpret_cast<void *>(&scuda_cuPointerGetAttributes_safe);
+    *pfn = reinterpret_cast<void *>(&lupine_cuPointerGetAttributes_safe);
     if (symbolStatus != nullptr) {
       *symbolStatus = CU_GET_PROC_ADDRESS_SUCCESS;
     }
@@ -7622,7 +7646,7 @@ CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion,
   if (symbol != nullptr &&
       strcmp(symbol, "cuOccupancyMaxActiveBlocksPerMultiprocessor") == 0) {
     *pfn = reinterpret_cast<void *>(
-        &scuda_cuOccupancyMaxActiveBlocksPerMultiprocessor_safe);
+        &lupine_cuOccupancyMaxActiveBlocksPerMultiprocessor_safe);
     if (symbolStatus != nullptr) {
       *symbolStatus = CU_GET_PROC_ADDRESS_SUCCESS;
     }
@@ -7632,7 +7656,7 @@ CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion,
       strcmp(symbol, "cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags") ==
           0) {
     *pfn = reinterpret_cast<void *>(
-        &scuda_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags_safe);
+        &lupine_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags_safe);
     if (symbolStatus != nullptr) {
       *symbolStatus = CU_GET_PROC_ADDRESS_SUCCESS;
     }
@@ -7645,7 +7669,7 @@ CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion,
     if (symbolStatus != nullptr) {
       *symbolStatus = CU_GET_PROC_ADDRESS_SUCCESS;
     }
-    if (scuda_trace_enabled()) {
+    if (lupine_trace_enabled()) {
       std::cout << "cuGetProcAddress: Mapped symbol '" << symbol
                 << "' to function: " << *pfn << std::endl;
     }
@@ -7708,7 +7732,7 @@ CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion,
       {"cuMemcpy3D", (void *)cuMemcpy3D_v2},
       {"cuMemcpy3D_v2", (void *)cuMemcpy3D_v2},
       {"cuPointerGetAttribute", (void *)cuPointerGetAttribute},
-      {"cuPointerGetAttributes", (void *)scuda_cuPointerGetAttributes_safe},
+      {"cuPointerGetAttributes", (void *)lupine_cuPointerGetAttributes_safe},
       {"cuGetExportTable", (void *)cuGetExportTable},
       {"cuModuleLoadData", (void *)cuModuleLoadData},
       {"cuModuleLoadDataEx", (void *)cuModuleLoadDataEx},
@@ -7776,7 +7800,7 @@ CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion,
     return CUDA_SUCCESS;
   }
 
-  void *unsupported_stub = scuda_get_unsupported_stub(symbol);
+  void *unsupported_stub = lupine_get_unsupported_stub(symbol);
   if (unsupported_stub != nullptr) {
     *pfn = unsupported_stub;
     if (symbolStatus != nullptr) {
@@ -7800,7 +7824,7 @@ CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion,
     return CUDA_SUCCESS;
   }
 
-  if (scuda_trace_enabled()) {
+  if (lupine_trace_enabled()) {
     std::cout << "cuGetProcAddress: Symbol '" << symbol
               << "' not found in cudaFunctionMap." << std::endl;
   }
@@ -7822,9 +7846,9 @@ CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion,
 
   void *libCudaHandle = dlopen("libcuda.so", RTLD_NOW | RTLD_GLOBAL);
   if (!libCudaHandle) {
-    if (scuda_stub_missing_enabled() &&
-        scuda_symbol_looks_like_driver_api(symbol)) {
-      *pfn = scuda_make_missing_stub(symbol);
+    if (lupine_stub_missing_enabled() &&
+        lupine_symbol_looks_like_driver_api(symbol)) {
+      *pfn = lupine_make_missing_stub(symbol);
       if (symbolStatus != nullptr) {
         *symbolStatus = CU_GET_PROC_ADDRESS_SUCCESS;
       }
@@ -7839,13 +7863,13 @@ CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion,
 
   *pfn = real_dlsym(libCudaHandle, symbol);
   if (!(*pfn)) {
-    if (scuda_trace_enabled()) {
+    if (lupine_trace_enabled()) {
       std::cerr << "Error: Could not resolve symbol '" << symbol
                 << "' using dlsym." << std::endl;
     }
-    if (scuda_stub_missing_enabled() &&
-        scuda_symbol_looks_like_driver_api(symbol)) {
-      *pfn = scuda_make_missing_stub(symbol);
+    if (lupine_stub_missing_enabled() &&
+        lupine_symbol_looks_like_driver_api(symbol)) {
+      *pfn = lupine_make_missing_stub(symbol);
       if (symbolStatus != nullptr) {
         *symbolStatus = CU_GET_PROC_ADDRESS_SUCCESS;
       }
@@ -7870,30 +7894,30 @@ extern "C" CUresult cuGetProcAddress(const char *symbol, void **pfn,
 }
 
 void *dlsym(void *handle, const char *name) __THROW {
-  if (scuda_trace_enabled()) {
+  if (lupine_trace_enabled()) {
     std::cout << "dlsym: " << name << std::endl;
   }
 
-  if (!scuda_symbol_looks_like_driver_api(name)) {
-    return scuda_real_dlsym(handle, name);
+  if (!lupine_symbol_looks_like_driver_api(name)) {
+    return lupine_real_dlsym(handle, name);
   }
 
   if (name != nullptr && strcmp(name, "cuFuncGetAttribute") == 0) {
-    return reinterpret_cast<void *>(&scuda_cuFuncGetAttribute_safe);
+    return reinterpret_cast<void *>(&lupine_cuFuncGetAttribute_safe);
   }
   if (name != nullptr && strcmp(name, "cuPointerGetAttributes") == 0) {
-    return reinterpret_cast<void *>(&scuda_cuPointerGetAttributes_safe);
+    return reinterpret_cast<void *>(&lupine_cuPointerGetAttributes_safe);
   }
   if (name != nullptr &&
       strcmp(name, "cuOccupancyMaxActiveBlocksPerMultiprocessor") == 0) {
     return reinterpret_cast<void *>(
-        &scuda_cuOccupancyMaxActiveBlocksPerMultiprocessor_safe);
+        &lupine_cuOccupancyMaxActiveBlocksPerMultiprocessor_safe);
   }
   if (name != nullptr &&
       strcmp(name, "cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags") ==
           0) {
     return reinterpret_cast<void *>(
-        &scuda_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags_safe);
+        &lupine_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags_safe);
   }
 
   void *func = get_function_pointer(name);
@@ -7969,7 +7993,7 @@ void *dlsym(void *handle, const char *name) __THROW {
       {"cuMemcpy3D", (void *)cuMemcpy3D_v2},
       {"cuMemcpy3D_v2", (void *)cuMemcpy3D_v2},
       {"cuPointerGetAttribute", (void *)cuPointerGetAttribute},
-      {"cuPointerGetAttributes", (void *)scuda_cuPointerGetAttributes_safe},
+      {"cuPointerGetAttributes", (void *)lupine_cuPointerGetAttributes_safe},
       {"cuGetExportTable", (void *)cuGetExportTable},
       {"cuModuleLoadData", (void *)cuModuleLoadData},
       {"cuModuleLoadDataEx", (void *)cuModuleLoadDataEx},
@@ -8033,17 +8057,17 @@ void *dlsym(void *handle, const char *name) __THROW {
     return manual_it->second;
   }
 
-  void *unsupported_stub = scuda_get_unsupported_stub(name);
+  void *unsupported_stub = lupine_get_unsupported_stub(name);
   if (unsupported_stub != nullptr) {
     return unsupported_stub;
   }
 
-  if (scuda_stub_missing_enabled() &&
-      scuda_symbol_looks_like_driver_api(name)) {
-    return scuda_make_missing_stub(name);
+  if (lupine_stub_missing_enabled() &&
+      lupine_symbol_looks_like_driver_api(name)) {
+    return lupine_make_missing_stub(name);
   }
 
   // std::cout << "[dlsym] Falling back to real_dlsym for name: " << name <<
   // std::endl;
-  return scuda_real_dlsym(handle, name);
+  return lupine_real_dlsym(handle, name);
 }

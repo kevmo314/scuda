@@ -1,14 +1,14 @@
-#ifndef SCUDA_MANUAL_SERVER_H
-#define SCUDA_MANUAL_SERVER_H
+#ifndef LUPINE_MANUAL_SERVER_H
+#define LUPINE_MANUAL_SERVER_H
 
 #include <cuda.h>
 
 #include "rpc.h"
 
-struct scuda_kernel_param_layout;
+struct lupine_kernel_param_layout;
 
-CUresult scuda_get_kernel_param_layout(CUfunction f,
-                                       scuda_kernel_param_layout *layout);
+CUresult lupine_get_kernel_param_layout(CUfunction f,
+                                        lupine_kernel_param_layout *layout);
 
 int handle_manual_cuGetExportTableMetadata(conn_t *conn);
 int handle_manual_cuPrivateGetModuleNode(conn_t *conn);

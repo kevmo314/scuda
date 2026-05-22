@@ -27,5 +27,5 @@ jobs:
       - name: Upload Python package artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: scuda-python-package
+          name: lupine-python-package
           path: python/dist/*

@@ -21,5 +21,5 @@ jobs:
             --build-arg RUN_CODEGEN=1 \
             --build-arg CUDA_VERSION=13.1.0 \
             --build-arg UBUNTU_VERSION=24.04 \
-            -t scuda-codegen:test \
+            -t lupine-codegen:test \
             .

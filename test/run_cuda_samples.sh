@@ -25,11 +25,11 @@ SSH_OPTS="${SSH_OPTS:-}"
 # shellcheck disable=SC2206
 SSH_ARGS=($SSH_OPTS)
 SERVER_UPLOAD="${SERVER_UPLOAD:-1}"
-SERVER_LOCAL_BIN="${SERVER_LOCAL_BIN:-$repo_root/build/scuda_driver_server}"
-SERVER_REMOTE_BIN="${SERVER_REMOTE_BIN:-/tmp/scuda-driver-server-scuda-$$}"
+SERVER_LOCAL_BIN="${SERVER_LOCAL_BIN:-$repo_root/build/lupine_driver_server}"
+SERVER_REMOTE_BIN="${SERVER_REMOTE_BIN:-/tmp/lupine-driver-server-lupine-$$}"
 SERVER_REMOTE_CLEANUP="${SERVER_REMOTE_CLEANUP:-1}"
 
-SCUDA_LIB="${SCUDA_LIB:-$repo_root/build/libcuda.so.1}"
+LUPINE_LIB="${LUPINE_LIB:-$repo_root/build/libcuda.so.1}"
 CUDA_HOME="${CUDA_HOME:-/usr/local/cuda}"
 CUDA_LIB_DIR="${CUDA_LIB_DIR:-/usr/local/cuda/lib64}"
 SAMPLE_TIMEOUT="${SAMPLE_TIMEOUT:-20}"
@@ -103,7 +103,7 @@ Environment:
                        Default: compliance.
   SERVER_SSH_TARGET    GPU host SSH target. Default: kevin@inferable-node-008.
   SERVER_PORT_BASE     First per-sample server port. Default: 14900.
-  SCUDA_LIB            Client shim. Default: $repo_root/build/libcuda.so.1.
+  LUPINE_LIB            Client shim. Default: $repo_root/build/libcuda.so.1.
   RESULTS_DIR          Output directory. Default: test/cuda-samples/results/<timestamp>.
 EOF
 }
@@ -113,8 +113,8 @@ if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
   exit 0
 fi
 
-if [[ ! -x "$SCUDA_LIB" ]]; then
-  echo "missing shim: $SCUDA_LIB" >&2
+if [[ ! -x "$LUPINE_LIB" ]]; then
+  echo "missing shim: $LUPINE_LIB" >&2
   exit 1
 fi
 
@@ -123,7 +123,7 @@ if [[ ! -x "$SERVER_LOCAL_BIN" ]]; then
   exit 1
 fi
 
-runtime_exports="$(nm -D --defined-only "$SCUDA_LIB" | awk '{print $3}' | grep -E '^cuda' || true)"
+runtime_exports="$(nm -D --defined-only "$LUPINE_LIB" | awk '{print $3}' | grep -E '^cuda' || true)"
 if [[ -n "$runtime_exports" ]]; then
   echo "shim exports CUDA Runtime API symbols; keep this driver-only:" >&2
   echo "$runtime_exports" >&2
@@ -434,8 +434,8 @@ for i in "${!samples[@]}"; do
   sample="${samples[$i]}"
   port=$((SERVER_PORT_BASE + i))
   log="$RESULTS_DIR/$sample.log"
-  server_log="/tmp/scuda-samples-$port.log"
-  pidfile="/tmp/scuda-samples-$port.pid"
+  server_log="/tmp/lupine-samples-$port.log"
+  pidfile="/tmp/lupine-samples-$port.pid"
 
   sample_exe="$(resolve_sample_exe "$sample" || true)"
   if [[ -z "$sample_exe" ]]; then
@@ -460,15 +460,15 @@ for i in "${!samples[@]}"; do
   stop_remote_server "$pidfile" "$server_log"
 
   ssh "${SSH_ARGS[@]}" "$SERVER_SSH_TARGET" \
-    "rm -f '$server_log' '$pidfile'; SCUDA_PORT=$port nohup '$SERVER_REMOTE_BIN' >'$server_log' 2>&1 < /dev/null & echo \$! >'$pidfile'; sleep 0.25"
+    "rm -f '$server_log' '$pidfile'; LUPINE_PORT=$port nohup '$SERVER_REMOTE_BIN' >'$server_log' 2>&1 < /dev/null & echo \$! >'$pidfile'; sleep 0.25"
 
   set +e
   (
     cd "$sample_cwd"
     timeout --kill-after=5s "$(sample_timeout "$sample")" env \
       LD_LIBRARY_PATH="$CUDA_LIB_DIR:${LD_LIBRARY_PATH:-}" \
-      SCUDA_SERVER="$SERVER_HOST:$port" \
-      LD_PRELOAD="$SCUDA_LIB" \
+      LUPINE_SERVER="$SERVER_HOST:$port" \
+      LD_PRELOAD="$LUPINE_LIB" \
       "$sample_exe" "${sample_argv[@]}"
   ) >"$log" 2>&1
   rc=$?

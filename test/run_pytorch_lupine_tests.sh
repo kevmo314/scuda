@@ -8,11 +8,11 @@ SERVER_USER="${SERVER_USER:-kevin}"
 SERVER_SSH_TARGET="${SERVER_SSH_TARGET:-$SERVER_USER@$SERVER_HOST}"
 SERVER_PORT_BASE="${SERVER_PORT_BASE:-20100}"
 SERVER_UPLOAD="${SERVER_UPLOAD:-1}"
-SERVER_LOCAL_BIN="${SERVER_LOCAL_BIN:-$repo_root/build/scuda_driver_server}"
-SERVER_REMOTE_BIN="${SERVER_REMOTE_BIN:-/tmp/scuda-driver-server-pytorch-${USER:-scuda}-$$}"
+SERVER_LOCAL_BIN="${SERVER_LOCAL_BIN:-$repo_root/build/lupine_driver_server}"
+SERVER_REMOTE_BIN="${SERVER_REMOTE_BIN:-/tmp/lupine-driver-server-pytorch-${USER:-lupine}-$$}"
 SERVER_REMOTE_CLEANUP="${SERVER_REMOTE_CLEANUP:-1}"
 
-SCUDA_LIB="${SCUDA_LIB:-$repo_root/build/libcuda.so.1}"
+LUPINE_LIB="${LUPINE_LIB:-$repo_root/build/libcuda.so.1}"
 PYTHON_BIN="${PYTHON_BIN:-$repo_root/.venv-pytorch312/bin/python}"
 CUDA_LIB_DIR="${CUDA_LIB_DIR:-/usr/local/cuda/lib64}"
 TEST_TIMEOUT="${TEST_TIMEOUT:-90}"
@@ -39,8 +39,8 @@ if [[ ! -x "$PYTHON_BIN" ]]; then
   echo "missing python: $PYTHON_BIN" >&2
   exit 1
 fi
-if [[ ! -x "$SCUDA_LIB" ]]; then
-  echo "missing shim: $SCUDA_LIB" >&2
+if [[ ! -x "$LUPINE_LIB" ]]; then
+  echo "missing shim: $LUPINE_LIB" >&2
   exit 1
 fi
 if [[ ! -x "$SERVER_LOCAL_BIN" ]]; then
@@ -70,22 +70,22 @@ for i in "${!TESTS[@]}"; do
   test_name="${TESTS[$i]}"
   port=$((SERVER_PORT_BASE + i))
   log="$RESULTS_DIR/$test_name.log"
-  server_log="/tmp/scuda-pytorch-$port.log"
-  pidfile="/tmp/scuda-pytorch-$port.pid"
+  server_log="/tmp/lupine-pytorch-$port.log"
+  pidfile="/tmp/lupine-pytorch-$port.pid"
 
   ssh "$SERVER_SSH_TARGET" \
     "if [ -f '$pidfile' ]; then kill \$(cat '$pidfile') >/dev/null 2>&1 || true; fi; pkill -f -- '$SERVER_REMOTE_BIN' >/dev/null 2>&1 || true; rm -f '$server_log' '$pidfile'" \
     >/dev/null 2>&1 || true
 
   ssh "$SERVER_SSH_TARGET" \
-    "rm -f '$server_log' '$pidfile'; SCUDA_PORT=$port nohup '$SERVER_REMOTE_BIN' >'$server_log' 2>&1 < /dev/null & echo \$! >'$pidfile'; sleep 0.25"
+    "rm -f '$server_log' '$pidfile'; LUPINE_PORT=$port nohup '$SERVER_REMOTE_BIN' >'$server_log' 2>&1 < /dev/null & echo \$! >'$pidfile'; sleep 0.25"
 
   set +e
   timeout --kill-after=5s "$TEST_TIMEOUT" env \
     LD_LIBRARY_PATH="$repo_root/build:$CUDA_LIB_DIR:${LD_LIBRARY_PATH:-}" \
-    SCUDA_SERVER="$SERVER_HOST:$port" \
-    LD_PRELOAD="$SCUDA_LIB" \
-    "$PYTHON_BIN" "$repo_root/test/pytorch_scuda_tests.py" "$test_name" \
+    LUPINE_SERVER="$SERVER_HOST:$port" \
+    LD_PRELOAD="$LUPINE_LIB" \
+    "$PYTHON_BIN" "$repo_root/test/pytorch_lupine_tests.py" "$test_name" \
     >"$log" 2>&1
   rc=$?
   set -e
