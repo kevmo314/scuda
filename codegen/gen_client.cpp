@@ -8,7 +8,11 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
+#include <fcntl.h>
 #include <string>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <unordered_map>
 #include <vector>
 
@@ -19,6 +23,7 @@
 extern int rpc_size();
 extern conn_t *rpc_client_get_connection(unsigned int index);
 extern void rpc_close(conn_t *conn);
+extern "C" int lupine_read_deferred_dtoh_copies(conn_t *conn);
 
 struct lupine_route {
   int kind;
@@ -1027,15 +1032,42 @@ CUresult cuModuleLoad(CUmodule *module, const char *fname) {
   }
   conn_t *conn = lupine_route_remote_conn(route);
   CUresult return_value;
+  void *file_mapping = MAP_FAILED;
+  size_t mapped_file_size = 0;
+  int file_fd = open(fname, O_RDONLY);
+  if (file_fd < 0) {
+    return CUDA_ERROR_FILE_NOT_FOUND;
+  }
+  struct stat st = {};
+  if (fstat(file_fd, &st) < 0 || st.st_size <= 0) {
+    close(file_fd);
+    return CUDA_ERROR_FILE_NOT_FOUND;
+  }
+  mapped_file_size = static_cast<size_t>(st.st_size);
+  file_mapping =
+      mmap(nullptr, mapped_file_size, PROT_READ, MAP_PRIVATE, file_fd, 0);
+  close(file_fd);
+  if (file_mapping == MAP_FAILED) {
+    return CUDA_ERROR_FILE_NOT_FOUND;
+  }
   std::size_t fname_len = std::strlen(fname) + 1;
-  if (conn == nullptr || rpc_write_start_request(conn, RPC_cuModuleLoad) < 0 ||
+  bool failed =
+      conn == nullptr || rpc_write_start_request(conn, RPC_cuModuleLoad) < 0 ||
       rpc_write(conn, &fname_len, sizeof(std::size_t)) < 0 ||
       rpc_write(conn, fname, fname_len) < 0 ||
+      rpc_write(conn, &mapped_file_size, sizeof(mapped_file_size)) < 0 ||
+      rpc_write(conn, file_mapping, mapped_file_size) < 0 ||
       rpc_wait_for_response(conn) < 0 ||
       rpc_read(conn, module, sizeof(CUmodule)) < 0 ||
       rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
-      rpc_read_end(conn) < 0)
+      rpc_read_end(conn) < 0;
+  munmap(file_mapping, mapped_file_size);
+  if (failed) {
     return CUDA_ERROR_DEVICE_UNAVAILABLE;
+  }
+  if (return_value == CUDA_SUCCESS && module != nullptr) {
+    lupine_note_module_owner(*module, conn);
+  }
   return return_value;
 }
 
@@ -2166,9 +2198,9 @@ CUresult cuMemcpyHtoDAsync_v2(CUdeviceptr dstDevice, const void *srcHost,
       rpc_write_start_request(conn, RPC_cuMemcpyHtoDAsync_v2) < 0 ||
       rpc_write(conn, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
       rpc_write(conn, &ByteCount, sizeof(size_t)) < 0 ||
+      rpc_write(conn, &hStream, sizeof(CUstream)) < 0 ||
       (ByteCount != 0 && srcHost == nullptr) ||
       (ByteCount != 0 && rpc_write(conn, srcHost, ByteCount) < 0) ||
-      rpc_write(conn, &hStream, sizeof(CUstream)) < 0 ||
       rpc_wait_for_response(conn) < 0 ||
       rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
       rpc_read_end(conn) < 0)
@@ -4072,6 +4104,7 @@ CUresult cuEventQuery(CUevent hEvent) {
   if (conn == nullptr || rpc_write_start_request(conn, RPC_cuEventQuery) < 0 ||
       rpc_write(conn, &hEvent, sizeof(CUevent)) < 0 ||
       rpc_wait_for_response(conn) < 0 ||
+      lupine_read_deferred_dtoh_copies(conn) < 0 ||
       rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
       rpc_read_end(conn) < 0)
     return CUDA_ERROR_DEVICE_UNAVAILABLE;

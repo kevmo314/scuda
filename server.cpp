@@ -407,6 +407,13 @@ void client_handler(int connfd) {
       }
       continue;
     }
+    if (op == RPC_cuEventQuery) {
+      if (handle_manual_cuEventQuery(&conn) < 0) {
+        lupine_log_manual_handler_error("cuEventQuery");
+        break;
+      }
+      continue;
+    }
     if (op == RPC_cuStreamWaitEvent) {
       if (handle_manual_cuStreamWaitEvent(&conn) < 0) {
         lupine_log_manual_handler_error("cuStreamWaitEvent");
@@ -492,6 +499,14 @@ void client_handler(int connfd) {
     if (op == RPC_cuGraphDestroy) {
       if (handle_manual_cuGraphDestroy(&conn) < 0) {
         std::cerr << "Error handling manual cuGraphDestroy request."
+                  << std::endl;
+        break;
+      }
+      continue;
+    }
+    if (op == RPC_cuMemcpyHtoD_v2) {
+      if (handle_manual_cuMemcpyHtoD_v2(&conn) < 0) {
+        std::cerr << "Error handling manual cuMemcpyHtoD_v2 request."
                   << std::endl;
         break;
       }

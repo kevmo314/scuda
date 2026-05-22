@@ -1035,21 +1035,30 @@ ERROR_0:
 }
 
 int handle_cuModuleLoad(conn_t *conn) {
-  CUmodule module;
-  const char *fname;
+  CUmodule module = nullptr;
+  char *fname;
   std::size_t fname_len;
+  size_t image_size = 0;
+  std::vector<unsigned char> image;
   int request_id;
-  CUresult lupine_intercept_result;
+  CUresult lupine_intercept_result = CUDA_ERROR_INVALID_VALUE;
   if (rpc_read(conn, &fname_len, sizeof(std::size_t)) < 0)
     goto ERROR_0;
-  fname = (const char *)malloc(fname_len);
+  fname = (char *)malloc(fname_len);
+  if (fname == nullptr)
+    goto ERROR_0;
   if (rpc_read(conn, (void *)fname, fname_len) < 0 || false)
+    goto ERROR_1;
+  if (rpc_read(conn, &image_size, sizeof(size_t)) < 0)
+    goto ERROR_1;
+  image.assign(image_size + 1, 0);
+  if (image_size == 0 || rpc_read(conn, image.data(), image_size) < 0)
     goto ERROR_1;
 
   request_id = rpc_read_end(conn);
   if (request_id < 0)
     goto ERROR_1;
-  lupine_intercept_result = cuModuleLoad(&module, fname);
+  lupine_intercept_result = cuModuleLoadData(&module, image.data());
 
   if (rpc_write_start_response(conn, request_id) < 0 ||
       rpc_write(conn, &module, sizeof(CUmodule)) < 0 ||

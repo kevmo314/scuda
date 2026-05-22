@@ -1,6 +1,7 @@
 #include <sys/socket.h>
 
 #include "rpc.h"
+#include <algorithm>
 #include <errno.h>
 #include <iostream>
 #include <string.h>
@@ -114,6 +115,19 @@ int rpc_read(conn_t *conn, void *data, size_t size) {
     total += static_cast<size_t>(bytes_read);
   }
   return static_cast<int>(total);
+}
+
+int rpc_drain(conn_t *conn, size_t size) {
+  char buffer[64 * 1024];
+  size_t offset = 0;
+  while (offset < size) {
+    size_t chunk = std::min(sizeof(buffer), size - offset);
+    if (rpc_read(conn, buffer, chunk) < 0) {
+      return -1;
+    }
+    offset += chunk;
+  }
+  return 0;
 }
 
 // rpc_read_end releases the response lock on the given connection.
