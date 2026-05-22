@@ -57,7 +57,8 @@ void client_handler(int connfd) {
   if (pthread_mutex_init(&conn.read_mutex, NULL) < 0 ||
       pthread_mutex_init(&conn.write_mutex, NULL) < 0 ||
       pthread_mutex_init(&conn.call_mutex, NULL) < 0 ||
-      pthread_cond_init(&conn.read_cond, NULL) < 0) {
+      pthread_cond_init(&conn.read_cond, NULL) < 0 ||
+      rpc_http2_server_init(&conn) < 0) {
     std::cerr << "Error initializing mutex." << std::endl;
     return;
   }

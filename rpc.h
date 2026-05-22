@@ -20,6 +20,7 @@ typedef struct {
   int write_iov_count;
   int local_request_parity;
   int closed;
+  void *http2;
 } conn_t;
 
 extern int rpc_dispatch(conn_t *conn, int parity);
@@ -34,5 +35,8 @@ extern int rpc_write_start_request(conn_t *conn, const int op);
 extern int rpc_write_start_response(conn_t *conn, const int read_id);
 extern int rpc_write(conn_t *conn, const void *data, const size_t size);
 extern int rpc_write_end(conn_t *conn);
+
+extern int rpc_http2_client_init(conn_t *conn);
+extern int rpc_http2_server_init(conn_t *conn);
 
 #endif
