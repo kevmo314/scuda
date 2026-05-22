@@ -2791,6 +2791,59 @@ int handle_manual_cuGraphDestroy(conn_t *conn) {
   return 0;
 }
 
+int handle_manual_cuMemcpyHtoD_v2(conn_t *conn) {
+  CUdeviceptr dstDevice = 0;
+  size_t byteCount = 0;
+  CUresult result = CUDA_SUCCESS;
+  void *host = nullptr;
+
+  if (rpc_read(conn, &dstDevice, sizeof(dstDevice)) < 0 ||
+      rpc_read(conn, &byteCount, sizeof(byteCount)) < 0) {
+    return -1;
+  }
+
+  size_t chunk_bytes = std::min(LUPINE_HTOD_CHUNK_BYTES, byteCount);
+  if (chunk_bytes != 0) {
+    result = cuMemAllocHost(&host, chunk_bytes);
+  }
+  if (result != CUDA_SUCCESS) {
+    if (rpc_drain(conn, byteCount) < 0) {
+      return -1;
+    }
+  }
+
+  size_t offset = 0;
+  while (result == CUDA_SUCCESS && offset < byteCount) {
+    size_t chunk = std::min(chunk_bytes, byteCount - offset);
+    if (rpc_read(conn, host, chunk) < 0) {
+      if (host != nullptr) {
+        cuMemFreeHost(host);
+      }
+      return -1;
+    }
+    result = cuMemcpyHtoD_v2(dstDevice + offset, host, chunk);
+    offset += chunk;
+    if (result != CUDA_SUCCESS && rpc_drain(conn, byteCount - offset) < 0) {
+      cuMemFreeHost(host);
+      return -1;
+    }
+  }
+
+  if (host != nullptr) {
+    cuMemFreeHost(host);
+  }
+
+  int request_id = rpc_read_end(conn);
+  if (request_id < 0) {
+    return -1;
+  }
+  if (rpc_write_start_response(conn, request_id) < 0 ||
+      rpc_write(conn, &result, sizeof(result)) < 0 || rpc_write_end(conn) < 0) {
+    return -1;
+  }
+  return 0;
+}
+
 int handle_manual_cuMemcpyHtoDAsync_v2(conn_t *conn) {
   CUdeviceptr dstDevice = 0;
   size_t byteCount = 0;
@@ -2818,14 +2871,8 @@ int handle_manual_cuMemcpyHtoDAsync_v2(conn_t *conn) {
     capture_host = lupine_alloc_capture_scratch(resources, byteCount);
     if (capture_host == nullptr && byteCount != 0) {
       result = CUDA_ERROR_OUT_OF_MEMORY;
-      std::vector<unsigned char> drain(64 * 1024);
-      size_t offset = 0;
-      while (offset < byteCount) {
-        size_t chunk = std::min(drain.size(), byteCount - offset);
-        if (rpc_read(conn, drain.data(), chunk) < 0) {
-          return -1;
-        }
-        offset += chunk;
+      if (rpc_drain(conn, byteCount) < 0) {
+        return -1;
       }
     } else {
       if (byteCount != 0 && rpc_read(conn, capture_host, byteCount) < 0) {
@@ -2840,14 +2887,8 @@ int handle_manual_cuMemcpyHtoDAsync_v2(conn_t *conn) {
       result = cuMemAllocHost(&host, byteCount);
     }
     if (result != CUDA_SUCCESS) {
-      std::vector<unsigned char> drain(64 * 1024);
-      size_t offset = 0;
-      while (offset < byteCount) {
-        size_t chunk = std::min(drain.size(), byteCount - offset);
-        if (rpc_read(conn, drain.data(), chunk) < 0) {
-          return -1;
-        }
-        offset += chunk;
+      if (rpc_drain(conn, byteCount) < 0) {
+        return -1;
       }
     }
     size_t offset = 0;
@@ -2870,14 +2911,9 @@ int handle_manual_cuMemcpyHtoDAsync_v2(conn_t *conn) {
         }
         cuMemFreeHost(host);
         result = copy_result;
-        std::vector<unsigned char> drain(64 * 1024);
         offset += chunk;
-        while (offset < byteCount) {
-          size_t drain_chunk = std::min(drain.size(), byteCount - offset);
-          if (rpc_read(conn, drain.data(), drain_chunk) < 0) {
-            return -1;
-          }
-          offset += drain_chunk;
+        if (rpc_drain(conn, byteCount - offset) < 0) {
+          return -1;
         }
         host = nullptr;
         break;

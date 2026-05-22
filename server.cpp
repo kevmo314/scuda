@@ -504,6 +504,14 @@ void client_handler(int connfd) {
       }
       continue;
     }
+    if (op == RPC_cuMemcpyHtoD_v2) {
+      if (handle_manual_cuMemcpyHtoD_v2(&conn) < 0) {
+        std::cerr << "Error handling manual cuMemcpyHtoD_v2 request."
+                  << std::endl;
+        break;
+      }
+      continue;
+    }
     if (op == RPC_cuMemcpyHtoDAsync_v2) {
       if (handle_manual_cuMemcpyHtoDAsync_v2(&conn) < 0) {
         std::cerr << "Error handling manual cuMemcpyHtoDAsync_v2 request."
