@@ -2911,8 +2911,7 @@ extern "C" CUresult cuMemPoolSetAttribute(CUmemoryPool pool,
 static thread_local CUcontext lupine_current_context = nullptr;
 static thread_local CUcontext lupine_default_context_hint = nullptr;
 static std::atomic<CUcontext> lupine_global_default_context_hint{nullptr};
-static thread_local auto *lupine_context_stack =
-    new std::vector<CUcontext>();
+static thread_local auto *lupine_context_stack = new std::vector<CUcontext>();
 static std::atomic<unsigned long long> lupine_context_cache_generation{0};
 static thread_local bool lupine_ctx_get_device_cache_valid = false;
 static thread_local unsigned long long lupine_ctx_get_device_cache_generation =

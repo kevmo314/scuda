@@ -5,11 +5,11 @@
 #include <deque>
 #include <errno.h>
 #include <iostream>
+#include <nghttp2/nghttp2.h>
 #include <stdint.h>
 #include <string.h>
 #include <unistd.h>
 #include <vector>
-
 
 void *_rpc_read_id_dispatch(void *p) {
   conn_t *conn = (conn_t *)p;
@@ -286,47 +286,46 @@ int rpc_write_end(conn_t *conn) {
 
 namespace {
 
-constexpr const char kH2ClientPreface[] = "PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n";
-constexpr size_t kH2PrefaceLen = 24;
 constexpr uint32_t kH2InitialWindow = 0x7fffffffU;
 constexpr uint32_t kH2MaxFrame = (16 * 1024 * 1024) - 1;
-constexpr size_t kH2WindowUpdateThreshold = 64 * 1024 * 1024;
-
-enum {
-  H2_DATA = 0x0,
-  H2_HEADERS = 0x1,
-  H2_SETTINGS = 0x4,
-  H2_WINDOW_UPDATE = 0x8,
-};
-
-enum {
-  H2_FLAG_END_STREAM = 0x1,
-  H2_FLAG_END_HEADERS = 0x4,
-  H2_FLAG_ACK = 0x1,
-};
-
-enum {
-  H2_SETTINGS_INITIAL_WINDOW_SIZE = 0x4,
-  H2_SETTINGS_MAX_FRAME_SIZE = 0x5,
-};
+constexpr size_t kH2FrameHeaderLen = 9;
 
 struct h2_buffer {
   std::vector<unsigned char> data;
   size_t offset = 0;
 };
 
-struct h2_tunnel {
+struct h2_transport {
   int netfd = -1;
   bool server = false;
-  bool got_preface = false;
   bool response_sent = false;
+  bool redirect = false;
   int32_t stream_id = 1;
-  uint32_t peer_max_frame = 16384;
+  int response_status = 0;
+  std::string redirect_location;
+  nghttp2_session *session = nullptr;
   std::deque<h2_buffer> local_out;
   size_t queued_local_bytes = 0;
-  size_t pending_conn_window_update = 0;
-  size_t pending_stream_window_update = 0;
   pthread_mutex_t send_mutex = PTHREAD_MUTEX_INITIALIZER;
+};
+
+struct h2_write_cursor {
+  const unsigned char *base = nullptr;
+  size_t len = 0;
+};
+
+struct h2_write_source {
+  std::vector<h2_write_cursor> cursors;
+  size_t index = 0;
+  size_t pending_len = 0;
+
+  size_t remaining() const {
+    size_t total = 0;
+    for (size_t i = index; i < cursors.size(); ++i) {
+      total += cursors[i].len;
+    }
+    return total;
+  }
 };
 
 void queue_bytes(std::deque<h2_buffer> &queue, size_t &queued,
@@ -340,26 +339,13 @@ void queue_bytes(std::deque<h2_buffer> &queue, size_t &queued,
   queue.push_back(std::move(buffer));
 }
 
-uint32_t read_u24(const unsigned char *p) {
-  return (static_cast<uint32_t>(p[0]) << 16) |
-         (static_cast<uint32_t>(p[1]) << 8) | static_cast<uint32_t>(p[2]);
-}
-
-uint32_t read_u32(const unsigned char *p) {
-  return (static_cast<uint32_t>(p[0]) << 24) |
-         (static_cast<uint32_t>(p[1]) << 16) |
-         (static_cast<uint32_t>(p[2]) << 8) | static_cast<uint32_t>(p[3]);
-}
-
-} // namespace
-
-static int h2_write_all_locked(h2_tunnel *tunnel, const struct iovec *iov,
-                               int iov_count) {
+int h2_write_all_locked(h2_transport *transport, const struct iovec *iov,
+                        int iov_count) {
   std::vector<struct iovec> local(iov, iov + iov_count);
   struct iovec *cursor = local.data();
   int count = iov_count;
   while (count > 0) {
-    ssize_t n = writev(tunnel->netfd, cursor, count);
+    ssize_t n = writev(transport->netfd, cursor, count);
     if (n < 0) {
       if (errno == EINTR) {
         continue;
@@ -383,199 +369,226 @@ static int h2_write_all_locked(h2_tunnel *tunnel, const struct iovec *iov,
   return 0;
 }
 
-static int h2_send_frame_direct(h2_tunnel *tunnel, uint8_t type, uint8_t flags,
-                                int32_t stream_id, const void *payload,
-                                size_t payload_len) {
-  unsigned char header[9];
-  header[0] = static_cast<unsigned char>((payload_len >> 16) & 0xff);
-  header[1] = static_cast<unsigned char>((payload_len >> 8) & 0xff);
-  header[2] = static_cast<unsigned char>(payload_len & 0xff);
-  header[3] = type;
-  header[4] = flags;
-  uint32_t sid = static_cast<uint32_t>(stream_id) & 0x7fffffffU;
-  header[5] = static_cast<unsigned char>((sid >> 24) & 0xff);
-  header[6] = static_cast<unsigned char>((sid >> 16) & 0xff);
-  header[7] = static_cast<unsigned char>((sid >> 8) & 0xff);
-  header[8] = static_cast<unsigned char>(sid & 0xff);
-
-  struct iovec iov[2];
-  iov[0] = {header, sizeof(header)};
-  iov[1] = {const_cast<void *>(payload), payload_len};
-  pthread_mutex_lock(&tunnel->send_mutex);
-  int result = h2_write_all_locked(tunnel, iov, payload_len == 0 ? 1 : 2);
-  pthread_mutex_unlock(&tunnel->send_mutex);
-  return result;
+ssize_t h2_send_callback(nghttp2_session *, const uint8_t *data, size_t length,
+                         int, void *user_data) {
+  auto *transport = static_cast<h2_transport *>(user_data);
+  struct iovec iov = {const_cast<uint8_t *>(data), length};
+  return h2_write_all_locked(transport, &iov, 1) == 0
+             ? static_cast<ssize_t>(length)
+             : NGHTTP2_ERR_CALLBACK_FAILURE;
 }
 
-static int h2_send_settings_direct(h2_tunnel *tunnel) {
-  unsigned char payload[12];
-  payload[0] = 0;
-  payload[1] = H2_SETTINGS_INITIAL_WINDOW_SIZE;
-  payload[2] = static_cast<unsigned char>((kH2InitialWindow >> 24) & 0xff);
-  payload[3] = static_cast<unsigned char>((kH2InitialWindow >> 16) & 0xff);
-  payload[4] = static_cast<unsigned char>((kH2InitialWindow >> 8) & 0xff);
-  payload[5] = static_cast<unsigned char>(kH2InitialWindow & 0xff);
-  payload[6] = 0;
-  payload[7] = H2_SETTINGS_MAX_FRAME_SIZE;
-  payload[8] = static_cast<unsigned char>((kH2MaxFrame >> 24) & 0xff);
-  payload[9] = static_cast<unsigned char>((kH2MaxFrame >> 16) & 0xff);
-  payload[10] = static_cast<unsigned char>((kH2MaxFrame >> 8) & 0xff);
-  payload[11] = static_cast<unsigned char>(kH2MaxFrame & 0xff);
-  return h2_send_frame_direct(tunnel, H2_SETTINGS, 0, 0, payload,
-                              sizeof(payload));
+ssize_t h2_data_source_read_callback(nghttp2_session *, int32_t, uint8_t *,
+                                     size_t length, uint32_t *data_flags,
+                                     nghttp2_data_source *source, void *) {
+  auto *write_source = static_cast<h2_write_source *>(source->ptr);
+  size_t remaining = write_source->remaining();
+  if (remaining == 0) {
+    *data_flags |= NGHTTP2_DATA_FLAG_EOF | NGHTTP2_DATA_FLAG_NO_END_STREAM;
+    write_source->pending_len = 0;
+    return 0;
+  }
+  size_t chunk = std::min(remaining, length);
+  *data_flags |= NGHTTP2_DATA_FLAG_NO_COPY;
+  if (chunk == remaining) {
+    *data_flags |= NGHTTP2_DATA_FLAG_EOF | NGHTTP2_DATA_FLAG_NO_END_STREAM;
+  }
+  write_source->pending_len = chunk;
+  return static_cast<ssize_t>(chunk);
 }
 
-static int h2_send_window_direct(h2_tunnel *tunnel, int32_t stream_id,
-                                 uint32_t inc) {
-  unsigned char payload[4];
-  payload[0] = static_cast<unsigned char>((inc >> 24) & 0xff);
-  payload[1] = static_cast<unsigned char>((inc >> 16) & 0xff);
-  payload[2] = static_cast<unsigned char>((inc >> 8) & 0xff);
-  payload[3] = static_cast<unsigned char>(inc & 0xff);
-  return h2_send_frame_direct(tunnel, H2_WINDOW_UPDATE, 0, stream_id, payload,
-                              sizeof(payload));
+ssize_t h2_data_source_read_length_callback(nghttp2_session *, uint8_t, int32_t,
+                                            int32_t session_remote_window_size,
+                                            int32_t stream_remote_window_size,
+                                            uint32_t remote_max_frame_size,
+                                            void *) {
+  int32_t window =
+      std::min(session_remote_window_size, stream_remote_window_size);
+  if (window <= 0) {
+    return NGHTTP2_ERR_CALLBACK_FAILURE;
+  }
+  size_t max_len = std::min<size_t>(kH2MaxFrame, remote_max_frame_size);
+  max_len = std::min<size_t>(max_len, static_cast<size_t>(window));
+  return static_cast<ssize_t>(std::max<size_t>(1, max_len));
 }
 
-static int h2_send_client_headers_direct(h2_tunnel *tunnel) {
-  unsigned char block[] = {
-      0x83, // :method: POST
-      0x86, // :scheme: http
-      0x84, // :path: /
-      0x01, 0x06, 'l', 'u', 'p', 'i', 'n', 'e', // :authority
-  };
-  return h2_send_frame_direct(tunnel, H2_HEADERS, H2_FLAG_END_HEADERS,
-                              tunnel->stream_id, block, sizeof(block));
-}
+int h2_send_data_callback(nghttp2_session *, nghttp2_frame *frame,
+                          const uint8_t *framehd, size_t length,
+                          nghttp2_data_source *source, void *user_data) {
+  auto *transport = static_cast<h2_transport *>(user_data);
+  auto *write_source = static_cast<h2_write_source *>(source->ptr);
+  if (length != write_source->pending_len) {
+    return NGHTTP2_ERR_CALLBACK_FAILURE;
+  }
 
-static int h2_send_server_headers_direct(h2_tunnel *tunnel) {
-  unsigned char block[] = {0x88}; // :status: 200
-  tunnel->response_sent = true;
-  return h2_send_frame_direct(tunnel, H2_HEADERS, H2_FLAG_END_HEADERS,
-                              tunnel->stream_id, block, sizeof(block));
-}
+  std::vector<struct iovec> iov;
+  iov.reserve(write_source->cursors.size() - write_source->index + 3);
+  iov.push_back({const_cast<uint8_t *>(framehd), kH2FrameHeaderLen});
 
-static int h2_read_exact(int fd, void *data, size_t size) {
-  char *cursor = static_cast<char *>(data);
-  size_t total = 0;
-  while (total < size) {
-    ssize_t n = read(fd, cursor + total, size - total);
-    if (n < 0) {
-      if (errno == EINTR) {
-        continue;
-      }
-      return -1;
+  unsigned char padlen = 0;
+  if (frame->data.padlen > 0) {
+    padlen = static_cast<unsigned char>(frame->data.padlen - 1);
+    iov.push_back({&padlen, 1});
+  }
+
+  size_t remaining = length;
+  size_t cursor_index = write_source->index;
+  while (remaining > 0 && cursor_index < write_source->cursors.size()) {
+    auto &cursor = write_source->cursors[cursor_index];
+    size_t chunk = std::min(remaining, cursor.len);
+    iov.push_back({const_cast<unsigned char *>(cursor.base), chunk});
+    remaining -= chunk;
+    ++cursor_index;
+  }
+  if (remaining != 0) {
+    return NGHTTP2_ERR_CALLBACK_FAILURE;
+  }
+
+  unsigned char padding[256] = {};
+  if (frame->data.padlen > 1) {
+    iov.push_back({padding, frame->data.padlen - 1});
+  }
+
+  if (h2_write_all_locked(transport, iov.data(), static_cast<int>(iov.size())) <
+      0) {
+    return NGHTTP2_ERR_CALLBACK_FAILURE;
+  }
+
+  remaining = length;
+  while (remaining > 0) {
+    auto &cursor = write_source->cursors[write_source->index];
+    size_t chunk = std::min(remaining, cursor.len);
+    cursor.base += chunk;
+    cursor.len -= chunk;
+    remaining -= chunk;
+    if (cursor.len == 0) {
+      ++write_source->index;
     }
-    if (n == 0) {
-      return -1;
+  }
+  write_source->pending_len = 0;
+  return 0;
+}
+
+int h2_on_data_chunk_recv_callback(nghttp2_session *, uint8_t, int32_t,
+                                   const uint8_t *data, size_t len,
+                                   void *user_data) {
+  auto *transport = static_cast<h2_transport *>(user_data);
+  queue_bytes(transport->local_out, transport->queued_local_bytes, data, len);
+  return 0;
+}
+
+nghttp2_nv h2_nv(const char *name, const char *value) {
+  return {reinterpret_cast<uint8_t *>(const_cast<char *>(name)),
+          reinterpret_cast<uint8_t *>(const_cast<char *>(value)), strlen(name),
+          strlen(value),
+          NGHTTP2_NV_FLAG_NO_COPY_NAME | NGHTTP2_NV_FLAG_NO_COPY_VALUE};
+}
+
+int h2_submit_server_response(h2_transport *transport) {
+  nghttp2_nv headers[] = {h2_nv(":status", "200")};
+  if (nghttp2_submit_headers(transport->session, NGHTTP2_FLAG_NONE,
+                             transport->stream_id, nullptr, headers, 1,
+                             nullptr) != 0) {
+    return -1;
+  }
+  transport->response_sent = true;
+  return 0;
+}
+
+int h2_on_frame_recv_callback(nghttp2_session *, const nghttp2_frame *frame,
+                              void *user_data) {
+  auto *transport = static_cast<h2_transport *>(user_data);
+  if (transport->server && frame->hd.type == NGHTTP2_HEADERS &&
+      frame->headers.cat == NGHTTP2_HCAT_REQUEST) {
+    transport->stream_id = frame->hd.stream_id;
+    if (!transport->response_sent && h2_submit_server_response(transport) < 0) {
+      return NGHTTP2_ERR_CALLBACK_FAILURE;
     }
-    total += static_cast<size_t>(n);
   }
   return 0;
 }
 
-static int h2_process_frame_direct(h2_tunnel *tunnel, uint8_t type,
-                                   uint8_t flags, int32_t stream_id,
-                                   const unsigned char *payload,
-                                   size_t payload_len) {
-  if (type == H2_SETTINGS) {
-    if ((flags & H2_FLAG_ACK) == 0) {
-      for (size_t offset = 0; offset + 6 <= payload_len; offset += 6) {
-        uint16_t id = (static_cast<uint16_t>(payload[offset]) << 8) |
-                      static_cast<uint16_t>(payload[offset + 1]);
-        uint32_t value = read_u32(payload + offset + 2);
-        if (id == H2_SETTINGS_MAX_FRAME_SIZE) {
-          tunnel->peer_max_frame = std::min<uint32_t>(value, kH2MaxFrame);
-        }
-      }
-      return h2_send_frame_direct(tunnel, H2_SETTINGS, H2_FLAG_ACK, 0, nullptr,
-                                  0);
-    }
+int h2_on_header_callback(nghttp2_session *, const nghttp2_frame *frame,
+                          const uint8_t *name, size_t namelen,
+                          const uint8_t *value, size_t valuelen, uint8_t,
+                          void *user_data) {
+  auto *transport = static_cast<h2_transport *>(user_data);
+  if (transport->server || frame->hd.type != NGHTTP2_HEADERS ||
+      frame->headers.cat != NGHTTP2_HCAT_RESPONSE) {
     return 0;
   }
-  if (type == H2_HEADERS) {
-    if (tunnel->server) {
-      tunnel->stream_id = stream_id;
-      if (!tunnel->response_sent) {
-        return h2_send_server_headers_direct(tunnel);
+  if (namelen == 7 && memcmp(name, ":status", 7) == 0) {
+    transport->response_status = 0;
+    for (size_t i = 0; i < valuelen; ++i) {
+      if (value[i] < '0' || value[i] > '9') {
+        return 0;
       }
+      transport->response_status =
+          transport->response_status * 10 + static_cast<int>(value[i] - '0');
     }
-    return 0;
-  }
-  if (type == H2_DATA) {
-    queue_bytes(tunnel->local_out, tunnel->queued_local_bytes, payload,
-                payload_len);
-    tunnel->pending_conn_window_update += payload_len;
-    tunnel->pending_stream_window_update += payload_len;
-    if (tunnel->pending_conn_window_update >= kH2WindowUpdateThreshold) {
-      if (h2_send_window_direct(
-              tunnel, 0,
-              static_cast<uint32_t>(tunnel->pending_conn_window_update)) < 0) {
-        return -1;
-      }
-      tunnel->pending_conn_window_update = 0;
-    }
-    if (tunnel->pending_stream_window_update >= kH2WindowUpdateThreshold) {
-      if (h2_send_window_direct(
-              tunnel, stream_id,
-              static_cast<uint32_t>(tunnel->pending_stream_window_update)) <
-          0) {
-        return -1;
-      }
-      tunnel->pending_stream_window_update = 0;
-    }
-    return 0;
+    transport->redirect =
+        transport->response_status >= 300 && transport->response_status < 400;
+  } else if (namelen == 8 && memcmp(name, "location", 8) == 0) {
+    transport->redirect_location.assign(reinterpret_cast<const char *>(value),
+                                        valuelen);
   }
   return 0;
 }
+
+int h2_flush_session(h2_transport *transport) {
+  pthread_mutex_lock(&transport->send_mutex);
+  int result = nghttp2_session_send(transport->session);
+  pthread_mutex_unlock(&transport->send_mutex);
+  return result == 0 ? 0 : -1;
+}
+
+int h2_read_from_net(h2_transport *transport) {
+  unsigned char buffer[64 * 1024];
+  ssize_t n = 0;
+  do {
+    n = read(transport->netfd, buffer, sizeof(buffer));
+  } while (n < 0 && errno == EINTR);
+  if (n <= 0) {
+    return -1;
+  }
+
+  size_t offset = 0;
+  while (offset < static_cast<size_t>(n)) {
+    ssize_t consumed = nghttp2_session_mem_recv(
+        transport->session, buffer + offset, static_cast<size_t>(n) - offset);
+    if (consumed <= 0) {
+      return -1;
+    }
+    offset += static_cast<size_t>(consumed);
+  }
+  return h2_flush_session(transport);
+}
+
+} // namespace
 
 int rpc_http2_read(conn_t *conn, void *data, size_t size) {
-  auto *tunnel = static_cast<h2_tunnel *>(conn->http2);
+  auto *transport = static_cast<h2_transport *>(conn->http2);
   auto *out = static_cast<unsigned char *>(data);
   size_t copied = 0;
   while (copied < size) {
-    while (!tunnel->local_out.empty() && copied < size) {
-      h2_buffer &front = tunnel->local_out.front();
+    while (!transport->local_out.empty() && copied < size) {
+      h2_buffer &front = transport->local_out.front();
       size_t available = front.data.size() - front.offset;
       size_t chunk = std::min(available, size - copied);
       memcpy(out + copied, front.data.data() + front.offset, chunk);
       front.offset += chunk;
-      tunnel->queued_local_bytes -= chunk;
+      transport->queued_local_bytes -= chunk;
       copied += chunk;
       if (front.offset == front.data.size()) {
-        tunnel->local_out.pop_front();
+        transport->local_out.pop_front();
       }
     }
     if (copied == size) {
       return static_cast<int>(size);
     }
-
-    if (tunnel->server && !tunnel->got_preface) {
-      char preface[kH2PrefaceLen];
-      if (h2_read_exact(tunnel->netfd, preface, sizeof(preface)) < 0 ||
-          memcmp(preface, kH2ClientPreface, sizeof(preface)) != 0) {
-        return -1;
-      }
-      tunnel->got_preface = true;
-    }
-
-    unsigned char header[9];
-    if (h2_read_exact(tunnel->netfd, header, sizeof(header)) < 0) {
-      return -1;
-    }
-    uint32_t len = read_u24(header);
-    if (len > kH2MaxFrame) {
-      return -1;
-    }
-    std::vector<unsigned char> payload(len);
-    if (len != 0 && h2_read_exact(tunnel->netfd, payload.data(), len) < 0) {
-      return -1;
-    }
-    uint8_t type = header[3];
-    uint8_t flags = header[4];
-    int32_t stream_id =
-        static_cast<int32_t>(read_u32(header + 5) & 0x7fffffffU);
-    if (h2_process_frame_direct(tunnel, type, flags, stream_id, payload.data(),
-                                payload.size()) < 0) {
+    if ((transport->response_status != 0 &&
+         transport->response_status != 200) ||
+        h2_read_from_net(transport) < 0) {
       return -1;
     }
   }
@@ -583,95 +596,100 @@ int rpc_http2_read(conn_t *conn, void *data, size_t size) {
 }
 
 int rpc_http2_writev(conn_t *conn, struct iovec *iov, int iov_count) {
-  auto *tunnel = static_cast<h2_tunnel *>(conn->http2);
-  struct cursor {
-    const unsigned char *base = nullptr;
-    size_t len = 0;
-  };
-  std::vector<cursor> cursors;
-  cursors.reserve(iov_count);
+  auto *transport = static_cast<h2_transport *>(conn->http2);
+  h2_write_source source;
+  source.cursors.reserve(iov_count);
   for (int i = 0; i < iov_count; ++i) {
     if (iov[i].iov_len == 0) {
       continue;
     }
-    cursors.push_back(
+    source.cursors.push_back(
         {static_cast<const unsigned char *>(iov[i].iov_base), iov[i].iov_len});
   }
+  if (source.cursors.empty()) {
+    return 0;
+  }
 
-  size_t index = 0;
-  while (index < cursors.size()) {
-    size_t frame_len = 0;
-    size_t end = index;
-    while (end < cursors.size() &&
-           frame_len + cursors[end].len <= tunnel->peer_max_frame) {
-      frame_len += cursors[end].len;
-      ++end;
-    }
-    if (frame_len == 0) {
-      frame_len = tunnel->peer_max_frame;
-    }
-
-    unsigned char header[9];
-    header[0] = static_cast<unsigned char>((frame_len >> 16) & 0xff);
-    header[1] = static_cast<unsigned char>((frame_len >> 8) & 0xff);
-    header[2] = static_cast<unsigned char>(frame_len & 0xff);
-    header[3] = H2_DATA;
-    header[4] = 0;
-    uint32_t sid = static_cast<uint32_t>(tunnel->stream_id) & 0x7fffffffU;
-    header[5] = static_cast<unsigned char>((sid >> 24) & 0xff);
-    header[6] = static_cast<unsigned char>((sid >> 16) & 0xff);
-    header[7] = static_cast<unsigned char>((sid >> 8) & 0xff);
-    header[8] = static_cast<unsigned char>(sid & 0xff);
-
-    std::vector<struct iovec> out;
-    out.reserve((end - index) + 2);
-    out.push_back({header, sizeof(header)});
-    size_t remaining = frame_len;
-    while (remaining > 0) {
-      size_t chunk = std::min(remaining, cursors[index].len);
-      out.push_back({const_cast<unsigned char *>(cursors[index].base), chunk});
-      cursors[index].base += chunk;
-      cursors[index].len -= chunk;
-      remaining -= chunk;
-      if (cursors[index].len == 0) {
-        ++index;
-      }
-    }
-
-    pthread_mutex_lock(&tunnel->send_mutex);
-    int result =
-        h2_write_all_locked(tunnel, out.data(), static_cast<int>(out.size()));
-    pthread_mutex_unlock(&tunnel->send_mutex);
-    if (result < 0) {
-        return -1;
-    }
+  nghttp2_data_provider provider = {};
+  provider.source.ptr = &source;
+  provider.read_callback = h2_data_source_read_callback;
+  if (nghttp2_submit_data(transport->session, NGHTTP2_FLAG_NONE,
+                          transport->stream_id, &provider) != 0 ||
+      h2_flush_session(transport) < 0 || source.remaining() != 0) {
+    return -1;
   }
   return 0;
 }
 
 static int h2_init_direct(conn_t *conn, bool server) {
-  auto *tunnel = new h2_tunnel();
-  tunnel->netfd = conn->connfd;
-  tunnel->server = server;
-  tunnel->got_preface = !server;
-  tunnel->peer_max_frame = kH2MaxFrame;
-  conn->http2 = tunnel;
+  auto *transport = new h2_transport();
+  transport->netfd = conn->connfd;
+  transport->server = server;
 
-  if (!server) {
-    struct iovec preface_iov = {
-        const_cast<char *>(kH2ClientPreface), kH2PrefaceLen};
-    pthread_mutex_lock(&tunnel->send_mutex);
-    int preface_result = h2_write_all_locked(tunnel, &preface_iov, 1);
-    pthread_mutex_unlock(&tunnel->send_mutex);
-    if (preface_result < 0) {
-      return -1;
-    }
-  }
-  if (h2_send_settings_direct(tunnel) < 0 ||
-      h2_send_window_direct(tunnel, 0, kH2InitialWindow - 65535U) < 0) {
+  nghttp2_session_callbacks *callbacks = nullptr;
+  if (nghttp2_session_callbacks_new(&callbacks) != 0) {
+    delete transport;
     return -1;
   }
-  if (!server && h2_send_client_headers_direct(tunnel) < 0) {
+  nghttp2_session_callbacks_set_send_callback(callbacks, h2_send_callback);
+  nghttp2_session_callbacks_set_send_data_callback(callbacks,
+                                                   h2_send_data_callback);
+  nghttp2_session_callbacks_set_data_source_read_length_callback(
+      callbacks, h2_data_source_read_length_callback);
+  nghttp2_session_callbacks_set_on_data_chunk_recv_callback(
+      callbacks, h2_on_data_chunk_recv_callback);
+  nghttp2_session_callbacks_set_on_frame_recv_callback(
+      callbacks, h2_on_frame_recv_callback);
+  nghttp2_session_callbacks_set_on_header_callback(callbacks,
+                                                   h2_on_header_callback);
+
+  int session_result = server ? nghttp2_session_server_new(&transport->session,
+                                                           callbacks, transport)
+                              : nghttp2_session_client_new(
+                                    &transport->session, callbacks, transport);
+  nghttp2_session_callbacks_del(callbacks);
+  if (session_result != 0) {
+    delete transport;
+    return -1;
+  }
+
+  nghttp2_settings_entry settings[] = {
+      {NGHTTP2_SETTINGS_INITIAL_WINDOW_SIZE, kH2InitialWindow},
+      {NGHTTP2_SETTINGS_MAX_FRAME_SIZE, kH2MaxFrame},
+  };
+  if (nghttp2_submit_settings(transport->session, NGHTTP2_FLAG_NONE, settings,
+                              2) != 0 ||
+      nghttp2_session_set_local_window_size(
+          transport->session, NGHTTP2_FLAG_NONE, 0,
+          static_cast<int32_t>(kH2InitialWindow)) != 0) {
+    nghttp2_session_del(transport->session);
+    delete transport;
+    return -1;
+  }
+
+  if (!server) {
+    nghttp2_nv headers[] = {
+        h2_nv(":method", "POST"),
+        h2_nv(":scheme", "http"),
+        h2_nv(":path", "/"),
+        h2_nv(":authority", "lupine"),
+    };
+    int32_t stream_id =
+        nghttp2_submit_headers(transport->session, NGHTTP2_FLAG_NONE, -1,
+                               nullptr, headers, 4, nullptr);
+    if (stream_id < 0) {
+      nghttp2_session_del(transport->session);
+      delete transport;
+      return -1;
+    }
+    transport->stream_id = stream_id;
+  }
+
+  conn->http2 = transport;
+  if (h2_flush_session(transport) < 0) {
+    conn->http2 = nullptr;
+    nghttp2_session_del(transport->session);
+    delete transport;
     return -1;
   }
   return 0;

@@ -19,6 +19,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     ca-certificates \
     cmake \
+    libnghttp2-dev \
     ninja-build \
     python3 \
     python3-pip \
@@ -78,6 +79,7 @@ LABEL org.opencontainers.image.version="${CUDA_VERSION}-ubuntu${UBUNTU_VERSION}"
 RUN apt-get update && apt-get install -y --no-install-recommends \
     bash \
     ca-certificates \
+    libnghttp2-14 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN set -eux; \
@@ -121,6 +123,7 @@ LABEL org.opencontainers.image.version="${CUDA_VERSION}-ubuntu${UBUNTU_VERSION}"
 RUN apt-get update && apt-get install -y --no-install-recommends \
     bash \
     ca-certificates \
+    libnghttp2-14 \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=server-build /opt/lupine/build/lupine_driver_server /opt/lupine/bin/lupine_driver_server

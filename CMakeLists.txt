@@ -5,6 +5,8 @@ project(LupineProject LANGUAGES CXX CUDA)
 set(MIN_CUDA_VERSION 11.0)
 
 find_package(CUDAToolkit REQUIRED)
+find_path(NGHTTP2_INCLUDE_DIR nghttp2/nghttp2.h REQUIRED)
+find_library(NGHTTP2_LIBRARY nghttp2 REQUIRED)
 
 if (NOT CUDAToolkit_VERSION)
     message(FATAL_ERROR "CUDA Toolkit is required but not found.")
@@ -30,6 +32,7 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/codegen
     ${CUDAToolkit_INCLUDE_DIRS}
+    ${NGHTTP2_INCLUDE_DIR}
 )
 
 set(CLIENT_SOURCES
@@ -68,7 +71,7 @@ set(SERVER_OUTPUT lupine_driver_server)
 
 add_library(${CLIENT_OUTPUT} SHARED ${CLIENT_SOURCES} ${CLIENT_HEADERS})
 target_include_directories(${CLIENT_OUTPUT} PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
-target_link_libraries(${CLIENT_OUTPUT} PRIVATE stdc++)
+target_link_libraries(${CLIENT_OUTPUT} PRIVATE stdc++ ${NGHTTP2_LIBRARY})
 target_link_options(${CLIENT_OUTPUT} PRIVATE
     "LINKER:--version-script=${CMAKE_CURRENT_SOURCE_DIR}/client.exports"
 )
@@ -81,7 +84,7 @@ set_target_properties(${CLIENT_OUTPUT} PROPERTIES
 
 add_library(${NVML_CLIENT_OUTPUT} SHARED ${NVML_CLIENT_SOURCES})
 target_include_directories(${NVML_CLIENT_OUTPUT} PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
-target_link_libraries(${NVML_CLIENT_OUTPUT} PRIVATE stdc++)
+target_link_libraries(${NVML_CLIENT_OUTPUT} PRIVATE stdc++ ${NGHTTP2_LIBRARY})
 target_link_options(${NVML_CLIENT_OUTPUT} PRIVATE
     "LINKER:--version-script=${CMAKE_CURRENT_SOURCE_DIR}/nvml.exports"
 )
@@ -94,7 +97,7 @@ set_target_properties(${NVML_CLIENT_OUTPUT} PROPERTIES
 
 add_executable(${SERVER_OUTPUT} ${SERVER_SOURCES} ${SERVER_HEADERS})
 target_include_directories(${SERVER_OUTPUT} PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
-target_link_libraries(${SERVER_OUTPUT} PRIVATE ${CUDAToolkit_LIBRARIES} cuda dl)
+target_link_libraries(${SERVER_OUTPUT} PRIVATE ${CUDAToolkit_LIBRARIES} cuda dl ${NGHTTP2_LIBRARY})
 
 set_source_files_properties(
     ${SERVER_SOURCES}
