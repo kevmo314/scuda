@@ -1,4 +1,4 @@
-name: Scuda CI
+name: Lupine CI
 
 on:
   workflow_dispatch:
@@ -29,14 +29,14 @@ jobs:
           ssh -o StrictHostKeyChecking=no root@100.118.7.128 'bash -s' <<'EOF'
           #!/bin/bash
 
-          cd /home/brodey/scuda-latest
+          cd /home/brodey/lupine-latest
           ls
 
-          SCUDA_PORT=14834 ./local.sh server &
+          LUPINE_PORT=14834 ./local.sh server &
 
           sleep 5
 
-          export SCUDA_SERVER=0.0.0.0:14834
+          export LUPINE_SERVER=0.0.0.0:14834
           test_output=$(./local.sh test_ci)
           test_exit_code=$?
 
@@ -44,7 +44,7 @@ jobs:
             echo "Tests passed successfully!"
           fi
 
-          ps aux | grep -E 'server_[0-9]+\.[0-9]+' | grep -v grep | awk '{print $2}' | xargs -r kill -TERM
+          ps aux | grep -E 'lupine_driver_server' | grep -v grep | awk '{print $2}' | xargs -r kill -TERM
           echo "server process and its children terminated. exiting..."
 
           exit $test_exit_code

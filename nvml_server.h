@@ -1,5 +1,5 @@
-#ifndef SCUDA_NVML_SERVER_H
-#define SCUDA_NVML_SERVER_H
+#ifndef LUPINE_NVML_SERVER_H
+#define LUPINE_NVML_SERVER_H
 
 #include "rpc.h"
 

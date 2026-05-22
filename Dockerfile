@@ -25,42 +25,42 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-venv \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /opt/scuda
+WORKDIR /opt/lupine
 
-COPY . /opt/scuda
+COPY . /opt/lupine
 
-RUN python3 -m venv /opt/scuda/.venv-codegen \
-    && /opt/scuda/.venv-codegen/bin/pip install --no-cache-dir -r /opt/scuda/codegen/requirements.txt
+RUN python3 -m venv /opt/lupine/.venv-codegen \
+    && /opt/lupine/.venv-codegen/bin/pip install --no-cache-dir -r /opt/lupine/codegen/requirements.txt
 
 # Generated sources are checked in because the current generator does not yet
 # preserve every hand-maintained driver shim path. Set RUN_CODEGEN=1 only when
 # updating generated sources intentionally for a CUDA header version.
 RUN if [ "$RUN_CODEGEN" = "1" ]; then \
-      cd /opt/scuda/codegen && /opt/scuda/.venv-codegen/bin/python ./codegen.py; \
+      cd /opt/lupine/codegen && /opt/lupine/.venv-codegen/bin/python ./codegen.py; \
     fi
 
-RUN cmake -S /opt/scuda -B /opt/scuda/build \
+RUN cmake -S /opt/lupine -B /opt/lupine/build \
       -G Ninja \
       -DCMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE}" \
       -DCMAKE_LIBRARY_PATH="${CUDA_HOME}/lib64/stubs"
 
 FROM builder AS client-build
 
-RUN cmake --build /opt/scuda/build --parallel --target scuda_driver scuda_nvml
+RUN cmake --build /opt/lupine/build --parallel --target lupine_driver lupine_nvml
 
-RUN test -e /opt/scuda/build/libcuda.so.1 \
-    && test -e /opt/scuda/build/libnvidia-ml.so.1 \
-    && ln -sf libcuda.so.1 /opt/scuda/build/libcuda.so \
-    && ln -sf libnvidia-ml.so.1 /opt/scuda/build/libnvidia-ml.so \
-    && ! nm -D --defined-only /opt/scuda/build/libcuda.so.1 \
+RUN test -e /opt/lupine/build/libcuda.so.1 \
+    && test -e /opt/lupine/build/libnvidia-ml.so.1 \
+    && ln -sf libcuda.so.1 /opt/lupine/build/libcuda.so \
+    && ln -sf libnvidia-ml.so.1 /opt/lupine/build/libnvidia-ml.so \
+    && ! nm -D --defined-only /opt/lupine/build/libcuda.so.1 \
       | awk '{print $3}' \
       | grep -E '^cuda'
 
 FROM builder AS server-build
 
-RUN cmake --build /opt/scuda/build --parallel --target scuda_driver_server
+RUN cmake --build /opt/lupine/build --parallel --target lupine_driver_server
 
-RUN test -x /opt/scuda/build/scuda_driver_server
+RUN test -x /opt/lupine/build/lupine_driver_server
 
 FROM nvidia/cuda:${CUDA_VERSION}-${CUDA_RUNTIME_IMAGE_FLAVOR}-ubuntu${UBUNTU_VERSION} AS client
 
@@ -70,9 +70,9 @@ ARG UBUNTU_VERSION
 ARG NVIDIA_UTILS_PACKAGE=nvidia-utils-535
 ARG NVIDIA_UTILS_VERSION=
 
-LABEL org.opencontainers.image.title="scuda-client"
-LABEL org.opencontainers.image.description="SCUDA client runtime with driver-only libcuda shim"
-LABEL org.opencontainers.image.source="https://github.com/kevmo314/scuda"
+LABEL org.opencontainers.image.title="lupine-client"
+LABEL org.opencontainers.image.description="LUPINE client runtime with driver-only libcuda shim"
+LABEL org.opencontainers.image.source="https://github.com/lupinemachines/lupine"
 LABEL org.opencontainers.image.version="${CUDA_VERSION}-ubuntu${UBUNTU_VERSION}"
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -94,14 +94,15 @@ RUN set -eux; \
     chmod +x /usr/bin/nvidia-smi; \
     rm -rf /var/lib/apt/lists/* /tmp/nvidia-utils
 
-COPY --from=client-build /opt/scuda/build/libcuda.so.1 /opt/scuda/lib/libcuda.so.1
-COPY --from=client-build /opt/scuda/build/libnvidia-ml.so.1 /opt/scuda/lib/libnvidia-ml.so.1
+COPY --from=client-build /opt/lupine/build/libcuda.so.1 /opt/lupine/lib/libcuda.so.1
+COPY --from=client-build /opt/lupine/build/libnvidia-ml.so.1 /opt/lupine/lib/libnvidia-ml.so.1
 
-RUN ln -sf /opt/scuda/lib/libcuda.so.1 /opt/scuda/lib/libcuda.so \
-    && ln -sf /opt/scuda/lib/libnvidia-ml.so.1 /opt/scuda/lib/libnvidia-ml.so
+RUN ln -sf /opt/lupine/lib/libcuda.so.1 /opt/lupine/lib/libcuda.so \
+    && ln -sf /opt/lupine/lib/libnvidia-ml.so.1 /opt/lupine/lib/libnvidia-ml.so
 
-ENV SCUDA_LIB=/opt/scuda/lib/libcuda.so.1
-ENV LD_LIBRARY_PATH=/opt/scuda/lib:${LD_LIBRARY_PATH}
+ENV LUPINE_LIBCUDA=/opt/lupine/lib/libcuda.so.1
+ENV LUPINE_LIB=/opt/lupine/lib/libcuda.so.1
+ENV LD_LIBRARY_PATH=/opt/lupine/lib:${LD_LIBRARY_PATH}
 
 ENTRYPOINT []
 CMD ["bash"]
@@ -112,9 +113,9 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG CUDA_VERSION
 ARG UBUNTU_VERSION
 
-LABEL org.opencontainers.image.title="scuda-server"
-LABEL org.opencontainers.image.description="SCUDA server runtime"
-LABEL org.opencontainers.image.source="https://github.com/kevmo314/scuda"
+LABEL org.opencontainers.image.title="lupine-server"
+LABEL org.opencontainers.image.description="LUPINE server runtime"
+LABEL org.opencontainers.image.source="https://github.com/lupinemachines/lupine"
 LABEL org.opencontainers.image.version="${CUDA_VERSION}-ubuntu${UBUNTU_VERSION}"
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -122,14 +123,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=server-build /opt/scuda/build/scuda_driver_server /opt/scuda/bin/scuda_driver_server
+COPY --from=server-build /opt/lupine/build/lupine_driver_server /opt/lupine/bin/lupine_driver_server
 
-RUN chmod +x /opt/scuda/bin/scuda_driver_server
+RUN chmod +x /opt/lupine/bin/lupine_driver_server
 
-ENV SCUDA_PORT=14833
+ENV LUPINE_PORT=14833
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility
 
 EXPOSE 14833
 
-ENTRYPOINT ["/opt/scuda/bin/scuda_driver_server"]
+ENTRYPOINT ["/opt/lupine/bin/lupine_driver_server"]

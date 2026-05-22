@@ -1,7 +1,7 @@
 #!/bin/bash
 
-libscuda_path="$(pwd)/libscuda_12_0.so"
-server_out_path="$(pwd)/server_12_0.so"
+client_lib_path="$(pwd)/build/libcuda.so.1"
+server_out_path="$(pwd)/build/lupine_driver_server"
 
 ansi_format() {
   case "$1" in
@@ -25,7 +25,7 @@ test_cuda_available() {
   pass_message=$1
   fail_message=$2
 
-  output=$(LD_PRELOAD="$libscuda_path" python3 -c "import torch; print(torch.cuda.is_available())" | tail -n 1)
+  output=$(LD_PRELOAD="$client_lib_path" python3 -c "import torch; print(torch.cuda.is_available())" | tail -n 1)
 
   if [[ "$output" == "True" ]]; then
     ansi_format "pass" "$pass_message"
@@ -36,7 +36,7 @@ test_cuda_available() {
 }
 
 test_tensor_to_cuda() {
-  output=$(LD_PRELOAD="$libscuda_path" python3 -c "
+  output=$(LD_PRELOAD="$client_lib_path" python3 -c "
 import torch
 print('Creating a tensor...')
 tensor = torch.zeros(10, 10)
@@ -54,7 +54,7 @@ print('Tensor successfully moved to CUDA')
 }
 
 test_tensor_to_cuda_to_cpu() {
-  output=$(LD_PRELOAD="$libscuda_path" python3 -c "
+  output=$(LD_PRELOAD="$client_lib_path" python3 -c "
 import torch
 print('Creating a tensor...')
 tensor = torch.full((10, 10), 5)
@@ -79,7 +79,7 @@ print('Tensor successfully moved back to CPU:')
 }
 
 test_vector_add() {
-  output=$(LD_PRELOAD="$libscuda_path" ./vector.o | tail -n 1)
+  output=$(LD_PRELOAD="$client_lib_path" ./vector.o | tail -n 1)
 
   if [[ "$output" == "PASSED" ]]; then
     ansi_format "pass" "$pass_message"
@@ -90,7 +90,7 @@ test_vector_add() {
 }
 
 test_cudnn() {
-  output=$(LD_PRELOAD="$libscuda_path" ./cudnn.o | tail -n 1)
+  output=$(LD_PRELOAD="$client_lib_path" ./cudnn.o | tail -n 1)
 
   if [[ "$output" == "New array: 0.5 0.731059 0.880797 0.952574 0.982014 0.993307 0.997527 0.999089 0.999665 0.999877 " ]]; then
     ansi_format "pass" "$pass_message"
@@ -101,7 +101,7 @@ test_cudnn() {
 }
 
 test_cublas_batched() {
-  output=$(LD_PRELOAD="$libscuda_path" ./cublas_batched.o | tail -n 5)
+  output=$(LD_PRELOAD="$client_lib_path" ./cublas_batched.o | tail -n 5)
 
   expected_output=$'=====\nC[1]\n111.00 122.00\n151.00 166.00\n====='
 
@@ -118,7 +118,7 @@ test_cublas_batched() {
 }
 
 test_unified_mem() {
-  output=$(LD_PRELOAD="$libscuda_path" ./unified_pointer.o | tail -n 1)
+  output=$(LD_PRELOAD="$client_lib_path" ./unified_pointer.o | tail -n 1)
 
   if [[ "$output" == "Max error: 0" ]]; then
     ansi_format "pass" "$pass_message"
@@ -129,7 +129,7 @@ test_unified_mem() {
 }
 
 test_graphs() {
-  output=$(LD_PRELOAD="$libscuda_path" ./cuda_graphs_host_func.o | tail -n 1)
+  output=$(LD_PRELOAD="$client_lib_path" ./cuda_graphs_host_func.o | tail -n 1)
 
   if [[ "$output" == "[cudaGraphsManual] Host callback final reduced sum = 1.000000" ]]; then
     ansi_format "pass" "$pass_message"
@@ -188,7 +188,7 @@ test() {
 
   build_tests
 
-  echo "running tests at: $libscuda_path"
+  echo "running tests at: $client_lib_path"
   echo -e "\n\033[1mRunning test(s)...\033[0m"
 
   for test in "${tests[@]}"; do
@@ -370,7 +370,7 @@ test() {
     cd "$(dirname "$test")"
 
     # Run the script with a timeout and suppress stdout/stderr
-    OUTPUT=$(LD_PRELOAD="$libscuda_path" ./$(basename "$test") 2>&1 | tr -d '\0')
+    OUTPUT=$(LD_PRELOAD="$client_lib_path" ./$(basename "$test") 2>&1 | tr -d '\0')
     RET_CODE=$?
 
     if [[ $RET_CODE -ne 0 ]]; then
@@ -401,30 +401,23 @@ build_tests() {
 }
 
 set_paths() {
-  scuda_path="$(ls | grep -E 'libscuda_[0-9]+\.[0-9]+\.so' | head -n 1)"
-
-  if [[ -z "$scuda_path" ]]; then
-    echo "Error: No matching libscuda file found in the current directory."
+  if [[ ! -f "$client_lib_path" ]]; then
+    echo "Error: missing client shim at $client_lib_path. Run: cmake -S . -B build && cmake --build build"
     exit 1
   fi
 
-  server_path="$(ls | grep -E 'server_[0-9]+\.[0-9]+\.so' | head -n 1)"
-
-  if [[ -z "$server_path" ]]; then
-    echo "Error: No matching server file found in the current directory."
+  if [[ ! -x "$server_out_path" ]]; then
+    echo "Error: missing server binary at $server_out_path. Run: cmake -S . -B build && cmake --build build"
     exit 1
   fi
 
-  server_out_path="./$server_path"
-  libscuda_path="./$scuda_path"
-
-  echo "Using client: $libscuda_path -- server: $server_out_path"
+  echo "Using client: $client_lib_path -- server: $server_out_path"
 }
 
 run() {
-  export SCUDA_SERVER=0.0.0.0
+  export LUPINE_SERVER="${LUPINE_SERVER:-0.0.0.0:14833}"
   set_paths
-  LD_PRELOAD="$libscuda_path" nvidia-smi
+  LD_PRELOAD="$client_lib_path" nvidia-smi
 }
 
 test_ci() {
@@ -435,7 +428,7 @@ test_ci() {
   
   build_tests
 
-  echo "running tests at: $libscuda_path"
+  echo "running tests at: $client_lib_path"
   echo -e "\n\033[1mRunning test(s)...\033[0m"
 
   for test in "${tests[@]}"; do
@@ -451,7 +444,7 @@ test_ci() {
 
 server() {
   set_paths
-  $server_out_path
+  "$server_out_path"
 }
 
 # Main script logic using a switch case

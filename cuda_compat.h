@@ -1,9 +1,9 @@
-#ifndef SCUDA_CUDA_COMPAT_H
-#define SCUDA_CUDA_COMPAT_H
+#ifndef LUPINE_CUDA_COMPAT_H
+#define LUPINE_CUDA_COMPAT_H
 
 #include <cuda.h>
 
-#ifndef SCUDA_CUDA_COMPAT_TYPES_ONLY
+#ifndef LUPINE_CUDA_COMPAT_TYPES_ONLY
 #include <dlfcn.h>
 #endif
 
@@ -27,14 +27,13 @@ typedef struct CUgraphExecUpdateResultInfo_st {
   CUgraphNode errorNode;
 } CUgraphExecUpdateResultInfo;
 
-#ifdef SCUDA_CUDA_COMPAT_TYPES_ONLY
-CUresult cuGraphKernelNodeGetParams_v2(CUgraphNode,
-                                       CUDA_KERNEL_NODE_PARAMS *);
-CUresult cuGraphExecKernelNodeSetParams_v2(
-    CUgraphExec, CUgraphNode, const CUDA_KERNEL_NODE_PARAMS *);
+#ifdef LUPINE_CUDA_COMPAT_TYPES_ONLY
+CUresult cuGraphKernelNodeGetParams_v2(CUgraphNode, CUDA_KERNEL_NODE_PARAMS *);
+CUresult cuGraphExecKernelNodeSetParams_v2(CUgraphExec, CUgraphNode,
+                                           const CUDA_KERNEL_NODE_PARAMS *);
 #endif
 
-#ifndef SCUDA_CUDA_COMPAT_TYPES_ONLY
+#ifndef LUPINE_CUDA_COMPAT_TYPES_ONLY
 static inline CUresult cuCtxGetId(CUcontext, unsigned long long *) {
   return CUDA_ERROR_NOT_SUPPORTED;
 }
@@ -43,9 +42,10 @@ static inline CUresult cuStreamGetId(CUstream, unsigned long long *) {
   return CUDA_ERROR_NOT_SUPPORTED;
 }
 
-static inline CUresult cuLibraryLoadFromFile(
-    CUlibrary *, const char *, CUjit_option *, void **, unsigned int,
-    CUlibraryOption *, void **, unsigned int) {
+static inline CUresult cuLibraryLoadFromFile(CUlibrary *, const char *,
+                                             CUjit_option *, void **,
+                                             unsigned int, CUlibraryOption *,
+                                             void **, unsigned int) {
   return CUDA_ERROR_NOT_SUPPORTED;
 }
 
@@ -124,25 +124,27 @@ static inline CUresult cuFuncGetParamInfo(CUfunction func, size_t paramIndex,
                        : CUDA_ERROR_NOT_SUPPORTED;
 }
 
-static inline CUresult cuGraphKernelNodeGetParams_v2(
-    CUgraphNode hNode, CUDA_KERNEL_NODE_PARAMS *nodeParams) {
+static inline CUresult
+cuGraphKernelNodeGetParams_v2(CUgraphNode hNode,
+                              CUDA_KERNEL_NODE_PARAMS *nodeParams) {
   return cuGraphKernelNodeGetParams(hNode, nodeParams);
 }
 
-static inline CUresult cuGraphKernelNodeSetParams_v2(
-    CUgraphNode hNode, const CUDA_KERNEL_NODE_PARAMS *nodeParams) {
+static inline CUresult
+cuGraphKernelNodeSetParams_v2(CUgraphNode hNode,
+                              const CUDA_KERNEL_NODE_PARAMS *nodeParams) {
   return cuGraphKernelNodeSetParams(hNode, nodeParams);
 }
 
-static inline CUresult cuGraphExecKernelNodeSetParams_v2(
-    CUgraphExec hGraphExec, CUgraphNode hNode,
-    const CUDA_KERNEL_NODE_PARAMS *nodeParams) {
+static inline CUresult
+cuGraphExecKernelNodeSetParams_v2(CUgraphExec hGraphExec, CUgraphNode hNode,
+                                  const CUDA_KERNEL_NODE_PARAMS *nodeParams) {
   return cuGraphExecKernelNodeSetParams(hGraphExec, hNode, nodeParams);
 }
 
-static inline CUresult cuGraphInstantiateWithParams(
-    CUgraphExec *phGraphExec, CUgraph hGraph,
-    CUDA_GRAPH_INSTANTIATE_PARAMS *instantiateParams) {
+static inline CUresult
+cuGraphInstantiateWithParams(CUgraphExec *phGraphExec, CUgraph hGraph,
+                             CUDA_GRAPH_INSTANTIATE_PARAMS *instantiateParams) {
   unsigned long long flags =
       instantiateParams == nullptr ? 0 : instantiateParams->flags;
   return cuGraphInstantiateWithFlags(phGraphExec, hGraph, flags);
@@ -152,8 +154,8 @@ static inline CUresult cuGraphExecGetFlags(CUgraphExec, cuuint64_t *) {
   return CUDA_ERROR_NOT_SUPPORTED;
 }
 
-static inline CUresult cuGraphExecUpdate_v2(
-    CUgraphExec, CUgraph, CUgraphExecUpdateResultInfo *) {
+static inline CUresult cuGraphExecUpdate_v2(CUgraphExec, CUgraph,
+                                            CUgraphExecUpdateResultInfo *) {
   return CUDA_ERROR_NOT_SUPPORTED;
 }
 #endif
@@ -184,14 +186,14 @@ typedef struct CUlaunchConfig_st {
   unsigned int numAttrs;
 } CUlaunchConfig;
 
-#ifndef SCUDA_CUDA_COMPAT_TYPES_ONLY
-static inline CUresult cuOccupancyMaxPotentialClusterSize(
-    int *, CUfunction, const CUlaunchConfig *) {
+#ifndef LUPINE_CUDA_COMPAT_TYPES_ONLY
+static inline CUresult
+cuOccupancyMaxPotentialClusterSize(int *, CUfunction, const CUlaunchConfig *) {
   return CUDA_ERROR_NOT_SUPPORTED;
 }
 
-static inline CUresult cuOccupancyMaxActiveClusters(
-    int *, CUfunction, const CUlaunchConfig *) {
+static inline CUresult cuOccupancyMaxActiveClusters(int *, CUfunction,
+                                                    const CUlaunchConfig *) {
   return CUDA_ERROR_NOT_SUPPORTED;
 }
 #endif
@@ -225,17 +227,18 @@ typedef struct CUgraphNodeParams_st {
 #define CU_GRAPH_NODE_TYPE_CONDITIONAL ((CUgraphNodeType)8)
 #endif
 
-#ifndef SCUDA_CUDA_COMPAT_TYPES_ONLY
-static inline CUresult cuGraphAddKernelNode_v2(
-    CUgraphNode *phGraphNode, CUgraph hGraph, const CUgraphNode *dependencies,
-    size_t numDependencies, const CUDA_KERNEL_NODE_PARAMS *nodeParams) {
+#ifndef LUPINE_CUDA_COMPAT_TYPES_ONLY
+static inline CUresult
+cuGraphAddKernelNode_v2(CUgraphNode *phGraphNode, CUgraph hGraph,
+                        const CUgraphNode *dependencies, size_t numDependencies,
+                        const CUDA_KERNEL_NODE_PARAMS *nodeParams) {
   return cuGraphAddKernelNode(phGraphNode, hGraph, dependencies,
                               numDependencies, nodeParams);
 }
 
-static inline CUresult cuGraphConditionalHandleCreate(
-    CUgraphConditionalHandle *, CUgraph, CUcontext, unsigned int,
-    unsigned int) {
+static inline CUresult
+cuGraphConditionalHandleCreate(CUgraphConditionalHandle *, CUgraph, CUcontext,
+                               unsigned int, unsigned int) {
   return CUDA_ERROR_NOT_SUPPORTED;
 }
 
@@ -252,9 +255,11 @@ static inline CUresult cuGraphAddNode(CUgraphNode *, CUgraph,
   return CUDA_ERROR_NOT_SUPPORTED;
 }
 
-static inline CUresult cuStreamBeginCaptureToGraph(
-    CUstream, CUgraph, const CUgraphNode *, const CUgraphEdgeData *, size_t,
-    CUstreamCaptureMode) {
+static inline CUresult cuStreamBeginCaptureToGraph(CUstream, CUgraph,
+                                                   const CUgraphNode *,
+                                                   const CUgraphEdgeData *,
+                                                   size_t,
+                                                   CUstreamCaptureMode) {
   return CUDA_ERROR_NOT_SUPPORTED;
 }
 
@@ -273,8 +278,8 @@ static inline CUresult cuStreamGetCaptureInfo_v3(
 static inline CUresult cuStreamUpdateCaptureDependencies_v2(
     CUstream stream, CUgraphNode *dependencies, const CUgraphEdgeData *,
     size_t numDependencies, unsigned int flags) {
-  return cuStreamUpdateCaptureDependencies(stream, dependencies, numDependencies,
-                                           flags);
+  return cuStreamUpdateCaptureDependencies(stream, dependencies,
+                                           numDependencies, flags);
 }
 #endif
 #endif

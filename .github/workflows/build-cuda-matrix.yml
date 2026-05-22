@@ -83,24 +83,24 @@ jobs:
             --target "${{ matrix.component }}" \
             --build-arg CUDA_VERSION="${{ matrix.cuda }}" \
             --build-arg UBUNTU_VERSION="${{ matrix.ubuntu }}" \
-            -t "scuda-${{ matrix.component }}:cuda-${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}" \
+            -t "lupine-${{ matrix.component }}:cuda-${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}" \
             .
 
       - name: Verify build artifacts
         run: |
-          image="scuda-${{ matrix.component }}:cuda-${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}"
+          image="lupine-${{ matrix.component }}:cuda-${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}"
           if [ "${{ matrix.component }}" = "client" ]; then
             docker run --rm --entrypoint bash "$image" -lc '
               set -euo pipefail
-              test -e /opt/scuda/lib/libcuda.so.1
-              test -e /opt/scuda/lib/libnvidia-ml.so.1
+              test -e /opt/lupine/lib/libcuda.so.1
+              test -e /opt/lupine/lib/libnvidia-ml.so.1
               test -x /usr/bin/nvidia-smi
-              test "${LD_LIBRARY_PATH%%:*}" = /opt/scuda/lib
+              test "${LD_LIBRARY_PATH%%:*}" = /opt/lupine/lib
             '
           else
             docker run --rm --entrypoint bash "$image" -lc '
               set -euo pipefail
-              test -x /opt/scuda/bin/scuda_driver_server
+              test -x /opt/lupine/bin/lupine_driver_server
             '
           fi
 
@@ -108,15 +108,15 @@ jobs:
         if: matrix.component == 'client'
         run: |
           set -euo pipefail
-          image="scuda-client:cuda-${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}"
-          out="artifacts/scuda-client-cuda-${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}-x86_64"
+          image="lupine-client:cuda-${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}"
+          out="artifacts/lupine-client-cuda-${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}-x86_64"
           mkdir -p "$out"
 
           container="$(docker create "$image")"
           trap 'docker rm -f "$container" >/dev/null 2>&1 || true' EXIT
 
-          docker cp "$container:/opt/scuda/lib/libcuda.so.1" "$out/libcuda.so.1"
-          docker cp "$container:/opt/scuda/lib/libnvidia-ml.so.1" "$out/libnvidia-ml.so.1"
+          docker cp "$container:/opt/lupine/lib/libcuda.so.1" "$out/libcuda.so.1"
+          docker cp "$container:/opt/lupine/lib/libnvidia-ml.so.1" "$out/libnvidia-ml.so.1"
           cp "$out/libcuda.so.1" "$out/libcuda.so"
           cp "$out/libnvidia-ml.so.1" "$out/libnvidia-ml.so"
           (cd "$out" && sha256sum libcuda.so libcuda.so.1 libnvidia-ml.so libnvidia-ml.so.1 > SHA256SUMS)
@@ -125,29 +125,29 @@ jobs:
         if: matrix.component == 'server'
         run: |
           set -euo pipefail
-          image="scuda-server:cuda-${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}"
-          out="artifacts/scuda-server-cuda-${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}-x86_64"
+          image="lupine-server:cuda-${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}"
+          out="artifacts/lupine-server-cuda-${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}-x86_64"
           mkdir -p "$out"
 
           container="$(docker create "$image")"
           trap 'docker rm -f "$container" >/dev/null 2>&1 || true' EXIT
 
-          docker cp "$container:/opt/scuda/bin/scuda_driver_server" "$out/scuda_driver_server"
-          chmod +x "$out/scuda_driver_server"
-          (cd "$out" && sha256sum scuda_driver_server > SHA256SUMS)
+          docker cp "$container:/opt/lupine/bin/lupine_driver_server" "$out/lupine_driver_server"
+          chmod +x "$out/lupine_driver_server"
+          (cd "$out" && sha256sum lupine_driver_server > SHA256SUMS)
 
       - name: Upload client artifacts
         if: matrix.component == 'client'
         uses: actions/upload-artifact@v4
         with:
-          name: scuda-client-cuda-${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}-x86_64
-          path: artifacts/scuda-client-cuda-${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}-x86_64/
+          name: lupine-client-cuda-${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}-x86_64
+          path: artifacts/lupine-client-cuda-${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}-x86_64/
           if-no-files-found: error
 
       - name: Upload server artifacts
         if: matrix.component == 'server'
         uses: actions/upload-artifact@v4
         with:
-          name: scuda-server-cuda-${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}-x86_64
-          path: artifacts/scuda-server-cuda-${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}-x86_64/
+          name: lupine-server-cuda-${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}-x86_64
+          path: artifacts/lupine-server-cuda-${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}-x86_64/
           if-no-files-found: error

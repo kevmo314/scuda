@@ -370,7 +370,7 @@ class ArrayOperation:
         if not self.recv:
             return
         f.write(
-            "        (scuda_prepare_host_range_write({param_name}, {size}), false) ||\n".format(
+            "        (lupine_prepare_host_range_write({param_name}, {size}), false) ||\n".format(
                 param_name=self.parameter.name,
                 size=self.transfer_size_expr(),
             )
@@ -380,7 +380,7 @@ class ArrayOperation:
         if not self.recv:
             return
         f.write(
-            "    if (return_value == CUDA_SUCCESS) scuda_mark_host_range_clean({param_name}, {size});\n".format(
+            "    if (return_value == CUDA_SUCCESS) lupine_mark_host_range_clean({param_name}, {size});\n".format(
                 param_name=self.parameter.name,
                 size=self.transfer_size_expr(),
             )
@@ -720,7 +720,7 @@ class OpaqueTypeOperation:
         if self.is_sent_cufunction():
             return (
                 f"    CUfunction {self.parameter.name}_rpc = "
-                f"scuda_translate_private_function_for_rpc({self.parameter.name});\n"
+                f"lupine_translate_private_function_for_rpc({self.parameter.name});\n"
             )
         return ""
 
@@ -1233,28 +1233,28 @@ def client_routing_route_expr(metadata: FunctionAnnotationMetadata) -> str:
     kind = metadata.routing_kind
     param = metadata.routing_parameter
     if kind is None:
-        return "scuda_route_for_default()"
+        return "lupine_route_for_default()"
     if kind == "CURRENT_CONTEXT":
-        return "scuda_route_for_current_context()"
+        return "lupine_route_for_current_context()"
     if param is None:
         raise NotImplementedError(f"Routing key {kind} requires a parameter")
     name = param.name
     if kind == "DEVICE":
-        return f"scuda_route_for_device(&{name})"
+        return f"lupine_route_for_device(&{name})"
     if kind == "CONTEXT":
-        return f"scuda_route_for_context({name})"
+        return f"lupine_route_for_context({name})"
     if kind == "MODULE":
-        return f"scuda_route_for_module({name})"
+        return f"lupine_route_for_module({name})"
     if kind == "LIBRARY":
-        return f"scuda_route_for_library({name})"
+        return f"lupine_route_for_library({name})"
     if kind == "FUNCTION":
-        return f"scuda_route_for_function({name})"
+        return f"lupine_route_for_function({name})"
     if kind == "STREAM":
-        return f"({name} != nullptr ? scuda_route_for_stream({name}) : scuda_route_for_default())"
+        return f"({name} != nullptr ? lupine_route_for_stream({name}) : lupine_route_for_default())"
     if kind == "EVENT":
-        return f"scuda_route_for_event({name})"
+        return f"lupine_route_for_event({name})"
     if kind == "DEVICEPTR":
-        return f"scuda_route_for_deviceptr({name})"
+        return f"lupine_route_for_deviceptr({name})"
     raise NotImplementedError(f"Unknown routing key kind: {kind}")
 
 
@@ -1264,19 +1264,19 @@ def client_record_owner_stmt(owner: OwnerAnnotation) -> str:
     value = f"*{name}" if isinstance(owner.parameter.type, Pointer) else name
     null_guard = f" && {name} != nullptr" if isinstance(owner.parameter.type, Pointer) else ""
     if kind == "CONTEXT":
-        fn = "scuda_note_context_owner"
+        fn = "lupine_note_context_owner"
     elif kind == "MODULE":
-        fn = "scuda_note_module_owner"
+        fn = "lupine_note_module_owner"
     elif kind == "LIBRARY":
-        fn = "scuda_note_library_owner"
+        fn = "lupine_note_library_owner"
     elif kind == "FUNCTION":
-        fn = "scuda_note_function_owner"
+        fn = "lupine_note_function_owner"
     elif kind == "STREAM":
-        fn = "scuda_note_stream_owner"
+        fn = "lupine_note_stream_owner"
     elif kind == "EVENT":
-        fn = "scuda_note_event_owner"
+        fn = "lupine_note_event_owner"
     elif kind == "DEVICEPTR":
-        fn = "scuda_note_deviceptr_owner"
+        fn = "lupine_note_deviceptr_owner"
     else:
         raise NotImplementedError(f"Unknown owner kind: {kind}")
     return (
@@ -1289,7 +1289,7 @@ def client_record_owner_stmt(owner: OwnerAnnotation) -> str:
 def write_client_post_call(f, function: Function, metadata: FunctionAnnotationMetadata):
     if function.name.format() == "cuDriverGetVersion":
         f.write("    if (driverVersion != nullptr) {\n")
-        f.write("        const char *override_version = getenv(\"SCUDA_DRIVER_VERSION_OVERRIDE\");\n")
+        f.write("        const char *override_version = getenv(\"LUPINE_DRIVER_VERSION_OVERRIDE\");\n")
         f.write("        if (override_version != nullptr) *driverVersion = atoi(override_version);\n")
         f.write("    }\n")
 
@@ -1297,33 +1297,33 @@ def write_client_post_call(f, function: Function, metadata: FunctionAnnotationMe
         f.write(client_record_owner_stmt(owner))
 
     if function.name.format() == "cuMemAlloc_v2":
-        f.write("    if (return_value == CUDA_SUCCESS && dptr != nullptr) scuda_note_deviceptr_allocation_route(*dptr, bytesize, route);\n")
+        f.write("    if (return_value == CUDA_SUCCESS && dptr != nullptr) lupine_note_deviceptr_allocation_route(*dptr, bytesize, route);\n")
     if function.name.format() == "cuMemAllocPitch_v2":
         f.write("    if (return_value == CUDA_SUCCESS && dptr != nullptr) {\n")
         f.write("        size_t allocation_size = 0;\n")
         f.write("        if (pPitch != nullptr) allocation_size = (*pPitch) * Height;\n")
         f.write("        else allocation_size = WidthInBytes * Height;\n")
-        f.write("        scuda_note_deviceptr_allocation_route(*dptr, allocation_size, route);\n")
+        f.write("        lupine_note_deviceptr_allocation_route(*dptr, allocation_size, route);\n")
         f.write("    }\n")
     if function.name.format() in {"cuMemAllocAsync", "cuMemAllocFromPoolAsync"}:
-        f.write("    if (return_value == CUDA_SUCCESS && dptr != nullptr) scuda_note_deviceptr_allocation_route(*dptr, bytesize, route);\n")
+        f.write("    if (return_value == CUDA_SUCCESS && dptr != nullptr) lupine_note_deviceptr_allocation_route(*dptr, bytesize, route);\n")
     if function.name.format() == "cuMemFreeAsync":
-        f.write("    if (return_value == CUDA_SUCCESS) scuda_forget_deviceptr_owner(dptr);\n")
+        f.write("    if (return_value == CUDA_SUCCESS) lupine_forget_deviceptr_owner(dptr);\n")
 
     if function.name.format() == "cuDevicePrimaryCtxRetain":
-        f.write("    if (return_value == CUDA_SUCCESS) scuda_note_primary_context_active(dev);\n")
+        f.write("    if (return_value == CUDA_SUCCESS) lupine_note_primary_context_active(dev);\n")
     if function.name.format() == "cuDevicePrimaryCtxRelease_v2":
-        f.write("    if (return_value == CUDA_SUCCESS) scuda_invalidate_primary_context_state(dev);\n")
+        f.write("    if (return_value == CUDA_SUCCESS) lupine_invalidate_primary_context_state(dev);\n")
     if function.name.format() == "cuDevicePrimaryCtxSetFlags_v2":
-        f.write("    if (return_value == CUDA_SUCCESS) scuda_note_primary_context_flags(dev, flags);\n")
+        f.write("    if (return_value == CUDA_SUCCESS) lupine_note_primary_context_flags(dev, flags);\n")
     if function.name.format() == "cuDevicePrimaryCtxReset_v2":
-        f.write("    if (return_value == CUDA_SUCCESS) scuda_invalidate_primary_context_state(dev);\n")
+        f.write("    if (return_value == CUDA_SUCCESS) lupine_invalidate_primary_context_state(dev);\n")
     if function.name.format() == "cuCtxDestroy_v2":
-        f.write("    if (return_value == CUDA_SUCCESS) scuda_invalidate_current_context_cache();\n")
+        f.write("    if (return_value == CUDA_SUCCESS) lupine_invalidate_current_context_cache();\n")
     if function.name.format() == "cuModuleGetFunction":
-        f.write("    if (return_value == CUDA_SUCCESS && hfunc != nullptr) scuda_record_module_function(*hfunc, hmod, name, route);\n")
+        f.write("    if (return_value == CUDA_SUCCESS && hfunc != nullptr) lupine_record_module_function(*hfunc, hmod, name, route);\n")
     if function.name.format() == "cuLibraryGetKernel":
-        f.write("    if (return_value == CUDA_SUCCESS && pKernel != nullptr) scuda_record_library_kernel(*pKernel, library, name, route);\n")
+        f.write("    if (return_value == CUDA_SUCCESS && pKernel != nullptr) lupine_record_library_kernel(*pKernel, library, name, route);\n")
 
 
 def error_const(return_type: str) -> str:
@@ -1481,9 +1481,9 @@ def main():
         f.write(
             "#include <cuda.h>\n"
             "\n"
-            "#define SCUDA_CUDA_COMPAT_TYPES_ONLY\n"
+            "#define LUPINE_CUDA_COMPAT_TYPES_ONLY\n"
             '#include "cuda_compat.h"\n'
-            "#undef SCUDA_CUDA_COMPAT_TYPES_ONLY\n"
+            "#undef LUPINE_CUDA_COMPAT_TYPES_ONLY\n"
             "\n"
             "#include <algorithm>\n"
             "#include <cstdint>\n"
@@ -1497,85 +1497,85 @@ def main():
             "extern int rpc_size();\n"
             "extern conn_t *rpc_client_get_connection(unsigned int index);\n"
             "extern void rpc_close(conn_t *conn);\n\n"
-            "struct scuda_route {\n"
+            "struct lupine_route {\n"
             "    int kind;\n"
             "    conn_t *conn;\n"
             "};\n\n"
-            'extern "C" CUresult scuda_cuInit_multi(unsigned int flags);\n'
-            'extern "C" CUresult scuda_cuDeviceGetCount_multi(int *count);\n'
-            'extern "C" CUresult scuda_cuDeviceGet_multi(CUdevice *device, int ordinal);\n'
-            'extern "C" scuda_route scuda_route_for_default();\n'
-            'extern "C" scuda_route scuda_route_for_device(CUdevice *device);\n'
-            'extern "C" scuda_route scuda_route_for_current_context();\n'
-            'extern "C" scuda_route scuda_route_for_context(CUcontext ctx);\n'
-            'extern "C" scuda_route scuda_route_for_module(CUmodule module);\n'
-            'extern "C" scuda_route scuda_route_for_library(CUlibrary library);\n'
-            'extern "C" scuda_route scuda_route_for_function(CUfunction function);\n'
-            'extern "C" scuda_route scuda_route_for_stream(CUstream stream);\n'
-            'extern "C" scuda_route scuda_route_for_event(CUevent event);\n'
-            'extern "C" scuda_route scuda_route_for_deviceptr(CUdeviceptr ptr);\n'
-            'extern "C" bool scuda_route_is_local(scuda_route route);\n'
-            'extern "C" conn_t *scuda_route_remote_conn(scuda_route route);\n'
-            'extern "C" void *scuda_real_cuda_symbol(const char *name);\n'
-            'extern "C" conn_t *scuda_rpc_conn_for_device(CUdevice *device);\n'
-            'extern "C" conn_t *scuda_rpc_conn_for_current_context();\n'
-            'extern "C" conn_t *scuda_rpc_conn_for_context(CUcontext ctx);\n'
-            'extern "C" conn_t *scuda_rpc_conn_for_module(CUmodule module);\n'
-            'extern "C" conn_t *scuda_rpc_conn_for_function(CUfunction function);\n'
-            'extern "C" conn_t *scuda_rpc_conn_for_stream(CUstream stream);\n'
-            'extern "C" conn_t *scuda_rpc_conn_for_event(CUevent event);\n'
-            'extern "C" conn_t *scuda_rpc_conn_for_deviceptr(CUdeviceptr ptr);\n'
-            'extern "C" CUfunction scuda_translate_private_function_for_rpc(CUfunction function);\n'
-            'extern "C" void scuda_note_context_owner(CUcontext ctx, conn_t *conn);\n'
-            'extern "C" void scuda_note_module_owner(CUmodule module, conn_t *conn);\n'
-            'extern "C" void scuda_note_library_owner(CUlibrary library, conn_t *conn);\n'
-            'extern "C" void scuda_note_function_owner(CUfunction function, conn_t *conn);\n'
-            'extern "C" void scuda_note_stream_owner(CUstream stream, conn_t *conn);\n'
-            'extern "C" void scuda_note_event_owner(CUevent event, conn_t *conn);\n'
-            'extern "C" void scuda_note_deviceptr_owner(CUdeviceptr ptr, conn_t *conn);\n\n'
-            'extern "C" void scuda_note_deviceptr_allocation(CUdeviceptr ptr, size_t size, conn_t *conn);\n\n'
-            'extern "C" void scuda_note_context_owner_route(CUcontext ctx, scuda_route route);\n'
-            'extern "C" void scuda_note_module_owner_route(CUmodule module, scuda_route route);\n'
-            'extern "C" void scuda_note_library_owner_route(CUlibrary library, scuda_route route);\n'
-            'extern "C" void scuda_note_function_owner_route(CUfunction function, scuda_route route);\n'
-            'extern "C" void scuda_note_stream_owner_route(CUstream stream, scuda_route route);\n'
-            'extern "C" void scuda_note_event_owner_route(CUevent event, scuda_route route);\n'
-            'extern "C" void scuda_note_deviceptr_owner_route(CUdeviceptr ptr, scuda_route route);\n\n'
-            'extern "C" void scuda_note_deviceptr_allocation_route(CUdeviceptr ptr, size_t size, scuda_route route);\n\n'
-            'extern "C" void scuda_forget_deviceptr_owner(CUdeviceptr ptr);\n\n'
-            'extern "C" void scuda_record_library_kernel(CUkernel kernel, CUlibrary library, const char *name, scuda_route route);\n\n'
-            'extern "C" void scuda_record_module_function(CUfunction function, CUmodule module, const char *name, scuda_route route);\n\n'
-            'extern "C" void scuda_prepare_host_range_write(void *host, size_t size);\n'
-            'extern "C" void scuda_mark_host_range_clean(void *host, size_t size);\n\n'
-            'extern "C" CUresult scuda_cuArrayCreate_v2_safe(CUarray *pHandle, const CUDA_ARRAY_DESCRIPTOR *pAllocateArray);\n'
-            'extern "C" CUresult scuda_cuArray3DCreate_v2_safe(CUarray *pHandle, const CUDA_ARRAY3D_DESCRIPTOR *pAllocateArray);\n'
-            'extern "C" CUresult scuda_cuLinkCreate_v2_safe(unsigned int numOptions, CUjit_option *options, void **optionValues, CUlinkState *stateOut);\n'
-            'extern "C" CUresult scuda_cuLinkAddData_v2_safe(CUlinkState state, CUjitInputType type, void *data, size_t size, const char *name, unsigned int numOptions, CUjit_option *options, void **optionValues);\n'
-            'extern "C" CUresult scuda_cuLinkAddFile_v2_safe(CUlinkState state, CUjitInputType type, const char *path, unsigned int numOptions, CUjit_option *options, void **optionValues);\n'
-            'extern "C" CUresult scuda_cuLinkComplete_safe(CUlinkState state, void **cubinOut, size_t *sizeOut);\n'
-            'extern "C" CUresult scuda_cuLinkDestroy_safe(CUlinkState state);\n'
-            'extern "C" CUresult scuda_cuLaunchCooperativeKernel_safe(CUfunction f, unsigned int gridDimX, unsigned int gridDimY, unsigned int gridDimZ, unsigned int blockDimX, unsigned int blockDimY, unsigned int blockDimZ, unsigned int sharedMemBytes, CUstream hStream, void **kernelParams);\n'
-            'extern "C" CUresult scuda_cuGraphExecKernelNodeSetParams_v2_safe(CUgraphExec hGraphExec, CUgraphNode hNode, const CUDA_KERNEL_NODE_PARAMS *nodeParams);\n'
-            'extern "C" CUresult scuda_cuMemAllocManaged_safe(CUdeviceptr *dptr, size_t bytesize, unsigned int flags);\n'
-            'extern "C" CUresult scuda_cuMemFree_v2_safe(CUdeviceptr dptr);\n'
-            'extern "C" CUresult scuda_cuCtxPushCurrent_virtual(CUcontext ctx);\n'
-            'extern "C" CUresult scuda_cuCtxPopCurrent_virtual(CUcontext *pctx);\n'
-            'extern "C" CUresult scuda_cuCtxSetCurrent_virtual(CUcontext ctx);\n'
-            'extern "C" CUresult scuda_cuCtxGetCurrent_virtual(CUcontext *pctx);\n'
-            'extern "C" CUresult scuda_cuCtxGetDevice_cached(CUdevice *device);\n'
-            'extern "C" void scuda_invalidate_current_context_cache();\n'
-            'extern "C" CUresult scuda_cuDevicePrimaryCtxGetState_cached(CUdevice dev, unsigned int *flags, int *active);\n'
-            'extern "C" void scuda_note_primary_context_active(CUdevice dev);\n'
-            'extern "C" void scuda_note_primary_context_flags(CUdevice dev, unsigned int flags);\n'
-            'extern "C" void scuda_invalidate_primary_context_state(CUdevice dev);\n'
-            'extern "C" CUresult scuda_cuDeviceGetAttribute_cached(int *pi, CUdevice_attribute attrib, CUdevice dev);\n'
-            'extern "C" CUresult scuda_cuKernelGetFunction_cached(CUfunction *pFunc, CUkernel kernel);\n'
-            'extern "C" CUresult scuda_cuPointerGetAttributes_safe(unsigned int numAttributes, CUpointer_attribute *attributes, void **data, CUdeviceptr ptr);\n'
-            'extern "C" CUresult scuda_cuOccupancyMaxActiveBlocksPerMultiprocessor_cached(int *numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize);\n'
-            'extern "C" CUresult scuda_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags_cached(int *numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize, unsigned int flags);\n'
-            'extern "C" CUresult scuda_cuDeviceCanAccessPeer_multi(int *canAccessPeer, CUdevice dev, CUdevice peerDev);\n'
-            'extern "C" CUresult scuda_cuCtxEnablePeerAccess_multi(CUcontext peerContext, unsigned int flags);\n'
-            'extern "C" CUresult scuda_cuCtxDisablePeerAccess_multi(CUcontext peerContext);\n\n'
+            'extern "C" CUresult lupine_cuInit_multi(unsigned int flags);\n'
+            'extern "C" CUresult lupine_cuDeviceGetCount_multi(int *count);\n'
+            'extern "C" CUresult lupine_cuDeviceGet_multi(CUdevice *device, int ordinal);\n'
+            'extern "C" lupine_route lupine_route_for_default();\n'
+            'extern "C" lupine_route lupine_route_for_device(CUdevice *device);\n'
+            'extern "C" lupine_route lupine_route_for_current_context();\n'
+            'extern "C" lupine_route lupine_route_for_context(CUcontext ctx);\n'
+            'extern "C" lupine_route lupine_route_for_module(CUmodule module);\n'
+            'extern "C" lupine_route lupine_route_for_library(CUlibrary library);\n'
+            'extern "C" lupine_route lupine_route_for_function(CUfunction function);\n'
+            'extern "C" lupine_route lupine_route_for_stream(CUstream stream);\n'
+            'extern "C" lupine_route lupine_route_for_event(CUevent event);\n'
+            'extern "C" lupine_route lupine_route_for_deviceptr(CUdeviceptr ptr);\n'
+            'extern "C" bool lupine_route_is_local(lupine_route route);\n'
+            'extern "C" conn_t *lupine_route_remote_conn(lupine_route route);\n'
+            'extern "C" void *lupine_real_cuda_symbol(const char *name);\n'
+            'extern "C" conn_t *lupine_rpc_conn_for_device(CUdevice *device);\n'
+            'extern "C" conn_t *lupine_rpc_conn_for_current_context();\n'
+            'extern "C" conn_t *lupine_rpc_conn_for_context(CUcontext ctx);\n'
+            'extern "C" conn_t *lupine_rpc_conn_for_module(CUmodule module);\n'
+            'extern "C" conn_t *lupine_rpc_conn_for_function(CUfunction function);\n'
+            'extern "C" conn_t *lupine_rpc_conn_for_stream(CUstream stream);\n'
+            'extern "C" conn_t *lupine_rpc_conn_for_event(CUevent event);\n'
+            'extern "C" conn_t *lupine_rpc_conn_for_deviceptr(CUdeviceptr ptr);\n'
+            'extern "C" CUfunction lupine_translate_private_function_for_rpc(CUfunction function);\n'
+            'extern "C" void lupine_note_context_owner(CUcontext ctx, conn_t *conn);\n'
+            'extern "C" void lupine_note_module_owner(CUmodule module, conn_t *conn);\n'
+            'extern "C" void lupine_note_library_owner(CUlibrary library, conn_t *conn);\n'
+            'extern "C" void lupine_note_function_owner(CUfunction function, conn_t *conn);\n'
+            'extern "C" void lupine_note_stream_owner(CUstream stream, conn_t *conn);\n'
+            'extern "C" void lupine_note_event_owner(CUevent event, conn_t *conn);\n'
+            'extern "C" void lupine_note_deviceptr_owner(CUdeviceptr ptr, conn_t *conn);\n\n'
+            'extern "C" void lupine_note_deviceptr_allocation(CUdeviceptr ptr, size_t size, conn_t *conn);\n\n'
+            'extern "C" void lupine_note_context_owner_route(CUcontext ctx, lupine_route route);\n'
+            'extern "C" void lupine_note_module_owner_route(CUmodule module, lupine_route route);\n'
+            'extern "C" void lupine_note_library_owner_route(CUlibrary library, lupine_route route);\n'
+            'extern "C" void lupine_note_function_owner_route(CUfunction function, lupine_route route);\n'
+            'extern "C" void lupine_note_stream_owner_route(CUstream stream, lupine_route route);\n'
+            'extern "C" void lupine_note_event_owner_route(CUevent event, lupine_route route);\n'
+            'extern "C" void lupine_note_deviceptr_owner_route(CUdeviceptr ptr, lupine_route route);\n\n'
+            'extern "C" void lupine_note_deviceptr_allocation_route(CUdeviceptr ptr, size_t size, lupine_route route);\n\n'
+            'extern "C" void lupine_forget_deviceptr_owner(CUdeviceptr ptr);\n\n'
+            'extern "C" void lupine_record_library_kernel(CUkernel kernel, CUlibrary library, const char *name, lupine_route route);\n\n'
+            'extern "C" void lupine_record_module_function(CUfunction function, CUmodule module, const char *name, lupine_route route);\n\n'
+            'extern "C" void lupine_prepare_host_range_write(void *host, size_t size);\n'
+            'extern "C" void lupine_mark_host_range_clean(void *host, size_t size);\n\n'
+            'extern "C" CUresult lupine_cuArrayCreate_v2_safe(CUarray *pHandle, const CUDA_ARRAY_DESCRIPTOR *pAllocateArray);\n'
+            'extern "C" CUresult lupine_cuArray3DCreate_v2_safe(CUarray *pHandle, const CUDA_ARRAY3D_DESCRIPTOR *pAllocateArray);\n'
+            'extern "C" CUresult lupine_cuLinkCreate_v2_safe(unsigned int numOptions, CUjit_option *options, void **optionValues, CUlinkState *stateOut);\n'
+            'extern "C" CUresult lupine_cuLinkAddData_v2_safe(CUlinkState state, CUjitInputType type, void *data, size_t size, const char *name, unsigned int numOptions, CUjit_option *options, void **optionValues);\n'
+            'extern "C" CUresult lupine_cuLinkAddFile_v2_safe(CUlinkState state, CUjitInputType type, const char *path, unsigned int numOptions, CUjit_option *options, void **optionValues);\n'
+            'extern "C" CUresult lupine_cuLinkComplete_safe(CUlinkState state, void **cubinOut, size_t *sizeOut);\n'
+            'extern "C" CUresult lupine_cuLinkDestroy_safe(CUlinkState state);\n'
+            'extern "C" CUresult lupine_cuLaunchCooperativeKernel_safe(CUfunction f, unsigned int gridDimX, unsigned int gridDimY, unsigned int gridDimZ, unsigned int blockDimX, unsigned int blockDimY, unsigned int blockDimZ, unsigned int sharedMemBytes, CUstream hStream, void **kernelParams);\n'
+            'extern "C" CUresult lupine_cuGraphExecKernelNodeSetParams_v2_safe(CUgraphExec hGraphExec, CUgraphNode hNode, const CUDA_KERNEL_NODE_PARAMS *nodeParams);\n'
+            'extern "C" CUresult lupine_cuMemAllocManaged_safe(CUdeviceptr *dptr, size_t bytesize, unsigned int flags);\n'
+            'extern "C" CUresult lupine_cuMemFree_v2_safe(CUdeviceptr dptr);\n'
+            'extern "C" CUresult lupine_cuCtxPushCurrent_virtual(CUcontext ctx);\n'
+            'extern "C" CUresult lupine_cuCtxPopCurrent_virtual(CUcontext *pctx);\n'
+            'extern "C" CUresult lupine_cuCtxSetCurrent_virtual(CUcontext ctx);\n'
+            'extern "C" CUresult lupine_cuCtxGetCurrent_virtual(CUcontext *pctx);\n'
+            'extern "C" CUresult lupine_cuCtxGetDevice_cached(CUdevice *device);\n'
+            'extern "C" void lupine_invalidate_current_context_cache();\n'
+            'extern "C" CUresult lupine_cuDevicePrimaryCtxGetState_cached(CUdevice dev, unsigned int *flags, int *active);\n'
+            'extern "C" void lupine_note_primary_context_active(CUdevice dev);\n'
+            'extern "C" void lupine_note_primary_context_flags(CUdevice dev, unsigned int flags);\n'
+            'extern "C" void lupine_invalidate_primary_context_state(CUdevice dev);\n'
+            'extern "C" CUresult lupine_cuDeviceGetAttribute_cached(int *pi, CUdevice_attribute attrib, CUdevice dev);\n'
+            'extern "C" CUresult lupine_cuKernelGetFunction_cached(CUfunction *pFunc, CUkernel kernel);\n'
+            'extern "C" CUresult lupine_cuPointerGetAttributes_safe(unsigned int numAttributes, CUpointer_attribute *attributes, void **data, CUdeviceptr ptr);\n'
+            'extern "C" CUresult lupine_cuOccupancyMaxActiveBlocksPerMultiprocessor_cached(int *numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize);\n'
+            'extern "C" CUresult lupine_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags_cached(int *numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize, unsigned int flags);\n'
+            'extern "C" CUresult lupine_cuDeviceCanAccessPeer_multi(int *canAccessPeer, CUdevice dev, CUdevice peerDev);\n'
+            'extern "C" CUresult lupine_cuCtxEnablePeerAccess_multi(CUcontext peerContext, unsigned int flags);\n'
+            'extern "C" CUresult lupine_cuCtxDisablePeerAccess_multi(CUcontext peerContext);\n\n'
         )
         for function, annotation, operations, disabled, metadata in functions_with_annotations:
             # we don't generate client function definitions for disabled functions; only the RPC definitions.
@@ -1594,50 +1594,50 @@ def main():
             f.write("{\n")
 
             if function.name.format() == "cuInit":
-                f.write("    return scuda_cuInit_multi(Flags);\n")
+                f.write("    return lupine_cuInit_multi(Flags);\n")
                 f.write("}\n\n")
                 continue
             if function.name.format() == "cuDeviceGet":
-                f.write("    return scuda_cuDeviceGet_multi(device, ordinal);\n")
+                f.write("    return lupine_cuDeviceGet_multi(device, ordinal);\n")
                 f.write("}\n\n")
                 continue
             if function.name.format() == "cuDeviceGetCount":
-                f.write("    return scuda_cuDeviceGetCount_multi(count);\n")
+                f.write("    return lupine_cuDeviceGetCount_multi(count);\n")
                 f.write("}\n\n")
                 continue
             direct_wrappers = {
-                "cuDeviceGetAttribute": "scuda_cuDeviceGetAttribute_cached(pi, attrib, dev)",
-                "cuDevicePrimaryCtxGetState": "scuda_cuDevicePrimaryCtxGetState_cached(dev, flags, active)",
-                "cuCtxPushCurrent_v2": "scuda_cuCtxPushCurrent_virtual(ctx)",
-                "cuCtxPopCurrent_v2": "scuda_cuCtxPopCurrent_virtual(pctx)",
-                "cuCtxSetCurrent": "scuda_cuCtxSetCurrent_virtual(ctx)",
-                "cuCtxGetCurrent": "scuda_cuCtxGetCurrent_virtual(pctx)",
-                "cuCtxGetDevice": "scuda_cuCtxGetDevice_cached(device)",
-                "cuKernelGetFunction": "scuda_cuKernelGetFunction_cached(pFunc, kernel)",
-                "cuMemFree_v2": "scuda_cuMemFree_v2_safe(dptr)",
-                "cuMemAllocManaged": "scuda_cuMemAllocManaged_safe(dptr, bytesize, flags)",
-                "cuArrayCreate_v2": "scuda_cuArrayCreate_v2_safe(pHandle, pAllocateArray)",
-                "cuArray3DCreate_v2": "scuda_cuArray3DCreate_v2_safe(pHandle, pAllocateArray)",
-                "cuLinkCreate_v2": "scuda_cuLinkCreate_v2_safe(numOptions, options, optionValues, stateOut)",
-                "cuLinkAddData_v2": "scuda_cuLinkAddData_v2_safe(state, type, data, size, name, numOptions, options, optionValues)",
-                "cuLinkAddFile_v2": "scuda_cuLinkAddFile_v2_safe(state, type, path, numOptions, options, optionValues)",
-                "cuLinkComplete": "scuda_cuLinkComplete_safe(state, cubinOut, sizeOut)",
-                "cuLinkDestroy": "scuda_cuLinkDestroy_safe(state)",
-                "cuLaunchCooperativeKernel": "scuda_cuLaunchCooperativeKernel_safe(f, gridDimX, gridDimY, gridDimZ, blockDimX, blockDimY, blockDimZ, sharedMemBytes, hStream, kernelParams)",
-                "cuGraphExecKernelNodeSetParams_v2": "scuda_cuGraphExecKernelNodeSetParams_v2_safe(hGraphExec, hNode, nodeParams)",
-                "cuPointerGetAttributes": "scuda_cuPointerGetAttributes_safe(numAttributes, attributes, data, ptr)",
-                "cuOccupancyMaxActiveBlocksPerMultiprocessor": "scuda_cuOccupancyMaxActiveBlocksPerMultiprocessor_cached(numBlocks, func, blockSize, dynamicSMemSize)",
-                "cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags": "scuda_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags_cached(numBlocks, func, blockSize, dynamicSMemSize, flags)",
-                "cuDeviceCanAccessPeer": "scuda_cuDeviceCanAccessPeer_multi(canAccessPeer, dev, peerDev)",
-                "cuCtxEnablePeerAccess": "scuda_cuCtxEnablePeerAccess_multi(peerContext, Flags)",
-                "cuCtxDisablePeerAccess": "scuda_cuCtxDisablePeerAccess_multi(peerContext)",
+                "cuDeviceGetAttribute": "lupine_cuDeviceGetAttribute_cached(pi, attrib, dev)",
+                "cuDevicePrimaryCtxGetState": "lupine_cuDevicePrimaryCtxGetState_cached(dev, flags, active)",
+                "cuCtxPushCurrent_v2": "lupine_cuCtxPushCurrent_virtual(ctx)",
+                "cuCtxPopCurrent_v2": "lupine_cuCtxPopCurrent_virtual(pctx)",
+                "cuCtxSetCurrent": "lupine_cuCtxSetCurrent_virtual(ctx)",
+                "cuCtxGetCurrent": "lupine_cuCtxGetCurrent_virtual(pctx)",
+                "cuCtxGetDevice": "lupine_cuCtxGetDevice_cached(device)",
+                "cuKernelGetFunction": "lupine_cuKernelGetFunction_cached(pFunc, kernel)",
+                "cuMemFree_v2": "lupine_cuMemFree_v2_safe(dptr)",
+                "cuMemAllocManaged": "lupine_cuMemAllocManaged_safe(dptr, bytesize, flags)",
+                "cuArrayCreate_v2": "lupine_cuArrayCreate_v2_safe(pHandle, pAllocateArray)",
+                "cuArray3DCreate_v2": "lupine_cuArray3DCreate_v2_safe(pHandle, pAllocateArray)",
+                "cuLinkCreate_v2": "lupine_cuLinkCreate_v2_safe(numOptions, options, optionValues, stateOut)",
+                "cuLinkAddData_v2": "lupine_cuLinkAddData_v2_safe(state, type, data, size, name, numOptions, options, optionValues)",
+                "cuLinkAddFile_v2": "lupine_cuLinkAddFile_v2_safe(state, type, path, numOptions, options, optionValues)",
+                "cuLinkComplete": "lupine_cuLinkComplete_safe(state, cubinOut, sizeOut)",
+                "cuLinkDestroy": "lupine_cuLinkDestroy_safe(state)",
+                "cuLaunchCooperativeKernel": "lupine_cuLaunchCooperativeKernel_safe(f, gridDimX, gridDimY, gridDimZ, blockDimX, blockDimY, blockDimZ, sharedMemBytes, hStream, kernelParams)",
+                "cuGraphExecKernelNodeSetParams_v2": "lupine_cuGraphExecKernelNodeSetParams_v2_safe(hGraphExec, hNode, nodeParams)",
+                "cuPointerGetAttributes": "lupine_cuPointerGetAttributes_safe(numAttributes, attributes, data, ptr)",
+                "cuOccupancyMaxActiveBlocksPerMultiprocessor": "lupine_cuOccupancyMaxActiveBlocksPerMultiprocessor_cached(numBlocks, func, blockSize, dynamicSMemSize)",
+                "cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags": "lupine_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags_cached(numBlocks, func, blockSize, dynamicSMemSize, flags)",
+                "cuDeviceCanAccessPeer": "lupine_cuDeviceCanAccessPeer_multi(canAccessPeer, dev, peerDev)",
+                "cuCtxEnablePeerAccess": "lupine_cuCtxEnablePeerAccess_multi(peerContext, Flags)",
+                "cuCtxDisablePeerAccess": "lupine_cuCtxDisablePeerAccess_multi(peerContext)",
             }
             if function.name.format() in direct_wrappers:
                 f.write("    return {call};\n".format(call=direct_wrappers[function.name.format()]))
                 f.write("}\n\n")
                 continue
             if function.name.format() == "cuModuleGetGlobal_v2":
-                f.write("    conn_t *conn = scuda_rpc_conn_for_module(hmod);\n")
+                f.write("    conn_t *conn = lupine_rpc_conn_for_module(hmod);\n")
                 f.write("    CUresult return_value;\n")
                 f.write("    size_t remote_bytes = 0;\n")
                 f.write("    std::size_t name_len = std::strlen(name) + 1;\n")
@@ -1653,13 +1653,13 @@ def main():
                 f.write("        rpc_read_end(conn) < 0)\n")
                 f.write("        return CUDA_ERROR_DEVICE_UNAVAILABLE;\n")
                 f.write("    if (bytes != nullptr) *bytes = remote_bytes;\n")
-                f.write("    if (return_value == CUDA_SUCCESS && dptr != nullptr) scuda_note_deviceptr_allocation(*dptr, remote_bytes, conn);\n")
+                f.write("    if (return_value == CUDA_SUCCESS && dptr != nullptr) lupine_note_deviceptr_allocation(*dptr, remote_bytes, conn);\n")
                 f.write("    return return_value;\n")
                 f.write("}\n\n")
                 continue
             if function.name.format() in {"cuLibraryGetGlobal", "cuLibraryGetManaged"}:
-                f.write("    scuda_route route = scuda_route_for_library(library);\n")
-                f.write("    conn_t *conn = scuda_route_remote_conn(route);\n")
+                f.write("    lupine_route route = lupine_route_for_library(library);\n")
+                f.write("    conn_t *conn = lupine_route_remote_conn(route);\n")
                 f.write("    CUresult return_value;\n")
                 f.write("    size_t remote_bytes = 0;\n")
                 f.write("    std::size_t name_len = std::strlen(name) + 1;\n")
@@ -1675,17 +1675,17 @@ def main():
                 f.write("        rpc_read_end(conn) < 0)\n")
                 f.write("        return CUDA_ERROR_DEVICE_UNAVAILABLE;\n")
                 f.write("    if (bytes != nullptr) *bytes = remote_bytes;\n")
-                f.write("    if (return_value == CUDA_SUCCESS && dptr != nullptr) scuda_note_deviceptr_allocation(*dptr, remote_bytes, conn);\n")
+                f.write("    if (return_value == CUDA_SUCCESS && dptr != nullptr) lupine_note_deviceptr_allocation(*dptr, remote_bytes, conn);\n")
                 f.write("    return return_value;\n")
                 f.write("}\n\n")
                 continue
 
             f.write(
-                "    scuda_route route = {route_expr};\n".format(
+                "    lupine_route route = {route_expr};\n".format(
                     route_expr=client_routing_route_expr(metadata)
                 )
             )
-            f.write("    if (scuda_route_is_local(route)) {\n")
+            f.write("    if (lupine_route_is_local(route)) {\n")
             f.write(
                 "        using real_fn_t = {return_type} (*)({params});\n".format(
                     return_type=function.return_type.format(),
@@ -1693,7 +1693,7 @@ def main():
                 )
             )
             f.write(
-                "        auto real = reinterpret_cast<real_fn_t>(scuda_real_cuda_symbol(\"{name}\"));\n".format(
+                "        auto real = reinterpret_cast<real_fn_t>(lupine_real_cuda_symbol(\"{name}\"));\n".format(
                     name=function.name.format()
                 )
             )
@@ -1711,7 +1711,7 @@ def main():
             write_client_post_call(f, function, metadata)
             f.write("        return return_value;\n")
             f.write("    }\n")
-            f.write("    conn_t *conn = scuda_route_remote_conn(route);\n")
+            f.write("    conn_t *conn = lupine_route_remote_conn(route);\n")
 
             f.write(
                 "    {return_type} return_value;\n".format(
@@ -1895,12 +1895,12 @@ def main():
             # we only generate return from non-void types
             if function.return_type.format() != "void":
                 f.write(
-                    "    {return_type} scuda_intercept_result;\n".format(
+                    "    {return_type} lupine_intercept_result;\n".format(
                         return_type=function.return_type.format()
                     )
                 )
             else:
-                f.write("    void* scuda_intercept_result;\n")
+                f.write("    void* lupine_intercept_result;\n")
 
             f.write("    if (\n")
             for operation in operations:
@@ -1929,7 +1929,7 @@ def main():
 
             if function.return_type.format() != "void":
                 f.write(
-                    "    scuda_intercept_result = {name}({params});\n\n".format(
+                    "    lupine_intercept_result = {name}({params});\n\n".format(
                         name=server_call_name(function.name.format()),
                         params=", ".join(params),
                     )
@@ -1948,7 +1948,7 @@ def main():
                 operation.server_rpc_write(f)
 
             f.write(
-                "        rpc_write(conn, &scuda_intercept_result, sizeof({return_type})) < 0 ||\n".format(
+                "        rpc_write(conn, &lupine_intercept_result, sizeof({return_type})) < 0 ||\n".format(
                     return_type=function.return_type.format()
                 )
             )

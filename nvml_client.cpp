@@ -9,8 +9,8 @@
 
 #include <algorithm>
 #include <cerrno>
-#include <cstdio>
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <string>
@@ -23,13 +23,13 @@
 // temperature struct. Keep the wrapper ABI-compatible with newer nvidia-smi.
 #if (defined(CUDA_VERSION) && CUDA_VERSION >= 12080) ||                        \
     (defined(NVML_API_VERSION) && NVML_API_VERSION >= 13)
-using scuda_nvmlTemperature_t = nvmlTemperature_t;
+using lupine_nvmlTemperature_t = nvmlTemperature_t;
 #else
 typedef struct {
   unsigned int version;
   nvmlTemperatureSensors_t sensorType;
   int temperature;
-} scuda_nvmlTemperature_t;
+} lupine_nvmlTemperature_t;
 #endif
 
 namespace {
@@ -41,14 +41,14 @@ conn_t conns[16] = {};
 int nconns = 0;
 bool connected = false;
 
-struct scuda_nvml_remote_device {
+struct lupine_nvml_remote_device {
   unsigned int conn_index = 0;
   unsigned int remote_index = 0;
   nvmlDevice_t remote_device = nullptr;
   std::string server_label;
 };
 
-std::vector<scuda_nvml_remote_device> devices;
+std::vector<lupine_nvml_remote_device> devices;
 std::vector<std::string> conn_labels;
 bool devices_ready = false;
 
@@ -77,9 +77,9 @@ int open_connection() {
     return 0;
   }
 
-  char *servers_env = getenv("SCUDA_SERVER");
+  char *servers_env = getenv("LUPINE_SERVER");
   if (servers_env == nullptr) {
-    fprintf(stderr, "SCUDA_SERVER environment variable not set\n");
+    fprintf(stderr, "LUPINE_SERVER environment variable not set\n");
     pthread_mutex_unlock(&conn_mutex);
     return -1;
   }
@@ -175,19 +175,18 @@ conn_t *connection(unsigned int index = 0) {
   return &conns[index];
 }
 
-scuda_nvml_remote_device *mapped_device(nvmlDevice_t device) {
+lupine_nvml_remote_device *mapped_device(nvmlDevice_t device) {
   if (device == nullptr || devices.empty()) {
     return nullptr;
   }
   uintptr_t begin = reinterpret_cast<uintptr_t>(devices.data());
-  uintptr_t end =
-      begin + devices.size() * sizeof(scuda_nvml_remote_device);
+  uintptr_t end = begin + devices.size() * sizeof(lupine_nvml_remote_device);
   uintptr_t value = reinterpret_cast<uintptr_t>(device);
   if (value < begin || value >= end ||
-      (value - begin) % sizeof(scuda_nvml_remote_device) != 0) {
+      (value - begin) % sizeof(lupine_nvml_remote_device) != 0) {
     return nullptr;
   }
-  return &devices[(value - begin) / sizeof(scuda_nvml_remote_device)];
+  return &devices[(value - begin) / sizeof(lupine_nvml_remote_device)];
 }
 
 nvmlReturn_t call_no_args_on(conn_t *c, int op) {
@@ -257,9 +256,8 @@ nvmlReturn_t ensure_devices() {
       }
       const std::string &server_label =
           i < static_cast<int>(conn_labels.size()) ? conn_labels[i] : "";
-      devices.push_back(scuda_nvml_remote_device{static_cast<unsigned int>(i),
-                                                 ordinal, remote,
-                                                 server_label});
+      devices.push_back(lupine_nvml_remote_device{
+          static_cast<unsigned int>(i), ordinal, remote, server_label});
     }
   }
   devices_ready = true;
@@ -798,7 +796,7 @@ extern "C" nvmlReturn_t nvmlDeviceGetName(nvmlDevice_t device, char *name,
     used = length - 1;
   }
   if (used + 1 < length) {
-    snprintf(name + used, length - used, " (via scuda %s)",
+    snprintf(name + used, length - used, " (via lupine %s)",
              mapped->server_label.c_str());
   }
   return result;
@@ -1028,7 +1026,7 @@ extern "C" nvmlReturn_t nvmlDeviceGetEccMode(nvmlDevice_t device,
 
 extern "C" nvmlReturn_t
 nvmlDeviceGetTemperatureV(nvmlDevice_t device,
-                          scuda_nvmlTemperature_t *temperature) {
+                          lupine_nvmlTemperature_t *temperature) {
   return call_device_struct(RPC_nvmlDeviceGetTemperatureV, device, temperature);
 }
 
@@ -1069,8 +1067,9 @@ extern "C" nvmlReturn_t nvmlDeviceGetNvLinkRemoteDeviceType(
                                link, pNvLinkDeviceType);
 }
 
-extern "C" nvmlReturn_t nvmlDeviceGetNvLinkRemotePciInfo_v2(
-    nvmlDevice_t device, unsigned int link, nvmlPciInfo_t *pci) {
+extern "C" nvmlReturn_t
+nvmlDeviceGetNvLinkRemotePciInfo_v2(nvmlDevice_t device, unsigned int link,
+                                    nvmlPciInfo_t *pci) {
   return call_device_arg_value(RPC_nvmlDeviceGetNvLinkRemotePciInfo_v2, device,
                                link, pci);
 }

@@ -11,7 +11,7 @@ available are `NULL_TERMINATED` (to indicate that this is a null-terminated stri
 `SIZE:<value>` to specify the size (aka width) of the parameter. If `LENGTH:<param>` is specified, `<param>` must
 be placed in front of the parameter referencing it, otherwise the generated code will not compile.
 
-Client routing can also be annotated for handles that belong to a specific SCUDA
+Client routing can also be annotated for handles that belong to a specific LUPINE
 server connection. `@routingkey <kind> <param>` selects the connection for the
 generated client wrapper before it writes the RPC. Supported kinds are
 `DEVICE`, `CONTEXT`, `MODULE`, `FUNCTION`, `STREAM`, `EVENT`, and `DEVICEPTR`.

@@ -19,34 +19,34 @@
 #define DEFAULT_PORT 14833
 #define MAX_CLIENTS 10
 
-static constexpr int SCUDA_RPC_cuFuncGetParamLayout = 1000001;
-static constexpr int SCUDA_RPC_cuCtxCreate_v2 = 1000002;
-static constexpr int SCUDA_RPC_cuMemPoolSetAttribute = 1000003;
-static constexpr int SCUDA_RPC_cuMemPoolGetAttribute = 1000004;
-static constexpr int SCUDA_RPC_cuLaunchHostFunc = 1000005;
-static constexpr int SCUDA_RPC_cuPointerGetAttribute = 1000006;
-static constexpr int SCUDA_RPC_cuGetExportTableMetadata = 1000007;
-static constexpr int SCUDA_RPC_cuPrivateGetModuleNode = 1000008;
-static constexpr int SCUDA_RPC_cuPointerGetAttributes = 1000009;
-static constexpr int SCUDA_RPC_cuStreamAddCallback = 1000010;
-static constexpr int SCUDA_RPC_cuGraphConditionalHandleCreate = 1000011;
-static constexpr int SCUDA_RPC_cuGraphAddNode_v2 = 1000012;
-static constexpr int SCUDA_RPC_cuStreamBeginCaptureToGraph = 1000013;
-static constexpr int SCUDA_RPC_cuStreamUpdateCaptureDependencies_v2 = 1000014;
-static constexpr int SCUDA_RPC_cuStreamGetCaptureInfo_v3 = 1000015;
-static constexpr int SCUDA_RPC_cuDeviceGetGraphMemAttribute = 1000016;
-static constexpr int SCUDA_RPC_cuDeviceSetGraphMemAttribute = 1000017;
-static constexpr int SCUDA_RPC_cuLinkAddData_v2 = 1000018;
+static constexpr int LUPINE_RPC_cuFuncGetParamLayout = 1000001;
+static constexpr int LUPINE_RPC_cuCtxCreate_v2 = 1000002;
+static constexpr int LUPINE_RPC_cuMemPoolSetAttribute = 1000003;
+static constexpr int LUPINE_RPC_cuMemPoolGetAttribute = 1000004;
+static constexpr int LUPINE_RPC_cuLaunchHostFunc = 1000005;
+static constexpr int LUPINE_RPC_cuPointerGetAttribute = 1000006;
+static constexpr int LUPINE_RPC_cuGetExportTableMetadata = 1000007;
+static constexpr int LUPINE_RPC_cuPrivateGetModuleNode = 1000008;
+static constexpr int LUPINE_RPC_cuPointerGetAttributes = 1000009;
+static constexpr int LUPINE_RPC_cuStreamAddCallback = 1000010;
+static constexpr int LUPINE_RPC_cuGraphConditionalHandleCreate = 1000011;
+static constexpr int LUPINE_RPC_cuGraphAddNode_v2 = 1000012;
+static constexpr int LUPINE_RPC_cuStreamBeginCaptureToGraph = 1000013;
+static constexpr int LUPINE_RPC_cuStreamUpdateCaptureDependencies_v2 = 1000014;
+static constexpr int LUPINE_RPC_cuStreamGetCaptureInfo_v3 = 1000015;
+static constexpr int LUPINE_RPC_cuDeviceGetGraphMemAttribute = 1000016;
+static constexpr int LUPINE_RPC_cuDeviceSetGraphMemAttribute = 1000017;
+static constexpr int LUPINE_RPC_cuLinkAddData_v2 = 1000018;
 
-static bool scuda_server_trace_enabled() {
+static bool lupine_server_trace_enabled() {
   static int enabled = []() {
-    const char *env = getenv("SCUDA_SERVER_TRACE");
+    const char *env = getenv("LUPINE_SERVER_TRACE");
     return env != nullptr && env[0] != '\0' && strcmp(env, "0") != 0;
   }();
   return enabled != 0;
 }
 
-static void scuda_log_manual_handler_error(const char *name) {
+static void lupine_log_manual_handler_error(const char *name) {
   std::cerr << "Error handling manual " << name << " request." << std::endl;
 }
 
@@ -70,11 +70,11 @@ void client_handler(int connfd) {
       std::cerr << "RPC dispatch failed; closing client." << std::endl;
       break;
     }
-    if (scuda_server_trace_enabled()) {
-      std::cerr << "SCUDA server handling op " << op << std::endl;
+    if (lupine_server_trace_enabled()) {
+      std::cerr << "LUPINE server handling op " << op << std::endl;
     }
 
-    if (op == SCUDA_RPC_cuGetExportTableMetadata) {
+    if (op == LUPINE_RPC_cuGetExportTableMetadata) {
       if (handle_manual_cuGetExportTableMetadata(&conn) < 0) {
         std::cerr << "Error handling manual cuGetExportTable metadata request."
                   << std::endl;
@@ -82,7 +82,7 @@ void client_handler(int connfd) {
       }
       continue;
     }
-    if (op == SCUDA_RPC_cuPrivateGetModuleNode) {
+    if (op == LUPINE_RPC_cuPrivateGetModuleNode) {
       if (handle_manual_cuPrivateGetModuleNode(&conn) < 0) {
         std::cerr << "Error handling manual private module node request."
                   << std::endl;
@@ -106,7 +106,7 @@ void client_handler(int connfd) {
       }
       continue;
     }
-    if (op == SCUDA_RPC_cuCtxCreate_v2) {
+    if (op == LUPINE_RPC_cuCtxCreate_v2) {
       if (handle_manual_cuCtxCreate_v2(&conn) < 0) {
         std::cerr << "Error handling manual cuCtxCreate_v2 request."
                   << std::endl;
@@ -114,7 +114,7 @@ void client_handler(int connfd) {
       }
       continue;
     }
-    if (op == SCUDA_RPC_cuMemPoolSetAttribute) {
+    if (op == LUPINE_RPC_cuMemPoolSetAttribute) {
       if (handle_manual_cuMemPoolSetAttribute(&conn) < 0) {
         std::cerr << "Error handling manual cuMemPoolSetAttribute request."
                   << std::endl;
@@ -122,7 +122,7 @@ void client_handler(int connfd) {
       }
       continue;
     }
-    if (op == SCUDA_RPC_cuMemPoolGetAttribute) {
+    if (op == LUPINE_RPC_cuMemPoolGetAttribute) {
       if (handle_manual_cuMemPoolGetAttribute(&conn) < 0) {
         std::cerr << "Error handling manual cuMemPoolGetAttribute request."
                   << std::endl;
@@ -130,7 +130,7 @@ void client_handler(int connfd) {
       }
       continue;
     }
-    if (op == SCUDA_RPC_cuPointerGetAttribute) {
+    if (op == LUPINE_RPC_cuPointerGetAttribute) {
       if (handle_manual_cuPointerGetAttribute(&conn) < 0) {
         std::cerr << "Error handling manual cuPointerGetAttribute request."
                   << std::endl;
@@ -138,7 +138,7 @@ void client_handler(int connfd) {
       }
       continue;
     }
-    if (op == SCUDA_RPC_cuPointerGetAttributes) {
+    if (op == LUPINE_RPC_cuPointerGetAttributes) {
       if (handle_manual_cuPointerGetAttributes(&conn) < 0) {
         std::cerr << "Error handling manual cuPointerGetAttributes request."
                   << std::endl;
@@ -164,35 +164,35 @@ void client_handler(int connfd) {
     }
     if (op == RPC_cuLinkCreate_v2) {
       if (handle_manual_cuLinkCreate_v2(&conn) < 0) {
-        scuda_log_manual_handler_error("cuLinkCreate_v2");
+        lupine_log_manual_handler_error("cuLinkCreate_v2");
         break;
       }
       continue;
     }
-    if (op == SCUDA_RPC_cuLinkAddData_v2) {
+    if (op == LUPINE_RPC_cuLinkAddData_v2) {
       if (handle_manual_cuLinkAddData_v2(&conn) < 0) {
-        scuda_log_manual_handler_error("cuLinkAddData_v2");
+        lupine_log_manual_handler_error("cuLinkAddData_v2");
         break;
       }
       continue;
     }
     if (op == RPC_cuLinkAddFile_v2) {
       if (handle_manual_cuLinkAddFile_v2(&conn) < 0) {
-        scuda_log_manual_handler_error("cuLinkAddFile_v2");
+        lupine_log_manual_handler_error("cuLinkAddFile_v2");
         break;
       }
       continue;
     }
     if (op == RPC_cuLinkComplete) {
       if (handle_manual_cuLinkComplete(&conn) < 0) {
-        scuda_log_manual_handler_error("cuLinkComplete");
+        lupine_log_manual_handler_error("cuLinkComplete");
         break;
       }
       continue;
     }
     if (op == RPC_cuLinkDestroy) {
       if (handle_manual_cuLinkDestroy(&conn) < 0) {
-        scuda_log_manual_handler_error("cuLinkDestroy");
+        lupine_log_manual_handler_error("cuLinkDestroy");
         break;
       }
       continue;
@@ -207,35 +207,35 @@ void client_handler(int connfd) {
     }
     if (op == RPC_cuMemcpy2D_v2) {
       if (handle_manual_cuMemcpy2D_v2(&conn) < 0) {
-        scuda_log_manual_handler_error("cuMemcpy2D_v2");
+        lupine_log_manual_handler_error("cuMemcpy2D_v2");
         break;
       }
       continue;
     }
     if (op == RPC_cuMemcpy2DUnaligned_v2) {
       if (handle_manual_cuMemcpy2DUnaligned_v2(&conn) < 0) {
-        scuda_log_manual_handler_error("cuMemcpy2DUnaligned_v2");
+        lupine_log_manual_handler_error("cuMemcpy2DUnaligned_v2");
         break;
       }
       continue;
     }
     if (op == RPC_cuMemcpy2DAsync_v2) {
       if (handle_manual_cuMemcpy2DAsync_v2(&conn) < 0) {
-        scuda_log_manual_handler_error("cuMemcpy2DAsync_v2");
+        lupine_log_manual_handler_error("cuMemcpy2DAsync_v2");
         break;
       }
       continue;
     }
-    if (op == SCUDA_RPC_cuDeviceGetGraphMemAttribute) {
+    if (op == LUPINE_RPC_cuDeviceGetGraphMemAttribute) {
       if (handle_manual_cuDeviceGetGraphMemAttribute(&conn) < 0) {
-        scuda_log_manual_handler_error("cuDeviceGetGraphMemAttribute");
+        lupine_log_manual_handler_error("cuDeviceGetGraphMemAttribute");
         break;
       }
       continue;
     }
-    if (op == SCUDA_RPC_cuDeviceSetGraphMemAttribute) {
+    if (op == LUPINE_RPC_cuDeviceSetGraphMemAttribute) {
       if (handle_manual_cuDeviceSetGraphMemAttribute(&conn) < 0) {
-        scuda_log_manual_handler_error("cuDeviceSetGraphMemAttribute");
+        lupine_log_manual_handler_error("cuDeviceSetGraphMemAttribute");
         break;
       }
       continue;
@@ -264,7 +264,7 @@ void client_handler(int connfd) {
       }
       continue;
     }
-    if (op == SCUDA_RPC_cuFuncGetParamLayout) {
+    if (op == LUPINE_RPC_cuFuncGetParamLayout) {
       if (handle_manual_cuFuncGetParamLayout(&conn) < 0) {
         std::cerr << "Error handling manual cuFuncGetParamLayout request."
                   << std::endl;
@@ -340,12 +340,12 @@ void client_handler(int connfd) {
     }
     if (op == RPC_cuGraphExecKernelNodeSetParams_v2) {
       if (handle_manual_cuGraphExecKernelNodeSetParams(&conn) < 0) {
-        scuda_log_manual_handler_error("cuGraphExecKernelNodeSetParams_v2");
+        lupine_log_manual_handler_error("cuGraphExecKernelNodeSetParams_v2");
         break;
       }
       continue;
     }
-    if (op == SCUDA_RPC_cuGraphConditionalHandleCreate) {
+    if (op == LUPINE_RPC_cuGraphConditionalHandleCreate) {
       if (handle_manual_cuGraphConditionalHandleCreate(&conn) < 0) {
         std::cerr << "Error handling manual cuGraphConditionalHandleCreate "
                      "request."
@@ -354,7 +354,7 @@ void client_handler(int connfd) {
       }
       continue;
     }
-    if (op == SCUDA_RPC_cuGraphAddNode_v2) {
+    if (op == LUPINE_RPC_cuGraphAddNode_v2) {
       if (handle_manual_cuGraphAddNode(&conn) < 0) {
         std::cerr << "Error handling manual cuGraphAddNode request."
                   << std::endl;
@@ -364,7 +364,7 @@ void client_handler(int connfd) {
     }
     if (op == RPC_cuGraphLaunch) {
       if (handle_manual_cuGraphLaunch(&conn) < 0) {
-        scuda_log_manual_handler_error("cuGraphLaunch");
+        lupine_log_manual_handler_error("cuGraphLaunch");
         break;
       }
       continue;
@@ -377,7 +377,7 @@ void client_handler(int connfd) {
       }
       continue;
     }
-    if (op == SCUDA_RPC_cuLaunchHostFunc) {
+    if (op == LUPINE_RPC_cuLaunchHostFunc) {
       if (handle_manual_cuLaunchHostFunc(&conn) < 0) {
         std::cerr << "Error handling manual cuLaunchHostFunc request."
                   << std::endl;
@@ -385,7 +385,7 @@ void client_handler(int connfd) {
       }
       continue;
     }
-    if (op == SCUDA_RPC_cuStreamAddCallback) {
+    if (op == LUPINE_RPC_cuStreamAddCallback) {
       if (handle_manual_cuStreamAddCallback(&conn) < 0) {
         std::cerr << "Error handling manual cuStreamAddCallback request."
                   << std::endl;
@@ -395,26 +395,26 @@ void client_handler(int connfd) {
     }
     if (op == RPC_cuEventRecord) {
       if (handle_manual_cuEventRecord(&conn, false) < 0) {
-        scuda_log_manual_handler_error("cuEventRecord");
+        lupine_log_manual_handler_error("cuEventRecord");
         break;
       }
       continue;
     }
     if (op == RPC_cuEventRecordWithFlags) {
       if (handle_manual_cuEventRecord(&conn, true) < 0) {
-        scuda_log_manual_handler_error("cuEventRecordWithFlags");
+        lupine_log_manual_handler_error("cuEventRecordWithFlags");
         break;
       }
       continue;
     }
     if (op == RPC_cuStreamWaitEvent) {
       if (handle_manual_cuStreamWaitEvent(&conn) < 0) {
-        scuda_log_manual_handler_error("cuStreamWaitEvent");
+        lupine_log_manual_handler_error("cuStreamWaitEvent");
         break;
       }
       continue;
     }
-    if (op == SCUDA_RPC_cuStreamBeginCaptureToGraph) {
+    if (op == LUPINE_RPC_cuStreamBeginCaptureToGraph) {
       if (handle_manual_cuStreamBeginCaptureToGraph(&conn) < 0) {
         std::cerr << "Error handling manual cuStreamBeginCaptureToGraph "
                      "request."
@@ -423,7 +423,7 @@ void client_handler(int connfd) {
       }
       continue;
     }
-    if (op == SCUDA_RPC_cuStreamUpdateCaptureDependencies_v2) {
+    if (op == LUPINE_RPC_cuStreamUpdateCaptureDependencies_v2) {
       if (handle_manual_cuStreamUpdateCaptureDependencies(&conn) < 0) {
         std::cerr << "Error handling manual "
                      "cuStreamUpdateCaptureDependencies request."
@@ -432,7 +432,7 @@ void client_handler(int connfd) {
       }
       continue;
     }
-    if (op == SCUDA_RPC_cuStreamGetCaptureInfo_v3) {
+    if (op == LUPINE_RPC_cuStreamGetCaptureInfo_v3) {
       if (handle_manual_cuStreamGetCaptureInfo(&conn) < 0) {
         std::cerr << "Error handling manual cuStreamGetCaptureInfo request."
                   << std::endl;
@@ -458,16 +458,16 @@ void client_handler(int connfd) {
     }
     if (op == RPC_cuGraphClone) {
       if (handle_manual_cuGraphClone(&conn) < 0) {
-        std::cerr << "Error handling manual cuGraphClone request."
-                  << std::endl;
+        std::cerr << "Error handling manual cuGraphClone request." << std::endl;
         break;
       }
       continue;
     }
     if (op == RPC_cuGraphInstantiateWithFlags) {
       if (handle_manual_cuGraphInstantiateWithFlags(&conn) < 0) {
-        std::cerr << "Error handling manual cuGraphInstantiateWithFlags request."
-                  << std::endl;
+        std::cerr
+            << "Error handling manual cuGraphInstantiateWithFlags request."
+            << std::endl;
         break;
       }
       continue;
@@ -566,7 +566,7 @@ int main() {
     exit(EXIT_FAILURE);
   }
 
-  char *p = getenv("SCUDA_PORT");
+  char *p = getenv("LUPINE_PORT");
 
   if (p == NULL) {
     port = DEFAULT_PORT;

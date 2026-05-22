@@ -9,10 +9,10 @@ RUN apt-get update && apt-get install -y \
 
 RUN pip3 install torch numpy --break-system-packages
 
-COPY libscuda.so /usr/local/lib/libscuda.so
+COPY libcuda.so.1 /usr/local/lib/libcuda.so.1
 
-ENV SCUDA_SERVER=71.183.65.83
-ENV libscuda_path=/usr/local/lib/libscuda.so
+ENV LUPINE_SERVER=71.183.65.83
+ENV client_lib_path=/usr/local/lib/libcuda.so.1
 
 COPY start.sh /start.sh
 

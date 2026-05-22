@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.18)
 
-project(ScudaProject LANGUAGES CXX CUDA)
+project(LupineProject LANGUAGES CXX CUDA)
 
 set(MIN_CUDA_VERSION 11.0)
 
@@ -62,9 +62,9 @@ set(SERVER_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/rpc.cpp
 )
 
-set(CLIENT_OUTPUT scuda_driver)
-set(NVML_CLIENT_OUTPUT scuda_nvml)
-set(SERVER_OUTPUT scuda_driver_server)
+set(CLIENT_OUTPUT lupine_driver)
+set(NVML_CLIENT_OUTPUT lupine_nvml)
+set(SERVER_OUTPUT lupine_driver_server)
 
 add_library(${CLIENT_OUTPUT} SHARED ${CLIENT_SOURCES} ${CLIENT_HEADERS})
 target_include_directories(${CLIENT_OUTPUT} PRIVATE ${CUDAToolkit_INCLUDE_DIRS})

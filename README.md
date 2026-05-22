@@ -1,6 +1,6 @@
-# SCUDA: GPU-over-IP
+# LUPINE: GPU-over-IP
 
-SCUDA is a GPU over IP bridge allowing GPUs on remote machines to be attached
+LUPINE is a GPU over IP bridge allowing GPUs on remote machines to be attached
 to CPU-only machines.
 
 ## Demo
@@ -28,15 +28,15 @@ Run the server on the GPU machine:
 
 ```bash
 docker run --rm --gpus all -p 14833:14833 \
-  ghcr.io/kevmo314/scuda-server:cuda-13.1.0-ubuntu24.04
+  ghcr.io/lupinemachines/lupine-server:cuda-13.1.0-ubuntu24.04
 ```
 
 Run the client pointing at that server:
 
 ```bash
 docker run --rm -it \
-  -e SCUDA_SERVER=<server>:14833 \
-  ghcr.io/kevmo314/scuda-client:cuda-13.1.0-ubuntu24.04 \
+  -e LUPINE_SERVER=<server>:14833 \
+  ghcr.io/lupinemachines/lupine-client:cuda-13.1.0-ubuntu24.04 \
   nvidia-smi
 ```
 
@@ -65,13 +65,13 @@ Mon May 18 15:40:46 2026
 +---------------------------------------------------------------------------------------+
 ```
 
-Inside the client container, `LD_LIBRARY_PATH=/opt/scuda/lib` is already set,
-so CUDA driver users pick up the SCUDA `libcuda.so.1` shim and NVML users such
-as `nvidia-smi` pick up the SCUDA `libnvidia-ml.so.1` shim automatically.
+Inside the client container, `LD_LIBRARY_PATH=/opt/lupine/lib` is already set,
+so CUDA driver users pick up the LUPINE `libcuda.so.1` shim and NVML users such
+as `nvidia-smi` pick up the LUPINE `libnvidia-ml.so.1` shim automatically.
 
 ## Multi-GPU Across Multiple Servers
 
-The client accepts a comma-separated `SCUDA_SERVER` list. Devices are exposed as
+The client accepts a comma-separated `LUPINE_SERVER` list. Devices are exposed as
 one local ordinal list in server order: all GPUs from the first server, then all
 GPUs from the next server, and so on.
 
@@ -80,19 +80,19 @@ Run a server on each GPU machine:
 ```bash
 # on gpu-host-a
 docker run --rm --gpus all -p 14833:14833 \
-  ghcr.io/kevmo314/scuda-server:cuda-13.1.0-ubuntu24.04
+  ghcr.io/lupinemachines/lupine-server:cuda-13.1.0-ubuntu24.04
 
 # on gpu-host-b
 docker run --rm --gpus all -p 14833:14833 \
-  ghcr.io/kevmo314/scuda-server:cuda-13.1.0-ubuntu24.04
+  ghcr.io/lupinemachines/lupine-server:cuda-13.1.0-ubuntu24.04
 ```
 
 Point the client at both servers:
 
 ```bash
 docker run --rm --network host \
-  -e SCUDA_SERVER=gpu-host-a:14833,gpu-host-b:14833 \
-  ghcr.io/kevmo314/scuda-client:cuda-13.1.0-ubuntu24.04 \
+  -e LUPINE_SERVER=gpu-host-a:14833,gpu-host-b:14833 \
+  ghcr.io/lupinemachines/lupine-client:cuda-13.1.0-ubuntu24.04 \
   nvidia-smi -L
 ```
 
@@ -103,12 +103,12 @@ GPU 0: NVIDIA GeForce RTX 4090 (UUID: GPU-...)
 GPU 1: NVIDIA GeForce RTX 4090 (UUID: GPU-...)
 ```
 
-CUDA driver applications use the same `SCUDA_SERVER` value:
+CUDA driver applications use the same `LUPINE_SERVER` value:
 
 ```bash
 docker run --rm --network host \
-  -e SCUDA_SERVER=gpu-host-a:14833,gpu-host-b:14833 \
-  ghcr.io/kevmo314/scuda-client:cuda-13.1.0-ubuntu24.04 \
+  -e LUPINE_SERVER=gpu-host-a:14833,gpu-host-b:14833 \
+  ghcr.io/lupinemachines/lupine-client:cuda-13.1.0-ubuntu24.04 \
   ./your_cuda_program
 ```
 
@@ -118,13 +118,13 @@ Same-server operations route by handle ownership.
 For a specific CUDA version:
 
 ```bash
-docker pull ghcr.io/kevmo314/scuda-client:cuda-12.4.1-ubuntu22.04
-docker pull ghcr.io/kevmo314/scuda-server:cuda-12.4.1-ubuntu22.04
+docker pull ghcr.io/lupinemachines/lupine-client:cuda-12.4.1-ubuntu22.04
+docker pull ghcr.io/lupinemachines/lupine-server:cuda-12.4.1-ubuntu22.04
 ```
 
 ## Slow Start for the Skeptics
 
-This path derives a small PyTorch client image from the published SCUDA client
+This path derives a small PyTorch client image from the published LUPINE client
 image and runs the `microgpt_train` test against a remote GPU. It is
 intentionally explicit so it is easy to see which side is the CPU-only client
 and which side owns the GPU.
@@ -132,8 +132,8 @@ and which side owns the GPU.
 Create a PyTorch client Dockerfile in the repo root:
 
 ```dockerfile
-# Dockerfile.pytorch-scuda
-FROM ghcr.io/kevmo314/scuda-client:cuda-13.1.0-ubuntu24.04
+# Dockerfile.pytorch-lupine
+FROM ghcr.io/lupinemachines/lupine-client:cuda-13.1.0-ubuntu24.04
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -146,32 +146,32 @@ RUN pip3 install --break-system-packages \
     --index-url https://download.pytorch.org/whl/cu130 \
     torch
 
-COPY test/pytorch_scuda_tests.py /opt/scuda/test/pytorch_scuda_tests.py
+COPY test/pytorch_lupine_tests.py /opt/lupine/test/pytorch_lupine_tests.py
 
-ENV LD_LIBRARY_PATH=/opt/scuda/lib:${LD_LIBRARY_PATH}
+ENV LD_LIBRARY_PATH=/opt/lupine/lib:${LD_LIBRARY_PATH}
 
-CMD ["python3", "/opt/scuda/test/pytorch_scuda_tests.py", "microgpt_train"]
+CMD ["python3", "/opt/lupine/test/pytorch_lupine_tests.py", "microgpt_train"]
 ```
 
 Build it:
 
 ```bash
-docker build -f Dockerfile.pytorch-scuda -t scuda-pytorch:cuda-13.1 .
+docker build -f Dockerfile.pytorch-lupine -t lupine-pytorch:cuda-13.1 .
 ```
 
 Run the server on the GPU machine:
 
 ```bash
 docker run --rm --gpus all -p 14833:14833 \
-  ghcr.io/kevmo314/scuda-server:cuda-13.1.0-ubuntu24.04
+  ghcr.io/lupinemachines/lupine-server:cuda-13.1.0-ubuntu24.04
 ```
 
 Run the PyTorch client from the CPU-only machine:
 
 ```bash
 docker run --rm \
-  -e SCUDA_SERVER=<server>:14833 \
-  scuda-pytorch:cuda-13.1
+  -e LUPINE_SERVER=<server>:14833 \
+  lupine-pytorch:cuda-13.1
 ```
 
 Expected success looks like:
@@ -183,7 +183,7 @@ microgpt_train: PASS
 
 ## Local development
 
-Building the binaries requires running codegen first. Scuda codegen reads the cuda dependency header files in order to generate rpc calls.
+Building the binaries requires running codegen first. Lupine codegen reads the cuda dependency header files in order to generate rpc calls.
 
 To ensure codegen works properly, the proper cuda packages need to be installed on your OS. Take a look at our [Dockerfile](./Dockerfile) to see an example.
 
@@ -211,26 +211,17 @@ Ensure there are no errors in the output of the codegen.
 ### Run cmake
 
 ```sh
-cmake .
-cmake --build .
+cmake -S . -B build
+cmake --build build
 ```
 
-Cmake will generate a server and a client file depending on your cuda version.
+CMake builds the CUDA driver shim at `build/libcuda.so.1`, the NVML shim at
+`build/libnvidia-ml.so.1`, and the server at `build/lupine_driver_server`.
 
-Example:
-`libscuda_12_0.so`, `server_12_0.so`
-
-It's required to run scuda server before initiating client commands.
+The Lupine server must be running before initiating client commands.
 
 ```sh
 ./local.sh server
-```
-
-The above command will grep for the generated libscuda + server files. You can also run the binaries directly.
-
-
-```sh
-./server_12_0.so
 ```
 
 If successful, the server will start:
@@ -241,19 +232,20 @@ Server listening on port 14833...
 
 ## Running the client
 
-Scuda requires you to preload the libscuda binary before executing any cuda commands.
+For local development, preload the built `libcuda.so.1` before executing CUDA
+commands. The published client image sets `LD_LIBRARY_PATH` for you instead.
 
 Once the server above is running:
 
 ```sh
 # update to your desired IP/port
-export SCUDA_SERVER=0.0.0.0
+export LUPINE_SERVER=<server>:14833
 
-LD_PRELOAD=./libscuda_12_0.so python3 -c "import torch; print(torch.cuda.is_available())"
+LD_PRELOAD=./build/libcuda.so.1 python3 -c "import torch; print(torch.cuda.is_available())"
 
 # or
 
-LD_PRELOAD=./libscuda_12_0.so nvidia-smi
+LD_PRELOAD=./build/libcuda.so.1 nvidia-smi
 ```
 
 You can also use the local shell script to run your commands.
@@ -264,13 +256,13 @@ You can also use the local shell script to run your commands.
 
 ## Motivations
 
-The goal of SCUDA is to enable developers to easily interact with GPUs over a network in order to take advantage of various pools of distributed GPUs. Obviously TCP is slower than traditional methods, but we have plans to minimize performance impact through various methods.
+The goal of LUPINE is to enable developers to easily interact with GPUs over a network in order to take advantage of various pools of distributed GPUs. Obviously TCP is slower than traditional methods, but we have plans to minimize performance impact through various methods.
 
 ### Some use cases / motivations:
 
 1. **Local testing** - For testing purposes, the latency added by TCP is acceptable, as the goal is to verify compatibility and performance rather than achieving the lowest latency. The remote GPU can still fully accelerate the application, allowing a developer to run tests they otherwise couldn’t on their local setup.
 
-2. **Aggregated GPU pools** - The goal is to centralize GPU management and resource allocation, making it easier to deploy and scale containerized applications that need GPU support without worrying about GPU availability. SCUDA will eventually handle capacity management and pooling.
+2. **Aggregated GPU pools** - The goal is to centralize GPU management and resource allocation, making it easier to deploy and scale containerized applications that need GPU support without worrying about GPU availability. LUPINE will eventually handle capacity management and pooling.
 
 3. **Remote model training** - Developers can train models from their laptops or low-power devices, using GPUs optimized for training without needing to deploy a full VM or move the entire development environment to the remote location.
 
@@ -278,7 +270,7 @@ The goal of SCUDA is to enable developers to easily interact with GPUs over a ne
 
 5. **Remote data processing** - Developers can run operations like filtering, joining, and aggregating data directly on the remote GPU, while the results are transferred back over the network. Technically, developers can accelerate matrix multiplication or linear algebra computations on large datasets by offloading these computations to a remote GPU; they can run their scripts locally while utilizing the power of a remote machine.
 
-6. **Remote fine-tuning** - Developers can download a pre-trained model (ex: resnet) and fine-tune it. With SCUDA, training is done remotely using the library to route PyTorch CUDA calls over TCP to a remote GPU, allowing the developer to run the fine-tuning process from their local machine or Jupyter Notebook environment.
+6. **Remote fine-tuning** - Developers can download a pre-trained model (ex: resnet) and fine-tune it. With LUPINE, training is done remotely using the library to route PyTorch CUDA calls over TCP to a remote GPU, allowing the developer to run the fine-tuning process from their local machine or Jupyter Notebook environment.
 
 ## Future goals:
 
@@ -290,7 +282,7 @@ This project is inspired by some existing proprietary solutions:
 
 - https://www.thundercompute.com/
 - https://www.juicelabs.co/
-- https://en.wikipedia.org/wiki/RCUDA (That's where SCUDA's name comes from, S is the next letter after R!)
+- https://en.wikipedia.org/wiki/RCUDA
 
 ## Benchmarks
 

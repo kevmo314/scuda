@@ -65,7 +65,7 @@ jobs:
             CUDA_VERSION=${{ matrix.cuda }}
             UBUNTU_VERSION=${{ matrix.ubuntu }}
           tags: |
-            ghcr.io/${{ github.repository_owner }}/scuda-server:cuda-${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}
+            ghcr.io/${{ github.repository_owner }}/lupine-server:cuda-${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
