@@ -2882,7 +2882,6 @@ int handle_manual_cuMemcpyHtoDAsync_v2(conn_t *conn) {
   } else {
     result = CUDA_SUCCESS;
     void *host = nullptr;
-    bool copy_enqueued = false;
     if (byteCount != 0) {
       result = cuMemAllocHost(&host, byteCount);
     }
@@ -2896,9 +2895,7 @@ int handle_manual_cuMemcpyHtoDAsync_v2(conn_t *conn) {
       size_t chunk = std::min(LUPINE_HTOD_CHUNK_BYTES, byteCount - offset);
       auto *chunk_host = static_cast<unsigned char *>(host) + offset;
       if (rpc_read(conn, chunk_host, chunk) < 0) {
-        if (copy_enqueued) {
-          cuStreamSynchronize(stream);
-        }
+        cuStreamSynchronize(stream);
         cuMemFreeHost(host);
         return -1;
       }
@@ -2906,9 +2903,7 @@ int handle_manual_cuMemcpyHtoDAsync_v2(conn_t *conn) {
       CUresult copy_result =
           cuMemcpyHtoDAsync_v2(dstDevice + offset, chunk_host, chunk, stream);
       if (copy_result != CUDA_SUCCESS) {
-        if (copy_enqueued) {
-          cuStreamSynchronize(stream);
-        }
+        cuStreamSynchronize(stream);
         cuMemFreeHost(host);
         result = copy_result;
         offset += chunk;
@@ -2918,7 +2913,6 @@ int handle_manual_cuMemcpyHtoDAsync_v2(conn_t *conn) {
         host = nullptr;
         break;
       }
-      copy_enqueued = true;
       offset += chunk;
     }
     if (host != nullptr && result == CUDA_SUCCESS) {
@@ -2928,9 +2922,7 @@ int handle_manual_cuMemcpyHtoDAsync_v2(conn_t *conn) {
                                 },
                                 host);
       if (result != CUDA_SUCCESS) {
-        if (copy_enqueued) {
-          cuStreamSynchronize(stream);
-        }
+        cuStreamSynchronize(stream);
         cuMemFreeHost(host);
       }
     }
