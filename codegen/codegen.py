@@ -923,6 +923,8 @@ def infer_routing_key(
             return "CONTEXT", param
         if type_name == "CUmodule":
             return "MODULE", param
+        if type_name == "CUlibrary":
+            return "LIBRARY", param
         if type_name == "CUfunction":
             return "FUNCTION", param
         if type_name == "CUstream":
@@ -1243,6 +1245,8 @@ def client_routing_route_expr(metadata: FunctionAnnotationMetadata) -> str:
         return f"scuda_route_for_context({name})"
     if kind == "MODULE":
         return f"scuda_route_for_module({name})"
+    if kind == "LIBRARY":
+        return f"scuda_route_for_library({name})"
     if kind == "FUNCTION":
         return f"scuda_route_for_function({name})"
     if kind == "STREAM":
@@ -1263,6 +1267,8 @@ def client_record_owner_stmt(owner: OwnerAnnotation) -> str:
         fn = "scuda_note_context_owner"
     elif kind == "MODULE":
         fn = "scuda_note_module_owner"
+    elif kind == "LIBRARY":
+        fn = "scuda_note_library_owner"
     elif kind == "FUNCTION":
         fn = "scuda_note_function_owner"
     elif kind == "STREAM":
@@ -1290,6 +1296,20 @@ def write_client_post_call(f, function: Function, metadata: FunctionAnnotationMe
     for owner in metadata.record_owners:
         f.write(client_record_owner_stmt(owner))
 
+    if function.name.format() == "cuMemAlloc_v2":
+        f.write("    if (return_value == CUDA_SUCCESS && dptr != nullptr) scuda_note_deviceptr_allocation_route(*dptr, bytesize, route);\n")
+    if function.name.format() == "cuMemAllocPitch_v2":
+        f.write("    if (return_value == CUDA_SUCCESS && dptr != nullptr) {\n")
+        f.write("        size_t allocation_size = 0;\n")
+        f.write("        if (pPitch != nullptr) allocation_size = (*pPitch) * Height;\n")
+        f.write("        else allocation_size = WidthInBytes * Height;\n")
+        f.write("        scuda_note_deviceptr_allocation_route(*dptr, allocation_size, route);\n")
+        f.write("    }\n")
+    if function.name.format() in {"cuMemAllocAsync", "cuMemAllocFromPoolAsync"}:
+        f.write("    if (return_value == CUDA_SUCCESS && dptr != nullptr) scuda_note_deviceptr_allocation_route(*dptr, bytesize, route);\n")
+    if function.name.format() == "cuMemFreeAsync":
+        f.write("    if (return_value == CUDA_SUCCESS) scuda_forget_deviceptr_owner(dptr);\n")
+
     if function.name.format() == "cuDevicePrimaryCtxRetain":
         f.write("    if (return_value == CUDA_SUCCESS) scuda_note_primary_context_active(dev);\n")
     if function.name.format() == "cuDevicePrimaryCtxRelease_v2":
@@ -1300,6 +1320,10 @@ def write_client_post_call(f, function: Function, metadata: FunctionAnnotationMe
         f.write("    if (return_value == CUDA_SUCCESS) scuda_invalidate_primary_context_state(dev);\n")
     if function.name.format() == "cuCtxDestroy_v2":
         f.write("    if (return_value == CUDA_SUCCESS) scuda_invalidate_current_context_cache();\n")
+    if function.name.format() == "cuModuleGetFunction":
+        f.write("    if (return_value == CUDA_SUCCESS && hfunc != nullptr) scuda_record_module_function(*hfunc, hmod, name, route);\n")
+    if function.name.format() == "cuLibraryGetKernel":
+        f.write("    if (return_value == CUDA_SUCCESS && pKernel != nullptr) scuda_record_library_kernel(*pKernel, library, name, route);\n")
 
 
 def error_const(return_type: str) -> str:
@@ -1485,6 +1509,7 @@ def main():
             'extern "C" scuda_route scuda_route_for_current_context();\n'
             'extern "C" scuda_route scuda_route_for_context(CUcontext ctx);\n'
             'extern "C" scuda_route scuda_route_for_module(CUmodule module);\n'
+            'extern "C" scuda_route scuda_route_for_library(CUlibrary library);\n'
             'extern "C" scuda_route scuda_route_for_function(CUfunction function);\n'
             'extern "C" scuda_route scuda_route_for_stream(CUstream stream);\n'
             'extern "C" scuda_route scuda_route_for_event(CUevent event);\n'
@@ -1503,16 +1528,23 @@ def main():
             'extern "C" CUfunction scuda_translate_private_function_for_rpc(CUfunction function);\n'
             'extern "C" void scuda_note_context_owner(CUcontext ctx, conn_t *conn);\n'
             'extern "C" void scuda_note_module_owner(CUmodule module, conn_t *conn);\n'
+            'extern "C" void scuda_note_library_owner(CUlibrary library, conn_t *conn);\n'
             'extern "C" void scuda_note_function_owner(CUfunction function, conn_t *conn);\n'
             'extern "C" void scuda_note_stream_owner(CUstream stream, conn_t *conn);\n'
             'extern "C" void scuda_note_event_owner(CUevent event, conn_t *conn);\n'
             'extern "C" void scuda_note_deviceptr_owner(CUdeviceptr ptr, conn_t *conn);\n\n'
+            'extern "C" void scuda_note_deviceptr_allocation(CUdeviceptr ptr, size_t size, conn_t *conn);\n\n'
             'extern "C" void scuda_note_context_owner_route(CUcontext ctx, scuda_route route);\n'
             'extern "C" void scuda_note_module_owner_route(CUmodule module, scuda_route route);\n'
+            'extern "C" void scuda_note_library_owner_route(CUlibrary library, scuda_route route);\n'
             'extern "C" void scuda_note_function_owner_route(CUfunction function, scuda_route route);\n'
             'extern "C" void scuda_note_stream_owner_route(CUstream stream, scuda_route route);\n'
             'extern "C" void scuda_note_event_owner_route(CUevent event, scuda_route route);\n'
             'extern "C" void scuda_note_deviceptr_owner_route(CUdeviceptr ptr, scuda_route route);\n\n'
+            'extern "C" void scuda_note_deviceptr_allocation_route(CUdeviceptr ptr, size_t size, scuda_route route);\n\n'
+            'extern "C" void scuda_forget_deviceptr_owner(CUdeviceptr ptr);\n\n'
+            'extern "C" void scuda_record_library_kernel(CUkernel kernel, CUlibrary library, const char *name, scuda_route route);\n\n'
+            'extern "C" void scuda_record_module_function(CUfunction function, CUmodule module, const char *name, scuda_route route);\n\n'
             'extern "C" void scuda_prepare_host_range_write(void *host, size_t size);\n'
             'extern "C" void scuda_mark_host_range_clean(void *host, size_t size);\n\n'
             'extern "C" CUresult scuda_cuArrayCreate_v2_safe(CUarray *pHandle, const CUDA_ARRAY_DESCRIPTOR *pAllocateArray);\n'
@@ -1541,7 +1573,9 @@ def main():
             'extern "C" CUresult scuda_cuPointerGetAttributes_safe(unsigned int numAttributes, CUpointer_attribute *attributes, void **data, CUdeviceptr ptr);\n'
             'extern "C" CUresult scuda_cuOccupancyMaxActiveBlocksPerMultiprocessor_cached(int *numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize);\n'
             'extern "C" CUresult scuda_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags_cached(int *numBlocks, CUfunction func, int blockSize, size_t dynamicSMemSize, unsigned int flags);\n'
-            'extern "C" CUresult scuda_cuDeviceCanAccessPeer_multi(int *canAccessPeer, CUdevice dev, CUdevice peerDev);\n\n'
+            'extern "C" CUresult scuda_cuDeviceCanAccessPeer_multi(int *canAccessPeer, CUdevice dev, CUdevice peerDev);\n'
+            'extern "C" CUresult scuda_cuCtxEnablePeerAccess_multi(CUcontext peerContext, unsigned int flags);\n'
+            'extern "C" CUresult scuda_cuCtxDisablePeerAccess_multi(CUcontext peerContext);\n\n'
         )
         for function, annotation, operations, disabled, metadata in functions_with_annotations:
             # we don't generate client function definitions for disabled functions; only the RPC definitions.
@@ -1595,6 +1629,8 @@ def main():
                 "cuOccupancyMaxActiveBlocksPerMultiprocessor": "scuda_cuOccupancyMaxActiveBlocksPerMultiprocessor_cached(numBlocks, func, blockSize, dynamicSMemSize)",
                 "cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags": "scuda_cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags_cached(numBlocks, func, blockSize, dynamicSMemSize, flags)",
                 "cuDeviceCanAccessPeer": "scuda_cuDeviceCanAccessPeer_multi(canAccessPeer, dev, peerDev)",
+                "cuCtxEnablePeerAccess": "scuda_cuCtxEnablePeerAccess_multi(peerContext, Flags)",
+                "cuCtxDisablePeerAccess": "scuda_cuCtxDisablePeerAccess_multi(peerContext)",
             }
             if function.name.format() in direct_wrappers:
                 f.write("    return {call};\n".format(call=direct_wrappers[function.name.format()]))
@@ -1617,12 +1653,13 @@ def main():
                 f.write("        rpc_read_end(conn) < 0)\n")
                 f.write("        return CUDA_ERROR_DEVICE_UNAVAILABLE;\n")
                 f.write("    if (bytes != nullptr) *bytes = remote_bytes;\n")
-                f.write("    if (return_value == CUDA_SUCCESS && dptr != nullptr) scuda_note_deviceptr_owner(*dptr, conn);\n")
+                f.write("    if (return_value == CUDA_SUCCESS && dptr != nullptr) scuda_note_deviceptr_allocation(*dptr, remote_bytes, conn);\n")
                 f.write("    return return_value;\n")
                 f.write("}\n\n")
                 continue
             if function.name.format() in {"cuLibraryGetGlobal", "cuLibraryGetManaged"}:
-                f.write("    conn_t *conn = rpc_client_get_connection(0);\n")
+                f.write("    scuda_route route = scuda_route_for_library(library);\n")
+                f.write("    conn_t *conn = scuda_route_remote_conn(route);\n")
                 f.write("    CUresult return_value;\n")
                 f.write("    size_t remote_bytes = 0;\n")
                 f.write("    std::size_t name_len = std::strlen(name) + 1;\n")
@@ -1638,7 +1675,7 @@ def main():
                 f.write("        rpc_read_end(conn) < 0)\n")
                 f.write("        return CUDA_ERROR_DEVICE_UNAVAILABLE;\n")
                 f.write("    if (bytes != nullptr) *bytes = remote_bytes;\n")
-                f.write("    if (return_value == CUDA_SUCCESS && dptr != nullptr) scuda_note_deviceptr_owner(*dptr, conn);\n")
+                f.write("    if (return_value == CUDA_SUCCESS && dptr != nullptr) scuda_note_deviceptr_allocation(*dptr, remote_bytes, conn);\n")
                 f.write("    return return_value;\n")
                 f.write("}\n\n")
                 continue
