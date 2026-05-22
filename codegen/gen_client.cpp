@@ -19,6 +19,7 @@
 extern int rpc_size();
 extern conn_t *rpc_client_get_connection(unsigned int index);
 extern void rpc_close(conn_t *conn);
+extern "C" int lupine_read_deferred_dtoh_copies(conn_t *conn);
 
 struct lupine_route {
   int kind;
@@ -2166,9 +2167,9 @@ CUresult cuMemcpyHtoDAsync_v2(CUdeviceptr dstDevice, const void *srcHost,
       rpc_write_start_request(conn, RPC_cuMemcpyHtoDAsync_v2) < 0 ||
       rpc_write(conn, &dstDevice, sizeof(CUdeviceptr)) < 0 ||
       rpc_write(conn, &ByteCount, sizeof(size_t)) < 0 ||
+      rpc_write(conn, &hStream, sizeof(CUstream)) < 0 ||
       (ByteCount != 0 && srcHost == nullptr) ||
       (ByteCount != 0 && rpc_write(conn, srcHost, ByteCount) < 0) ||
-      rpc_write(conn, &hStream, sizeof(CUstream)) < 0 ||
       rpc_wait_for_response(conn) < 0 ||
       rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
       rpc_read_end(conn) < 0)
@@ -4072,6 +4073,7 @@ CUresult cuEventQuery(CUevent hEvent) {
   if (conn == nullptr || rpc_write_start_request(conn, RPC_cuEventQuery) < 0 ||
       rpc_write(conn, &hEvent, sizeof(CUevent)) < 0 ||
       rpc_wait_for_response(conn) < 0 ||
+      lupine_read_deferred_dtoh_copies(conn) < 0 ||
       rpc_read(conn, &return_value, sizeof(CUresult)) < 0 ||
       rpc_read_end(conn) < 0)
     return CUDA_ERROR_DEVICE_UNAVAILABLE;

@@ -407,6 +407,13 @@ void client_handler(int connfd) {
       }
       continue;
     }
+    if (op == RPC_cuEventQuery) {
+      if (handle_manual_cuEventQuery(&conn) < 0) {
+        lupine_log_manual_handler_error("cuEventQuery");
+        break;
+      }
+      continue;
+    }
     if (op == RPC_cuStreamWaitEvent) {
       if (handle_manual_cuStreamWaitEvent(&conn) < 0) {
         lupine_log_manual_handler_error("cuStreamWaitEvent");
