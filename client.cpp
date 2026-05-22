@@ -694,6 +694,19 @@ static int lupine_route_identity(lupine_route route) {
   return -2;
 }
 
+extern "C" bool lupine_routes_share_server(lupine_route first,
+                                           lupine_route second) {
+  return lupine_route_identity(first) == lupine_route_identity(second);
+}
+
+extern "C" lupine_route lupine_route_for_deviceptr(CUdeviceptr ptr);
+
+extern "C" bool lupine_deviceptrs_share_route(CUdeviceptr first,
+                                              CUdeviceptr second) {
+  return lupine_routes_share_server(lupine_route_for_deviceptr(first),
+                                    lupine_route_for_deviceptr(second));
+}
+
 static lupine_route lupine_route_from_identity(int route_id) {
   if (route_id == -1) {
     return lupine_local_route();
@@ -2802,6 +2815,50 @@ CUresult cuMemcpyDtoH_v2(void *dstHost, CUdeviceptr srcDevice,
                          size_t ByteCount);
 CUresult cuMemcpyHtoDAsync_v2(CUdeviceptr dstDevice, const void *srcHost,
                               size_t ByteCount, CUstream hStream);
+CUresult cuStreamSynchronize(CUstream hStream);
+
+extern "C" CUresult lupine_cuMemcpyDtoD_via_client(CUdeviceptr dstDevice,
+                                                   CUdeviceptr srcDevice,
+                                                   size_t ByteCount,
+                                                   CUstream hStream,
+                                                   bool async) {
+  if (lupine_trace_enabled()) {
+    std::cerr << "LUPINE cross-route D2D via client dst="
+              << reinterpret_cast<void *>(dstDevice)
+              << " src=" << reinterpret_cast<void *>(srcDevice)
+              << " bytes=" << ByteCount << " async=" << async
+              << " stream=" << hStream << std::endl;
+  }
+  if (ByteCount == 0) {
+    return CUDA_SUCCESS;
+  }
+
+  constexpr size_t chunk_size = 16 * 1024 * 1024;
+  std::vector<unsigned char> staging(std::min(ByteCount, chunk_size));
+  size_t offset = 0;
+  while (offset < ByteCount) {
+    size_t chunk = std::min(staging.size(), ByteCount - offset);
+    CUresult result =
+        cuMemcpyDtoH_v2(staging.data(), srcDevice + offset, chunk);
+    if (result != CUDA_SUCCESS) {
+      return result;
+    }
+    if (async) {
+      result = cuMemcpyHtoDAsync_v2(dstDevice + offset, staging.data(), chunk,
+                                    hStream);
+      if (result == CUDA_SUCCESS) {
+        result = cuStreamSynchronize(hStream);
+      }
+    } else {
+      result = cuMemcpyHtoD_v2(dstDevice + offset, staging.data(), chunk);
+    }
+    if (result != CUDA_SUCCESS) {
+      return result;
+    }
+    offset += chunk;
+  }
+  return CUDA_SUCCESS;
+}
 
 #ifdef cuStreamDestroy
 #undef cuStreamDestroy
@@ -5842,7 +5899,7 @@ extern "C" CUresult cuMemcpyAsync(CUdeviceptr dst, CUdeviceptr src,
   conn_t *conn = lupine_rpc_conn_for_deviceptr(dst);
   conn_t *src_conn = lupine_rpc_conn_for_deviceptr(src);
   if (conn != src_conn) {
-    return CUDA_ERROR_NOT_SUPPORTED;
+    return lupine_cuMemcpyDtoD_via_client(dst, src, ByteCount, hStream, true);
   }
   CUresult return_value;
   if (conn == nullptr || rpc_write_start_request(conn, RPC_cuMemcpyAsync) < 0 ||
