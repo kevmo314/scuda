@@ -91,7 +91,6 @@ int rpc_read_start(conn_t *conn, int write_id) {
 }
 
 int rpc_read(conn_t *conn, void *data, size_t size) {
-  extern int rpc_http2_read(conn_t *, void *, size_t);
   return rpc_http2_read(conn, data, size);
 }
 
@@ -214,7 +213,6 @@ int rpc_write_end(conn_t *conn) {
   struct iovec iov[128];
   memcpy(iov, conn->write_iov, sizeof(struct iovec) * iov_count);
 
-  extern int rpc_http2_writev(conn_t *, struct iovec *, int);
   int result = rpc_http2_writev(conn, iov, iov_count);
   pthread_mutex_unlock(&conn->write_mutex);
   return result == 0 ? write_id : -1;

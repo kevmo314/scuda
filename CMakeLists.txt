@@ -102,6 +102,14 @@ add_executable(${SERVER_OUTPUT} ${SERVER_SOURCES} ${SERVER_HEADERS})
 target_include_directories(${SERVER_OUTPUT} PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
 target_link_libraries(${SERVER_OUTPUT} PRIVATE ${CUDAToolkit_LIBRARIES} cuda dl ${NGHTTP2_LIBRARY})
 
+add_executable(h2_test
+    ${CMAKE_CURRENT_SOURCE_DIR}/h2.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/h2_test.cpp
+)
+target_link_libraries(h2_test PRIVATE stdc++ ${NGHTTP2_LIBRARY})
+enable_testing()
+add_test(NAME h2_test COMMAND h2_test)
+
 set_source_files_properties(
     ${SERVER_SOURCES}
     PROPERTIES LANGUAGE CUDA
