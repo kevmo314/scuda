@@ -1,5 +1,3 @@
-#include <sys/socket.h>
-
 #include "rpc.h"
 #include <algorithm>
 #include <deque>
@@ -102,26 +100,7 @@ int rpc_read(conn_t *conn, void *data, size_t size) {
     extern int rpc_http2_read(conn_t *, void *, size_t);
     return rpc_http2_read(conn, data, size);
   }
-  char *cursor = static_cast<char *>(data);
-  size_t total = 0;
-  while (total < size) {
-    ssize_t bytes_read =
-        recv(conn->connfd, cursor + total, size - total, MSG_WAITALL);
-    if (bytes_read == 0) {
-      return total == 0 ? 0 : -1;
-    }
-    if (bytes_read < 0) {
-      if (errno == EINTR) {
-        continue;
-      }
-      if (errno != EBADF && errno != ECONNRESET) {
-        printf("recv error: %s\n", strerror(errno));
-      }
-      return -1;
-    }
-    total += static_cast<size_t>(bytes_read);
-  }
-  return static_cast<int>(total);
+  return -1;
 }
 
 int rpc_drain(conn_t *conn, size_t size) {
@@ -239,49 +218,18 @@ int rpc_write_end(conn_t *conn) {
   if (conn->write_op != -1) {
     conn->write_iov[1] = {&conn->write_op, sizeof(unsigned int)};
   }
+  int write_id = conn->write_id;
+  int iov_count = conn->write_iov_count;
+  struct iovec iov[128];
+  memcpy(iov, conn->write_iov, sizeof(struct iovec) * iov_count);
 
+  int result = -1;
   if (conn->http2 != nullptr) {
     extern int rpc_http2_writev(conn_t *, struct iovec *, int);
-    int result = rpc_http2_writev(conn, conn->write_iov, conn->write_iov_count);
-    pthread_mutex_unlock(&conn->write_mutex);
-    return result == 0 ? conn->write_id : -1;
+    result = rpc_http2_writev(conn, iov, iov_count);
   }
-
-  struct iovec iov[128];
-  int iov_count = conn->write_iov_count;
-  memcpy(iov, conn->write_iov, sizeof(struct iovec) * iov_count);
-  struct iovec *iov_cursor = iov;
-
-  while (iov_count > 0) {
-    ssize_t written = writev(conn->connfd, iov_cursor, iov_count);
-    if (written < 0) {
-      if (errno == EINTR) {
-        continue;
-      }
-      pthread_mutex_unlock(&conn->write_mutex);
-      return -1;
-    }
-    if (written == 0) {
-      pthread_mutex_unlock(&conn->write_mutex);
-      return -1;
-    }
-
-    size_t remaining = static_cast<size_t>(written);
-    while (iov_count > 0 && remaining >= iov_cursor[0].iov_len) {
-      remaining -= iov_cursor[0].iov_len;
-      ++iov_cursor;
-      --iov_count;
-    }
-    if (iov_count > 0 && remaining != 0) {
-      iov_cursor[0].iov_base =
-          static_cast<char *>(iov_cursor[0].iov_base) + remaining;
-      iov_cursor[0].iov_len -= remaining;
-    }
-  }
-
-  if (pthread_mutex_unlock(&conn->write_mutex) < 0)
-    return -1;
-  return conn->write_id;
+  pthread_mutex_unlock(&conn->write_mutex);
+  return result == 0 ? write_id : -1;
 }
 
 namespace {
@@ -306,7 +254,7 @@ struct h2_transport {
   nghttp2_session *session = nullptr;
   std::deque<h2_buffer> local_out;
   size_t queued_local_bytes = 0;
-  pthread_mutex_t send_mutex = PTHREAD_MUTEX_INITIALIZER;
+  pthread_mutex_t session_mutex = PTHREAD_MUTEX_INITIALIZER;
 };
 
 struct h2_write_cursor {
@@ -535,11 +483,16 @@ int h2_on_header_callback(nghttp2_session *, const nghttp2_frame *frame,
   return 0;
 }
 
-int h2_flush_session(h2_transport *transport) {
-  pthread_mutex_lock(&transport->send_mutex);
+int h2_flush_session_locked(h2_transport *transport) {
   int result = nghttp2_session_send(transport->session);
-  pthread_mutex_unlock(&transport->send_mutex);
   return result == 0 ? 0 : -1;
+}
+
+int h2_flush_session(h2_transport *transport) {
+  pthread_mutex_lock(&transport->session_mutex);
+  int result = h2_flush_session_locked(transport);
+  pthread_mutex_unlock(&transport->session_mutex);
+  return result;
 }
 
 int h2_read_from_net(h2_transport *transport) {
@@ -553,15 +506,19 @@ int h2_read_from_net(h2_transport *transport) {
   }
 
   size_t offset = 0;
+  pthread_mutex_lock(&transport->session_mutex);
   while (offset < static_cast<size_t>(n)) {
     ssize_t consumed = nghttp2_session_mem_recv(
         transport->session, buffer + offset, static_cast<size_t>(n) - offset);
     if (consumed <= 0) {
+      pthread_mutex_unlock(&transport->session_mutex);
       return -1;
     }
     offset += static_cast<size_t>(consumed);
   }
-  return h2_flush_session(transport);
+  int result = h2_flush_session_locked(transport);
+  pthread_mutex_unlock(&transport->session_mutex);
+  return result;
 }
 
 } // namespace
@@ -613,11 +570,14 @@ int rpc_http2_writev(conn_t *conn, struct iovec *iov, int iov_count) {
   nghttp2_data_provider provider = {};
   provider.source.ptr = &source;
   provider.read_callback = h2_data_source_read_callback;
+  pthread_mutex_lock(&transport->session_mutex);
   if (nghttp2_submit_data(transport->session, NGHTTP2_FLAG_NONE,
                           transport->stream_id, &provider) != 0 ||
-      h2_flush_session(transport) < 0 || source.remaining() != 0) {
+      h2_flush_session_locked(transport) < 0 || source.remaining() != 0) {
+    pthread_mutex_unlock(&transport->session_mutex);
     return -1;
   }
+  pthread_mutex_unlock(&transport->session_mutex);
   return 0;
 }
 
