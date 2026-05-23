@@ -285,18 +285,6 @@ sample_workdir() {
   dirname "$sample_exe"
 }
 
-sample_timeout() {
-  local sample="$1"
-  case "$sample" in
-    cuSolverRf|conjugateGradientPrecond|simpleStreams)
-      printf '%s\n' "${SLOW_SAMPLE_TIMEOUT:-240}"
-      ;;
-    *)
-      printf '%s\n' "$SAMPLE_TIMEOUT"
-      ;;
-  esac
-}
-
 prepare_sample_runtime_files() {
   local sample="$1"
   local sample_cwd="$2"
@@ -465,7 +453,7 @@ for i in "${!samples[@]}"; do
   set +e
   (
     cd "$sample_cwd"
-    timeout --kill-after=5s "$(sample_timeout "$sample")" env \
+    timeout --kill-after=5s "$SAMPLE_TIMEOUT" env \
       LD_LIBRARY_PATH="$CUDA_LIB_DIR:${LD_LIBRARY_PATH:-}" \
       LUPINE_SERVER="$SERVER_HOST:$port" \
       LD_PRELOAD="$LUPINE_LIB" \

@@ -1,12 +1,7 @@
-#include <sys/socket.h>
-
 #include "rpc.h"
 #include <algorithm>
-#include <errno.h>
 #include <iostream>
 #include <string.h>
-#include <unistd.h>
-
 
 void *_rpc_read_id_dispatch(void *p) {
   conn_t *conn = (conn_t *)p;
@@ -45,7 +40,8 @@ void *_rpc_read_id_dispatch(void *p) {
 // entry.
 int rpc_dispatch(conn_t *conn, int parity) {
   if (conn->rpc_thread == 0 &&
-      pthread_create(&conn->rpc_thread, nullptr, _rpc_read_id_dispatch, (void *)conn) < 0) {
+      pthread_create(&conn->rpc_thread, nullptr, _rpc_read_id_dispatch,
+                     (void *)conn) < 0) {
     return -1;
   }
 
@@ -95,26 +91,7 @@ int rpc_read_start(conn_t *conn, int write_id) {
 }
 
 int rpc_read(conn_t *conn, void *data, size_t size) {
-  char *cursor = static_cast<char *>(data);
-  size_t total = 0;
-  while (total < size) {
-    ssize_t bytes_read =
-        recv(conn->connfd, cursor + total, size - total, MSG_WAITALL);
-    if (bytes_read == 0) {
-      return total == 0 ? 0 : -1;
-    }
-    if (bytes_read < 0) {
-      if (errno == EINTR) {
-        continue;
-      }
-      if (errno != EBADF && errno != ECONNRESET) {
-        printf("recv error: %s\n", strerror(errno));
-      }
-      return -1;
-    }
-    total += static_cast<size_t>(bytes_read);
-  }
-  return static_cast<int>(total);
+  return rpc_http2_read(conn, data, size);
 }
 
 int rpc_drain(conn_t *conn, size_t size) {
@@ -139,8 +116,7 @@ int rpc_read_end(conn_t *conn) {
   if (pthread_cond_broadcast(&conn->read_cond) < 0 ||
       pthread_mutex_unlock(&conn->read_mutex) < 0)
     return -1;
-  if (completes_local_request &&
-      pthread_mutex_unlock(&conn->call_mutex) < 0)
+  if (completes_local_request && pthread_mutex_unlock(&conn->call_mutex) < 0)
     return -1;
   return read_id;
 }
@@ -232,40 +208,12 @@ int rpc_write_end(conn_t *conn) {
   if (conn->write_op != -1) {
     conn->write_iov[1] = {&conn->write_op, sizeof(unsigned int)};
   }
-
-  struct iovec iov[128];
+  int write_id = conn->write_id;
   int iov_count = conn->write_iov_count;
+  struct iovec iov[128];
   memcpy(iov, conn->write_iov, sizeof(struct iovec) * iov_count);
-  struct iovec *iov_cursor = iov;
 
-  while (iov_count > 0) {
-    ssize_t written = writev(conn->connfd, iov_cursor, iov_count);
-    if (written < 0) {
-      if (errno == EINTR) {
-        continue;
-      }
-      pthread_mutex_unlock(&conn->write_mutex);
-      return -1;
-    }
-    if (written == 0) {
-      pthread_mutex_unlock(&conn->write_mutex);
-      return -1;
-    }
-
-    size_t remaining = static_cast<size_t>(written);
-    while (iov_count > 0 && remaining >= iov_cursor[0].iov_len) {
-      remaining -= iov_cursor[0].iov_len;
-      ++iov_cursor;
-      --iov_count;
-    }
-    if (iov_count > 0 && remaining != 0) {
-      iov_cursor[0].iov_base =
-          static_cast<char *>(iov_cursor[0].iov_base) + remaining;
-      iov_cursor[0].iov_len -= remaining;
-    }
-  }
-
-  if (pthread_mutex_unlock(&conn->write_mutex) < 0)
-    return -1;
-  return conn->write_id;
+  int result = rpc_http2_writev(conn, iov, iov_count);
+  pthread_mutex_unlock(&conn->write_mutex);
+  return result == 0 ? write_id : -1;
 }

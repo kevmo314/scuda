@@ -138,6 +138,7 @@ int open_connection() {
             pthread_mutex_init(&c->write_mutex, nullptr) < 0 ||
             pthread_mutex_init(&c->call_mutex, nullptr) < 0 ||
             pthread_cond_init(&c->read_cond, nullptr) < 0 ||
+            rpc_http2_client_init(c) < 0 ||
             pthread_create(&c->read_thread, nullptr, rpc_client_dispatch_thread,
                            c) < 0) {
           close(sockfd);

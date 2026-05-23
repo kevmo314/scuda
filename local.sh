@@ -423,6 +423,7 @@ run() {
 test_ci() {
   cmake .
   cmake --build .
+  ctest --output-on-failure -R h2_test
 
   set_paths
   
