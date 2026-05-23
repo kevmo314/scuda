@@ -36,12 +36,14 @@ include_directories(
 )
 
 set(CLIENT_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/h2.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rpc.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/client.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/codegen/gen_client.cpp
 )
 
 set(SERVER_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/h2.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/server.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/manual_server.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/nvml_server.cpp
@@ -50,6 +52,7 @@ set(SERVER_SOURCES
 )
 
 set(NVML_CLIENT_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/h2.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rpc.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/nvml_client.cpp
 )
