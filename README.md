@@ -5,7 +5,7 @@ to CPU-only machines.
 
 ## Getting a GPU on a Mac
 
-LUPINE lets you spin up a container with a virtual GPU, like attaching a GPU to a Mac.
+LUPINE lets you spin up a container with a virtual GPU, like connecting a Mac to a Linux GPU server.
 
 ```sh
 % uname -mors 
