@@ -122,6 +122,12 @@ docker pull ghcr.io/lupinemachines/lupine-client:cuda-12.4.1-ubuntu22.04
 docker pull ghcr.io/lupinemachines/lupine-server:cuda-12.4.1-ubuntu22.04
 ```
 
+Client images are also published with a `-slim` tag, for example
+`ghcr.io/lupinemachines/lupine-client:cuda-13.1.0-ubuntu24.04-slim`. The
+default client tag keeps the CUDA runtime libraries for applications that link
+against them; the slim tag includes only the LUPINE shims, their runtime
+dependencies, and `nvidia-smi`.
+
 ## Slow Start for the Skeptics
 
 This path derives a small PyTorch client image from the published LUPINE client
