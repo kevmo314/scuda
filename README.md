@@ -3,20 +3,23 @@
 LUPINE is a GPU over IP bridge allowing GPUs on remote machines to be attached
 to CPU-only machines.
 
-## Demo
+## Getting a GPU on a Mac
 
-### CUBLAS Matrix Multiplication using Unified Memory
+LUPINE lets you spin up a container with a virtual GPU, like attaching a GPU to a Mac.
 
-The below demo displays a NVIDIA GeForce RTX 4090 running on a remote machine (right pane).
-Left pane is a Mac running a docker container with nvidia utils installed.
-
-The docker container runs this [matrixMulCUBLAS](./test/cublas_unified.cu) example. This example not only uses cuBLAS, but also takes advantage of unified memory.
-
-You can view the docker image used [here](./deploy/Dockerfile.unified).
-
-https://github.com/user-attachments/assets/b2db5d82-f214-41cf-8274-b913c04080f9
-
-You can see a list of some currently working examples in the [test folder](./test/).
+```sh
+% uname -mors 
+Darwin 25.5.0 arm64
+% docker run --rm -it --network=host \                                                                                                                          
+    ghcr.io/lupinemachines/lupine-client:cuda-13.1.0-ubuntu24.04-slim \
+    bash -c 'apt-get update -qq && apt-get install -qq -y curl ca-certificates && curl -LsSf https://astral.sh/uv/install.sh | sh && ~/.local/bin/uv run https://raw.githubusercontent.com/lupinemachines/lupine/main/python/examples/tensor.py'
+...
+cuda available: True
+device: cuda:0
+count: 1
+gpu: NVIDIA GeForce RTX 4090
+result: [0.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0]
+```
 
 ## Quick Start
 
