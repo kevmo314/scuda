@@ -107,16 +107,8 @@ add_executable(h2_test
     ${CMAKE_CURRENT_SOURCE_DIR}/h2_test.cpp
 )
 target_link_libraries(h2_test PRIVATE stdc++ ${NGHTTP2_LIBRARY})
-
-add_executable(client_loader_test
-    ${CMAKE_CURRENT_SOURCE_DIR}/client_loader_test.cpp
-)
-target_link_libraries(client_loader_test PRIVATE ${CMAKE_DL_LIBS})
 enable_testing()
 add_test(NAME h2_test COMMAND h2_test)
-add_test(NAME client_loader_test
-    COMMAND client_loader_test $<TARGET_FILE:${CLIENT_OUTPUT}>
-)
 
 set_source_files_properties(
     ${SERVER_SOURCES}

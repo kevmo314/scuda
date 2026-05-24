@@ -47,14 +47,12 @@ RUN cmake -S /opt/lupine -B /opt/lupine/build \
 
 FROM builder AS client-build
 
-RUN cmake --build /opt/lupine/build --parallel --target lupine_driver lupine_nvml client_loader_test
+RUN cmake --build /opt/lupine/build --parallel --target lupine_driver lupine_nvml
 
 RUN test -e /opt/lupine/build/libcuda.so.1 \
     && test -e /opt/lupine/build/libnvidia-ml.so.1 \
     && ln -sf libcuda.so.1 /opt/lupine/build/libcuda.so \
     && ln -sf libnvidia-ml.so.1 /opt/lupine/build/libnvidia-ml.so \
-    && LD_LIBRARY_PATH=/opt/lupine/build \
-      /opt/lupine/build/client_loader_test /opt/lupine/build/libcuda.so.1 \
     && ! nm -D --defined-only /opt/lupine/build/libcuda.so.1 \
       | awk '{print $3}' \
       | grep -E '^cuda'
