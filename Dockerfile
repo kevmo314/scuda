@@ -63,13 +63,31 @@ RUN cmake --build /opt/lupine/build --parallel --target lupine_driver_server
 
 RUN test -x /opt/lupine/build/lupine_driver_server
 
+FROM nvidia/cuda:${CUDA_VERSION}-${CUDA_RUNTIME_IMAGE_FLAVOR}-ubuntu${UBUNTU_VERSION} AS nvidia-utils
+
+ARG DEBIAN_FRONTEND=noninteractive
+ARG NVIDIA_UTILS_PACKAGE=nvidia-utils-535
+ARG NVIDIA_UTILS_VERSION=
+
+RUN set -eux; \
+    apt-get update; \
+    mkdir -p /tmp/nvidia-utils; \
+    cd /tmp/nvidia-utils; \
+    if [ -n "$NVIDIA_UTILS_VERSION" ]; then \
+      apt-get download "${NVIDIA_UTILS_PACKAGE}=${NVIDIA_UTILS_VERSION}"; \
+    else \
+      apt-get download "${NVIDIA_UTILS_PACKAGE}"; \
+    fi; \
+    dpkg-deb -x ./*.deb /tmp/nvidia-utils/root; \
+    cp /tmp/nvidia-utils/root/usr/bin/nvidia-smi /nvidia-smi; \
+    chmod +x /nvidia-smi; \
+    rm -rf /var/lib/apt/lists/* /tmp/nvidia-utils
+
 FROM nvidia/cuda:${CUDA_VERSION}-${CUDA_RUNTIME_IMAGE_FLAVOR}-ubuntu${UBUNTU_VERSION} AS client
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG CUDA_VERSION
 ARG UBUNTU_VERSION
-ARG NVIDIA_UTILS_PACKAGE=nvidia-utils-535
-ARG NVIDIA_UTILS_VERSION=
 
 LABEL org.opencontainers.image.title="lupine-client"
 LABEL org.opencontainers.image.description="LUPINE client runtime with driver-only libcuda shim"
@@ -82,19 +100,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libnghttp2-14 \
     && rm -rf /var/lib/apt/lists/*
 
-RUN set -eux; \
-    apt-get update; \
-    mkdir -p /tmp/nvidia-utils; \
-    cd /tmp/nvidia-utils; \
-    if [ -n "$NVIDIA_UTILS_VERSION" ]; then \
-      apt-get download "${NVIDIA_UTILS_PACKAGE}=${NVIDIA_UTILS_VERSION}"; \
-    else \
-      apt-get download "${NVIDIA_UTILS_PACKAGE}"; \
-    fi; \
-    dpkg-deb -x ./*.deb /tmp/nvidia-utils/root; \
-    cp /tmp/nvidia-utils/root/usr/bin/nvidia-smi /usr/bin/nvidia-smi; \
-    chmod +x /usr/bin/nvidia-smi; \
-    rm -rf /var/lib/apt/lists/* /tmp/nvidia-utils
+COPY --from=nvidia-utils /nvidia-smi /usr/bin/nvidia-smi
 
 COPY --from=client-build /opt/lupine/build/libcuda.so.1 /opt/lupine/lib/libcuda.so.1
 COPY --from=client-build /opt/lupine/build/libnvidia-ml.so.1 /opt/lupine/lib/libnvidia-ml.so.1
@@ -105,6 +111,39 @@ RUN ln -sf /opt/lupine/lib/libcuda.so.1 /opt/lupine/lib/libcuda.so \
 ENV LUPINE_LIBCUDA=/opt/lupine/lib/libcuda.so.1
 ENV LUPINE_LIB=/opt/lupine/lib/libcuda.so.1
 ENV LD_LIBRARY_PATH=/opt/lupine/lib:${LD_LIBRARY_PATH}
+
+ENTRYPOINT []
+CMD ["bash"]
+
+FROM ubuntu:${UBUNTU_VERSION} AS client-slim
+
+ARG DEBIAN_FRONTEND=noninteractive
+ARG CUDA_VERSION
+ARG UBUNTU_VERSION
+
+LABEL org.opencontainers.image.title="lupine-client"
+LABEL org.opencontainers.image.description="LUPINE slim client runtime with driver-only libcuda shim"
+LABEL org.opencontainers.image.source="https://github.com/lupinemachines/lupine"
+LABEL org.opencontainers.image.version="${CUDA_VERSION}-ubuntu${UBUNTU_VERSION}-slim"
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    bash \
+    ca-certificates \
+    libgcc-s1 \
+    libnghttp2-14 \
+    libstdc++6 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=nvidia-utils /nvidia-smi /usr/bin/nvidia-smi
+COPY --from=client-build /opt/lupine/build/libcuda.so.1 /opt/lupine/lib/libcuda.so.1
+COPY --from=client-build /opt/lupine/build/libnvidia-ml.so.1 /opt/lupine/lib/libnvidia-ml.so.1
+
+RUN ln -sf /opt/lupine/lib/libcuda.so.1 /opt/lupine/lib/libcuda.so \
+    && ln -sf /opt/lupine/lib/libnvidia-ml.so.1 /opt/lupine/lib/libnvidia-ml.so
+
+ENV LUPINE_LIBCUDA=/opt/lupine/lib/libcuda.so.1
+ENV LUPINE_LIB=/opt/lupine/lib/libcuda.so.1
+ENV LD_LIBRARY_PATH=/opt/lupine/lib
 
 ENTRYPOINT []
 CMD ["bash"]
