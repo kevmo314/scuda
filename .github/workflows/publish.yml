@@ -1,6 +1,9 @@
 name: Publish
 
 on:
+  push:
+    branches:
+      - main
   release:
     types: [published]
   workflow_dispatch:
@@ -9,6 +12,7 @@ jobs:
   pypi:
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       id-token: write
     environment:
       name: pypi
@@ -25,9 +29,12 @@ jobs:
 
       - name: Build Python package
         working-directory: python
-        run: uv build
+        run: |
+          rm -rf dist
+          uv build
 
       - name: Publish Python package to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: python/dist
+          skip-existing: true
