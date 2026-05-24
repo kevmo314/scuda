@@ -266,7 +266,7 @@ You can also use the local shell script to run your commands.
 ## Questions
 
 1. **What does LUPINE stand for?** Nothing, it just looks cool in all caps.
-2. **Does this support authentication? TLS?** Indirectly, yes. It's a plain HTTP/3 server, so you can front it with whatever TLS/auth server you want.
+2. **Does this support authentication? TLS?** Indirectly, yes. It's a plain HTTP/2 server, so you can front it with whatever TLS/auth server you want.
 3. **Was this repo AI-generated?** A chunk of it, yes. I mean, would you want to hand write hundreds of tedious API stubs? No? Me neither.
 4. **Doesn't this incur a lot of latency?** Surprisingly, no! You will see device transfers get slower because this is basically bottlenecking a PCIe link over the network, but there is very little overhead besides that. For things like model training and inference, once the model is on the GPU very little data transfer happens to the host. As a result, it might be faster than you expect.
 5. **Can I do remote video encoding/decoding?** This is probably one use case we wouldn't recommend because that's a lot heavier on the PCIe link. It works in theory though, so if you do have access to a 1 Tbps link it might work for you.
