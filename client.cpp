@@ -261,141 +261,14 @@ static bool lupine_symbol_looks_like_driver_api(const char *symbol) {
 using lupine_dlsym_fn = void *(*)(void *, const char *);
 
 #if defined(__GLIBC__)
-static bool lupine_range_ok(size_t size, size_t offset, size_t length) {
-  return offset <= size && length <= size - offset;
-}
-
-template <typename T>
-static const T *lupine_elf_at(const char *base, size_t size, size_t offset,
-                              size_t count = 1) {
-  if (!lupine_range_ok(size, offset, sizeof(T) * count)) {
-    return nullptr;
-  }
-  return reinterpret_cast<const T *>(base + offset);
-}
-
-static const char *lupine_strtab_at(const char *strtab, size_t strtab_size,
-                                    uint32_t offset) {
-  if (offset >= strtab_size) {
-    return nullptr;
-  }
-  return strtab + offset;
-}
-
-static bool lupine_find_symbol_version_in_elf(const char *path,
-                                              const char *symbol,
-                                              std::string *version) {
-  int fd = open(path, O_RDONLY | O_CLOEXEC);
-  if (fd < 0) {
-    return false;
-  }
-
-  struct stat st = {};
-  if (fstat(fd, &st) != 0 || st.st_size <= 0) {
-    close(fd);
-    return false;
-  }
-
-  size_t file_size = static_cast<size_t>(st.st_size);
-  void *mapping = mmap(nullptr, file_size, PROT_READ, MAP_PRIVATE, fd, 0);
-  close(fd);
-  if (mapping == MAP_FAILED) {
-    return false;
-  }
-
-  const char *base = static_cast<const char *>(mapping);
-  const Elf64_Ehdr *ehdr = lupine_elf_at<Elf64_Ehdr>(base, file_size, 0);
-  if (ehdr == nullptr || memcmp(ehdr->e_ident, ELFMAG, SELFMAG) != 0 ||
-      ehdr->e_ident[EI_CLASS] != ELFCLASS64 || ehdr->e_shentsize == 0) {
-    munmap(mapping, file_size);
-    return false;
-  }
-
-  const Elf64_Shdr *sections = lupine_elf_at<Elf64_Shdr>(
-      base, file_size, ehdr->e_shoff, ehdr->e_shnum);
-  if (sections == nullptr) {
-    munmap(mapping, file_size);
-    return false;
-  }
-
-  const Elf64_Shdr *dynsym_section = nullptr;
-  const Elf64_Shdr *versym_section = nullptr;
-  const Elf64_Shdr *verdef_section = nullptr;
-  for (uint16_t i = 0; i < ehdr->e_shnum; ++i) {
-    if (sections[i].sh_type == SHT_DYNSYM) {
-      dynsym_section = &sections[i];
-    } else if (sections[i].sh_type == SHT_GNU_versym) {
-      versym_section = &sections[i];
-    } else if (sections[i].sh_type == SHT_GNU_verdef) {
-      verdef_section = &sections[i];
-    }
-  }
-
-  bool found = false;
-  if (dynsym_section != nullptr && versym_section != nullptr &&
-      verdef_section != nullptr && dynsym_section->sh_entsize != 0 &&
-      dynsym_section->sh_link < ehdr->e_shnum) {
-    const Elf64_Shdr &dynstr_section = sections[dynsym_section->sh_link];
-    const char *dynstr = lupine_elf_at<char>(
-        base, file_size, dynstr_section.sh_offset, dynstr_section.sh_size);
-    const Elf64_Sym *dynsyms = lupine_elf_at<Elf64_Sym>(
-        base, file_size, dynsym_section->sh_offset,
-        dynsym_section->sh_size / dynsym_section->sh_entsize);
-    const Elf64_Versym *versyms = lupine_elf_at<Elf64_Versym>(
-        base, file_size, versym_section->sh_offset,
-        versym_section->sh_size / sizeof(Elf64_Versym));
-
-    if (dynstr != nullptr && dynsyms != nullptr && versyms != nullptr) {
-      size_t symbol_count = dynsym_section->sh_size / dynsym_section->sh_entsize;
-      size_t versym_count = versym_section->sh_size / sizeof(Elf64_Versym);
-      for (size_t i = 0; i < symbol_count && i < versym_count; ++i) {
-        const char *name =
-            lupine_strtab_at(dynstr, dynstr_section.sh_size, dynsyms[i].st_name);
-        if (name == nullptr || strcmp(name, symbol) != 0) {
-          continue;
-        }
-
-        uint16_t version_index = versyms[i] & 0x7fff;
-        size_t offset = verdef_section->sh_offset;
-        for (uint32_t j = 0; j < verdef_section->sh_info; ++j) {
-          const Elf64_Verdef *def =
-              lupine_elf_at<Elf64_Verdef>(base, file_size, offset);
-          if (def == nullptr || def->vd_aux == 0) {
-            break;
-          }
-          if ((def->vd_ndx & 0x7fff) == version_index) {
-            const Elf64_Verdaux *aux = lupine_elf_at<Elf64_Verdaux>(
-                base, file_size, offset + def->vd_aux);
-            const char *version_name =
-                aux == nullptr ? nullptr
-                               : lupine_strtab_at(dynstr, dynstr_section.sh_size,
-                                                  aux->vda_name);
-            if (version_name != nullptr) {
-              *version = version_name;
-              found = true;
-            }
-            break;
-          }
-          if (def->vd_next == 0) {
-            break;
-          }
-          offset += def->vd_next;
-        }
-        break;
-      }
-    }
-  }
-
-  munmap(mapping, file_size);
-  return found;
-}
-
-static bool lupine_find_symbol_version_near(void *near_symbol,
-                                            const char *symbol,
-                                            std::string *version) {
-  Dl_info info = {};
-  return dladdr(near_symbol, &info) != 0 && info.dli_fname != nullptr &&
-         lupine_find_symbol_version_in_elf(info.dli_fname, symbol, version);
+static const char *lupine_dlsym_glibc_version() {
+#if defined(__x86_64__)
+  return "GLIBC_2.2.5";
+#elif defined(__aarch64__)
+  return "GLIBC_2.17";
+#else
+  return nullptr;
+#endif
 }
 #endif
 
@@ -405,19 +278,10 @@ static void *lupine_real_dlsym(void *handle, const char *name) {
   if (!initialized) {
     initialized = true;
 #if defined(__GLIBC__)
-    std::string version;
-    void *lookup_symbols[] = {reinterpret_cast<void *>(&dlvsym),
-                              reinterpret_cast<void *>(&dlopen)};
-    for (void *lookup_symbol : lookup_symbols) {
-      if (!lupine_find_symbol_version_near(lookup_symbol, "dlsym", &version)) {
-        continue;
-      }
+    const char *version = lupine_dlsym_glibc_version();
+    if (version != nullptr) {
       real_dlsym =
-          reinterpret_cast<lupine_dlsym_fn>(dlvsym(RTLD_NEXT, "dlsym",
-                                                   version.c_str()));
-      if (real_dlsym != nullptr) {
-        break;
-      }
+          reinterpret_cast<lupine_dlsym_fn>(dlvsym(RTLD_NEXT, "dlsym", version));
     }
 #else
     real_dlsym = dlsym;
