@@ -96,6 +96,7 @@ jobs:
               test -e /opt/lupine/lib/libnvidia-ml.so.1
               test -x /usr/bin/nvidia-smi
               test "${LD_LIBRARY_PATH%%:*}" = /opt/lupine/lib
+              nm -D --defined-only /opt/lupine/lib/libcuda.so.1 | awk "{print \$3}" | grep -x dlsym
             '
           else
             docker run --rm --entrypoint bash "$image" -lc '
