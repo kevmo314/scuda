@@ -7,6 +7,9 @@
 #include <cudaProfiler.h>
 #include <dlfcn.h>
 #include <elf.h>
+#if defined(__linux__)
+#include <features.h>
+#endif
 #include <fcntl.h>
 #include <fstream>
 #include <functional>
@@ -255,11 +258,27 @@ static bool lupine_symbol_looks_like_driver_api(const char *symbol) {
          symbol[2] >= 'A' && symbol[2] <= 'Z';
 }
 
+using lupine_dlsym_fn = void *(*)(void *, const char *);
+
 static void *lupine_real_dlsym(void *handle, const char *name) {
-  static void *(*real_dlsym)(void *, const char *) = nullptr;
+  static lupine_dlsym_fn real_dlsym = nullptr;
   if (real_dlsym == nullptr) {
-    real_dlsym = reinterpret_cast<void *(*)(void *, const char *)>(
-        dlvsym(RTLD_NEXT, "dlsym", "GLIBC_2.2.5"));
+#if defined(__GLIBC__)
+#if defined(__aarch64__)
+    constexpr const char *versions[] = {"GLIBC_2.17", "GLIBC_2.2.5"};
+#else
+    constexpr const char *versions[] = {"GLIBC_2.2.5", "GLIBC_2.17"};
+#endif
+    for (const char *version : versions) {
+      real_dlsym =
+          reinterpret_cast<lupine_dlsym_fn>(dlvsym(RTLD_NEXT, "dlsym", version));
+      if (real_dlsym != nullptr) {
+        break;
+      }
+    }
+#else
+    real_dlsym = dlsym;
+#endif
   }
   return real_dlsym != nullptr ? real_dlsym(handle, name) : nullptr;
 }
@@ -7980,14 +7999,8 @@ CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion,
               << "' not found in cudaFunctionMap." << std::endl;
   }
 
-  // fall back to dlsym
-  static void *(*real_dlsym)(void *, const char *) = NULL;
-  if (real_dlsym == NULL) {
-    real_dlsym = (void *(*)(void *, const char *))dlvsym(RTLD_NEXT, "dlsym",
-                                                         "GLIBC_2.2.5");
-  }
-
-  *pfn = real_dlsym(RTLD_DEFAULT, symbol);
+  // fall back to the real loader before creating a local missing-symbol stub
+  *pfn = lupine_real_dlsym(RTLD_DEFAULT, symbol);
   if (*pfn != nullptr) {
     if (symbolStatus != nullptr) {
       *symbolStatus = CU_GET_PROC_ADDRESS_SUCCESS;
@@ -8012,7 +8025,7 @@ CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion,
     return CUDA_SUCCESS;
   }
 
-  *pfn = real_dlsym(libCudaHandle, symbol);
+  *pfn = lupine_real_dlsym(libCudaHandle, symbol);
   if (!(*pfn)) {
     if (lupine_trace_enabled()) {
       std::cerr << "Error: Could not resolve symbol '" << symbol
@@ -8044,6 +8057,7 @@ extern "C" CUresult cuGetProcAddress(const char *symbol, void **pfn,
   return cuGetProcAddress_v2(symbol, pfn, cudaVersion, flags, nullptr);
 }
 
+#if defined(__GLIBC__)
 void *dlsym(void *handle, const char *name) __THROW {
   if (lupine_trace_enabled()) {
     std::cout << "dlsym: " << name << std::endl;
@@ -8222,3 +8236,4 @@ void *dlsym(void *handle, const char *name) __THROW {
   // std::endl;
   return lupine_real_dlsym(handle, name);
 }
+#endif
