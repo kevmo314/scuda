@@ -4,9 +4,6 @@
 #   "lupine",
 #   "torch",
 # ]
-#
-# [tool.uv.sources]
-# lupine = { path = "..", editable = true }
 # ///
 
 import torch
