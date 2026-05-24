@@ -7,9 +7,7 @@
 #include <cudaProfiler.h>
 #include <dlfcn.h>
 #include <elf.h>
-#if defined(__linux__)
 #include <features.h>
-#endif
 #include <fcntl.h>
 #include <fstream>
 #include <functional>
@@ -34,6 +32,10 @@
 #include <unistd.h>
 #include <unordered_map>
 #include <vector>
+
+#if !defined(__GLIBC__)
+#error "Lupine CUDA client requires glibc"
+#endif
 
 #define LUPINE_CUDA_COMPAT_TYPES_ONLY
 #include "cuda_compat.h"
@@ -260,7 +262,6 @@ static bool lupine_symbol_looks_like_driver_api(const char *symbol) {
 
 using lupine_dlsym_fn = void *(*)(void *, const char *);
 
-#if defined(__GLIBC__)
 static const char *lupine_dlsym_glibc_version() {
 #if defined(__x86_64__)
   return "GLIBC_2.2.5";
@@ -270,22 +271,17 @@ static const char *lupine_dlsym_glibc_version() {
   return nullptr;
 #endif
 }
-#endif
 
 static void *lupine_real_dlsym(void *handle, const char *name) {
   static lupine_dlsym_fn real_dlsym = nullptr;
   static bool initialized = false;
   if (!initialized) {
     initialized = true;
-#if defined(__GLIBC__)
     const char *version = lupine_dlsym_glibc_version();
     if (version != nullptr) {
       real_dlsym =
           reinterpret_cast<lupine_dlsym_fn>(dlvsym(RTLD_NEXT, "dlsym", version));
     }
-#else
-    real_dlsym = dlsym;
-#endif
   }
   return real_dlsym != nullptr ? real_dlsym(handle, name) : nullptr;
 }
@@ -8064,7 +8060,6 @@ extern "C" CUresult cuGetProcAddress(const char *symbol, void **pfn,
   return cuGetProcAddress_v2(symbol, pfn, cudaVersion, flags, nullptr);
 }
 
-#if defined(__GLIBC__)
 void *dlsym(void *handle, const char *name) __THROW {
   if (lupine_trace_enabled()) {
     std::cout << "dlsym: " << name << std::endl;
@@ -8243,4 +8238,3 @@ void *dlsym(void *handle, const char *name) __THROW {
   // std::endl;
   return lupine_real_dlsym(handle, name);
 }
-#endif
