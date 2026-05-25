@@ -3,7 +3,7 @@
 LUPINE is a GPU over IP bridge allowing GPUs on remote machines to be attached
 to CPU-only machines.
 
-## Getting a GPU on a Mac
+## Mac Demo
 
 LUPINE lets you spin up a container with a virtual GPU, like connecting a Mac to a Linux GPU server.
 
