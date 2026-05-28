@@ -161,3 +161,158 @@ def test_duplicate_hosts_are_rejected(lupine_module):
 
     with pytest.raises(lupine.LupineError, match="unique"):
         lupine.connect(host=["host-a:14833", "host-a"])
+
+
+def test_sidecar_container_runtime_defaults_to_arm64(monkeypatch):
+    pytest.importorskip("torch")
+    import lupine.sidecar as sidecar
+
+    monkeypatch.setattr(sidecar.shutil, "which", lambda name: "/usr/bin/container")
+    monkeypatch.setattr(sidecar.sys, "platform", "darwin")
+
+    cmd = sidecar.ContainerRuntime(server="host-a:14833").command("print(1)")
+
+    assert cmd[:8] == [
+        "/usr/bin/container",
+        "run",
+        "--rm",
+        "--interactive",
+        "--progress",
+        "none",
+        "--platform",
+        "linux/arm64",
+    ]
+    assert "--rosetta" not in cmd
+    assert "LUPINE_SERVER=host-a:14833" in cmd
+
+
+def test_sidecar_container_runtime_is_macos_only(monkeypatch):
+    pytest.importorskip("torch")
+    import lupine.sidecar as sidecar
+
+    monkeypatch.setattr(sidecar.sys, "platform", "linux")
+
+    with pytest.raises(sidecar.SidecarError, match="only supported on macOS"):
+        sidecar.ContainerRuntime(server="host-a:14833").command("print(1)")
+
+
+def test_sidecar_container_runtime_requires_cli(monkeypatch):
+    pytest.importorskip("torch")
+    import lupine.sidecar as sidecar
+
+    monkeypatch.setattr(sidecar.shutil, "which", lambda name: None)
+    monkeypatch.setattr(sidecar.sys, "platform", "darwin")
+
+    with pytest.raises(sidecar.SidecarError, match="brew install --cask container"):
+        sidecar.ContainerRuntime(server="host-a:14833").command("print(1)")
+
+
+def test_sidecar_container_runtime_starts_services_and_pulls_missing_image(monkeypatch):
+    pytest.importorskip("torch")
+    import lupine.sidecar as sidecar
+
+    calls = []
+
+    def fake_run(args, **kwargs):
+        calls.append(args)
+        if args[1:4] == ["system", "status", "--format"]:
+            return sidecar.subprocess.CompletedProcess(args, 0, '{"status":"stopped"}', "")
+        return sidecar.subprocess.CompletedProcess(args, 0, "", "")
+
+    monkeypatch.setattr(sidecar.shutil, "which", lambda name: "/usr/bin/container")
+    monkeypatch.setattr(sidecar.sys, "platform", "darwin")
+    monkeypatch.setattr(sidecar.subprocess, "run", fake_run)
+
+    sidecar.ContainerRuntime(server="host-a:14833").prepare()
+
+    assert calls == [
+        ["/usr/bin/container", "system", "status", "--format", "json"],
+        ["/usr/bin/container", "system", "start"],
+        ["/usr/bin/container", "image", "inspect", sidecar.DEFAULT_IMAGE],
+    ]
+
+
+def test_sidecar_container_runtime_pulls_missing_image(monkeypatch):
+    pytest.importorskip("torch")
+    import lupine.sidecar as sidecar
+
+    calls = []
+
+    def fake_run(args, **kwargs):
+        calls.append(args)
+        if args[1:3] == ["image", "inspect"]:
+            return sidecar.subprocess.CompletedProcess(args, 1, "", "missing")
+        return sidecar.subprocess.CompletedProcess(args, 0, '{"status":"running"}', "")
+
+    monkeypatch.setattr(sidecar.shutil, "which", lambda name: "/usr/bin/container")
+    monkeypatch.setattr(sidecar.sys, "platform", "darwin")
+    monkeypatch.setattr(sidecar.subprocess, "run", fake_run)
+
+    sidecar.ContainerRuntime(server="host-a:14833").prepare()
+
+    assert calls[-1] == [
+        "/usr/bin/container",
+        "image",
+        "pull",
+        "--progress",
+        "none",
+        "--platform",
+        "linux/arm64",
+        sidecar.DEFAULT_IMAGE,
+    ]
+
+
+def test_sidecar_dispatch_mode_forwards_factory_ops(monkeypatch):
+    pytest.importorskip("torch")
+    import torch
+    import lupine.sidecar as sidecar
+
+    sidecar._ensure_registered()
+    session = sidecar.SidecarSession(server="host-a:14833")
+    calls = []
+
+    def fake_request(payload):
+        calls.append(payload)
+        return {"type": "tensor", "handle": 1, "shape": [2, 3], "dtype": "float32"}
+
+    monkeypatch.setattr(session, "_request", fake_request)
+
+    with sidecar.SidecarDispatchMode(session):
+        tensor = torch.zeros((2, 3), device=session.device(), dtype=torch.float32)
+
+    assert isinstance(tensor, sidecar.SidecarTensor)
+    assert calls[0]["op"] == "call"
+    assert calls[0]["packet"] == "zeros"
+    assert calls[0]["kwargs"]["device"] == {"__device__": "cuda:0"}
+    assert calls[0]["kwargs"]["dtype"] == {"__dtype__": "float32"}
+
+
+def test_sidecar_dispatch_mode_forwards_tensor_ops(monkeypatch):
+    pytest.importorskip("torch")
+    import torch
+    import lupine.sidecar as sidecar
+
+    sidecar._ensure_registered()
+    session = sidecar.SidecarSession(server="host-a:14833")
+    calls = []
+
+    def fake_request(payload):
+        calls.append(payload)
+        return {"type": "tensor", "handle": 2, "shape": [2], "dtype": "float32"}
+
+    monkeypatch.setattr(session, "_request", fake_request)
+    tensor = sidecar.SidecarTensor(
+        session=session,
+        handle=1,
+        shape=(2,),
+        dtype=torch.float32,
+        device=session.device(),
+    )
+
+    with sidecar.SidecarDispatchMode(session):
+        result = tensor + 3
+
+    assert isinstance(result, sidecar.SidecarTensor)
+    assert calls[0]["packet"] == "add"
+    assert calls[0]["overload"] == "Tensor"
+    assert calls[0]["args"]["__tuple__"][0] == {"__sidecar_tensor__": 1}
