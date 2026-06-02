@@ -3,6 +3,18 @@
 LUPINE is a GPU over IP bridge allowing GPUs on remote machines to be attached
 to CPU-only machines.
 
+## Hosted Demo
+
+Connect to a hosted demo server with a T4 attached for free.
+
+```
+$ docker run --rm \
+  -e LUPINE_SERVER=demo.lupinemachines.com:14833 \
+  ghcr.io/lupinemachines/lupine-client:cuda-13.1.0-ubuntu24.04 \
+  nvidia-smi -L
+GPU 0: Tesla T4 (via lupine demo.lupinemachines.com) (UUID: GPU-b80ae1b9-863f-8f91-7c63-d351fabff035)
+```
+
 ## Mac Demo
 
 LUPINE lets you spin up a container with a virtual GPU, like connecting a Mac to a Linux GPU server.
