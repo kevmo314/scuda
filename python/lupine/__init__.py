@@ -5,8 +5,6 @@ on its built-in CUDA dispatch path while LUPINE handles CUDA driver calls below
 it.
 """
 
-from __future__ import annotations
-
 import os
 import ctypes
 from collections.abc import Sequence
@@ -250,6 +248,29 @@ def synchronize(index: int = 0) -> None:
     torch.cuda.synchronize(_cuda_device(index, require_available=False))
 
 
+def sidecar(
+    server: str | None = None,
+    *,
+    image: str | None = None,
+    runtime: str = "auto",
+    platform: str = "linux/arm64",
+    rosetta: bool = False,
+    env: dict[str, str] | None = None,
+) -> Any:
+    """Create a session-scoped sidecar PyTorch worker frontend."""
+
+    from .sidecar import DEFAULT_IMAGE, sidecar as _sidecar
+
+    return _sidecar(
+        server=server,
+        image=image or DEFAULT_IMAGE,
+        runtime=runtime,
+        platform=platform,
+        rosetta=rosetta,
+        env=env,
+    )
+
+
 __all__ = [
     "DEFAULT_PORT",
     "LupineError",
@@ -261,6 +282,7 @@ __all__ = [
     "devices",
     "is_available",
     "is_configured",
+    "sidecar",
     "servers",
     "synchronize",
 ]
