@@ -3,9 +3,11 @@
 #include <algorithm>
 #include <deque>
 #include <errno.h>
+#include <iostream>
 #include <nghttp2/nghttp2.h>
 #include <stdint.h>
 #include <string.h>
+#include <string>
 #include <unistd.h>
 #include <vector>
 
@@ -203,6 +205,15 @@ nghttp2_nv h2_nv(const char *name, const char *value) {
           NGHTTP2_NV_FLAG_NO_COPY_NAME | NGHTTP2_NV_FLAG_NO_COPY_VALUE};
 }
 
+bool lupine_h2_debug_enabled() {
+  const char *debug = getenv("LUPINE_DEBUG");
+  if (debug != nullptr && debug[0] != '\0' && strcmp(debug, "0") != 0) {
+    return true;
+  }
+  const char *trace = getenv("LUPINE_TRACE");
+  return trace != nullptr && trace[0] != '\0' && strcmp(trace, "0") != 0;
+}
+
 int h2_submit_server_response(h2_transport *transport) {
   nghttp2_nv headers[] = {h2_nv(":status", "200")};
   if (nghttp2_submit_headers(transport->session, NGHTTP2_FLAG_NONE,
@@ -217,6 +228,21 @@ int h2_submit_server_response(h2_transport *transport) {
 int h2_on_frame_recv_callback(nghttp2_session *, const nghttp2_frame *frame,
                               void *user_data) {
   auto *transport = static_cast<h2_transport *>(user_data);
+  if (!transport->server && frame->hd.type == NGHTTP2_GOAWAY &&
+      lupine_h2_debug_enabled()) {
+    std::string debug;
+    if (frame->goaway.opaque_data != nullptr &&
+        frame->goaway.opaque_data_len > 0) {
+      debug.assign(reinterpret_cast<const char *>(frame->goaway.opaque_data),
+                   frame->goaway.opaque_data_len);
+    }
+    std::cerr << "LUPINE remote server sent HTTP/2 GOAWAY"
+              << " error_code=" << frame->goaway.error_code;
+    if (!debug.empty()) {
+      std::cerr << " debug=\"" << debug << "\"";
+    }
+    std::cerr << std::endl;
+  }
   if (transport->server && frame->hd.type == NGHTTP2_HEADERS &&
       frame->headers.cat == NGHTTP2_HCAT_REQUEST) {
     transport->stream_id = frame->hd.stream_id;
