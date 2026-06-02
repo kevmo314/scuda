@@ -52,7 +52,12 @@ std::vector<lupine_nvml_remote_device> devices;
 std::vector<std::string> conn_labels;
 bool devices_ready = false;
 
-nvmlReturn_t rpc_error() { return NVML_ERROR_UNKNOWN; }
+nvmlReturn_t rpc_error(conn_t *conn = nullptr) {
+  if (rpc_error_reason(conn) == LUPINE_RPC_ERROR_DEMO_TIMEOUT) {
+    return NVML_ERROR_TIMEOUT;
+  }
+  return NVML_ERROR_UNKNOWN;
+}
 
 void *rpc_client_dispatch_thread(void *p) {
   conn_t *connection = static_cast<conn_t *>(p);
@@ -290,7 +295,7 @@ nvmlReturn_t call_string_no_device(int op, char *value, unsigned int length) {
       rpc_wait_for_response(c) < 0 ||
       (length != 0 && rpc_read(c, value, length) < 0) ||
       rpc_read(c, &result, sizeof(result)) < 0 || rpc_read_end(c) < 0) {
-    return rpc_error();
+    return rpc_error(c);
   }
   return result;
 }
@@ -302,7 +307,7 @@ nvmlReturn_t call_int_out(int op, int *value) {
   if (c == nullptr || rpc_write_start_request(c, op) < 0 ||
       rpc_wait_for_response(c) < 0 || rpc_read(c, &temp, sizeof(temp)) < 0 ||
       rpc_read(c, &result, sizeof(result)) < 0 || rpc_read_end(c) < 0) {
-    return rpc_error();
+    return rpc_error(c);
   }
   if (value != nullptr) {
     *value = temp;
@@ -317,7 +322,7 @@ nvmlReturn_t call_uint_out(int op, unsigned int *value) {
   if (c == nullptr || rpc_write_start_request(c, op) < 0 ||
       rpc_wait_for_response(c) < 0 || rpc_read(c, &temp, sizeof(temp)) < 0 ||
       rpc_read(c, &result, sizeof(result)) < 0 || rpc_read_end(c) < 0) {
-    return rpc_error();
+    return rpc_error(c);
   }
   if (value != nullptr) {
     *value = temp;
@@ -334,7 +339,7 @@ nvmlReturn_t call_device_from_index(int op, unsigned int index,
       rpc_write(c, &index, sizeof(index)) < 0 || rpc_wait_for_response(c) < 0 ||
       rpc_read(c, &temp, sizeof(temp)) < 0 ||
       rpc_read(c, &result, sizeof(result)) < 0 || rpc_read_end(c) < 0) {
-    return rpc_error();
+    return rpc_error(c);
   }
   if (device != nullptr) {
     *device = temp;
@@ -354,7 +359,7 @@ nvmlReturn_t call_device_from_string(int op, const char *value,
       (length != 0 && rpc_write(c, value, length) < 0) ||
       rpc_wait_for_response(c) < 0 || rpc_read(c, &temp, sizeof(temp)) < 0 ||
       rpc_read(c, &result, sizeof(result)) < 0 || rpc_read_end(c) < 0) {
-    return rpc_error();
+    return rpc_error(c);
   }
   if (device != nullptr) {
     *device = temp;
@@ -372,7 +377,7 @@ nvmlReturn_t call_device_string(int op, nvmlDevice_t device, char *value,
       rpc_wait_for_response(c) < 0 ||
       (length != 0 && rpc_read(c, value, length) < 0) ||
       rpc_read(c, &result, sizeof(result)) < 0 || rpc_read_end(c) < 0) {
-    return rpc_error();
+    return rpc_error(c);
   }
   return result;
 }
@@ -387,7 +392,7 @@ nvmlReturn_t call_device_struct(int op, nvmlDevice_t device, T *value) {
       rpc_write(c, &temp, sizeof(temp)) < 0 || rpc_wait_for_response(c) < 0 ||
       rpc_read(c, &temp, sizeof(temp)) < 0 ||
       rpc_read(c, &result, sizeof(result)) < 0 || rpc_read_end(c) < 0) {
-    return rpc_error();
+    return rpc_error(c);
   }
   if (value != nullptr) {
     *value = temp;
@@ -404,7 +409,7 @@ nvmlReturn_t call_device_value(int op, nvmlDevice_t device, T *value) {
       rpc_write(c, &device, sizeof(device)) < 0 ||
       rpc_wait_for_response(c) < 0 || rpc_read(c, &temp, sizeof(temp)) < 0 ||
       rpc_read(c, &result, sizeof(result)) < 0 || rpc_read_end(c) < 0) {
-    return rpc_error();
+    return rpc_error(c);
   }
   if (value != nullptr) {
     *value = temp;
@@ -423,7 +428,7 @@ nvmlReturn_t call_device_arg_value(int op, nvmlDevice_t device, Arg arg,
       rpc_write(c, &arg, sizeof(arg)) < 0 || rpc_wait_for_response(c) < 0 ||
       rpc_read(c, &temp, sizeof(temp)) < 0 ||
       rpc_read(c, &result, sizeof(result)) < 0 || rpc_read_end(c) < 0) {
-    return rpc_error();
+    return rpc_error(c);
   }
   if (value != nullptr) {
     *value = temp;
@@ -449,7 +454,7 @@ nvmlReturn_t call_processes(int op, nvmlDevice_t device,
       (copied_count != 0 &&
        rpc_read(c, infos, copied_count * sizeof(infos[0])) < 0) ||
       rpc_read(c, &result, sizeof(result)) < 0 || rpc_read_end(c) < 0) {
-    return rpc_error();
+    return rpc_error(c);
   }
   if (infoCount != nullptr) {
     *infoCount = returned_count;
@@ -464,7 +469,7 @@ nvmlReturn_t call_event_set_create(nvmlEventSet_t *set) {
   if (c == nullptr || rpc_write_start_request(c, RPC_nvmlEventSetCreate) < 0 ||
       rpc_wait_for_response(c) < 0 || rpc_read(c, &temp, sizeof(temp)) < 0 ||
       rpc_read(c, &result, sizeof(result)) < 0 || rpc_read_end(c) < 0) {
-    return rpc_error();
+    return rpc_error(c);
   }
   if (set != nullptr) {
     *set = temp;
@@ -478,7 +483,7 @@ nvmlReturn_t call_event_set_free(nvmlEventSet_t set) {
   if (c == nullptr || rpc_write_start_request(c, RPC_nvmlEventSetFree) < 0 ||
       rpc_write(c, &set, sizeof(set)) < 0 || rpc_wait_for_response(c) < 0 ||
       rpc_read(c, &result, sizeof(result)) < 0 || rpc_read_end(c) < 0) {
-    return rpc_error();
+    return rpc_error(c);
   }
   return result;
 }
@@ -493,7 +498,7 @@ nvmlReturn_t call_event_set_wait(nvmlEventSet_t set, nvmlEventData_t *data,
       rpc_write(c, &timeoutms, sizeof(timeoutms)) < 0 ||
       rpc_wait_for_response(c) < 0 || rpc_read(c, &temp, sizeof(temp)) < 0 ||
       rpc_read(c, &result, sizeof(result)) < 0 || rpc_read_end(c) < 0) {
-    return rpc_error();
+    return rpc_error(c);
   }
   if (data != nullptr) {
     *data = temp;
@@ -512,7 +517,7 @@ nvmlReturn_t call_device_register_events(nvmlDevice_t device,
       rpc_write(c, &eventTypes, sizeof(eventTypes)) < 0 ||
       rpc_write(c, &set, sizeof(set)) < 0 || rpc_wait_for_response(c) < 0 ||
       rpc_read(c, &result, sizeof(result)) < 0 || rpc_read_end(c) < 0) {
-    return rpc_error();
+    return rpc_error(c);
   }
   return result;
 }
@@ -530,7 +535,7 @@ nvmlReturn_t call_device_two_values(int op, nvmlDevice_t device, A *first,
       rpc_read(c, &first_temp, sizeof(first_temp)) < 0 ||
       rpc_read(c, &second_temp, sizeof(second_temp)) < 0 ||
       rpc_read(c, &result, sizeof(result)) < 0 || rpc_read_end(c) < 0) {
-    return rpc_error();
+    return rpc_error(c);
   }
   if (first != nullptr) {
     *first = first_temp;

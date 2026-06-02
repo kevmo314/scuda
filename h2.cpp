@@ -14,6 +14,7 @@ namespace {
 constexpr uint32_t kH2InitialWindow = 0x7fffffffU;
 constexpr uint32_t kH2MaxFrame = (16 * 1024 * 1024) - 1;
 constexpr size_t kH2FrameHeaderLen = 9;
+constexpr const char *kDemoTimeoutDebug = "lupine:demo-timeout";
 
 struct h2_buffer {
   std::vector<unsigned char> data;
@@ -21,6 +22,7 @@ struct h2_buffer {
 };
 
 struct h2_transport {
+  conn_t *conn = nullptr;
   int netfd = -1;
   bool server = false;
   bool response_sent = false;
@@ -217,6 +219,14 @@ int h2_submit_server_response(h2_transport *transport) {
 int h2_on_frame_recv_callback(nghttp2_session *, const nghttp2_frame *frame,
                               void *user_data) {
   auto *transport = static_cast<h2_transport *>(user_data);
+  if (!transport->server && frame->hd.type == NGHTTP2_GOAWAY) {
+    const uint8_t *debug = frame->goaway.opaque_data;
+    size_t debug_len = frame->goaway.opaque_data_len;
+    if (debug_len == strlen(kDemoTimeoutDebug) &&
+        memcmp(debug, kDemoTimeoutDebug, debug_len) == 0) {
+      rpc_set_error_reason(transport->conn, LUPINE_RPC_ERROR_DEMO_TIMEOUT);
+    }
+  }
   if (transport->server && frame->hd.type == NGHTTP2_HEADERS &&
       frame->headers.cat == NGHTTP2_HCAT_REQUEST) {
     transport->stream_id = frame->hd.stream_id;
@@ -291,6 +301,7 @@ int h2_read_from_net(h2_transport *transport) {
 
 int h2_init_direct(conn_t *conn, bool server) {
   auto *transport = new h2_transport();
+  transport->conn = conn;
   transport->netfd = conn->connfd;
   transport->server = server;
 
@@ -370,6 +381,9 @@ int rpc_http2_read(conn_t *conn, void *data, size_t size) {
   auto *out = static_cast<unsigned char *>(data);
   size_t copied = 0;
   while (copied < size) {
+    if (rpc_error_reason(conn) != LUPINE_RPC_ERROR_NONE) {
+      return -1;
+    }
     while (!transport->local_out.empty() && copied < size) {
       h2_buffer &front = transport->local_out.front();
       size_t available = front.data.size() - front.offset;

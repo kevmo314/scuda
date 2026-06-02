@@ -2,7 +2,11 @@
 #define RPC_H
 
 #include <pthread.h>
+#include <stdint.h>
 #include <sys/uio.h>
+
+#define LUPINE_RPC_ERROR_NONE 0
+#define LUPINE_RPC_ERROR_DEMO_TIMEOUT 1
 
 typedef struct {
   int connfd;
@@ -20,6 +24,7 @@ typedef struct {
   int write_iov_count;
   int local_request_parity;
   int closed;
+  int error_reason;
   void *http2;
 } conn_t;
 
@@ -40,5 +45,8 @@ extern int rpc_http2_read(conn_t *conn, void *data, size_t size);
 extern int rpc_http2_writev(conn_t *conn, struct iovec *iov, int iov_count);
 extern int rpc_http2_client_init(conn_t *conn);
 extern int rpc_http2_server_init(conn_t *conn);
+
+extern int rpc_error_reason(conn_t *conn);
+extern void rpc_set_error_reason(conn_t *conn, int reason);
 
 #endif

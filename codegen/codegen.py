@@ -1330,7 +1330,7 @@ def error_const(return_type: str) -> str:
     if return_type == "nvmlReturn_t":
         return "NVML_ERROR_GPU_IS_LOST"
     if return_type == "CUresult":
-        return "CUDA_ERROR_DEVICE_UNAVAILABLE"
+        return "lupine_rpc_error()"
     if return_type == "cudaError_t":
         return "cudaErrorDevicesUnavailable"
     if return_type == "cublasStatus_t":
@@ -1496,7 +1496,8 @@ def main():
             '#include "rpc.h"\n\n'
             "extern int rpc_size();\n"
             "extern conn_t *rpc_client_get_connection(unsigned int index);\n"
-            "extern void rpc_close(conn_t *conn);\n\n"
+            "extern void rpc_close(conn_t *conn);\n"
+            'extern "C" CUresult lupine_rpc_error();\n\n'
             "struct lupine_route {\n"
             "    int kind;\n"
             "    conn_t *conn;\n"

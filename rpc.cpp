@@ -3,6 +3,17 @@
 #include <iostream>
 #include <string.h>
 
+int rpc_error_reason(conn_t *conn) {
+  return conn == nullptr ? LUPINE_RPC_ERROR_NONE : conn->error_reason;
+}
+
+void rpc_set_error_reason(conn_t *conn, int reason) {
+  if (conn == nullptr || conn->error_reason != LUPINE_RPC_ERROR_NONE) {
+    return;
+  }
+  conn->error_reason = reason;
+}
+
 void *_rpc_read_id_dispatch(void *p) {
   conn_t *conn = (conn_t *)p;
 
